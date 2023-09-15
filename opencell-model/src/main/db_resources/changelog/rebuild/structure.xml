@@ -11039,6 +11039,7 @@
             <column name="conversion_from_billing_currency" type="${type.boolean}" defaultValueNumeric="0" />
 			<column name="linked_invoice_line_id" type="bigint"/>
             <column name="additional_agg_fields" type="${type.json}" />
+            <column name="invoice_key" type="varchar(255)" />
         </createTable>
     </changeSet>
     <changeSet id="rebuild-str-tbl-488" author="NabilOUACHI">

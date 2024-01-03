@@ -23341,6 +23341,7 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code = 'org.meveo.service.script.DummyPaymentGatewayScript')" />
         </insert>
     </changeSet>
+
     <changeSet id="#INTRD-20962_add_missing_currencies" author="a.rouaguebe">
         <insert tableName="adm_currency">
             <column name="id" valueNumeric="-193" />
@@ -23816,7 +23817,7 @@ public class DummyPaymentGatewayScript extends Script {
 			<where>code='ARREARS_BALANCE'</where>
 		</update>
 	</changeSet>
-	
+
 	<changeSet id="#INTRD-21661_20240301" author="aeljaouhari">
     	<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -23856,7 +23857,7 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="version" value="1" />
         </insert>
     </changeSet>
-    
+
     <changeSet id="#INTRD-21883_20240318" author="aeljaouhari">
     	<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -23898,4 +23899,16 @@ public class DummyPaymentGatewayScript extends Script {
 		    <column name="description" value="standardExports.fileNameExtension"/>
 		</insert>
 	</changeSet>
+
+    <changeSet id="INTRD-19826_20240103" author="ZBARIKI">
+        <insert tableName="meveo_script_instance_cat">
+            <column name="id" valueSequenceNext="meveo_script_instance_cat_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="PAYMENT_REJECTION_ACTIONS"/>
+            <column name="description" value="Payment rejection actions"/>
+            <column name="description_i18n" value='{"EN":"Payment rejection actions","FR":"Actions sur rejet de paiement"}' />
+        </insert>
+    </changeSet>
 </databaseChangeLog>

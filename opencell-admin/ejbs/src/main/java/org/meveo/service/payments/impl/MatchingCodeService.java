@@ -297,7 +297,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             invoiceTransactionalUnMatchingAmount = accountOperation.getTransactionalUnMatchingAmount();
             BigDecimal matchedAmount;
             BigDecimal transactionMatchedAmount;
-            if (0 != amountToMatch.longValue()) {
+            if (BigDecimal.ZERO.compareTo(amountToMatch) != 0) {
                 // add baseMatchingAmount to avoid having TransactionalMatchingAmount = MatchingAmount * 2
                 matchedAmount = accountOperation.getMatchingAmount();
                 transactionMatchedAmount = accountOperation.getTransactionalMatchingAmount();
@@ -438,7 +438,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             invoiceTransactionalUnMatchingAmount = accountOperation.getTransactionalUnMatchingAmount();
             BigDecimal matchedAmount;
             BigDecimal transactionMatchedAmount;
-            if(0 != amountToMatch.longValue()) {
+            if(BigDecimal.ZERO.compareTo(amountToMatch) != 0) {
                 matchedAmount = accountOperation.getMatchingAmount();
                 transactionMatchedAmount = accountOperation.getTransactionalMatchingAmount();
                 if(invoiceTransactionalUnMatchingAmount.compareTo(amountToMatch) <= 0) {

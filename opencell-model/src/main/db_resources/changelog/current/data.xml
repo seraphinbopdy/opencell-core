@@ -22790,4 +22790,24 @@ public class ImportJobNotification extends Script {
             <where>code = 'org.meveo.service.script.MassWrittingOffInvoicesScript'</where>
         </update>
     </changeSet>
+
+    <changeSet id="#INTRD-19467_20240111" author="TarikFA.">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript" />
+            <column name="src_type" value="JAVA_CLASS" />
+            <column name="description" value="Invoice Write off Journal entry builder, from AccountOperation"/>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='ACCOUNTING_SCHEMES')" />
+        </insert>
+        <insert tableName="ar_accounting_scheme">
+            <column name="id" valueSequenceNext="ar_accounting_scheme_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript" />
+            <column name="description" value="Default Accounting Scheme"/>
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript')"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

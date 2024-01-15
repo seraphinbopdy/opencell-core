@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -369,11 +371,13 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
             Thread jobStatusReportThread = new Thread(jobStatusReportTask);
             jobStatusReportThread.start();
 
+            ExecutorService executorService = Executors.newFixedThreadPool(tasks.size(), executorFactory);
+
             // Launch main publishing and processing tasks
             int i = 0;
             for (Runnable task : tasks) {
                 log.info("{}/{} Will submit data {} task #{} to run", jobInstance.getJobTemplate(), jobInstance.getCode(), nbPublishers != null && i < nbPublishers ? "publishing" : "processing", i++);
-                futures.add(executor.submit(task));
+                futures.add(executorService.submit(task));
                 try {
                     Thread.sleep(waitingMillis.longValue());
                 } catch (InterruptedException e) {
@@ -420,6 +424,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                 }
                 i++;
             }
+
+            executorService.shutdown();
 
             // This will exit the status report task
             isProcessing[0] = false;

@@ -95,7 +95,7 @@ public class RoleService extends PersistenceService<Role> {
     public Role findByName(String name, boolean extendedInfo, boolean syncWithKC) {
 	    Role kcRole = null;
 		if(canSynchroWithKC()){
-			kcRole = keycloakAdminClientService.findRole(name, extendedInfo, false);
+			kcRole = keycloakAdminClientService.findRole(name, false);
 			if (kcRole == null) {
 				return null;
 			}

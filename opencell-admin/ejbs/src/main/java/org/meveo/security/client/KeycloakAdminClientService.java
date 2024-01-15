@@ -19,14 +19,7 @@
 package org.meveo.security.client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -42,20 +35,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.AuthorizationResource;
-import org.keycloak.admin.client.resource.ClientResource;
-import org.keycloak.admin.client.resource.GroupsResource;
-import org.keycloak.admin.client.resource.PoliciesResource;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.RoleResource;
-import org.keycloak.admin.client.resource.RolesResource;
-import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.admin.client.resource.*;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.authorization.client.resource.ProtectedResource;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.GroupRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.*;
 import org.keycloak.representations.idm.authorization.DecisionStrategy;
 import org.keycloak.representations.idm.authorization.PolicyRepresentation;
 import org.keycloak.representations.idm.authorization.ResourceOwnerRepresentation;
@@ -68,6 +51,7 @@ import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.InvalidParameterException;
 import org.meveo.admin.exception.UsernameAlreadyExistsException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.meveo.api.dto.UserDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -791,11 +775,10 @@ public class KeycloakAdminClientService implements Serializable {
      * Find a role by name in Keycloak.
      * 
      * @param roleName Role name
-     * @param extendedInfo Shall child roles be retrieved - NOT implemented now
      * @param isClientRole Is this a client role
      * @return Role
      */
-    public Role findRole(String roleName, boolean extendedInfo, boolean isClientRole) {
+    public Role findRole(String roleName, boolean isClientRole) {
 
         KeycloakAdminClientConfig keycloakAdminClientConfig = AuthenticationProvider.getKeycloakConfig();
         Keycloak keycloak = getKeycloakClient(keycloakAdminClientConfig);
@@ -1481,4 +1464,131 @@ public class KeycloakAdminClientService implements Serializable {
 		log.info("lUserManagementSource : " + lUserManagementSource);
 		return lUserManagementSource.equalsIgnoreCase("OC");
 	}
+
+    public void addOrUpdateRoleToUserInKeycloak(String pUserName, List<String> roles, Map<String, List<String>> pClientRole, Boolean replaceRoles, Boolean isUpdate) {
+        KeycloakAdminClientConfig keycloakAdminClientConfig = AuthenticationProvider.getKeycloakConfig();
+        Keycloak keycloak = getKeycloakClient(keycloakAdminClientConfig);
+        RealmResource realmResource = keycloak.realm(keycloakAdminClientConfig.getRealm());
+
+        // Get User
+        List<UserRepresentation> users = realmResource.users().search(pUserName);
+
+        if (!users.isEmpty()) {
+            RoleMappingResource roleMappingResource = realmResource.users().get(users.get(0).getId()).roles();
+
+            if(!isUpdate) {
+                addRealmRoles(roles, roleMappingResource);
+                addClientRoles(pClientRole, realmResource, roleMappingResource);
+            } else {
+                updateRealmRoles(roles, roleMappingResource, replaceRoles);
+                updateClientRoles(pClientRole, realmResource, roleMappingResource, replaceRoles);
+            }
+        }
+    }
+
+    private List<RoleRepresentation> getMatchingRoles(List<String> roles, List<RoleRepresentation> allRoles) {
+        return roles.stream()
+                .map(role -> allRoles.stream()
+                        .filter(roleRepresentation -> roleRepresentation.getName().equals(role))
+                        .findFirst()
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private void addRealmRoles(List<String> roles, RoleMappingResource roleMappingResource) {
+        List<RoleRepresentation> matchingRoles = getMatchingRoles(roles, roleMappingResource.realmLevel().listAvailable());
+        roleMappingResource.realmLevel().add(matchingRoles);
+    }
+
+    private void updateRealmRoles(List<String> roles, RoleMappingResource roleMappingResource, Boolean replacedRoles) {
+        if (replacedRoles) {
+            roleMappingResource.realmLevel().remove(roleMappingResource.realmLevel().listEffective());
+        }
+
+        List<RoleRepresentation> matchingRoles = getMatchingRoles(roles, roleMappingResource.realmLevel().listAvailable());
+        roleMappingResource.realmLevel().add(matchingRoles);
+    }
+
+
+    private static void addClientRoles(Map<String, List<String>> pClientRole, RealmResource realmResource, RoleMappingResource roleMappingResource) {
+        pClientRole.forEach((clientName, clientRoleNames) -> {
+            List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientName);
+
+            if (!clients.isEmpty()) {
+                String clientId = clients.get(0).getId();
+
+                clientRoleNames.stream()
+                    .map(roleName -> {
+                        try {
+                            RoleResource roleResource = realmResource.clients().get(clientId).roles().get(roleName);
+                            return roleResource != null ? roleResource.toRepresentation() : null;
+                        } catch (NotFoundException e) {
+                            // Handle 404 response (Role not found) as needed
+                            // You might want to log a message or take appropriate action
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull) // Filter out null roles
+                    .forEach(role -> roleMappingResource.clientLevel(clientId).add(Collections.singletonList(role)));
+
+
+            }
+        });
+    }
+
+    private String getClientId(String clientName, RealmResource realmResource) {
+        List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientName);
+        return clients.isEmpty() ? null : clients.get(0).getId();
+    }
+
+    private void updateClientRoles(Map<String, List<String>> clientRoles, RealmResource realmResource, RoleMappingResource roleMappingResource, Boolean replaceRoles) {
+        if (replaceRoles) {
+            clientRoles.forEach((clientName, clientRoleNames) -> {
+                try {
+                    String clientId = getClientId(clientName, realmResource);
+
+                    if (clientId != null) {
+                        RoleScopeResource clientLevel = roleMappingResource.clientLevel(clientId);
+                        List<RoleRepresentation> effectiveClientRoles = clientLevel.listEffective();
+                        clientLevel.remove(effectiveClientRoles);
+                    } else {
+                        // Handle the case where the client doesn't exist (clientId is null)
+                        // You might want to log a message or take appropriate action
+                    }
+                } catch (NotFoundException e) {
+                    // Handle 404 response (Client not found) as needed
+                    // You might want to log a message or take appropriate action
+                }
+            });
+
+        }
+
+        addClientRoles(clientRoles, realmResource, roleMappingResource);
+    }
+
+    public void fillClientRoles(UserDto pUserDto) {
+        KeycloakAdminClientConfig keycloakAdminClientConfig = AuthenticationProvider.getKeycloakConfig();
+        Keycloak keycloak = getKeycloakClient(keycloakAdminClientConfig);
+        RealmResource realmResource = keycloak.realm(keycloakAdminClientConfig.getRealm());
+        UsersResource usersResource = realmResource.users();
+        UserRepresentation userRepresentation = userService.getUserRepresentationByUsername(pUserDto.getUsername());
+        Map<String, ClientMappingsRepresentation> all = usersResource.get(userRepresentation.getId()).roles().getAll().getClientMappings();
+        pUserDto.setClientRoles(convertClientMappingsToStringMap(all));
+    }
+
+    private static Map<String, List<String>> convertClientMappingsToStringMap(Map<String, ClientMappingsRepresentation> clientMappings) {
+        Map<String, List<String>> result = new HashMap<>();
+
+        if (clientMappings != null && !clientMappings.isEmpty()) {
+            clientMappings.forEach((client, clientMapping) -> {
+                List<String> roleNames = clientMapping.getMappings().stream()
+                        .map(RoleRepresentation::getName)
+                        .collect(Collectors.toList());
+                result.put(client, roleNames);
+            });
+        }
+
+        return result;
+    }
 }

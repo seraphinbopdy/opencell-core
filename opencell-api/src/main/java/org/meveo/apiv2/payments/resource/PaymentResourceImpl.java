@@ -23,6 +23,7 @@ import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
+import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.refund.CardRefund;
 import org.meveo.model.payments.CreditCardTypeEnum;
 
@@ -234,6 +235,37 @@ public class PaymentResourceImpl implements PaymentResource {
                 .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
                         ",\"message\":\"Rejection action successfully deleted\"," +
                         " \"numberOfDeletedCodes\":" + deletedCodeCount + "}")
+                .build();
+    }
+
+    /**
+     * Create rejection code group
+     *
+     * @param rejectionGroup rejection code group
+     */
+    @Override
+    public Response createRejectionGroup(RejectionGroup rejectionGroup) {
+        RejectionGroup created = paymentApi.createRejectionGroup(rejectionGroup);
+        return ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Rejection codes group successfully created\"},\"id\":"
+                        + created.getId() + ", \"code\": \""
+                        + created.getCode() + "\"}")
+                .build();
+    }
+
+    /**
+     * Update rejection code group
+     *
+     * @param id rejection code group id to update
+     * @param rejectionGroup rejection code group
+     */
+    @Override
+    public Response updateRejectionGroup(Long id, RejectionGroup rejectionGroup) {
+        RejectionGroup updated = paymentApi.updateRejectionGroup(id, rejectionGroup);
+        return ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Rejection codes group successfully updated\"},\"id\":"
+                        + updated.getId() + ", \"code\": \""
+                        + updated.getCode() + "\"}")
                 .build();
     }
 }

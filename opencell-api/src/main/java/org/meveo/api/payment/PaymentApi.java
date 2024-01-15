@@ -19,6 +19,7 @@
 package org.meveo.api.payment;
 
 import static java.util.Optional.ofNullable;
+import static org.meveo.apiv2.payments.ImmutableRejectionGroup.builder;
 import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.ENCODED_FILE_RESULT_LABEL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.EXPORT_SIZE_RESULT_LABEL;
@@ -77,8 +78,10 @@ import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
 import org.meveo.apiv2.payments.RejectionCodesExportResult;
 import org.meveo.apiv2.payments.RejectionCodesImportResult;
+import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.payments.resource.RejectionActionMapper;
 import org.meveo.apiv2.payments.resource.RejectionCodeMapper;
+import org.meveo.apiv2.payments.resource.RejectionGroupMapper;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.ExchangeRate;
 import org.meveo.model.billing.TradingCurrency;
@@ -98,6 +101,7 @@ import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentRejectionAction;
 import org.meveo.model.payments.PaymentRejectionCode;
+import org.meveo.model.payments.PaymentRejectionCodesGroup;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.scripts.ScriptInstance;
@@ -111,6 +115,7 @@ import org.meveo.service.payments.impl.PaymentGatewayService;
 import org.meveo.service.payments.impl.PaymentHistoryService;
 import org.meveo.service.payments.impl.PaymentRejectionActionService;
 import org.meveo.service.payments.impl.PaymentRejectionCodeService;
+import org.meveo.service.payments.impl.PaymentRejectionCodesGroupService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.payments.impl.RejectionCodeImportResult;
@@ -164,10 +169,14 @@ public class PaymentApi extends BaseApi {
 	@Inject
 	private ScriptInstanceService scriptInstanceService;
 
+	@Inject
+	private PaymentRejectionCodesGroupService paymentRejectionCodesGroupService;
+
 	private static final String PAYMENT_GATEWAY_NOT_FOUND_ERROR_MESSAGE = "Payment gateway not found";
 	private static final String PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE = "Payment rejection code not found";
 	private final RejectionCodeMapper rejectionCodeMapper = new RejectionCodeMapper();
 	private final RejectionActionMapper rejectionActionMapper = new RejectionActionMapper();
+	private final RejectionGroupMapper groupMapper = new RejectionGroupMapper();
 
 	/**
      * @param paymentDto payment object which encapsulates the input data sent by client
@@ -884,5 +893,117 @@ public class PaymentApi extends BaseApi {
 		} catch (Exception exception) {
 			throw new BusinessApiException(exception.getMessage());
 		}
+	}
+
+	/**
+	 * Create payment rejection code group
+	 *
+	 * @param rejectionGroup Payment rejection group
+	 * @return created entity
+	 */
+	public RejectionGroup createRejectionGroup(RejectionGroup rejectionGroup) {
+		checkCodeExistence(rejectionGroup);
+		PaymentRejectionCodesGroup entityToSave = groupMapper.toEntity(rejectionGroup);
+		if (entityToSave.getPaymentGateway() != null) {
+			entityToSave.setPaymentGateway(loadPaymentGateway(entityToSave.getPaymentGateway()));
+		}
+		if (rejectionGroup.getRejectionCodes() != null && !rejectionGroup.getRejectionCodes().isEmpty()) {
+			entityToSave.setPaymentRejectionCodes(loadRejectionCode(rejectionGroup.getRejectionCodes(), entityToSave));
+		}
+		if (rejectionGroup.getRejectionActions() != null && !rejectionGroup.getRejectionActions().isEmpty()) {
+			entityToSave.setPaymentRejectionActions(loadRejectionAction(rejectionGroup.getRejectionActions(), entityToSave));
+		}
+		paymentRejectionCodesGroupService.create(entityToSave);
+		return builder()
+				.id(entityToSave.getId())
+				.code(entityToSave.getCode())
+				.build();
+	}
+
+	private void checkCodeExistence(RejectionGroup rejectionGroup) {
+		if(!isBlank(rejectionGroup.getCode())
+				&& (paymentRejectionCodesGroupService.findByCode(rejectionGroup.getCode()) != null)) {
+			throw new EntityAlreadyExistsException("Payment rejection codes group with code "
+					+  rejectionGroup.getCode()+ " already exists");
+		}
+	}
+
+	private PaymentGateway loadPaymentGateway(PaymentGateway paymentGatewayEntity) {
+		return ofNullable(paymentGatewayService.findByIdOrCode(paymentGatewayEntity))
+				.orElseThrow(() -> new NotFoundException("Payment gateway does not exists"));
+	}
+
+	private List<PaymentRejectionCode> loadRejectionCode(List<Resource> rejectionCodes,
+														 PaymentRejectionCodesGroup rejectionCodesGroupEntity) {
+		List<PaymentRejectionCode> paymentRejectionCodes = new ArrayList<>();
+		for (Resource rejectionCodeResource : rejectionCodes) {
+			if (rejectionCodeResource != null) {
+				PaymentRejectionCode rejectionCodeEntity = new PaymentRejectionCode();
+				rejectionCodeEntity.setId(rejectionCodeResource.getId());
+				rejectionCodeEntity.setCode(rejectionCodeResource.getCode());
+				rejectionCodeEntity = ofNullable(rejectionCodeService.findByIdOrCode(rejectionCodeEntity))
+						.orElseThrow(() -> new NotFoundException("Payment rejection code "
+								+ (rejectionCodeResource.getId() != null
+								? rejectionCodeResource.getId() : rejectionCodeResource.getCode())
+								+ " does not exists"));
+				rejectionCodeEntity.setPaymentRejectionCodesGroup(rejectionCodesGroupEntity);
+				paymentRejectionCodes.add(rejectionCodeEntity);
+			}
+		}
+
+		return paymentRejectionCodes;
+	}
+
+	private List<PaymentRejectionAction> loadRejectionAction(List<Resource> rejectionActions,
+															 PaymentRejectionCodesGroup entity) {
+		List<PaymentRejectionAction> paymentRejectionActions = new ArrayList<>();
+		for (Resource rejectionActionResource : rejectionActions) {
+			if (rejectionActionResource != null) {
+				PaymentRejectionAction paymentRejectionActionEntity = new PaymentRejectionAction();
+				paymentRejectionActionEntity.setId(rejectionActionResource.getId());
+				paymentRejectionActionEntity.setCode(rejectionActionResource.getCode());
+				paymentRejectionActionEntity = ofNullable(paymentRejectionActionService.findByIdOrCode(paymentRejectionActionEntity))
+						.orElseThrow(() -> new NotFoundException("Payment rejection action "
+								+ (rejectionActionResource.getId() != null
+								? rejectionActionResource.getId() : rejectionActionResource.getCode())
+								+ " does not exists"));
+				paymentRejectionActionEntity.setPaymentRejectionCodesGroup(entity);
+				paymentRejectionActions.add(paymentRejectionActionEntity);
+			}
+		}
+		return paymentRejectionActions;
+	}
+
+	/**
+	 * Update payment rejection code group
+	 *
+	 * @param id Payment rejection group id
+	 * @param rejectionGroup Payment rejection group
+	 * @return updated entity
+	 */
+	public RejectionGroup updateRejectionGroup(Long id, RejectionGroup rejectionGroup) {
+		checkCodeExistence(rejectionGroup);
+		PaymentRejectionCodesGroup entityToUpdate = ofNullable(paymentRejectionCodesGroupService.findById(id))
+				.orElseThrow(() -> new NotFoundException("Payment rejection code group does not exists"));
+		entityToUpdate = groupMapper.toEntity(rejectionGroup, entityToUpdate);
+		if (entityToUpdate.getPaymentGateway() != null) {
+			entityToUpdate.setPaymentGateway(loadPaymentGateway(entityToUpdate.getPaymentGateway()));
+		}
+		if (rejectionGroup.getRejectionCodes() != null) {
+			if(entityToUpdate.getPaymentRejectionCodes() != null) {
+				entityToUpdate.getPaymentRejectionCodes()
+						.forEach(paymentRejectionCode -> paymentRejectionCode.setPaymentRejectionCodesGroup(null));
+			}
+			entityToUpdate.setPaymentRejectionCodes(loadRejectionCode(rejectionGroup.getRejectionCodes(), entityToUpdate));
+		}
+		if (rejectionGroup.getRejectionActions() != null) {
+			if(entityToUpdate.getPaymentRejectionActions() != null) {
+				entityToUpdate.getPaymentRejectionActions()
+						.forEach(paymentRejectionAction -> paymentRejectionAction.setPaymentRejectionCodesGroup(null));
+			}
+			entityToUpdate.setPaymentRejectionActions(loadRejectionAction(rejectionGroup.getRejectionActions(), entityToUpdate));
+		}
+		paymentRejectionCodesGroupService.update(entityToUpdate);
+		return groupMapper.toResource(entityToUpdate);
 	}
 }

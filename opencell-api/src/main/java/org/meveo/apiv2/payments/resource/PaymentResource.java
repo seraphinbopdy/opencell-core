@@ -18,6 +18,7 @@ import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
+import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.refund.CardRefund;
 
 @Path("/payment")
@@ -186,4 +187,30 @@ public interface PaymentResource {
                     @ApiResponse(responseCode = "400", description = "RejectionCode deletion failed")
             })
     Response removeRejectionCode(@Parameter(required = true) PagingAndFiltering filters);
+
+    @POST
+    @Path("/rejectionCodes/group")
+    @Operation(summary = "Create Payment Rejection Codes Group",
+            tags = {"RejectionCodesGroup"},
+            description = "Create anew Payment Rejection Codes Group",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "RejectionCodesGroup successfully created"),
+                    @ApiResponse(responseCode = "404", description = "Group does not exist"),
+                    @ApiResponse(responseCode = "400", description = "RejectionCodesGroup creation failed")
+            })
+    Response createRejectionGroup(@Parameter(required = true) RejectionGroup rejectionGroup);
+
+    @PUT
+    @Path("/rejectionCodes/group/{id}")
+    @Operation(summary = "update Payment Rejection Codes Group",
+            tags = {"RejectionCodesGroup"},
+            description = "update anew Payment Rejection Codes Group",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "RejectionCodesGroup successfully updated"),
+                    @ApiResponse(responseCode = "404", description = "Group does not exist"),
+                    @ApiResponse(responseCode = "404", description = "Group does not exist"),
+                    @ApiResponse(responseCode = "412", description = "Missing parameters")
+            })
+    Response updateRejectionGroup(@Parameter(description = "Rejection action id", required = true) @PathParam("id") Long id,
+            @Parameter(required = true) RejectionGroup rejectionGroup);
 }

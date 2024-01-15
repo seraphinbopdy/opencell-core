@@ -87,7 +87,7 @@ public class MassWrittingOffInvoices extends Script {
 		if(amount == null){
 			throw  new BusinessException("the amount from write off invoice : " + invoice.getInvoiceNumber() + " is required");
 		}
-		return invoice.getAmountWithoutTax().compareTo(amount) == 0;
+		return invoice.getAmountWithTax().compareTo(amount) == 0;
 	}
 	
 	private Invoice getInvoice(String invoiceNumber) {
@@ -145,6 +145,7 @@ public class MassWrittingOffInvoices extends Script {
 		writeOff.setMatchingStatus(MatchingStatusEnum.O);
 		writeOff.setTransactionalMatchingAmount(amount);
 		writeOff.setTransactionalUnMatchingAmount(invoice.getAmountWithTax());
+		writeOff.setJournal(occTemplate.getJournal());
 		
 		accountOperationService.create(writeOff);
 		return writeOff;

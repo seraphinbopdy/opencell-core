@@ -618,7 +618,7 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 		// 3 - procude dubt receivable
 		saved.addAll(createDoubtfulReceivable(writeOff));
 		// 4 - product bad debt write off
-		saved.add(createBadDebtWritOff(writeOff, occT.getAccountingCode(), taxJournalEntries.stream().filter(journalEntry -> OperationCategoryEnum.DEBIT.getLabel().equalsIgnoreCase(journalEntry.getDirection().getLabel())).map(JournalEntry::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)));
+		saved.add(createBadDebtWritOff(writeOff, occT.getAccountingCode(), taxJournalEntries.stream().map(JournalEntry::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)));
 		
 		saved.forEach(this::create);
 		return saved;
@@ -626,7 +626,7 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 	
 	private JournalEntry createBadDebtWritOff(WriteOff writeOff, AccountingCode accountingCode,  BigDecimal reduce) {
 		return  buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.DEBIT,
-				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount(), null, writeOff.getOperationNumber());
+				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount().subtract(reduce), null, writeOff.getOperationNumber());
 	}
 	
 	private List<JournalEntry> createDoubtfulReceivable(WriteOff writeOff) {

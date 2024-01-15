@@ -25,6 +25,7 @@ import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXI
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.accountingScheme.JournalEntry;
 import org.meveo.model.accountingScheme.JournalEntryDirectionEnum;
@@ -52,6 +53,7 @@ import org.meveo.model.payments.WriteOff;
 import org.meveo.model.securityDeposit.AuxiliaryAccounting;
 import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.service.billing.impl.AccountingCodeService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.crm.impl.ProviderService;
@@ -103,6 +105,9 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 	
 	@Inject
 	private InvoiceService invoiceService;
+	
+	@Inject
+	private AccountingCodeService accountingCodeService;
 
     @Transactional
     public List<JournalEntry> createFromAccountOperation(AccountOperation ao, OCCTemplate occT) {
@@ -608,12 +613,40 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 		saved.add(customerAccountEntry);
 		
 		// 2 - procude tax accounting entry
-		saved.addAll(buildTaxesJournalEntries(writeOff, occT));
-		// 3 - procude bad debt
+		List<JournalEntry> taxJournalEntries = buildTaxesJournalEntries(writeOff, occT);
+		saved.addAll(taxJournalEntries);
+		// 3 - procude dubt receivable
+		saved.addAll(createDoubtfulReceivable(writeOff));
+		// 4 - product bad debt write off
+		saved.add(createBadDebtWritOff(writeOff, occT.getAccountingCode(), taxJournalEntries.stream().filter(journalEntry -> OperationCategoryEnum.DEBIT.getLabel().equalsIgnoreCase(journalEntry.getDirection().getLabel())).map(JournalEntry::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)));
 		
 		saved.forEach(this::create);
 		return saved;
 	}
+	
+	private JournalEntry createBadDebtWritOff(WriteOff writeOff, AccountingCode accountingCode,  BigDecimal reduce) {
+		return  buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.DEBIT,
+				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount(), null, writeOff.getOperationNumber());
+	}
+	
+	private List<JournalEntry> createDoubtfulReceivable(WriteOff writeOff) {
+		final String ACCOUNTING_CODE_KEY = "accounting.code.doubtful.receivable.key";
+		String accountingCodeFromProperty = ParamBeanFactory.getAppScopeInstance().getProperty(ACCOUNTING_CODE_KEY, "416000000");
+		AccountingCode accountingCode = ofNullable(accountingCodeService.findByCode(accountingCodeFromProperty))
+				.orElse(null);
+		if(accountingCode == null) {
+			throw new BusinessException("no accounting code found from key : " + ACCOUNTING_CODE_KEY);
+		}
+		JournalEntry journalEntryDoubtfulRecCredit = buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.CREDIT,
+				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount(), null, writeOff.getOperationNumber());
+		
+		JournalEntry journalEntryDoubtfulRecDebit = buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.DEBIT,
+				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount(), null, writeOff.getOperationNumber());
+		
+		return List.of(journalEntryDoubtfulRecCredit, journalEntryDoubtfulRecDebit);
+		
+	}
+	
 	
 	private List<JournalEntry> buildTaxesJournalEntries(WriteOff writeOff, OCCTemplate occT) {
 		Invoice invoice = invoiceService.findByInvoiceNumber(writeOff.getReference());

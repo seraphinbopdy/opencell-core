@@ -6518,6 +6518,19 @@
     <changeSet id="#INTRD-19862_20231220" author="zelmeliani" />
     <changeSet id="#INTRD-20278_20240109" author="AbdellatifBARI" />
 
+	<changeSet id="#INTRD-20752_20240115" author="zelmeliani">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+			<column name="disabled" value="0" />
+            <column name="code" value="org.meveo.service.script.dunning.DunningSuspendSubscriptionScript" />
+            <column name="src_type" value="JAVA_CLASS" />
+            <column name="description" value="Dunning Suspend Subscription Script - To Suspend a subscription linked to a dunning"/>
+            <column name="created" valueDate="${db.current.time}" />
+			<column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='DUNNING_ACTION')" />
+        </insert>
+	</changeSet>
+
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->
     <changeSet id="#liquibase_hack_data" author="AbdelmounaimAkadid">
         <sql>update databasechangelog set filename='src/main/db_resources/changelog/current/data.xml' where filename='src/main/db_resources/changelog/rebuild/data-demo.xml'</sql>

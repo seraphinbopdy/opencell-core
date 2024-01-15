@@ -599,7 +599,7 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
     private String rejectReason;
 
     @Embedded
-    private OrderInfo infoOrder;
+    private OrderInfo orderInfo;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "accounting_article_id")
@@ -751,8 +751,10 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
         this.parameterExtra = criteriaExtra;
         this.inputQuantity = inputQuantity;
         OrderInfo orderInfo = new OrderInfo();
-        orderInfo.setOrder(chargeInstance.getSubscription()!= null ? chargeInstance.getSubscription().getOrder() : null );
-        this.infoOrder = orderInfo;
+		orderInfo.setOrder(chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null);
+        orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
+        orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
+        this.orderInfo = orderInfo;
 
         // TODO AKK in what case prevails customized description of chargeInstance??
 
@@ -1270,6 +1272,7 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
         result.setAccountingCode(accountingCode);
         result.setTradingCurrency(tradingCurrency);
         result.setReratingBatch(reratingBatch);
+        result.setOrderInfo(orderInfo);
 
         return result;
     }
@@ -1654,18 +1657,12 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
             quantity, unitAmountWithoutTax, amountWithoutTax);
     }
 
-    /**
-     * @return the infoOrder
-     */
     public OrderInfo getOrderInfo() {
-        return infoOrder;
+        return orderInfo;
     }
 
-    /**
-     * @param infoOrder the infoOrder to set
-     */
-    public void setOrderInfo(OrderInfo infoOrder) {
-        this.infoOrder = infoOrder;
+    public void setOrderInfo(OrderInfo orderInfo) {
+        this.orderInfo = orderInfo;
     }
 
     public AccountingArticle getAccountingArticle() {
@@ -1690,14 +1687,6 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
 	
 	public void setDiscountPlan(DiscountPlan discountPlan) {
 		this.discountPlan = discountPlan;
-	}
-
-	public OrderInfo getInfoOrder() {
-		return infoOrder;
-	}
-
-	public void setInfoOrder(OrderInfo infoOrder) {
-		this.infoOrder = infoOrder;
 	}
 
 	public BigDecimal getDiscountValue() {

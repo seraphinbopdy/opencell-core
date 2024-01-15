@@ -21,12 +21,15 @@ package org.meveo.service.billing.impl;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.ejb.Stateless;
@@ -261,9 +264,9 @@ public class RecurringRatingService extends RatingService implements Serializabl
             }
 
             if(chargeInstance.isAnticipateEndOfSubscription()) {
-                Date prorateLastPeriodDate = asList(period.getTo(), chargeInstance.getSubscription().getSubscribedTillDate(),
+
+                Date prorateLastPeriodDate = Stream.of(period.getTo(), chargeInstance.getSubscription().getSubscribedTillDate(),
                         chargeInstance.getServiceInstance().getSubscribedTillDate())
-                        .stream()
                         .filter(Objects::nonNull).min(Date::compareTo).orElse(null);
                 if(prorateLastPeriodDate != null && prorateLastPeriodDate.compareTo(period.getTo()) != 0) {
                     applyChargeFromDate = period.getFrom();
@@ -272,18 +275,13 @@ public class RecurringRatingService extends RatingService implements Serializabl
                 }
                 if(chargeInstance.getSubscription().getSubscribedTillDate() != null) {
                     Date end = getRecurringPeriodEndDate(chargeInstance, chargeInstance.getSubscription().getSubscribedTillDate());
-                    if(end != null && chargeInstance.getTerminationDate() != null && chargeInstance.getTerminationDate().after(end)) {
-                        WalletOperation walletOperation = chargeInstance.getWalletOperations().get(chargeInstance.getWalletOperations().size() - 1);
+                    if (end != null && chargeInstance.getTerminationDate() != null && chargeInstance.getTerminationDate().after(end)) {
+                        Date startDate = chargeInstance.getSubscription().getSubscribedTillDate();
                         while (chargeInstance.getTerminationDate().after(end)) {
-                            Date startDate = getRecurringPeriodStartDate(chargeInstance, chargeInstance.getSubscription().getSubscribedTillDate());
-                            if (walletOperation.getRatedTransaction() != null
-                                    && walletOperation.getRatedTransaction().getStatus().equals(RatedTransactionStatusEnum.BILLED)
-                                    && walletOperation.getStartDate().compareTo(startDate) == 0) {
-                                startDate = walletOperation.getEndDate();
-                            }
                             DatePeriod datePeriod = new DatePeriod(startDate, end);
-                            end = chargeInstance.getCalendar().nextCalendarDate(end);
                             periods.add(datePeriod);
+                            startDate = end;
+                            end = getRecurringPeriodEndDate(chargeInstance, startDate);
                         }
                     }
                 }
@@ -408,6 +406,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
 
                 } else {
 
+                    boolean alreadyInvoiced = false;
                     BigDecimal inputQuantity = chargeMode.isReimbursement() ? chargeInstance.getQuantity().negate() : chargeInstance.getQuantity();
 
                     if (chargeInstance != null && chargeInstance.getSubscription() != null
@@ -425,7 +424,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
                             } else {
                                 walletOperations.add(chargeInstance.getWalletOperations().get(lastIndex));
                             }
-                            boolean alreadyInvoiced = walletOperations.stream().allMatch(this::isAlreadyInvoiced);
+                            alreadyInvoiced = walletOperations.stream().allMatch(this::isAlreadyInvoiced);
                             if(!alreadyInvoiced) {
                                 walletOperationService.cancelWalletOperations(walletOperations.stream().map(WalletOperation::getId).collect(Collectors.toList()));
                                 inputQuantity = inputQuantity.abs();
@@ -441,6 +440,9 @@ public class RecurringRatingService extends RatingService implements Serializabl
                                 effectiveChargeFromDate = chargeInstance.getChargeToDateOnTermination();
                                 effectiveChargeToDate = chargeInstance.getSubscription().getSubscribedTillDate();
                             }
+                            if(effectiveChargeFromDate.compareTo(effectiveChargeToDate) == 0 && chargeInstance.getSubscription() != null) {
+                                effectiveChargeFromDate = getRecurringPeriodStartDate(chargeInstance, chargeInstance.getSubscription().getSubscribedTillDate());
+                            }
                         }
                     }
                     // Apply prorating if needed
@@ -450,12 +452,15 @@ public class RecurringRatingService extends RatingService implements Serializabl
                             throw new RatingException("Failed to calculate prorating for charge id=" + chargeInstance.getId() + " : periodFrom=" + currentPeriodFromDate + ", periodTo=" + currentPeriodToDate
                                     + ", proratedFrom=" + effectiveChargeFromDate + ", proratedTo=" + effectiveChargeToDate);
                         }
-
-                        inputQuantity = inputQuantity.multiply(prorata)
-                                .setScale(appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
                         if(effectiveChargeFromDate.after(effectiveChargeToDate)) {
                             inputQuantity = inputQuantity.negate();
                         }
+                    }
+                    if((!prorate && !prorateLastPeriod) && chargeInstance.getTerminationDate() != null && chargeInstance.getTerminationDate().compareTo(new Date()) < 0) {
+                        effectiveChargeToDate = chargeInstance.getTerminationDate();
+                        effectiveChargeFromDate = getRecurringPeriodStartDate(chargeInstance, chargeInstance.getChargeToDateOnTermination());
+                        inputQuantity = computeProrate(chargeInstance, effectiveChargeFromDate,
+                                effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, inputQuantity);
                     }
 
                     if (chargeMode.isReimbursement()) {
@@ -484,10 +489,13 @@ public class RecurringRatingService extends RatingService implements Serializabl
 
                         if(chargeInstance != null
                                 && chargeInstance.getSubscription() != null
-                                && chargeInstance.getSubscription().getSubscribedTillDate() != null) {
-                            effectiveChargeFromDate = chargeInstance.getSubscription().getSubscriptionDate();
+
+                                && chargeInstance.getSubscription().getSubscribedTillDate() != null
+                                && ( chargeInstance.getSubscription().getSubscribedTillDate().before(effectiveChargeToDate) || chargeInstance.getSubscription().getSubscribedTillDate().compareTo(effectiveChargeToDate) == 0)
+                                && inputQuantity.compareTo(BigDecimal.ONE) == 0) {
+	                        effectiveChargeFromDate = operationDate;
                             inputQuantity = computeProrate(chargeInstance, effectiveChargeFromDate,
-                                    effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, inputQuantity);
+                                    effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, chargeInstance.getQuantity());
                         }
 
                         RatingResult localRatingResult = rateChargeAndInstantiateTriggeredEDRs(chargeInstance, operationDate, inputQuantity, null,

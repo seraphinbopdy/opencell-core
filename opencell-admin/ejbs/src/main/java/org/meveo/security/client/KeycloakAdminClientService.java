@@ -68,7 +68,9 @@ import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.InvalidParameterException;
 import org.meveo.admin.exception.UsernameAlreadyExistsException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.commons.utils.ParamBean;
+import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.admin.User;
 import org.meveo.model.security.Role;
@@ -78,6 +80,7 @@ import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.security.UserGroup;
 import org.meveo.security.keycloak.AuthenticationProvider;
+import org.meveo.service.admin.impl.UserService;
 import org.meveo.security.keycloak.KeycloakAdminClientConfig;
 import org.slf4j.Logger;
 import org.wildfly.security.http.oidc.OidcPrincipal;
@@ -106,6 +109,10 @@ public class KeycloakAdminClientService implements Serializable {
     @Inject
     @CurrentUser
     protected MeveoUser currentUser;
+    
+
+    @Inject
+    protected ParamBeanFactory paramBeanFactory;
 
     /**
      * A Keycloak client role giving a full API access
@@ -136,6 +143,9 @@ public class KeycloakAdminClientService implements Serializable {
      * A prefix to add to a role based policy
      */
     private static final String KC_POLICY_ROLE_PREFIX = "Role ";
+	
+	@Inject
+	private UserService userService;
 
     /**
      * @param keycloakAdminClientConfig keycloak admin client config.
@@ -267,6 +277,7 @@ public class KeycloakAdminClientService implements Serializable {
 
         KeycloakAdminClientConfig keycloakAdminClientConfig = AuthenticationProvider.getKeycloakConfig();
         Keycloak keycloak = getKeycloakClient(keycloakAdminClientConfig);
+        boolean isMasterOC=isMasterOC();
 
         RealmResource realmResource = keycloak.realm(keycloakAdminClientConfig.getRealm());
         UsersResource usersResource = realmResource.users();
@@ -288,12 +299,20 @@ public class KeycloakAdminClientService implements Serializable {
                 break;
             }
         }
-
-        if (isUpdate && user == null) {
-            throw new ElementNotFoundException("User with username " + userName + " not found");
+		User userFromDb = userService.getUserFromDatabase(userName);
+		if(userFromDb != null &&  user == null) {
+			isUpdate = false;
+		}else if (isUpdate && user == null) {
+			if (!isMasterOC) 
+				throw new ElementNotFoundException("User with username " + userName + " not found");
+			
+			return null;
 
         } else if (!isUpdate && user != null) {
-            throw new UsernameAlreadyExistsException("User with username " + userName + " already exists");
+        	if (!isMasterOC)
+        		throw new UsernameAlreadyExistsException("User with username " + userName + " already exists");
+        	
+        	return null;
         }
 
         if (!isUpdate && StringUtils.isBlank(password)) {
@@ -358,8 +377,14 @@ public class KeycloakAdminClientService implements Serializable {
         // Update current user
         if (isUpdate) {
             userId = user.getId();
-            usersResource.get(userId).update(user);
-        } else {
+			try{
+				usersResource.get(userId).update(user);
+			}catch (BusinessApiException e){
+				log.warn("Impossible to update user on keycloak : " + usersResource.get(userId));
+				log.error("error when updating user  : " + user);
+			}
+        
+        } else{
             // Create a new user
             Response response = usersResource.create(user);
 
@@ -444,7 +469,10 @@ public class KeycloakAdminClientService implements Serializable {
                     RoleRepresentation tempRole = rolesResource.get(role).toRepresentation();
                     rolesToAdd.add(tempRole);
                 } catch (NotFoundException e) {
-                    throw new InvalidParameterException("Role " + role + " was not found");
+                	if("KC".equals(ParamBean.getInstance().getProperty("userManagement.master", "KC"))) {
+                		throw new InvalidParameterException("Role " + role + " was not found");
+                	}
+                    
                 }
             }
         }
@@ -1447,4 +1475,10 @@ public class KeycloakAdminClientService implements Serializable {
         }
         throw new ElementNotFoundException("No user found with username " + username);
     }
+    
+    private boolean isMasterOC() {
+		String lUserManagementSource = paramBeanFactory.getInstance().getProperty("userManagement.master", "KC");
+		log.info("lUserManagementSource : " + lUserManagementSource);
+		return lUserManagementSource.equalsIgnoreCase("OC");
+	}
 }

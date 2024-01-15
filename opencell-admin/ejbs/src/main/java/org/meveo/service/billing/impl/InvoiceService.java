@@ -1436,16 +1436,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param automaticInvoiceCheck
      */
     private void applyAutomaticInvoiceCheck(Invoice invoice, boolean automaticInvoiceCheck, boolean save) {
-    	invoice = invoiceService.refreshOrRetrieve(invoice);
-        if (invoice.getStatus() != InvoiceStatusEnum.VALIDATED) {
-            invoice.setStatus(InvoiceStatusEnum.DRAFT);
-        }
-        if (automaticInvoiceCheck && invoice.getInvoiceType() != null &&
-                (invoice.getInvoiceType().getInvoiceValidationScript() != null
-                        || invoice.getInvoiceType().getInvoiceValidationRules() != null)) {
-            InvoiceType invoiceType = invoiceTypeService.refreshOrRetrieve(invoice.getInvoiceType());
-            if(invoice.getInvoiceType().getInvoiceValidationScript() != null) {
-                ScriptInstance scriptInstance = invoice.getInvoiceType().getInvoiceValidationScript();
+    	InvoiceType invoiceType = invoiceTypeService.refreshOrRetrieve(invoice.getInvoiceType());
+        if (automaticInvoiceCheck && invoiceType != null && (invoiceType.getInvoiceValidationScript() != null || invoiceType.getInvoiceValidationRules() != null)) {
+            if (invoiceType.getInvoiceValidationScript() != null) {
+                ScriptInstance scriptInstance = invoiceType.getInvoiceValidationScript();
                 if (scriptInstance != null) {
                     ScriptInterface script = scriptInstanceService.getScriptInstance(scriptInstance.getCode());
                     if (script != null) {
@@ -1464,8 +1458,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                         }
                     }
                 }
-            } else if (invoiceType.getInvoiceValidationRules() != null
-                    && !invoiceType.getInvoiceValidationRules().isEmpty()) {
+            } else if (invoiceType.getInvoiceValidationRules() != null && !invoiceType.getInvoiceValidationRules().isEmpty()) {
 				List<InvoiceValidationRule> invoiceValidationRules = invoice.getInvoiceType().getInvoiceValidationRules()
 						.stream().filter(rule -> Objects.isNull(rule.getParentRule())).collect(Collectors.toList());
                 sort(invoiceValidationRules, comparingInt(InvoiceValidationRule::getPriority));
@@ -7013,7 +7006,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
     
     public Invoice duplicateByType(Invoice invoice, List<Long> invoiceLinesIds, boolean isAdjustment) {
-        invoice = refreshOrRetrieve(invoice);
 
         if (invoice.getOrders() != null) {
             invoice.getOrders().size();
@@ -7040,36 +7032,29 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			invoice.getLinkedInvoices().size();
 		}
 
-        detach(invoice);
 
         var duplicateInvoice = new Invoice(invoice);
         this.create(duplicateInvoice);
 
         if (invoiceLinesIds == null || invoiceLinesIds.isEmpty()) {
             for (InvoiceAgregate invoiceAgregate : invoiceAgregates) {
-    
-                invoiceAgregateService.detach(invoiceAgregate);
-    
                 switch (invoiceAgregate.getDescriminatorValue()) {
                     case TAX_INVOICE_AGREGATE: {
                         var taxInvoiceAgregate = new TaxInvoiceAgregate((TaxInvoiceAgregate) invoiceAgregate);
                         taxInvoiceAgregate.setInvoice(duplicateInvoice);
                         invoiceAgregateService.create(taxInvoiceAgregate);
-                        duplicateInvoice.getInvoiceAgregates().add(taxInvoiceAgregate);
                         break;
                     }
                     case CATEGORY_INVOICE_AGREGATE: {
                         var categoryInvoiceAgregate = new CategoryInvoiceAgregate((CategoryInvoiceAgregate) invoiceAgregate);
                         categoryInvoiceAgregate.setInvoice(duplicateInvoice);
                         invoiceAgregateService.create(categoryInvoiceAgregate);
-                        duplicateInvoice.getInvoiceAgregates().add(categoryInvoiceAgregate);
                         break;
                     }
                     case SUBCATEGORY_INVOICE_AGREGATE: {
                         var subCategoryInvoiceAgregate = new SubCategoryInvoiceAgregate((SubCategoryInvoiceAgregate) invoiceAgregate);
                         subCategoryInvoiceAgregate.setInvoice(duplicateInvoice);
                         invoiceAgregateService.create(subCategoryInvoiceAgregate);
-                        duplicateInvoice.getInvoiceAgregates().add(subCategoryInvoiceAgregate);
                         break;
                     }
                 }
@@ -7081,8 +7066,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             InvoiceLine duplicateInvoiceLine = new InvoiceLine(invoiceLine, duplicateInvoice);
             duplicateInvoiceLine.setAdjustmentStatus(AdjustmentStatusEnum.NOT_ADJUSTED);
             duplicateInvoiceLine.setLinkedInvoiceLine(invoiceLine); // Add linked adjusted invoiceLine
-            invoiceLinesService.createInvoiceLineWithInvoice(duplicateInvoiceLine, invoice, true);
-            duplicateInvoice.getInvoiceLines().add(duplicateInvoiceLine);
+            invoiceLinesService.createInvoiceLineWithInvoice(duplicateInvoiceLine, duplicateInvoice, true);
         }
 
         return duplicateInvoice;
@@ -7112,6 +7096,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Invoice createAdjustment(Invoice invoice, InvoiceLinesToReplicate invoiceLinesToReplicate) {
 
+        invoice = findById(invoice.getId());
+                
         List<InvoiceLineRTs> invoiceLineRTs = invoiceLinesToReplicate.getInvoiceLinesRTs();
         InvoiceType invoiceType = null;
 
@@ -7181,6 +7167,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Invoice createAdjustment(Invoice invoice, List<Long> invoiceLinesIds, InvoiceType type) {
+        
+        invoice = findById(invoice.getId());
+        
         Invoice adjustmentInvoice = duplicateByType(invoice, invoiceLinesIds, true);
         addLinkedInvoice(invoice, adjustmentInvoice);
         populateAdjustmentInvoice(adjustmentInvoice, type, invoice);

@@ -47,6 +47,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditNo
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditedQuantity;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Description;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DocumentCurrencyCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DocumentTypeCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndDate;
@@ -65,6 +66,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PayableA
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PaymentMeansCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Percent;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PostalZone;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrepaidAmount;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PriceAmount;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.RegistrationName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.SalesOrderID;
@@ -94,6 +96,8 @@ import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.InvoiceType;
+import org.meveo.model.billing.InvoiceTypeEnum;
+import org.meveo.model.billing.LinkedInvoice;
 import org.meveo.model.billing.SubCategoryInvoiceAgregate;
 import org.meveo.model.billing.Tax;
 import org.meveo.model.billing.TaxInvoiceAgregate;
@@ -132,6 +136,7 @@ public class InvoiceUblHelper {
 	private final static UntdidAllowanceCodeService untdidAllowanceCodeService;
 	private final static UntdidTaxationCategoryService UntdidTaxationCategoryService;
 	private final static InvoiceAgregateService invoiceAgregateService;
+	private static final String XUN = "XUN";
 	
 	static {
 		objectFactorycommonBasic = new oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ObjectFactory();
@@ -171,18 +176,20 @@ public class InvoiceUblHelper {
 		String curreny = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode():null;
 		BigDecimal amountWithoutTax = invoice.getAmountWithoutTax();
 		BigDecimal amountWithTax = invoice.getAmountWithTax();
+		BigDecimal totalPrepaidAmount = invoice.getLinkedInvoices().stream().filter(li -> li.getType() == InvoiceTypeEnum.ADVANCEMENT_PAYMENT).map(LinkedInvoice::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
 			setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote);
-			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(curreny, amountWithoutTax , amountWithTax));
+			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax));
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
 			setBillingReference(invoice, invoiceXml);
 			setOrderReference(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml);
-			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(curreny, amountWithoutTax , amountWithTax));
+			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax));
+			setBillingReferenceForInvoice(invoice, invoiceXml);
 		}
 		
 		
@@ -192,7 +199,8 @@ public class InvoiceUblHelper {
 		if (!StorageFactory.existsDirectory(ublDirectory)) {
 			StorageFactory.createDirectory(ublDirectory);
 		}
-		File ublInvoiceFileName = new File(	ublDirectory.getAbsolutePath() + File.separator + "invoice_" + invoice.getInvoiceNumber() + "_"	+ new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".xml");
+		String invoiceTypeAdj = creditNote != null ? "invoice_ADJ_" : "invoice_";
+		File ublInvoiceFileName = new File(	ublDirectory.getAbsolutePath() + File.separator +  invoiceTypeAdj +  invoice.getInvoiceNumber() + "_"	+ new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".xml");
 		Path pathCreatedFile = null;
 
 		try {
@@ -395,6 +403,7 @@ public class InvoiceUblHelper {
 			// InvoiceLine/ InvoicedQuantity
 			InvoicedQuantity invoicedQuantity = objectFactorycommonBasic.createInvoicedQuantity();
 			invoicedQuantity.setValue(invoiceLine.getQuantity());
+			invoicedQuantity.setUnitCode(XUN);
 			invoiceLineType.setInvoicedQuantity(invoicedQuantity);
 			setPriceAndCreditLine(invoiceLine, invoiceLineType, itemType);
 			target.getInvoiceLines().add(invoiceLineType);
@@ -407,6 +416,7 @@ public class InvoiceUblHelper {
 			ItemType itemType = getItemTyp(invoiceLine);
 			// InvoiceLine/ InvoicedQuantity
 			CreditedQuantity invoicedQuantity = objectFactorycommonBasic.createCreditedQuantity();
+			invoicedQuantity.setUnitCode(XUN);
 			invoicedQuantity.setValue(invoiceLine.getQuantity());
 			invoiceLineType.setCreditedQuantity(invoicedQuantity);
 			setPriceAndCreditLine(invoiceLine, invoiceLineType, itemType);
@@ -451,6 +461,16 @@ public class InvoiceUblHelper {
 	private ItemType getItemTyp(InvoiceLine invoiceLine){
 		ItemType itemType = objectFactoryCommonAggrement.createItemType();
 		TaxCategoryType taxCategoryType = objectFactoryCommonAggrement.createTaxCategoryType();
+		
+		//id.setValue();
+		String untdidTaxationCategory = invoiceLine.getTax() != null ? invoiceLine.getTax().getUntdidTaxationCategory() != null ?  invoiceLine.getTax().getUntdidTaxationCategory().getCode() : null: null;
+		if(untdidTaxationCategory != null) {
+			ID id = objectFactorycommonBasic.createID();
+			id.setSchemeID("UN/ECE 5305");
+			id.setSchemeAgencyID("6");
+			id.setValue(untdidTaxationCategory);
+			taxCategoryType.setID(id);
+		}
 		Percent percent = objectFactorycommonBasic.createPercent();
 		percent.setValue(invoiceLine.getTaxRate());
 		taxCategoryType.setPercent(percent);
@@ -958,7 +978,7 @@ public class InvoiceUblHelper {
 		return taxCategoryType;
 	}
 	
-	private static MonetaryTotalType setTaxExclusiveAmount(String currency, BigDecimal amountWithoutTax, BigDecimal amountWithTax) {
+	private static MonetaryTotalType setTaxExclusiveAmount(BigDecimal totalPrepaidAmount, String currency, BigDecimal amountWithoutTax, BigDecimal amountWithTax) {
 		MonetaryTotalType moneyTotalType = objectFactoryCommonAggrement.createMonetaryTotalType();
 		TaxInclusiveAmount taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
 		taxInclusiveAmount.setCurrencyID(currency);
@@ -970,7 +990,27 @@ public class InvoiceUblHelper {
 		taxExclusiveAmount.setValue(amountWithoutTax);
 		moneyTotalType.setTaxExclusiveAmount(taxExclusiveAmount);
 		
+		if(totalPrepaidAmount.compareTo(BigDecimal.ZERO) != 0){
+			PrepaidAmount prepaidAmount = objectFactorycommonBasic.createPrepaidAmount();
+			prepaidAmount.setCurrencyID(currency);
+			prepaidAmount.setValue(totalPrepaidAmount);
+			moneyTotalType.setPrepaidAmount(prepaidAmount);
+		}
+		
+		
 		return moneyTotalType;
 		
+	}
+	
+	private BillingReference setBillingReferenceForInvoice(org.meveo.model.billing.Invoice source, Invoice target) {
+		BillingReference billingReference = setBillingReference(source);
+		DocumentReferenceType documentReferenceType =  billingReference.getInvoiceDocumentReference();
+		
+		IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
+		dueDate.setValue(toXmlDate(source.getDueDate()));
+		documentReferenceType.setIssueDate(dueDate);
+		
+		target.getBillingReferences().add(billingReference);
+		return billingReference;
 	}
 }

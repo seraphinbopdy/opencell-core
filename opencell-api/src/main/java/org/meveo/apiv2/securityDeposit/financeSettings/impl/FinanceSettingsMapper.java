@@ -37,7 +37,10 @@ public class FinanceSettingsMapper  extends ResourceMapper<org.meveo.apiv2.secur
                 .nbPartitionsToKeep(entity.getNbPartitionsToKeep())
                 .woPartitionPeriod(entity.getWoPartitionPeriod())
                 .rtPartitionPeriod(entity.getRtPartitionPeriod())
-                .edrPartitionPeriod(entity.getEdrPartitionPeriod());
+                .edrPartitionPeriod(entity.getEdrPartitionPeriod())
+                .handleAccountingPeriods(entity.isHandleAccountingPeriods())
+                .handleFrameworkAgreement(entity.isHandleFrameworkAgreement())
+                .handleInvoicingPlans(entity.isHandleInvoicingPlans());
         
         if (entity.getAuxiliaryAccounting() != null) {
             builder.useAuxiliaryAccounting(entity.getAuxiliaryAccounting().isUseAuxiliaryAccounting())
@@ -105,24 +108,35 @@ public class FinanceSettingsMapper  extends ResourceMapper<org.meveo.apiv2.secur
 	        financeSettings.setEntitiesWithHugeVolume(hugeEntitiesSettings);
 	     }
          financeSettings.setBillingRunProcessWarning(resource.getBillingRunProcessWarning());
-         
+
          if (resource.getNbPartitionsToKeep() != null) {
         	 financeSettings.setNbPartitionsToKeep(resource.getNbPartitionsToKeep());
          }
-         if (resource.getWoPartitionPeriod() != null) {
-        	 financeSettings.setWoPartitionPeriod(resource.getWoPartitionPeriod());
-         }
-         if (resource.getRtPartitionPeriod() != null) {
-        	 financeSettings.setRtPartitionPeriod(resource.getRtPartitionPeriod());
-         }
-         if (resource.getEdrPartitionPeriod() != null) {
-        	 financeSettings.setEdrPartitionPeriod(resource.getEdrPartitionPeriod());
-         }
+         
          if (resource.getSynchronousMassActionLimit() != null) {
         	 financeSettings.setSynchronousMassActionLimit(resource.getSynchronousMassActionLimit());
          } else if (financeSettings.getId() == null) {
         	 financeSettings.setSynchronousMassActionLimit(10000);
          }
+                  
+         financeSettings.setWoPartitionPeriod(resource.getWoPartitionPeriod());
+         if(financeSettings.getWoPartitionPeriod() != null && financeSettings.getWoPartitionPeriod() == 0) {
+             financeSettings.setWoPartitionPeriod(null);
+         }
+         
+         financeSettings.setRtPartitionPeriod(resource.getRtPartitionPeriod());
+         if(financeSettings.getRtPartitionPeriod() != null && financeSettings.getRtPartitionPeriod() == 0) {
+             financeSettings.setRtPartitionPeriod(null);
+         }
+         
+         financeSettings.setEdrPartitionPeriod(resource.getEdrPartitionPeriod());
+         if(financeSettings.getEdrPartitionPeriod() != null && financeSettings.getEdrPartitionPeriod() == 0) {
+             financeSettings.setEdrPartitionPeriod(null);
+         }
+
+         financeSettings.setHandleAccountingPeriods(resource.getHandleAccountingPeriods());
+         financeSettings.setHandleFrameworkAgreement(resource.getHandleFrameworkAgreement());
+         financeSettings.setHandleInvoicingPlans(resource.getHandleInvoicingPlans());
          
          return financeSettings;
     }

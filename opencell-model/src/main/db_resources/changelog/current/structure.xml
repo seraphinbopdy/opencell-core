@@ -8872,6 +8872,13 @@ public class AgedBalanceReporting extends ReportExtractScript {
         <sql>update ${db.schema.adapted}finance_settings set use_auxiliary_accounting = 0 where use_auxiliary_accounting is null;</sql>
         <sql>ALTER TABLE ${db.schema.adapted}finance_settings ALTER COLUMN use_auxiliary_accounting SET NOT NULL ;</sql>
     </changeSet>
+    
+    <changeSet id="#INTRD-20273_20231219" author="AndriusKarpavicius">
+        <addColumn tableName="meveo_job_instance">
+            <column name="limit_to_nr_of_nodes" type="int"/>
+        </addColumn>
+        <modifyDataType tableName="meveo_job_instance" columnName="run_on_nodes" newDataType="VARCHAR(500)"/>
+    </changeSet>
 
     <changeSet id="#INTRD-19574_20230712" author="zbariki">
         <addColumn tableName="ar_account_operation">
@@ -8879,4 +8886,242 @@ public class AgedBalanceReporting extends ReportExtractScript {
         </addColumn>
     </changeSet>
     
+    <changeSet id="#INTRD-20181_28122023" author="Mbarek-Ay" failOnError="false">
+	<addColumn tableName="cpq_attribute_allowed_values">
+		<column name="order_idx" type="int4"/>
+	</addColumn>
+	<sql>UPDATE cpq_attribute_allowed_values AS attr SET order_idx = subquery.new_order_idx - 1 FROM (SELECT attribute_id, allowed_values,
+	    ROW_NUMBER() OVER (PARTITION BY attribute_id ORDER BY allowed_values) AS new_order_idx
+	    FROM cpq_attribute_allowed_values) AS subquery
+	    WHERE attr.attribute_id = subquery.attribute_id AND attr.allowed_values = subquery.allowed_values;
+     </sql>
+
+  </changeSet>
+
+    <changeSet id="#INTRD-19124_wo_partitioning_fct" author="a.rouaguebe">
+        <createSequence sequenceName="tech_wo_partition_log_seq" startValue="1" />
+        <createSequence sequenceName="tech_rt_partition_log_seq" startValue="1" />
+        <createSequence sequenceName="tech_edr_partition_log_seq" startValue="1" />
+        <createTable tableName="tech_wo_partition_log">
+            <column name="id" type="bigint" defaultValueSequenceNext="tech_wo_partition_log_seq">
+                <constraints nullable="false" primaryKeyName="tech_wo_partition_log_pk" />
+            </column>
+            <column name="partition_name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="range_from" type="datetime" />
+            <column name="range_to" type="datetime" />
+            <column name="purge_date" type="datetime" />
+        </createTable>
+        <createTable tableName="tech_rt_partition_log">
+            <column name="id" type="bigint" defaultValueSequenceNext="tech_rt_partition_log_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tech_rt_partition_log_pk" />
+            </column>
+            <column name="partition_name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="range_from" type="datetime" />
+            <column name="range_to" type="datetime" />
+            <column name="purge_date" type="datetime" />
+        </createTable>
+        <createTable tableName="tech_edr_partition_log">
+            <column name="id" type="bigint" defaultValueSequenceNext="tech_edr_partition_log_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tech_wedrpartition_log_pk" />
+            </column>
+            <column name="partition_name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="range_from" type="datetime" />
+            <column name="range_to" type="datetime" />
+            <column name="purge_date" type="datetime" />
+        </createTable>
+        <sql splitStatements="false" stripComments="false" dbms="postgresql"><![CDATA[
+            CREATE OR REPLACE FUNCTION create_new_wo_partition(
+                p_source_table    text,
+                p_partition_name  text,
+                p_range_from      date
+            ) RETURNS void LANGUAGE plpgsql AS $$
+            DECLARE
+                l_partition_interval  integer;
+                l_range_to            date;
+            BEGIN
+
+                SELECT wo_partition_range_months
+                INTO l_partition_interval
+                FROM finance_settings limit 1;
+
+                IF l_partition_interval IS NULL THEN
+                    RAISE EXCEPTION 'Partition interval setting not found for table: %', p_source_table;
+                END IF;
+
+                l_range_to = p_range_from + l_partition_interval * interval '1 month';
+
+                IF EXISTS (SELECT 1 FROM tech_wo_partition_log t WHERE t.partition_name = p_partition_name) THEN
+                    RAISE EXCEPTION 'The partition name [%] already exists', p_partition_name;
+                end if;
+
+                IF EXISTS (SELECT 1 FROM tech_wo_partition_log t WHERE (t.range_from, t.range_to) OVERLAPS (p_range_from, l_range_to)) THEN
+                    RAISE EXCEPTION 'The period range [%, %[ already coverd by an existing partition', p_range_from, l_range_to;
+                end if;
+
+                execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
+                               p_partition_name,
+                               p_source_table,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+
+                execute format('insert into tech_wo_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
+                               p_partition_name,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+            END;
+            $$;
+            ]]></sql>
+        <sql splitStatements="false" stripComments="false" dbms="postgresql"><![CDATA[
+            CREATE OR REPLACE FUNCTION create_new_rt_partition(
+                p_source_table    text,
+                p_partition_name  text,
+                p_range_from      date
+            ) RETURNS void LANGUAGE plpgsql AS $$
+            DECLARE
+                l_partition_interval  integer;
+                l_range_to            date;
+            BEGIN
+
+                SELECT rt_partition_range_months
+                INTO l_partition_interval
+                FROM finance_settings limit 1;
+
+                IF l_partition_interval IS NULL THEN
+                    RAISE EXCEPTION 'Partition interval setting not found for table: %', p_source_table;
+                END IF;
+
+                l_range_to = p_range_from + l_partition_interval * interval '1 month';
+
+                IF EXISTS (SELECT 1 FROM tech_rt_partition_log t WHERE t.partition_name = p_partition_name) THEN
+                    RAISE EXCEPTION 'The partition name [%] already exists', p_partition_name;
+                end if;
+
+                IF EXISTS (SELECT 1 FROM tech_rt_partition_log t WHERE (t.range_from, t.range_to) OVERLAPS (p_range_from, l_range_to)) THEN
+                    RAISE EXCEPTION 'The period range [%, %[ already coverd by an existing partition', p_range_from, l_range_to;
+                end if;
+
+                execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
+                               p_partition_name,
+                               p_source_table,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+
+                execute format('insert into tech_rt_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
+                               p_partition_name,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+            END;
+            $$;
+            ]]></sql>
+        <sql splitStatements="false" stripComments="false" dbms="postgresql"><![CDATA[
+            CREATE OR REPLACE FUNCTION create_new_edr_partition(
+                p_source_table    text,
+                p_partition_name  text,
+                p_range_from      date
+            ) RETURNS void LANGUAGE plpgsql AS $$
+            DECLARE
+                l_partition_interval  integer;
+                l_range_to            date;
+            BEGIN
+
+                SELECT edr_partition_range_months
+                INTO l_partition_interval
+                FROM finance_settings limit 1;
+
+                IF l_partition_interval IS NULL THEN
+                    RAISE EXCEPTION 'Partition interval setting not found for table: %', p_source_table;
+                END IF;
+
+                l_range_to = p_range_from + l_partition_interval * interval '1 month';
+
+                IF EXISTS (SELECT 1 FROM tech_edr_partition_log t WHERE t.partition_name = p_partition_name) THEN
+                    RAISE EXCEPTION 'The partition name [%] already exists', p_partition_name;
+                end if;
+
+                IF EXISTS (SELECT 1 FROM tech_edr_partition_log t WHERE (t.range_from, t.range_to) OVERLAPS (p_range_from, l_range_to)) THEN
+                    RAISE EXCEPTION 'The period range [%, %[ already coverd by an existing partition', p_range_from, l_range_to;
+                end if;
+
+                execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
+                               p_partition_name,
+                               p_source_table,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+
+                execute format('insert into tech_edr_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
+                               p_partition_name,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+            END;
+            $$;
+            ]]></sql>
+    </changeSet>
+    
+    <changeSet id="#INTRD-19244_27102023" author="Mbarek-Ay" failOnError="false">
+		<addColumn tableName="cpq_quote_price">
+			<column name="tax_id"  type="bigint" />
+		</addColumn>
+		<addColumn tableName="order_price">
+			<column name="tax_id"  type="bigint" />
+		</addColumn>
+	
+	   <addForeignKeyConstraint baseColumnNames="tax_id" baseTableName="cpq_quote_price" constraintName="fk_quote_price_tax"
+            referencedColumnNames="id" referencedTableName="billing_tax" />
+       <addForeignKeyConstraint baseColumnNames="tax_id" baseTableName="order_price" constraintName="fk_order_price_tax"
+            referencedColumnNames="id" referencedTableName="billing_tax" />
+            
+      </changeSet>
+
+      <changeSet id="#INTRD-20460_20240104" author="zelmeliani">
+		<addColumn tableName="finance_settings">
+            <column name="handle_framework_agreement" type="${type.boolean}" defaultValueNumeric="1" />
+            <column name="handle_invoice_plan" type="${type.boolean}" defaultValueNumeric="1" />
+            <column name="handle_accounting_periods" type="${type.boolean}" defaultValueNumeric="1" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="#INTRD-20501_20240104" author="AdilElJaouhari">
+		<addColumn tableName="billing_wallet_operation">
+			<column name="order_product_id" type="bigint" />
+		</addColumn>
+		<addColumn tableName="billing_rated_transaction">
+			<column name="order_product_id" type="bigint" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			baseColumnNames="order_product_id"
+			baseTableName="billing_wallet_operation"
+			constraintName="fk_wallet_operation_order_product"
+			referencedColumnNames="id" referencedTableName="cpq_order_product" />
+		<addForeignKeyConstraint
+			baseColumnNames="order_product_id"
+			baseTableName="billing_rated_transaction"
+			constraintName="fk_rated_transaction_order_product"
+			referencedColumnNames="id" referencedTableName="cpq_order_product" />
+	</changeSet>
+	
+	<changeSet id="#INTRD-20725_20240112" author="AdilElJaouhari">
+		<addColumn tableName="billing_service_instance">
+			<column name="order_product_id" type="bigint" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			baseColumnNames="order_product_id"
+			baseTableName="billing_service_instance"
+			constraintName="fk_service_instance_order_product"
+			referencedColumnNames="id" referencedTableName="cpq_order_product" />
+	</changeSet>
+
 </databaseChangeLog>

@@ -699,7 +699,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 if(matchingAmount.getAccountOperation() != null
                         && (XCH_LOSS.equalsIgnoreCase(matchingAmount.getAccountOperation().getCode())
                         || XCH_GAIN.equalsIgnoreCase(matchingAmount.getAccountOperation().getCode()))) {
-                    accountOperationService.remove(matchingAmount.getAccountOperation());
+                    AccountOperation accountOperationToRemove = matchingAmount.getAccountOperation();
+                    matchingAmount.setAccountOperation(null);
+                    accountOperationService.remove(accountOperationToRemove);
                 } else {
                     operation.getMatchingAmounts().remove(matchingAmount);
                     accountOperationService.update(operation);

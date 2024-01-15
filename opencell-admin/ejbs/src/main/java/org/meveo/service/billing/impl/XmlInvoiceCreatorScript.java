@@ -1680,6 +1680,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         invoiceTag.setAttribute("status", invoice.getStatus() != null ? invoice.getStatus().name() : "");
         invoiceTag.setAttribute("paymentStatus", invoice.getPaymentStatus() != null ? invoice.getPaymentStatus().name() : "");
         invoiceTag.setAttribute("paymentStatusDate", invoice.getPaymentStatusDate() != null ? DateUtils.formatDateWithPattern(invoice.getPaymentStatusDate(), invoiceDateFormat) : "");
+	    invoiceTag.setAttribute("certificateUncollectibilityNumber", invoice.getCertificateUncollectibilityNumber());
         ofNullable(invoice.getOpenOrderNumber()).ifPresent(oon -> invoiceTag.setAttribute("openOrderNumber", oon));
         ofNullable(invoice.getOrder()).ifPresent(order -> invoiceTag.setAttribute("orderNumber", order.getOrderNumber()));
         ofNullable(invoice.getExternalRef()).ifPresent(externalRef

@@ -9113,9 +9113,7 @@ public class AgedBalanceReporting extends ReportExtractScript {
 	</changeSet>
 
     <changeSet id="INTRD-20050_20231226_V2" author="TarikFA.">
-        <dropSequence sequenceName="account_registration_number_seq" />
         <createSequence sequenceName="account_registration_number_seq" startValue="1" />
-        <dropTable tableName="account_registration_number" />
         <createTable tableName="account_registration_number">
             <column name="id" type="bigint" autoIncrement="${id.auto}">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="account_registration_number_pkey" />

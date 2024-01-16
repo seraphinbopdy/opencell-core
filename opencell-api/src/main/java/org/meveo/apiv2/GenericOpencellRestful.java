@@ -45,6 +45,8 @@ import org.meveo.apiv2.billing.service.RollbackOnErrorExceptionMapper;
 import org.meveo.apiv2.catalog.resource.DiscountPlanResourceImpl;
 import org.meveo.apiv2.catalog.resource.PricePlanMatrixResourceImpl;
 import org.meveo.apiv2.catalog.resource.PricePlanResourceImpl;
+import org.meveo.apiv2.catalog.resource.ProductManagementRs;
+import org.meveo.apiv2.catalog.resource.ProductManagementRsImpl;
 import org.meveo.apiv2.catalog.resource.pricelist.CatalogPriceListResourceImpl;
 import org.meveo.apiv2.catalog.resource.pricelist.PriceListLineResourceImpl;
 import org.meveo.apiv2.catalog.resource.pricelist.PriceListResourceImpl;
@@ -166,7 +168,8 @@ public class GenericOpencellRestful extends Application {
                 ContactCategoryResourceImpl.class, WalletOperationResourceImpl.class, InvoiceValidationRulesResourceImpl.class, InternationalSettingsResourceImpl.class,
                 CustomTableResourceImpl.class, AdvancedSettingsResourceImpl.class, CustomerBalanceResourceImpl.class, FileTypeResourceImpl.class, DocumentCategoryResourceImpl.class, 
                 ElectronicInvoicingResourceImpl.class,PaymentResourceImpl.class, PriceListResourceImpl.class, SellerResourceImpl.class, PriceListLineResourceImpl.class, CatalogPriceListResourceImpl.class,
-				SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class)
+				SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
+                ProductManagementRsImpl.class)
                 .collect(Collectors.toSet());
         if (GENERIC_API_REQUEST_LOGGING_CONFIG.equalsIgnoreCase("true")) {
             resources.add(GenericApiLoggingFilter.class);

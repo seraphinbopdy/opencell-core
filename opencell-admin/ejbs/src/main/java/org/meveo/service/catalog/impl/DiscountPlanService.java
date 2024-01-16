@@ -223,6 +223,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 				discountWalletOperation.setSequence(discountPlanItem.getFinalSequence());
 				discountWalletOperation.setOrderNumber(walletOperation != null ? walletOperation.getOrderNumber() : null);
 				discountWalletOperation.setTradingCurrency(billingAccount.getTradingCurrency());
+			    discountWalletOperation.setEdr(walletOperation.getEdr());
 
 				TaxInfo taxInfo = taxMappingService.determineTax(discountAccountingArticle.getTaxClass(), seller, billingAccount, null, operationDate, discountWalletOperation, false, false, null);
     			taxPercent = taxInfo.tax.getPercent();

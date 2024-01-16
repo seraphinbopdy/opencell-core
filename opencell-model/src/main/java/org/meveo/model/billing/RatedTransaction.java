@@ -174,8 +174,8 @@ import org.meveo.model.tax.TaxClass;
         @NamedQuery(name = "RatedTransaction.listToInvoiceByBillingAccount", query = "SELECT r FROM RatedTransaction r left join fetch r.wallet where r.billingAccount.id=:billingAccountId AND r.status='OPEN' AND :firstTransactionDate<=r.usageDate AND r.usageDate<:lastTransactionDate and (r.invoicingDate is NULL or r.invoicingDate<:invoiceUpToDate) "),
         @NamedQuery(name = "RatedTransaction.moveToQuarantineBRByInvoiceIds", query = "update RatedTransaction r set r.billingRun= :billingRun where r.invoiceLine.id in (select il.id from InvoiceLine il where il.invoice.id IN (:invoiceIds))"),
 
-        @NamedQuery(name = "RatedTransaction.sumPositiveRTByBillingRun", query = "select sum(r.amountWithoutTax), sum(r.amountWithTax), r.subscription.id, r.infoOrder.order.id,  r.invoiceLine.invoice.id, r.billingAccount.id, r.billingAccount.customerAccount.id, r.billingAccount.customerAccount.customer.id "
-                + "FROM RatedTransaction r where r.billingRun.id=:billingRunId and r.amountWithoutTax > 0 and r.status='BILLED' group by r.subscription.id, r.infoOrder.order.id, r.invoiceLine.invoice.id, r.billingAccount.id, r.billingAccount.customerAccount.id, r.billingAccount.customerAccount.customer.id"),
+        @NamedQuery(name = "RatedTransaction.sumPositiveRTByBillingRun", query = "select sum(r.amountWithoutTax), sum(r.amountWithTax), r.subscription.id, r.orderInfo.order.id,  r.invoiceLine.invoice.id, r.billingAccount.id, r.billingAccount.customerAccount.id, r.billingAccount.customerAccount.customer.id "
+                + "FROM RatedTransaction r where r.billingRun.id=:billingRunId and r.amountWithoutTax > 0 and r.status='BILLED' group by r.subscription.id, r.orderInfo.order.id, r.invoiceLine.invoice.id, r.billingAccount.id, r.billingAccount.customerAccount.id, r.billingAccount.customerAccount.customer.id"),
         @NamedQuery(name = "RatedTransaction.unInvoiceByInvoiceIds", query = "update RatedTransaction r set r.status='OPEN', r.updated = :now, r.billingRun= null, r.invoiceLine=null, r.invoiceAgregateF=null where r.status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and r.invoiceLine.id IN (select il.id from InvoiceLine il where il.invoice.id IN (:invoiceIds))"),
         @NamedQuery(name = "RatedTransaction.deleteSupplementalRTByInvoiceIds", query = "DELETE from RatedTransaction r WHERE r.type='MINIMUM' and r.invoiceLine.id in (select il.id from InvoiceLine il where il.invoice.id IN (:invoicesIds))"),
         @NamedQuery(name = "RatedTransaction.detachRTsFromSubscription", query = "UPDATE RatedTransaction set serviceInstance = null where serviceInstance.id IN (SELECT id from ServiceInstance where subscription=:subscription)"),
@@ -612,7 +612,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     private AccountingArticle accountingArticle;
 
     @Embedded
-    private OrderInfo infoOrder;
+    private OrderInfo orderInfo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_line_id")
@@ -832,7 +832,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.ratingUnitOfMeasure = walletOperation.getRatingUnitOfMeasure();
         this.accountingCode = walletOperation.getAccountingCode();
         this.accountingArticle = walletOperation.getAccountingArticle();
-        this.infoOrder = walletOperation.getOrderInfo();
+        this.orderInfo = walletOperation.getOrderInfo();
         this.invoicingDate = walletOperation.getInvoicingDate();
         this.unityDescription = walletOperation.getInputUnitDescription();
         this.ratingUnitDescription = walletOperation.getRatingUnitDescription();
@@ -853,6 +853,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.transactionalAmountWithoutTax = walletOperation.getTransactionalAmountWithoutTax();
         this.transactionalAmountWithTax = walletOperation.getTransactionalAmountWithTax();
         this.businessKey = walletOperation.getBusinessKey();
+        this.orderInfo = walletOperation.getOrderInfo();
     }
 
 
@@ -897,7 +898,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.ratingUnitOfMeasure = rateTransactionToDuplicate.getRatingUnitOfMeasure();
         this.accountingCode = rateTransactionToDuplicate.getAccountingCode();
         this.accountingArticle = rateTransactionToDuplicate.getAccountingArticle();
-        this.infoOrder = rateTransactionToDuplicate.getOrderInfo();
+        this.orderInfo = rateTransactionToDuplicate.getOrderInfo();
         this.invoicingDate = rateTransactionToDuplicate.getInvoicingDate();
         this.unityDescription = rateTransactionToDuplicate.getUnityDescription();
         this.ratingUnitDescription = rateTransactionToDuplicate.getRatingUnitDescription();
@@ -911,6 +912,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.sequence = rateTransactionToDuplicate.getSequence();
         this.rulesContract = rateTransactionToDuplicate.getRulesContract();
         this.businessKey = rateTransactionToDuplicate.getBusinessKey();
+        this.orderInfo = rateTransactionToDuplicate.getOrderInfo();
     }
     
     public WalletInstance getWallet() {
@@ -1641,17 +1643,17 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     }
 
     /**
-     * @return the infoOrder
+     * @return the orderInfo
      */
     public OrderInfo getOrderInfo() {
-        return infoOrder;
+        return orderInfo;
     }
 
     /**
-     * @param infoOrder the infoOrder to set
+     * @param orderInfo the orderInfo to set
      */
-    public void setOrderInfo(OrderInfo infoOrder) {
-        this.infoOrder = infoOrder;
+    public void setOrderInfo(OrderInfo orderInfo) {
+        this.orderInfo = orderInfo;
     }
 
     public InvoiceLine getInvoiceLine() {
@@ -1709,14 +1711,6 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     public void setDiscountedAmount(BigDecimal discountedAmount) {
         this.discountedAmount = discountedAmount;
     }
-
-	public OrderInfo getInfoOrder() {
-		return infoOrder;
-	}
-
-	public void setInfoOrder(OrderInfo infoOrder) {
-		this.infoOrder = infoOrder;
-	}
 
 	public Integer getSequence() {
 		return sequence;

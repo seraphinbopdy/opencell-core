@@ -57,6 +57,7 @@ import org.meveo.model.catalog.DiscountPlanTypeEnum;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.RoundingModeEnum;
 import org.meveo.model.cpq.Product;
+import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.tax.TaxMappingService;
@@ -270,6 +271,12 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 					discountWalletOperation.setUuid(walletOperation.getUuid());
 					discountWalletOperation.setBusinessKey(walletOperation.getBusinessKey());
 				}
+				
+		        OrderInfo orderInfo = new OrderInfo();
+				orderInfo.setOrder(chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null);
+		        orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
+		        orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
+		        discountWalletOperation.setOrderInfo(orderInfo);
     			
     			if(!isVirtual) {
     				discountWalletOperation.setSubscription(subscription);

@@ -47,6 +47,7 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IWFEntity;
 import org.meveo.model.ObservableEntity;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.billing.GeneralLedger;
 import org.meveo.model.billing.InvoiceType;
@@ -106,13 +107,6 @@ public class Seller extends AccountEntity implements IWFEntity {
     private TradingLanguage tradingLanguage;
 
     /**
-     * The seller registration No
-     */
-    @Size(max = 100)
-    @Column(name = "registration_no", length = 100)
-    private String registrationNo;
-
-    /**
      * A legal text for the seller
      */
     @Type(type = "longText")
@@ -161,21 +155,17 @@ public class Seller extends AccountEntity implements IWFEntity {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "billing_seller_media", joinColumns = @JoinColumn(name = "seller_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
     private List<Media> medias = new ArrayList<>();
-    
-    /**
-     * IsoIcd
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "icd_id")
-    private IsoIcd icdId;
-    
-    public IsoIcd getIcdId() {
-        return icdId;
-    }
-
-    public void setIcdId(IsoIcd icdId) {
-        this.icdId = icdId;
-    }
+	
+	@OneToMany(mappedBy = "seller")
+	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+	
+	public List<RegistrationNumber> getRegistrationNumbers() {
+		return registrationNumbers;
+	}
+	
+	public void setRegistrationNumbers(List<RegistrationNumber> registrationNumbers) {
+		this.registrationNumbers = registrationNumbers;
+	}
     
     public List<Contract> getContracts() {
         return contracts;
@@ -207,25 +197,6 @@ public class Seller extends AccountEntity implements IWFEntity {
 
     public void setTradingLanguage(TradingLanguage tradingLanguage) {
         this.tradingLanguage = tradingLanguage;
-    }
-
-    /**
-     * Gets the seller's registration No
-     * 
-     * @return a registration No
-     *
-     */
-    public String getRegistrationNo() {
-        return registrationNo;
-    }
-
-    /**
-     * Sets the seller's registration No
-     * 
-     * @param registrationNo new registration No
-     */
-    public void setRegistrationNo(String registrationNo) {
-        this.registrationNo = registrationNo;
     }
 
     /**

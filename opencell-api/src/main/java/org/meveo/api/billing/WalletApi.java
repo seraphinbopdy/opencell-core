@@ -33,6 +33,7 @@ import org.meveo.model.billing.*;
 import org.meveo.model.catalog.Calendar;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.WalletTemplate;
+import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.payments.CustomerAccount;
@@ -609,6 +610,12 @@ public class WalletApi extends BaseApi {
         }
         
         walletOperation.setBusinessKey(postData.getBusinessKey());
+        
+		OrderInfo orderInfo = new OrderInfo();
+		orderInfo.setOrder(chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null);
+		orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
+		orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
+		walletOperation.setOrderInfo(orderInfo);
         
         walletOperationService.create(walletOperation);
 

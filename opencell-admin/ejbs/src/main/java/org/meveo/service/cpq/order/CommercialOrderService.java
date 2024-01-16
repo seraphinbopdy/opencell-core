@@ -316,9 +316,9 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 			}else if (offer.getOrderLineType() == OfferLineTypeEnum.APPLY_ONE_SHOT) {
 				Subscription subscription = offer.getSubscription();
 				subscription.setOrder(order);
-				for(OrderProduct quoteProduct: offer.getProducts()) {
-					if(quoteProduct.getProductVersion() != null) {
-						Product product = quoteProduct.getProductVersion().getProduct();
+				for(OrderProduct orderProduct: offer.getProducts()) {
+					if(orderProduct.getProductVersion() != null) {
+						Product product = orderProduct.getProductVersion().getProduct();
 						for(ProductChargeTemplateMapping charge: product.getProductCharges()) {
 							if(charge.getChargeTemplate() != null) {
 								ChargeTemplate templateCharge = (ChargeTemplate) Hibernate.unproxy(charge.getChargeTemplate());
@@ -326,13 +326,12 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 									OneShotChargeTemplate oneShotCharge = (OneShotChargeTemplate) templateCharge;
 									if (oneShotCharge.getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.OTHER) {
 										// Build ServiceInstance
-										ServiceInstance serviceInstance = buildServiceInstanceForOSO(quoteProduct.getProductVersion().getProduct().getCode(),
-												quoteProduct.getOrderAttributes(), subscription);
+										ServiceInstance serviceInstance = buildServiceInstanceForOSO(orderProduct, orderProduct.getOrderAttributes(), subscription);
 
 										// field to add : serviceInstance, operationDate & quantity = from orderProduct,
 										oneShotChargeInstanceService.instantiateAndApplyOneShotCharge(subscription, serviceInstance,
-												oneShotCharge, null, quoteProduct.getDeliveryDate() == null ? new Date() : quoteProduct.getDeliveryDate(),
-                                                null, null, quoteProduct.getQuantity(),
+												oneShotCharge, null, orderProduct.getDeliveryDate() == null ? new Date() : orderProduct.getDeliveryDate(),
+                                                null, null, orderProduct.getQuantity(),
 												null, null, null, null,
 												order.getOrderNumber(), null, true, ChargeApplicationModeEnum.SUBSCRIPTION);
 									}
@@ -370,17 +369,14 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 	 * @param subscription subscription
 	 * @return Virtual or Real ServiceInstance
 	 */
-	private ServiceInstance buildServiceInstanceForOSO(String productCode, List<OrderAttribute> attributes, Subscription subscription) {
+	private ServiceInstance buildServiceInstanceForOSO(OrderProduct orderProduct, List<OrderAttribute> attributes, Subscription subscription) {
 		ServiceInstance serviceInstance = null;
 		if (attributes != null) {
 			serviceInstance = new ServiceInstance(); // Create a virtual ServiceInstance
 			serviceInstance.setSubscription(subscription);
 			// Product data
-			Product product = productService.findByCode(productCode);
-			ProductVersion pVersion = new ProductVersion();
-			pVersion.setProduct(product);
-			serviceInstance.setCode(product.getCode());
-			serviceInstance.setProductVersion(pVersion);
+			serviceInstance.setOrderProduct(orderProduct);
+			serviceInstance.setProductVersion(orderProduct.getProductVersion());
 			// add attributes
 			for (OrderAttribute orderAttribute : attributes) {
 				AttributeInstance attributeInstance = new AttributeInstance();
@@ -395,6 +391,7 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 			}
 		} else { // no attributs provided in payload (OSO case for example)
 			List<ServiceInstance> alreadyInstantiatedServices = null;
+			String productCode = orderProduct.getProductVersion().getProduct().getCode();
 			if (StringUtils.isNotBlank(productCode)) {
 				alreadyInstantiatedServices = serviceInstanceService.findByCodeSubscriptionAndStatus(productCode, subscription,
 						InstanceStatusEnum.ACTIVE);
@@ -472,6 +469,7 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 						deliveryDate != null ? deliveryDate : serviceInstance.getSubscriptionDate())
 				.orElseThrow(() -> new BusinessException("No product version found for subscription code: " + subscription.getCode()));
 		serviceInstance.setProductVersion(productVersion);
+		serviceInstance.setOrderProduct(orderProduct);
 		serviceInstance.setOrderNumber(subscription.getOrderNumber());
 		if (deliveryDate != null) {
 			serviceInstance.setDeliveryDate(deliveryDate);
@@ -589,6 +587,7 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 			ProductVersion productVersion = productService.getCurrentPublishedVersion(serviceInstance.getCode(),
 							deliveryDate != null ? deliveryDate : serviceInstance.getSubscriptionDate()).orElse(null);
 			serviceInstance.setProductVersion(productVersion);
+			serviceInstance.setOrderProduct(orderProduct);
 			if (deliveryDate != null) {
 				serviceInstance.setDeliveryDate(deliveryDate);
 			} else {

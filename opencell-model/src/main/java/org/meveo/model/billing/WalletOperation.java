@@ -70,6 +70,7 @@ import org.meveo.model.catalog.PricePlanMatrixLine;
 import org.meveo.model.catalog.PricePlanMatrixVersion;
 import org.meveo.model.catalog.RoundingModeEnum;
 import org.meveo.model.catalog.UnitOfMeasure;
+import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
@@ -599,7 +600,7 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
     private String rejectReason;
 
     @Embedded
-    private OrderInfo infoOrder;
+    private OrderInfo orderInfo;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "accounting_article_id")
@@ -728,9 +729,10 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
      * @param endDate Operation date range - end date
      * @param accountingCode Accounting code
      * @param invoicingDate Date from which operation can be included in an invoice
+     * @param commercialOrder commercial order
      */
     public WalletOperation(ChargeInstance chargeInstance, BigDecimal inputQuantity, BigDecimal quantityInChargeUnits, Date operationDate, String orderNumber, String criteria1, String criteria2, String criteria3,
-            String criteriaExtra, Tax tax, Date startDate, Date endDate, AccountingCode accountingCode, Date invoicingDate) {
+                           String criteriaExtra, Tax tax, Date startDate, Date endDate, AccountingCode accountingCode, Date invoicingDate, CommercialOrder commercialOrder) {
 
         ChargeTemplate chargeTemplate = chargeInstance.getChargeTemplate();
 
@@ -751,8 +753,10 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
         this.parameterExtra = criteriaExtra;
         this.inputQuantity = inputQuantity;
         OrderInfo orderInfo = new OrderInfo();
-        orderInfo.setOrder(chargeInstance.getSubscription()!= null ? chargeInstance.getSubscription().getOrder() : null );
-        this.infoOrder = orderInfo;
+        orderInfo.setOrder(commercialOrder != null ? commercialOrder : (chargeInstance.getSubscription()!= null ? chargeInstance.getSubscription().getOrder() : null) );
+        orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
+        orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
+        this.orderInfo = orderInfo;
 
         // TODO AKK in what case prevails customized description of chargeInstance??
 
@@ -1270,6 +1274,7 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
         result.setAccountingCode(accountingCode);
         result.setTradingCurrency(tradingCurrency);
         result.setReratingBatch(reratingBatch);
+        result.setOrderInfo(orderInfo);
 
         return result;
     }
@@ -1654,18 +1659,12 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
             quantity, unitAmountWithoutTax, amountWithoutTax);
     }
 
-    /**
-     * @return the infoOrder
-     */
     public OrderInfo getOrderInfo() {
-        return infoOrder;
+        return orderInfo;
     }
 
-    /**
-     * @param infoOrder the infoOrder to set
-     */
-    public void setOrderInfo(OrderInfo infoOrder) {
-        this.infoOrder = infoOrder;
+    public void setOrderInfo(OrderInfo orderInfo) {
+        this.orderInfo = orderInfo;
     }
 
     public AccountingArticle getAccountingArticle() {
@@ -1690,14 +1689,6 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
 	
 	public void setDiscountPlan(DiscountPlan discountPlan) {
 		this.discountPlan = discountPlan;
-	}
-
-	public OrderInfo getInfoOrder() {
-		return infoOrder;
-	}
-
-	public void setInfoOrder(OrderInfo infoOrder) {
-		this.infoOrder = infoOrder;
 	}
 
 	public BigDecimal getDiscountValue() {

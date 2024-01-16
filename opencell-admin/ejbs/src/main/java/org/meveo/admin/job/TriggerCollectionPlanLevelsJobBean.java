@@ -32,6 +32,7 @@ import org.meveo.model.shared.Title;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.payments.impl.*;
+import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 
 import javax.ejb.EJB;
@@ -231,7 +232,9 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
     private void triggerAction(DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
         if (actionInstance.getActionType().equals(SCRIPT) && actionInstance.getDunningAction() != null) {
-            scriptInstanceService.execute(actionInstance.getDunningAction().getScriptInstance().getCode(), new HashMap<>());
+            HashMap<String, Object> context = new HashMap<>();
+            context.put(Script.CONTEXT_ENTITY, collectionPlan.getRelatedInvoice());
+            scriptInstanceService.execute(actionInstance.getDunningAction().getScriptInstance().getCode(), context);
         }
         if (actionInstance.getActionType().equals(SEND_NOTIFICATION)
                 && (actionInstance.getDunningAction().getActionChannel().equals(EMAIL)

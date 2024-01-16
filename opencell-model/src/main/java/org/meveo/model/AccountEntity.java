@@ -18,6 +18,7 @@
 package org.meveo.model;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -26,7 +27,9 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
 
@@ -42,6 +45,9 @@ import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parent class of all account entities
@@ -137,8 +143,8 @@ public abstract class AccountEntity extends BusinessCFEntity {
     /**
      * Registration number
      */
-    @Column(name = "registration_no", length = 100)
-    private String registrationNo;
+    /*@Column(name = "registration_no", length = 100)
+    private String registrationNo;*/
 
     /**
      * Expression to determine minimum amount value
@@ -173,10 +179,9 @@ public abstract class AccountEntity extends BusinessCFEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "legal_entity_type_id")
     protected Title legalEntityType;
-    
-
-
-    public String getExternalRef1() {
+	
+	
+	public String getExternalRef1() {
         return externalRef1;
     }
 
@@ -266,13 +271,13 @@ public abstract class AccountEntity extends BusinessCFEntity {
         this.vatNo = vatNo;
     }
 
-    public String getRegistrationNo() {
+    /*public String getRegistrationNo() {
         return registrationNo;
     }
 
     public void setRegistrationNo(String registrationNo) {
         this.registrationNo = registrationNo;
-    }
+    }*/
 
 	/**
      * Instantiate contactInformation field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record

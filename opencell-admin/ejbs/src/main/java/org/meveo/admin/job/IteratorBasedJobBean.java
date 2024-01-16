@@ -313,6 +313,9 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                 // Determine and create or connect to a queue
                 if (isRunningAsJobManager) {
 
+                    // Delete a queue, as it would be recreated later, just in case durability status has changed
+                    deleteQueue(jobInstance, queueName);
+
                     // If queue is not durable - use a JMX API to create it
                     boolean isDurableQueue = ParamBean.getInstance().getPropertyAsBoolean("jobs.mq.durable", false);
                     if (!isDurableQueue) {
@@ -327,9 +330,6 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
                 // Create publishing data to the job processing queue tasks if data processing is spread over a cluster
                 if (isRunningAsJobManager) {
-
-                    // Clear any leftover data in a queue if it is a durable queue
-                    clearPendingWorkLoad(jobInstance, queueName);
 
                     // A value of data publishers might come from a Custom Field or calculated dynamically based on number of nodes in a cluster
                     nbPublishers = (Long) getParamOrCFValue(jobInstance, Job.CF_NB_PUBLISHERS, 0L);
@@ -1000,6 +1000,46 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
         } catch (Exception e) {
             log.error("Failed to purge pending job data  messages for job {}", jobInstance.getCode(), e);
+        }
+    }
+
+    /**
+     * Clear pending workload if data set was distributed over a JMS queue
+     * 
+     * @param jobInstance Job instance to clear
+     * @param queueName Name of the MQ queue to clear
+     */
+    private void deleteQueue(JobInstance jobInstance, String queueName) {
+
+        String mqHost = System.getenv(REMOTE_MQ_HOST);
+        if (StringUtils.isBlank(mqHost)) {
+            mqHost = "localhost";
+        }
+
+        String jmxPort = System.getenv(REMOTE_MQ_JMX_PORT);
+        if (StringUtils.isBlank(jmxPort)) {
+            jmxPort = "1099";
+        }
+
+        HashMap<String, Object> environment = new HashMap<String, Object>();
+        String[] credentials = new String[] { System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD) };
+        environment.put(JMXConnector.CREDENTIALS, credentials);
+
+        try (JMXConnector connector = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + mqHost + ":" + jmxPort + "/jmxrmi"), environment)) {
+            MBeanServerConnection remote = connector.getMBeanServerConnection();
+
+            ObjectName bean = new ObjectName("org.apache.activemq.artemis:broker=\"0.0.0.0\"");
+
+            remote.invoke(bean, "deleteAddress", new Object[] { queueName, true }, new String[] { "java.lang.String", "boolean" });
+            connector.close();
+
+        } catch (InstanceNotFoundException e) {
+            // Do nothing, the queue does not exist yet
+
+        } catch (Exception e) {
+            if (!(e instanceof RuntimeMBeanException && e.getMessage().contains("AMQ229203"))) {
+                log.error("Failed to detele a queue for job {}", jobInstance.getCode(), e);
+            }
         }
     }
 

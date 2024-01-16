@@ -107,6 +107,7 @@ import org.meveo.model.catalog.TradingPricePlanMatrixLine;
 import org.meveo.model.catalog.TradingPricePlanVersion;
 import org.meveo.model.catalog.TriggeredEDRTemplate;
 import org.meveo.model.communication.MeveoInstance;
+import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.cpq.contract.ContractRateTypeEnum;
@@ -1666,6 +1667,13 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         if(discountArticle!=null) {
         	discountWalletOperation.setAccountingArticle(discountArticle);
         }
+        
+		OrderInfo orderInfo = new OrderInfo();
+		orderInfo.setOrder(chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null);
+		orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
+		orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
+		discountWalletOperation.setOrderInfo(orderInfo);
+              
         log.info("rateDiscountWalletOperation walletOperation code={},discountValue={},UnitAmountWithoutTax={},UnitAmountWithTax={},UnitAmountTax={}",discountWalletOperation.getCode(),discountedAmount,amounts[0],amounts[1],amounts[2]);
         return discountWalletOperation;
     }

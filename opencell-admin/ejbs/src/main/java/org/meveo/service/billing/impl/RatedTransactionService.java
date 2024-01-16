@@ -122,6 +122,7 @@ import org.meveo.model.cpq.ProductVersion;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.commercial.OrderLot;
+import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.Customer;
@@ -456,7 +457,7 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 ratedTransaction.setAccountingArticle(em.getReference(AccountingArticle.class, walletOperation.getAccountingArticleId()));
             }
 
-            if (walletOperation.getOrderId() != null || walletOperation.getProductVersionId() != null || walletOperation.getOrderLotId() != null) {
+            if (walletOperation.getOrderId() != null || walletOperation.getProductVersionId() != null || walletOperation.getOrderLotId() != null || walletOperation.getOrderProductId() != null) {
                 OrderInfo orderInfo = new OrderInfo();
 
                 if (walletOperation.getOrderId() != null) {
@@ -468,7 +469,10 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 if (walletOperation.getOrderLotId() != null) {
                     orderInfo.setOrderLot(em.getReference(OrderLot.class, walletOperation.getOrderLotId()));
                 }
-                ratedTransaction.setInfoOrder(orderInfo);
+                if (walletOperation.getOrderProductId() != null) {
+                    orderInfo.setOrderProduct(em.getReference(OrderProduct.class, walletOperation.getOrderProductId()));
+                }
+                ratedTransaction.setOrderInfo(orderInfo);
             }
             ratedTransaction.setInvoicingDate(walletOperation.getInvoicingDate());
             ratedTransaction.setUnityDescription(walletOperation.getInputUnitDescription());

@@ -499,6 +499,9 @@ public class WalletOperationNative extends BaseEntity {
     
     @Column(name = "business_key")
     private String businessKey;
+    
+    @Column(name = "order_product_id")
+    private Long orderProductId;
 
     /**
      * Constructor
@@ -1204,6 +1207,14 @@ public class WalletOperationNative extends BaseEntity {
 
 	public void setBusinessKey(String businessKey) {
 		this.businessKey = businessKey;
+	}
+
+	public Long getOrderProductId() {
+		return orderProductId;
+	}
+
+	public void setOrderProductId(Long orderProductId) {
+		this.orderProductId = orderProductId;
 	}
     
 }

@@ -500,13 +500,13 @@ public class RecurringRatingService extends RatingService implements Serializabl
 
                         RatingResult localRatingResult = rateChargeAndInstantiateTriggeredEDRs(chargeInstance, operationDate, inputQuantity, null,
                             orderNumberToOverride != null ? orderNumberToOverride : chargeInstance.getOrderNumber(), effectiveChargeFromDate, effectiveChargeToDate,
-                            prorate ? new DatePeriod(currentPeriodFromDate, currentPeriodToDate) : null, chargeMode, null, null, forSchedule, isVirtual);
+                            prorate ? new DatePeriod(currentPeriodFromDate, currentPeriodToDate) : null, chargeMode, null, null, forSchedule, isVirtual, null);
                         ratingResult.add(localRatingResult);
                         for (DatePeriod datePeriod : periods) {
                             BigDecimal prorata = DateUtils.calculateProrataRatio(datePeriod.getFrom(), datePeriod.getTo(),  currentPeriodFromDate, currentPeriodToDate, false);
                             localRatingResult = rateChargeAndInstantiateTriggeredEDRs(chargeInstance, operationDate, BigDecimal.ONE.multiply(prorata), null,
                                     orderNumberToOverride != null ? orderNumberToOverride : chargeInstance.getOrderNumber(), datePeriod.getFrom(), datePeriod.getTo(),
-                                    prorate ? new DatePeriod(currentPeriodFromDate, currentPeriodToDate) : null, chargeMode, null, null, forSchedule, isVirtual);
+                                    prorate ? new DatePeriod(currentPeriodFromDate, currentPeriodToDate) : null, chargeMode, null, null, forSchedule, isVirtual, null);
                             ratingResult.add(localRatingResult);
                         }
 
@@ -754,7 +754,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
 
                 RatingResult localRatingResult = rateChargeAndInstantiateTriggeredEDRs(chargeInstance, isApplyInAdvance ? computedApplyChargeOnDate : computedNextChargeDate, computedInputQuantityHolder, null,
                     orderNumberToOverride != null ? orderNumberToOverride : chargeInstance.getOrderNumber(), computedApplyChargeOnDate, computedNextChargeDate, fullRatingPeriod, chargeMode, null, null, forSchedule,
-                    false);
+                    false, null);
 
                 ratingResult.add(localRatingResult);
 

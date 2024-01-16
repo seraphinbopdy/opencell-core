@@ -102,7 +102,8 @@ public class RecurringRatingServiceTest {
 
                 return ratingResult;
             }
-        }).when(recurringRatingService).rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean());
+        }).when(recurringRatingService).rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                anyBoolean(), anyBoolean(), null);
 
         doAnswer(new Answer<List<WalletOperation>>() {
             public List<WalletOperation> answer(InvocationOnMock invocation) throws Throwable {
@@ -479,7 +480,8 @@ public class RecurringRatingServiceTest {
         }
         newCalendar.setDays(days);
 
-        when(recurringRatingService.rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenAnswer(new Answer<RatingResult>() {
+        when(recurringRatingService.rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(),
+                anyBoolean(), null)).thenAnswer(new Answer<RatingResult>() {
             public RatingResult answer(InvocationOnMock invocation) throws Throwable {
 
                 WalletOperation wo = new WalletOperation();
@@ -538,7 +540,8 @@ public class RecurringRatingServiceTest {
         }
         newCalendar.setDays(days);
 
-        when(recurringRatingService.rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenAnswer(new Answer<RatingResult>() {
+        when(recurringRatingService.rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(),
+                anyBoolean(), null)).thenAnswer(new Answer<RatingResult>() {
             public RatingResult answer(InvocationOnMock invocation) throws Throwable {
 
                 WalletOperation wo = new WalletOperation();

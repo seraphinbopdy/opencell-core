@@ -122,6 +122,11 @@ public class ApplyOneShotChargeInstanceRequestDto extends BaseEntityDto {
     private String criteria3;
 
     /**
+     * The commercial order id.
+     */
+    private Long commercialOrderId;
+
+    /**
      * The custom fields.
      */
     @XmlElement(required = false)
@@ -426,4 +431,22 @@ public class ApplyOneShotChargeInstanceRequestDto extends BaseEntityDto {
 	public void setBusinessKey(String businessKey) {
 		this.businessKey = businessKey;
 	}
+
+    /**
+     * Gets commercialOrderId.
+     *
+     * @return value of commercialOrderId
+     */
+    public Long getCommercialOrderId() {
+        return commercialOrderId;
+    }
+
+    /**
+     * Sets commercialOrderId.
+     *
+     * @param commercialOrderId value of commercialOrderId
+     */
+    public void setCommercialOrderId(Long commercialOrderId) {
+        this.commercialOrderId = commercialOrderId;
+    }
 }

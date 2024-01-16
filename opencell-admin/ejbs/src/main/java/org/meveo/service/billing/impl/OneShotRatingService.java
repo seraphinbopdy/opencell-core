@@ -22,6 +22,7 @@ import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplate;
+import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
@@ -58,12 +59,13 @@ public class OneShotRatingService extends RatingService implements Serializable 
      * @param chargeMode Charge mode
      * @param isVirtual Is it a virtual charge
      * @param failSilently If true, any error will be reported and returned in the rating result instead of throwing an exception
+     * @param commercialOrder commercial order
      * @return Rating result containing a rated wallet operation (persisted) and triggered EDRs (persisted)
      * @throws BusinessException General exception.
      * @throws RatingException EDR rejection due to lack of funds, data validation, inconsistency or other rating related failure
      */
     public RatingResult rateOneShotCharge(OneShotChargeInstance chargeInstance, BigDecimal inputQuantity, BigDecimal quantityInChargeUnits, Date applicationDate, String orderNumberOverride,
-            ChargeApplicationModeEnum chargeMode, boolean isVirtual, boolean failSilently) throws BusinessException, RatingException {
+            ChargeApplicationModeEnum chargeMode, boolean isVirtual, boolean failSilently, CommercialOrder commercialOrder) throws BusinessException, RatingException {
 
         if (applicationDate == null) {
             applicationDate = new Date();
@@ -90,7 +92,8 @@ public class OneShotRatingService extends RatingService implements Serializable 
 
         RatingResult ratingResult = null;
         try {
-            ratingResult = rateChargeAndInstantiateTriggeredEDRs(chargeInstance, applicationDate, inputQuantity, quantityInChargeUnits, orderNumberOverride, null, null, null, chargeMode, null, null, false, isVirtual);
+            ratingResult = rateChargeAndInstantiateTriggeredEDRs(chargeInstance, applicationDate, inputQuantity, quantityInChargeUnits, orderNumberOverride,
+                    null, null, null, chargeMode, null, null, false, isVirtual, commercialOrder);
 
             final List<WalletOperation> walletOperations = ratingResult.getWalletOperations();
 			incrementAccumulatorCounterValues(walletOperations, ratingResult, isVirtual);

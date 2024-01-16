@@ -164,7 +164,7 @@ public class RealtimeChargingService {
 //        }
 //
 
-        RatingResult ratingResult = oneShotRatingService.rateOneShotCharge(ci, inputQuantity, ratingQuantity, subscriptionDate, null, null, true, false);
+        RatingResult ratingResult = oneShotRatingService.rateOneShotCharge(ci, inputQuantity, ratingQuantity, subscriptionDate, null, null, true, false, null);
         WalletOperation op = ratingResult.getWalletOperations().get(0);
 
         return new Amounts(op.getAmountWithoutTax(), op.getAmountWithTax(), op.getAmountTax(), op.getTax());

@@ -18,6 +18,8 @@
 
 package org.meveo.model.billing;
 
+import org.meveo.model.cpq.commercial.CommercialOrder;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -85,10 +87,12 @@ public class WalletReservation extends WalletOperation {
      * @param accountingCode Accounting code
      * @param invoicingDate Date from which operation can be included in an invoice
      * @param reservation Reservation
+     * @param commercialOrder commercial order
      */
     public WalletReservation(ChargeInstance chargeInstance, BigDecimal inputQuantity, BigDecimal quantityInChargeUnits, Date operationDate, String orderNumber, String criteria1, String criteria2, String criteria3,
-            String criteriaExtra, Tax tax, Date startDate, Date endDate, AccountingCode accountingCode, Date invoicingDate, Reservation reservation) {
-        super(chargeInstance, inputQuantity, quantityInChargeUnits, operationDate, orderNumber, criteria1, criteria2, criteria3, criteriaExtra, tax, startDate, endDate, accountingCode, invoicingDate);
+                             String criteriaExtra, Tax tax, Date startDate, Date endDate, AccountingCode accountingCode, Date invoicingDate, Reservation reservation, CommercialOrder commercialOrder) {
+        super(chargeInstance, inputQuantity, quantityInChargeUnits, operationDate, orderNumber, criteria1, criteria2, criteria3, criteriaExtra,
+                tax, startDate, endDate, accountingCode, invoicingDate, commercialOrder);
         
         this.reservation = reservation;
                 

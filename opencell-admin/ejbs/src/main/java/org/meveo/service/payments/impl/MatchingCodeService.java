@@ -41,6 +41,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
+import org.meveo.admin.util.ResourceBundle;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.qualifier.Updated;
@@ -135,6 +136,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
 
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
     private final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN);
+	
+	@Inject
+	protected ResourceBundle resourceMessages;
 
     /**
      * Match account operations.
@@ -895,7 +899,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
         }
 
         if (cptPartialAllowed == 0) {
-            throw new BusinessException("matchingService.matchingImpossible");
+            throw new BusinessException(resourceMessages.getString("matchingService.matchingImpossible"));
         }
         log.info("matchOperations successful :  partial  (plusieurs idPartial possible)");
         matchingReturnObject.setOk(false);
@@ -948,10 +952,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             }
         }
         if (cptOccCredit == 0) {
-            throw new BusinessException("matchingService.noCreditOps");
+            throw new BusinessException(resourceMessages.getString("matchingService.noCreditOps"));
         }
         if (cptOccDebit == 0) {
-            throw new BusinessException("matchingService.noDebitOps");
+            throw new BusinessException(resourceMessages.getString("matchingService.noDebitOps"));
         }
             BigDecimal balance = amount.subtract(amoutCredit);
             balance = balance.abs();
@@ -1038,7 +1042,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
         }
 
         if (cptPartialAllowed == 0) {
-            throw new BusinessException("matchingService.matchingImpossible");
+            throw new BusinessException(resourceMessages.getString(resourceMessages.getString("matchingService.matchingImpossible")));
         }
         log.info("matchOperations successful :  partial  (plusieurs idPartial possible)");
         matchingReturnObject.setOk(false);

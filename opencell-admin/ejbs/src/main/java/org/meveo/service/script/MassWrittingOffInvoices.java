@@ -60,14 +60,19 @@ public class MassWrittingOffInvoices extends Script {
 		Invoice invoice = getInvoice(invoiceNumber);
 		if(invoice == null) {
 			log.warn("the invoice number " + invoiceNumber + " doesn't exist");
-			return;
+			throw  new BusinessException("the invoice number " + invoiceNumber + " doesn't exist");
 		}
 		boolean isValid = isEligibleToWriteOff(invoice);
 		if(!isValid) {
 			log.warn("the invoice number : " + invoiceNumber + " is with incorrect payment status ");
-			return;
+			throw  new BusinessException("the invoice number : " + invoiceNumber + " is with incorrect payment status ");
 		}
-		AccountOperation accountOperation = createAccountOperationFromInvoice(invoice, new BigDecimal((String) recordMap.get(INVOICE_AMOUNT)), currentDate);
+		BigDecimal amount = new BigDecimal((String) recordMap.get(INVOICE_AMOUNT));
+		boolean isAmountValid = isAmountSameAsInvoice(invoice, amount);
+		if(!isAmountValid){
+			throw new BusinessException("the invoice can not be full abandoned ");
+		}
+		AccountOperation accountOperation = createAccountOperationFromInvoice(invoice, amount, currentDate);
 		List<Long> operations = Optional.ofNullable(accountOperationService.listByInvoice(invoice).stream().map(AccountOperation::getId).collect(Collectors.toList())).orElse(Collections.emptyList());
 		matchOperation(accountOperation, operations);
 		
@@ -76,6 +81,13 @@ public class MassWrittingOffInvoices extends Script {
 		invoice.setCertificateUncollectibilityNumber((String) recordMap.get(UNCOLLECTIBILITY_CERTIFICATE_NUMBER));
 		
 		invoiceService.updateNoCheck(invoice);
+	}
+	
+	private boolean isAmountSameAsInvoice(Invoice invoice, BigDecimal amount) {
+		if(amount == null){
+			throw  new BusinessException("the amount from write off invoice : " + invoice.getInvoiceNumber() + " is required");
+		}
+		return invoice.getAmountWithTax().compareTo(amount) == 0;
 	}
 	
 	private Invoice getInvoice(String invoiceNumber) {
@@ -133,6 +145,7 @@ public class MassWrittingOffInvoices extends Script {
 		writeOff.setMatchingStatus(MatchingStatusEnum.O);
 		writeOff.setTransactionalMatchingAmount(amount);
 		writeOff.setTransactionalUnMatchingAmount(invoice.getAmountWithTax());
+		writeOff.setJournal(occTemplate.getJournal());
 		
 		accountOperationService.create(writeOff);
 		return writeOff;

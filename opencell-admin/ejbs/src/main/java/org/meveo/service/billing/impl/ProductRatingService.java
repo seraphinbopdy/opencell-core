@@ -52,7 +52,8 @@ public class ProductRatingService extends RatingService implements Serializable 
 
         RatingResult ratingResult = null;
         try {
-            ratingResult = rateChargeAndInstantiateTriggeredEDRs(chargeInstance, chargeInstance.getChargeDate(), chargeInstance.getQuantity(), null, null, null, null, null, null, null, null, false, isVirtual);
+            ratingResult = rateChargeAndInstantiateTriggeredEDRs(chargeInstance, chargeInstance.getChargeDate(), chargeInstance.getQuantity(), null,
+                    null, null, null, null, null, null, null, false, isVirtual, null);
 
             incrementAccumulatorCounterValues(ratingResult.getWalletOperations(), ratingResult, isVirtual);
 

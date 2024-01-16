@@ -108,6 +108,7 @@ import org.meveo.model.catalog.TradingPricePlanVersion;
 import org.meveo.model.catalog.TriggeredEDRTemplate;
 import org.meveo.model.communication.MeveoInstance;
 import org.meveo.model.cpq.commercial.OrderInfo;
+import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.cpq.contract.ContractRateTypeEnum;
@@ -306,12 +307,13 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
      * @param edr EDR being rated
      * @param reservation - Reservation the rating is for
      * @param isVirtual Is this a virtual charge - simulation of rating, charge instance will be matched by code to the charge instantiated in subscription
+     * @param commercialOrder commercial order
      * @return Rating result containing a rated wallet operation (NOT persisted)
      * @throws InvalidELException Failure to evaluate EL expression
      * @throws RatingException Failure to rate charge due to lack of funds, data validation, inconsistency or other rating related failure
      */
     protected RatingResult rateCharge(ChargeInstance chargeInstance, Date applicationDate, BigDecimal inputQuantity, BigDecimal quantityInChargeUnits, String orderNumberOverride, Date startdate, Date endDate,
-            DatePeriod fullRatingPeriod, ChargeApplicationModeEnum chargeMode, EDR edr, Reservation reservation, boolean isVirtual) throws InvalidELException, RatingException {
+            DatePeriod fullRatingPeriod, ChargeApplicationModeEnum chargeMode, EDR edr, Reservation reservation, boolean isVirtual, CommercialOrder commercialOrder) throws InvalidELException, RatingException {
 
         WalletOperation walletOperation = null;
 
@@ -344,22 +346,22 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             if (orderNumberOverride != null) {
                 walletOperation = new WalletReservation(chargeInstance, inputQuantity, quantityInChargeUnits, applicationDate, orderNumberOverride.equals(ChargeInstance.NO_ORDER_NUMBER) ? null : orderNumberOverride,
                     edr != null ? edr.getParameter1() : chargeInstance.getCriteria1(), edr != null ? edr.getParameter2() : chargeInstance.getCriteria2(), edr != null ? edr.getParameter3() : chargeInstance.getCriteria3(),
-                            extraParam, null, startdate, endDate, null, invoicingDate, reservation);
+                            extraParam, null, startdate, endDate, null, invoicingDate, reservation, commercialOrder);
             } else {
                 walletOperation = new WalletReservation(chargeInstance, inputQuantity, quantityInChargeUnits, applicationDate, chargeInstance.getOrderNumber(),
                     edr != null ? edr.getParameter1() : chargeInstance.getCriteria1(), edr != null ? edr.getParameter2() : chargeInstance.getCriteria2(), edr != null ? edr.getParameter3() : chargeInstance.getCriteria3(),
-                            extraParam, null, startdate, endDate, null, invoicingDate, reservation);
+                            extraParam, null, startdate, endDate, null, invoicingDate, reservation, commercialOrder);
             }
 
         } else {
             if (orderNumberOverride != null) {
                 walletOperation = new WalletOperation(chargeInstance, inputQuantity, quantityInChargeUnits, applicationDate, orderNumberOverride.equals(ChargeInstance.NO_ORDER_NUMBER) ? null : orderNumberOverride,
                     edr != null ? edr.getParameter1() : chargeInstance.getCriteria1(), edr != null ? edr.getParameter2() : chargeInstance.getCriteria2(), edr != null ? edr.getParameter3() : chargeInstance.getCriteria3(),
-                            extraParam , null, startdate, endDate, null, invoicingDate);
+                            extraParam , null, startdate, endDate, null, invoicingDate, commercialOrder);
             } else {
                 walletOperation = new WalletOperation(chargeInstance, inputQuantity, quantityInChargeUnits, applicationDate, chargeInstance.getOrderNumber(),
                     edr != null ? edr.getParameter1() : chargeInstance.getCriteria1(), edr != null ? edr.getParameter2() : chargeInstance.getCriteria2(), edr != null ? edr.getParameter3() : chargeInstance.getCriteria3(),
-                            extraParam , null, startdate, endDate, null, invoicingDate);
+                            extraParam , null, startdate, endDate, null, invoicingDate, commercialOrder);
             }
         }
         walletOperation.setChargeMode(chargeMode);
@@ -423,16 +425,18 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
      * @param reservation - Reservation the rating is for
      * @param forSchedule - is it to be scheduled
      * @param isVirtual Is this a virtual charge - simulation of rating. Charge instance will be matched by code to the charge instantiated in subscription, EDRS will not be triggered.
+     * @param commercialOrder commercial order
      * @return Rating result containing a rated wallet operation (NOT persisted) and triggered EDRs (NOT persisted)
      * @throws ValidationException Failure to rate due to data or EL validation exceptions
      * @throws RatingException Failure to rate charge due to lack of funds, inconsistency or other rating related failure
      * @throws CommunicateToRemoteInstanceException Failed to communicate to a remote Opencell instance when sending Triggered EDRs
      */
     public RatingResult rateChargeAndInstantiateTriggeredEDRs(ChargeInstance chargeInstance, Date applicationDate, BigDecimal inputQuantity, BigDecimal quantityInChargeUnits, String orderNumberOverride, Date startDate,
-            Date endDate, DatePeriod fullRatingPeriod, ChargeApplicationModeEnum chargeMode, EDR edr, Reservation reservation, boolean forSchedule, boolean isVirtual)
+                                                              Date endDate, DatePeriod fullRatingPeriod, ChargeApplicationModeEnum chargeMode, EDR edr, Reservation reservation, boolean forSchedule, boolean isVirtual, CommercialOrder commercialOrder)
             throws ValidationException, RatingException, CommunicateToRemoteInstanceException {
 
-        RatingResult ratedEDRResult = rateCharge(chargeInstance, applicationDate, inputQuantity, quantityInChargeUnits, orderNumberOverride, startDate, endDate, fullRatingPeriod, chargeMode, edr, reservation, isVirtual);
+        RatingResult ratedEDRResult = rateCharge(chargeInstance, applicationDate, inputQuantity, quantityInChargeUnits, orderNumberOverride, startDate, endDate,
+                fullRatingPeriod, chargeMode, edr, reservation, isVirtual, commercialOrder);
 
         // Do not trigger EDRs for virtual or Scheduled operations
         if (forSchedule || isVirtual) {

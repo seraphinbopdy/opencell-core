@@ -145,6 +145,7 @@ import org.meveo.model.cpq.AgreementDateSettingEnum;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.ProductVersion;
+import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderAttribute;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.enums.PriceVersionDateSettingEnum;
@@ -1200,6 +1201,14 @@ public class SubscriptionApi extends BaseApi {
             throw new EntityDoesNotExistsException(Subscription.class, postData.getSubscription(), postData.getSubscriptionValidityDate());
         }
 
+        CommercialOrder commercialOrder = null;
+        if (postData.getCommercialOrderId() != null) {
+            commercialOrder = commercialOrderService.findById(postData.getCommercialOrderId());
+            if (commercialOrder == null) {
+                throw new EntityDoesNotExistsException(CommercialOrder.class, postData.getOneShotCharge());
+            }
+        }
+
         if (postData.getWallet() != null) {
             WalletTemplate walletTemplate = walletTemplateService.findByCode(postData.getWallet());
             if (walletTemplate == null) {
@@ -1233,7 +1242,7 @@ public class SubscriptionApi extends BaseApi {
         	OneShotChargeInstance osho = oneShotChargeInstanceService
                     .instantiateAndApplyOneShotCharge(subscription, serviceInstance, (OneShotChargeTemplate) oneShotChargeTemplate, postData.getWallet(), postData.getOperationDate(),
                             postData.getAmountWithoutTax(), postData.getAmountWithTax(), postData.getQuantity(), postData.getCriteria1(), postData.getCriteria2(),
-                            postData.getCriteria3(), postData.getDescription(), null, oneShotChargeInstance.getCfValues(), true, ChargeApplicationModeEnum.SUBSCRIPTION, isVirtual);
+                            postData.getCriteria3(), postData.getDescription(), null, oneShotChargeInstance.getCfValues(), true, ChargeApplicationModeEnum.SUBSCRIPTION, isVirtual, commercialOrder);
         	
         	if(StringUtils.isNotBlank(postData.getBusinessKey())) {
         		osho.getWalletOperations().stream().forEach(wo -> {wo.setBusinessKey(postData.getBusinessKey());});

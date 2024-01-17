@@ -23039,4 +23039,14 @@ public class ImportJobNotification extends Script {
             <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript')"/>
         </insert>
     </changeSet>
+
+	<changeSet id="#INTRD-20785_20240117" author="zelmeliani">
+        <update tableName="meveo_script_instance">
+            <column name="description" value="The invoice's subscription is suspended when the TriggerCollectionPlanLevelsJob launch a dunning level with a script type action"/>
+            <column name="description_i18n">
+				<![CDATA[{"ENG": "<p>The invoice's subscription is suspended when the TriggerCollectionPlanLevelsJob launch a dunning level with a script type action.</p>", "FRA": "<p>La souscription liée à la facture est suspendu lorsque le TriggerCollectionPlanLevelsJob lance un niveau avec une action de type script.</p>"}]]>
+			</column>
+            <where>code = 'org.meveo.service.script.dunning.DunningSuspendSubscriptionScript'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

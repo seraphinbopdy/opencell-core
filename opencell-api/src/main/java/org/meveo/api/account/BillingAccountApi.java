@@ -32,6 +32,7 @@ import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.MeveoApiErrorCodeEnum;
@@ -39,6 +40,7 @@ import org.meveo.api.dto.GDPRInfoDto;
 import org.meveo.api.dto.LanguageDescriptionDto;
 import org.meveo.api.dto.account.BillingAccountDto;
 import org.meveo.api.dto.account.BillingAccountsDto;
+import org.meveo.api.dto.account.RegistrationNumberDto;
 import org.meveo.api.dto.billing.DiscountPlanInstanceDto;
 import org.meveo.api.dto.catalog.DiscountPlanDto;
 import org.meveo.api.dto.invoice.InvoiceDto;
@@ -63,6 +65,7 @@ import org.meveo.api.security.filter.ListFilter;
 import org.meveo.api.security.parameter.ObjectPropertyParser;
 import org.meveo.commons.utils.BeanUtils;
 import org.meveo.commons.utils.PersistenceUtils;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.billing.BankCoordinates;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.BillingCycle;
@@ -91,6 +94,7 @@ import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.pricelist.PriceList;
 import org.meveo.model.shared.Title;
 import org.meveo.model.tax.TaxCategory;
+import org.meveo.service.admin.impl.RegistrationNumberService;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.BillingCycleService;
@@ -139,9 +143,6 @@ public class BillingAccountApi extends AccountEntityApi {
 
     @Inject
     private TradingLanguageService tradingLanguageService;
-
-    @Inject
-    private IsoIcdService isoIcdService;
     
     @Inject
     private CustomerAccountService customerAccountService;
@@ -202,6 +203,7 @@ public class BillingAccountApi extends AccountEntityApi {
 
     @Inject
     private PriceListService priceListService;
+	
 
     public BillingAccount create(BillingAccountDto postData) throws MeveoApiException, BusinessException {
         return create(postData, true);
@@ -334,6 +336,7 @@ public class BillingAccountApi extends AccountEntityApi {
 
         dtoToEntity(billingAccount, postData, checkCustomFields, businessAccountModel, null);
         processTags(postData,billingAccount);
+	    createOrUpdateRegistrationNumber(billingAccount, postData.getRegistrationNumbers());
 
         billingAccount = billingAccountService.update(billingAccount);
 
@@ -634,8 +637,10 @@ public class BillingAccountApi extends AccountEntityApi {
                 billingAccount.setPriceList(priceList);
             }
         }
-
-        // Update payment method information in a customer account.
+	    
+	    createOrUpdateRegistrationNumber(billingAccount, postData.getRegistrationNumbers());
+	    
+	    // Update payment method information in a customer account.
         // ONLY used to handle deprecated billingAccountDto.paymentMethod and billingAccountDto.bankCoordinates fields. Use
         createOrUpdatePaymentMethodInCA(postData, billingAccount);
 
@@ -651,8 +656,35 @@ public class BillingAccountApi extends AccountEntityApi {
         }
 
     }
-
-    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(entityClass = BillingAccount.class))
+	
+	private void createOrUpdateRegistrationNumber(BillingAccount billingAccount, Set<RegistrationNumberDto> registrationNumbers)  {
+		if(CollectionUtils.isNotEmpty(billingAccount.getRegistrationNumbers())) {
+			billingAccount.getRegistrationNumbers().forEach(registrationNumber -> registrationNumber.setBillingAccount(null));
+		}
+		if(CollectionUtils.isNotEmpty(registrationNumbers)) {
+			registrationNumbers.forEach(registrationNumberDto -> {
+				RegistrationNumber registrationNumber = registrationNumberService.findByRegistrationNo(registrationNumberDto.getRegistrationNo());
+				IsoIcd isoIcd = null;
+				
+				if(registrationNumber == null) {
+					registrationNumber = new RegistrationNumber(registrationNumberDto.getRegistrationNo(), isoIcd, billingAccount);
+				}else{
+					registrationNumber.setAccountEntity(billingAccount);
+				}
+				
+				if(org.meveo.commons.utils.StringUtils.isNotBlank(registrationNumberDto.getIsoIcdCode())){
+					isoIcd = isoIcdService.findByCode(registrationNumberDto.getIsoIcdCode());
+					if(isoIcd == null) {
+						throw new EntityDoesNotExistsException(IsoIcd.class, registrationNumberDto.getIsoIcdCode());
+					}
+					registrationNumber.setIsoIcd(isoIcd);
+				}
+				billingAccount.getRegistrationNumbers().add(registrationNumber);
+			});
+		}
+	}
+	
+	@SecuredBusinessEntityMethod(validate = @SecureMethodParameter(entityClass = BillingAccount.class))
     public BillingAccountDto find(String billingAccountCode) throws MeveoApiException {
         return find(billingAccountCode, CustomFieldInheritanceEnum.INHERIT_NO_MERGE, false);
     }

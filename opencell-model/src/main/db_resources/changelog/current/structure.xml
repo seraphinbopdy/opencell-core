@@ -9178,4 +9178,38 @@ public class AgedBalanceReporting extends ReportExtractScript {
                                  referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="#INTRD-20052_20240117" author="TarikFA.">
+        <renameColumn tableName="account_registration_number" oldColumnName="registration_id" newColumnName="registration_no" />
+        <sql>
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, seller_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', s.registration_no, s.icd_id, s.id from ${db.schema.adapted}crm_seller s where s.icd_id is not null or s.registration_no is not null);
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, billing_account_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', ba.registration_no, ba.icd_id, ba.id from ${db.schema.adapted}billing_billing_account ba where ba.icd_id is not null or ba.registration_no is not null);
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, user_account_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', ua.registration_no, ua.icd_id, ua.id from ${db.schema.adapted}billing_user_account ua where ua.icd_id is not null or ua.registration_no is not null);
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, customer_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', c.registration_no, NULL, c.id from ${db.schema.adapted}crm_customer c where c.registration_no is not null);
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, customer_account_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', ca.registration_no, NULL, ca.id from ${db.schema.adapted}ar_customer_account ca where ca.registration_no is not null);
+            UPDATE ${db.schema.adapted}account_registration_number ar set icd_id=p.icd_id from ${db.schema.adapted}crm_provider p where ar.customer_id is not null or ar.customer_account_id is not null
+        </sql>
+        <dropColumn tableName="crm_seller" columnName="registration_no" />
+        <dropColumn tableName="crm_seller" columnName="icd_id" />
+
+        <dropColumn tableName="billing_billing_account" columnName="registration_no" />
+        <dropColumn tableName="billing_billing_account" columnName="icd_id" />
+
+        <dropColumn tableName="billing_user_account" columnName="registration_no" />
+        <dropColumn tableName="billing_user_account" columnName="icd_id" />
+
+        <dropColumn tableName="crm_customer" columnName="registration_no" />
+        <dropColumn tableName="ar_customer_account" columnName="registration_no" />
+
+        <update tableName="iso_icd" >
+            <column name="code" value="SIREN" />
+            <where>code = '0002'</where>
+        </update>
+
+
+        <update tableName="iso_icd" >
+            <column name="code" value="SIRET" />
+            <where>code = '0009'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

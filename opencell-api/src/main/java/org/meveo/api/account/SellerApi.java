@@ -194,7 +194,7 @@ public class SellerApi extends AccountEntityApi {
 	    });
         return seller;
     }
-
+	
     /**
      * Update the seller's address by the given addressDto.
      *

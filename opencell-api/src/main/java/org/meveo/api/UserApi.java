@@ -145,8 +145,6 @@ public class UserApi extends BaseApi {
                         }).collect(Collectors.toSet());
                 roles.removeIf(Objects::isNull);
                 user.getUserRoles().addAll(roles);
-                //TODO
-                //user.setRoles(new HashSet<>(postData.getRoles()));
             }
             user.setUserLevel(postData.getUserLevel());
             if (postData.getCustomFields() != null) {
@@ -154,10 +152,7 @@ public class UserApi extends BaseApi {
             }
             userService.create(user);
 
-            //Fix issue when creating a new user (id is not set)
-            // TODO
-            //addUserRoles(persistedUser.getId(), postData.getRoles());
-            keycloakAdminClientService.addOrUpdateRoleToUserInKeycloak(postData.getUsername(), postData.getRoles(), postData.getClientRoles(), postData.getReplaceRoles(), false);
+            keycloakAdminClientService.addOrUpdateRoleToUserInKeycloak(postData.getUsername(), postData.getRoles(), postData.getClientRoles(), postData.getReplaceRoles() != null ? postData.getReplaceRoles() : Boolean.FALSE, false);
 
             // Save secured entities
             securedBusinessEntityService.syncSecuredEntitiesForUser(securedEntities, postData.getUsername());
@@ -234,7 +229,7 @@ public class UserApi extends BaseApi {
         userService.updateUserWithAttributes(user, postData.getAttributes());
         
         addUserRoles(user.getId(), postData.getRoles());
-        keycloakAdminClientService.addOrUpdateRoleToUserInKeycloak(postData.getUsername(), postData.getRoles(), postData.getClientRoles(), postData.getReplaceRoles(), true);
+        keycloakAdminClientService.addOrUpdateRoleToUserInKeycloak(postData.getUsername(), postData.getRoles(), postData.getClientRoles(), postData.getReplaceRoles() != null ? postData.getReplaceRoles() : Boolean.FALSE, true);
 
         // Save secured entities
         if (securedEntities != null) {

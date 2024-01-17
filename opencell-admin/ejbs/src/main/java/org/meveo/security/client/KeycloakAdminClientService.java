@@ -1502,7 +1502,7 @@ public class KeycloakAdminClientService implements Serializable {
     }
 
     private void updateRealmRoles(List<String> roles, RoleMappingResource roleMappingResource, Boolean replacedRoles) {
-        if (replacedRoles) {
+        if (replacedRoles != null && replacedRoles) {
             roleMappingResource.realmLevel().remove(roleMappingResource.realmLevel().listEffective());
         }
 

@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedExecutorService;
+import javax.enterprise.concurrent.ManagedThreadFactory;
 import javax.inject.Inject;
 
 import org.meveo.model.crm.Provider;
@@ -70,6 +71,9 @@ public abstract class BaseJobBean implements Serializable {
 
     @Resource(lookup = "java:jboss/ee/concurrency/executor/job_executor")
     protected ManagedExecutorService executor;
+
+    @Resource(lookup = "java:jboss/ee/concurrency/factory/job_thread_factory")
+    protected ManagedThreadFactory executorFactory;
 
     @Inject
     protected CurrentUserProvider currentUserProvider;

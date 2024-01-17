@@ -21,7 +21,9 @@ public class DunningSuspendSubscriptionScript extends Script {
 			log.warn("No Invoice passed as CONTEXT_ENTITY");
 			throw new BusinessException("No Invoice passed as CONTEXT_ENTITY");
 		} else {
-			subscriptionService.subscriptionSuspension(invoice.getSubscription(), new Date());
+			if(invoice.getSubscription() != null) {
+				subscriptionService.subscriptionSuspension(invoice.getSubscription(), new Date());
+			}
 		}
 	}
 }

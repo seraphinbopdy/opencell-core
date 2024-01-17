@@ -216,6 +216,6 @@ public class AttributeValue<T extends AttributeValue> extends AuditableCFEntity 
 
     @Override
     public String toString() {
-        return attribute.getCode()+"="+getValue();
+        return attribute.getCode()+"="+getRealValue();
     }	
 }

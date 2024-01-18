@@ -195,6 +195,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			}
 			billingRun.setStatus(VALIDATED);
 		}
+		billingRun.setInvoiceNumber(result.getInvoiceCount());
 		billingRunService.update(billingRun);
 		billingRunService.updateBillingRunStatistics(billingRun);
 		billingRunService.updateBillingRunJobExecution(billingRun.getId(), result);
@@ -219,6 +220,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			invoicingService.createAgregatesAndInvoiceForJob(item, billingRun, billingCycle, jobInstanceId,
 					lastCurrentUser, isFullAutomatic, result);
 		};
+
 		iteratorBasedJobProcessing.processItems(result,
 				new SynchronizedIterator<>(ListUtils.partition(bAIds, itemsPerSplit)), task, null, null, nbRuns,
 				waitingMillis, false, false);

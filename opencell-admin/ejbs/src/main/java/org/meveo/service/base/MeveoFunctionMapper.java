@@ -1097,9 +1097,10 @@ public class MeveoFunctionMapper extends FunctionMapper {
         }
         if (result != null && result.containsKey(Script.RESULT_VALUE)) {
             return result.get(Script.RESULT_VALUE);
+        
+        } else {
+            return null;
         }
-
-        return result;
     }
 
     /**

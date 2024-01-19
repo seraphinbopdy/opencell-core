@@ -14,6 +14,7 @@ import org.meveo.api.dto.catalog.PricePlanMatrixVersionDto;
 import org.meveo.api.dto.cpq.ProductDto;
 import org.meveo.apiv2.catalog.ImmutableSimpleOneshotProductDto;
 import org.meveo.apiv2.catalog.SimpleOneshotProductDto;
+import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.model.DatePeriod;
 import org.meveo.model.catalog.ChargeTemplateStatusEnum;
 import org.meveo.model.catalog.OneShotChargeTemplate;
@@ -33,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -61,6 +63,12 @@ public class ProductManagementApiServiceTest extends TestCase {
     @Mock
     private ProductApi productApi;
 
+    @Mock
+    private EntityManagerWrapper emWrapper;
+
+    @Mock
+    private EntityManager entityManager;
+
     @Test
     public void testCreateProductSimpleOneShot() {
         
@@ -75,6 +83,8 @@ public class ProductManagementApiServiceTest extends TestCase {
                                                                            .price(BigDecimal.valueOf(12345678.90))
                                                                            .build();
 
+
+        when(emWrapper.getEntityManager()).thenReturn(entityManager);
         // when
         productManagementApiService.createProductSimpleOneShot(postData);
         

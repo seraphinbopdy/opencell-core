@@ -1515,8 +1515,8 @@ public class BillingRunService extends PersistenceService<BillingRun> {
      * @param quarantineBRId
      * @return
      */
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+   /* @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)*/
     public BillingRun findOrCreateNextQuarantineBR(Long billingRunId, List<LanguageDescriptionDto> descriptionsTranslated) {
         BillingRun billingRun = findById(billingRunId);
         if (billingRun != null) {
@@ -1526,12 +1526,13 @@ public class BillingRunService extends PersistenceService<BillingRun> {
             BillingRun quarantineBillingRun = new BillingRun();
             try {
                 BeanUtils.copyProperties(quarantineBillingRun, billingRun);
-
+	            quarantineBillingRun.setId(null);
+	            quarantineBillingRun.setAdditionalAggregationFields(new ArrayList<>(billingRun.getAdditionalAggregationFields()));
                 Set<BillingRunList> billingRunLists = new HashSet<>();
-                billingRunLists.addAll(billingRun.getBillingRunLists());
+               // billingRunLists.addAll(billingRun.getBillingRunLists());
                 quarantineBillingRun.setBillingRunLists(billingRunLists);
                 List<JobExecutionResultImpl> billingRunJobExecutions = new ArrayList<>();
-                billingRunJobExecutions.addAll(billingRun.getJobExecutions());                   
+               // billingRunJobExecutions.addAll(billingRun.getJobExecutions());
                 quarantineBillingRun.setJobExecutions(billingRunJobExecutions);
                 quarantineBillingRun.setBillableBillingAccounts(new ArrayList<>());
                 quarantineBillingRun.setBillingAccountNumber(null);

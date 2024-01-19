@@ -1651,6 +1651,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                         false, automaticInvoiceCheck, false);
                 jobExecutionResult.addNbItemsToProcess(invoices.size());
                 jobExecutionResult.addNbItemsCorrectlyProcessed(invoices.size());
+                jobExecutionResult.incrementInvoiceNumber(invoices.size());
                 updateBillingRunWithStatistics(invoices);
             } catch (Exception exception) {
                 throw new BusinessException(exception);

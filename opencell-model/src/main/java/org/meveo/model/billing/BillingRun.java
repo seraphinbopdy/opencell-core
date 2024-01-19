@@ -151,9 +151,8 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     private BigDecimal producibleAmountTax;
 
     /**
-     * Deprecated in 5.3 for not use
+     * Number of generated invoice
      */
-    @Deprecated
     @Column(name = "nb_invoice")
     private Integer InvoiceNumber;
 

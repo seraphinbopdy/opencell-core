@@ -6171,7 +6171,6 @@
             <column name="trading_country_id" value="-1"/>
             <column name="legal_entity_type_id" valueComputed="(select id from adm_title where code = 'SAS')" />
             <column name="vat_no" value="89810129411" />
-            <column name="registration_no" value="89810129411" />
             <column name="address_city" value="New York" />
             <column name="address_zipcode" value="10001" />
             <column name="address_1" value="High level suite" />

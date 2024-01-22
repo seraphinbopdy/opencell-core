@@ -25,7 +25,7 @@ import javax.persistence.Transient;
 		@Parameter(name = "sequence_name", value = "account_registration_number_seq"), })
 public class RegistrationNumber extends  AuditableEntity {
 	
-	@Column(name = "registration_id")
+	@Column(name = "registration_no")
 	private String registrationNo;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "icd_id")
@@ -80,8 +80,30 @@ public class RegistrationNumber extends  AuditableEntity {
 		return accountEntity;
 	}
 	
+	public AccountEntity getAccountEntity(AccountEntity  accountEntity) {
+		if(accountEntity instanceof  Seller)
+			return this.seller;
+		else if(accountEntity instanceof Customer)
+			return this.customer;
+		else if(accountEntity instanceof CustomerAccount)
+			return this.customerAccount;
+		else if(accountEntity instanceof  BillingAccount)
+			return this.billingAccount;
+		else if(accountEntity instanceof  UserAccount)
+			return this.userAccount;
+		return this.accountEntity;
+	}
+	
 	public RegistrationNumber setAccountEntity(AccountEntity accountEntity) {
 		this.accountEntity = accountEntity;
+		if(accountEntity == null) {
+			this.seller = null;
+			this.customer = null;
+			this.customerAccount = null;
+			this.billingAccount = null;
+			this.userAccount = null;
+			return this;
+		}
 		if(accountEntity instanceof  Seller)
 			this.seller = (Seller) accountEntity;
 		else if(accountEntity instanceof Customer)

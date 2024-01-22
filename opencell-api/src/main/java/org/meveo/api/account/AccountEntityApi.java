@@ -18,27 +18,35 @@
 
 package org.meveo.api.account;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.api.BaseApi;
 import org.meveo.api.dto.account.AccountDto;
+import org.meveo.api.dto.account.RegistrationNumberDto;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.model.AccountEntity;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.billing.Country;
+import org.meveo.model.billing.IsoIcd;
 import org.meveo.model.catalog.OneShotChargeTemplate;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 import org.meveo.service.admin.impl.CountryService;
+import org.meveo.service.admin.impl.RegistrationNumberService;
+import org.meveo.service.billing.impl.IsoIcdService;
 import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
 import org.meveo.service.catalog.impl.TitleService;
 
-import java.util.ArrayList;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Edward P. Legaspi
@@ -55,6 +63,13 @@ public class AccountEntityApi extends BaseApi {
 
     @Inject
     private OneShotChargeTemplateService oneShotChargeTemplateService;
+	
+	
+	@Inject
+	protected RegistrationNumberService registrationNumberService;
+	
+	@Inject
+	protected IsoIcdService isoIcdService;
 
     public void populate(AccountDto postData, AccountEntity accountEntity) throws MeveoApiException {
         Address address = new Address();
@@ -257,4 +272,38 @@ public class AccountEntityApi extends BaseApi {
             }
         }
     }
+	
+	protected void createOrUpdateRegistrationNumber(AccountEntity accountEntity, Set<RegistrationNumberDto> registrationNumbers) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		Method registrationFromEntity = accountEntity.getClass().getMethod("getRegistrationNumbers");
+		List<RegistrationNumber> registrationNumberList = (List<RegistrationNumber>) registrationFromEntity.invoke(accountEntity);
+		/*if(org.apache.commons.collections.CollectionUtils.isNotEmpty(registrationNumberList)) {
+			registrationNumberList.forEach(registrationNumber -> registrationNumber.setAccountEntity(null));
+		}*/
+		if(org.apache.commons.collections.CollectionUtils.isNotEmpty(registrationNumbers)) {
+			registrationNumbers.forEach(registrationNumberDto -> {
+				RegistrationNumber registrationNumber = registrationNumberService.findByRegistrationNo(registrationNumberDto.getRegistrationNo());
+				IsoIcd isoIcd = null;
+				
+				if(registrationNumber == null) {
+					registrationNumber = new RegistrationNumber(registrationNumberDto.getRegistrationNo(), isoIcd, accountEntity);
+				}else if(registrationNumber.getAccountEntity(accountEntity) == null ||  accountEntity.getId() == registrationNumber.getAccountEntity(accountEntity).getId()){
+					registrationNumber.setAccountEntity(accountEntity);
+				}else{
+					throw new BusinessApiException("The register number is already attach to another " + accountEntity.getClass().getSimpleName());
+				}
+				
+				if(org.meveo.commons.utils.StringUtils.isNotBlank(registrationNumberDto.getIsoIcdCode())){
+					isoIcd = isoIcdService.findByCode(registrationNumberDto.getIsoIcdCode());
+					if(isoIcd == null) {
+						throw new EntityDoesNotExistsException(IsoIcd.class, registrationNumberDto.getIsoIcdCode());
+					}
+					registrationNumber.setIsoIcd(isoIcd);
+				}
+				registrationNumberList.add(registrationNumber);
+				if(registrationNumber.getId() == null){
+					registrationNumberService.create(registrationNumber);
+				}
+			});
+		}
+	}
 }

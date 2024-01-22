@@ -27,11 +27,13 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -53,6 +55,7 @@ import org.meveo.api.dto.account.CustomerBrandDto;
 import org.meveo.api.dto.account.CustomerCategoryDto;
 import org.meveo.api.dto.account.CustomerDto;
 import org.meveo.api.dto.account.CustomersDto;
+import org.meveo.api.dto.account.RegistrationNumberDto;
 import org.meveo.api.dto.payment.AccountOperationDto;
 import org.meveo.api.dto.payment.PaymentMethodDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
@@ -79,9 +82,12 @@ import org.meveo.api.sequence.GenericSequenceApi;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.export.CustomBigDecimalConverter;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.AccountingCode;
+import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.CounterInstance;
+import org.meveo.model.billing.IsoIcd;
 import org.meveo.model.catalog.ProductChargeTemplateMapping;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.crm.BusinessAccountModel;
@@ -381,8 +387,14 @@ public class CustomerApi extends AccountEntityApi {
 			customer.setSeller((customer.getParentCustomer() != null && customer.getParentCustomer().getSeller() != null)? 
 							customer.getParentCustomer().getSeller() : customer.getCustomerCategory().getDefaultSeller());
         }
-        
-
+	    
+	    try {
+		    createOrUpdateRegistrationNumber(customer, postData.getRegistrationNumbers());
+	    } catch (NoSuchMethodException  | InvocationTargetException | IllegalAccessException e) {
+		    throw new BusinessException("Error when inserting register number", e);
+	    }
+	    
+	    
     }
     
 	private void updateCustomerChilds(CustomerDto postData, Customer customer) {

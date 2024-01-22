@@ -9211,5 +9211,10 @@ public class AgedBalanceReporting extends ReportExtractScript {
             <where>code = '0009'</where>
         </update>
     </changeSet>
+    
+    <changeSet id="INTRD-20836-pp-cache" author="AndriusKarpavicius">
+        <sql>update ${db.schema.adapted}advanced_settings set property_type='java.lang.Integer',  property_value=case when property_value='false' then '0' else '2' end where code in ('pricePlanFilters.enableCriteria1Value', 'pricePlanFilters.enableCriteria2Value', 'pricePlanFilters.enableCriteria3Value')</sql>
+    </changeSet>
+    
 
 </databaseChangeLog>

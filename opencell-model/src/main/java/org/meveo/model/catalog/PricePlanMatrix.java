@@ -79,28 +79,15 @@ import org.meveo.model.scripts.ScriptInstance;
 @NamedQueries({
         @NamedQuery(name = "PricePlanMatrix.getPricePlansByChargeCode", query = "SELECT ppm from PricePlanMatrix ppm join ppm.chargeTemplates as ct where ct.code=:chargeCode order by ppm.priority ASC"),
         @NamedQuery(name = "PricePlanMatrix.getActivePricePlansByChargeCode", query = "SELECT ppm from PricePlanMatrix ppm join ppm.chargeTemplates as ct where ppm.disabled is false and ct.code=:chargeCode order by ppm.priority ASC, ppm.id", hints = {
-                @QueryHint(name = "org.hibernate.cacheable", value = "true"), @QueryHint(name = "org.hibernate.readOnly", value = "true") }),
-        @NamedQuery(name = "PricePlanMatrix.getActivePricePlansByChargeCodeForRatingMatchDB", query = "SELECT ppm from PricePlanMatrix ppm join ppm.chargeTemplates as ct where ppm.disabled is false and ct.code=:chargeCode and "
-                + "(ppm.seller.id is null or ppm.seller.id=:sellerId) and (ppm.offerTemplate.id is null or ppm.offerTemplate.id=:offerId) and (ppm.tradingCountry.id is null or ppm.tradingCountry.id=:tradingCountryId) and (ppm.tradingCurrency.id is null or ppm.tradingCurrency.id=:tradingCurrencyId) and "
-                + "(ppm.criteria1Value is null or ppm.criteria1Value=:param1) and (ppm.criteria2Value is null or ppm.criteria2Value=:param2) and (ppm.criteria3Value is null or ppm.criteria3Value=:param3) and (ppm.startSubscriptionDate is null or ppm.startSubscriptionDate<=:subscriptionDate) and "
-                + "(ppm.endSubscriptionDate is null or ppm.endSubscriptionDate>:subscriptionDate) and (ppm.minSubscriptionAgeInMonth is null or ppm.minSubscriptionAgeInMonth<=:subscriptionAge) and (ppm.maxSubscriptionAgeInMonth is null or ppm.maxSubscriptionAgeInMonth>:subscriptionAge) and "
-                + "(ppm.startRatingDate is null or ppm.startRatingDate<=:operationDate) and (ppm.endRatingDate is null or ppm.endRatingDate>:operationDate) and (ppm.validityFrom is null or ppm.validityFrom<:startDate) and (ppm.validityDate is null or (ppm.validityDate>=:startDate or ppm.validityDate>=:endDate)) and "
-                + "(ppm.maxQuantity is null or ppm.maxQuantity>:quantity) and (ppm.minQuantity is null or ppm.minQuantity<=:quantity)"
-                + "order by ppm.priority ASC, ppm.id", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-        @NamedQuery(name = "PricePlanMatrix.getActivePricePlansByChargeCodeForRating", query = "SELECT new org.meveo.model.catalog.PricePlanMatrixForRating(ppm.id,  ppm.code, ppm.offerTemplate.id,  ppm.startSubscriptionDate,  ppm.endSubscriptionDate,  ppm.startRatingDate,  ppm.endRatingDate,  ppm.minQuantity, "
-                + "ppm.maxQuantity, ppm.minSubscriptionAgeInMonth, ppm.maxSubscriptionAgeInMonth,  ppm.criteria1Value,  ppm.criteria2Value,  ppm.criteria3Value,  ppm.criteriaEL,  ppm.amountWithoutTax, "
-                + "ppm.amountWithTax,  ppm.amountWithoutTaxEL,  ppm.amountWithTaxEL, ppm.tradingCurrency.id, ppm.tradingCountry.id,  ppm.priority, ppm.seller.id, ppm.validityCalendar.id, ppm.sequence, ppm.scriptInstance.id, "
-                + "ppm.totalAmountEL,  ppm.minimumAmountEL,  ppm.invoiceSubCategoryEL,  ppm.validityFrom,  ppm.validityDate) from PricePlanMatrix ppm join ppm.chargeTemplates as ct where ppm.disabled is false and ct.code=:chargeCode and "
-                + "(ppm.seller.id is null or ppm.seller.id=:sellerId) and (ppm.offerTemplate.id is null or ppm.offerTemplate.id=:offerId) and (ppm.tradingCountry.id is null or ppm.tradingCountry.id=:tradingCountryId) and (ppm.tradingCurrency.id is null or ppm.tradingCurrency.id=:tradingCurrencyId) and "
-                + "(ppm.criteria1Value is null or ppm.criteria1Value=:param1) and (ppm.criteria2Value is null or ppm.criteria2Value=:param2) and (ppm.criteria3Value is null or ppm.criteria3Value=:param3) and (ppm.startSubscriptionDate is null or ppm.startSubscriptionDate<=:subscriptionDate) and "
-                + "(ppm.endSubscriptionDate is null or ppm.endSubscriptionDate>:subscriptionDate) and (ppm.minSubscriptionAgeInMonth is null or ppm.minSubscriptionAgeInMonth<=:subscriptionAge) and (ppm.maxSubscriptionAgeInMonth is null or ppm.maxSubscriptionAgeInMonth>:subscriptionAge) and "
-                + "(ppm.startRatingDate is null or ppm.startRatingDate<=:operationDate) and (ppm.endRatingDate is null or ppm.endRatingDate>:operationDate) and (ppm.validityFrom is null or ppm.validityFrom<:startDate) and (ppm.validityDate is null or (ppm.validityDate>=:startDate or ppm.validityDate>=:endDate)) and "
-                + "(ppm.maxQuantity is null or ppm.maxQuantity>:quantity) and (ppm.minQuantity is null or ppm.minQuantity<=:quantity)"
-                + "order by ppm.priority ASC, ppm.id", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }) })
+                @QueryHint(name = "org.hibernate.cacheable", value = "true"), @QueryHint(name = "org.hibernate.readOnly", value = "true") }) })
 
 public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparable<PricePlanMatrix>, ISearchable {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Cache region for Price plan selection
+     */
+    public static final String CACHE_REGION_PP = "pp-selection";
     
 	public PricePlanMatrix() {
 		super();
@@ -389,7 +376,7 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
 	 * Discount plan items
 	 */
 	@OneToMany(mappedBy = "pricePlanMatrix", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-	private List<DiscountPlanItem> discountPlanItems = new ArrayList<>();
+    private List<DiscountPlanItem> discountPlanItems = new ArrayList<>();
 
     public OfferTemplate getOfferTemplate() {
         return offerTemplate;

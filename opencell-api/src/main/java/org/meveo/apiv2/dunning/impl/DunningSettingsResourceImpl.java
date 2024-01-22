@@ -11,6 +11,7 @@ import org.meveo.apiv2.dunning.ImmutableDunningSettings;
 import org.meveo.apiv2.dunning.resource.DunningSettingResource;
 import org.meveo.apiv2.dunning.service.DunningSettingsApiService;
 import org.meveo.apiv2.generic.common.LinkGenerator;
+import org.meveo.service.payments.impl.DunningPolicyService;
 import org.meveo.service.payments.impl.DunningTemplateService;
 
 @Interceptors({ WsRestApiInterceptor.class })
@@ -22,15 +23,19 @@ public class DunningSettingsResourceImpl implements DunningSettingResource {
 	@Inject
 	private DunningTemplateService dunningTemplateService;
 
+	@Inject
+	private DunningPolicyService dunningPolicyService;
+
 	private DunningSettingsMapper mapper = new DunningSettingsMapper();
 	
 	@Override
 	public Response create(org.meveo.apiv2.dunning.DunningSettings dunningSettings) {
 		var entity = mapper.toEntity(dunningSettings);
 		var savedDunning = dunningSettingsApiService.create(entity);
-
-		//Update DunningTemplate after creating a new DunningSettings
+		//Update Dunning Templates after creating a new Setting of Dunning
 		dunningTemplateService.updateDunningTemplateByDunningMode(dunningSettings.getDunningMode());
+		//Update Dunning Policies after creating a new Setting of Dunning
+		dunningPolicyService.updateDunningPoliciesByDunningMode(dunningSettings.getDunningMode());
 		return Response.created(LinkGenerator.getUriBuilderFromResource(DunningSettingResource.class, savedDunning.getId()).build())
 				.entity(toResourceOrderWithLink(mapper.toResource(savedDunning)))
 				.build();
@@ -39,9 +44,10 @@ public class DunningSettingsResourceImpl implements DunningSettingResource {
 	@Override
 	public Response update(org.meveo.apiv2.dunning.DunningSettings dunningSettings, Long dunningId) {
 		var updated = dunningSettingsApiService.update(dunningId, mapper.toEntity(dunningSettings)).get();
-
-		//Update DunningTemplate after creating a new DunningSettings
+		//Update Dunning Templates after creating a new Setting of Dunning
 		dunningTemplateService.updateDunningTemplateByDunningMode(dunningSettings.getDunningMode());
+		//Update Dunning Policies after creating a new Setting of Dunning
+		dunningPolicyService.updateDunningPoliciesByDunningMode(dunningSettings.getDunningMode());
 		return Response.status(Status.ACCEPTED).entity(toResourceOrderWithLink(mapper.toResource(updated))).build();
 	}
 	

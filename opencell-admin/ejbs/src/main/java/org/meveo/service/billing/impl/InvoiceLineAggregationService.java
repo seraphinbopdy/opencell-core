@@ -197,24 +197,24 @@ public class InvoiceLineAggregationService implements Serializable {
             fieldToFetch = new ArrayList<>(
                 asList("id as rated_transaction_ids", "billingAccount.id as billing_account__id", "description as label", "quantity as quantity", unitAmount + " as unit_amount_without_tax",
                     "amountWithoutTax as sum_without_tax", "amountWithTax as sum_with_tax", "offerTemplate.id as offer_id", "serviceInstance.id as service_instance_id", "usageDate as usage_date",
-                    "startDate as start_date", "endDate as end_date", "orderNumber as order_number", "infoOrder.order.id as commercial_order_id", "infoOrder.order.id as order_id", "taxPercent as tax_percent",
-                    "tax.id as tax_id", "infoOrder.productVersion.id as product_version_id", "infoOrder.orderLot.id as order_lot_id", "chargeInstance.id as charge_instance_id", "accountingArticle.id as article_id",
+                    "startDate as start_date", "endDate as end_date", "orderNumber as order_number", "orderInfo.order.id as commercial_order_id", "orderInfo.order.id as order_id", "taxPercent as tax_percent",
+                    "tax.id as tax_id", "orderInfo.productVersion.id as product_version_id", "orderInfo.orderLot.id as order_lot_id", "chargeInstance.id as charge_instance_id", "accountingArticle.id as article_id",
                     "discountedRatedTransaction as discounted_ratedtransaction_id", "discountPlanType as discount_plan_type", "discountValue as discount_value", "subscription.id as subscription_id", "userAccount.id as user_account_id"));
 
         } else {
             fieldToFetch = new ArrayList<>(
                 asList("string_agg_long(a.id) as rated_transaction_ids", "billingAccount.id as billing_account__id", "SUM(a.quantity) as quantity", unitAmountAggregationFunction + " as unit_amount_without_tax",
                     "SUM(a.amountWithoutTax) as sum_without_tax", "SUM(a.amountWithTax) as sum_with_tax", "offerTemplate.id as offer_id", usageDateAggregationFunction + " as usage_date", "min(a.startDate) as start_date",
-                    "max(a.endDate) as end_date", "taxPercent as tax_percent", "tax.id as tax_id", "infoOrder.productVersion.id as product_version_id", "accountingArticle.id as article_id", "count(a.id) as rt_count"));
+                    "max(a.endDate) as end_date", "taxPercent as tax_percent", "tax.id as tax_id", "orderInfo.productVersion.id as product_version_id", "accountingArticle.id as article_id", "count(a.id) as rt_count"));
 
             fieldToFetch.add("discountedRatedTransaction as discounted_ratedtransaction_id");
             fieldToFetch.add("discountPlanType as discount_plan_type");
             fieldToFetch.add("discountValue as discount_value");
 
             if (!aggregationConfiguration.isIgnoreOrders()) {
-                fieldToFetch.add("infoOrder.order.id as commercial_order_id");
+                fieldToFetch.add("orderInfo.order.id as commercial_order_id");
                 fieldToFetch.add("orderNumber as order_number");
-                fieldToFetch.add("infoOrder.order.id as order_id");
+                fieldToFetch.add("orderInfo.order.id as order_id");
             }
             
             if(!aggregationConfiguration.isIgnoreUserAccounts()) {
@@ -305,7 +305,7 @@ public class InvoiceLineAggregationService implements Serializable {
         groupBy.add("accountingArticle.id");
         groupBy.add("tax.id");
         groupBy.add("taxPercent");
-        groupBy.add("infoOrder.productVersion.id");
+        groupBy.add("orderInfo.productVersion.id");
         groupBy.add("discountedRatedTransaction");
         groupBy.add("discountValue");
         groupBy.add("discountPlanType");
@@ -324,7 +324,7 @@ public class InvoiceLineAggregationService implements Serializable {
         }
 
         if (!aggregationConfiguration.isIgnoreOrders()) {
-            groupBy.add("infoOrder.order.id");
+            groupBy.add("orderInfo.order.id");
             groupBy.add("orderNumber");
         }
         

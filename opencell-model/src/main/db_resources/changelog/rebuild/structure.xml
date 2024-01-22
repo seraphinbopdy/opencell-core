@@ -21223,7 +21223,7 @@
             <column name="updated" type="datetime" />
             <column name="creator" type="varchar(100)" />
             <column name="updater" type="varchar(100)" />
-            <column name="registration_id" type="varchar(100)" />
+            <column name="registration_no" type="varchar(100)" />
             <column name="icd_id" type="bigint" />
             <column name="seller_id" type="bigint" />
             <column name="billing_account_id" type="bigint" />

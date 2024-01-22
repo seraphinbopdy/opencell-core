@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.meveo.api.BaseApi;
 import org.meveo.api.dto.account.AccountDto;
 import org.meveo.api.dto.account.RegistrationNumberDto;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.model.AccountEntity;
@@ -275,9 +276,9 @@ public class AccountEntityApi extends BaseApi {
 	protected void createOrUpdateRegistrationNumber(AccountEntity accountEntity, Set<RegistrationNumberDto> registrationNumbers) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 		Method registrationFromEntity = accountEntity.getClass().getMethod("getRegistrationNumbers");
 		List<RegistrationNumber> registrationNumberList = (List<RegistrationNumber>) registrationFromEntity.invoke(accountEntity);
-		if(org.apache.commons.collections.CollectionUtils.isNotEmpty(registrationNumberList)) {
+		/*if(org.apache.commons.collections.CollectionUtils.isNotEmpty(registrationNumberList)) {
 			registrationNumberList.forEach(registrationNumber -> registrationNumber.setAccountEntity(null));
-		}
+		}*/
 		if(org.apache.commons.collections.CollectionUtils.isNotEmpty(registrationNumbers)) {
 			registrationNumbers.forEach(registrationNumberDto -> {
 				RegistrationNumber registrationNumber = registrationNumberService.findByRegistrationNo(registrationNumberDto.getRegistrationNo());
@@ -285,8 +286,10 @@ public class AccountEntityApi extends BaseApi {
 				
 				if(registrationNumber == null) {
 					registrationNumber = new RegistrationNumber(registrationNumberDto.getRegistrationNo(), isoIcd, accountEntity);
-				}else{
+				}else if(registrationNumber.getAccountEntity(accountEntity) == null ||  accountEntity.getId() == registrationNumber.getAccountEntity(accountEntity).getId()){
 					registrationNumber.setAccountEntity(accountEntity);
+				}else{
+					throw new BusinessApiException("The register number is already attach to another " + accountEntity.getClass().getSimpleName());
 				}
 				
 				if(org.meveo.commons.utils.StringUtils.isNotBlank(registrationNumberDto.getIsoIcdCode())){
@@ -297,6 +300,9 @@ public class AccountEntityApi extends BaseApi {
 					registrationNumber.setIsoIcd(isoIcd);
 				}
 				registrationNumberList.add(registrationNumber);
+				if(registrationNumber.getId() == null){
+					registrationNumberService.create(registrationNumber);
+				}
 			});
 		}
 	}

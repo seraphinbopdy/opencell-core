@@ -18,6 +18,7 @@
 
 package org.meveo.api.account;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -367,6 +368,12 @@ public class CustomerAccountApi extends AccountEntityApi {
         } else {
             customerAccount.setGeneralClientAccount(null);
         }
+	    
+	    try {
+		    createOrUpdateRegistrationNumber(customerAccount, postData.getRegistrationNumbers());
+	    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+		    throw new BusinessException("Error when inserting register number", e);
+	    }
 
     }
 

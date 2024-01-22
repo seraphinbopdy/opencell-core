@@ -18,6 +18,7 @@
 
 package org.meveo.api.account;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -643,8 +644,10 @@ public class BillingAccountApi extends AccountEntityApi {
 	    // Update payment method information in a customer account.
         // ONLY used to handle deprecated billingAccountDto.paymentMethod and billingAccountDto.bankCoordinates fields. Use
         createOrUpdatePaymentMethodInCA(postData, billingAccount);
-
-        // Validate and populate customFields
+	    
+	    createOrUpdateRegistrationNumber(billingAccount, postData.getRegistrationNumbers());
+	    
+	    // Validate and populate customFields
         try {
             populateCustomFields(postData.getCustomFields(), billingAccount, isNew, checkCustomFields);
         } catch (MissingParameterException | InvalidParameterException e) {
@@ -654,7 +657,6 @@ public class BillingAccountApi extends AccountEntityApi {
             log.error("Failed to associate custom field instance to an entity", e);
             throw e;
         }
-
     }
 	
 	private void createOrUpdateRegistrationNumber(BillingAccount billingAccount, Set<RegistrationNumberDto> registrationNumbers)  {

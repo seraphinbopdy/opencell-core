@@ -80,6 +80,20 @@ public class RegistrationNumber extends  AuditableEntity {
 		return accountEntity;
 	}
 	
+	public AccountEntity getAccountEntity(AccountEntity  accountEntity) {
+		if(accountEntity instanceof  Seller)
+			return this.seller;
+		else if(accountEntity instanceof Customer)
+			return this.customer;
+		else if(accountEntity instanceof CustomerAccount)
+			return this.customerAccount;
+		else if(accountEntity instanceof  BillingAccount)
+			return this.billingAccount;
+		else if(accountEntity instanceof  UserAccount)
+			return this.userAccount;
+		return this.accountEntity;
+	}
+	
 	public RegistrationNumber setAccountEntity(AccountEntity accountEntity) {
 		this.accountEntity = accountEntity;
 		if(accountEntity == null) {

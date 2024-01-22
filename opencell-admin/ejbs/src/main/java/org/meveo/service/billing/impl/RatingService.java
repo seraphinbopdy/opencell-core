@@ -761,7 +761,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                         if (contractItem.getRate() != null) {
                             discountRate = BigDecimal.valueOf(contractItem.getRate());
                             amount = unitPriceWithoutTax.abs().multiply(discountRate.divide(HUNDRED));
-                            if (amount != null && unitPriceWithoutTax.compareTo(amount) > 0 && !separateDiscount) {
+                            if (amount != null && unitPriceWithoutTax.compareTo(amount) >= 0 && !separateDiscount) {
                                 unitPriceWithoutTax = unitPriceWithoutTax.subtract(amount);
                             }
 
@@ -772,7 +772,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                                 discountRate = pricePlanMatrixLine.getValue();
                                 if (discountRate != null) {
                                     amount = unitPriceWithoutTax.abs().multiply(discountRate.divide(HUNDRED));
-                                    if (amount != null && unitPriceWithoutTax.compareTo(amount) > 0 && !separateDiscount) {
+                                    if (amount != null && unitPriceWithoutTax.compareTo(amount) >= 0 && !separateDiscount) {
                                         unitPriceWithoutTax = unitPriceWithoutTax.subtract(amount);
                                     }
                                 }
@@ -1185,6 +1185,15 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         if(wo.isOverrodePrice()) {
             priceWithoutTax=wo.getUnitAmountWithoutTax();
         }
+	    
+	    
+	    if (pricePlan.getScriptInstance() != null) {
+		    log.debug("start to execute script instance for ratePrice {}", pricePlan);
+		    executeRatingScript(wo, pricePlan.getScriptInstance(), false);
+		    priceWithoutTax=wo.getUnitAmountWithoutTax()!=null?wo.getUnitAmountWithoutTax():BigDecimal.ZERO;
+		    priceWithTax=wo.getUnitAmountWithTax()!=null?wo.getUnitAmountWithTax():BigDecimal.ZERO;
+		    return new Amounts(priceWithoutTax, priceWithTax);
+	    }
 
         ServiceInstance serviceInstance = wo.getServiceInstance();
         Date ppmvDate = wo.getOperationDate();

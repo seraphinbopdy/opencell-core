@@ -83,6 +83,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
@@ -629,6 +630,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @throws BusinessException business exception
      */
     private void assignInvoiceNumberFromReserve(Invoice invoice, InvoicesToNumberInfo invoicesToNumberInfo) throws BusinessException {
+        log.debug("Will assign invoiceNumber from reserve: invId={}, invoicesToNumberInfo={}", invoice.getId(), invoicesToNumberInfo);
         InvoiceType invoiceType = invoice.getInvoiceType();
         String prefix = invoiceType.getPrefixEL();
 
@@ -1436,6 +1438,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param automaticInvoiceCheck
      */
     private void applyAutomaticInvoiceCheck(Invoice invoice, boolean automaticInvoiceCheck, boolean save) {
+        log.debug("Will apply automatic invoice check. invId={}, automaticInvoiceCheck={}, save={}",
+                invoice.getId(), automaticInvoiceCheck, save);
     	InvoiceType invoiceType = invoiceTypeService.refreshOrRetrieve(invoice.getInvoiceType());
         if (automaticInvoiceCheck && invoiceType != null && (invoiceType.getInvoiceValidationScript() != null || invoiceType.getInvoiceValidationRules() != null)) {
             if (invoiceType.getInvoiceValidationScript() != null) {
@@ -3364,6 +3368,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
             billingCycle = billingRun.getBillingCycle();
         }
         billingCycle = PersistenceUtils.initializeAndUnproxy(billingCycle);
+
+        log.debug("Will assign invoice number and recalculate dates. invId={}, baId={}", invoiceId, billingAccount.getId());
+
         if (billingRun == null) {
             return;
         }
@@ -3423,6 +3430,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
 
     private void reCalculateDates(Invoice invoice, BillingRun billingRun, BillingAccount billingAccount, BillingCycle billingCycle, boolean isCalculateInvoiceDateByDelayEL) {
+        log.debug("Will reCalculate Dates. invId={}, baId={}, isCalculateInvoiceDateByDelayEL={}",
+                invoice.getId(), billingAccount.getId(), isCalculateInvoiceDateByDelayEL);
         int delay;
         if (isCalculateInvoiceDateByDelayEL) {
             delay = billingCycle.getInvoiceDateDelayEL() == null ? 0 : InvoiceService.resolveImmediateInvoiceDateDelay(billingCycle.getInvoiceDateDelayEL(), invoice, billingAccount);
@@ -3444,7 +3453,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @throws BusinessException business exception
      */
     public BillingAccount incrementBAInvoiceDate(BillingRun billingRun, BillingAccount billingAccount) throws BusinessException {
-
+        log.debug("Will increment BA invoice date. BaId={}", billingAccount.getId());
         Date initCalendarDate = billingAccount.getSubscriptionDate() != null ? billingAccount.getSubscriptionDate() : billingAccount.getAuditable().getCreated();
         Calendar bcCalendar = CalendarService.initializeCalendar(billingAccount.getBillingCycle().getCalendar(), initCalendarDate, billingAccount, billingRun);
 
@@ -3483,6 +3492,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void incrementBAInvoiceDate(BillingRun billingRun, Long billingAccountId) throws BusinessException {
+        log.debug("Will increment BA invoice date. baId={}, br.isExceptionalBR={}",
+                billingAccountId, billingRun.isExceptionalBR());
         if (!billingRun.isExceptionalBR()) {
             BillingAccount billingAccount = billingAccountService.findById(billingAccountId);
             incrementBAInvoiceDate(billingRun, billingAccount);
@@ -7151,6 +7162,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         updateInvoiceLinesAmountFromRatedTransactions(invoiceLineRTs, invoiceLines);
 
+        invoice = refreshOrRetrieve(invoice);
         for (InvoiceLine invoiceLine : invoiceLines) {
             invoiceLinesService.detach(invoiceLine);
             InvoiceLine duplicateInvoiceLine = new InvoiceLine(invoiceLine, duplicateInvoice);
@@ -7255,24 +7267,23 @@ public class InvoiceService extends PersistenceService<Invoice> {
     /**
      * @return billingRunId the id of the new billing run.
      */
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+   /* @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)*/
     public Long quarantineBillingRun(Invoice invoice, QuarantineBillingRunDto quarantineBillingRunDto) {
         List<Long> invoiceIds = new ArrayList<>();
         List<Invoice> invoices = new ArrayList<>();
-        
+        invoice = invoiceService.refreshOrRetrieve(invoice);
         invoiceIds.add(invoice.getId());
         BillingRun billingRun = invoice.getBillingRun();
-        invoices.add(invoiceService.refreshOrRetrieve(invoice));
+        invoices.add(invoice);
        
         if (billingRun != null) {
             BillingRun nextBR = billingRunService.findOrCreateNextQuarantineBR(billingRun.getId(), quarantineBillingRunDto.getDescriptionsTranslated());
-            getEntityManager().createNamedQuery("Invoice.moveToBRByIds").setParameter("billingRun", nextBR).setParameter("invoiceIds", invoiceIds).executeUpdate();
+            getEntityManager().createNamedQuery("Invoice.moveToBRByIds").setParameter("billingRun", nextBR).setFlushMode(FlushModeType.AUTO).setParameter("invoiceIds", invoiceIds).executeUpdate();
             getEntityManager().createNamedQuery("InvoiceLine.moveToQuarantineBRByInvoiceIds").setParameter("billingRun", nextBR).setParameter("invoiceIds", invoiceIds).executeUpdate();
             getEntityManager().createNamedQuery("RatedTransaction.moveToQuarantineBRByInvoiceIds").setParameter("billingRun", nextBR).setParameter("invoiceIds", invoiceIds).executeUpdate();
             getEntityManager().createNamedQuery("SubCategoryInvoiceAgregate.moveToQuarantineBRByInvoiceIds").setParameter("billingRun", nextBR).setParameter("invoiceIds", invoiceIds).executeUpdate();
             
-            billingRun = billingRunService.refreshOrRetrieve(billingRun);
             
             billingRunService.updateBillingRunStatistics(nextBR);
             billingRunService.updateBillingRunStatistics(billingRun);
@@ -7649,7 +7660,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         }
     }
-    
+
 	@SuppressWarnings("unchecked")
 	public List<Invoice> findByFilter(Map<String, Object> filters) {
 		try {
@@ -7676,7 +7687,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	public List<Long> listInvoicesWithoutXml(List<InvoiceStatusEnum> statusList) {
 		return getEntityManager().createNamedQuery("Invoice.xmlWithStatusForUBL", Long.class).setParameter("statusList", statusList).getResultList();
 	}
-	
+
 	/**
 	 * Produce invoice's XML file and update invoice record in DB.
 	 *
@@ -7688,7 +7699,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	public Invoice produceInvoiceUBLFormat(Invoice invoice) throws BusinessException, JAXBException {
 		InvoiceUblHelper invoiceUblHelper = InvoiceUblHelper.getInstance();
 		Path pathCreatedFile = null;
-		
+
 		ScriptInstance customUblScript = invoice.getInvoiceType().getCustomUblScript();
         if (customUblScript != null) {
             ScriptInterface script = scriptInstanceService.getScriptInstance(customUblScript.getCode());
@@ -7704,15 +7715,15 @@ public class InvoiceService extends PersistenceService<Invoice> {
         } else {
         	pathCreatedFile = invoiceUblHelper.createInvoiceUBL(invoice);
         }
-        
+
 		invoice.setXmlDate(new Date());
 		invoice.setUblReference(true);
 		invoice = updateNoCheck(invoice);
 		entityUpdatedEventProducer.fire(invoice);
-		
+
 		if (pathCreatedFile != null)
 			pathCreatedFile.toFile().setReadOnly();
-		
+
 		return invoice;
 	}
 
@@ -7755,7 +7766,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             });
         }
     }
-	
+
 	public List<Invoice> findByInvoicesNumber(String invoiceNumber) {
 			return (List<Invoice>) getEntityManager().createQuery("SELECT inv FROM Invoice inv WHERE inv.invoiceNumber = :invoiceNumber")
 					.setParameter("invoiceNumber", invoiceNumber).setMaxResults(1)

@@ -45,17 +45,16 @@ import org.meveo.api.dto.UsersDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
 import org.meveo.api.exception.ActionForbiddenException;
-import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.SecuredEntity;
-import org.meveo.model.admin.Seller;
 import org.meveo.model.admin.User;
 import org.meveo.model.security.Role;
 import org.meveo.model.shared.Name;
+import org.meveo.security.client.KeycloakAdminClientService;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.admin.impl.RoleService;
 import org.meveo.service.admin.impl.UserService;
@@ -86,6 +85,9 @@ public class UserApi extends BaseApi {
 
     @Inject
     private SecuredBusinessEntityService securedBusinessEntityService;
+
+    @Inject
+    KeycloakAdminClientService keycloakAdminClientService;
 
     public void create(UserDto postData) throws MeveoApiException, BusinessException {
         create(postData, false);
@@ -134,14 +136,23 @@ public class UserApi extends BaseApi {
             user.setEmail((postData.getEmail()));
             user.setName(new Name(null, postData.getFirstName(), postData.getLastName()));
             if(postData.getRoles()!=null && !postData.getRoles().isEmpty()) {
-            	 user.setRoles(new HashSet<>(postData.getRoles()));
+                Set<Role> roles = postData.getRoles().stream()
+                        .map(roleCode -> {
+                            Role role = roleService.findByName(roleCode);
+                            if (role == null && !userService.canSynchroWithKC()) //throw an exception only when the master is OC
+                                throw new EntityDoesNotExistsException(Role.class, roleCode);
+                            return role;
+                        }).collect(Collectors.toSet());
+                roles.removeIf(Objects::isNull);
+                user.getUserRoles().addAll(roles);
             }
             user.setUserLevel(postData.getUserLevel());
             if (postData.getCustomFields() != null) {
                 super.populateCustomFields(postData.getCustomFields(), user, true, true);
             }
             userService.create(user);
-            addUserRoles(user.getId(), postData.getRoles());
+
+            keycloakAdminClientService.addOrUpdateRoleToUserInKeycloak(postData.getUsername(), postData.getRoles(), postData.getClientRoles(), postData.getReplaceRoles() != null ? postData.getReplaceRoles() : Boolean.FALSE, false);
 
             // Save secured entities
             securedBusinessEntityService.syncSecuredEntitiesForUser(securedEntities, postData.getUsername());
@@ -218,6 +229,7 @@ public class UserApi extends BaseApi {
         userService.updateUserWithAttributes(user, postData.getAttributes());
         
         addUserRoles(user.getId(), postData.getRoles());
+        keycloakAdminClientService.addOrUpdateRoleToUserInKeycloak(postData.getUsername(), postData.getRoles(), postData.getClientRoles(), postData.getReplaceRoles() != null ? postData.getReplaceRoles() : Boolean.FALSE, true);
 
         // Save secured entities
         if (securedEntities != null) {
@@ -276,6 +288,7 @@ public class UserApi extends BaseApi {
 
         UserDto userDto = new UserDto(user);
         getKeycloakAttributesByUsername(userDto);
+        keycloakAdminClientService.fillClientRoles(userDto);
 
         List<SecuredEntity> securedEntities = securedBusinessEntityService.getSecuredEntitiesForUser(username);
         if (securedEntities != null) {
@@ -380,6 +393,7 @@ public class UserApi extends BaseApi {
                     }
                 }
                 userDto.setCustomFields(entityToDtoConverter.getCustomFieldsDTO(user));
+                keycloakAdminClientService.fillClientRoles(userDto);
                 result.getUsers().add(userDto);
             }
         }
@@ -454,22 +468,23 @@ public class UserApi extends BaseApi {
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void addUserRoles(Long userId, List<String> roleCodes){
-    	if(roleCodes!=null && !roleCodes.isEmpty()) {
-    		 User user = userService.findById(userId);
-    	        if(user == null)
-    	            throw new EntityDoesNotExistsException(User.class, userId);
-    	        Set<Role> roles = roleCodes.stream()
-    	                .map(roleCode -> {
-    	                    Role role = roleService.findByName(roleCode);
-    	                    if (role == null && !userService.canSynchroWithKC()) //throw an exception only when the master is OC
-    	                        throw new EntityDoesNotExistsException(Role.class, roleCode);
-    	                    return role;
-    	                }).collect(Collectors.toSet());
-    	        roles.removeIf(Objects::isNull);
-    	        user.getUserRoles().addAll(roles);
-    	        userService.update(user);
-    	}
-       
+        if(!userService.canSynchroWithKC()) {
+            if(roleCodes!=null && !roleCodes.isEmpty()) {
+                User user = userService.findById(userId);
+                if(user == null)
+                    throw new EntityDoesNotExistsException(User.class, userId);
+                Set<Role> roles = roleCodes.stream()
+                        .map(roleCode -> {
+                            Role role = roleService.findByName(roleCode);
+                            if (role == null && !userService.canSynchroWithKC()) //throw an exception only when the master is OC
+                                throw new EntityDoesNotExistsException(Role.class, roleCode);
+                            return role;
+                        }).collect(Collectors.toSet());
+                roles.removeIf(Objects::isNull);
+                user.getUserRoles().addAll(roles);
+                userService.update(user);
+            }
+        }
     }
 	
 	@JpaAmpNewTx

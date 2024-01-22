@@ -23039,4 +23039,266 @@ public class ImportJobNotification extends Script {
             <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript')"/>
         </insert>
     </changeSet>
+
+	<changeSet id="#INTRD-20785_20240117" author="zelmeliani">
+        <update tableName="meveo_script_instance">
+            <column name="description" value="The invoice's subscription is suspended when the TriggerCollectionPlanLevelsJob launch a dunning level with a script type action"/>
+            <column name="description_i18n">
+				<![CDATA[{"ENG": "<p>The invoice's subscription is suspended when the TriggerCollectionPlanLevelsJob launch a dunning level with a script type action.</p>", "FRA": "<p>La souscription liée à la facture est suspendu lorsque le TriggerCollectionPlanLevelsJob lance un niveau avec une action de type script.</p>"}]]>
+			</column>
+            <where>code = 'org.meveo.service.script.dunning.DunningSuspendSubscriptionScript'</where>
+        </update>
+    </changeSet>
+    
+   <changeSet id="#INTRD-20753_20240118" author="aeljaouhari">
+   		<sql>update adm_country set description_i18n = '{"ENG": "Andorra", "FRA": "Andorre"}', description =  'Andorra' where country_code = 'AD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "United Arab Emirates", "FRA": "Emirats arabes unis"}', description =  'United Arab Emirates' where country_code = 'AE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Afghanistan", "FRA": "Afghanistan"}', description =  'Afghanistan' where country_code = 'AF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Antigua and Barbuda", "FRA": "Antigua-et-Barbuda"}', description =  'Antigua and Barbuda' where country_code = 'AG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Anguilla", "FRA": "Anguilla"}', description =  'Anguilla' where country_code = 'AI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Albania", "FRA": "Albanie"}', description =  'Albania' where country_code = 'AL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Armenia", "FRA": "Arménie"}', description =  'Armenia' where country_code = 'AM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Angola", "FRA": "Angola"}', description =  'Angola' where country_code = 'AO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Antarctica", "FRA": "Antarctique"}', description =  'Antarctica' where country_code = 'AQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Argentina", "FRA": "Argentine"}', description =  'Argentina' where country_code = 'AR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "American Samoa", "FRA": "Samoa américaines"}', description =  'American Samoa' where country_code = 'AS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Austria", "FRA": "Autriche"}', description =  'Austria' where country_code = 'AT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Australia", "FRA": "Australie"}', description =  'Australia' where country_code = 'AU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Aruba", "FRA": "Aruba"}', description =  'Aruba' where country_code = 'AW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Aland Islands", "FRA": "Iles Aland"}', description =  'Aland Islands' where country_code = 'AX'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Azerbaijan", "FRA": "Azerbaïdjan"}', description =  'Azerbaijan' where country_code = 'AZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bosnia and Herzegovina", "FRA": "Bosnie-Herzégovine"}', description =  'Bosnia and Herzegovina' where country_code = 'BA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Barbados", "FRA": "Barbade"}', description =  'Barbados' where country_code = 'BB'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bangladesh", "FRA": "Bangladesh"}', description =  'Bangladesh' where country_code = 'BD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Belgium", "FRA": "Belgique"}', description =  'Belgium' where country_code = 'BE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Burkina Faso", "FRA": "Burkina Faso"}', description =  'Burkina Faso' where country_code = 'BF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bulgaria", "FRA": "Bulgarie"}', description =  'Bulgaria' where country_code = 'BG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bahrain", "FRA": "Bahreïn"}', description =  'Bahrain' where country_code = 'BH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Burundi", "FRA": "Burundi"}', description =  'Burundi' where country_code = 'BI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Benin", "FRA": "Bénin"}', description =  'Benin' where country_code = 'BJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Barthélemy", "FRA": "Saint-Barthélemy"}', description =  'St. Barthélemy' where country_code = 'BL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bermuda", "FRA": "Bermudes"}', description =  'Bermuda' where country_code = 'BM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Brunei", "FRA": "Brunéi Darussalam"}', description =  'Brunei' where country_code = 'BN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bolivia", "FRA": "Bolivie"}', description =  'Bolivia' where country_code = 'BO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Caribbean Netherlands", "FRA": "Pays-Bas caribéens"}', description =  'Caribbean Netherlands' where country_code = 'BQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Brazil", "FRA": "Brésil"}', description =  'Brazil' where country_code = 'BR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bahamas", "FRA": "Bahamas"}', description =  'Bahamas' where country_code = 'BS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bhutan", "FRA": "Bhoutan"}', description =  'Bhutan' where country_code = 'BT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bouvet Island", "FRA": "Ile Bouvet"}', description =  'Bouvet Island' where country_code = 'BV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Botswana", "FRA": "Botswana"}', description =  'Botswana' where country_code = 'BW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Belarus", "FRA": "Biélorussie"}', description =  'Belarus' where country_code = 'BY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Belize", "FRA": "Belize"}', description =  'Belize' where country_code = 'BZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Canada", "FRA": "Canada"}', description =  'Canada' where country_code = 'CA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cocos (Keeling) Islands", "FRA": "Iles Cocos"}', description =  'Cocos (Keeling) Islands' where country_code = 'CC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Congo - Kinshasa", "FRA": "Congo-Kinshasa"}', description =  'Congo - Kinshasa' where country_code = 'CD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Central African Republic", "FRA": "République centrafricaine"}', description =  'Central African Republic' where country_code = 'CF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Congo - Brazzaville", "FRA": "Congo-Brazzaville"}', description =  'Congo - Brazzaville' where country_code = 'CG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Switzerland", "FRA": "Suisse"}', description =  'Switzerland' where country_code = 'CH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Côte d’Ivoire", "FRA": "Côte d’Ivoire"}', description =  'Côte d’Ivoire' where country_code = 'CI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cook Islands", "FRA": "Iles Cook"}', description =  'Cook Islands' where country_code = 'CK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Chile", "FRA": "Chili"}', description =  'Chile' where country_code = 'CL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cameroon", "FRA": "Cameroun"}', description =  'Cameroon' where country_code = 'CM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "China", "FRA": "Chine"}', description =  'China' where country_code = 'CN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Colombia", "FRA": "Colombie"}', description =  'Colombia' where country_code = 'CO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Costa Rica", "FRA": "Costa Rica"}', description =  'Costa Rica' where country_code = 'CR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cuba", "FRA": "Cuba"}', description =  'Cuba' where country_code = 'CU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cape Verde", "FRA": "Cap-Vert"}', description =  'Cape Verde' where country_code = 'CV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Curaçao", "FRA": "Curaçao"}', description =  'Curaçao' where country_code = 'CW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Christmas Island", "FRA": "Ile Christmas"}', description =  'Christmas Island' where country_code = 'CX'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cyprus", "FRA": "Chypre"}', description =  'Cyprus' where country_code = 'CY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Czechia", "FRA": "Tchéquie"}', description =  'Czechia' where country_code = 'CZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Germany", "FRA": "Allemagne"}', description =  'Germany' where country_code = 'DE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Djibouti", "FRA": "Djibouti"}', description =  'Djibouti' where country_code = 'DJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Denmark", "FRA": "Danemark"}', description =  'Denmark' where country_code = 'DK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Dominica", "FRA": "Dominique"}', description =  'Dominica' where country_code = 'DM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Dominican Republic", "FRA": "République dominicaine"}', description =  'Dominican Republic' where country_code = 'DO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Algeria", "FRA": "Algérie"}', description =  'Algeria' where country_code = 'DZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ecuador", "FRA": "Equateur"}', description =  'Ecuador' where country_code = 'EC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Estonia", "FRA": "Estonie"}', description =  'Estonia' where country_code = 'EE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Egypt", "FRA": "Egypte"}', description =  'Egypt' where country_code = 'EG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Western Sahara", "FRA": "Sahara occidental"}', description =  'Western Sahara' where country_code = 'EH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Eritrea", "FRA": "Erythrée"}', description =  'Eritrea' where country_code = 'ER'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Spain", "FRA": "Espagne"}', description =  'Spain' where country_code = 'ES'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ethiopia", "FRA": "Ethiopie"}', description =  'Ethiopia' where country_code = 'ET'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Finland", "FRA": "Finlande"}', description =  'Finland' where country_code = 'FI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Fiji", "FRA": "Fidji"}', description =  'Fiji' where country_code = 'FJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Falkland Islands", "FRA": "Iles Malouines"}', description =  'Falkland Islands' where country_code = 'FK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Micronesia", "FRA": "Etats fédérés de Micronésie"}', description =  'Micronesia' where country_code = 'FM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Faroe Islands", "FRA": "Iles Féroé"}', description =  'Faroe Islands' where country_code = 'FO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "France", "FRA": "France"}', description =  'France' where country_code = 'FR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Gabon", "FRA": "Gabon"}', description =  'Gabon' where country_code = 'GA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "United Kingdom", "FRA": "Royaume-Uni"}', description =  'United Kingdom' where country_code = 'GB'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Grenada", "FRA": "Grenade"}', description =  'Grenada' where country_code = 'GD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Georgia", "FRA": "Géorgie"}', description =  'Georgia' where country_code = 'GE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "French Guiana", "FRA": "Guyane française"}', description =  'French Guiana' where country_code = 'GF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guernsey", "FRA": "Guernesey"}', description =  'Guernsey' where country_code = 'GG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ghana", "FRA": "Ghana"}', description =  'Ghana' where country_code = 'GH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Gibraltar", "FRA": "Gibraltar"}', description =  'Gibraltar' where country_code = 'GI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Greenland", "FRA": "Groenland"}', description =  'Greenland' where country_code = 'GL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Gambia", "FRA": "Gambie"}', description =  'Gambia' where country_code = 'GM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guinea", "FRA": "Guinée"}', description =  'Guinea' where country_code = 'GN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guadeloupe", "FRA": "Guadeloupe"}', description =  'Guadeloupe' where country_code = 'GP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Equatorial Guinea", "FRA": "Guinée équatoriale"}', description =  'Equatorial Guinea' where country_code = 'GQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Greece", "FRA": "Grèce"}', description =  'Greece' where country_code = 'GR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "South Georgia and South Sandwich Islands", "FRA": "Géorgie du Sud et îles Sandwich du Sud"}', description =  'South Georgia and South Sandwich Islands' where country_code = 'GS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guatemala", "FRA": "Guatemala"}', description =  'Guatemala' where country_code = 'GT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guam", "FRA": "Guam"}', description =  'Guam' where country_code = 'GU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guinea-Bissau", "FRA": "Guinée-Bissau"}', description =  'Guinea-Bissau' where country_code = 'GW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guyana", "FRA": "Guyana"}', description =  'Guyana' where country_code = 'GY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Hong Kong SAR China", "FRA": "R.A.S. chinoise de Hong Kong"}', description =  'Hong Kong SAR China' where country_code = 'HK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Heard and McDonald Islands", "FRA": "Iles Heard et McDonald"}', description =  'Heard and McDonald Islands' where country_code = 'HM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Honduras", "FRA": "Honduras"}', description =  'Honduras' where country_code = 'HN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Croatia", "FRA": "Croatie"}', description =  'Croatia' where country_code = 'HR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Haiti", "FRA": "Haïti"}', description =  'Haiti' where country_code = 'HT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Hungary", "FRA": "Hongrie"}', description =  'Hungary' where country_code = 'HU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Indonesia", "FRA": "Indonésie"}', description =  'Indonesia' where country_code = 'ID'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ireland", "FRA": "Irlande"}', description =  'Ireland' where country_code = 'IE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Israel", "FRA": "Israël"}', description =  'Israel' where country_code = 'IL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Isle of Man", "FRA": "Ile de Man"}', description =  'Isle of Man' where country_code = 'IM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "India", "FRA": "Inde"}', description =  'India' where country_code = 'IN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "British Indian Ocean Territory", "FRA": "Territoire britannique de l’océan Indien"}', description =  'British Indian Ocean Territory' where country_code = 'IO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Iraq", "FRA": "Irak"}', description =  'Iraq' where country_code = 'IQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Iran", "FRA": "Iran"}', description =  'Iran' where country_code = 'IR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Iceland", "FRA": "Islande"}', description =  'Iceland' where country_code = 'IS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Italy", "FRA": "Italie"}', description =  'Italy' where country_code = 'IT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Jersey", "FRA": "Jersey"}', description =  'Jersey' where country_code = 'JE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Jamaica", "FRA": "Jamaïque"}', description =  'Jamaica' where country_code = 'JM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Jordan", "FRA": "Jordanie"}', description =  'Jordan' where country_code = 'JO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Japan", "FRA": "Japon"}', description =  'Japan' where country_code = 'JP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kenya", "FRA": "Kenya"}', description =  'Kenya' where country_code = 'KE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kyrgyzstan", "FRA": "Kirghizistan"}', description =  'Kyrgyzstan' where country_code = 'KG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cambodia", "FRA": "Cambodge"}', description =  'Cambodia' where country_code = 'KH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kiribati", "FRA": "Kiribati"}', description =  'Kiribati' where country_code = 'KI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Comoros", "FRA": "Comores"}', description =  'Comoros' where country_code = 'KM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Kitts and Nevis", "FRA": "Saint-Christophe-et-Niévès"}', description =  'St. Kitts and Nevis' where country_code = 'KN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "North Korea", "FRA": "Corée du Nord"}', description =  'North Korea' where country_code = 'KP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "South Korea", "FRA": "Corée du Sud"}', description =  'South Korea' where country_code = 'KR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kuwait", "FRA": "Koweït"}', description =  'Kuwait' where country_code = 'KW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cayman Islands", "FRA": "Iles Caïmans"}', description =  'Cayman Islands' where country_code = 'KY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kazakhstan", "FRA": "Kazakhstan"}', description =  'Kazakhstan' where country_code = 'KZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Laos", "FRA": "Laos"}', description =  'Laos' where country_code = 'LA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Lebanon", "FRA": "Liban"}', description =  'Lebanon' where country_code = 'LB'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Lucia", "FRA": "Sainte-Lucie"}', description =  'St. Lucia' where country_code = 'LC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Liechtenstein", "FRA": "Liechtenstein"}', description =  'Liechtenstein' where country_code = 'LI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sri Lanka", "FRA": "Sri Lanka"}', description =  'Sri Lanka' where country_code = 'LK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Liberia", "FRA": "Libéria"}', description =  'Liberia' where country_code = 'LR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Lesotho", "FRA": "Lesotho"}', description =  'Lesotho' where country_code = 'LS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Lithuania", "FRA": "Lituanie"}', description =  'Lithuania' where country_code = 'LT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Luxembourg", "FRA": "Luxembourg"}', description =  'Luxembourg' where country_code = 'LU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Latvia", "FRA": "Lettonie"}', description =  'Latvia' where country_code = 'LV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Libya", "FRA": "Libye"}', description =  'Libya' where country_code = 'LY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Morocco", "FRA": "Maroc"}', description =  'Morocco' where country_code = 'MA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Monaco", "FRA": "Monaco"}', description =  'Monaco' where country_code = 'MC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Moldova", "FRA": "Moldavie"}', description =  'Moldova' where country_code = 'MD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Montenegro", "FRA": "Monténégro"}', description =  'Montenegro' where country_code = 'ME'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Martin", "FRA": "Saint-Martin"}', description =  'St. Martin' where country_code = 'MF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Madagascar", "FRA": "Madagascar"}', description =  'Madagascar' where country_code = 'MG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Marshall Islands", "FRA": "Iles Marshall"}', description =  'Marshall Islands' where country_code = 'MH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Macedonia", "FRA": "Macédoine"}', description =  'Macedonia' where country_code = 'MK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mali", "FRA": "Mali"}', description =  'Mali' where country_code = 'ML'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Myanmar (Burma)", "FRA": "Myanmar (Birmanie)"}', description =  'Myanmar (Burma)' where country_code = 'MM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mongolia", "FRA": "Mongolie"}', description =  'Mongolia' where country_code = 'MN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Macau SAR China", "FRA": "R.A.S. chinoise de Macao"}', description =  'Macau SAR China' where country_code = 'MO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Northern Mariana Islands", "FRA": "Iles Mariannes du Nord"}', description =  'Northern Mariana Islands' where country_code = 'MP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Martinique", "FRA": "Martinique"}', description =  'Martinique' where country_code = 'MQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mauritania", "FRA": "Mauritanie"}', description =  'Mauritania' where country_code = 'MR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Montserrat", "FRA": "Montserrat"}', description =  'Montserrat' where country_code = 'MS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Malta", "FRA": "Malte"}', description =  'Malta' where country_code = 'MT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mauritius", "FRA": "Maurice"}', description =  'Mauritius' where country_code = 'MU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Maldives", "FRA": "Maldives"}', description =  'Maldives' where country_code = 'MV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Malawi", "FRA": "Malawi"}', description =  'Malawi' where country_code = 'MW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mexico", "FRA": "Mexique"}', description =  'Mexico' where country_code = 'MX'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Malaysia", "FRA": "Malaisie"}', description =  'Malaysia' where country_code = 'MY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mozambique", "FRA": "Mozambique"}', description =  'Mozambique' where country_code = 'MZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Namibia", "FRA": "Namibie"}', description =  'Namibia' where country_code = 'NA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "New Caledonia", "FRA": "Nouvelle-Calédonie"}', description =  'New Caledonia' where country_code = 'NC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Niger", "FRA": "Niger"}', description =  'Niger' where country_code = 'NE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Norfolk Island", "FRA": "Ile Norfolk"}', description =  'Norfolk Island' where country_code = 'NF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Nigeria", "FRA": "Nigéria"}', description =  'Nigeria' where country_code = 'NG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Nicaragua", "FRA": "Nicaragua"}', description =  'Nicaragua' where country_code = 'NI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Netherlands", "FRA": "Pays-Bas"}', description =  'Netherlands' where country_code = 'NL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Norway", "FRA": "Norvège"}', description =  'Norway' where country_code = 'NO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Nepal", "FRA": "Népal"}', description =  'Nepal' where country_code = 'NP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Nauru", "FRA": "Nauru"}', description =  'Nauru' where country_code = 'NR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Niue", "FRA": "Niue"}', description =  'Niue' where country_code = 'NU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "New Zealand", "FRA": "Nouvelle-Zélande"}', description =  'New Zealand' where country_code = 'NZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Oman", "FRA": "Oman"}', description =  'Oman' where country_code = 'OM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Panama", "FRA": "Panama"}', description =  'Panama' where country_code = 'PA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Peru", "FRA": "Pérou"}', description =  'Peru' where country_code = 'PE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "French Polynesia", "FRA": "Polynésie française"}', description =  'French Polynesia' where country_code = 'PF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Papua New Guinea", "FRA": "Papouasie-Nouvelle-Guinée"}', description =  'Papua New Guinea' where country_code = 'PG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Philippines", "FRA": "Philippines"}', description =  'Philippines' where country_code = 'PH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Pakistan", "FRA": "Pakistan"}', description =  'Pakistan' where country_code = 'PK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Poland", "FRA": "Pologne"}', description =  'Poland' where country_code = 'PL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Pierre and Miquelon", "FRA": "Saint-Pierre-et-Miquelon"}', description =  'St. Pierre and Miquelon' where country_code = 'PM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Pitcairn Islands", "FRA": "Iles Pitcairn"}', description =  'Pitcairn Islands' where country_code = 'PN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Puerto Rico", "FRA": "Porto Rico"}', description =  'Puerto Rico' where country_code = 'PR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Palestinian Territories", "FRA": "Territoires palestiniens"}', description =  'Palestinian Territories' where country_code = 'PS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Portugal", "FRA": "Portugal"}', description =  'Portugal' where country_code = 'PT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Palau", "FRA": "Palaos"}', description =  'Palau' where country_code = 'PW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Paraguay", "FRA": "Paraguay"}', description =  'Paraguay' where country_code = 'PY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Qatar", "FRA": "Qatar"}', description =  'Qatar' where country_code = 'QA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Réunion", "FRA": "La Réunion"}', description =  'Réunion' where country_code = 'RE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Romania", "FRA": "Roumanie"}', description =  'Romania' where country_code = 'RO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Serbia", "FRA": "Serbie"}', description =  'Serbia' where country_code = 'RS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Russia", "FRA": "Russie"}', description =  'Russia' where country_code = 'RU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Rwanda", "FRA": "Rwanda"}', description =  'Rwanda' where country_code = 'RW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Saudi Arabia", "FRA": "Arabie saoudite"}', description =  'Saudi Arabia' where country_code = 'SA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Solomon Islands", "FRA": "Iles Salomon"}', description =  'Solomon Islands' where country_code = 'SB'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Seychelles", "FRA": "Seychelles"}', description =  'Seychelles' where country_code = 'SC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sudan", "FRA": "Soudan"}', description =  'Sudan' where country_code = 'SD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sweden", "FRA": "Suède"}', description =  'Sweden' where country_code = 'SE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Singapore", "FRA": "Singapour"}', description =  'Singapore' where country_code = 'SG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Helena", "FRA": "Sainte-Hélène"}', description =  'St. Helena' where country_code = 'SH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Slovenia", "FRA": "Slovénie"}', description =  'Slovenia' where country_code = 'SI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Svalbard and Jan Mayen", "FRA": "Svalbard et Jan Mayen"}', description =  'Svalbard and Jan Mayen' where country_code = 'SJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Slovakia", "FRA": "Slovaquie"}', description =  'Slovakia' where country_code = 'SK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sierra Leone", "FRA": "Sierra Leone"}', description =  'Sierra Leone' where country_code = 'SL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "San Marino", "FRA": "Saint-Marin"}', description =  'San Marino' where country_code = 'SM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Senegal", "FRA": "Sénégal"}', description =  'Senegal' where country_code = 'SN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Somalia", "FRA": "Somalie"}', description =  'Somalia' where country_code = 'SO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Suriname", "FRA": "Suriname"}', description =  'Suriname' where country_code = 'SR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "South Sudan", "FRA": "Soudan du Sud"}', description =  'South Sudan' where country_code = 'SS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sao Tomé and Príncipe", "FRA": "Sao Tomé-et-Principe"}', description =  'Sao Tomé and Príncipe' where country_code = 'ST'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "El Salvador", "FRA": "Salvador"}', description =  'El Salvador' where country_code = 'SV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sint Maarten", "FRA": "Saint-Martin (partie néerlandaise)"}', description =  'Sint Maarten' where country_code = 'SX'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Syria", "FRA": "Syrie"}', description =  'Syria' where country_code = 'SY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Swaziland", "FRA": "Swaziland"}', description =  'Swaziland' where country_code = 'SZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Turks and Caicos Islands", "FRA": "Iles Turques-et-Caïques"}', description =  'Turks and Caicos Islands' where country_code = 'TC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Chad", "FRA": "Tchad"}', description =  'Chad' where country_code = 'TD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "French Southern Territories", "FRA": "Terres australes françaises"}', description =  'French Southern Territories' where country_code = 'TF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Togo", "FRA": "Togo"}', description =  'Togo' where country_code = 'TG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Thailand", "FRA": "Thaïlande"}', description =  'Thailand' where country_code = 'TH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tajikistan", "FRA": "Tadjikistan"}', description =  'Tajikistan' where country_code = 'TJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tokelau", "FRA": "Tokélaou"}', description =  'Tokelau' where country_code = 'TK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Timor-Leste", "FRA": "Timor oriental"}', description =  'Timor-Leste' where country_code = 'TL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Turkmenistan", "FRA": "Turkménistan"}', description =  'Turkmenistan' where country_code = 'TM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tunisia", "FRA": "Tunisie"}', description =  'Tunisia' where country_code = 'TN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tonga", "FRA": "Tonga"}', description =  'Tonga' where country_code = 'TO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Turkey", "FRA": "Turquie"}', description =  'Turkey' where country_code = 'TR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Trinidad and Tobago", "FRA": "Trinité-et-Tobago"}', description =  'Trinidad and Tobago' where country_code = 'TT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tuvalu", "FRA": "Tuvalu"}', description =  'Tuvalu' where country_code = 'TV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Taiwan", "FRA": "Taïwan"}', description =  'Taiwan' where country_code = 'TW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tanzania", "FRA": "Tanzanie"}', description =  'Tanzania' where country_code = 'TZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ukraine", "FRA": "Ukraine"}', description =  'Ukraine' where country_code = 'UA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Uganda", "FRA": "Ouganda"}', description =  'Uganda' where country_code = 'UG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "U.S. Outlying Islands", "FRA": "Iles mineures éloignées des Etats-Unis"}', description =  'U.S. Outlying Islands' where country_code = 'UM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "United States", "FRA": "Etats-Unis"}', description =  'United States' where country_code = 'US'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Uruguay", "FRA": "Uruguay"}', description =  'Uruguay' where country_code = 'UY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Uzbekistan", "FRA": "Ouzbékistan"}', description =  'Uzbekistan' where country_code = 'UZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Vatican City", "FRA": "Etat de la Cité du Vatican"}', description =  'Vatican City' where country_code = 'VA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Vincent and Grenadines", "FRA": "Saint-Vincent-et-les-Grenadines"}', description =  'St. Vincent and Grenadines' where country_code = 'VC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Venezuela", "FRA": "Venezuela"}', description =  'Venezuela' where country_code = 'VE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "British Virgin Islands", "FRA": "Iles Vierges britanniques"}', description =  'British Virgin Islands' where country_code = 'VG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "U.S. Virgin Islands", "FRA": "Iles Vierges des Etats-Unis"}', description =  'U.S. Virgin Islands' where country_code = 'VI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Vietnam", "FRA": "Vietnam"}', description =  'Vietnam' where country_code = 'VN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Vanuatu", "FRA": "Vanuatu"}', description =  'Vanuatu' where country_code = 'VU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Wallis and Futuna", "FRA": "Wallis-et-Futuna"}', description =  'Wallis and Futuna' where country_code = 'WF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Samoa", "FRA": "Samoa"}', description =  'Samoa' where country_code = 'WS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Yemen", "FRA": "Yémen"}', description =  'Yemen' where country_code = 'YE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mayotte", "FRA": "Mayotte"}', description =  'Mayotte' where country_code = 'YT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "South Africa", "FRA": "Afrique du Sud"}', description =  'South Africa' where country_code = 'ZA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Zambia", "FRA": "Zambie"}', description =  'Zambia' where country_code = 'ZM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Zimbabwe", "FRA": "Zimbabwe"}', description =  'Zimbabwe' where country_code = 'ZW'</sql>
+    </changeSet>
 </databaseChangeLog>

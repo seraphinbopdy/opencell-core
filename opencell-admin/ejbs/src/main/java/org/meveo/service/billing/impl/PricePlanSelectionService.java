@@ -387,7 +387,7 @@ public class PricePlanSelectionService implements Serializable {
             return null;
         }
         Set<AttributeValue> attributeValues = chargeInstance.getServiceInstance().getAttributeInstances().stream().map(attributeInstance -> attributeInstanceService.getAttributeValue(attributeInstance, walletOperation))
-            .collect(Collectors.toSet());
+            .filter(value -> value != null).collect(Collectors.toSet());
 
         addBusinessAttributeValues(pricePlanMatrixVersion.getColumns().stream().filter(column -> AttributeCategoryEnum.BUSINESS.equals(column.getAttribute().getAttributeCategory())).map(column -> column.getAttribute())
             .collect(Collectors.toList()), attributeValues, walletOperation);

@@ -576,6 +576,9 @@ public class AccountHierarchyApi extends BaseApi {
 
         String creditCategory = paramBean.getProperty("api.default.customerAccount.creditCategory", "NEWCUSTOMER");
 
+        if (customerDto.getAddress() == null) {
+            customerDto.setAddress(new AddressDto());
+        }
         AddressDto address = customerDto.getAddress();
         address.setAddress1(postData.getAddress1());
         address.setAddress2(postData.getAddress2());
@@ -584,6 +587,9 @@ public class AccountHierarchyApi extends BaseApi {
         address.setCity(postData.getCity());
         address.setCountry(postData.getCountryCode());
 
+        if (customerDto.getContactInformation() == null) {
+            customerDto.setContactInformation(new ContactInformationDto());
+        }
         ContactInformationDto contactInformation = customerDto.getContactInformation();
         contactInformation.setEmail(postData.getEmail());
         contactInformation.setPhone(postData.getPhoneNumber());

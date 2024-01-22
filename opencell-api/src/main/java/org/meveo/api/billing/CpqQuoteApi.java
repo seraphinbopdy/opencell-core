@@ -2057,6 +2057,7 @@ public class CpqQuoteApi extends BaseApi {
             	Set<AttributeValue> attributeValues = serviceInstance.getAttributeInstances()
                         .stream()
                         .map(attributeInstance -> attributeInstanceService.getAttributeValue(attributeInstance,serviceInstance, subscription))
+                        .filter(value -> value != null)
                         .collect(Collectors.toSet());
             	
             	

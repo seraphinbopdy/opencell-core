@@ -63,7 +63,11 @@ import org.meveo.model.NotifiableEntity;
         @NamedQuery(name = "JobExecutionResult.listUnfinishedJobs", query = "select jr from JobExecutionResultImpl jr where jr.id in (select distinct (case when je.parentJobExecutionResult is null then je.id else je.parentJobExecutionResult end) from JobExecutionResultImpl je where je.status = 'RUNNING' or je.status = 'SHUTDOWN')") })
 
 public class JobExecutionResultImpl extends BaseEntity {
+
     private static final long serialVersionUID = 430457580612075457L;
+
+    @Transient
+    private int invoiceCount = 0;
 
     /**
      * Job instance
@@ -755,6 +759,17 @@ public class JobExecutionResultImpl extends BaseEntity {
         }
 
         return cumulativeStatus;
+    }
+
+    public int getInvoiceCount() {
+        return invoiceCount;
+    }
+
+    public void setInvoiceCount(int invoiceCount) {
+        this.invoiceCount = invoiceCount;
+    }
+    public void incrementInvoiceNumber(int count) {
+        this.invoiceCount += count;
     }
 
     @Override

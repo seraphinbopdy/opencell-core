@@ -131,6 +131,8 @@ public abstract class AttributeValueService<T extends AttributeValue> extends Pe
 
                         return attributeValue;
 
+                    } else {
+                        return null;
                     }
                 }
             }

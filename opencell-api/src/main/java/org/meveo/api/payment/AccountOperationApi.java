@@ -156,7 +156,7 @@ public class AccountOperationApi extends BaseApi {
     
     @Inject
     private OCCTemplateService oCCTemplateService;
-
+	
     /**
      * Create account operation.
      *
@@ -906,20 +906,18 @@ public class AccountOperationApi extends BaseApi {
         }
 
         AccountOperation accountOperation = null;
-        TransferCustomerAccountDto transferCustomerAccountDto = new TransferCustomerAccountDto();
 
         for (Long aoId : transferOperationsDto.getAccountOperationsList()) {
             accountOperation = accountOperationService.findById(aoId);
             if(accountOperation == null) {
                 throw new EntityDoesNotExistsException(AccountOperation.class, aoId);
             }
-            transferCustomerAccountDto.setFromCustomerAccountCode(accountOperation.getCustomerAccount().getCode());
-            transferCustomerAccountDto.setToCustomerAccountCode(toCA.getCode());
-            transferCustomerAccountDto.setAmount(accountOperation.getAmount());
-
-            accountOperationService.transferAccountOperation(accountOperation, transferCustomerAccountDto);
-
+	        if( accountOperation.getMatchingStatus() != MatchingStatusEnum.O && accountOperation.getStatus() != EXPORTED ){
+				throw new BusinessApiException("only account operation that has status EXPORTED and matching status OPEN can be transferred");
+	        }
+	        accountOperation.setCustomerAccount(toCA);
             accountOperation.setReference(accountOperationService.getRefrence(accountOperation.getId(), accountOperation.getReference() , AccountOperationActionEnum.s.name()));
+	        accountOperationService.update(accountOperation);
 
         }
 

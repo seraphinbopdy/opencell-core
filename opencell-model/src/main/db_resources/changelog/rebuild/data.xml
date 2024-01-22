@@ -2679,7 +2679,7 @@
             <column name="language_code" value="HRV" />
         </insert>
     </changeSet>
-    <changeSet author="AndriusKarpavicius" id="rebuild-data-countries">
+        <changeSet author="AndriusKarpavicius" id="rebuild-data-countries">
         <insert tableName="adm_country">
             <column name="id" valueNumeric="1" />
             <column name="created" valueDate="2015-03-19 00:04:03.579" />
@@ -2688,7 +2688,7 @@
             <column name="description" value="Andorra" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Andorre","ENG":"Andorra"}' />
+            <column name="description_i18n" value='{"ENG": "Andorra", "FRA": "Andorre"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="2" />
@@ -2698,7 +2698,7 @@
             <column name="description" value="United Arab Emirates" />
             <column name="currency_id" valueNumeric="54" />
             <column name="language_id" valueNumeric="3" />
-            <column name="description_i18n" value='{"FRA":"Emirats Arabes Unis","ENG":"United Arab Emirates"}' />
+            <column name="description_i18n" value='{"ENG": "United Arab Emirates", "FRA": "Emirats arabes unis"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="3" />
@@ -2708,7 +2708,7 @@
             <column name="description" value="Afghanistan" />
             <column name="currency_id" valueNumeric="1" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Afghanistan","ENG":"Afghanistan"}' />
+            <column name="description_i18n" value='{"ENG": "Afghanistan", "FRA": "Afghanistan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="4" />
@@ -2718,7 +2718,7 @@
             <column name="description" value="Antigua and Barbuda" />
             <column name="currency_id" valueNumeric="7" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Antigua-et-Barbuda","ENG":"Antigua and Barbuda"}' />
+            <column name="description_i18n" value='{"ENG": "Antigua and Barbuda", "FRA": "Antigua-et-Barbuda"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="5" />
@@ -2728,7 +2728,7 @@
             <column name="description" value="Anguilla" />
             <column name="currency_id" valueNumeric="7" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Anguilla","ENG":"Anguilla"}' />
+            <column name="description_i18n" value='{"ENG": "Anguilla", "FRA": "Anguilla"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="6" />
@@ -2738,7 +2738,7 @@
             <column name="description" value="Albania" />
             <column name="currency_id" valueNumeric="3" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Albanie","ENG":"Albania"}' />
+            <column name="description_i18n" value='{"ENG": "Albania", "FRA": "Albanie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="7" />
@@ -2748,7 +2748,7 @@
             <column name="description" value="Armenia" />
             <column name="currency_id" valueNumeric="11" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Arménie","ENG":"Armenia"}' />
+            <column name="description_i18n" value='{"ENG": "Armenia", "FRA": "Arménie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="8" />
@@ -2758,7 +2758,7 @@
             <column name="description" value="Netherlands Antilles" />
             <column name="currency_id" valueNumeric="8" />
             <column name="language_id" valueNumeric="21" />
-            <column name="description_i18n" value='{"FRA":"Antilles néerlandaises","ENG":"Netherlands Antilles"}' />
+            <column name="description_i18n" value='{"ENG":"Netherlands Antilles", "FRA":"Antilles néerlandaises"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="9" />
@@ -2768,7 +2768,7 @@
             <column name="description" value="Angola" />
             <column name="currency_id" valueNumeric="6" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Angola","ENG":"Angola"}' />
+            <column name="description_i18n" value='{"ENG": "Angola", "FRA": "Angola"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="10" />
@@ -2778,7 +2778,7 @@
             <column name="description" value="Argentina" />
             <column name="currency_id" valueNumeric="10" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Argentine","ENG":"Argentina"}' />
+            <column name="description_i18n" value='{"ENG": "Argentina", "FRA": "Argentine"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="11" />
@@ -2788,7 +2788,7 @@
             <column name="description" value="American Samoa" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="1" />
-            <column name="description_i18n" value='{"FRA":"Samoa orientales","ENG":"American Samoa"}' />
+            <column name="description_i18n" value='{"ENG": "American Samoa", "FRA": "Samoa américaines"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="12" />
@@ -2798,7 +2798,7 @@
             <column name="description" value="Austria" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="1" />
-            <column name="description_i18n" value='{"FRA":"Autriche","ENG":"Austria"}' />
+            <column name="description_i18n" value='{"ENG": "Austria", "FRA": "Autriche"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="13" />
@@ -2808,7 +2808,7 @@
             <column name="description" value="Australia" />
             <column name="currency_id" valueNumeric="13" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Australie","ENG":"Australia"}' />
+            <column name="description_i18n" value='{"ENG": "Australia", "FRA": "Australie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="14" />
@@ -2818,7 +2818,7 @@
             <column name="description" value="Aruba" />
             <column name="currency_id" valueNumeric="12" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Aruba","ENG":"Aruba"}' />
+            <column name="description_i18n" value='{"ENG": "Aruba", "FRA": "Aruba"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="15" />
@@ -2828,7 +2828,7 @@
             <column name="description" value="Azerbaijan" />
             <column name="currency_id" valueNumeric="6" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Azerbaïdjan","ENG":"Azerbaijan"}' />
+            <column name="description_i18n" value='{"ENG": "Azerbaijan", "FRA": "Azerbaïdjan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="16" />
@@ -2838,7 +2838,7 @@
             <column name="description" value="Bosnia and Herzegovina" />
             <column name="currency_id" valueNumeric="25" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bosnie-Herzégovine","ENG":"Bosnia and Herzegovina"}' />
+            <column name="description_i18n" value='{"ENG": "Bosnia and Herzegovina", "FRA": "Bosnie-Herzégovine"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="17" />
@@ -2848,7 +2848,7 @@
             <column name="description" value="Barbados" />
             <column name="currency_id" valueNumeric="18" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Barbade","ENG":"Barbados"}' />
+            <column name="description_i18n" value='{"ENG": "Barbados", "FRA": "Barbade"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="18" />
@@ -2858,7 +2858,7 @@
             <column name="description" value="Bangladesh" />
             <column name="currency_id" valueNumeric="17" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bangladesh","ENG":"Bangladesh"}' />
+            <column name="description_i18n" value='{"ENG": "Bangladesh", "FRA": "Bangladesh"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="19" />
@@ -2868,7 +2868,7 @@
             <column name="description" value="Belgium" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Belgique","ENG":"Belgium"}' />
+            <column name="description_i18n" value='{"ENG": "Belgium", "FRA": "Belgique"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="20" />
@@ -2878,7 +2878,7 @@
             <column name="description" value="Burkina Faso" />
             <column name="currency_id" valueNumeric="20" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Burkina Faso","ENG":"Burkina Faso"}' />
+            <column name="description_i18n" value='{"ENG": "Burkina Faso", "FRA": "Burkina Faso"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="21" />
@@ -2888,7 +2888,7 @@
             <column name="description" value="Bulgaria" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bulgarie","ENG":"Bulgaria"}' />
+            <column name="description_i18n" value='{"ENG": "Bulgaria", "FRA": "Bulgarie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="22" />
@@ -2898,7 +2898,7 @@
             <column name="description" value="Bahrain" />
             <column name="currency_id" valueNumeric="16" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bahreïn","ENG":"Bahrain"}' />
+            <column name="description_i18n" value='{"ENG": "Bahrain", "FRA": "Bahreïn"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="23" />
@@ -2908,7 +2908,7 @@
             <column name="description" value="Burundi" />
             <column name="currency_id" valueNumeric="30" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Burundi","ENG":"Burundi"}' />
+            <column name="description_i18n" value='{"ENG": "Burundi", "FRA": "Burundi"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="24" />
@@ -2918,7 +2918,7 @@
             <column name="description" value="Benin" />
             <column name="currency_id" valueNumeric="20" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bénin","ENG":"Benin"}' />
+            <column name="description_i18n" value='{"ENG": "Benin", "FRA": "Bénin"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="25" />
@@ -2928,17 +2928,17 @@
             <column name="description" value="Bermuda" />
             <column name="currency_id" valueNumeric="21" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bermudes","ENG":"Bermuda"}' />
+            <column name="description_i18n" value='{"ENG": "Bermuda", "FRA": "Bermudes"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="26" />
             <column name="created" valueDate="2015-03-19 00:04:04.12" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="BN" />
-            <column name="description" value="Brunei Darussalam" />
+            <column name="description" value="Brunei" />
             <column name="currency_id" valueNumeric="28" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bruneï","ENG":"Brunei Darussalam"}' />
+            <column name="description_i18n" value='{"ENG": "Brunei", "FRA": "Brunéi Darussalam"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="27" />
@@ -2948,7 +2948,7 @@
             <column name="description" value="Bolivia" />
             <column name="currency_id" valueNumeric="24" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bolivie","ENG":"Bolivia"}' />
+            <column name="description_i18n" value='{"ENG": "Bolivia", "FRA": "Bolivie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="28" />
@@ -2958,17 +2958,17 @@
             <column name="description" value="Brazil" />
             <column name="currency_id" valueNumeric="27" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Brésil","ENG":"Brazil"}' />
+            <column name="description_i18n" value='{"ENG": "Brazil", "FRA": "Brésil"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="29" />
             <column name="created" valueDate="2015-03-19 00:04:04.185" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="BS" />
-            <column name="description" value="The Bahamas" />
+            <column name="description" value="Bahamas" />
             <column name="currency_id" valueNumeric="15" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bahamas","ENG":"The Bahamas"}' />
+            <column name="description_i18n" value='{"ENG": "Bahamas", "FRA": "Bahamas"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="30" />
@@ -2978,7 +2978,7 @@
             <column name="description" value="Bhutan" />
             <column name="currency_id" valueNumeric="16" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bhoutan","ENG":"Bhutan"}' />
+            <column name="description_i18n" value='{"ENG": "Bhutan", "FRA": "Bhoutan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="31" />
@@ -2988,7 +2988,7 @@
             <column name="description" value="Bouvet Island" />
             <column name="currency_id" valueNumeric="31" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bouvet (Île)","ENG":"Bouvet Island"}' />
+            <column name="description_i18n" value='{"ENG": "Bouvet Island", "FRA": "Ile Bouvet"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="32" />
@@ -2998,7 +2998,7 @@
             <column name="description" value="Botswana" />
             <column name="currency_id" valueNumeric="26" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Botswana","ENG":"Botswana"}' />
+            <column name="description_i18n" value='{"ENG": "Botswana", "FRA": "Botswana"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="33" />
@@ -3008,7 +3008,7 @@
             <column name="description" value="Belarus" />
             <column name="currency_id" valueNumeric="23" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Biélorussie","ENG":"Belarus"}' />
+            <column name="description_i18n" value='{"ENG": "Belarus", "FRA": "Biélorussie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="34" />
@@ -3018,7 +3018,7 @@
             <column name="description" value="Belize" />
             <column name="currency_id" valueNumeric="19" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Bélize","ENG":"Belize"}' />
+            <column name="description_i18n" value='{"ENG": "Belize", "FRA": "Belize"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="35" />
@@ -3028,7 +3028,7 @@
             <column name="description" value="Canada" />
             <column name="currency_id" valueNumeric="35" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Canada","ENG":"Canada"}' />
+            <column name="description_i18n" value='{"ENG": "Canada", "FRA": "Canada"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="36" />
@@ -3038,17 +3038,17 @@
             <column name="description" value="Cocos (Keeling) Islands" />
             <column name="currency_id" valueNumeric="13" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Cocos / Keeling (Îles)","ENG":"Cocos (Keeling) Islands"}' />
+            <column name="description_i18n" value='{"ENG": "Cocos (Keeling) Islands", "FRA": "Iles Cocos"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="37" />
             <column name="created" valueDate="2015-03-19 00:04:04.361" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="CD" />
-            <column name="description" value="Congo, Democratic Republic of the" />
+            <column name="description" value="Congo - Kinshasa" />
             <column name="currency_id" valueNumeric="43" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"République Démocratique du Congo","ENG":"Congo , Democratic Republic of the"}' />
+            <column name="description_i18n" value='"ENG": "Congo - Kinshasa", "FRA": "Congo-Kinshasa"' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="38" />
@@ -3058,17 +3058,17 @@
             <column name="description" value="Central African Republic" />
             <column name="currency_id" valueNumeric="34" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"République Centrafricaine","ENG":"Central African Republic"}' />
+            <column name="description_i18n" value='{"ENG": "Central African Republic", "FRA": "République centrafricaine"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="39" />
             <column name="created" valueDate="2015-03-19 00:04:04.404" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="CG" />
-            <column name="description" value="Congo, Republic of the" />
+            <column name="description" value="Congo - Brazzaville" />
             <column name="currency_id" valueNumeric="34" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Congo","ENG":"Congo, Republic of the"}' />
+            <column name="description_i18n" value='{"ENG": "Congo - Brazzaville", "FRA": "Congo-Brazzaville"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="40" />
@@ -3078,17 +3078,17 @@
             <column name="description" value="Switzerland" />
             <column name="currency_id" valueNumeric="92" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Suisse","ENG":"Switzerland"}' />
+            <column name="description_i18n" value='{"ENG": "Switzerland", "FRA": "Suisse"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="41" />
             <column name="created" valueDate="2015-03-19 00:04:04.452" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="CI" />
-            <column name="description" value="Cote Ivoire" />
+            <column name="description" value="Côte d’Ivoire" />
             <column name="currency_id" valueNumeric="20" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Côte DIvoire","ENG":"Cote Ivoire"}' />
+            <column name="description_i18n" value='{"ENG": "Côte d’Ivoire", "FRA": "Côte d’Ivoire"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="42" />
@@ -3098,7 +3098,7 @@
             <column name="description" value="Cook Islands" />
             <column name="currency_id" valueNumeric="72" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Cook (Îles)","ENG":"Cook Islands"}' />
+            <column name="description_i18n" value='{"ENG": "Cook Islands", "FRA": "Iles Cook"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="43" />
@@ -3108,7 +3108,7 @@
             <column name="description" value="Chile" />
             <column name="currency_id" valueNumeric="38" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Chili","ENG":"Chile"}' />
+            <column name="description_i18n" value='{"ENG": "Chile", "FRA": "Chili"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="44" />
@@ -3118,7 +3118,7 @@
             <column name="description" value="Cameroon" />
             <column name="currency_id" valueNumeric="34" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Cameroun","ENG":"Cameroon"}' />
+            <column name="description_i18n" value='{"ENG": "Cameroon", "FRA": "Cameroun"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="45" />
@@ -3128,7 +3128,7 @@
             <column name="description" value="China" />
             <column name="currency_id" valueNumeric="39" />
             <column name="language_id" valueNumeric="6" />
-            <column name="description_i18n" value='{"FRA":"Chine","ENG":"China"}' />
+            <column name="description_i18n" value='{"ENG": "China", "FRA": "Chine"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="46" />
@@ -3138,7 +3138,7 @@
             <column name="description" value="Colombia" />
             <column name="currency_id" valueNumeric="41" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Colombie","ENG":"Colombia"}' />
+            <column name="description_i18n" value='{"ENG": "Colombia", "FRA": "Colombie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="47" />
@@ -3148,7 +3148,7 @@
             <column name="description" value="Costa Rica" />
             <column name="currency_id" valueNumeric="46" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Costa Rica","ENG":"Costa Rica"}' />
+            <column name="description_i18n" value='{"ENG": "Costa Rica", "FRA": "Costa Rica"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="48" />
@@ -3158,7 +3158,7 @@
             <column name="description" value="Cuba" />
             <column name="currency_id" valueNumeric="48" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Cuba","ENG":"Cuba"}' />
+            <column name="description_i18n" value='{"ENG": "Cuba", "FRA": "Cuba"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="49" />
@@ -3168,7 +3168,7 @@
             <column name="description" value="Cape Verde" />
             <column name="currency_id" valueNumeric="36" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Cap Vert","ENG":"Cape Verde"}' />
+            <column name="description_i18n" value='{"ENG": "Cape Verde", "FRA": "Cap-Vert"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="50" />
@@ -3178,7 +3178,7 @@
             <column name="description" value="Christmas Island" />
             <column name="currency_id" valueNumeric="13" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Christmas (Île)","ENG":"Christmas Island"}' />
+            <column name="description_i18n" value='{"ENG": "Christmas Island", "FRA": "Ile Christmas"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="51" />
@@ -3188,17 +3188,17 @@
             <column name="description" value="Cyprus" />
             <column name="currency_id" valueNumeric="40" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Chypre","ENG":"Cyprus"}' />
+            <column name="description_i18n" value='{"ENG": "Cyprus", "FRA": "Chypre"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="52" />
             <column name="created" valueDate="2015-03-19 00:04:04.687" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="CZ" />
-            <column name="description" value="Czech Republic" />
+            <column name="description" value="Czechia" />
             <column name="currency_id" valueNumeric="152" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"République Tchèque","ENG":"Czech Republic"}' />
+            <column name="description_i18n" value='{"ENG": "Czechia", "FRA": "Tchéquie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="53" />
@@ -3208,7 +3208,7 @@
             <column name="description" value="Germany" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="1" />
-            <column name="description_i18n" value='{"FRA":"Allemagne","ENG":"Germany"}' />
+            <column name="description_i18n" value='{"ENG": "Germany", "FRA": "Allemagne"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="54" />
@@ -3218,7 +3218,7 @@
             <column name="description" value="Djibouti" />
             <column name="currency_id" valueNumeric="51" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Djibouti","ENG":"Djibouti"}' />
+            <column name="description_i18n" value='{"ENG": "Djibouti", "FRA": "Djibouti"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="55" />
@@ -3228,7 +3228,7 @@
             <column name="description" value="Denmark" />
             <column name="currency_id" valueNumeric="50" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Danemark","ENG":"Denmark"}' />
+            <column name="description_i18n" value='{"ENG": "Denmark", "FRA": "Danemark"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="56" />
@@ -3238,7 +3238,7 @@
             <column name="description" value="Dominica" />
             <column name="currency_id" valueNumeric="7" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Dominique","ENG":"Dominica"}' />
+            <column name="description_i18n" value='{"ENG": "Dominica", "FRA": "Dominique"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="57" />
@@ -3248,7 +3248,7 @@
             <column name="description" value="Dominican Republic" />
             <column name="currency_id" valueNumeric="52" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"République Dominicaine","ENG":"Dominican Republic"}' />
+            <column name="description_i18n" value='{"ENG": "Dominican Republic", "FRA": "République dominicaine"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="58" />
@@ -3258,7 +3258,7 @@
             <column name="description" value="Algeria" />
             <column name="currency_id" valueNumeric="4" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Algérie","ENG":"Algeria"}' />
+            <column name="description_i18n" value='{"ENG": "Algeria", "FRA": "Algérie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="59" />
@@ -3268,7 +3268,7 @@
             <column name="description" value="Ecuador" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Equateur","ENG":"Ecuador"}' />
+            <column name="description_i18n" value='{"ENG": "Ecuador", "FRA": "Equateur"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="60" />
@@ -3278,7 +3278,7 @@
             <column name="description" value="Estonia" />
             <column name="currency_id" valueNumeric="56" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Estonie","ENG":"Estonia"}' />
+            <column name="description_i18n" value='{"ENG": "Estonia", "FRA": "Estonie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="61" />
@@ -3288,7 +3288,7 @@
             <column name="description" value="Egypt" />
             <column name="currency_id" valueNumeric="53" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Egypte","ENG":"Egypt"}' />
+            <column name="description_i18n" value='{"ENG": "Egypt", "FRA": "Egypte"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="62" />
@@ -3298,7 +3298,7 @@
             <column name="description" value="Eritrea" />
             <column name="currency_id" valueNumeric="55" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Erythrée","ENG":"Eritrea"}' />
+            <column name="description_i18n" value='{"ENG": "Eritrea", "FRA": "Erythrée"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="63" />
@@ -3308,7 +3308,7 @@
             <column name="description" value="Spain" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Espagne","ENG":"Spain"}' />
+            <column name="description_i18n" value='{"ENG": "Spain", "FRA": "Espagne"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="64" />
@@ -3318,7 +3318,7 @@
             <column name="description" value="Ethiopia" />
             <column name="currency_id" valueNumeric="57" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Ethiopie","ENG":"Ethiopia"}' />
+            <column name="description_i18n" value='{"ENG": "Ethiopia", "FRA": "Ethiopie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="65" />
@@ -3328,7 +3328,7 @@
             <column name="description" value="Finland" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Finlande","ENG":"Finland"}' />
+            <column name="description_i18n" value='{"ENG": "Finland", "FRA": "Finlande"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="66" />
@@ -3338,27 +3338,27 @@
             <column name="description" value="Fiji" />
             <column name="currency_id" valueNumeric="59" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Fiji","ENG":"Fiji"}' />
+            <column name="description_i18n" value='{"ENG": "Fiji", "FRA": "Fidji"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="67" />
             <column name="created" valueDate="2015-03-19 00:04:05.151" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="FK" />
-            <column name="description" value="Falkland Islands (Islas Malvinas)" />
+            <column name="description" value="Falkland Islands" />
             <column name="currency_id" valueNumeric="58" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Falkland / Malouines (Îles)","ENG":"Falkland Islands (Islas Malvinas)"}' />
+            <column name="description_i18n" value='{"ENG": "Falkland Islands", "FRA": "Iles Malouines"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="68" />
             <column name="created" valueDate="2015-03-19 00:04:05.172" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="FM" />
-            <column name="description" value="Micronesia, Federated States of" />
+            <column name="description" value="Micronesia" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Micronésie (Etats fédérés de)","ENG":"Micronesia, Federated States of"}' />
+            <column name="description_i18n" value='{"ENG": "Micronesia", "FRA": "Etats fédérés de Micronésie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="69" />
@@ -3368,7 +3368,7 @@
             <column name="description" value="Faroe Islands" />
             <column name="currency_id" valueNumeric="50" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Féroé (Îles)","ENG":"Faroe Islands"}' />
+            <column name="description_i18n" value='{"ENG": "Faroe Islands", "FRA": "Iles Féroé"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="70" />
@@ -3378,7 +3378,7 @@
             <column name="description" value="France" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"France","ENG":"France"}' />
+            <column name="description_i18n" value='{"ENG": "France", "FRA": "France"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="71" />
@@ -3388,7 +3388,7 @@
             <column name="description" value="Gabon" />
             <column name="currency_id" valueNumeric="34" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Gabon","ENG":"Gabon"}' />
+            <column name="description_i18n" value='{"ENG": "Gabon", "FRA": "Gabon"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="72" />
@@ -3398,7 +3398,7 @@
             <column name="description" value="Grenada" />
             <column name="currency_id" valueNumeric="7" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Grenade","ENG":"Grenada"}' />
+            <column name="description_i18n" value='{"ENG": "Grenada", "FRA": "Grenade"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="73" />
@@ -3408,7 +3408,7 @@
             <column name="description" value="Georgia" />
             <column name="currency_id" valueNumeric="61" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Géorgie","ENG":"Georgia"}' />
+            <column name="description_i18n" value='{"ENG": "Georgia", "FRA": "Géorgie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="74" />
@@ -3418,7 +3418,7 @@
             <column name="description" value="French Guiana" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Guyane française","ENG":"French Guiana"}' />
+            <column name="description_i18n" value='{"ENG": "French Guiana", "FRA": "Guyane française"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="75" />
@@ -3428,7 +3428,7 @@
             <column name="description" value="Ghana" />
             <column name="currency_id" valueNumeric="62" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Ghana","ENG":"Ghana"}' />
+            <column name="description_i18n" value='{"ENG": "Ghana", "FRA": "Ghana"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="76" />
@@ -3438,7 +3438,7 @@
             <column name="description" value="Gibraltar" />
             <column name="currency_id" valueNumeric="63" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Gibraltar","ENG":"Gibraltar"}' />
+            <column name="description_i18n" value='{"ENG": "Gibraltar", "FRA": "Gibraltar"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="77" />
@@ -3448,17 +3448,17 @@
             <column name="description" value="Greenland" />
             <column name="currency_id" valueNumeric="50" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Groënland","ENG":"Greenland"}' />
+            <column name="description_i18n" value='{"ENG": "Greenland", "FRA": "Groenland"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="78" />
             <column name="created" valueDate="2015-03-19 00:04:05.391" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="GM" />
-            <column name="description" value="The Gambia" />
+            <column name="description" value="Gambia" />
             <column name="currency_id" valueNumeric="60" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Gambie","ENG":"The Gambia"}' />
+            <column name="description_i18n" value='{"ENG": "Gambia", "FRA": "Gambie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="79" />
@@ -3468,7 +3468,7 @@
             <column name="description" value="Guinea" />
             <column name="currency_id" valueNumeric="66" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Guinée","ENG":"Guinea"}' />
+            <column name="description_i18n" value='{"ENG": "Guinea", "FRA": "Guinée"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="80" />
@@ -3478,7 +3478,7 @@
             <column name="description" value="Guadeloupe" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Guadeloupe","ENG":"Guadeloupe"}' />
+            <column name="description_i18n" value='{"ENG": "Guadeloupe", "FRA": "Guadeloupe"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="81" />
@@ -3488,7 +3488,7 @@
             <column name="description" value="Equatorial Guinea" />
             <column name="currency_id" valueNumeric="34" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Guinée Equatoriale","ENG":"Equatorial Guinea"}' />
+            <column name="description_i18n" value='{"ENG": "Equatorial Guinea", "FRA": "Guinée équatoriale"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="82" />
@@ -3498,17 +3498,17 @@
             <column name="description" value="Greece" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Grèce","ENG":"Greece"}' />
+            <column name="description_i18n" value='{"ENG": "Greece", "FRA": "Grèce"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="83" />
             <column name="created" valueDate="2015-03-19 00:04:05.496" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="GS" />
-            <column name="description" value="South Georgia and the South Sand" />
+            <column name="description" value="South Georgia and South Sandwich Islands" />
             <column name="currency_id" valueNumeric="65" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Géorgie du Sud et îles Sandwich du Sud","ENG":"South Georgia and the South Sand"}' />
+            <column name="description_i18n" value='{"ENG": "South Georgia and South Sandwich Islands", "FRA": "Géorgie du Sud et îles Sandwich du Sud"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="84" />
@@ -3518,7 +3518,7 @@
             <column name="description" value="Guatemala" />
             <column name="currency_id" valueNumeric="64" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Guatemala","ENG":"Guatemala"}' />
+            <column name="description_i18n" value='{"ENG": "Guatemala", "FRA": "Guatemala"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="85" />
@@ -3528,7 +3528,7 @@
             <column name="description" value="Guam" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Guam","ENG":"Guam"}' />
+            <column name="description_i18n" value='{"ENG": "Guam", "FRA": "Guam"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="86" />
@@ -3538,7 +3538,7 @@
             <column name="description" value="Guinea-Bissau" />
             <column name="currency_id" valueNumeric="20" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Guinée-Bissau","ENG":"Guinea-Bissau"}' />
+            <column name="description_i18n" value='{"ENG": "Guinea-Bissau", "FRA": "Guinée-Bissau"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="87" />
@@ -3548,27 +3548,27 @@
             <column name="description" value="Guyana" />
             <column name="currency_id" valueNumeric="67" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Guyana","ENG":"Guyana"}' />
+            <column name="description_i18n" value='{"ENG": "Guyana", "FRA": "Guyana"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="88" />
             <column name="created" valueDate="2015-03-19 00:04:05.611" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="HK" />
-            <column name="description" value="Hong Kong (SAR)" />
+            <column name="description" value="Hong Kong SAR China" />
             <column name="currency_id" valueNumeric="70" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Hong Kong","ENG":"Hong Kong (SAR)"}' />
+            <column name="description_i18n" value='{"ENG": "Hong Kong SAR China", "FRA": "R.A.S. chinoise de Hong Kong"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="89" />
             <column name="created" valueDate="2015-03-19 00:04:05.631" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="HM" />
-            <column name="description" value="Heard Island and McDonald Island" />
+            <column name="description" value="Heard and McDonald Islands" />
             <column name="currency_id" valueNumeric="13" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Territoire des Îles Heard et McDonald","ENG":"Heard Island and McDonald Island"}' />
+            <column name="description_i18n" value='{"ENG": "Heard and McDonald Islands", "FRA": "Iles Heard et McDonald"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="90" />
@@ -3578,7 +3578,7 @@
             <column name="description" value="Honduras" />
             <column name="currency_id" valueNumeric="69" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Honduras","ENG":"Honduras"}' />
+            <column name="description_i18n" value='{"ENG": "Honduras", "FRA": "Honduras"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="91" />
@@ -3588,7 +3588,7 @@
             <column name="description" value="Croatia" />
             <column name="currency_id" valueNumeric="47" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Croatie","ENG":"Croatia"}' />
+            <column name="description_i18n" value='{"ENG": "Croatia", "FRA": "Croatie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="92" />
@@ -3598,7 +3598,7 @@
             <column name="description" value="Haiti" />
             <column name="currency_id" valueNumeric="68" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Haïti","ENG":"Haiti"}' />
+            <column name="description_i18n" value='{"ENG": "Haiti", "FRA": "Haïti"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="93" />
@@ -3608,7 +3608,7 @@
             <column name="description" value="Hungary" />
             <column name="currency_id" valueNumeric="71" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Hongrie","ENG":"Hungary"}' />
+            <column name="description_i18n" value='{"ENG": "Hungary", "FRA": "Hongrie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="94" />
@@ -3618,7 +3618,7 @@
             <column name="description" value="Indonesia" />
             <column name="currency_id" valueNumeric="74" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Indonésie","ENG":"Indonesia"}' />
+            <column name="description_i18n" value='{"ENG": "Indonesia", "FRA": "Indonésie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="95" />
@@ -3628,7 +3628,7 @@
             <column name="description" value="Ireland" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Irlande","ENG":"Ireland"}' />
+            <column name="description_i18n" value='{"ENG": "Ireland", "FRA": "Irlande"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="96" />
@@ -3638,7 +3638,7 @@
             <column name="description" value="Israel" />
             <column name="currency_id" valueNumeric="78" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Israël","ENG":"Israel"}' />
+            <column name="description_i18n" value='{"ENG": "Israel", "FRA": "Israël"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="97" />
@@ -3648,7 +3648,7 @@
             <column name="description" value="India" />
             <column name="currency_id" valueNumeric="73" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Indie","ENG":"India"}' />
+            <column name="description_i18n" value='{"ENG": "India", "FRA": "Inde"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="98" />
@@ -3658,7 +3658,7 @@
             <column name="description" value="British Indian Ocean Territory" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Territoire britannique de l Océan Indien","ENG":"British Indian Ocean Territory"}' />
+            <column name="description_i18n" value='{"ENG": "British Indian Ocean Territory", "FRA": "Territoire britannique de l’océan Indien"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="99" />
@@ -3668,7 +3668,7 @@
             <column name="description" value="Iraq" />
             <column name="currency_id" valueNumeric="76" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Irak","ENG":"Iraq"}' />
+            <column name="description_i18n" value='{"ENG": "Iraq", "FRA": "Irak"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="100" />
@@ -3678,7 +3678,7 @@
             <column name="description" value="Iran" />
             <column name="currency_id" valueNumeric="75" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Iran (République islamique d)","ENG":"Iran"}' />
+            <column name="description_i18n" value='{"ENG": "Iran", "FRA": "Iran"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="101" />
@@ -3688,7 +3688,7 @@
             <column name="description" value="Iceland" />
             <column name="currency_id" valueNumeric="77" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Islande","ENG":"Iceland"}' />
+            <column name="description_i18n" value='{"ENG": "Iceland", "FRA": "Islande"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="102" />
@@ -3698,7 +3698,7 @@
             <column name="description" value="Italy" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Italie","ENG":"Italy"}' />
+            <column name="description_i18n" value='{"ENG": "Italy", "FRA": "Italie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="103" />
@@ -3708,7 +3708,7 @@
             <column name="description" value="Jamaica" />
             <column name="currency_id" valueNumeric="79" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Jamaïque","ENG":"Jamaica"}' />
+            <column name="description_i18n" value='{"ENG": "Jamaica", "FRA": "Jamaïque"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="104" />
@@ -3718,7 +3718,7 @@
             <column name="description" value="Jordan" />
             <column name="currency_id" valueNumeric="81" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Jordanie","ENG":"Jordan"}' />
+            <column name="description_i18n" value='{"ENG": "Jordan", "FRA": "Jordanie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="105" />
@@ -3728,7 +3728,7 @@
             <column name="description" value="Japan" />
             <column name="currency_id" valueNumeric="80" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Japon","ENG":"Japan"}' />
+            <column name="description_i18n" value='{"ENG": "Japan", "FRA": "Japon"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="106" />
@@ -3738,7 +3738,7 @@
             <column name="description" value="Kenya" />
             <column name="currency_id" valueNumeric="83" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Kenya","ENG":"Kenya"}' />
+            <column name="description_i18n" value='{"ENG": "Kenya", "FRA": "Kenya"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="107" />
@@ -3748,7 +3748,7 @@
             <column name="description" value="Kyrgyzstan" />
             <column name="currency_id" valueNumeric="84" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Kyrgyzstan","ENG":"Kyrgyzstan"}' />
+            <column name="description_i18n" value='{"ENG": "Kyrgyzstan", "FRA": "Kirghizistan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="108" />
@@ -3758,7 +3758,7 @@
             <column name="description" value="Cambodia" />
             <column name="currency_id" valueNumeric="33" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Cambodge","ENG":"Cambodia"}' />
+            <column name="description_i18n" value='{"ENG": "Cambodia", "FRA": "Cambodge"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="109" />
@@ -3768,7 +3768,7 @@
             <column name="description" value="Kiribati" />
             <column name="currency_id" valueNumeric="13" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Kiribati","ENG":"Kiribati"}' />
+            <column name="description_i18n" value='{"ENG": "Kiribati", "FRA": "Kiribati"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="110" />
@@ -3778,37 +3778,37 @@
             <column name="description" value="Comoros" />
             <column name="currency_id" valueNumeric="42" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Comores","ENG":"Comoros"}' />
+            <column name="description_i18n" value='{"ENG": "Comoros", "FRA": "Comores"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="111" />
             <column name="created" valueDate="2015-03-19 00:04:06.11" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="KN" />
-            <column name="description" value="Saint Kitts and Nevis" />
+            <column name="description" value="St. Kitts and Nevis" />
             <column name="currency_id" valueNumeric="7" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Saint Kitts et Nevis","ENG":"Saint Kitts and Nevis"}' />
+            <column name="description_i18n" value='{"ENG": "St. Kitts and Nevis", "FRA": "Saint-Christophe-et-Niévès"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="112" />
             <column name="created" valueDate="2015-03-19 00:04:06.132" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="KP" />
-            <column name="description" value="Korea, North" />
+            <column name="description" value="North Korea" />
             <column name="currency_id" valueNumeric="45" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Corée (République populaire démocratique du)","ENG":"Korea, North"}' />
+            <column name="description_i18n" value='{"ENG": "North Korea", "FRA": "Corée du Nord"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="113" />
             <column name="created" valueDate="2015-03-19 00:04:06.153" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="KR" />
-            <column name="description" value="Korea, South" />
+            <column name="description" value="South Korea" />
             <column name="currency_id" valueNumeric="44" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Corée (République démocratique du)","ENG":"Korea, South"}' />
+            <column name="description_i18n" value='{"ENG": "South Korea", "FRA": "Corée du Sud"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="114" />
@@ -3818,7 +3818,7 @@
             <column name="description" value="Kuwait" />
             <column name="currency_id" valueNumeric="85" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Koweït","ENG":"Kuwait"}' />
+            <column name="description_i18n" value='{"ENG": "Kuwait", "FRA": "Koweït"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="115" />
@@ -3828,7 +3828,7 @@
             <column name="description" value="Cayman Islands" />
             <column name="currency_id" valueNumeric="32" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Caïmans (Îles)","ENG":"Cayman Islands"}' />
+            <column name="description_i18n" value='{"ENG": "Cayman Islands", "FRA": "Iles Caïmans"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="116" />
@@ -3838,7 +3838,7 @@
             <column name="description" value="Kazakhstan" />
             <column name="currency_id" valueNumeric="82" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Kazakstan","ENG":"Kazakhstan"}' />
+            <column name="description_i18n" value='{"ENG": "Kazakhstan", "FRA": "Kazakhstan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="117" />
@@ -3848,7 +3848,7 @@
             <column name="description" value="Laos" />
             <column name="currency_id" valueNumeric="86" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Laos (République populaire démocratique du)","ENG":"Laos"}' />
+            <column name="description_i18n" value='{"ENG": "Laos", "FRA": "Laos"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="118" />
@@ -3858,17 +3858,17 @@
             <column name="description" value="Lebanon" />
             <column name="currency_id" valueNumeric="89" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Liban","ENG":"Lebanon"}' />
+            <column name="description_i18n" value='{"ENG": "Lebanon", "FRA": "Liban"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="119" />
             <column name="created" valueDate="2015-03-19 00:04:06.279" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="LC" />
-            <column name="description" value="Saint Lucia" />
+            <column name="description" value="St. Lucia" />
             <column name="currency_id" valueNumeric="7" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Sainte Lucie","ENG":"Saint Lucia"}' />
+            <column name="description_i18n" value='{"ENG": "St. Lucia", "FRA": "Sainte-Lucie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="120" />
@@ -3878,7 +3878,7 @@
             <column name="description" value="Liechtenstein" />
             <column name="currency_id" valueNumeric="92" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Liechtenstein","ENG":"Liechtenstein"}' />
+            <column name="description_i18n" value='{"ENG": "Liechtenstein", "FRA": "Liechtenstein"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="121" />
@@ -3888,7 +3888,7 @@
             <column name="description" value="Sri Lanka" />
             <column name="currency_id" valueNumeric="143" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Sri Lanka","ENG":"Sri Lanka"}' />
+            <column name="description_i18n" value='{"ENG": "Sri Lanka", "FRA": "Sri Lanka"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="122" />
@@ -3898,7 +3898,7 @@
             <column name="description" value="Liberia" />
             <column name="currency_id" valueNumeric="90" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Libéria","ENG":"Liberia"}' />
+            <column name="description_i18n" value='{"ENG": "Liberia", "FRA": "Libéria"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="123" />
@@ -3908,7 +3908,7 @@
             <column name="description" value="Lesotho" />
             <column name="currency_id" valueNumeric="87" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Lesotho","ENG":"Lesotho"}' />
+            <column name="description_i18n" value='{"ENG": "Lesotho", "FRA": "Lesotho"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="124" />
@@ -3918,7 +3918,7 @@
             <column name="description" value="Lithuania" />
             <column name="currency_id" valueNumeric="93" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Lithuanie","ENG":"Lithuania"}' />
+            <column name="description_i18n" value='{"ENG": "Lithuania", "FRA": "Lituanie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="125" />
@@ -3928,7 +3928,7 @@
             <column name="description" value="Luxembourg" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Luxembourg","ENG":"Luxembourg"}' />
+            <column name="description_i18n" value='{"ENG": "Luxembourg", "FRA": "Luxembourg"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="126" />
@@ -3938,7 +3938,7 @@
             <column name="description" value="Latvia" />
             <column name="currency_id" valueNumeric="88" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Lettonie","ENG":"Latvia"}' />
+            <column name="description_i18n" value='{"ENG": "Latvia", "FRA": "Lettonie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="127" />
@@ -3948,7 +3948,7 @@
             <column name="description" value="Libya" />
             <column name="currency_id" valueNumeric="91" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Libye (Jamahiriya Arabe Libyenne)","ENG":"Libya"}' />
+            <column name="description_i18n" value='{"ENG": "Libya", "FRA": "Libye"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="128" />
@@ -3958,7 +3958,7 @@
             <column name="description" value="Morocco" />
             <column name="currency_id" valueNumeric="102" />
             <column name="language_id" valueNumeric="3" />
-            <column name="description_i18n" value='{"FRA":"Maroc","ENG":"Morocco"}' />
+            <column name="description_i18n" value='{"ENG": "Morocco", "FRA": "Maroc"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="129" />
@@ -3968,7 +3968,7 @@
             <column name="description" value="Monaco" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Monaco","ENG":"Monaco"}' />
+            <column name="description_i18n" value='{"ENG": "Monaco", "FRA": "Monaco"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="130" />
@@ -3978,7 +3978,7 @@
             <column name="description" value="Moldova" />
             <column name="currency_id" valueNumeric="106" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Moldavie","ENG":"Moldova"}' />
+            <column name="description_i18n" value='{"ENG": "Moldova", "FRA": "Moldavie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="131" />
@@ -3988,7 +3988,7 @@
             <column name="description" value="Madagascar" />
             <column name="currency_id" valueNumeric="97" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Madagascar","ENG":"Madagascar"}' />
+            <column name="description_i18n" value='{"ENG": "Madagascar", "FRA": "Madagascar"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="132" />
@@ -3998,17 +3998,17 @@
             <column name="description" value="Marshall Islands" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Marshall (Îles)","ENG":"Marshall Islands"}' />
+            <column name="description_i18n" value='{"ENG": "Marshall Islands", "FRA": "Iles Marshall"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="133" />
             <column name="created" valueDate="2015-03-19 00:04:06.581" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="MK" />
-            <column name="description" value="Macedonia, The Former Yugoslav R" />
+            <column name="description" value="Macedonia" />
             <column name="currency_id" valueNumeric="95" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Macédoine (ancienne République yougoslave de)","ENG":"Macedonia, The Former Yugoslav R"}' />
+            <column name="description_i18n" value='{"ENG": "Macedonia", "FRA": "Macédoine"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="134" />
@@ -4018,17 +4018,17 @@
             <column name="description" value="Mali" />
             <column name="currency_id" valueNumeric="20" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Mali","ENG":"Mali"}' />
+            <column name="description_i18n" value='{"ENG": "Mali", "FRA": "Mali"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="135" />
             <column name="created" valueDate="2015-03-19 00:04:06.631" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="MM" />
-            <column name="description" value="Burma" />
+            <column name="description" value="Myanmar (Burma)" />
             <column name="currency_id" valueNumeric="109" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Myanmar","ENG":"Burma"}' />
+            <column name="description_i18n" value='{"ENG": "Myanmar (Burma)", "FRA": "Myanmar (Birmanie)"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="136" />
@@ -4038,17 +4038,17 @@
             <column name="description" value="Mongolia" />
             <column name="currency_id" valueNumeric="107" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Mongolie","ENG":"Mongolia"}' />
+            <column name="description_i18n" value='{"ENG": "Mongolia", "FRA": "Mongolie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="137" />
             <column name="created" valueDate="2015-03-19 00:04:06.673" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="MO" />
-            <column name="description" value="Macao" />
+            <column name="description" value="Macau SAR China" />
             <column name="currency_id" valueNumeric="94" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Macau","ENG":"Macao"}' />
+            <column name="description_i18n" value='{"ENG": "Macau SAR China", "FRA": "R.A.S. chinoise de Macao"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="138" />
@@ -4058,7 +4058,7 @@
             <column name="description" value="Northern Mariana Islands" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Mariannes (Îles)","ENG":"Northern Mariana Islands"}' />
+            <column name="description_i18n" value='{"ENG": "Northern Mariana Islands", "FRA": "Iles Mariannes du Nord"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="139" />
@@ -4068,7 +4068,7 @@
             <column name="description" value="Martinique" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Martinique","ENG":"Martinique"}' />
+            <column name="description_i18n" value='{"ENG": "Martinique", "FRA": "Martinique"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="140" />
@@ -4078,7 +4078,7 @@
             <column name="description" value="Mauritania" />
             <column name="currency_id" valueNumeric="104" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Mauritanie","ENG":"Mauritania"}' />
+            <column name="description_i18n" value='{"ENG": "Mauritania", "FRA": "Mauritanie"}}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="141" />
@@ -4088,7 +4088,7 @@
             <column name="description" value="Montserrat" />
             <column name="currency_id" valueNumeric="7" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Montserrat","ENG":"Montserrat"}' />
+            <column name="description_i18n" value='{"ENG": "Montserrat", "FRA": "Montserrat"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="142" />
@@ -4098,7 +4098,7 @@
             <column name="description" value="Malta" />
             <column name="currency_id" valueNumeric="101" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Malte","ENG":"Malta"}' />
+            <column name="description_i18n" value='{"ENG": "Malta", "FRA": "Malte"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="143" />
@@ -4108,7 +4108,7 @@
             <column name="description" value="Mauritius" />
             <column name="currency_id" valueNumeric="103" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Maurice","ENG":"Mauritius"}' />
+            <column name="description_i18n" value='{"ENG": "Mauritius", "FRA": "Maurice"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="144" />
@@ -4118,7 +4118,7 @@
             <column name="description" value="Maldives" />
             <column name="currency_id" valueNumeric="100" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Maldives","ENG":"Maldives"}' />
+            <column name="description_i18n" value='{"ENG": "Maldives", "FRA": "Maldives"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="145" />
@@ -4128,7 +4128,7 @@
             <column name="description" value="Malawi" />
             <column name="currency_id" valueNumeric="99" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Malawi","ENG":"Malawi"}' />
+            <column name="description_i18n" value='{"ENG": "Malawi", "FRA": "Malawi"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="146" />
@@ -4138,7 +4138,7 @@
             <column name="description" value="Mexico" />
             <column name="currency_id" valueNumeric="105" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Mexique","ENG":"Mexico"}' />
+            <column name="description_i18n" value='{"ENG": "Mexico", "FRA": "Mexique"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="147" />
@@ -4148,7 +4148,7 @@
             <column name="description" value="Malaysia" />
             <column name="currency_id" valueNumeric="98" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Malaysie","ENG":"Malaysia"}' />
+            <column name="description_i18n" value='{"ENG": "Malaysia", "FRA": "Malaisie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="148" />
@@ -4158,7 +4158,7 @@
             <column name="description" value="Mozambique" />
             <column name="currency_id" valueNumeric="108" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Mozambique","ENG":"Mozambique"}' />
+            <column name="description_i18n" value='{"ENG": "Mozambique", "FRA": "Mozambique"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="149" />
@@ -4168,7 +4168,7 @@
             <column name="description" value="Namibia" />
             <column name="currency_id" valueNumeric="110" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Namibie","ENG":"Namibia"}' />
+            <column name="description_i18n" value='{"ENG": "Namibia", "FRA": "Namibie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="150" />
@@ -4178,7 +4178,7 @@
             <column name="description" value="New Caledonia" />
             <column name="currency_id" valueNumeric="114" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Nouvelle-Calédonie","ENG":"New Caledonia"}' />
+            <column name="description_i18n" value='{"ENG": "New Caledonia", "FRA": "Nouvelle-Calédonie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="151" />
@@ -4188,7 +4188,7 @@
             <column name="description" value="Niger" />
             <column name="currency_id" valueNumeric="20" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Niger","ENG":"Niger"}' />
+            <column name="description_i18n" value='{"ENG": "Niger", "FRA": "Niger"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="152" />
@@ -4198,7 +4198,7 @@
             <column name="description" value="Norfolk Island" />
             <column name="currency_id" valueNumeric="13" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Norfolk (Île)","ENG":"Norfolk Island"}' />
+            <column name="description_i18n" value='{"ENG": "Norfolk Island", "FRA": "Ile Norfolk"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="153" />
@@ -4208,7 +4208,7 @@
             <column name="description" value="Nigeria" />
             <column name="currency_id" valueNumeric="113" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Nigéria","ENG":"Nigeria"}' />
+            <column name="description_i18n" value='{"ENG": "Nigeria", "FRA": "Nigéria"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="154" />
@@ -4218,7 +4218,7 @@
             <column name="description" value="Nicaragua" />
             <column name="currency_id" valueNumeric="112" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Nicaragua","ENG":"Nicaragua"}' />
+            <column name="description_i18n" value='{"ENG": "Nicaragua", "FRA": "Nicaragua"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="155" />
@@ -4228,7 +4228,7 @@
             <column name="description" value="Netherlands" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Pays-Bas","ENG":"Netherlands"}' />
+            <column name="description_i18n" value='{"ENG": "Netherlands", "FRA": "Pays-Bas"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="156" />
@@ -4238,7 +4238,7 @@
             <column name="description" value="Norway" />
             <column name="currency_id" valueNumeric="31" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Norvège","ENG":"Norway"}' />
+            <column name="description_i18n" value='{"ENG": "Norway", "FRA": "Norvège"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="157" />
@@ -4248,7 +4248,7 @@
             <column name="description" value="Nepal" />
             <column name="currency_id" valueNumeric="111" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Népal","ENG":"Nepal"}' />
+            <column name="description_i18n" value='{"ENG": "Nepal", "FRA": "Népal"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="158" />
@@ -4258,7 +4258,7 @@
             <column name="description" value="Nauru" />
             <column name="currency_id" valueNumeric="13" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Nauru","ENG":"Nauru"}' />
+            <column name="description_i18n" value='{"ENG": "Nauru", "FRA": "Nauru"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="159" />
@@ -4268,7 +4268,7 @@
             <column name="description" value="Niue" />
             <column name="currency_id" valueNumeric="72" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Niue","ENG":"Niue"}' />
+            <column name="description_i18n" value='{"ENG": "Niue", "FRA": "Niue"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="160" />
@@ -4278,7 +4278,7 @@
             <column name="description" value="New Zealand" />
             <column name="currency_id" valueNumeric="72" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Nouvelle-Zélande","ENG":"New Zealand"}' />
+            <column name="description_i18n" value='{"ENG": "New Zealand", "FRA": "Nouvelle-Zélande"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="161" />
@@ -4288,7 +4288,7 @@
             <column name="description" value="Oman" />
             <column name="currency_id" valueNumeric="115" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Oman","ENG":"Oman"}' />
+            <column name="description_i18n" value='{"ENG": "Oman", "FRA": "Oman"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="162" />
@@ -4298,7 +4298,7 @@
             <column name="description" value="Panama" />
             <column name="currency_id" valueNumeric="120" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Panama","ENG":"Panama"}' />
+            <column name="description_i18n" value='{"ENG": "Panama", "FRA": "Panama"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="163" />
@@ -4308,7 +4308,7 @@
             <column name="description" value="Peru" />
             <column name="currency_id" valueNumeric="123" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Pérou","ENG":"Peru"}' />
+            <column name="description_i18n" value='{"ENG": "Peru", "FRA": "Pérou"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="164" />
@@ -4318,7 +4318,7 @@
             <column name="description" value="French Polynesia" />
             <column name="currency_id" valueNumeric="114" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Polynésie française","ENG":"French Polynesia"}' />
+            <column name="description_i18n" value='{"ENG": "French Polynesia", "FRA": "Polynésie française"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="165" />
@@ -4328,7 +4328,7 @@
             <column name="description" value="Papua New Guinea" />
             <column name="currency_id" valueNumeric="121" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='{"FRA":"Papouasie Nouvelle-Guinée","ENG":"Papua New Guinea"}' />
+            <column name="description_i18n" value='{"ENG": "Papua New Guinea", "FRA": "Papouasie-Nouvelle-Guinée"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="166" />
@@ -4338,7 +4338,7 @@
             <column name="description" value="Philippines" />
             <column name="currency_id" valueNumeric="124" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Philippines","ENG":"Philippines"}' />
+            <column name="description_i18n" value='{"ENG": "Philippines", "FRA": "Philippines"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="167" />
@@ -4348,7 +4348,7 @@
             <column name="description" value="Pakistan" />
             <column name="currency_id" valueNumeric="119" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Pakistan","ENG":"Pakistan"}' />
+            <column name="description_i18n" value='{"ENG": "Pakistan", "FRA": "Pakistan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="168" />
@@ -4358,17 +4358,17 @@
             <column name="description" value="Poland" />
             <column name="currency_id" valueNumeric="125" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Pologne","ENG":"Poland"}' />
+            <column name="description_i18n" value='{"ENG": "Poland", "FRA": "Pologne"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="169" />
             <column name="created" valueDate="2015-03-19 00:04:07.404" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="PM" />
-            <column name="description" value="Saint Pierre and Miquelon" />
+            <column name="description" value="St. Pierre and Miquelon" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"St. Pierre et Miquelon","ENG":"Saint Pierre and Miquelon"}' />
+            <column name="description_i18n" value='{"ENG": "St. Pierre and Miquelon", "FRA": "Saint-Pierre-et-Miquelon"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="170" />
@@ -4378,7 +4378,7 @@
             <column name="description" value="Pitcairn Islands" />
             <column name="currency_id" valueNumeric="72" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Pitcaïrn","ENG":"Pitcairn Islands"}' />
+            <column name="description_i18n" value='{"ENG": "Pitcairn Islands", "FRA": "Iles Pitcairn"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="171" />
@@ -4388,17 +4388,17 @@
             <column name="description" value="Puerto Rico" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="8" />
-            <column name="description_i18n" value='{"FRA":"Porto Rico","ENG":"Puerto Rico"}' />
+            <column name="description_i18n" value='{"ENG": "Puerto Rico", "FRA": "Porto Rico"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="172" />
             <column name="created" valueDate="2015-03-19 00:04:07.472" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="PS" />
-            <column name="description" value="Palestinian Territory, Occupied" />
+            <column name="description" value="Palestinian Territories" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Territoire Palestinien Occupé","ENG":"Palestinian Territory, Occupied"}' />
+            <column name="description_i18n" value='{"ENG": "Palestinian Territories", "FRA": "Territoires palestiniens"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="173" />
@@ -4408,7 +4408,7 @@
             <column name="description" value="Portugal" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Portugal","ENG":"Portugal"}' />
+            <column name="description_i18n" value='{"ENG": "Portugal", "FRA": "Portugal"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="174" />
@@ -4418,7 +4418,7 @@
             <column name="description" value="Palau" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Palau","ENG":"Palau"}' />
+            <column name="description_i18n" value='{"ENG": "Palau", "FRA": "Palaos"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="175" />
@@ -4428,7 +4428,7 @@
             <column name="description" value="Paraguay" />
             <column name="currency_id" valueNumeric="122" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Paraguay","ENG":"Paraguay"}' />
+            <column name="description_i18n" value='{"ENG": "Paraguay", "FRA": "Paraguay"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="176" />
@@ -4438,7 +4438,7 @@
             <column name="description" value="Qatar" />
             <column name="currency_id" valueNumeric="126" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Quatar","ENG":"Qatar"}' />
+            <column name="description_i18n" value='{"ENG": "Qatar", "FRA": "Qatar"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="177" />
@@ -4448,7 +4448,7 @@
             <column name="description" value="Réunion" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Réunion","ENG":"Réunion"}' />
+            <column name="description_i18n" value='{"ENG": "Réunion", "FRA": "La Réunion"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="178" />
@@ -4458,7 +4458,7 @@
             <column name="description" value="Romania" />
             <column name="currency_id" valueNumeric="128" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Romania","ENG":"Romania"}' />
+            <column name="description_i18n" value='{"ENG": "Romania", "FRA": "Roumanie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="179" />
@@ -4468,7 +4468,7 @@
             <column name="description" value="Russia" />
             <column name="currency_id" valueNumeric="129" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Russie (Fédération de)","ENG":"Russia"}' />
+            <column name="description_i18n" value='{"ENG": "Russia", "FRA": "Russie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="180" />
@@ -4478,7 +4478,7 @@
             <column name="description" value="Rwanda" />
             <column name="currency_id" valueNumeric="130" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Rwanda","ENG":"Rwanda"}' />
+            <column name="description_i18n" value='{"ENG": "Rwanda", "FRA": "Rwanda"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="181" />
@@ -4488,7 +4488,7 @@
             <column name="description" value="Saudi Arabia" />
             <column name="currency_id" valueNumeric="9" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Arabie Séoudite","ENG":"Saudi Arabia"}' />
+            <column name="description_i18n" value='{"ENG": "Saudi Arabia", "FRA": "Arabie saoudite"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="182" />
@@ -4498,7 +4498,7 @@
             <column name="description" value="Solomon Islands" />
             <column name="currency_id" valueNumeric="131" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Salomon (Îles)","ENG":"Solomon Islands"}' />
+            <column name="description_i18n" value='{"ENG": "Solomon Islands", "FRA": "Iles Salomon"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="183" />
@@ -4508,7 +4508,7 @@
             <column name="description" value="Seychelles" />
             <column name="currency_id" valueNumeric="136" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Seychelles","ENG":"Seychelles"}' />
+            <column name="description_i18n" value='{"ENG": "Seychelles", "FRA": "Seychelles"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="184" />
@@ -4518,7 +4518,7 @@
             <column name="description" value="Sudan" />
             <column name="currency_id" valueNumeric="21" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Soudan","ENG":"Sudan"}' />
+            <column name="description_i18n" value='{"ENG": "Sudan", "FRA": "Soudan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="185" />
@@ -4528,7 +4528,7 @@
             <column name="description" value="Sweden" />
             <column name="currency_id" valueNumeric="145" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Suède","ENG":"Sweden"}' />
+            <column name="description_i18n" value='{"ENG": "Sweden", "FRA": "Suède"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="186" />
@@ -4538,17 +4538,17 @@
             <column name="description" value="Singapore" />
             <column name="currency_id" valueNumeric="138" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Singapour","ENG":"Singapore"}' />
+            <column name="description_i18n" value='{"ENG": "Singapore", "FRA": "Singapour"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="187" />
             <column name="created" valueDate="2015-03-19 00:04:07.8" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="SH" />
-            <column name="description" value="Saint Helena" />
+            <column name="description" value="St. Helena" />
             <column name="currency_id" valueNumeric="144" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Ste Hélène","ENG":"Saint Helena"}' />
+            <column name="description_i18n" value='{"ENG": "St. Helena", "FRA": "Sainte-Hélène"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="188" />
@@ -4558,17 +4558,17 @@
             <column name="description" value="Slovenia" />
             <column name="currency_id" valueNumeric="140" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Slovénie","ENG":"Slovenia"}' />
+            <column name="description_i18n" value='{"ENG": "Slovenia", "FRA": "Slovénie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="189" />
             <column name="created" valueDate="2015-03-19 00:04:07.842" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="SJ" />
-            <column name="description" value="Svalbard" />
+            <column name="description" value="Svalbard and Jan Mayen" />
             <column name="currency_id" valueNumeric="31" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Svalbard et Jan Mayen (Îles)","ENG":"Svalbard"}' />
+            <column name="description_i18n" value='{"ENG": "Svalbard and Jan Mayen", "FRA": "Svalbard et Jan Mayen"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="190" />
@@ -4578,7 +4578,7 @@
             <column name="description" value="Slovakia" />
             <column name="currency_id" valueNumeric="139" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Slovaquie","ENG":"Slovakia"}' />
+            <column name="description_i18n" value='{"ENG": "Slovakia", "FRA": "Slovaquie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="191" />
@@ -4588,7 +4588,7 @@
             <column name="description" value="Sierra Leone" />
             <column name="currency_id" valueNumeric="137" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Sierra Léone","ENG":"Sierra Leone"}' />
+            <column name="description_i18n" value='{"ENG": "Sierra Leone", "FRA": "Sierra Leone"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="192" />
@@ -4598,7 +4598,7 @@
             <column name="description" value="San Marino" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"San Marin","ENG":"San Marino"}' />
+            <column name="description_i18n" value='{"ENG": "San Marino", "FRA": "Saint-Marin"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="193" />
@@ -4608,7 +4608,7 @@
             <column name="description" value="Senegal" />
             <column name="currency_id" valueNumeric="20" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Sénégal","ENG":"Senegal"}' />
+            <column name="description_i18n" value='{"ENG": "Senegal", "FRA": "Sénégal"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="194" />
@@ -4618,7 +4618,7 @@
             <column name="description" value="Somalia" />
             <column name="currency_id" valueNumeric="141" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Somalie","ENG":"Sénégal"}' />
+            <column name="description_i18n" value='{"ENG": "Somalia", "FRA": "Somalie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="195" />
@@ -4628,17 +4628,17 @@
             <column name="description" value="Suriname" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Surinam","ENG":"Suriname"}' />
+            <column name="description_i18n" value='{"ENG": "Suriname", "FRA": "Suriname"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="196" />
             <column name="created" valueDate="2015-03-19 00:04:08.004" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="ST" />
-            <column name="description" value="Santo Tomas and Principe" />
+            <column name="description" value="Sao Tomé and Príncipe" />
             <column name="currency_id" valueNumeric="134" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Sao Tomé et Principe","ENG":"Santo Tomas and Principe"}' />
+            <column name="description_i18n" value='{"ENG": "Sao Tomé and Príncipe", "FRA": "Sao Tomé-et-Principe"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="197" />
@@ -4648,7 +4648,7 @@
             <column name="description" value="El Salvador" />
             <column name="currency_id" valueNumeric="132" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Salvador","ENG":"El Salvador"}' />
+            <column name="description_i18n" value='{"ENG": "El Salvador", "FRA": "Salvador"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="198" />
@@ -4658,7 +4658,7 @@
             <column name="description" value="Syria" />
             <column name="currency_id" valueNumeric="148" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Syrie (République arabe syrienne)","ENG":"Syria"}' />
+            <column name="description_i18n" value='{"ENG": "Syria", "FRA": "Syrie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="199" />
@@ -4668,7 +4668,7 @@
             <column name="description" value="Swaziland" />
             <column name="currency_id" valueNumeric="147" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Swaziland","ENG":"Swaziland"}' />
+            <column name="description_i18n" value='{"ENG": "Swaziland", "FRA": "Swaziland"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="200" />
@@ -4678,7 +4678,7 @@
             <column name="description" value="Turks and Caicos Islands" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Turks et Caicos (Îles)","ENG":"Turks and Caicos Islands"}' />
+            <column name="description_i18n" value='{"ENG": "Turks and Caicos Islands", "FRA": "Iles Turques-et-Caïques"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="201" />
@@ -4688,17 +4688,17 @@
             <column name="description" value="Chad" />
             <column name="currency_id" valueNumeric="34" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Tchad","ENG":"Chad"}' />
+            <column name="description_i18n" value='{"ENG": "Chad", "FRA": "Tchad"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="202" />
             <column name="created" valueDate="2015-03-19 00:04:08.132" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="TF" />
-            <column name="description" value="French Southern and Antarctic Land" />
+            <column name="description" value="French Southern Territories" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Territoires Antarctiques français","ENG":"French Southern and Antarctic Land"}' />
+            <column name="description_i18n" value='{"ENG": "French Southern Territories", "FRA": "Terres australes françaises"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="203" />
@@ -4708,7 +4708,7 @@
             <column name="description" value="Togo" />
             <column name="currency_id" valueNumeric="20" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Togo","ENG":"Togo"}' />
+            <column name="description_i18n" value='{"ENG": "Togo", "FRA": "Togo"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="204" />
@@ -4718,7 +4718,7 @@
             <column name="description" value="Thailand" />
             <column name="currency_id" valueNumeric="153" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Thaïlande","ENG":"Thailand"}' />
+            <column name="description_i18n" value='{"ENG": "Thailand", "FRA": "Thaïlande"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="205" />
@@ -4728,7 +4728,7 @@
             <column name="description" value="Tajikistan" />
             <column name="currency_id" valueNumeric="149" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Tadjikistan","ENG":"Tajikistan"}' />
+            <column name="description_i18n" value='{"ENG": "Tajikistan", "FRA": "Tadjikistan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="206" />
@@ -4738,7 +4738,7 @@
             <column name="description" value="Tokelau" />
             <column name="currency_id" valueNumeric="72" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Tokelau","ENG":"Tokelau"}' />
+            <column name="description_i18n" value='{"ENG": "Tokelau", "FRA": "Tokélaou"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="207" />
@@ -4748,7 +4748,7 @@
             <column name="description" value="Turkmenistan" />
             <column name="currency_id" valueNumeric="157" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Turkménistan","ENG":"Turkmenistan"}' />
+            <column name="description_i18n" value='{"ENG": "Turkmenistan", "FRA": "Turkménistan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="208" />
@@ -4758,7 +4758,7 @@
             <column name="description" value="Tunisia" />
             <column name="currency_id" valueNumeric="156" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Tunisie","ENG":"Tunisia"}' />
+            <column name="description_i18n" value='{"ENG": "Tunisia", "FRA": "Tunisie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="209" />
@@ -4768,7 +4768,7 @@
             <column name="description" value="Tonga" />
             <column name="currency_id" valueNumeric="154" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Tonga","ENG":"Tonga"}' />
+            <column name="description_i18n" value='{"ENG": "Tonga", "FRA": "Tonga"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="210" />
@@ -4788,7 +4788,7 @@
             <column name="description" value="Turkey" />
             <column name="currency_id" valueNumeric="159" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Turquie","ENG":"Turkey"}' />
+            <column name="description_i18n" value='{"ENG": "Turkey", "FRA": "Turquie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="212" />
@@ -4798,7 +4798,7 @@
             <column name="description" value="Trinidad and Tobago" />
             <column name="currency_id" valueNumeric="155" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Trinidad et Tobago","ENG":"Trinidad and Tobago"}' />
+            <column name="description_i18n" value='{"ENG": "Trinidad and Tobago", "FRA": "Trinité-et-Tobago"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="213" />
@@ -4808,7 +4808,7 @@
             <column name="description" value="Tuvalu" />
             <column name="currency_id" valueNumeric="13" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Tuvalu","ENG":"Tuvalu"}' />
+            <column name="description_i18n" value='{"ENG": "Tuvalu", "FRA": "Tuvalu"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="214" />
@@ -4818,7 +4818,7 @@
             <column name="description" value="Taiwan" />
             <column name="currency_id" valueNumeric="150" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Taiwan","ENG":"Taiwan"}' />
+            <column name="description_i18n" value='{"ENG": "Taiwan", "FRA": "Taïwan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="215" />
@@ -4828,7 +4828,7 @@
             <column name="description" value="Tanzania" />
             <column name="currency_id" valueNumeric="151" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Tanzanie","ENG":"Tanzania"}' />
+            <column name="description_i18n" value='{"ENG": "Tanzania", "FRA": "Tanzanie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="216" />
@@ -4838,7 +4838,7 @@
             <column name="description" value="Ukraine" />
             <column name="currency_id" valueNumeric="160" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Ukraine","ENG":"Ukraine"}' />
+            <column name="description_i18n" value='{"ENG": "Ukraine", "FRA": "Ukraine"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="217" />
@@ -4848,7 +4848,7 @@
             <column name="description" value="Uganda" />
             <column name="currency_id" valueNumeric="117" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Ouganda","ENG":"Uganda"}' />
+            <column name="description_i18n" value='{"ENG": "Uganda", "FRA": "Ouganda"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="218" />
@@ -4858,17 +4858,17 @@
             <column name="description" value="United Kingdom" />
             <column name="currency_id" valueNumeric="65" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Royaume-Uni","ENG":"United Kingdom"}' />
+            <column name="description_i18n" value='{"ENG": "United Kingdom", "FRA": "Royaume-Uni"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="219" />
             <column name="created" valueDate="2015-03-19 00:04:08.505" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="UM" />
-            <column name="description" value="United States Minor Outlying Island" />
+            <column name="description" value="U.S. Outlying Islands" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Territoires non incorporés des États-Unis","ENG":"United States Minor Outlying Island"}' />
+            <column name="description_i18n" value='{"ENG": "U.S. Outlying Islands", "FRA": "Iles mineures éloignées des Etats-Unis"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="220" />
@@ -4878,7 +4878,7 @@
             <column name="description" value="United States" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Etats-Unis d Amérique","ENG":"United States"}' />
+            <column name="description_i18n" value='{"ENG": "United States", "FRA": "Etats-Unis"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="221" />
@@ -4888,7 +4888,7 @@
             <column name="description" value="Uruguay" />
             <column name="currency_id" valueNumeric="161" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Uruguay","ENG":"Uruguay"}' />
+            <column name="description_i18n" value='{"ENG": "Uruguay", "FRA": "Uruguay"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="222" />
@@ -4898,27 +4898,27 @@
             <column name="description" value="Uzbekistan" />
             <column name="currency_id" valueNumeric="118" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Ouzbékistan","ENG":"Uzbekistan"}' />
+            <column name="description_i18n" value='{"ENG": "Uzbekistan", "FRA": "Ouzbékistan"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="223" />
             <column name="created" valueDate="2015-03-19 00:04:08.599" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="VA" />
-            <column name="description" value="Holy See Vatican City" />
+            <column name="description" value="Vatican City" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Vatican","ENG":"Holy See Vatican City"}' />
+            <column name="description_i18n" value='{"ENG": "Vatican City", "FRA": "Etat de la Cité du Vatican"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="224" />
             <column name="created" valueDate="2015-03-19 00:04:08.621" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="VC" />
-            <column name="description" value="Saint Vincent and the Grenadines" />
+            <column name="description" value="St. Vincent and Grenadines" />
             <column name="currency_id" valueNumeric="7" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Saint Vincent et Grenadines","ENG":"Saint Vincent and the Grenadines"}' />
+            <column name="description_i18n" value='{"ENG": "St. Vincent and Grenadines", "FRA": "Saint-Vincent-et-les-Grenadines"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="225" />
@@ -4928,7 +4928,7 @@
             <column name="description" value="Venezuela" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Vénézuela","ENG":"Venezuela"}' />
+            <column name="description_i18n" value='{"ENG": "Venezuela", "FRA": "Venezuela"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="226" />
@@ -4938,17 +4938,17 @@
             <column name="description" value="British Virgin Islands" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Vierges (Îles) - RU","ENG":"British Virgin Islands"}' />
+            <column name="description_i18n" value='{"ENG": "British Virgin Islands", "FRA": "Iles Vierges britanniques"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="227" />
             <column name="created" valueDate="2015-03-19 00:04:08.683" />
             <column name="version" valueNumeric="1" />
             <column name="country_code" value="VI" />
-            <column name="description" value="Virgin Islands" />
+            <column name="description" value="U.S. Virgin Islands" />
             <column name="currency_id" valueNumeric="49" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Vierges (Îles) - EU","ENG":"Virgin Islands"}' />
+            <column name="description_i18n" value='{"ENG": "U.S. Virgin Islands", "FRA": "Iles Vierges des Etats-Unis"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="228" />
@@ -4958,7 +4958,7 @@
             <column name="description" value="Vietnam" />
             <column name="currency_id" valueNumeric="164" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Vietnam","ENG":"Vietnam"}' />
+            <column name="description_i18n" value='{"ENG": "Vietnam", "FRA": "Vietnam"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="229" />
@@ -4968,7 +4968,7 @@
             <column name="description" value="Vanuatu" />
             <column name="currency_id" valueNumeric="162" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Vanuatu","ENG":"Vanuatu"}' />
+            <column name="description_i18n" value='{"ENG": "Vanuatu", "FRA": "Vanuatu"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="230" />
@@ -4978,7 +4978,7 @@
             <column name="description" value="Wallis and Futuna" />
             <column name="currency_id" valueNumeric="114" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Wallis et Futuna (Îles)","ENG":"Wallis and Futuna"}' />
+            <column name="description_i18n" value='{"ENG": "Wallis and Futuna", "FRA": "Wallis-et-Futuna"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="231" />
@@ -4988,7 +4988,7 @@
             <column name="description" value="Samoa" />
             <column name="currency_id" valueNumeric="133" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Samoa","ENG":"Samoa"}' />
+            <column name="description_i18n" value='{"ENG": "Samoa", "FRA": "Samoa"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="232" />
@@ -4998,7 +4998,7 @@
             <column name="description" value="Yemen" />
             <column name="currency_id" valueNumeric="165" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Yemen","ENG":"Yemen"}' />
+            <column name="description_i18n" value='{"ENG": "Yemen", "FRA": "Yémen"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="233" />
@@ -5008,7 +5008,7 @@
             <column name="description" value="Mayotte" />
             <column name="currency_id" valueNumeric="5" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Mayotte","ENG":"Mayotte"}' />
+            <column name="description_i18n" value='{"ENG": "Mayotte", "FRA": "Mayotte"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="234" />
@@ -5028,7 +5028,7 @@
             <column name="description" value="South Africa" />
             <column name="currency_id" valueNumeric="2" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Afrique du Sud","ENG":"South Africa"}' />
+            <column name="description_i18n" value='{"ENG": "South Africa", "FRA": "Afrique du Sud"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="236" />
@@ -5038,7 +5038,7 @@
             <column name="description" value="Zambia" />
             <column name="currency_id" valueNumeric="166" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Zambie","ENG":"Zambia"}' />
+            <column name="description_i18n" value='{"ENG": "Zambia", "FRA": "Zambie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="237" />
@@ -5048,8 +5048,9 @@
             <column name="description" value="Zimbabwe" />
             <column name="currency_id" valueNumeric="167" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"FRA":"Zimbabwe","ENG":"Zimbabwe"}' />
+            <column name="description_i18n" value='{"ENG": "Zimbabwe", "FRA": "Zimbabwe"}' />
         </insert>
+		
         <insert tableName="adm_country">
             <column name="id" valueNumeric="-238" />
             <column name="created" valueDate="2015-03-19 00:04:08.896" />
@@ -5058,123 +5059,134 @@
             <column name="description" value="Antarctica" />
 			<column name="currency_id" valueNumeric="49" />
 			<column name="language_id" valueNumeric="2" />
+			<column name="description_i18n" value='{"ENG": "Antarctica", "FRA": "Antarctique"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-239" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="AX" />
-		            <column name="description" value="Åland Islands" />
-					<column name="language_id" valueNumeric="30" />
-					<column name="currency_id" valueNumeric="5" />
+		    <column name="id" valueNumeric="-239" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="AX" />
+		    <column name="description" value="Aland Islands" />
+			<column name="language_id" valueNumeric="30" />
+			<column name="currency_id" valueNumeric="5" />
+			<column name="description_i18n" value='{"ENG": "Aland Islands", "FRA": "Iles Aland"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-240" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="BL" />
-		            <column name="description" value="Saint Barthélemy" />
-					<column name="currency_id" valueNumeric="5" />
-					<column name="language_id" valueNumeric="12" />
+		    <column name="id" valueNumeric="-240" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="BL" />
+		    <column name="description" value="St. Barthélemy" />
+			<column name="currency_id" valueNumeric="5" />
+			<column name="language_id" valueNumeric="12" />
+			<column name="description_i18n" value='{"ENG": "St. Barthélemy", "FRA": "Saint-Barthélemy"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-241" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="BQ" />
-		            <column name="description" value="Bonaire, Sint Eustatius and Saba" />
-					<column name="currency_id" valueNumeric="5" />
-					<column name="language_id" valueNumeric="21" />
-		</insert>
-		
-		
-		
+		    <column name="id" valueNumeric="-241" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="BQ" />
+		    <column name="description" value="Caribbean Netherlands" />
+			<column name="currency_id" valueNumeric="5" />
+			<column name="language_id" valueNumeric="21" />
+			<column name="description_i18n" value='{"ENG": "Caribbean Netherlands", "FRA": "Pays-Bas caribéens"}' />
+		</insert>	
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-242" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="SX" />
-		            <column name="description" value="Sint Maarten (Dutch part)" />
-					<column name="currency_id" valueNumeric="5" />
-					<column name="language_id" valueNumeric="21" />
-		</insert>
-		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-243" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="GG" />
-		            <column name="description" value="Guernsey" />
-					<column name="currency_id" valueNumeric="65" />
-					<column name="language_id" valueNumeric="2" />
+		    <column name="id" valueNumeric="-242" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="SX" />
+		    <column name="description" value="Sint Maarten" />
+			<column name="currency_id" valueNumeric="5" />
+			<column name="language_id" valueNumeric="21" />
+			<column name="description_i18n" value='{"ENG": "Sint Maarten", "FRA": "Saint-Martin (partie néerlandaise)"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-244" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="IM" />
-		            <column name="description" value="Isle of Man" />
-					<column name="currency_id" valueNumeric="65" />
-					<column name="language_id" valueNumeric="2" />
+		    <column name="id" valueNumeric="-243" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="GG" />
+		    <column name="description" value="Guernsey" />
+			<column name="currency_id" valueNumeric="65" />
+			<column name="language_id" valueNumeric="2" />
+			<column name="description_i18n" value='{"ENG": "Guernsey", "FRA": "Guernesey"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-245" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="JE" />
-		            <column name="description" value="Jersey" />
-					<column name="currency_id" valueNumeric="65" />
-					<column name="language_id" valueNumeric="2" />
+		    <column name="id" valueNumeric="-244" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="IM" />
+		    <column name="description" value="Isle of Man" />
+			<column name="currency_id" valueNumeric="65" />
+			<column name="language_id" valueNumeric="2" />
+			<column name="description_i18n" value='{"ENG": "Isle of Man", "FRA": "Ile de Man"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-246" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="ME" />
-		            <column name="description" value="Montenegro" />
-					<column name="currency_id" valueNumeric="5" />
+		    <column name="id" valueNumeric="-245" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="JE" />
+		    <column name="description" value="Jersey" />
+			<column name="currency_id" valueNumeric="65" />
+			<column name="language_id" valueNumeric="2" />
+			<column name="description_i18n" value='{"ENG": "Jersey", "FRA": "Jersey"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-247" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="MF" />
-		            <column name="description" value="Saint Martin (French part)" />
+		    <column name="id" valueNumeric="-246" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="ME" />
+		    <column name="description" value="Montenegro" />
+			<column name="currency_id" valueNumeric="5" />
+			<column name="description_i18n" value='{"ENG": "Montenegro", "FRA": "Monténégro"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-248" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="RS" />
-		            <column name="description" value="Serbia" />
-					<column name="language_id" valueNumeric="27" />
-					<column name="currency_id" valueNumeric="5" />
+		    <column name="id" valueNumeric="-247" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="MF" />
+		    <column name="description" value="St. Martin" />
+			<column name="description_i18n" value='{"ENG": "St. Martin", "FRA": "Saint-Martin"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-249" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="SS" />
-		            <column name="description" value="South Sudan" />
-					<column name="currency_id" valueNumeric="-176" />
-					<column name="language_id" valueNumeric="2" />
+		    <column name="id" valueNumeric="-248" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="RS" />
+		    <column name="description" value="Serbia" />
+			<column name="language_id" valueNumeric="27" />
+			<column name="currency_id" valueNumeric="5" />
+			<column name="description_i18n" value='{"ENG": "Serbia", "FRA": "Serbie"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-250" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="1A" />
-		            <column name="description" value="Kosovo" />
-					<column name="language_id" valueNumeric="27" />
-					<column name="currency_id" valueNumeric="5" />
+		    <column name="id" valueNumeric="-249" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="SS" />
+		    <column name="description" value="South Sudan" />
+			<column name="currency_id" valueNumeric="-176" />
+			<column name="language_id" valueNumeric="2" />
+			<column name="description_i18n" value='{"ENG": "South Sudan", "FRA": "Soudan du Sud"}' />
 		</insert>
 		<insert tableName="adm_country">
-		            <column name="id" valueNumeric="-251" />
-		            <column name="created" valueDate="2015-03-19 00:04:08.896" />
-		            <column name="version" valueNumeric="1" />
-		            <column name="country_code" value="XI" />
-		            <column name="description" value="United Kingdom (Northern Ireland)" />					
-					<column name="currency_id" valueNumeric="65" />
-					<column name="language_id" valueNumeric="2" />
+		    <column name="id" valueNumeric="-250" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="1A" />
+		    <column name="description" value="Kosovo" />
+			<column name="language_id" valueNumeric="27" />
+			<column name="currency_id" valueNumeric="5" />
+			<column name="description_i18n" value='{"ENG": "Kosovo", "FRA": "Kosovo"}' />
+		</insert>
+		<insert tableName="adm_country">
+		    <column name="id" valueNumeric="-251" />
+		    <column name="created" valueDate="2015-03-19 00:04:08.896" />
+		    <column name="version" valueNumeric="1" />
+		    <column name="country_code" value="XI" />
+		    <column name="description" value="Northern Ireland" />					
+			<column name="currency_id" valueNumeric="65" />
+			<column name="language_id" valueNumeric="2" />
+			<column name="description_i18n" value='{"ENG": "Northern Ireland", "FRA": "irlande du nord"}' />
 		</insert>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-data-calendarDays">
@@ -13040,6 +13052,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 	<changeSet id="#INTRD-19685_20231130" author="AbdellatifBARI" />
 	<changeSet id="#INTRD-20278_20240109" author="AbdellatifBARI" />
 	<changeSet id="#INTRD-19279_update-currencies" author="a.rouaguebe" />
+	<changeSet id="#INTRD-20753_20240118" author="aeljaouhari" />
 
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->
     <changeSet id="#liquibase_hack_data" author="AbdelmounaimAkadid">

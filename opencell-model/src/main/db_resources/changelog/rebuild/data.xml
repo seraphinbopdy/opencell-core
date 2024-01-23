@@ -3048,7 +3048,7 @@
             <column name="description" value="Congo - Kinshasa" />
             <column name="currency_id" valueNumeric="43" />
             <column name="language_id" valueNumeric="12" />
-            <column name="description_i18n" value='"ENG": "Congo - Kinshasa", "FRA": "Congo-Kinshasa"' />
+            <column name="description_i18n" value='{"ENG": "Congo - Kinshasa", "FRA": "Congo-Kinshasa"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="38" />
@@ -4078,7 +4078,7 @@
             <column name="description" value="Mauritania" />
             <column name="currency_id" valueNumeric="104" />
             <column name="language_id" valueNumeric="2" />
-            <column name="description_i18n" value='{"ENG": "Mauritania", "FRA": "Mauritanie"}}' />
+            <column name="description_i18n" value='{"ENG": "Mauritania", "FRA": "Mauritanie"}' />
         </insert>
         <insert tableName="adm_country">
             <column name="id" valueNumeric="141" />

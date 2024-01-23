@@ -92,7 +92,7 @@ public class Attribute extends EnableBusinessCFEntity{
      * list of tag attached
      */   
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "cpq_attribute_charge", joinColumns = @JoinColumn(name = "attribute_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
     private Set<ChargeTemplate> chargeTemplates = new HashSet<>();
     

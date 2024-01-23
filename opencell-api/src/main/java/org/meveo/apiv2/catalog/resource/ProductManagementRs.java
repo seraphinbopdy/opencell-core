@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.meveo.api.dto.response.cpq.GetProductDtoResponse;
 import org.meveo.apiv2.catalog.SimpleOneshotProductDto;
+import org.meveo.apiv2.catalog.SimpleRecurrentProductDto;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -27,11 +28,22 @@ public interface ProductManagementRs {
             responses = {
                     @ApiResponse(responseCode="200", description = "the product successfully created",
                             content = @Content(schema = @Schema(implementation = GetProductDtoResponse.class))),
-                    @ApiResponse(responseCode = "412", description = "the product with code is missing"),
-                    @ApiResponse(responseCode = "302", description = "the product already existe with the given code"),
-                    @ApiResponse(responseCode = "400", description = "Internat error"),
-                    @ApiResponse(responseCode = "404", description = "one of the entites doesn't exist : ")
+                    @ApiResponse(responseCode = "400", description = "the product already existe with the given code")
             })
     Response createProductSimpleOneshot(SimpleOneshotProductDto postData);
-    
+
+
+
+
+    @POST
+    @Path("/createProductSimpleRecurrent")
+    @Operation(summary = "This endpoint allows to create a new product",
+            tags = { "Product" },
+            description ="creation of the product",
+            responses = {
+                    @ApiResponse(responseCode="200", description = "the product successfully created",
+                            content = @Content(schema = @Schema(implementation = GetProductDtoResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "the product already existe with the given code")
+            })
+    Response createProductSimpleRecurrent(SimpleRecurrentProductDto postData);
 }

@@ -26,11 +26,7 @@ import org.meveo.model.dunning.DunningPolicyRule;
 import org.meveo.model.dunning.DunningPolicyRuleLine;
 import org.meveo.service.admin.impl.CurrencyService;
 import org.meveo.service.audit.logging.AuditLogService;
-import org.meveo.service.payments.impl.DunningLevelService;
-import org.meveo.service.payments.impl.DunningPolicyLevelService;
-import org.meveo.service.payments.impl.DunningPolicyRuleLineService;
-import org.meveo.service.payments.impl.DunningPolicyRuleService;
-import org.meveo.service.payments.impl.DunningPolicyService;
+import org.meveo.service.payments.impl.*;
 
 public class DunningPolicyApiService implements ApiService<DunningPolicy> {
 
@@ -54,6 +50,9 @@ public class DunningPolicyApiService implements ApiService<DunningPolicy> {
 
     @Inject
     private DunningPolicyRuleLineService dunningPolicyRuleLineService;
+
+    @Inject
+    private DunningSettingsService dunningSettingsService;
 
     @Inject
     private CurrencyService currencyService;
@@ -98,6 +97,10 @@ public class DunningPolicyApiService implements ApiService<DunningPolicy> {
             if(dunningPolicy.getPolicyPriority() != null && dunningPolicyService.checkIfSamePriorityExists(dunningPolicy.getPolicyPriority())) {
                 throw new BusinessApiException("Policy with priority " + dunningPolicy.getPolicyPriority() + " already exists");
             }
+
+            //Set dunning mode in dunning policy
+            dunningPolicy.setType(dunningSettingsService.findLastOne().getDunningMode());
+
             dunningPolicyService.create(dunningPolicy);
             auditLogService.trackOperation("create", new Date(), dunningPolicy, dunningPolicy.getPolicyName());
             return findByCode(dunningPolicy.getPolicyName()).get();

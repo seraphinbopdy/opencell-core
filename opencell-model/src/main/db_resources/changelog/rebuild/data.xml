@@ -12791,8 +12791,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="created" valueComputed="${db.current.time}"/>
 		    <column name="category" value="performance"/>
 		    <column name="property_group" value="pricePlanFilters"/>
-		    <column name="property_type" value="java.lang.Boolean"/>
-		    <column name="property_value" value="false"/>
+		    <column name="property_type" value="java.lang.Integer"/>
+		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria1Value"/>
 		    <column name="description" value="pricePlanFilters.enableCriteria1Value"/>
@@ -12804,8 +12804,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="created" valueComputed="${db.current.time}"/>
 		    <column name="category" value="performance"/>
 		    <column name="property_group" value="pricePlanFilters"/>
-		    <column name="property_type" value="java.lang.Boolean"/>
-		    <column name="property_value" value="false"/>
+		    <column name="property_type" value="java.lang.Integer"/>
+		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria2Value"/>
 		    <column name="description" value="pricePlanFilters.enableCriteria2Value"/>
@@ -12817,8 +12817,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="created" valueComputed="${db.current.time}"/>
 		    <column name="category" value="performance"/>
 		    <column name="property_group" value="pricePlanFilters"/>
-		    <column name="property_type" value="java.lang.Boolean"/>
-		    <column name="property_value" value="false"/>
+		    <column name="property_type" value="java.lang.Integer"/>
+		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria3Value"/>
 		    <column name="description" value="pricePlanFilters.enableCriteria3Value"/>

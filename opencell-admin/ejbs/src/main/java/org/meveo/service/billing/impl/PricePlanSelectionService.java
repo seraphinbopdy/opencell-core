@@ -1,10 +1,12 @@
 package org.meveo.service.billing.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,12 +17,11 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.hibernate.annotations.QueryHints;
 import org.meveo.admin.exception.InvalidELException;
 import org.meveo.admin.exception.NoPricePlanException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.commons.utils.ELUtils;
-import org.meveo.commons.utils.ListUtils;
-import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.EntityManagerWrapper;
@@ -44,6 +45,7 @@ import org.meveo.model.cpq.AttributeValue;
 import org.meveo.model.cpq.enums.PriceVersionDateSettingEnum;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.ValueExpressionWrapper;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +64,9 @@ public class PricePlanSelectionService implements Serializable {
     private AttributeInstanceService attributeInstanceService;
 
     @Inject
+    private AdvancedSettingsService advancedSettingsService;
+
+    @Inject
     private ELUtils elUtils;
 
     public EntityManager getEntityManager() {
@@ -69,7 +74,7 @@ public class PricePlanSelectionService implements Serializable {
     }
 
     /**
-     * Determine a price plan that match a wallet operation and buyer country and currency
+     * Determine a first/highest priority price plan that match a wallet operation and buyer country and currency
      * 
      * @param bareWo Wallet operation to determine price for
      * @param buyerCountryId Buyer country id
@@ -80,64 +85,39 @@ public class PricePlanSelectionService implements Serializable {
      */
     public PricePlanMatrix determineDefaultPricePlan(WalletOperation bareWo, Long buyerCountryId, TradingCurrency buyerCurrency) throws NoPricePlanException, InvalidELException {
 
-        long subscriptionAge = 0;
-        Date subscriptionDate = DateUtils.truncateTime(bareWo.getSubscriptionDate());
-        Date operationDate = DateUtils.truncateTime(bareWo.getOperationDate());
-        if (subscriptionDate != null && operationDate != null) {
-            subscriptionAge = DateUtils.monthsBetween(operationDate, DateUtils.addDaysToDate(subscriptionDate, -1));
-        }
-
-        Date startDate = operationDate;
-        Date endDate = operationDate;
-        RecurringChargeTemplate recurringChargeTemplate = getRecurringChargeTemplateFromChargeInstance(bareWo.getChargeInstance());
-
-        if ((recurringChargeTemplate != null && recurringChargeTemplate.isProrataOnPriceChange() && bareWo.getEndDate().after(bareWo.getStartDate()))) {
-            startDate = DateUtils.truncateTime(bareWo.getStartDate());
-            endDate = DateUtils.truncateTime(bareWo.getEndDate());
-        }
-
-        EntityManager em = getEntityManager();
-
-        Object[] params = new Object[] { "chargeCode", bareWo.getCode(), "sellerId", bareWo.getSeller().getId(), "tradingCountryId", buyerCountryId, "tradingCurrencyId",
-                buyerCurrency != null ? buyerCurrency.getId() : null, "subscriptionDate", subscriptionDate, "subscriptionAge", subscriptionAge, "operationDate", operationDate, "param1", bareWo.getParameter1(), "param2",
-                bareWo.getParameter2(), "param3", bareWo.getParameter3(), "offerId", bareWo.getOfferTemplate() != null ? bareWo.getOfferTemplate().getId() : null, "quantity", bareWo.getQuantity(), "startDate", startDate,
-                "endDate", endDate };
-
-        // When matching in DB only, no PricePlanMatrix.criteriaEl and validityCalendar fields will be consulted and the highest priority will be chosen
-        boolean matchDbOnly = ParamBean.getInstance().getPropertyAsBoolean("pricePlan.default.matchDBOnly", false);
-
-        if (matchDbOnly) {
-            TypedQuery<PricePlanMatrix> query = em.createNamedQuery("PricePlanMatrix.getActivePricePlansByChargeCodeForRatingMatchDB", PricePlanMatrix.class);
-
-            for (int i = 0; i < 28; i = i + 2) {
-                query.setParameter((String) params[i], params[i + 1]);
-            }
-            query.setMaxResults(1);
-
-            try {
-                PricePlanMatrix pricePlan = query.getSingleResult();
-                return pricePlan;
-            } catch (NoResultException e) {
-                throw new NoPricePlanException("No active price plan matched for parameters: " + StringUtils.concatenate(params));
-            }
-
-        } else {
-            TypedQuery<PricePlanMatrixForRating> query = em.createNamedQuery("PricePlanMatrix.getActivePricePlansByChargeCodeForRating", PricePlanMatrixForRating.class);
-
-            for (int i = 0; i < 28; i = i + 2) {
-                query.setParameter((String) params[i], params[i + 1]);
-            }
-
-            List<PricePlanMatrixForRating> chargePricePlans = query.getResultList();
-            PricePlanMatrixForRating pricePlan = matchPricePlan(chargePricePlans, bareWo, buyerCountryId, buyerCurrency);
-            if (pricePlan == null) {
-                throw new NoPricePlanException("No active price plan matched for parameters: " + StringUtils.concatenate(params));
-            }
-            return em.getReference(PricePlanMatrix.class, pricePlan.getId());
-        }
+        List<PricePlanMatrix> pps = getActivePricePlansByChargeCodeForRating(bareWo, buyerCountryId, buyerCurrency, true);
+        return pps.get(0);
     }
 
+    /**
+     * Determine all price plans that match a wallet operation and buyer country and currency
+     * 
+     * @param bareWo Wallet operation to determine price for
+     * @param buyerCountryId Buyer country id
+     * @param buyerCurrency Buyer currency
+     * @return A list of Price plans matched
+     * @throws NoPricePlanException No price plan line was matched
+     * @throws InvalidELException Failed to evaluate EL expression
+     */
     public List<PricePlanMatrix> determineAvailablePricePlansForRating(WalletOperation bareWo, Long buyerCountryId, TradingCurrency buyerCurrency) {
+
+        List<PricePlanMatrix> pps = getActivePricePlansByChargeCodeForRating(bareWo, buyerCountryId, buyerCurrency, false);
+
+        return pps;
+    }
+
+    /**
+     * Determine price plans that match a wallet operation and buyer country and currency
+     * 
+     * @param bareWo Wallet operation to determine price for
+     * @param buyerCountryId Buyer country id
+     * @param buyerCurrency Buyer currency
+     * @param returnFirst Return only the best matched price plan - the first or with a highest priority
+     * @return A list of Price plans matched
+     * @throws NoPricePlanException No price plan line was matched
+     * @throws InvalidELException Failed to evaluate EL expression
+     */
+    private List<PricePlanMatrix> getActivePricePlansByChargeCodeForRating(WalletOperation bareWo, Long buyerCountryId, TradingCurrency buyerCurrency, boolean returnFirst) {
 
         long subscriptionAge = 0;
         Date subscriptionDate = DateUtils.truncateTime(bareWo.getSubscriptionDate());
@@ -155,64 +135,215 @@ public class PricePlanSelectionService implements Serializable {
             endDate = DateUtils.truncateTime(bareWo.getEndDate());
         }
 
-        EntityManager em = getEntityManager();
+        Map<String, Object> advancedSettingsValues = advancedSettingsService.getAdvancedSettingsMapByGroup("pricePlanFilters", Object.class);
 
-        Object[] params = new Object[] { "chargeCode", bareWo.getCode(), "sellerId", bareWo.getSeller().getId(), "tradingCountryId", buyerCountryId, "tradingCurrencyId",
-                buyerCurrency != null ? buyerCurrency.getId() : null, "subscriptionDate", subscriptionDate, "subscriptionAge", subscriptionAge, "operationDate", operationDate, "param1", bareWo.getParameter1(), "param2",
-                bareWo.getParameter2(), "param3", bareWo.getParameter3(), "offerId", bareWo.getOfferTemplate() != null ? bareWo.getOfferTemplate().getId() : null, "quantity", bareWo.getQuantity(), "startDate", startDate,
-                "endDate", endDate };
+        // A short match is data filtering in DB side only
+        // A long match requires an additional record filtering in code once data is retrieved from DB
 
-        // When matching in DB only, no PricePlanMatrix.criteriaEl and validityCalendar fields will be consulted and the highest priority will be chosen
-        boolean matchDbOnly = ParamBean.getInstance().getPropertyAsBoolean("pricePlan.default.matchDBOnly", false);
+        boolean filterByCriteria1ValueInCode = advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value") instanceof Integer && 2 == (Integer) advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value");
+        boolean filterByCriteria2ValueInCode = advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value") instanceof Integer && 2 == (Integer) advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value");
+        boolean filterByCriteria3ValueInCode = advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value") instanceof Integer && 2 == (Integer) advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value");
+        boolean filterByValidityCalendarInCode = (Boolean) advancedSettingsValues.get("pricePlanFilters.enableValidityCalendar");
+        boolean filterByCriteriaELInCode = (Boolean) advancedSettingsValues.get("pricePlanFilters.enableCriteriaEL");
 
-        if (matchDbOnly) {
-            TypedQuery<PricePlanMatrix> query = em.createNamedQuery("PricePlanMatrix.getActivePricePlansByChargeCodeForRatingMatchDB", PricePlanMatrix.class);
+        boolean enablePPFilters = (Boolean) advancedSettingsValues.get("pricePlanFilters.enablePricePlanFilters");
 
-            for (int i = 0; i < 28; i = i + 2) {
-                query.setParameter((String) params[i], params[i + 1]);
-            }
+        boolean matchLong = enablePPFilters && (filterByCriteria1ValueInCode || filterByCriteria2ValueInCode || filterByCriteria3ValueInCode || filterByValidityCalendarInCode || filterByCriteriaELInCode);
 
-            return query.getResultList();
-
+        StringBuilder queryBuilder = null;
+        if (matchLong) {
+            queryBuilder = new StringBuilder(
+                "SELECT new org.meveo.model.catalog.PricePlanMatrixForRating(id,  code, offerTemplate.id,  startSubscriptionDate,  endSubscriptionDate,  startRatingDate,  endRatingDate,  minQuantity, "
+                        + "maxQuantity, minSubscriptionAgeInMonth, maxSubscriptionAgeInMonth,  criteria1Value,  criteria2Value,  criteria3Value,  criteriaEL,  amountWithoutTax, "
+                        + "amountWithTax,  amountWithoutTaxEL,  amountWithTaxEL, tradingCurrency.id, tradingCountry.id,  priority, seller.id, validityCalendar.id, sequence, scriptInstance.id, "
+                        + "totalAmountEL,  minimumAmountEL,  invoiceSubCategoryEL,  validityFrom,  validityDate) from PricePlanMatrix ppm join ppm.chargeTemplates as ct WHERE ppm.disabled = false AND ct.code = :chargeCode");
         } else {
-            TypedQuery<PricePlanMatrixForRating> query = em.createNamedQuery("PricePlanMatrix.getActivePricePlansByChargeCodeForRating", PricePlanMatrixForRating.class);
+            queryBuilder = new StringBuilder("SELECT ppm FROM PricePlanMatrix ppm join ppm.chargeTemplates as ct WHERE ppm.disabled = false AND ct.code = :chargeCode");
+        }
 
-            for (int i = 0; i < 28; i = i + 2) {
-                query.setParameter((String) params[i], params[i + 1]);
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("chargeCode", bareWo.getCode());
+
+        if (enablePPFilters) {
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableSeller")) {
+                queryBuilder.append(" AND (seller.id = :sellerId OR seller.id IS NULL)");
+                queryParams.put("sellerId", bareWo.getSeller().getId());
             }
 
-            List<PricePlanMatrixForRating> chargePricePlans = query.getResultList();
-            List<Long> matchingPPMs = chargePricePlans.stream()
-                                                 .filter(ppm -> isMatchingPricePlan(ppm, bareWo))
-                                                 .map(PricePlanMatrixForRating::getId)
-                                                 .collect(Collectors.toList());
-            if (ListUtils.isEmtyCollection(matchingPPMs)) {
-                throw new NoPricePlanException("No active price plan matched for parameters: " + StringUtils.concatenate(params));
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableOfferTemplate")) {
+                queryBuilder.append(" AND (offerTemplate.id = :offerId OR offerTemplate.id IS NULL)");
+                queryParams.put("offerId", bareWo.getOfferTemplate() != null ? bareWo.getOfferTemplate().getId() : null);
             }
 
-            List<PricePlanMatrix> result = em.createQuery("FROM PricePlanMatrix WHERE id in :ids", PricePlanMatrix.class)
-                                          .setParameter("ids", matchingPPMs)
-                                          .getResultList();
-            result.sort(Comparator.comparingInt(a -> matchingPPMs.indexOf(a.getId())));
-            return result;
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableTradingCountry")) {
+                queryBuilder.append(" AND (tradingCountry.id = :tradingCountryId OR tradingCountry.id IS NULL)");
+                queryParams.put("tradingCountryId", buyerCountryId);
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableTradingCurrency")) {
+                queryBuilder.append(" AND (tradingCurrency.id = :tradingCurrencyId OR tradingCurrency.id IS NULL)");
+                queryParams.put("tradingCurrencyId", buyerCurrency != null ? buyerCurrency.getId() : null);
+            }
+
+            // Value of FALSE or 1 will filter by criteria1Value property in DB
+            if ((advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value") instanceof Boolean && (Boolean) advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value"))
+                    || (advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value") instanceof Integer && 1 == (Integer) advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value"))) {
+                queryBuilder.append(" AND (criteria1Value = :param1 OR criteria1Value IS NULL)");
+                queryParams.put("param1", bareWo.getParameter1());
+            }
+
+            // Value of FALSE or 1 will filter by criteria2Value property in DB
+            if ((advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value") instanceof Boolean && (Boolean) advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value"))
+                    || (advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value") instanceof Integer && 1 == (Integer) advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value"))) {
+                queryBuilder.append(" AND (criteria2Value = :param2 OR criteria2Value IS NULL)");
+                queryParams.put("param2", bareWo.getParameter2());
+            }
+
+            // Value of FALSE or 1 will filter by criteria3Value property in DB
+            if ((advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value") instanceof Boolean && (Boolean) advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value"))
+                    || (advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value") instanceof Integer && 1 == (Integer) advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value"))) {
+                queryBuilder.append(" AND (criteria3Value = :param3 OR criteria3Value IS NULL)");
+                queryParams.put("param3", bareWo.getParameter3());
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableStartSubscriptionDate")) {
+                queryBuilder.append(" AND (startSubscriptionDate IS NULL OR startSubscriptionDate <= :subscriptionDate)");
+                queryParams.put("subscriptionDate", subscriptionDate);
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableEndSubscriptionDate")) {
+                queryBuilder.append(" AND (endSubscriptionDate IS NULL OR endSubscriptionDate > :subscriptionDate)");
+                queryParams.put("subscriptionDate", subscriptionDate);
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableMinSubscriptionAgeInMonth")) {
+                queryBuilder.append(" AND (minSubscriptionAgeInMonth IS NULL OR minSubscriptionAgeInMonth <= :subscriptionAge)");
+                queryParams.put("subscriptionAge", subscriptionAge);
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableMaxSubscriptionAgeInMonth")) {
+                queryBuilder.append(" AND (maxSubscriptionAgeInMonth IS NULL OR maxSubscriptionAgeInMonth > :subscriptionAge)");
+                queryParams.put("subscriptionAge", subscriptionAge);
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableStartRatingDate")) {
+                queryBuilder.append(" AND (startRatingDate IS NULL OR startRatingDate <= :operationDate)");
+                queryParams.put("operationDate", operationDate);
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableEndRatingDate")) {
+                queryBuilder.append(" AND (endRatingDate IS NULL OR endRatingDate > :operationDate)");
+                queryParams.put("operationDate", operationDate);
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableValidityFrom")) {
+                queryBuilder.append(" AND (validityFrom IS NULL OR validityFrom < :startDate)");
+                queryParams.put("startDate", startDate);
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableValidityDate")) {
+                queryBuilder.append(" AND (validityDate IS NULL OR validityDate >= :startDate OR validityDate >= :endDate)");
+                queryParams.put("startDate", startDate);
+                queryParams.put("endDate", endDate);
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableMaxQuantity")) {
+                queryBuilder.append(" AND (maxQuantity IS NULL OR maxQuantity > :quantity)");
+                queryParams.put("quantity", bareWo.getQuantity());
+            }
+
+            if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableMinQuantity")) {
+                queryBuilder.append(" AND (minQuantity IS NULL OR minQuantity <= :quantity)");
+                queryParams.put("quantity", bareWo.getQuantity());
+            }
+        }
+
+        queryBuilder.append(" ORDER BY ppm.priority ASC, ppm.id");
+
+        EntityManager em = getEntityManager();
+        // A long match will retrieve multiple PricePlanMatrixForRating entities and will require a further filtering in code
+        if (matchLong) {
+
+            TypedQuery<PricePlanMatrixForRating> query = em.createQuery(queryBuilder.toString(), PricePlanMatrixForRating.class);
+            query.setHint(QueryHints.CACHEABLE, true);
+            query.setHint(QueryHints.CACHE_REGION, PricePlanMatrix.CACHE_REGION_PP);
+
+            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+
+            List<PricePlanMatrixForRating> pricePlansRating = query.getResultList();
+            pricePlansRating = matchPricePlan(pricePlansRating, bareWo, buyerCountryId, buyerCurrency, filterByCriteria1ValueInCode, filterByCriteria2ValueInCode, filterByCriteria3ValueInCode, returnFirst);
+            if (pricePlansRating.isEmpty()) {
+                throw new NoPricePlanException("No active price plan matched for parameters: " + StringUtils.concatenate(queryParams));
+            }
+
+            List<PricePlanMatrix> pricePlans = new ArrayList<PricePlanMatrix>();
+            for (PricePlanMatrixForRating pricePlan : pricePlansRating) {
+                pricePlans.add(em.getReference(PricePlanMatrix.class, pricePlan.getId()));
+            }
+
+            return pricePlans;
+
+            // A short match will retrieve a single PricePlanMatrix entity directly
+        } else {
+
+            TypedQuery<PricePlanMatrix> query = em.createQuery(queryBuilder.toString(), PricePlanMatrix.class);
+
+            query.setHint(QueryHints.CACHEABLE, true);
+            query.setHint(QueryHints.CACHE_REGION, PricePlanMatrix.CACHE_REGION_PP);
+            query.setHint(QueryHints.READ_ONLY, true);
+
+            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+
+            if (returnFirst) {
+                query.setMaxResults(1);
+            }
+            List<PricePlanMatrix> pricePlans = query.getResultList();
+            if (pricePlans.isEmpty()) {
+                throw new NoPricePlanException("No active price plan matched for parameters: " + StringUtils.concatenate(queryParams));
+            }
+            return pricePlans;
         }
     }
 
     /**
-     * Find a matching price plan for a given wallet operation - used to resolve Price plan criteriaEL and validityCalendar fields that can not be done in DB
+     * Find a matching price plan for a given wallet operation - used to resolve Price plan criteriaEL and validityCalendar fields that can not be done in DB or filter by param1, param2 or param3 fields if their values
+     * are vary widely
      *
      * @param listPricePlan List of price plans to consider
      * @param bareOperation Wallet operation to lookup price plan for
      * @param buyerCountryId Buyer's county id
      * @param buyerCurrency Buyer's trading currency
+     * @param filterByCriteria3Value Filer PP by
+     * @param filterByCriteria2Value
+     * @param filterByCriteria1Value
+     * @param returnFirst Return only the first matched price plan
      * @return Matched price plan
      * @throws InvalidELException Failed to evaluate EL expression
      */
-    private PricePlanMatrixForRating matchPricePlan(List<PricePlanMatrixForRating> listPricePlan, WalletOperation bareOperation, Long buyerCountryId, TradingCurrency buyerCurrency) throws InvalidELException {
+    private List<PricePlanMatrixForRating> matchPricePlan(List<PricePlanMatrixForRating> listPricePlan, WalletOperation bareOperation, Long buyerCountryId, TradingCurrency buyerCurrency, boolean filterByCriteria1Value,
+            boolean filterByCriteria2Value, boolean filterByCriteria3Value, boolean returnFirst) throws InvalidELException {
+
+        List<PricePlanMatrixForRating> ppsMatched = new ArrayList<PricePlanMatrixForRating>();
 
         for (PricePlanMatrixForRating pricePlan : listPricePlan) {
 
             log.trace("Try to verify price plan {} for WO {}", pricePlan.getId(), bareOperation.getCode());
+
+            if (filterByCriteria1Value && pricePlan.getCriteria1Value() != null && !pricePlan.getCriteria1Value().equals(bareOperation.getParameter1())) {
+                continue;
+            }
+
+            if (filterByCriteria2Value && pricePlan.getCriteria2Value() != null && !pricePlan.getCriteria2Value().equals(bareOperation.getParameter2())) {
+                continue;
+            }
+
+            if (filterByCriteria3Value && pricePlan.getCriteria3Value() != null && !pricePlan.getCriteria3Value().equals(bareOperation.getParameter3())) {
+                continue;
+            }
 
             if (!StringUtils.isBlank(pricePlan.getCriteriaEL())) {
                 UserAccount ua = bareOperation.getWallet().getUserAccount();
@@ -231,35 +362,12 @@ public class PricePlanSelectionService implements Serializable {
                 }
             }
 
-            return pricePlan;
-        }
-        return null;
-
-    }
-
-    private boolean isMatchingPricePlan(PricePlanMatrixForRating pricePlan, WalletOperation bareOperation) throws InvalidELException {
-
-
-        log.trace("Try to verify price plan {} for WO {}", pricePlan.getId(), bareOperation.getCode());
-
-        if (!StringUtils.isBlank(pricePlan.getCriteriaEL())) {
-            UserAccount ua = bareOperation.getWallet().getUserAccount();
-            if (!elUtils.evaluateBooleanExpression(pricePlan.getCriteriaEL(), bareOperation, ua, null, pricePlan, null)) {
-                // log.trace("The operation is not compatible with price plan criteria EL: {}", pricePlan.getCriteriaEL());
-                return false;
+            ppsMatched.add(pricePlan);
+            if (returnFirst) {
+                return ppsMatched;
             }
         }
-
-        if (pricePlan.getValidityCalendar() != null) {
-            org.meveo.model.catalog.Calendar validityCalendar = getEntityManager().find(org.meveo.model.catalog.Calendar.class, pricePlan.getValidityCalendar());
-            boolean validityCalendarOK = validityCalendar.previousCalendarDate(bareOperation.getOperationDate()) != null;
-            if (!validityCalendarOK) {
-                // log.trace("The operation date " + operationDate + " does not match pricePlan validity calendar " + validityCalendar.getCode() + "period range ");
-                return false;
-            }
-        }
-
-        return true;
+        return ppsMatched;
 
     }
 
@@ -281,7 +389,7 @@ public class PricePlanSelectionService implements Serializable {
             operationDateParam = serviceInstance.getPriceVersionDate();
         }
 
-        if (operationDateParam == null) {
+        if (operationDateParam != null) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(operationDate);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -291,8 +399,8 @@ public class PricePlanSelectionService implements Serializable {
             operationDateParam = calendar.getTime();
         }
 
-        List<PricePlanMatrixVersion> result = this.getEntityManager().createNamedQuery("PricePlanMatrixVersion.getPublishedVersionValideForDate", PricePlanMatrixVersion.class).setParameter("pricePlanMatrixId", pricePlanId)
-            .setParameter("operationDate", operationDateParam).getResultList();
+        List<PricePlanMatrixVersion> result = this.getEntityManager().createNamedQuery("PricePlanMatrixVersion.getPublishedVersionValideForDate", PricePlanMatrixVersion.class)
+            .setParameter("pricePlanMatrixId", pricePlanId).setParameter("operationDate", operationDateParam).getResultList();
         if (CollectionUtils.isEmpty(result)) {
             return null;
         }
@@ -352,7 +460,7 @@ public class PricePlanSelectionService implements Serializable {
     public PricePlanMatrixLine determinePricePlanLine(PricePlanMatrix pricePlan, WalletOperation bareWalletOperation) throws NoPricePlanException {
         return determinePricePlanLine(pricePlan.getId(), bareWalletOperation);
     }
-    
+
     /**
      * Determine a price plan matrix line matching wallet operation parameters. Business type attributes defined in a price plan version will be resolved via Wallet operation properties.
      * 

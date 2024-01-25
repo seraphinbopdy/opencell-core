@@ -268,4 +268,18 @@ public class PaymentResourceImpl implements PaymentResource {
                         + updated.getCode() + "\"}")
                 .build();
     }
+
+    /**
+     * Remove payment rejection code group
+     *
+     * @param rejectionGroupId payment rejection code group id to remove
+     */
+    @Override
+    public Response removeRejectionGroup(Long rejectionGroupId) {
+        paymentApi.removeRejectionCodeGroup(rejectionGroupId);
+        return ok()
+                .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Payment rejection codes group successfully deleted\"}")
+                .build();
+    }
 }

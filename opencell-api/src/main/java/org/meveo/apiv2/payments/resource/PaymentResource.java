@@ -204,13 +204,25 @@ public interface PaymentResource {
     @Path("/rejectionCodes/group/{id}")
     @Operation(summary = "update Payment Rejection Codes Group",
             tags = {"RejectionCodesGroup"},
-            description = "update anew Payment Rejection Codes Group",
+            description = "update Payment Rejection Codes Group",
             responses = {
                     @ApiResponse(responseCode = "200", description = "RejectionCodesGroup successfully updated"),
-                    @ApiResponse(responseCode = "404", description = "Group does not exist"),
                     @ApiResponse(responseCode = "404", description = "Group does not exist"),
                     @ApiResponse(responseCode = "412", description = "Missing parameters")
             })
     Response updateRejectionGroup(@Parameter(description = "Rejection action id", required = true) @PathParam("id") Long id,
             @Parameter(required = true) RejectionGroup rejectionGroup);
+
+    @DELETE
+    @Path("/rejectionCodes/group/{id}")
+    @Operation(summary = "Delete Payment Rejection Codes Group",
+            tags = {"RejectionCodesGroup"},
+            description = "Delete Payment Rejection Codes Group",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "RejectionCodesGroup successfully deleted"),
+                    @ApiResponse(responseCode = "404", description = "Group does not exist"),
+                    @ApiResponse(responseCode = "400", description = "PaymentRejectionCodesGroup deletion failed")
+            })
+    Response removeRejectionGroup(@Parameter(description = "Rejection group id", required = true)
+                                  @PathParam("id") Long rejectionGroupId);
 }

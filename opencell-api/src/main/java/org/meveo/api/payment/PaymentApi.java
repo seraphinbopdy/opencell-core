@@ -862,7 +862,7 @@ public class PaymentApi extends BaseApi {
 			}
 			toUpdate.setScript(scriptInstance);
 		}
-		return rejectionActionMapper.toResource(toUpdate);
+		return rejectionActionMapper.toResource(paymentRejectionActionService.update(toUpdate));
 	}
 
 	/**
@@ -1005,5 +1005,26 @@ public class PaymentApi extends BaseApi {
 		}
 		paymentRejectionCodesGroupService.update(entityToUpdate);
 		return groupMapper.toResource(entityToUpdate);
+	}
+
+	/**
+	 * Delete payment rejection code group
+	 *
+	 * @param rejectionGroupId payment rejection code group id to remove
+	 */
+	public void removeRejectionCodeGroup(Long rejectionGroupId) {
+		final PaymentRejectionCodesGroup toRemove =
+				ofNullable(paymentRejectionCodesGroupService.findById(rejectionGroupId))
+						.orElseThrow(() -> new NotFoundException("Payment rejection codes group with id "
+								+ rejectionGroupId + " does not exists"));
+		try {
+			toRemove.getPaymentRejectionActions()
+					.forEach(paymentRejectionAction -> paymentRejectionAction.setPaymentRejectionCodesGroup(null));
+			toRemove.getPaymentRejectionCodes()
+					.forEach(paymentRejectionCode -> paymentRejectionCode.setPaymentRejectionCodesGroup(null));
+			paymentRejectionCodesGroupService.remove(toRemove);
+		} catch (Exception exception) {
+			throw new BusinessApiException(exception.getMessage());
+		}
 	}
 }

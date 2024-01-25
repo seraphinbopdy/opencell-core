@@ -1,8 +1,9 @@
 package org.meveo.api.payment;
 
+import static java.util.List.of;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.rules.ExpectedException.none;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -11,39 +12,44 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.payment.PaymentDto;
 import org.meveo.api.exception.BusinessApiException;
+import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.apiv2.models.ImmutableResource;
 import org.meveo.apiv2.payments.ImmutableImportRejectionCodeInput;
 import org.meveo.apiv2.payments.ImmutablePaymentGatewayInput;
+import org.meveo.apiv2.payments.ImmutableRejectionAction;
 import org.meveo.apiv2.payments.ImmutableRejectionCode;
+import org.meveo.apiv2.payments.ImmutableRejectionGroup;
 import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
+import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
 import org.meveo.apiv2.payments.RejectionCodesExportResult;
+import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.model.ICustomFieldEntity;
-import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.Journal;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.PaymentRejectionAction;
 import org.meveo.model.payments.PaymentRejectionCode;
-import org.meveo.service.admin.impl.TradingCurrencyService;
+import org.meveo.model.payments.PaymentRejectionCodesGroup;
 import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.payments.impl.PaymentGatewayService;
 import org.meveo.service.payments.impl.PaymentHistoryService;
+import org.meveo.service.payments.impl.PaymentRejectionActionService;
 import org.meveo.service.payments.impl.PaymentRejectionCodeService;
+import org.meveo.service.payments.impl.PaymentRejectionCodesGroupService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -52,6 +58,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import javax.ws.rs.NotFoundException;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -63,10 +70,6 @@ public class PaymentApiTest {
         return null;
     }
     }
-
-
-    @Rule
-    public final ExpectedException expectedException = none();
 
     @InjectMocks()
     private PaymentApi paymentApi = new PaymentApiMock();
@@ -84,22 +87,22 @@ public class PaymentApiTest {
     private JournalService journalService;
 
     @Mock
-    private TradingCurrencyService tradingCurrencyService;
-
-    @Mock
-    private Provider applicationProvider;
+    private PaymentHistoryService paymentHistoryService;
 
     @Mock
     private AccountOperationService accountOperationService;
-
-    @Mock
-    private PaymentHistoryService paymentHistoryService;
 
     @Mock
     private PaymentGatewayService paymentGatewayService;
 
     @Mock
     private PaymentRejectionCodeService paymentRejectionCodeService;
+
+    @Mock
+    private PaymentRejectionActionService paymentRejectionActionService;
+
+    @Mock
+    private PaymentRejectionCodesGroupService paymentRejectionCodesGroupService;
 
 
     @Test
@@ -130,9 +133,8 @@ public class PaymentApiTest {
 
         when(paymentGatewayService.findById(any())).thenReturn(null);
 
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage("Payment gateway not found");
-        paymentApi.createPaymentRejectionCode(rejectionCode);
+        assertThrows("Payment gateway not found", NotFoundException.class,
+                () -> paymentApi.createPaymentRejectionCode(rejectionCode));
     }
 
     @Test
@@ -153,7 +155,7 @@ public class PaymentApiTest {
 
         RejectionCode updatedEntity = paymentApi.updatePaymentRejectionCode(1L, rejectionCode);
 
-        assertTrue(updatedEntity instanceof RejectionCode);
+        assertTrue(updatedEntity instanceof ImmutableRejectionCode);
     }
 
     @Test
@@ -167,10 +169,8 @@ public class PaymentApiTest {
 
         when(paymentGatewayService.findById(any())).thenReturn(paymentGateway);
 
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage("Payment rejection code not found");
-
-        paymentApi.updatePaymentRejectionCode(1L, rejectionCode);
+        assertThrows("Payment rejection code not found", NotFoundException.class,
+                () -> paymentApi.updatePaymentRejectionCode(1L, rejectionCode));
     }
 
     @Test
@@ -184,10 +184,8 @@ public class PaymentApiTest {
 
         when(paymentGatewayService.findById(any())).thenReturn(null);
 
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage("Payment gateway not found");
-
-        paymentApi.updatePaymentRejectionCode(1L, rejectionCode);
+        assertThrows("Payment gateway not found", NotFoundException.class,
+                () -> paymentApi.updatePaymentRejectionCode(1L, rejectionCode));
     }
 
     @Test
@@ -236,10 +234,8 @@ public class PaymentApiTest {
                 .build();
         when(paymentGatewayService.findById(any())).thenReturn(null);
 
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage("Payment gateway not found");
-
-        paymentApi.export(paymentGatewayInput);
+        assertThrows("Payment gateway not found", NotFoundException.class,
+                () -> paymentApi.export(paymentGatewayInput));
     }
 
     @Test
@@ -252,9 +248,172 @@ public class PaymentApiTest {
                 .base64csv("")
                 .build();
 
-        expectedException.expect(BusinessApiException.class);
-        expectedException.expectMessage("Encoded file should not be null or empty");
+        assertThrows("Encoded file should not be null or empty", BusinessApiException.class,
+                () -> paymentApi.importRejectionCodes(importRejectionCodeInput));
+    }
 
-        paymentApi.importRejectionCodes(importRejectionCodeInput);
+    @Test
+    public void should_create_payment_rejection_action() {
+        RejectionAction rejectionAction = ImmutableRejectionAction.builder()
+                .code("ACTION_01")
+                .description("ACTION DESCRIPTION")
+                .build();
+
+        when(paymentRejectionActionService.findByCode("ACTION_01")).thenReturn(null);
+
+        RejectionAction result = paymentApi.createRejectionAction(rejectionAction);
+
+        assertTrue(result instanceof ImmutableRejectionAction);
+
+        verify(paymentRejectionActionService, times(1)).create(any());
+    }
+
+    @Test
+    public void should_fail_when_create_payment_rejection_action_with_an_existing_code() {
+        RejectionAction rejectionAction = ImmutableRejectionAction.builder()
+                .code("ACTION_01")
+                .description("ACTION DESCRIPTION")
+                .build();
+
+        when(paymentRejectionActionService.findByCode("ACTION_01")).thenReturn(new PaymentRejectionAction());
+
+        assertThrows("Payment rejection action with code ACTION_01 already exists",
+                EntityAlreadyExistsException.class,
+                () -> paymentApi.createRejectionAction(rejectionAction));
+    }
+
+    @Test
+    public void should_update_payment_rejection_action() {
+        RejectionAction rejectionAction = ImmutableRejectionAction.builder()
+                .code("ACTION_01")
+                .description("ACTION DESCRIPTION")
+                .build();
+
+        when(paymentRejectionActionService.findById(1L)).thenReturn(new PaymentRejectionAction());
+
+        when(paymentRejectionActionService.findByCode("ACTION_01")).thenReturn(null);
+        when(paymentRejectionActionService.update(any())).thenReturn(new PaymentRejectionAction());
+
+        paymentApi.updateRejectionAction(1L, rejectionAction);
+
+        verify(paymentRejectionActionService, times(1)).update(any());
+    }
+
+    @Test
+    public void should_fail_when_update_payment_rejection_action_with_an_existing_code() {
+        RejectionAction rejectionAction = ImmutableRejectionAction.builder()
+                .code("ACTION_01")
+                .description("ACTION DESCRIPTION")
+                .build();
+
+        when(paymentRejectionActionService.findById(1L)).thenReturn(new PaymentRejectionAction());
+        when(paymentRejectionActionService.findByCode("ACTION_01")).thenReturn(new PaymentRejectionAction());
+
+        assertThrows("Payment rejection action with code " + rejectionAction.getCode() + " already exists",
+                EntityAlreadyExistsException.class,
+                () -> paymentApi.updateRejectionAction(1L, rejectionAction));
+    }
+
+    @Test
+    public void should_fail_to_update_when_no_payment_rejection_action_found() {
+        RejectionAction rejectionAction = ImmutableRejectionAction.builder()
+                .code("ACTION_01")
+                .description("ACTION DESCRIPTION")
+                .build();
+
+        when(paymentRejectionActionService.findById(1L)).thenReturn(null);
+
+        assertThrows("Payment rejection action not found", NotFoundException.class,
+                () -> paymentApi.updateRejectionAction(1L, rejectionAction));
+    }
+
+    @Test
+    public void should_remove_payment_rejection_action_found() {
+        when(paymentRejectionActionService.findById(1L)).thenReturn(new PaymentRejectionAction());
+
+        paymentApi.removeRejectionAction(1L);
+
+        verify(paymentRejectionActionService, times(1)).remove(any(PaymentRejectionAction.class));
+    }
+
+    @Test
+    public void should_fail_to_remove_when_no_payment_rejection_action_found() {
+        when(paymentRejectionActionService.findById(1L)).thenReturn(null);
+
+        assertThrows("Payment rejection action not found", NotFoundException.class,
+                () -> paymentApi.removeRejectionAction(1L));
+    }
+
+    @Test
+    public void should_create_payment_rejection_codes_group() {
+        List<RejectionCode> rejectionCodes = of(ImmutableRejectionCode.builder().id(1L).build());
+        List<RejectionAction> actions = of(ImmutableRejectionAction.builder().id(2L).build());
+        RejectionGroup rejectionGroup = ImmutableRejectionGroup.builder()
+                .code("RCG_01")
+                .description("DESCRIPTION")
+                .rejectionCodes(rejectionCodes)
+                .rejectionActions(actions)
+                .build();
+
+        when(paymentRejectionCodesGroupService.findByCode("RCG_01")).thenReturn(null);
+        when(paymentRejectionCodeService.findByIdOrCode(any())).thenReturn(new PaymentRejectionCode());
+        when(paymentRejectionActionService.findByIdOrCode(any())).thenReturn(new PaymentRejectionAction());
+
+        paymentApi.createRejectionGroup(rejectionGroup);
+
+        verify(paymentRejectionCodesGroupService, times(1)).create(any());
+    }
+
+    @Test
+    public void should_fail_to_create_payment_rejection_codes_group_if_rejection_code_not_found() {
+        List<RejectionCode> rejectionCodes = of(ImmutableRejectionCode.builder().id(1L).build());
+        List<RejectionAction> actions = of(ImmutableRejectionAction.builder().id(2L).build());
+        RejectionGroup rejectionGroup = ImmutableRejectionGroup.builder()
+                .code("RCG_01")
+                .description("DESCRIPTION")
+                .rejectionCodes(rejectionCodes)
+                .rejectionActions(actions)
+                .build();
+
+        when(paymentRejectionCodesGroupService.findByCode("RCG_01")).thenReturn(null);
+        when(paymentRejectionCodeService.findByIdOrCode(any())).thenReturn(null);
+
+        assertThrows("Payment rejection code 1 does not exists", NotFoundException.class,
+                () -> paymentApi.createRejectionGroup(rejectionGroup));
+    }
+
+    @Test
+    public void should_fail_to_create_payment_rejection_codes_group_if__code_already_exists() {
+        RejectionGroup rejectionGroup = ImmutableRejectionGroup.builder()
+                .code("RCG_01")
+                .description("DESCRIPTION")
+                .build();
+
+        when(paymentRejectionCodesGroupService.findByCode("RCG_01")).thenReturn(new PaymentRejectionCodesGroup());
+
+        assertThrows("Payment rejection codes group with code RCG_01 already exists",
+                EntityAlreadyExistsException.class,
+                () -> paymentApi.createRejectionGroup(rejectionGroup));
+    }
+
+    @Test
+    public void should_remove_payment_rejection_codes_group() {
+        PaymentRejectionCodesGroup toRemove = new PaymentRejectionCodesGroup();
+        toRemove.setId(1L);
+        toRemove.setPaymentRejectionCodes(of(new PaymentRejectionCode()));
+        toRemove.setPaymentRejectionActions(of(new PaymentRejectionAction()));
+
+        when(paymentRejectionCodesGroupService.findById(1L)).thenReturn(toRemove);
+
+        paymentApi.removeRejectionCodeGroup(1L);
+
+        verify(paymentRejectionCodesGroupService,
+                times(1)).remove(any(PaymentRejectionCodesGroup.class));
+    }
+
+    @Test
+    public void should_fail_to_remove_when_no_payment_rejection_codes_group_found() {
+        assertThrows("Payment rejection codes group with id 1 does not exists", NotFoundException.class,
+                () -> paymentApi.removeRejectionCodeGroup(1L));
     }
 }

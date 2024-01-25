@@ -20,6 +20,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.Invo
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ItemType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.MonetaryTotalType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderReference;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyIdentification;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyLegalEntity;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxScheme;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
@@ -92,6 +93,7 @@ import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.InvoiceLine;
@@ -750,6 +752,20 @@ public class InvoiceUblHelper {
 			}
 			partyType.getPersons().add(personType);
 		}
+		if(CollectionUtils.isNotEmpty(seller.getRegistrationNumbers())){
+			PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
+			ID id = objectFactorycommonBasic.createID();
+			for(RegistrationNumber registerNumber: seller.getRegistrationNumbers()) {
+				if(registerNumber.getIsoIcd() != null && registerNumber.getIsoIcd().getCode().equalsIgnoreCase("SIREN")){
+					id.setSchemeID("2");
+					id.setValue(registerNumber.getRegistrationNo());
+					break;
+				}
+			}
+			partyIdentification.setID(id);
+			partyType.getPartyIdentifications().add(partyIdentification);
+		}
+		
 		supplierPartyType.setParty(partyType);
 		if(creditNote == null)
 			target.setAccountingSupplierParty(supplierPartyType);

@@ -167,7 +167,7 @@ public class UserApi extends BaseApi {
         handleMissingParameters();
 
         // find user
-        User user = userService.findByUsername(postData.getUsername(), false, true);
+        User user = userService.findByUsername(postData.getUsername(), false, true, false);
 
         if (user == null) {
             throw new EntityDoesNotExistsException(User.class, postData.getUsername(), "username");
@@ -260,7 +260,7 @@ public class UserApi extends BaseApi {
     }
 
     public void remove(String username) throws MeveoApiException, BusinessException {
-        User user = userService.findByUsername(username, false, false);
+        User user = userService.findByUsername(username, false, false, false);
 
         if (user == null) {
             throw new EntityDoesNotExistsException(User.class, username, "username");
@@ -280,7 +280,7 @@ public class UserApi extends BaseApi {
         handleMissingParameters();
         checkPermissions(username);
 
-        User user = userService.findByUsername(username, true, false);
+        User user = userService.findByUsername(username, true, false, false);
 
         if (user == null) {
             throw new EntityDoesNotExistsException(User.class, username, "username");
@@ -337,7 +337,7 @@ public class UserApi extends BaseApi {
     }
 
     public void createOrUpdate(UserDto postData) throws MeveoApiException, BusinessException {
-        User user = userService.findByUsername(postData.getUsername(), false, false);
+        User user = userService.findByUsername(postData.getUsername(), false, false, false);
         if (user == null) {
             create(postData);
         } else {

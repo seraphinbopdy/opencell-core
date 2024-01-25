@@ -816,7 +816,7 @@ public class KeycloakAdminClientService implements Serializable {
      * @param extendedInfo Shall group membership and roles be retrieved
      * @return User information
      */
-    public User findUser(String userName, boolean extendedInfo) {
+    public User findUser(String userName, boolean extendedInfo, boolean extendedClientRoles) {
 
         KeycloakAdminClientConfig keycloakAdminClientConfig = AuthenticationProvider.getKeycloakConfig();
         Keycloak keycloak = getKeycloakClient(keycloakAdminClientConfig);
@@ -842,12 +842,32 @@ public class KeycloakAdminClientService implements Serializable {
                 user.setRoles(new HashSet<String>(currentRoles.stream().map(r -> r.getName()).collect(Collectors.toList())));
             }
 
+            if(extendedClientRoles) {
+                Map<String, ClientMappingsRepresentation> all = usersResource.get(userRepresentation.getId()).roles().getAll().getClientMappings();
+                user.getRoles().addAll(convertClientMappingsToStringMap(all));
+            }
+
             return user;
 
         } catch (ElementNotFoundException e) {
             log.debug("No user with username {} was found", userName);
         }
         return null;
+    }
+
+    private static List<String> convertClientMappingsToStringMap(Map<String, ClientMappingsRepresentation> clientMappings) {
+        List<String> listAllRoles = new ArrayList<>();
+
+        if (clientMappings != null && !clientMappings.isEmpty()) {
+            clientMappings.forEach((client, clientMapping) -> {
+                List<String> roleNames = clientMapping.getMappings().stream()
+                        .map(RoleRepresentation::getName)
+                        .collect(Collectors.toList());
+                listAllRoles.addAll(roleNames);
+            });
+        }
+
+        return listAllRoles;
     }
 
     /**

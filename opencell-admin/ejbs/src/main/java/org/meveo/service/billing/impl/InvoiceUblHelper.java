@@ -22,6 +22,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.Mone
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderReference;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyIdentification;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyLegalEntity;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyName;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxScheme;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMeans;
@@ -52,6 +53,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Document
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndpointID;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FamilyName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FirstName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ID;
@@ -126,6 +128,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class InvoiceUblHelper {
@@ -139,6 +142,9 @@ public class InvoiceUblHelper {
 	private final static UntdidTaxationCategoryService UntdidTaxationCategoryService;
 	private final static InvoiceAgregateService invoiceAgregateService;
 	private static final String XUN = "XUN";
+	public static final String ISO_IEC_6523 = "ISO/IEC 6523";
+	public static final String SIREN = "SIREN";
+	public static final String SIRET = "SIRET";
 	
 	static {
 		objectFactorycommonBasic = new oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ObjectFactory();
@@ -571,6 +577,35 @@ public class InvoiceUblHelper {
 			AddressType addressType = getRegistrationAddress(billingAccount.getAddress());
 			partyLegalEntity.setRegistrationAddress(addressType);
 		}
+		
+		if(CollectionUtils.isNotEmpty(billingAccount.getRegistrationNumbers())){
+			Optional<RegistrationNumber> registrationNumbers = billingAccount.getRegistrationNumbers().stream().filter(rgn -> rgn.getIsoIcd() != null && rgn.getIsoIcd().getCode().equals(SIREN)).findFirst();
+			if(registrationNumbers.isPresent()) {
+				CompanyID companyID = objectFactorycommonBasic.createCompanyID();
+				companyID.setSchemeID("0009");
+				companyID.setSchemeAgencyID(ISO_IEC_6523);
+				companyID.setValue(registrationNumbers.get().getRegistrationNo());
+				partyLegalEntity.setCompanyID(companyID);
+			}
+			registrationNumbers = billingAccount.getRegistrationNumbers().stream().filter(rgn -> rgn.getIsoIcd() != null && rgn.getIsoIcd().getCode().equals("0230")).findFirst();
+			if(registrationNumbers.isPresent()) {
+				EndpointID endpointID = objectFactorycommonBasic.createEndpointID();
+				endpointID.setSchemeID("0230");
+				endpointID.setSchemeAgencyID(ISO_IEC_6523);
+				endpointID.setValue(registrationNumbers.get().getRegistrationNo());
+				partyType.setEndpointID(endpointID);
+			}
+			registrationNumbers = billingAccount.getRegistrationNumbers().stream().filter(rgn -> rgn.getIsoIcd() != null && rgn.getIsoIcd().getCode().equals(SIRET)).findFirst();
+			if(registrationNumbers.isPresent()){
+				PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
+				ID id = objectFactorycommonBasic.createID();
+				id.setSchemeID("0002");
+				id.setSchemeAgencyID(ISO_IEC_6523);
+				id.setValue(registrationNumbers.get().getRegistrationNo());
+				partyIdentification.setID(id);
+				partyType.getPartyIdentifications().add(partyIdentification);
+			}
+		}
 		partyType.getPartyLegalEntities().add(partyLegalEntity);
 		
 		// AccountingCustomerParty/Party/PartyLegalEntity/Contact
@@ -753,19 +788,36 @@ public class InvoiceUblHelper {
 			partyType.getPersons().add(personType);
 		}
 		if(CollectionUtils.isNotEmpty(seller.getRegistrationNumbers())){
-			PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
-			ID id = objectFactorycommonBasic.createID();
 			for(RegistrationNumber registerNumber: seller.getRegistrationNumbers()) {
-				if(registerNumber.getIsoIcd() != null && registerNumber.getIsoIcd().getCode().equalsIgnoreCase("SIREN")){
-					id.setSchemeID("2");
+				if(registerNumber.getIsoIcd() == null) continue;
+				if(registerNumber.getIsoIcd().getCode().equalsIgnoreCase(SIRET)){
+					PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
+					ID id = objectFactorycommonBasic.createID();
+					id.setSchemeID("0009");
+					id.setSchemeAgencyID(ISO_IEC_6523);
 					id.setValue(registerNumber.getRegistrationNo());
-					break;
+					partyIdentification.setID(id);
+					partyType.getPartyIdentifications().add(partyIdentification);
+					continue;
+				}
+				if(registerNumber.getIsoIcd().getCode().equalsIgnoreCase("0230")){
+					EndpointID endpointID = objectFactorycommonBasic.createEndpointID();
+					endpointID.setSchemeID("0230");
+					endpointID.setSchemeAgencyID(ISO_IEC_6523);
+					endpointID.setValue(registerNumber.getRegistrationNo());
+					partyType.setEndpointID(endpointID);
+					continue;
+				}
+				if(registerNumber.getIsoIcd().getCode().equalsIgnoreCase(SIREN)) {
+					CompanyID companyID = objectFactorycommonBasic.createCompanyID();
+					companyID.setSchemeID("0002");
+					companyID.setSchemeAgencyID(ISO_IEC_6523);
+					companyID.setValue(registerNumber.getRegistrationNo());
+					partyLegalEntity.setCompanyID(companyID);
 				}
 			}
-			partyIdentification.setID(id);
-			partyType.getPartyIdentifications().add(partyIdentification);
 		}
-		
+		partyType.getPartyLegalEntities().add(partyLegalEntity);
 		supplierPartyType.setParty(partyType);
 		if(creditNote == null)
 			target.setAccountingSupplierParty(supplierPartyType);

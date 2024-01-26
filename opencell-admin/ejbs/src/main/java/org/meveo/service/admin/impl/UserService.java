@@ -63,7 +63,7 @@ public class UserService extends PersistenceService<User> {
         user.setUserName(user.getUserName().toUpperCase());
         String userId =keycloakAdminClientService.createUser(user.getUserName(), user.getName().getFirstName(), user.getName().getLastName(), user.getEmail(), user.getPassword(), user.getUserLevel(), user.getRoles(), null);
 	    // check if the user already exists
-        if (findByUsername(user.getUserName(), false, false) != null) {
+        if (findByUsername(user.getUserName(), false, false, false) != null) {
         	if(userId==null) // when master=OC and user already exists in KC
         		throw new EntityAlreadyExistsException(User.class, user.getUserName(), "username");
         }else {

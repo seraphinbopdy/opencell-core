@@ -9463,4 +9463,53 @@ public class AgedBalanceReporting extends ReportExtractScript {
                                  referencedTableName="ar_payment_rejection_codes_group"
                                  referencedColumnNames="id"/>
     </changeSet>
+    
+  	<changeSet id="INTRD-20888_20240125" author="AdilElJaouhari">
+        <createSequence sequenceName="ar_payment_rejection_action_report_seq" startValue="1" />
+
+        <createTable tableName="ar_payment_rejection_action_report">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ar_payment_rejection_action_report_pk"/>
+            </column>
+            <column name="version" type="int4"/>
+            <column name="disabled" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="datetime"/>
+            <column name="code" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="uuid" type="varchar(60)" defaultValueComputed="${uuid_function}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="varchar(100)"/>
+            <column name="updater" type="varchar(100)"/>
+            <column name="cf_values" type="${type.json}"/>
+            <column name="rejected_payment_id" type="bigint" />
+            <column name="payment_rejection_action_id" type="bigint" />
+            <column name="status" type="varchar(30)" />
+            <column name="report" type="${type.text}" />
+            <column name="start_date" type="datetime" />
+            <column name="end_date" type="datetime" />
+        </createTable>
+        
+        <addColumn tableName="ar_account_operation">
+            <column name="rejection_actions_status" type="varchar(30)" />
+        </addColumn>
+        
+        <addForeignKeyConstraint baseColumnNames="rejected_payment_id"
+                                 baseTableName="ar_payment_rejection_action_report"
+                                 constraintName="fk_payment_rejection_action_report_rejected_payment"
+                                 referencedTableName="ar_account_operation"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseColumnNames="payment_rejection_action_id"
+                                 baseTableName="ar_payment_rejection_action_report"
+                                 constraintName="fk_payment_rejection_action_report_rejection_action"
+                                 referencedTableName="ar_payment_rejection_action"
+                                 referencedColumnNames="id" />
+	</changeSet>
 </databaseChangeLog>

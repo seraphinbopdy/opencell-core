@@ -495,6 +495,7 @@
         <createSequence sequenceName="ar_payment_rejection_code_seq" startValue="1" />
         <createSequence sequenceName="ar_payment_rejection_action_seq" startValue="1" />
         <createSequence sequenceName="ar_payment_rejection_codes_group_seq" startValue="1" />
+        <createSequence sequenceName="ar_payment_rejection_action_report_seq" startValue="1" />
     </changeSet>
 
 
@@ -21418,8 +21419,7 @@
                                  referencedTableName="billing_user_account"
                                  referencedColumnNames="id"/>
     </changeSet>
-    
-  	<changeSet id="#INTRD-21087_20240208_rebuild_fk" author="AdilElJaouhari">
+    <changeSet id="#INTRD-21087_20240208_rebuild_fk" author="AdilElJaouhari">
 		<addForeignKeyConstraint
 			baseTableName="billing_rated_transaction"
 			baseColumnNames="contract_id"
@@ -21435,6 +21435,49 @@
 			referencedTableName="cpq_contract_item" referencedColumnNames="id"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" />
+    </changeSet>
+
+  	<changeSet id="INTRD-20888_20240125" author="AdilElJaouhari">
+        <createTable tableName="ar_payment_rejection_action_report">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ar_payment_rejection_action_report_pk"/>
+            </column>
+            <column name="version" type="int4"/>
+            <column name="disabled" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="datetime"/>
+            <column name="code" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="uuid" type="varchar(60)" defaultValueComputed="${uuid_function}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="varchar(100)"/>
+            <column name="updater" type="varchar(100)"/>
+            <column name="cf_values" type="${type.json}"/>
+            <column name="rejected_payment_id" type="bigint" />
+            <column name="payment_rejection_action_id" type="bigint" />
+            <column name="status" type="varchar(30)" />
+            <column name="report" type="${type.text}" />
+            <column name="start_date" type="datetime" />
+            <column name="end_date" type="datetime" />
+        </createTable>
+        
+        <addForeignKeyConstraint baseColumnNames="rejected_payment_id"
+                                 baseTableName="ar_payment_rejection_action_report"
+                                 constraintName="fk_payment_rejection_action_report_rejected_payment"
+                                 referencedTableName="ar_account_operation"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseColumnNames="payment_rejection_action_id"
+                                 baseTableName="ar_payment_rejection_action_report"
+                                 constraintName="fk_payment_rejection_action_report_rejection_action"
+                                 referencedTableName="ar_payment_rejection_action"
+                                 referencedColumnNames="id" />
 	</changeSet>
 
     <changeSet id="#INTRD-20987_20240216_rebuild_fk" author="zelmeliani">

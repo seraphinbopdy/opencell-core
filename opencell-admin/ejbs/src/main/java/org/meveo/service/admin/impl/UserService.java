@@ -63,7 +63,7 @@ public class UserService extends PersistenceService<User> {
         user.setUserName(user.getUserName().toUpperCase());
         String userId =keycloakAdminClientService.createUser(user.getUserName(), user.getName().getFirstName(), user.getName().getLastName(), user.getEmail(), user.getPassword(), user.getUserLevel(), user.getRoles(), null);
 	    // check if the user already exists
-        if (findByUsername(user.getUserName(), false, false) != null) {
+        if (findByUsername(user.getUserName(), false, false, false) != null) {
         	if(userId==null) // when master=OC and user already exists in KC
         		throw new EntityAlreadyExistsException(User.class, user.getUserName(), "username");
         }else {
@@ -110,7 +110,7 @@ public class UserService extends PersistenceService<User> {
      * @return User found
      */
     public User findByUsername(String username, boolean extendedInfo) {
-        return findByUsername(username, extendedInfo, false);
+        return findByUsername(username, extendedInfo, false, false);
     }
 
     /**
@@ -121,11 +121,11 @@ public class UserService extends PersistenceService<User> {
      * @param syncWithKC Shall a user record be created in Opencell if a user already exists in Keycloak
      * @return User found
      */
-    public User findByUsername(String username, boolean extendedInfo, boolean syncWithKC) {
+    public User findByUsername(String username, boolean extendedInfo, boolean syncWithKC, boolean extendedClientRoles) {
         User lUser = null;
 	    
 	    if(canSynchroWithKC()) {
-		    lUser = keycloakAdminClientService.findUser(username, extendedInfo);
+		    lUser = keycloakAdminClientService.findUser(username, extendedInfo, extendedClientRoles);
         }
 		if(lUser == null) {
 			lUser = getUserFromDatabase(username);
@@ -290,7 +290,7 @@ public class UserService extends PersistenceService<User> {
      * @param user user
      */
     private void fillKeycloakUserInfo(User user) {
-        User kcUser = keycloakAdminClientService.findUser(user.getUserName(), true);
+        User kcUser = keycloakAdminClientService.findUser(user.getUserName(), true, false);
         if (kcUser != null) {
             user.setRoles(kcUser.getRoles());
             user.setUserLevel(kcUser.getUserLevel());

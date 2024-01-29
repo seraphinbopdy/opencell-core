@@ -23301,4 +23301,406 @@ public class ImportJobNotification extends Script {
 		<sql>update adm_country set description_i18n = '{"ENG": "Zambia", "FRA": "Zambie"}', description =  'Zambia' where country_code = 'ZM'</sql>
 		<sql>update adm_country set description_i18n = '{"ENG": "Zimbabwe", "FRA": "Zimbabwe"}', description =  'Zimbabwe' where country_code = 'ZW'</sql>
     </changeSet>
+    <changeSet id="#INTRD-20962_add_missing_currencies" author="a.rouaguebe">
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-193" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ADP" />
+            <column name="description_en" value="Andorran Peseta" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Andorran Peseta", "FRA" : "peseta andorrane"}' />
+            <column name="symbol" value="ADP" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-194" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="SDD" />
+            <column name="description_en" value="Sudanese Dinar (1992–2007)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Sudanese Dinar (1992–2007)", "FRA" : "dinar soudanais"}' />
+            <column name="symbol" value="SDD" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-195" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="PTE" />
+            <column name="description_en" value="Portuguese Escudo" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Portuguese Escudo", "FRA" : "escudo portugais"}' />
+            <column name="symbol" value="PTE" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-196" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="DEM" />
+            <column name="description_en" value="German Mark" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "German Mark", "FRA" : "mark allemand"}' />
+            <column name="symbol" value="DEM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-197" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="VEB" />
+            <column name="description_en" value="Venezuelan Bolívar (1871–2008)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Venezuelan Bolívar (1871–2008)", "FRA" : "bolivar vénézuélien (1871–2008)"}' />
+            <column name="symbol" value="VEB" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-198" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="GWP" />
+            <column name="description_en" value="Guinea-Bissau Peso" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Guinea-Bissau Peso", "FRA" : "peso bissau-guinéen"}' />
+            <column name="symbol" value="GWP" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-199" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ZWN" />
+            <column name="description_en" value="ZWN" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "ZWN", "FRA" : "ZWN"}' />
+            <column name="symbol" value="ZWN" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-200" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="MRO" />
+            <column name="description_en" value="Mauritanian Ouguiya (1973–2017)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Mauritanian Ouguiya (1973–2017)", "FRA" : "ouguiya mauritanien (1973–2017)"}' />
+            <column name="symbol" value="MRO" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-201" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="FIM" />
+            <column name="description_en" value="Finnish Markka" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Finnish Markka", "FRA" : "mark finlandais"}' />
+            <column name="symbol" value="FIM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-202" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="GRD" />
+            <column name="description_en" value="Greek Drachma" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Greek Drachma", "FRA" : "drachme grecque"}' />
+            <column name="symbol" value="GRD" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-203" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ZWR" />
+            <column name="description_en" value="Zimbabwean Dollar (2008)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Zimbabwean Dollar (2008)", "FRA" : "dollar zimbabwéen (2008)"}' />
+            <column name="symbol" value="ZWR" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-204" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ZWD" />
+            <column name="description_en" value="Zimbabwean Dollar (1980–2008)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Zimbabwean Dollar (1980–2008)", "FRA" : "dollar zimbabwéen"}' />
+            <column name="symbol" value="ZWD" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-205" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ZMK" />
+            <column name="description_en" value="Zambian Kwacha (1968–2012)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Zambian Kwacha (1968–2012)", "FRA" : "kwacha zambien (1968–2012)"}' />
+            <column name="symbol" value="ZMK" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-206" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="TMM" />
+            <column name="description_en" value="Turkmenistani Manat (1993–2009)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Turkmenistani Manat (1993–2009)", "FRA" : "manat turkmène"}' />
+            <column name="symbol" value="TMM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-207" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="BGL" />
+            <column name="description_en" value="Bulgarian Hard Lev" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Bulgarian Hard Lev", "FRA" : "lev bulgare (1962–1999)"}' />
+            <column name="symbol" value="BGL" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-208" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="IEP" />
+            <column name="description_en" value="Irish Pound" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Irish Pound", "FRA" : "livre irlandaise"}' />
+            <column name="symbol" value="IEP" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-209" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="AYM" />
+            <column name="description_en" value="AYM" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "AYM", "FRA" : "AYM"}' />
+            <column name="symbol" value="AYM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-210" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="XFO" />
+            <column name="description_en" value="French Gold Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "French Gold Franc", "FRA" : "franc or"}' />
+            <column name="symbol" value="XFO" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-211" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="TPE" />
+            <column name="description_en" value="Timorese Escudo" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Timorese Escudo", "FRA" : "escudo timorais"}' />
+            <column name="symbol" value="TPE" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-212" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ATS" />
+            <column name="description_en" value="Austrian Schilling" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Austrian Schilling", "FRA" : "schilling autrichien"}' />
+            <column name="symbol" value="ATS" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-213" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="GHC" />
+            <column name="description_en" value="Ghanaian Cedi (1979–2007)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Ghanaian Cedi (1979–2007)", "FRA" : "cédi"}' />
+            <column name="symbol" value="GHC" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-214" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ESP" />
+            <column name="description_en" value="Spanish Peseta" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Spanish Peseta", "FRA" : "peseta espagnole"}' />
+            <column name="symbol" value="ESP" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-215" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ITL" />
+            <column name="description_en" value="Italian Lira" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Italian Lira", "FRA" : "lire italienne"}' />
+            <column name="symbol" value="ITL" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-216" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="BYR" />
+            <column name="description_en" value="Belarusian Rouble (2000–2016)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Belarusian Rouble (2000–2016)", "FRA" : "rouble biélorusse (2000–2016)"}' />
+            <column name="symbol" value="BYR" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-217" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="VED" />
+            <column name="description_en" value="Venezuelan Bolívar Soberano" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Venezuelan Bolívar Soberano", "FRA" : "Venezuelan Bolívar Soberano"}' />
+            <column name="symbol" value="VED" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-218" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="RUR" />
+            <column name="description_en" value="Russian Rouble (1991–1998)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Russian Rouble (1991–1998)", "FRA" : "rouble russe (1991–1998)"}' />
+            <column name="symbol" value="RUR" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-219" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="FRF" />
+            <column name="description_en" value="French Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "French Franc", "FRA" : "franc français"}' />
+            <column name="symbol" value="FRF" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-220" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="AZM" />
+            <column name="description_en" value="Azerbaijani Manat (1993–2006)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Azerbaijani Manat (1993–2006)", "FRA" : "manat azéri (1993–2006)"}' />
+            <column name="symbol" value="AZM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-221" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="AFA" />
+            <column name="description_en" value="Afghan Afghani (1927–2002)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Afghan Afghani (1927–2002)", "FRA" : "afghani (1927–2002)"}' />
+            <column name="symbol" value="AFA" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-222" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="BYB" />
+            <column name="description_en" value="Belarusian New Rouble (1994–1999)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Belarusian New Rouble (1994–1999)", "FRA" : "nouveau rouble biélorusse (1994–1999)"}' />
+            <column name="symbol" value="BYB" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-223" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="BEF" />
+            <column name="description_en" value="Belgian Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Belgian Franc", "FRA" : "franc belge"}' />
+            <column name="symbol" value="BEF" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-224" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="XFU" />
+            <column name="description_en" value="French UIC-Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "French UIC-Franc", "FRA" : "franc UIC"}' />
+            <column name="symbol" value="XFU" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-225" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="SRG" />
+            <column name="description_en" value="Surinamese Guilder" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Surinamese Guilder", "FRA" : "florin surinamais"}' />
+            <column name="symbol" value="SRG" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-226" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="YUM" />
+            <column name="description_en" value="Yugoslavian New Dinar (1994–2002)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Yugoslavian New Dinar (1994–2002)", "FRA" : "dinar yougoslave Noviy"}' />
+            <column name="symbol" value="YUM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-227" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="USS" />
+            <column name="description_en" value="US Dollar (Same day)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "US Dollar (Same day)", "FRA" : "dollar des Etats-Unis (jour même)"}' />
+            <column name="symbol" value="USS" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-228" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="MZN" />
+            <column name="description_en" value="Mozambican Metical" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Mozambican Metical", "FRA" : "metical mozambicain"}' />
+            <column name="symbol" value="MZN" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-229" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="LUF" />
+            <column name="description_en" value="Luxembourgian Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Luxembourgian Franc", "FRA" : "franc luxembourgeois"}' />
+            <column name="symbol" value="LUF" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-230" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="NLG" />
+            <column name="description_en" value="Dutch Guilder" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Dutch Guilder", "FRA" : "florin néerlandais"}' />
+            <column name="symbol" value="NLG" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-231" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="SLE" />
+            <column name="description_en" value="Sierra Leonean Leone" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Sierra Leonean Leone", "FRA" : "Sierra Leonean Leone"}' />
+            <column name="symbol" value="SLE" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-232" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="STD" />
+            <column name="description_en" value="São Tomé &amp; Príncipe Dobra (1977–2017)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "São Tomé &amp; Príncipe Dobra (1977–2017)", "FRA" : "dobra santoméen (1977–2017)"}' />
+            <column name="symbol" value="STD" />
+        </insert>
+    </changeSet>
 </databaseChangeLog>

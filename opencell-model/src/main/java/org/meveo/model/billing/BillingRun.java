@@ -154,7 +154,7 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
      * Number of generated invoice
      */
     @Column(name = "nb_invoice")
-    private Integer InvoiceNumber;
+    private Integer invoiceNumber;
 
     /**
      * Deprecated in 5.3 for not use
@@ -600,11 +600,11 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     }
 
     public Integer getInvoiceNumber() {
-        return InvoiceNumber;
+        return invoiceNumber;
     }
 
     public void setInvoiceNumber(Integer invoiceNumber) {
-        InvoiceNumber = invoiceNumber;
+        this.invoiceNumber = invoiceNumber;
     }
 
     public BigDecimal getProducibleAmountWithTax() {

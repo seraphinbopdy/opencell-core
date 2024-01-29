@@ -101,8 +101,6 @@ public class PaymentResourceImpl implements PaymentResource {
     }
 
     private void validateRejectionCodeInput(RejectionCode rejectionCode) {
-        ofNullable(rejectionCode.getCode())
-                .orElseThrow(() -> new MissingParameterException("Code is mandatory"));
         ofNullable(rejectionCode.getPaymentGateway())
                 .orElseThrow(() -> new MissingParameterException("Payment gateway is mandatory"));
     }

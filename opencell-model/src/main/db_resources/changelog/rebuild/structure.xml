@@ -13245,6 +13245,9 @@
             <column name="sequence" type="int"/>
             <column name="script_instance_id" type="bigint" />
             <column name="payment_rejection_codes_group_id" type="bigint" />
+            <column name="script_parameters" type="${type.json}">
+                <constraints nullable="true" />
+            </column>
         </createTable>
 
         <createTable tableName="ar_payment_rejection_codes_group">
@@ -21653,6 +21656,7 @@
     <changeSet author="ZBARIKI" id="INTRD-19605_20231225" />
     <changeSet id="INTRD-19605_20231225" author="ZBARIKI" />
     <changeSet id="INTRD-19826_20240103" author="ZBARIKI" />
+    <changeSet id="INTRD-21021_20240129" author="ZBARIKI" />
 
     <!--  !!! PLEASE KEEP THIS CHANGESET AT THE END OF FILE !!! -->
     <changeSet id="#liquibase_hack_structure" author="AbdelmounaimAkadid">

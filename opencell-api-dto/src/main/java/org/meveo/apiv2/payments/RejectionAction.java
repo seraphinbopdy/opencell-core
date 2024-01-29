@@ -6,6 +6,7 @@ import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 @Value.Immutable
 @Value.Style(jdkOnly = true)
@@ -23,4 +24,8 @@ public interface RejectionAction extends Resource {
     @Nullable
     @Schema(description = "Payment rejection action associated script")
     Resource getScriptInstance();
+
+    @Nullable
+    @Schema(description = "Payment rejection action script parameters")
+    Map<String,String> getScriptParameters();
 }

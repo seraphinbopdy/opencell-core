@@ -17,7 +17,8 @@ public class RejectionActionMapper extends ResourceMapper<RejectionAction, Payme
                 .id(entity.getId())
                 .code(entity.getCode())
                 .description(entity.getDescription())
-                .sequence(entity.getSequence());
+                .sequence(entity.getSequence())
+                .scriptParameters(entity.getScriptParameters());
         if(entity.getScript() != null) {
             builder.scriptInstance(ImmutableResource.builder().code(entity.getScript().getCode())
                     .build());
@@ -37,6 +38,7 @@ public class RejectionActionMapper extends ResourceMapper<RejectionAction, Payme
             scriptInstance.setCode(resource.getScriptInstance().getCode());
             rejectionAction.setScript(scriptInstance);
         }
+        rejectionAction.setScriptParameters(resource.getScriptParameters());
         return rejectionAction;
     }
 }

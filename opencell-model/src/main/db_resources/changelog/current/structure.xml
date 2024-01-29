@@ -9512,4 +9512,12 @@ public class AgedBalanceReporting extends ReportExtractScript {
                                  referencedTableName="ar_payment_rejection_action"
                                  referencedColumnNames="id" />
 	</changeSet>
+
+    <changeSet id="INTRD-21021_20240129" author="ZBARIKI">
+        <addColumn tableName="ar_payment_rejection_action">
+            <column name="script_parameters" type="${type.json}">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

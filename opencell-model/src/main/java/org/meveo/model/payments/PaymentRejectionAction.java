@@ -2,6 +2,7 @@ package org.meveo.model.payments;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ModuleItem;
@@ -13,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.Map;
 
 @Entity
 @ModuleItem
@@ -39,6 +41,10 @@ public class PaymentRejectionAction extends BusinessCFEntity {
     @JoinColumn(name = "payment_rejection_codes_group_id")
     private PaymentRejectionCodesGroup paymentRejectionCodesGroup;
 
+    @Type(type = "json")
+    @Column(name = "script_parameters", columnDefinition = "jsonb")
+    private Map<String,String> scriptParameters;
+
     public int getSequence() {
         return sequence;
     }
@@ -61,5 +67,13 @@ public class PaymentRejectionAction extends BusinessCFEntity {
 
     public void setPaymentRejectionCodesGroup(PaymentRejectionCodesGroup paymentRejectionCodesGroup) {
         this.paymentRejectionCodesGroup = paymentRejectionCodesGroup;
+    }
+
+    public Map<String, String> getScriptParameters() {
+        return scriptParameters;
+    }
+
+    public void setScriptParameters(Map<String, String> scriptParameters) {
+        this.scriptParameters = scriptParameters;
     }
 }

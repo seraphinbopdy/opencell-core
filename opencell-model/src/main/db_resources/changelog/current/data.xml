@@ -23970,4 +23970,48 @@ public class DummyPaymentGatewayScript extends Script {
 			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
 		</insert>
     </changeSet>
+
+    <changeSet id="INTRD-20997-20230129" author="ZBariki">
+        <insert tableName="generic_sequence">
+            <column name="id" valueSequenceNext="bill_seq_invoice_seq"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="payment_rejection_codes_group_seq"/>
+            <column name="description" value="Payment rejection codes group sequence"/>
+            <column name="sequence_type" value="SEQUENCE"/>
+            <column name="sequence_size" valueNumeric="6"/>
+            <column name="current_number" valueNumeric="0"/>
+        </insert>
+        <insert tableName="adm_custom_generic_entity_code">
+            <column name="id" valueSequenceNext="adm_custom_generic_entity_code_seq"/>
+            <column name="entity_class" value="org.meveo.model.payments.PaymentRejectionCodesGroup"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="format_el" value="PRCG-"/>
+            <column name="sequence_id"
+                    valueComputed="(SELECT id from generic_sequence where code = 'payment_rejection_codes_group_seq')"/>
+        </insert>
+
+        <insert tableName="generic_sequence">
+            <column name="id" valueSequenceNext="bill_seq_invoice_seq"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="payment_rejection_code_seq"/>
+            <column name="description" value="Payment rejection code sequence"/>
+            <column name="sequence_type" value="SEQUENCE"/>
+            <column name="sequence_size" valueNumeric="6"/>
+            <column name="current_number" valueNumeric="0"/>
+        </insert>
+        <insert tableName="adm_custom_generic_entity_code">
+            <column name="id" valueSequenceNext="adm_custom_generic_entity_code_seq"/>
+            <column name="entity_class" value="org.meveo.model.payments.PaymentRejectionCode"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="format_el" value="PRC-"/>
+            <column name="sequence_id"
+                    valueComputed="(SELECT id from generic_sequence where code = 'payment_rejection_code_seq')"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

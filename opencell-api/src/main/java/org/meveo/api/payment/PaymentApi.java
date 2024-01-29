@@ -45,6 +45,7 @@ import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.BaseApi;
+import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.api.dto.payment.AccountOperationDto;
 import org.meveo.api.dto.payment.AccountOperationsDto;
 import org.meveo.api.dto.payment.PayByCardOrSepaDto;
@@ -677,6 +678,10 @@ public class PaymentApi extends BaseApi {
 			throw new NotFoundException(PAYMENT_GATEWAY_NOT_FOUND_ERROR_MESSAGE);
 		}
 		PaymentRejectionCode paymentRejectionCode = rejectionCodeMapper.toEntity(rejectionCode, paymentGateway);
+		if(isBlank(paymentRejectionCode.getCode())) {
+			paymentRejectionCode.setCode(ofNullable(getGenericCode(PaymentRejectionCode.class.getName()))
+					.orElseThrow(() -> new MissingParameterException("Code is missing")));
+		}
 		rejectionCodeService.create(paymentRejectionCode);
 		return paymentRejectionCode.getId();
 
@@ -853,6 +858,7 @@ public class PaymentApi extends BaseApi {
 		ofNullable(rejectionAction.getCode()).ifPresent(toUpdate::setCode);
 		ofNullable(rejectionAction.getDescription()).ifPresent(toUpdate::setDescription);
 		ofNullable(rejectionAction.getSequence()).ifPresent(toUpdate::setSequence);
+		ofNullable(rejectionAction.getScriptParameters()).ifPresent(toUpdate::setScriptParameters);
 		if (rejectionAction.getScriptInstance() != null) {
 			final Resource script = rejectionAction.getScriptInstance();
 			ScriptInstance scriptInstance = ofNullable(scriptInstanceService.findById(script.getId()))
@@ -904,6 +910,10 @@ public class PaymentApi extends BaseApi {
 	public RejectionGroup createRejectionGroup(RejectionGroup rejectionGroup) {
 		checkCodeExistence(rejectionGroup);
 		PaymentRejectionCodesGroup entityToSave = groupMapper.toEntity(rejectionGroup);
+		if(isBlank(entityToSave.getCode())) {
+			entityToSave.setCode(ofNullable(getGenericCode(PaymentRejectionCodesGroup.class.getName()))
+					.orElseThrow(() -> new MissingParameterException("Code is missing")));
+		}
 		if (entityToSave.getPaymentGateway() != null) {
 			entityToSave.setPaymentGateway(loadPaymentGateway(entityToSave.getPaymentGateway()));
 		}

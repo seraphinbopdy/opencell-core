@@ -261,6 +261,10 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                     finalizeFunction.accept(jobExecutionResult);
                 }
                 return;
+                // when we have the value = -1 it's mean that we don't know the number of records to be processed,
+                // but we will be incremented or calculated as records are being processed.
+            } else if (jobExecutionResult.getNbItemsToProcess() == -1) {
+                jobExecutionResult.setNbItemsToProcess(0);
             }
             if (isJobRequestedToStop(jobInstance.getId())) {
                 log.info("{}/{} will skip as should not continue", jobInstance.getJobTemplate(), jobInstance.getCode());

@@ -35,6 +35,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -80,6 +81,7 @@ import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.transformer.AliasToAggregatedWalletOperationResultTransformer;
 import org.meveo.service.admin.impl.CurrencyService;
 import org.meveo.service.admin.impl.SellerService;
+import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.catalog.impl.CalendarService;
@@ -136,7 +138,12 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
 
     @Inject
     private RecurringChargeTemplateService recurringChargeTemplateService;
-    
+
+    @Inject
+    @Named
+    private NativePersistenceService nativePersistenceService;
+
+
     /**
      *
      * @param ids
@@ -1063,6 +1070,17 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
                 .createNamedQuery("WalletOperation.findWalletOperationTradingCurrency")
                 .setParameter("walletOperationIds", walletOperationsIds)
                 .getResultList();
+    }
+
+    /**
+     * Mark a multiple Wallet operations to rerate
+     *
+     * @param updateQuery the update query which mark Wallet operations to rerate
+     * @param ids         the ids of Wallet operations to be marked
+     * @return the number of updated Wallet operations
+     */
+    public int markWoToRerate(StringBuilder updateQuery, List<Long> ids) {
+        return nativePersistenceService.update(updateQuery, ids);
     }
 
 }

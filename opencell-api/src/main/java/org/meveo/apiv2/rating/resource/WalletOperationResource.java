@@ -18,6 +18,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("/rating/walletOperation")
 @Produces({APPLICATION_JSON})
 @Consumes({APPLICATION_JSON})
+@Deprecated
 public interface WalletOperationResource {
 
     /**

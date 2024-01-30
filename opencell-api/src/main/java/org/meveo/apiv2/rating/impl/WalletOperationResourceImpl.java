@@ -52,6 +52,7 @@ import java.util.Objects;
  * @since 15.1.0
  */
 @Interceptors({WsRestApiInterceptor.class})
+@Deprecated
 public class WalletOperationResourceImpl implements WalletOperationResource {
 
     @Inject
@@ -108,7 +109,7 @@ public class WalletOperationResourceImpl implements WalletOperationResource {
                     .append("status=").append(QueryBuilder.paramToString(WalletOperationStatusEnum.TO_RERATE))
                     .append(", updated=").append(QueryBuilder.paramToString(new Date()));
 
-            int updated = batchEntityService.markWoToRerate(updateQuery, ids);
+            int updated = walletOperationService.markWoToRerate(updateQuery, ids);
 
             if (updated > 0) {
                 result.setMessage(updated + " Wallet operations updated to status 'TO_RERATE'");

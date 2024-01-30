@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -67,7 +69,27 @@ public class JobExecutionResultImpl extends BaseEntity {
     private static final long serialVersionUID = 430457580612075457L;
 
     @Transient
+    Map<String,Object> jobParams = new TreeMap<>();
+
+    @Transient
     private int invoiceCount = 0;
+
+    public Object getJobParam(String key){
+        return jobParams.get(key);
+    }
+
+
+    public void addJobParam(String key, Object value){
+        jobParams.put(key,value);
+    }
+
+    public void setJobParams(Map<String,Object> jobParams){
+        this.jobParams=jobParams;
+    }
+
+    public Map<String,Object> getJobParams(){
+        return this.jobParams;
+    }
 
     /**
      * Job instance

@@ -17,8 +17,14 @@
  */
 package org.meveo.service.billing.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.job.MassUpdaterJobBean;
+import org.meveo.admin.job.UpdateHugeEntityJob;
+import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.apiv2.common.HugeEntity;
 import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
@@ -26,10 +32,8 @@ import org.meveo.model.admin.CustomGenericEntityCode;
 import org.meveo.model.admin.User;
 import org.meveo.model.billing.BatchEntity;
 import org.meveo.model.billing.BatchEntityStatusEnum;
-import org.meveo.model.billing.InvoiceLineStatusEnum;
-import org.meveo.model.billing.RatedTransactionStatusEnum;
-import org.meveo.model.billing.WalletOperationStatusEnum;
 import org.meveo.model.communication.email.EmailTemplate;
+import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
@@ -45,24 +49,19 @@ import org.meveo.service.crm.impl.ProviderService;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
 /**
- * BatchEntityService : A class for Batch entity persistence services.
+ * A class for Batch entity persistence services.
  *
  * @author Abdellatif BARI
  * @since 15.1.0
@@ -71,6 +70,7 @@ import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 public class BatchEntityService extends PersistenceService<BatchEntity> {
 
     private static final String DEFAULT_EMAIL_ADDRESS = "no-reply@opencellsoft.com";
+    private static final String SELECT_ALIAS_TABLE = "a";
 
     @Inject
     @Named
@@ -100,6 +100,10 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     @Inject
     private ServiceSingleton serviceSingleton;
 
+    @Inject
+    private MassUpdaterJobBean massUpdaterJobBean;
+
+
     /**
      * Create the new batch entity
      *
@@ -107,11 +111,30 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @param targetJob    the target job
      * @param targetEntity the target entity
      */
+    @Deprecated()
     public void create(Map<String, Object> filters, String targetJob, String targetEntity) {
         BatchEntity batchEntity = new BatchEntity();
         batchEntity.setCode(getBatchEntityCode(null));
         batchEntity.setDescription(targetJob + "_" + targetEntity);
         batchEntity.setTargetJob(targetJob);
+        batchEntity.setTargetEntity(targetEntity);
+        batchEntity.setFilters(filters);
+        batchEntity.setNotify(true);
+        create(batchEntity);
+    }
+
+    /**
+     * Create the new batch entity
+     *
+     * @param hugeEntity   the huge entity
+     * @param filters      the filters
+     * @param targetEntity the target entity
+     */
+    public void create(HugeEntity hugeEntity, Map<String, Object> filters, String targetEntity) {
+        BatchEntity batchEntity = new BatchEntity();
+        batchEntity.setCode(getBatchEntityCode(null));
+        batchEntity.setDescription(hugeEntity.getTargetJob() + "_" + targetEntity);
+        batchEntity.setTargetJob(hugeEntity.getTargetJob());
         batchEntity.setTargetEntity(targetEntity);
         batchEntity.setFilters(filters);
         batchEntity.setNotify(true);
@@ -141,35 +164,22 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     }
 
     /**
-     * Mark a multiple Wallet operations to rerate
+     * Update a huge entity.
      *
-     * @param batchEntities      batch entities
      * @param jobExecutionResult Job execution result
-     * @param emailTemplateId    Email template id
      */
-    public void markWoToRerate(List<BatchEntity> batchEntities, JobExecutionResultImpl jobExecutionResult, Long emailTemplateId) {
+    public void updateHugeEntity(JobExecutionResultImpl jobExecutionResult) {
+        String hugeEntityClassName = getHugeEntityClassName(jobExecutionResult);
+        String targetJob = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_TARGET_JOB);
+        if (StringUtils.isBlank(targetJob)) {
+            throw new BusinessException("the target job is missing!");
+        }
+        List<BatchEntity> batchEntities = getEntityManager().createNamedQuery("BatchEntity.getOpenedBatchEntity")
+                .setParameter("targetJob", targetJob).getResultList();
         JobInstance jobInstance = jobExecutionResult.getJobInstance();
-        jobExecutionResult.addNbItemsToProcess(batchEntities.size());
         for (BatchEntity batchEntity : batchEntities) {
             try {
-                batchEntity.setStatus(BatchEntityStatusEnum.PROCESSING);
-                batchEntity.setJobInstance(jobInstance);
-
-                String entityClassName = "WalletOperation";
-                StringBuilder updateQuery = new StringBuilder("UPDATE ").append(entityClassName).append(" SET ")
-                        .append("status=").append(QueryBuilder.paramToString(WalletOperationStatusEnum.TO_RERATE))
-                        .append(", updated=").append(QueryBuilder.paramToString(new Date()))
-                        .append(", reratingBatch.id=").append(batchEntity.getId());
-
-                QueryBuilder queryBuilder = new QueryBuilder(updateQuery.toString());
-                Map<String, Object> filters = addFilters(batchEntity.getFilters());
-                nativePersistenceService.update(queryBuilder, entityClassName, filters);
-                batchEntity.setStatus(BatchEntityStatusEnum.SUCCESS);
-                update(batchEntity);
-                jobExecutionResult.registerSucces();
-                if (batchEntity.isNotify() && emailTemplateId != null) {
-                    sendEmail(batchEntity, emailTemplateId, jobExecutionResult);
-                }
+                updateHugeEntity(jobExecutionResult, jobInstance, batchEntity, hugeEntityClassName);
             } catch (Exception e) {
                 log.error("Failed to process the entity batch id : " + batchEntity.getId(), e);
                 methodCallingUtils.callMethodInNewTx(() -> update(batchEntity, jobExecutionResult,
@@ -179,57 +189,135 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     }
 
     /**
-     * Add new filters to original filters
+     * Get the class name of huge entity
      *
-     * @param originalFilters Original filters
-     * @return all filters (new + original)
+     * @param jobExecutionResult the job execution result
+     * @return the class name of huge entity
      */
-    private Map<String, Object> addFilters(Map<String, Object> originalFilters) {
-        Set<String> statusTobeExcluded = Stream.of(WalletOperationStatusEnum.TO_RERATE.name(), WalletOperationStatusEnum.RERATED.name(),
-                        WalletOperationStatusEnum.CANCELED.name())
-                .collect(Collectors.toCollection(HashSet::new));
-        Map<String, Object> filters = new HashMap<>();
-        if (originalFilters != null) {
-            filters.putAll(originalFilters);
+    public String getHugeEntityClassName(JobExecutionResultImpl jobExecutionResult) {
+        String targetEntity = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME);
+        return (getHugeEntityClass(targetEntity)).getSimpleName();
+    }
+
+    /**
+     * Get the class of huge entity
+     *
+     * @param targetEntity the target entity
+     * @return the class name of huge entity
+     */
+    public Class getHugeEntityClass(String targetEntity) {
+        if (StringUtils.isBlank(targetEntity)) {
+            throw new BusinessException("the entity class name is missing!");
         }
-        if (filters.get("not-inList status") != null) {
-            if (filters.get("not-inList status") instanceof Collection) {
-                statusTobeExcluded.addAll(((Collection<String>) filters.get("not-inList status")).stream().map(val -> val != null ? val.toUpperCase() : val)
-                        .collect(Collectors.toSet()));
-            } else {
-                statusTobeExcluded.add((String) filters.get("not-inList status"));
+        Class entityClass = null;
+        try {
+            entityClass = Class.forName(targetEntity);
+        } catch (ClassNotFoundException e) {
+            throw new BusinessException("Unknown classname " + targetEntity + ". Please provide a valid entity classname");
+        }
+        return entityClass;
+    }
+
+    /**
+     * Update a multiple Wallet operations to rerate for one batch entity
+     *
+     * @param jobExecutionResult job execution result
+     * @param jobInstance        job instance
+     * @param batchEntity        batch entity
+     * @param entityClassName    entity class name
+     */
+    private void updateHugeEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, String entityClassName) {
+        batchEntity.setStatus(BatchEntityStatusEnum.PROCESSING);
+        batchEntity.setJobInstance(jobInstance);
+
+        executeMassUpdaterJob(jobExecutionResult, jobInstance, batchEntity, entityClassName);
+
+        batchEntity.setStatus(BatchEntityStatusEnum.SUCCESS);
+        update(batchEntity);
+        EntityReferenceWrapper emailTemplate = (EntityReferenceWrapper) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_EMAIL_TEMPLATE);
+        if (batchEntity.isNotify() && emailTemplate != null) {
+            sendEmail(batchEntity, emailTemplate.getId(), jobExecutionResult);
+        }
+    }
+
+    /**
+     * Add the default filter to batch filters
+     *
+     * @param jobExecutionResult the job execution result
+     * @param filters            batch filters
+     * @return all filters (new + default)
+     */
+    private Map<String, Object> addFilters(JobExecutionResultImpl jobExecutionResult, Map<String, Object> filters) {
+        String defaultFilter = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER);
+        if (!StringUtils.isBlank(defaultFilter)) {
+            try {
+                Map<String, Object> result = new ObjectMapper().readValue(defaultFilter, HashMap.class);
+                if (result != null && result.get("filters") != null) {
+                    Map<String, Object> subFilters = (Map<String, Object>) result.get("filters");
+                    for (Map.Entry<String, Object> mapItem : subFilters.entrySet()) {
+                        if (mapItem.getKey().matches("\\$filter[0-9]+$")) {
+                            filters.put(mapItem.getKey() + "0000000", mapItem.getValue());
+                        } else {
+                            filters.put(mapItem.getKey(), mapItem.getValue());
+                        }
+                    }
+                }
+            } catch (JsonProcessingException e) {
+                throw new BusinessException("The default filter is invalid!");
             }
         }
-        filters.put("not-inList status", statusTobeExcluded);
-        Map<String, Object> filter = new LinkedHashMap();
-        filter.put("$operator", "OR");
-        filter.put("ne ratedTransaction.status", RatedTransactionStatusEnum.BILLED.name());
-        filter.put("ne ratedTransaction.invoiceLine.status", InvoiceLineStatusEnum.BILLED.name());
-        boolean result = Stream.of(filters.keySet().toArray())
-                .anyMatch(key -> {
-                    String keyObject = (String) key;
-                    if (keyObject.matches("\\$filter[0-9]+$")) {
-                        return filter.equals(filters.get(key));
-                    }
-                    return false;
-                });
-        if (!result) {
-            filters.put("$filter0101", filter);
-        }
-        filter.put("inList status", Set.of(WalletOperationStatusEnum.OPEN.name(), WalletOperationStatusEnum.F_TO_RERATE.name(),
-                WalletOperationStatusEnum.REJECTED.name()));
         return filters;
     }
 
     /**
-     * Mark a multiple Wallet operations to rerate
+     * Execute the mass updater job
      *
-     * @param updateQuery the update query which mark Wallet operations to rerate
-     * @param ids         the ids of Wallet operations to be marked
-     * @return the number of updated Wallet operations
+     * @param jobExecutionResult the job execution result
+     * @param jobInstance        the job instance
+     * @param batchEntity        the batch entity
+     * @param entityClassName    entity class name
      */
-    public int markWoToRerate(StringBuilder updateQuery, List<Long> ids) {
-        return nativePersistenceService.update(updateQuery, ids);
+    private void executeMassUpdaterJob(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, String entityClassName) {
+        Long selectLimit = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_SELECT_LIMIT);
+        Long updateChunk = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK);
+
+        Map<String, Object> filters = addFilters(jobExecutionResult, batchEntity.getFilters());
+
+        String selectQuery = getSelectQuery(entityClassName, filters);
+        String updateQuery = getUpdateQuery(jobExecutionResult, batchEntity, entityClassName);
+        massUpdaterJobBean.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunk, selectQuery, SELECT_ALIAS_TABLE, selectLimit, false);
+    }
+
+    /**
+     * Build the update query with the provided fields
+     *
+     * @param jobExecutionResult the job execution result
+     * @param batchEntity        the batch entity
+     * @param entityClassName    the entity class name
+     */
+    public String getUpdateQuery(JobExecutionResultImpl jobExecutionResult, BatchEntity batchEntity, String entityClassName) {
+        StringBuilder updateQuery = new StringBuilder("UPDATE ").append(entityClassName).append(" SET ")
+                .append("updated=").append(QueryBuilder.paramToString(new Date()))
+                .append(", reratingBatch.id=").append(batchEntity.getId());
+
+        String fieldsToUpdate = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE);
+        if (!StringUtils.isBlank(fieldsToUpdate)) {
+            updateQuery = updateQuery.append(", ").append(fieldsToUpdate);
+        }
+        return updateQuery.toString();
+    }
+
+    /**
+     * Gets the select query
+     *
+     * @param entityClassName the entity class name
+     * @param filters         the filters
+     * @return the select query
+     */
+    private String getSelectQuery(String entityClassName, Map<String, Object> filters) {
+        PaginationConfiguration searchConfig = new PaginationConfiguration(filters);
+        searchConfig.setFetchFields(Arrays.asList("id"));
+        return nativePersistenceService.getQuery(entityClassName, searchConfig, null).getQueryAsString();
     }
 
     /**

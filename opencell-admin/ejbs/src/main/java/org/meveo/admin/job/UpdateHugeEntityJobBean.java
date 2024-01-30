@@ -19,10 +19,6 @@ package org.meveo.admin.job;
 
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.interceptor.PerformanceInterceptor;
-import org.meveo.jpa.EntityManagerWrapper;
-import org.meveo.jpa.MeveoJpa;
-import org.meveo.model.billing.BatchEntity;
-import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.BatchEntityService;
@@ -32,22 +28,17 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
-import java.util.List;
 
 /**
- * A job implementation to mark Open Wallet operations to rerate
+ * A job implementation to update huge entity
  *
  * @author Abdellatif BARI
  * @since 15.1.0
  */
 @Stateless
-public class MarkWOToRerateJobBean extends IteratorBasedJobBean<BatchEntity> {
+public class UpdateHugeEntityJobBean extends BaseJobBean {
 
     private static final long serialVersionUID = 1L;
-
-    @Inject
-    @MeveoJpa
-    private EntityManagerWrapper emWrapper;
 
     @Inject
     private BatchEntityService batchEntityService;
@@ -56,9 +47,23 @@ public class MarkWOToRerateJobBean extends IteratorBasedJobBean<BatchEntity> {
     @Interceptors({JobLoggingInterceptor.class, PerformanceInterceptor.class})
     @TransactionAttribute(TransactionAttributeType.NEVER)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        List<BatchEntity> batchEntities = emWrapper.getEntityManager().createNamedQuery("BatchEntity.getOpenedBatchEntity").
-                setParameter("targetJob", "MarkWOToRerateJob").getResultList();
-        EntityReferenceWrapper emailTemplate = (EntityReferenceWrapper) this.getParamOrCFValue(jobInstance, MarkWOToRerateJob.CF_EMAIL_TEMPLATE);
-        batchEntityService.markWoToRerate(batchEntities, jobExecutionResult, emailTemplate != null ? emailTemplate.getId() : null);
+        initJob(jobExecutionResult, jobInstance);
+        batchEntityService.updateHugeEntity(jobExecutionResult);
+    }
+
+    /**
+     * Initialize the job parameters.
+     *
+     * @param jobExecutionResult the job execution result
+     * @param jobInstance        the job instance
+     */
+    private void initJob(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_TARGET_JOB, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_TARGET_JOB));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_DEFAULT_FILTER));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_SELECT_LIMIT, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_SELECT_LIMIT));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_UPDATE_CHUNK));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_EMAIL_TEMPLATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_EMAIL_TEMPLATE));
     }
 }

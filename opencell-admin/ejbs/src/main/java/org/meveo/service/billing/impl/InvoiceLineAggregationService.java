@@ -9,14 +9,18 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,17 +31,23 @@ import org.hibernate.StatelessSession;
 import org.hibernate.query.Query;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.AggregationConfiguration;
+import org.meveo.admin.util.pagination.FilterOperatorEnum;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
+import org.meveo.api.generics.PersistenceServiceHelper;
+import org.meveo.api.generics.filter.FactoryFilterMapper;
+import org.meveo.api.generics.filter.FilterMapper;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
+import org.meveo.model.IEntity;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingEntityTypeEnum;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.DateAggregationOption;
 import org.meveo.model.billing.DiscountAggregationModeEnum;
+import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.crm.Provider;
 import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.base.PersistenceService;
@@ -255,12 +265,45 @@ public class InvoiceLineAggregationService implements Serializable {
 
         Set<String> groupBy = getAggregationQueryGroupBy(aggregationConfiguration);
 
-        PaginationConfiguration searchConfig = new PaginationConfiguration(null, null, bcFilter, null, fieldToFetch, groupBy, (Set<String>) null, "billingAccount.id", SortOrder.ASCENDING);
+        PaginationConfiguration searchConfig = new PaginationConfiguration(null, null, evaluateFilters(bcFilter, RatedTransaction.class), null, fieldToFetch, groupBy, (Set<String>) null, "billingAccount.id", SortOrder.ASCENDING);
 
         String extraCondition = (billingRun.getLastTransactionDate() != null ? " a.usageDate < :lastTransactionDate and " : " ") + QUERY_FILTER;
 
         QueryBuilder queryBuilder = nativePersistenceService.getAggregateQuery("RatedTransaction", searchConfig, null, extraCondition, null);
         return queryBuilder.getQueryAsString();
+    }
+
+
+
+    private Map<String, Object> evaluateFilters(Map<String, Object> filters, Class<? extends IEntity> entity) {
+        return Stream.of(filters.keySet().toArray())
+                     .map(key -> {
+                         String keyObject = (String) key;
+                         if(keyObject.matches("\\$filter[0-9]+$")) {
+                             return Collections.singletonMap(keyObject, evaluateFilters((Map<String, Object>)filters.get(key), entity));
+                         } else if(!keyObject.startsWith("SQL") && !"$FILTER".equalsIgnoreCase(keyObject) && !"$OPERATOR".equalsIgnoreCase(keyObject)){
+
+                             String fieldName = keyObject.contains(" ") ? keyObject.substring(keyObject.indexOf(" ")).trim() : keyObject;
+                             String[] fields=fieldName.split(" ");
+                             FilterMapper filterMapper=null;
+                             for(String field:fields) {
+                                 filterMapper=new FactoryFilterMapper().create(field, filters.get(key), (String) filters.get("cetCode"), PersistenceServiceHelper.getPersistenceService(), entity);
+                             }
+                             return Collections.singletonMap(keyObject, filterMapper.map());
+                         } else if ("$OPERATOR".equalsIgnoreCase(keyObject)) {
+                             String filterOperator = (String) filters.get(keyObject);
+                             try {
+                                 FilterOperatorEnum enumValue = FilterOperatorEnum.valueOf(filterOperator);
+                                 return Collections.singletonMap(keyObject, enumValue);
+                             } catch (IllegalArgumentException e) {
+                                 throw new IllegalArgumentException("Invalid $operator value. Accepted value : 'OR', 'AND'", e);
+                             }
+                         }
+                         return Collections.singletonMap(keyObject, filters.get(key));
+                     })
+                     .flatMap (map -> map.entrySet().stream())
+                     .filter(stringObjectEntry -> Objects.nonNull(stringObjectEntry.getValue()))
+                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private String buildJoinWithILQuery(Long billingRunId, List<String> aggregationFields, AggregationConfiguration aggregationConfiguration) {

@@ -5,6 +5,7 @@ import static org.meveo.service.base.PersistenceService.SEARCH_WILDCARD_OR_IGNOR
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import java.util.stream.Stream;
 
 import javax.persistence.criteria.JoinType;
 
+import org.apache.commons.collections.MapUtils;
 import org.meveo.admin.util.pagination.FilterOperatorEnum;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.BaseEntity;
@@ -112,10 +114,16 @@ public class NativeExpressionFactory {
                         operator = (FilterOperatorEnum) nestedFilterItems.getOrDefault("$operator", FilterOperatorEnum.AND);
                     }
             		queryBuilder.startNestedFilter(operator);
-                    nestedFilterItems.keySet().stream()
+                    
+                    Map<String, Object> cfFilters = PersistenceService.extractCustomFieldsFilters(nestedFilterItems);
+                    Map<String, Object> filters = new HashMap<>(nestedFilterItems);
+                    if(MapUtils.isNotEmpty(cfFilters)) {
+                        filters.putAll(cfFilters);
+                    }
+                    filters.keySet().stream()
 	                    						.sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
-	                    						.filter(orItemKey -> nestedFilterItems.get(orItemKey) != null && !"$OPERATOR".equalsIgnoreCase(orItemKey))
-	                    						.forEach(orItemKey -> addFilters(orItemKey, nestedFilterItems.get(orItemKey)));
+	                    						.filter(orItemKey -> filters.get(orItemKey) != null && !"$OPERATOR".equalsIgnoreCase(orItemKey))
+	                    						.forEach(orItemKey -> addFilters(orItemKey, filters.get(orItemKey)));
             		queryBuilder.endNestedFilter();
                 } else if (key.startsWith(PersistenceService.SEARCH_SQL)) {
                     queryBuilder.addSearchSqlFilters(value);

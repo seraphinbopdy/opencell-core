@@ -47,6 +47,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.FlushMode;
@@ -88,6 +89,7 @@ import org.meveo.model.report.query.ReportQuery;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.model.transformer.AliasToEntityOrderedMapResultTransformer;
 import org.meveo.security.keycloak.CurrentUserProvider;
+import org.meveo.service.base.expressions.ExpressionFactory;
 import org.meveo.service.base.expressions.NativeExpressionFactory;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CustomEntityTemplateService;
@@ -1048,12 +1050,21 @@ public class NativePersistenceService extends BaseService {
         }
         Map<String, Object> filters = config.getFilters();
 
+
+        Map<String, Object> cfFilters = PersistenceService.extractCustomFieldsFilters(filters);
+        if(MapUtils.isNotEmpty(cfFilters)) {
+            filters.putAll(cfFilters);
+        }
+
         if (filters != null && !filters.isEmpty()) {
-            NativeExpressionFactory nativeExpressionFactory = new NativeExpressionFactory(queryBuilder, "a");
+            NativeExpressionFactory nativeExpressionFactory = new ExpressionFactory(queryBuilder, "a");
             filters.keySet().stream()
             		.sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
-                    .filter(key -> filters.get(key) != null)
+                    .filter(key -> filters.get(key) != null && !"$OPERATOR".equalsIgnoreCase(key))
                     .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
+            for (String cft : cfFilters.keySet()) {
+                filters.remove(cft);
+            }
         }
 
         if (config.getOrderings() != null && config.getOrderings().length == 2) {

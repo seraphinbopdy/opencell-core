@@ -9520,4 +9520,20 @@ public class AgedBalanceReporting extends ReportExtractScript {
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="INTRD-20911_20240131" author="ZBARIKI">
+        <addColumn tableName="ar_account_operation">
+            <column name="payment_gateway_id" type="bigint"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="payment_gateway_id"
+                                 baseTableName="ar_account_operation"
+                                 constraintName="fk_payment_gateway_id_account_operation"
+                                 referencedTableName="ar_payment_gateway"
+                                 referencedColumnNames="id" />
+        <sql>update ar_account_operation set payment_gateway_id = (
+            SELECT id
+            FROM ar_payment_gateway
+            WHERE code = 'SEPA_FILE')
+             WHERE reference LIKE 'ddItem%'</sql>
+    </changeSet>
 </databaseChangeLog>

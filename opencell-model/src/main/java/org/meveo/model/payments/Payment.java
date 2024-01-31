@@ -17,7 +17,6 @@
  */
 package org.meveo.model.payments;
 
-import org.hibernate.annotations.Type;
 import org.meveo.model.dunning.DunningDocument;
 
 import java.math.BigDecimal;
@@ -54,6 +53,13 @@ public class Payment extends AccountOperation {
      */
     @Column(name = "transactional_payment_fees")
     private BigDecimal transactionalFees = BigDecimal.ZERO;
+
+    /**
+     * if a payment is done as part of a dunning process
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_gateway_id")
+    private PaymentGateway paymentGateway;
 
     /**
      * get the  associated dunning doc if exists
@@ -113,4 +119,11 @@ public class Payment extends AccountOperation {
 		this.transactionalFees = transactionalFees;
 	}
 
+    public PaymentGateway getPaymentGateway() {
+        return paymentGateway;
+    }
+
+    public void setPaymentGateway(PaymentGateway paymentGateway) {
+        this.paymentGateway = paymentGateway;
+    }
 }

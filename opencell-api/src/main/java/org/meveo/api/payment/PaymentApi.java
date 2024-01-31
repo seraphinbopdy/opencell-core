@@ -826,8 +826,9 @@ public class PaymentApi extends BaseApi {
 						+ rejectionAction.getCode() + " already exists");
 			}
 			if (entity.getScript() != null) {
-				final ScriptInstance scriptInstance = ofNullable(scriptInstanceService.findById(entity.getScript().getId()))
-							.orElse(scriptInstanceService.findByCode(entity.getScript().getCode()));
+				ScriptInstance scriptInstance = entity.getScript().getId() != null
+						? scriptInstanceService.findById(entity.getScript().getId())
+						: scriptInstanceService.findByCode(entity.getScript().getCode());
 				if (scriptInstance == null) {
 					throw new NotFoundException("Script instance not found");
 				}
@@ -874,8 +875,9 @@ public class PaymentApi extends BaseApi {
 		ofNullable(rejectionAction.getScriptParameters()).ifPresent(toUpdate::setScriptParameters);
 		if (rejectionAction.getScriptInstance() != null) {
 			final Resource script = rejectionAction.getScriptInstance();
-			ScriptInstance scriptInstance = ofNullable(scriptInstanceService.findById(script.getId()))
-					.orElse(scriptInstanceService.findByCode(script.getCode()));
+			ScriptInstance scriptInstance = script.getId() != null
+					? scriptInstanceService.findById(script.getId())
+					: scriptInstanceService.findByCode(script.getCode());
 			if (scriptInstance == null) {
 				throw new NotFoundException("Script instance not found");
 			}

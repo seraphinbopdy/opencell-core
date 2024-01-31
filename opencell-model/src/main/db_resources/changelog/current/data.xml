@@ -24014,4 +24014,5 @@ public class DummyPaymentGatewayScript extends Script {
                     valueComputed="(SELECT id from generic_sequence where code = 'payment_rejection_code_seq')"/>
         </insert>
     </changeSet>
+
 </databaseChangeLog>

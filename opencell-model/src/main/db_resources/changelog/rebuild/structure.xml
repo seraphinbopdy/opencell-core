@@ -2179,6 +2179,7 @@
 			<column name="refunded_payment_id" type="bigint" />
             <column name="litigation_reason" type="varchar(2000)" />
             <column name="source_account_operation_id" type="bigint" />
+            <column name="payment_gateway_id" type="bigint" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-146">
@@ -18135,6 +18136,14 @@
                                  referencedTableName="ar_payment_rejection_codes_group"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="INTRD-20911_20240131-rebuild-fk" author="ZBARIKI">
+        <addForeignKeyConstraint baseColumnNames="payment_gateway_id"
+                                 baseTableName="ar_account_operation"
+                                 constraintName="fk_payment_gateway_id_account_operation"
+                                 referencedTableName="ar_payment_gateway"
+                                 referencedColumnNames="id" />
+    </changeSet>
     <!-- end fk -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-constr-995">
@@ -21657,6 +21666,7 @@
     <changeSet id="INTRD-19605_20231225" author="ZBARIKI" />
     <changeSet id="INTRD-19826_20240103" author="ZBARIKI" />
     <changeSet id="INTRD-21021_20240129" author="ZBARIKI" />
+    <changeSet id="INTRD-20911_20240131" author="ZBARIKI" />
 
     <!--  !!! PLEASE KEEP THIS CHANGESET AT THE END OF FILE !!! -->
     <changeSet id="#liquibase_hack_structure" author="AbdelmounaimAkadid">

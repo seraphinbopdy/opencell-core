@@ -63,10 +63,14 @@ import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.PaymentRejectionAction;
+import org.meveo.model.payments.PaymentRejectionActionReport;
+import org.meveo.model.payments.PaymentRejectionActionStatus;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.Refund;
 import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.RejectedType;
+import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 
@@ -122,6 +126,11 @@ public class PaymentService extends PersistenceService<Payment> {
     @Inject
     private TradingCurrencyService tradingCurrencyService;
 
+	@Inject
+	private PaymentRejectionActionService paymentRejectionActionService;
+	
+	@Inject
+	private PaymentRejectionActionReportService paymentRejectionActionReportService;
 
     @MeveoAudit
     @Override
@@ -909,7 +918,9 @@ public class PaymentService extends PersistenceService<Payment> {
                 rejectedPayment.setListAaccountOperationSupposedPaid(listAoThatSupposedPaid);
 
                 accountOperationService.handleAccountingPeriods(rejectedPayment);
+                
                 accountOperationService.create(rejectedPayment);
+                createRejectionActions(rejectedPayment);
                 if (listAoThatSupposedPaid != null) {
                     for (AccountOperation ao : listAoThatSupposedPaid) {
                         ao.setRejectedPayment(rejectedPayment);
@@ -1061,4 +1072,25 @@ public class PaymentService extends PersistenceService<Payment> {
     private BigDecimal toTransactional(BigDecimal amount, BigDecimal rate) {
         return amount != null ? amount.multiply(rate) : BigDecimal.ZERO;
     }
+    
+	public void createRejectionActions(RejectedPayment rejectedPayment) {
+        List<PaymentRejectionAction> rejectionActions = paymentRejectionActionService.findActionsByCodeAndPaymentGateway(rejectedPayment.getRejectedCode(), null);
+        
+        if (rejectionActions == null || rejectionActions.isEmpty()) {
+        	rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.NO_ACTION);
+        } else {
+        	rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.PENDING);
+        }
+        accountOperationService.update(rejectedPayment);
+
+        rejectionActions.forEach(action -> {
+        	PaymentRejectionActionReport actionReport = new PaymentRejectionActionReport();
+        	actionReport.setCode(rejectedPayment.getRejectedCode());
+        	actionReport.setAction(action);
+        	actionReport.setRejectedPayment(rejectedPayment);
+        	actionReport.setStatus(PaymentRejectionActionStatus.PENDING);
+        	
+        	paymentRejectionActionReportService.create(actionReport);
+        });
+	}
 }

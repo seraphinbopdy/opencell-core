@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import java.util.Map;
 
@@ -22,6 +24,7 @@ import java.util.Map;
 @Table(name = "ar_payment_rejection_action")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
         parameters = {@Parameter(name = "sequence_name", value = "ar_payment_rejection_action_seq"),})
+@NamedQueries({@NamedQuery(name = "PaymentRejectionAction.getActionsByRejectionCode", query = "select distinct (pra) from PaymentRejectionAction pra where pra.paymentRejectionCodesGroup in (select rc.paymentRejectionCodesGroup from PaymentRejectionCode rc where rc.code = :code and (:paymentGatewayId is null or rc.paymentGateway.id = :paymentGatewayId))") })
 public class PaymentRejectionAction extends BusinessCFEntity {
 
     /**

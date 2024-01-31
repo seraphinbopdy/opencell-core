@@ -105,6 +105,7 @@ import org.meveo.service.payments.impl.MatchingAmountService;
 import org.meveo.service.payments.impl.MatchingCodeService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.payments.impl.PaymentPlanService;
+import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.AccountOperationService.AccountOperationActionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,6 +157,9 @@ public class AccountOperationApi extends BaseApi {
     
     @Inject
     private OCCTemplateService oCCTemplateService;
+    
+    @Inject
+    private PaymentService paymentService;
 	
     /**
      * Create account operation.
@@ -207,6 +211,7 @@ public class AccountOperationApi extends BaseApi {
                 rejectedPayment.setRejectedDescription(postData.getRejectedPayment().getRejectedDescription());
                 rejectedPayment.setRejectedCode(postData.getRejectedPayment().getRejectedCode());
             }
+            
             accountOperation = rejectedPayment;
         } else if (aoSubclassObject instanceof WriteOff) {
             WriteOff writeOff = new WriteOff();
@@ -438,6 +443,10 @@ public class AccountOperationApi extends BaseApi {
             }
         }
         accountOperation.setComment(postData.getComment());
+        
+        if (accountOperation instanceof RejectedPayment) {
+        	paymentService.createRejectionActions((RejectedPayment) accountOperation);
+        }
         return accountOperation.getId();
     }
 

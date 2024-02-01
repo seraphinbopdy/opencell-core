@@ -45,7 +45,6 @@ import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.BaseApi;
-import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.api.dto.payment.AccountOperationDto;
 import org.meveo.api.dto.payment.AccountOperationsDto;
 import org.meveo.api.dto.payment.PayByCardOrSepaDto;
@@ -834,11 +833,25 @@ public class PaymentApi extends BaseApi {
 				}
 				entity.setScript(scriptInstance);
 			}
+			if(rejectionAction.getRejectionCodeGroup() != null) {
+				entity.setPaymentRejectionCodesGroup(loadRejectionCodeGroup(rejectionAction.getRejectionCodeGroup()));
+			}
 			paymentRejectionActionService.create(entity);
 			return rejectionActionMapper.toResource(entity);
 		} catch (BusinessException exception) {
 			throw new BadRequestException(exception.getMessage());
 		}
+	}
+
+	private PaymentRejectionCodesGroup loadRejectionCodeGroup(Resource rejectionGroup) {
+		PaymentRejectionCodesGroup paymentRejectionCodesGroup = new PaymentRejectionCodesGroup();
+		paymentRejectionCodesGroup.setId(rejectionGroup.getId());
+		paymentRejectionCodesGroup.setCode(rejectionGroup.getCode());
+		paymentRejectionCodesGroup = paymentRejectionCodesGroupService.findByIdOrCode(paymentRejectionCodesGroup);
+		if (paymentRejectionCodesGroup == null) {
+			throw new NotFoundException("Payment rejection code group not found");
+		}
+		return paymentRejectionCodesGroup;
 	}
 
 	/**
@@ -867,6 +880,9 @@ public class PaymentApi extends BaseApi {
 				throw new NotFoundException("Script instance not found");
 			}
 			toUpdate.setScript(scriptInstance);
+		}
+		if(rejectionAction.getRejectionCodeGroup() != null) {
+			toUpdate.setPaymentRejectionCodesGroup(loadRejectionCodeGroup(rejectionAction.getRejectionCodeGroup()));
 		}
 		return rejectionActionMapper.toResource(paymentRejectionActionService.update(toUpdate));
 	}

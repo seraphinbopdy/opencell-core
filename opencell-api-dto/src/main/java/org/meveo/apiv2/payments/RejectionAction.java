@@ -28,4 +28,8 @@ public interface RejectionAction extends Resource {
     @Nullable
     @Schema(description = "Payment rejection action script parameters")
     Map<String,String> getScriptParameters();
+
+    @Nullable
+    @Schema(description = "Payment rejection code group")
+    Resource getRejectionCodeGroup();
 }

@@ -382,6 +382,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
         subscription.setInitialSubscriptionRenewal(JacksonUtil.toString(renewal));
 
         subscription.setSubscribedTillDate(terminationDate);
+        subscription.setToValidity(terminationDate);
         subscriptionRenewal.setTerminationReason(terminationReason);
         subscriptionRenewal.setInitialTermType(SubscriptionRenewal.InitialTermTypeEnum.FIXED);
         subscriptionRenewal.setAutoRenew(false);
@@ -431,6 +432,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
 
         subscription.setSubscriptionTerminationReason(terminationReason);
         subscription.setTerminationDate(terminationDate);
+        subscription.setToValidity(terminationDate);
         subscription.setStatus(SubscriptionStatusEnum.RESILIATED);
         subscription = update(subscription);
 

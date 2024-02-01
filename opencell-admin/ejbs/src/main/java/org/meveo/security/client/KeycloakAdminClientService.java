@@ -1506,62 +1506,104 @@ public class KeycloakAdminClientService implements Serializable {
         }
     }
 
+    /**
+     * Get matching roles
+     * @param roles Roles to match
+     * @param allRoles All roles
+     * @return A list of {@link RoleRepresentation}
+     */
     private List<RoleRepresentation> getMatchingRoles(List<String> roles, List<RoleRepresentation> allRoles) {
-        return roles.stream()
-                .map(role -> allRoles.stream()
-                        .filter(roleRepresentation -> roleRepresentation.getName().equals(role))
-                        .findFirst()
-                        .orElse(null))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        if(roles != null && !roles.isEmpty()) {
+            return roles.stream()
+                    .map(role -> allRoles.stream()
+                            .filter(roleRepresentation -> roleRepresentation.getName().equals(role))
+                            .findFirst()
+                            .orElse(null))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+
+        return null;
     }
 
+    /**
+     * Add realm roles
+     * @param roles A list of roles
+     * @param roleMappingResource {@link RoleMappingResource}
+     */
     private void addRealmRoles(List<String> roles, RoleMappingResource roleMappingResource) {
         List<RoleRepresentation> matchingRoles = getMatchingRoles(roles, roleMappingResource.realmLevel().listAvailable());
-        roleMappingResource.realmLevel().add(matchingRoles);
+        if(matchingRoles != null && !matchingRoles.isEmpty()) {
+            roleMappingResource.realmLevel().add(matchingRoles);
+        }
     }
 
+    /**
+     * Update realms roles
+     * @param roles A list of roles
+     * @param roleMappingResource {@link RoleMappingResource}
+     * @param replacedRoles Replace or not roles
+     */
     private void updateRealmRoles(List<String> roles, RoleMappingResource roleMappingResource, Boolean replacedRoles) {
         if (replacedRoles != null && replacedRoles) {
             roleMappingResource.realmLevel().remove(roleMappingResource.realmLevel().listEffective());
         }
 
         List<RoleRepresentation> matchingRoles = getMatchingRoles(roles, roleMappingResource.realmLevel().listAvailable());
-        roleMappingResource.realmLevel().add(matchingRoles);
+        if(matchingRoles != null && !matchingRoles.isEmpty()) {
+            roleMappingResource.realmLevel().add(matchingRoles);
+        }
     }
 
-
+    /**
+     * Add client roles
+     * @param pClientRole A Map of client roles
+     * @param realmResource {@link RealmResource}
+     * @param roleMappingResource {@link RoleMappingResource}
+     */
     private static void addClientRoles(Map<String, List<String>> pClientRole, RealmResource realmResource, RoleMappingResource roleMappingResource) {
-        pClientRole.forEach((clientName, clientRoleNames) -> {
-            List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientName);
+        if(pClientRole != null && !pClientRole.isEmpty()) {
+            pClientRole.forEach((clientName, clientRoleNames) -> {
+                List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientName);
 
-            if (!clients.isEmpty()) {
-                String clientId = clients.get(0).getId();
-
-                clientRoleNames.stream()
-                    .map(roleName -> {
-                        try {
-                            RoleResource roleResource = realmResource.clients().get(clientId).roles().get(roleName);
-                            return roleResource != null ? roleResource.toRepresentation() : null;
-                        } catch (NotFoundException e) {
-                            // Handle 404 response (Role not found) as needed
-                            // You might want to log a message or take appropriate action
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull) // Filter out null roles
-                    .forEach(role -> roleMappingResource.clientLevel(clientId).add(Collections.singletonList(role)));
-
-
-            }
-        });
+                if (!clients.isEmpty()) {
+                    String clientId = clients.get(0).getId();
+                    clientRoleNames.stream()
+                            .map(roleName -> {
+                                try {
+                                    RoleResource roleResource = realmResource.clients().get(clientId).roles().get(roleName);
+                                    return roleResource != null ? roleResource.toRepresentation() : null;
+                                } catch (NotFoundException e) {
+                                    // Handle 404 response (Role not found) as needed
+                                    // You might want to log a message or take appropriate action
+                                    return null;
+                                }
+                            })
+                            .filter(Objects::nonNull) // Filter out null roles
+                            .forEach(role -> roleMappingResource.clientLevel(clientId).add(Collections.singletonList(role)));
+                }
+            });
+        }
     }
 
+    /**
+     * Get client id
+     * @param clientName Client name
+     * @param realmResource {@link RealmResource}
+     * @return Client id
+     */
     private String getClientId(String clientName, RealmResource realmResource) {
         List<ClientRepresentation> clients = realmResource.clients().findByClientId(clientName);
         return clients.isEmpty() ? null : clients.get(0).getId();
     }
 
+    /**
+     * Update Client Roles
+     * @param clientRoles Client roles
+     * @param realmResource {@link RealmResource}
+     * @param roleMappingResource {@link RoleMappingResource}
+     * @param replaceRoles Replace or not role
+     */
     private void updateClientRoles(Map<String, List<String>> clientRoles, RealmResource realmResource, RoleMappingResource roleMappingResource, Boolean replaceRoles) {
         if (replaceRoles) {
             clientRoles.forEach((clientName, clientRoleNames) -> {
@@ -1587,6 +1629,10 @@ public class KeycloakAdminClientService implements Serializable {
         addClientRoles(clientRoles, realmResource, roleMappingResource);
     }
 
+    /**
+     * Fill client roles
+     * @param pUserDto {@link UserDto}
+     */
     public void fillClientRoles(UserDto pUserDto) {
         KeycloakAdminClientConfig keycloakAdminClientConfig = AuthenticationProvider.getKeycloakConfig();
         Keycloak keycloak = getKeycloakClient(keycloakAdminClientConfig);
@@ -1597,6 +1643,11 @@ public class KeycloakAdminClientService implements Serializable {
         pUserDto.setClientRoles(convertClientMappingsToMap(all));
     }
 
+    /**
+     * Convert Client mapping to string
+     * @param clientMappings A map of client mappings
+     * @return A map of Client Roles
+     */
     private static Map<String, List<String>> convertClientMappingsToMap(Map<String, ClientMappingsRepresentation> clientMappings) {
         Map<String, List<String>> result = new HashMap<>();
 

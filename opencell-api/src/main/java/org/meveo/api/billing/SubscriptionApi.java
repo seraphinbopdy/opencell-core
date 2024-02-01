@@ -2906,7 +2906,7 @@ public class SubscriptionApi extends BaseApi {
         subscription.setUserAccount(userAccount);
         subscription.setSeller(seller);
         subscription.setOffer(offerTemplate);
-        subscription.setFromValidity(postData.getValidityDate());
+        subscription.setFromValidity(Optional.ofNullable(postData.getValidityDate()).orElse(postData.getSubscriptionDate()));
         subscription.setRenewed(postData.isRenewed());
         subscription.setPrestation(postData.getCustomerService());
         subscription.setSalesPersonName(postData.getSalesPersonName());

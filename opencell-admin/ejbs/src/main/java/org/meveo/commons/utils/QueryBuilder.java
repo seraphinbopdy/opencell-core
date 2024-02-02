@@ -239,6 +239,11 @@ public class QueryBuilder {
     	this(sql, alias, false);
 	}
 
+    public QueryBuilder(String sql, String alias, Class<?> entityClass) {
+        this(sql, alias);
+        this.clazz = entityClass;
+    }
+
     public QueryBuilder(String sql, String alias, boolean distinct) {
         q = new StringBuilder(sql);
         initQueryBuilder(sql, alias);

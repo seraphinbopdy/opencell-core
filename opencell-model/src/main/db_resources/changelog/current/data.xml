@@ -23720,4 +23720,13 @@ public class ImportJobNotification extends Script {
             <where>code='MarkWOToRerateJob'</where>
         </update>
     </changeSet>
+    
+    <changeSet id="#INTRD_21035_20240202" author="TarikFA.">
+        <update tableName="ar_occ_template">
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="contra_accounting_code2_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '445710000')" />
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Invoice and Writeoff')" />
+            <where>code='EXP_WRT'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

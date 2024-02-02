@@ -277,6 +277,9 @@ public abstract class BaseApi {
 
         Map<String, CustomFieldTemplate> customFieldTemplates = customFieldTemplateService.findByAppliesTo(entity);
 
+        //check custom fields before populate
+        checkCFBeforePopulate(customFieldsDto);
+
         List<CustomFieldDto> customFieldDtos = null;
         if (customFieldsDto != null) {
             customFieldDtos = customFieldsDto.getCustomField();
@@ -285,6 +288,19 @@ public abstract class BaseApi {
         }
 
         return populateCustomFields(customFieldTemplates, customFieldDtos, entity, isNewEntity, checkCustomField);
+    }
+
+    /**
+     * Check custom field before populate
+     * @param customFieldsDto {@link CustomFieldsDto}
+     */
+    private void checkCFBeforePopulate(CustomFieldsDto customFieldsDto) {
+        customFieldsDto.getCustomField()
+                .forEach(cf -> {
+                    if (cf.getStringValue() != null && cf.getStringValue().trim().isEmpty()) {
+                        cf.setStringValue(null);
+                    }
+                });
     }
 
     /**

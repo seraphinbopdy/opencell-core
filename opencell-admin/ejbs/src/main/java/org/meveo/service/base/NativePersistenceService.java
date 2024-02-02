@@ -1027,14 +1027,20 @@ public class NativePersistenceService extends BaseService {
         }
         String distinct = config.isDistinctQuery() ? "distinct" : "";
 
+        Class<?> entityClass = null;
+        try {
+            entityClass = Class.forName(tableName);
+        } catch (ClassNotFoundException e) {
+            log.warn("The requested entity does not exist");
+        }
         QueryBuilder queryBuilder;
         if (leftJoinClause != null) {
             queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from "
-                    + tableName + " a " + leftJoinClause, "a");
+                    + tableName + " a " + leftJoinClause, "a", entityClass);
         }
         else {
             queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from "
-                    + tableName + " a ", "a");
+                    + tableName + " a ", "a", entityClass);
         }
 
         if (id != null) {

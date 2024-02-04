@@ -55,7 +55,7 @@ import org.meveo.model.ReferenceIdentifierCode;
 import org.meveo.model.ReferenceIdentifierDescription;
 import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.security.Role;
-import org.meveo.model.shared.Name;
+import org.meveo.model.shared.NameInfo;
 
 /**
  * Application user
@@ -81,7 +81,7 @@ public class User extends AuditableEntity implements ICustomFieldEntity, IRefere
      * User name
      */
     @Embedded
-    private Name name;
+    private NameInfo name;
 
     /**
      * Login name
@@ -174,7 +174,7 @@ public class User extends AuditableEntity implements ICustomFieldEntity, IRefere
      */
     public User(String username, String firstName, String lastName, String email, List<String> groups, List<String> roles) {
         this.userName = username;
-        this.name = new Name(null, firstName, lastName);
+        this.name = new NameInfo(null, firstName, lastName);
         this.email = email;
         if (groups != null && !groups.isEmpty()) {
             userLevel = groups.get(0);
@@ -208,11 +208,11 @@ public class User extends AuditableEntity implements ICustomFieldEntity, IRefere
         this.userName = userName;
     }
 
-    public Name getName() {
+    public NameInfo getName() {
         return name;
     }
 
-    public void setName(Name name) {
+    public void setName(NameInfo name) {
         this.name = name;
     }
 

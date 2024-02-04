@@ -44,7 +44,7 @@ import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.SecuredEntity;
 import org.meveo.model.admin.User;
 import org.meveo.model.security.Role;
-import org.meveo.model.shared.Name;
+import org.meveo.model.shared.NameInfo;
 import org.meveo.security.UserGroup;
 import org.meveo.service.admin.impl.RoleService;
 import org.meveo.service.admin.impl.UserService;
@@ -144,7 +144,7 @@ public class UserBean extends CustomFieldBean<User> {
 
         } else {
             entity = new User();
-            entity.setName(new Name());
+            entity.setName(new NameInfo());
         }
 
         return entity;

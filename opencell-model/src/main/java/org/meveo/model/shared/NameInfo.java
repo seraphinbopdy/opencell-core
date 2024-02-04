@@ -31,15 +31,14 @@ import org.meveo.commons.encryption.PersonnalDataEncryptor;
  * @lastModifiedVersion 5.2
  */
 @Embeddable
-public class Name implements Serializable, Cloneable {
+public class NameInfo implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Title
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "title_id")
+    @Transient
     private Title title;
 
     /**
@@ -58,10 +57,10 @@ public class Name implements Serializable, Cloneable {
     @Size(max = 100)
     protected String lastName;
 
-    public Name() {
+    public NameInfo() {
     }
 
-    public Name(Title title, String firstName, String lastName) {
+    public NameInfo(Title title, String firstName, String lastName) {
         this.title = title;
         this.firstName = firstName;
         this.lastName = lastName;

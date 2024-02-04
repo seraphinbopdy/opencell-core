@@ -53,7 +53,7 @@ import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.SecuredEntity;
 import org.meveo.model.admin.User;
 import org.meveo.model.security.Role;
-import org.meveo.model.shared.Name;
+import org.meveo.model.shared.NameInfo;
 import org.meveo.security.client.KeycloakAdminClientService;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.admin.impl.RoleService;
@@ -134,7 +134,7 @@ public class UserApi extends BaseApi {
             user.setUserName(postData.getUsername().toUpperCase());
             user.setPassword(postData.getPassword());
             user.setEmail((postData.getEmail()));
-            user.setName(new Name(null, postData.getFirstName(), postData.getLastName()));
+            user.setName(new NameInfo(null, postData.getFirstName(), postData.getLastName()));
             if(postData.getRoles()!=null && !postData.getRoles().isEmpty()) {
                 Set<Role> roles = postData.getRoles().stream()
                         .map(roleCode -> {
@@ -206,7 +206,7 @@ public class UserApi extends BaseApi {
 
         if (postData.getFirstName() != null || postData.getLastName() != null) {
             if (user.getName() == null) {
-                user.setName(new Name());
+                user.setName(new NameInfo());
             }
             if (postData.getFirstName() != null) {
                 user.getName().setFirstName(postData.getFirstName());

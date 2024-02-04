@@ -58,7 +58,7 @@ import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.admin.User;
 import org.meveo.model.security.Role;
-import org.meveo.model.shared.Name;
+import org.meveo.model.shared.NameInfo;
 import org.meveo.security.AccessScopeEnum;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
@@ -829,7 +829,7 @@ public class KeycloakAdminClientService implements Serializable {
 
             User user = new User();
             user.setUserName(userName);
-            user.setName(new Name(null, userRepresentation.getFirstName(), userRepresentation.getLastName()));
+            user.setName(new NameInfo(null, userRepresentation.getFirstName(), userRepresentation.getLastName()));
             user.setEmail(userRepresentation.getEmail());
 
             if (extendedInfo) {

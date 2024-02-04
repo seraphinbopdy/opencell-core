@@ -171,7 +171,7 @@ public class PricePlanSelectionService implements Serializable {
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableOfferTemplate")) {
-                queryBuilder.append(" AND (offerTemplate.id = :offerId OR offerTemplate.id IS NULL)");
+                queryBuilder.append(" AND (ppm.offerTemplate.id = :offerId OR ppm.offerTemplate.id IS NULL)");
                 queryParams.put("offerId", bareWo.getOfferTemplate() != null ? bareWo.getOfferTemplate().getId() : null);
             }
 

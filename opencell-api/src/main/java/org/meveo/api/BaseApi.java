@@ -277,11 +277,10 @@ public abstract class BaseApi {
 
         Map<String, CustomFieldTemplate> customFieldTemplates = customFieldTemplateService.findByAppliesTo(entity);
 
-        //check custom fields before populate
-        checkCFBeforePopulate(customFieldsDto);
-
         List<CustomFieldDto> customFieldDtos = null;
         if (customFieldsDto != null) {
+            //check custom fields before populate
+            checkCFBeforePopulate(customFieldsDto);
             customFieldDtos = customFieldsDto.getCustomField();
         } else {
             customFieldDtos = new ArrayList<CustomFieldDto>();

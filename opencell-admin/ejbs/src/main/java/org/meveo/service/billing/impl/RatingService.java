@@ -1675,6 +1675,10 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
     	discountWalletOperation.setParameter3(bareWalletOperation.getParameter3());
         discountWalletOperation.setTradingCurrency(bareWalletOperation.getBillingAccount().getTradingCurrency());
         discountWalletOperation.setBusinessKey(bareWalletOperation.getBusinessKey());
+        discountWalletOperation.setParameter1(bareWalletOperation.getParameter1());
+	    discountWalletOperation.setParameter2(bareWalletOperation.getParameter2());
+	    discountWalletOperation.setParameter3(bareWalletOperation.getParameter3());
+	    discountWalletOperation.setParameterExtra(bareWalletOperation.getParameterExtra());
 
         AccountingArticle discountArticle=accountingArticleService.findByCode(defaultDiscountArticle);
         if(discountArticle!=null) {

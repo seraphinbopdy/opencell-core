@@ -900,7 +900,9 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 throw new BusinessException("accountingArticleCode should be 'ART_SECURITY_DEPOSIT'");
             }
         }
-        
+        invoiceLine.setInvoiceRounding(appProvider.getInvoiceRounding());
+        invoiceLine.setRoundingMode(appProvider.getInvoiceRoundingMode());
+
         return invoiceLine;
     }
 

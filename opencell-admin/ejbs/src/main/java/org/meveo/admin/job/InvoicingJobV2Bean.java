@@ -208,7 +208,6 @@ public class InvoicingJobV2Bean extends BaseJobBean {
         }
 		billingRun.setInvoiceNumber(result.getInvoiceCount());
         billingRunService.update(billingRun);
-        billingRunService.updateBillingRunStatistics(billingRun);
         billingRunService.updateBillingRunJobExecution(billingRun.getId(), result);
 
     }

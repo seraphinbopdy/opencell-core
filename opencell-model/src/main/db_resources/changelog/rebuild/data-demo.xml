@@ -584,7 +584,7 @@
             <column name="created" valueDate="${db.current.time}" />
             <column name="code" value="Invoice and Writeoff" />
             <column name="description" value="Write off description"/>
-            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript')"/>
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.accountingscheme.InvoiceWriteOffAccountingSchemeScript')"/>
         </insert>
     </changeSet>
 

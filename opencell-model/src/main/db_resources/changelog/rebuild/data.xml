@@ -13414,7 +13414,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="version" valueNumeric="0" />
-            <column name="code" value="org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript" />
+            <column name="code" value="org.meveo.service.script.accountingscheme.InvoiceWriteOffAccountingSchemeScript" />
             <column name="src_type" value="JAVA_CLASS" />
             <column name="description" value="Invoice Write off Journal entry builder, from AccountOperation"/>
             <column name="created" valueDate="${db.current.time}" />
@@ -13450,6 +13450,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 	<changeSet id="#INTRD-19279_update-currencies" author="a.rouaguebe" />
 	<changeSet id="#INTRD-20753_20240118" author="aeljaouhari" />
 	<changeSet id="#INTRD-20962_add_missing_currencies" author="a.rouaguebe" />
+    <changeSet id="#INTRD-21035_20240206" author="TarikFA." />
 
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->
     <changeSet id="#liquibase_hack_data" author="AbdelmounaimAkadid">

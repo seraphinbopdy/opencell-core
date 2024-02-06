@@ -10,13 +10,13 @@ import org.meveo.service.script.Script;
 
 import java.util.Map;
 
-public class InvoiceWritOffAccountingSchemeScript extends Script {
+public class InvoiceWriteOffAccountingSchemeScript extends Script {
 	
 	private JournalEntryService journalEntryService = getServiceInterface(JournalEntryService.class.getSimpleName());
 	private OCCTemplateService occTemplateService = getServiceInterface(OCCTemplateService.class.getSimpleName());
 	@Override
 	public void execute(Map<String, Object> context) throws BusinessException {
-		log.info("InvoiceWritOffAccountingSchemeScript EXECUTE context {}", context);
+		log.info("InvoiceWriteOffAccountingSchemeScript EXECUTE context {}", context);
 		
 		AccountOperation ao = (AccountOperation) context.get(Script.CONTEXT_ENTITY);
 		if (ao == null) {

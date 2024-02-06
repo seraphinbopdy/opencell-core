@@ -1,6 +1,5 @@
 package org.meveo.service.billing.impl;
 
-import static java.lang.Integer.valueOf;
 import static java.math.BigDecimal.ZERO;
 
 import java.math.BigDecimal;
@@ -16,7 +15,7 @@ public class BasicStatistics {
         this.sumAmountWithoutTax = ZERO;
         this.sumAmountWithTax = ZERO;
         this.sumAmountTax = ZERO;
-        this.count = valueOf(0);
+        this.count = 0;
     }
 
     public BigDecimal getSumAmountWithoutTax() {
@@ -76,5 +75,12 @@ public class BasicStatistics {
         this.sumAmountWithoutTax = this.sumAmountWithoutTax.add(statistics.getSumAmountWithoutTax());
         this.sumAmountWithTax = this.sumAmountWithTax.add(statistics.getSumAmountWithTax());
         this.sumAmountTax = this.sumAmountTax.add(statistics.getSumAmountTax());
+    }
+
+    public synchronized void reset() {
+        this.count = 0;
+        this.sumAmountWithoutTax = ZERO;
+        this.sumAmountWithTax = ZERO;
+        this.sumAmountTax = ZERO;
     }
 }

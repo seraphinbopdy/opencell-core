@@ -47,7 +47,7 @@ public class MassUpdaterJob extends Job {
     /**
      * Default value of limit of select query
      */
-    public static final Long DEFAULT_SELECT_LIMIT = 10000000L; //10M
+    public static final Long DEFAULT_SELECT_LIMIT = 1000000L; //1M
 
     /**
      * Job instance name with which all custom fields will be applied
@@ -70,11 +70,6 @@ public class MassUpdaterJob extends Job {
     public static final String PARAM_SELECT_QUERY = "MassUpdaterJob_selectQuery";
 
     /**
-     * Custom field that contains the select table alias value
-     */
-    public static final String PARAM_SELECT_TABLE_ALIAS = "MassUpdaterJob_selectTableAlias";
-
-    /**
      * Custom field that contains the select limit value
      */
     public static final String PARAM_SELECT_LIMIT = "MassUpdaterJob_selectLimit";
@@ -83,6 +78,11 @@ public class MassUpdaterJob extends Job {
      * Custom field that contains the flag that indicates if query select and update one are native or not.
      */
     public static final String PARAM_IS_NATIVE_QUERY = "MassUpdaterJob_isNativeQuery";
+
+    /**
+     * Custom field containing the flag whether all update queries will be run on distinct IDs or whether it doesn't matter.
+     */
+    public static final String PARAM_IS_PESSIMISTIC_UPDATE_LOCK = "MassUpdaterJob_isPessimisticUpdateLock";
 
     /**
      * Custom field that contains the named query name
@@ -102,10 +102,10 @@ public class MassUpdaterJob extends Job {
         String updateQuery = (String) getParamOrCFValue(jobInstance, PARAM_UPDATE_QUERY);
         Long updateChunk = (Long) getParamOrCFValue(jobInstance, PARAM_UPDATE_CHUNK);
         String selectQuery = (String) getParamOrCFValue(jobInstance, PARAM_SELECT_QUERY);
-        String selectTableAlias = (String) getParamOrCFValue(jobInstance, PARAM_SELECT_TABLE_ALIAS);
         Long selectLimit = (Long) getParamOrCFValue(jobInstance, PARAM_SELECT_LIMIT);
         Boolean isNativeQuery = (Boolean) getParamOrCFValue(jobInstance, PARAM_IS_NATIVE_QUERY, false);
-        massUpdaterJobBean.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunk, selectQuery, selectTableAlias, selectLimit, isNativeQuery);
+        Boolean isPessimisticLock = (Boolean) getParamOrCFValue(jobInstance, PARAM_IS_PESSIMISTIC_UPDATE_LOCK, false);
+        massUpdaterJobBean.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunk, selectQuery, selectLimit, isNativeQuery, isPessimisticLock);
         return jobExecutionResult;
     }
 
@@ -125,10 +125,10 @@ public class MassUpdaterJob extends Job {
                 CustomFieldTemplateUtils.buildCF(Job.CF_WAITING_MILLIS,
                         resourceMessages.getString("jobExecution.waitingMillis"), CustomFieldTypeEnum.LONG,
                         "tab:Configuration:0;fieldGroup:Configuration:0;field:1", "0", APPLIES_TO));
-        result.put(PARAM_UPDATE_QUERY,
-                CustomFieldTemplateUtils.buildCF(PARAM_UPDATE_QUERY,
-                        resourceMessages.getString("jobExecution.massUpdate.updateQuery"), CustomFieldTypeEnum.TEXT_AREA,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:2", "", APPLIES_TO));
+        result.put(PARAM_SELECT_LIMIT,
+                CustomFieldTemplateUtils.buildCF(PARAM_SELECT_LIMIT,
+                        resourceMessages.getString("jobExecution.massUpdate.selectLimit"), CustomFieldTypeEnum.LONG,
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:2", String.valueOf(DEFAULT_SELECT_LIMIT), APPLIES_TO));
         result.put(PARAM_UPDATE_CHUNK,
                 CustomFieldTemplateUtils.buildCF(PARAM_UPDATE_CHUNK,
                         resourceMessages.getString("jobExecution.massUpdate.updateChunk"), CustomFieldTypeEnum.LONG,
@@ -137,19 +137,18 @@ public class MassUpdaterJob extends Job {
                 CustomFieldTemplateUtils.buildCF(PARAM_SELECT_QUERY,
                         resourceMessages.getString("jobExecution.massUpdate.selectQuery"), CustomFieldTypeEnum.TEXT_AREA,
                         "tab:Configuration:0;fieldGroup:Configuration:0;field:4", "", APPLIES_TO));
-        result.put(PARAM_SELECT_TABLE_ALIAS,
-                CustomFieldTemplateUtils.buildCF(PARAM_SELECT_TABLE_ALIAS,
-                        resourceMessages.getString("jobExecution.massUpdate.selectTableAlias"), CustomFieldTypeEnum.STRING,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:5", "a", false,
-                        null, null, APPLIES_TO, 5L));
-        result.put(PARAM_SELECT_LIMIT,
-                CustomFieldTemplateUtils.buildCF(PARAM_SELECT_LIMIT,
-                        resourceMessages.getString("jobExecution.massUpdate.selectLimit"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:6", String.valueOf(DEFAULT_SELECT_LIMIT), APPLIES_TO));
+        result.put(PARAM_UPDATE_QUERY,
+                CustomFieldTemplateUtils.buildCF(PARAM_UPDATE_QUERY,
+                        resourceMessages.getString("jobExecution.massUpdate.updateQuery"), CustomFieldTypeEnum.TEXT_AREA,
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:5", "", APPLIES_TO));
         result.put(PARAM_IS_NATIVE_QUERY,
                 CustomFieldTemplateUtils.buildCF(PARAM_IS_NATIVE_QUERY,
                         resourceMessages.getString("jobExecution.massUpdate.isNativeQuery"), CustomFieldTypeEnum.BOOLEAN,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:7", "true", APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:6", "true", APPLIES_TO));
+        result.put(PARAM_IS_PESSIMISTIC_UPDATE_LOCK,
+                CustomFieldTemplateUtils.buildCF(PARAM_IS_PESSIMISTIC_UPDATE_LOCK,
+                        resourceMessages.getString("jobExecution.massUpdate.isPessimisticUpdateLock"), CustomFieldTypeEnum.BOOLEAN,
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:7", "false", APPLIES_TO));
         return result;
     }
 }

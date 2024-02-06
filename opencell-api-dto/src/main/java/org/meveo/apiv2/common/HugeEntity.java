@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -37,13 +38,23 @@ import java.util.Map;
 @JsonDeserialize(as = ImmutableHugeEntity.class)
 public interface HugeEntity extends Resource {
 
+    @Nullable
+    @Schema(description = "An optional text for user to input a customized description")
+    String getDescription();
+
     @NotNull
     @Schema(description = "The job template that can process the batch.\n" +
             "For now, we won’t limit to a specific job instance.")
     String getTargetJob();
 
-
     @NotEmpty(message = "At least one filter is required")
     @Schema(description = "The filters defining the batch")
     Map<String, Object> getFilters();
+
+    @Nullable
+    @Value.Default
+    @Schema(description = "If true then an email will be sent to notify the creator that his batch has been processed.")
+    default Boolean getNotify() {
+        return Boolean.FALSE;
+    }
 }

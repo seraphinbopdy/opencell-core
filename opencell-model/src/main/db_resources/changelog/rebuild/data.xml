@@ -13026,13 +13026,16 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="creator" value="applicationInitializer"/>
 			<column name="uuid" value="MarkWOToRerateJob"/>
 			<column name="cf_values"><![CDATA[{
+                "nbRuns":[{"long":-1}],
+                "waitingMillis":[{"long":0}],
                 "UpdateHugeEntityJob_targetJob":[{"string":"MarkWOToRerateJob"}],
                 "UpdateHugeEntityJob_entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
                 "UpdateHugeEntityJob_fieldsToUpdate":[{"string": "status='TO_RERATE'"}],
                 "UpdateHugeEntityJob_defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
-                "UpdateHugeEntityJob_selectLimit":[{"long":10000000}],
+                "UpdateHugeEntityJob_selectLimit":[{"long":1000000}],
                 "UpdateHugeEntityJob_updateChunk":[{"long":32767}],
-                "ReRatingJobBean_emailTemplate": [{"entity": {"id": 8, "code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
+                "UpdateHugeEntityJob_isPessimisticUpdateLock":[{"boolean":false}],
+                "UpdateHugeEntityJob_emailTemplate": [{"entity": {"id": 8, "code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
                 }]]></column>
 		</insert>
 	</changeSet>

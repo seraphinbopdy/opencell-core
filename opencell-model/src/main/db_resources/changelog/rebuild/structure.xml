@@ -19341,6 +19341,7 @@
             <column name="code" type="varchar(255)" />
             <column name="description" type="varchar(255)" />
             <column name="default_balance" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="balance_el" type="varchar(2000)" />
         </createTable>
         <createTable tableName="ar_customer_balance_templates">
             <column name="customer_balance_id" type="bigint">
@@ -21410,6 +21411,7 @@
     <changeSet id="#INTRD-20501_20240104" author="AdilElJaouhari" />
     <changeSet id="#INTRD-20725_20240112" author="AdilElJaouhari" />
     <changeSet id="#INTRD-15093_20230123" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-20847_20240202" author="zelmeliani" />
 
     <!--  !!! PLEASE KEEP THIS CHANGESET AT THE END OF FILE !!! -->
     <changeSet id="#liquibase_hack_structure" author="AbdelmounaimAkadid">

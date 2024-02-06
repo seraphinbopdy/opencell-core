@@ -30,6 +30,7 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.job.Job;
+import org.meveo.service.job.TablesPartitioningService;
 
 @Stateless
 public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
@@ -42,6 +43,9 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	@MeveoJpa
 	private EntityManagerWrapper emWrapper;
 	
+	@Inject
+	TablesPartitioningService tablesPartitioningService;
+	
 	private EntityManager entityManager;
 
 	private StatelessSession statelessSession;
@@ -51,6 +55,8 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	private Long nrOfInitialWOs = null;
 	
 	private boolean useSamePricePlan;
+	
+	private boolean useLastPartition;
 	
     @Inject
     private ReratingService reratingService;
@@ -79,6 +85,8 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		}
 
 		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_NR_ITEMS_PER_TX, 10000);
+		
+		useLastPartition = (Boolean) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_LAST_PARTITION_ONLY, true);
 		
 		entityManager = emWrapper.getEntityManager();
 		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();
@@ -132,7 +140,9 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	private void rerateByGroup(List<Long> reratingTree, JobExecutionResultImpl jobExecutionResult) {
     	final int maxValue = ParamBean.getInstance().getPropertyAsInteger("database.number.of.inlist.limit", reratingService.SHORT_MAX_VALUE);
     	List<List<Long>> subList = partition(reratingTree, maxValue);
-    	subList.forEach(ids -> reratingService.applyMassRerate(ids, useSamePricePlan, jobExecutionResult));
+    	String lastEDRPartition = tablesPartitioningService.getLastPartitionDate(tablesPartitioningService.EDR_PARTITION_SOURCE);
+		String edrDateCondition = useLastPartition ?  lastEDRPartition == null ? "" : " AND edr.eventDate>'" + lastEDRPartition+"'" : null;
+		subList.forEach(ids -> reratingService.applyMassRerate(ids, useSamePricePlan, jobExecutionResult, edrDateCondition));
 	}
 
 

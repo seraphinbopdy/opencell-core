@@ -24,6 +24,8 @@ public class RatingCancellationJob extends Job {
 	public static final String CF_INVOICE_LINES_NR_RTS_PER_TX = "JobInstance_RatingCancellationJob_MaxRTsPerTransaction";
 
 	public static final String CF_USE_EXISTING_VIEWS = "JobInstance_RatingCancellationJob_UseExistingViews";
+	
+	public static final String CF_LAST_PARTITION_ONLY = "JobInstance_RatingCancellationJob_LastPartitionOnly";
 
     @Inject
     private RatingCancellationJobBean jobBean;
@@ -51,6 +53,8 @@ public class RatingCancellationJob extends Job {
                 "tab:Configuration:0;fieldGroup:Configuration:0;field:2", "100000", true, JOB_INSTANCE_RATING_CANCELLATION_JOB));
         result.put(CF_USE_EXISTING_VIEWS, CustomFieldTemplateUtils.buildCF(CF_USE_EXISTING_VIEWS, resourceMessages.getString("jobExecution.useExistingViews"), CustomFieldTypeEnum.BOOLEAN,
                 "tab:Configuration:0;fieldGroup:Configuration:0;field:3", "true", JOB_INSTANCE_RATING_CANCELLATION_JOB));
+        result.put(CF_LAST_PARTITION_ONLY, CustomFieldTemplateUtils.buildCF(CF_LAST_PARTITION_ONLY, resourceMessages.getString("jobExecution.lastPartitionOnly"), CustomFieldTypeEnum.BOOLEAN,
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:4", "true", JOB_INSTANCE_RATING_CANCELLATION_JOB));
 
         return result;
     }

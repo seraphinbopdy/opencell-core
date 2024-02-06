@@ -19,8 +19,12 @@ import org.meveo.service.job.Job;
 @Stateless
 public class ReRatingV2Job extends Job {
 
-    public static final String CF_NR_ITEMS_PER_TX = "JobInstance_ReRatingV2Job_MaxRTsPerTransaction";
+    private static final String JOB_INSTANCE_RE_RATING_V2_JOB = "JobInstance_ReRatingV2Job";
 
+	public static final String CF_NR_ITEMS_PER_TX = "JobInstance_ReRatingV2Job_MaxRTsPerTransaction";
+
+    public static final String CF_LAST_PARTITION_ONLY = "JobInstance_RatingCancellationJob_LastPartitionOnly";
+    
     @Inject
     private ReRatingV2JobBean jobBean;
 
@@ -40,11 +44,13 @@ public class ReRatingV2Job extends Job {
         Map<String, CustomFieldTemplate> result = new HashMap<>();
 
         result.put(CF_NB_RUNS, CustomFieldTemplateUtils.buildCF(CF_NB_RUNS, resourceMessages.getString("jobExecution.nbRuns"), CustomFieldTypeEnum.LONG,
-                "tab:Configuration:0;fieldGroup:Configuration:0;field:0", "-1", "JobInstance_ReRatingV2Job"));
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:0", "-1", JOB_INSTANCE_RE_RATING_V2_JOB));
         result.put(Job.CF_WAITING_MILLIS, CustomFieldTemplateUtils.buildCF(Job.CF_WAITING_MILLIS, resourceMessages.getString("jobExecution.waitingMillis"), CustomFieldTypeEnum.LONG,
-                "tab:Configuration:0;fieldGroup:Configuration:0;field:1", "0", "JobInstance_ReRatingV2Job"));
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:1", "0", JOB_INSTANCE_RE_RATING_V2_JOB));
         result.put(CF_NR_ITEMS_PER_TX, CustomFieldTemplateUtils.buildCF(CF_NR_ITEMS_PER_TX, resourceMessages.getString("jobExecution.numberOfItems"), CustomFieldTypeEnum.LONG,
-                "tab:Configuration:0;fieldGroup:Configuration:0;field:2", "100000", true, "JobInstance_ReRatingV2Job"));
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:2", "100000", true, JOB_INSTANCE_RE_RATING_V2_JOB));
+        result.put(CF_LAST_PARTITION_ONLY, CustomFieldTemplateUtils.buildCF(CF_LAST_PARTITION_ONLY, resourceMessages.getString("jobExecution.lastPartitionOnly"), CustomFieldTypeEnum.BOOLEAN,
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:3", "true", JOB_INSTANCE_RE_RATING_V2_JOB));
 
         return result;
     }

@@ -286,8 +286,8 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
                     cets.forEach((cet) -> customFieldsCache.addUpdateCustomEntityTemplate(cet, false));
                 }
             }
-            
-            cets = cets.stream().filter(x -> currentUser.hasRole(x.getReadPermission())).collect(Collectors.toList());
+
+            cets = cets.stream().filter(cet -> currentUser.hasRoles(cet.getReadPermission(), "ReadAllCE")).collect(Collectors.toList());
 
             // Order the list
             try {
@@ -311,8 +311,8 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
             return cets;
 
         } else {
-            List<CustomEntityTemplate> result = super.list(config);
-            return result.stream().filter(x -> currentUser.hasRole(x.getReadPermission())).collect(Collectors.toList());
+            List<CustomEntityTemplate> cets = super.list(config);
+            return cets.stream().filter(cet -> currentUser.hasRoles(cet.getReadPermission(), "ReadAllCE")).collect(Collectors.toList());
         }
     }
 

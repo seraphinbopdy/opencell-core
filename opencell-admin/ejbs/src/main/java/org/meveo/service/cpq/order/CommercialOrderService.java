@@ -1,6 +1,7 @@
 package org.meveo.service.cpq.order;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -532,6 +533,15 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 					case TEXT:
 						if(attributeInstance.getStringValue()==null)
 							attributeInstance.setStringValue(productVersionAttribute.getDefaultValue());
+						break;
+					case DATE:
+						if(attributeInstance.getDateValue()==null){
+							try {
+								attributeInstance.setDateValue(new SimpleDateFormat("yyyy-MM-dd").parse(productVersionAttribute.getDefaultValue()));
+							} catch (Exception e) {
+								attributeInstance.setDateValue(new Date());
+							}
+						}
 						break;
 				default:
 					if(attributeInstance.getStringValue()==null)

@@ -294,12 +294,15 @@ public abstract class BaseApi {
      * @param customFieldsDto {@link CustomFieldsDto}
      */
     private void checkCFBeforePopulate(CustomFieldsDto customFieldsDto) {
-        customFieldsDto.getCustomField()
-                .forEach(cf -> {
-                    if (cf.getStringValue() != null && cf.getStringValue().trim().isEmpty()) {
-                        cf.setStringValue(null);
-                    }
-                });
+    	if(customFieldsDto!=null && customFieldsDto.getCustomField()!=null) {
+    		customFieldsDto.getCustomField()
+            .forEach(cf -> {
+                if (cf.getStringValue() != null && cf.getStringValue().trim().isEmpty()) {
+                    cf.setStringValue(null);
+                }
+            });
+    	}
+        
     }
 
     /**

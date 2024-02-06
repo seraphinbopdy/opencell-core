@@ -18,11 +18,12 @@
 package org.meveo.admin.job;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.FlushMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
+import org.hibernate.type.LongType;
+import org.jgroups.JChannel;
 import org.meveo.admin.async.SynchronizedMultiItemIterator;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
@@ -32,13 +33,19 @@ import org.meveo.service.base.NativePersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Job definition to do the mass update.
@@ -56,33 +63,37 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
     @MeveoJpa
     private EntityManagerWrapper emWrapper;
 
+    @Resource(lookup = "java:jboss/jgroups/channel/default")
+    private JChannel channel;
+
     private StatelessSession statelessSession;
     private ScrollableResults scrollableResults;
+    private Set<Long> uniqueIds = new HashSet<>();
 
     /**
      * Execute job
      *
-     * @param jobExecutionResult the job execution result
-     * @param jobInstance        the job instance
-     * @param namedQuery         the named query
-     * @param updateQuery        the update query
-     * @param updateChunk        the chunk of update query
-     * @param selectQuery        the select query
-     * @param selectAliasTable   the select alias table
-     * @param selectLimit        the limit of select query
-     * @param isNativeQuery      indicates if the query is native or not
+     * @param jobExecutionResult      the job execution result
+     * @param jobInstance             the job instance
+     * @param namedQuery              the named query
+     * @param updateQuery             the update query
+     * @param updateChunk             the chunk of update query
+     * @param selectQuery             the select query
+     * @param selectLimit             the limit of select query
+     * @param isNativeQuery           indicates if the query is native or not
+     * @param isPessimisticUpdateLock indicates if all update queries will be run on distinct IDs or whether it doesn't matter.
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, String namedQuery, String updateQuery, Long updateChunk,
-                        String selectQuery, String selectAliasTable, Long selectLimit, boolean isNativeQuery) {
+                        String selectQuery, Long selectLimit, Boolean isNativeQuery, Boolean isPessimisticUpdateLock) {
 
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_NAMED_QUERY, namedQuery);
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_UPDATE_QUERY, updateQuery);
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_UPDATE_CHUNK, updateChunk);
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_SELECT_QUERY, selectQuery);
-        jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_SELECT_TABLE_ALIAS, selectAliasTable);
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_SELECT_LIMIT, selectLimit);
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_IS_NATIVE_QUERY, isNativeQuery);
+        jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_IS_PESSIMISTIC_UPDATE_LOCK, isPessimisticUpdateLock);
         execute(jobExecutionResult, jobInstance);
     }
 
@@ -102,22 +113,31 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
         String namedQuery = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_NAMED_QUERY);
         String updateString = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_UPDATE_QUERY);
         String selectQuery = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_SELECT_QUERY);
-        String tableAlias = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_SELECT_TABLE_ALIAS);
         Long selectLimit = (Long) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_SELECT_LIMIT);
         Long updateChunk = (Long) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_UPDATE_CHUNK);
 
         //Check the mandatory settings for mass update processing
-        if (StringUtils.isEmpty(selectQuery) || (StringUtils.isBlank(namedQuery) && (StringUtils.isBlank(updateString) || StringUtils.isBlank(tableAlias)))) {
-            log.error("params should not be null - selectQuery: {}, updateString: {}, tableAlias: {}, namedQuery: {}", selectQuery, updateString, tableAlias, namedQuery);
+        if (StringUtils.isEmpty(selectQuery) || (StringUtils.isBlank(updateString) && StringUtils.isBlank(namedQuery))) {
+            log.error("params should not be null - selectQuery: {} and (updateString: {} or namedQuery: {})", selectQuery, updateString, namedQuery);
             return Optional.empty();
         }
+        Long size = ((long) Runtime.getRuntime().availableProcessors()) * Long.valueOf(NativePersistenceService.SHORT_MAX_VALUE);
         if (selectLimit == null) {
-            selectLimit = ((long) Runtime.getRuntime().availableProcessors()) * Long.valueOf(NativePersistenceService.SHORT_MAX_VALUE);
+            selectLimit = size;
         }
-        if (updateChunk == null) {
-            updateChunk = Long.valueOf(NativePersistenceService.SHORT_MAX_VALUE);
+        updateChunk = (updateChunk != null) ? Math.min(updateChunk, NativePersistenceService.SHORT_MAX_VALUE) : Long.valueOf(NativePersistenceService.SHORT_MAX_VALUE);
+
+        if (isPessimisticUpdateLock(jobExecutionResult)) {
+            JobInstance jobInstance = jobExecutionResult.getJobInstance();
+            int nrOfNodes = jobInstance.getRunOnNodes() != null ? jobInstance.getRunOnNodes().split(",").length : channel.getView().getMembers().size();
+            uniqueIds = Collections.newSetFromMap(new LinkedHashMap<>() {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<Long, Boolean> eldest) {
+                    return this.size() > (2 * (nrOfNodes < 1 ? 1 : nrOfNodes) * size.intValue());
+                }
+            });
         }
-        updateChunk = Math.min(updateChunk, selectLimit);
+
 
         scrollableResults = getScrollableResult(jobExecutionResult, selectQuery, selectLimit);
         Long finalUpdateChunk = updateChunk;
@@ -149,15 +169,23 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
      * @param jobExecutionResult The job execution result.
      */
     private void processUpdateQueries(List<Long> interval, JobExecutionResultImpl jobExecutionResult) {
-        String namedQuery = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_NAMED_QUERY);
-        if (!StringUtils.isBlank(namedQuery)) {
-            emWrapper.getEntityManager().createNamedQuery(namedQuery).setParameter("ids", interval).executeUpdate();
-        } else {
-            String updateQuery = getUpdateQuery(jobExecutionResult);
-            if (isNativeQuery(jobExecutionResult)) {
-                emWrapper.getEntityManager().createNativeQuery(updateQuery).setParameter("ids", interval).executeUpdate();
+        if (isPessimisticUpdateLock(jobExecutionResult)) {
+            interval.removeAll(uniqueIds);
+        }
+        if (!interval.isEmpty()) {
+            String namedQuery = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_NAMED_QUERY);
+            if (!StringUtils.isBlank(namedQuery)) {
+                emWrapper.getEntityManager().createNamedQuery(namedQuery).setParameter("ids", interval).executeUpdate();
             } else {
-                emWrapper.getEntityManager().createQuery(updateQuery).setParameter("ids", interval).executeUpdate();
+                String updateQuery = getUpdateQuery(jobExecutionResult);
+                if (isNativeQuery(jobExecutionResult)) {
+                    emWrapper.getEntityManager().createNativeQuery(updateQuery).setParameter("ids", interval).executeUpdate();
+                } else {
+                    emWrapper.getEntityManager().createQuery(updateQuery).setParameter("ids", interval).executeUpdate();
+                }
+            }
+            if (isPessimisticUpdateLock(jobExecutionResult)) {
+                uniqueIds.addAll(interval);
             }
         }
     }
@@ -185,6 +213,17 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
     private boolean isNativeQuery(JobExecutionResultImpl jobExecutionResult) {
         return jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_IS_NATIVE_QUERY) != null ?
                 (boolean) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_IS_NATIVE_QUERY) : true;
+    }
+
+    /**
+     * Indicates if all update queries will be run on distinct IDs or whether it doesn't matter.
+     *
+     * @param jobExecutionResult the job execution result
+     * @return true if all update queries will be run on distinct IDs.
+     */
+    private boolean isPessimisticUpdateLock(JobExecutionResultImpl jobExecutionResult) {
+        return jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_IS_PESSIMISTIC_UPDATE_LOCK) != null ?
+                (boolean) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_IS_PESSIMISTIC_UPDATE_LOCK) : false;
     }
 
     /**
@@ -224,8 +263,7 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
                         .setFetchSize(selectLimit.intValue())
                         .setReadOnly(true)
                         .setCacheable(false)
-                        //.setLockMode("a", LockMode.NONE)
-                        .setFlushMode(FlushMode.COMMIT)
+                        .addScalar("id", new LongType())
                         .scroll(ScrollMode.FORWARD_ONLY);
             } else {
                 scrollableResults = statelessSession.createQuery(selectQuery)

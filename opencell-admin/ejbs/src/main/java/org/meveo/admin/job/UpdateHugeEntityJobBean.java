@@ -64,6 +64,7 @@ public class UpdateHugeEntityJobBean extends BaseJobBean {
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_DEFAULT_FILTER));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_SELECT_LIMIT, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_SELECT_LIMIT));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_UPDATE_CHUNK));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_PESSIMISTIC_UPDATE_LOCK, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_PESSIMISTIC_UPDATE_LOCK));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_EMAIL_TEMPLATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_EMAIL_TEMPLATE));
     }
 }

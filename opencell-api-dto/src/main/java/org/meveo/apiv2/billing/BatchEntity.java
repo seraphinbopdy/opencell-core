@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.immutables.value.Value;
 import org.meveo.apiv2.common.HugeEntity;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -36,19 +35,8 @@ import javax.validation.constraints.NotNull;
 @JsonDeserialize(as = ImmutableBatchEntity.class)
 public interface BatchEntity extends HugeEntity {
 
-    @Nullable
-    @Schema(description = "An optional text for user to input a customized description")
-    String getDescription();
-
     @NotNull
     @Schema(description = "The target entity of the filters.\n" +
             "Short entity name.")
     String getTargetEntity();
-
-    @Nullable
-    @Value.Default
-    @Schema(description = "If true then an email will be sent to notify the creator that his batch has been processed.")
-    default Boolean getNotify() {
-        return Boolean.FALSE;
-    }
 }

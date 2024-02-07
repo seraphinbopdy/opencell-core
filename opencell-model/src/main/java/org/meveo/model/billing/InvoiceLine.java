@@ -496,6 +496,7 @@ public class InvoiceLine extends AuditableCFEntity {
 		this.status = InvoiceLineStatusEnum.OPEN;
 		this.adjustmentStatus = copy.adjustmentStatus;
 		this.additionalAggregationFields = copy.additionalAggregationFields;
+		this.cfValues = copy.cfValues;
 	}
 
 	public Invoice getInvoice() {

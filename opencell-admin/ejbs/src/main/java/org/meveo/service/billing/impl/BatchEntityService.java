@@ -25,6 +25,7 @@ import org.meveo.admin.job.UpdateHugeEntityJob;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.apiv2.common.HugeEntity;
+import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.CustomGenericEntityCode;
@@ -99,6 +100,8 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     @Inject
     private MassUpdaterJobBean massUpdaterJobBean;
 
+    @Inject
+    private MethodCallingUtils methodCallingUtils;
 
     /**
      * Create the new batch entity
@@ -152,7 +155,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @param jobExecutionResult Job execution result
      */
     public void updateHugeEntity(JobExecutionResultImpl jobExecutionResult) {
-        String hugeEntityClassName = getHugeEntityClassName(jobExecutionResult);
+        String entityClassName = getHugeEntityClassName(jobExecutionResult);
         String targetJob = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_TARGET_JOB);
         if (StringUtils.isBlank(targetJob)) {
             throw new BusinessException("the target job is missing!");
@@ -161,28 +164,73 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
                 .setParameter("targetJob", targetJob).getResultList();
         JobInstance jobInstance = jobExecutionResult.getJobInstance();
         for (BatchEntity batchEntity : batchEntities) {
-            try {
-                updateHugeEntity(jobExecutionResult, jobInstance, batchEntity, hugeEntityClassName);
-            } catch (Exception e) {
-                log.error("Failed to process the entity batch id : {}", batchEntity.getId(), e);
-                jobExecutionResult.registerError(e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
-                if (jobExecutionResult.getJobLauncherEnum() != JobLauncherEnum.WORKER) {
-                    batchEntity.setStatus(BatchEntityStatusEnum.FAILURE);
-                }
-            } finally {
-                if (jobExecutionResult.getJobLauncherEnum() != JobLauncherEnum.WORKER) {
-                    if (batchEntity.getStatus() != BatchEntityStatusEnum.FAILURE) {
-                        for (JobExecutionResultImpl workerJobExecutionResult : jobExecutionResult.getWorkerJobExecutionResults()) {
-                            if (workerJobExecutionResult.getNbItemsProcessedWithError() > 0) {
-                                batchEntity.setStatus(BatchEntityStatusEnum.FAILURE);
-                                break;
-                            }
-                        }
-                    }
-                    update(batchEntity);
-                }
+            processBatchEntity(jobExecutionResult, jobInstance, batchEntity, entityClassName);
+        }
+    }
+
+    /**
+     * Process a batch entity
+     *
+     * @param jobExecutionResult job execution result
+     * @param jobInstance        job instance
+     * @param batchEntity        batch entity
+     * @param entityClassName    entity class name
+     */
+    private void processBatchEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, String entityClassName) {
+        try {
+            updateHugeEntity(jobExecutionResult, jobInstance, batchEntity, entityClassName);
+        } catch (Exception e) {
+            log.error("Failed to process the entity batch id : {}", batchEntity.getId(), e);
+            jobExecutionResult.registerError(e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
+            if (isRunningAsJobManager(jobExecutionResult)) {
+                batchEntity.setJobInstance(jobInstance);
+                batchEntity.setStatus(BatchEntityStatusEnum.FAILURE);
+                update(batchEntity);
             }
         }
+    }
+
+    /**
+     * Check is running as job manager and not worker one
+     *
+     * @param jobExecutionResult the job execution result
+     * @return true if is running as job manager
+     */
+    private boolean isRunningAsJobManager(JobExecutionResultImpl jobExecutionResult) {
+        return jobExecutionResult.getJobLauncherEnum() != JobLauncherEnum.WORKER;
+    }
+
+    /**
+     * Update batch entity
+     *
+     * @param jobExecutionResult the job execution result
+     * @param jobInstance        the job instance
+     * @param batchEntity        the batch entity
+     */
+    private void update(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity) {
+        if (isRunningAsJobManager(jobExecutionResult)) {
+            batchEntity.setJobInstance(jobInstance);
+            if (hasError(jobExecutionResult)) {
+                batchEntity.setStatus(BatchEntityStatusEnum.FAILURE);
+            } else {
+                batchEntity.setStatus(BatchEntityStatusEnum.SUCCESS);
+            }
+            update(batchEntity);
+        }
+    }
+
+    /**
+     * Check if the batch entity has an error.
+     *
+     * @return true if the batch entity has an error.
+     */
+    private boolean hasError(JobExecutionResultImpl jobExecutionResult) {
+        for (JobExecutionResultImpl workerJobExecutionResult : jobExecutionResult.getWorkerJobExecutionResults()) {
+            if (workerJobExecutionResult.getNbItemsProcessedWithError() > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -225,13 +273,10 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      */
     private void updateHugeEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, String entityClassName) {
         executeMassUpdaterJob(jobExecutionResult, jobInstance, batchEntity, entityClassName);
-        if (jobExecutionResult.getJobLauncherEnum() != JobLauncherEnum.WORKER) {
-            EntityReferenceWrapper emailTemplate = (EntityReferenceWrapper) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_EMAIL_TEMPLATE);
-            if (batchEntity.isNotify() && emailTemplate != null) {
-                sendEmail(batchEntity, emailTemplate.getId(), jobExecutionResult);
-            }
-            batchEntity.setJobInstance(jobInstance);
-            batchEntity.setStatus(BatchEntityStatusEnum.SUCCESS);
+        if (isRunningAsJobManager(jobExecutionResult)) {
+            //Execute the email sending in an isolated transaction ==> if there is an exception, we don't position the batch in FAILURE status.
+            methodCallingUtils.callMethodInNewTx(() -> sendEmail(batchEntity, jobExecutionResult));
+            update(jobExecutionResult, jobInstance, batchEntity);
         }
     }
 
@@ -321,50 +366,59 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Send Email to the creator
      *
      * @param batchEntity        Batch entity
-     * @param emailTemplateId    Email template id
      * @param jobExecutionResult Job execution result
      */
-    private void sendEmail(BatchEntity batchEntity, Long emailTemplateId, JobExecutionResultImpl jobExecutionResult) {
-        String from = DEFAULT_EMAIL_ADDRESS;
-        Provider provider = providerService.getProvider();
-        if (provider != null && StringUtils.isNotBlank(provider.getEmail())) {
-            from = provider.getEmail();
+    private void sendEmail(BatchEntity batchEntity, JobExecutionResultImpl jobExecutionResult) {
+        EntityReferenceWrapper emailTemplateWrapper = (EntityReferenceWrapper) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_EMAIL_TEMPLATE);
+        if (batchEntity.isNotify() && emailTemplateWrapper != null && !StringUtils.isBlank(emailTemplateWrapper.getCode())) {
+            try {
+                String emailTemplateCode = emailTemplateWrapper.getCode();
+                String from = DEFAULT_EMAIL_ADDRESS;
+                Provider provider = providerService.getProvider();
+                if (provider != null && StringUtils.isNotBlank(provider.getEmail())) {
+                    from = provider.getEmail();
+                }
+                String username = batchEntity.getAuditable().getCreator();
+                User user = userService.findByUsername(username, false);
+                if (user == null) {
+                    log.warn("No user with username {} was found", username);
+                    return;
+                }
+                String to = user.getEmail();
+                if (StringUtils.isBlank(to)) {
+                    log.warn("Cannot send batch entity notification message to the creator {}, because he doesn't have an email", username);
+                    return;
+                }
+
+                EmailTemplate emailTemplate = ofNullable(emailTemplateService.findByCode(emailTemplateCode))
+                        .orElseThrow(() -> new EntityDoesNotExistsException(EmailTemplate.class, emailTemplateCode));
+                String localeAttribute = userService.getUserAttributeValue(username, "locale");
+                Locale locale = !StringUtils.isBlank(localeAttribute) ? new Locale(localeAttribute) : new Locale("en");
+                String languageCode = locale.getISO3Language().toUpperCase();
+
+                String emailSubject = internationalSettingsService.resolveSubject(emailTemplate, languageCode);
+                String emailContent = internationalSettingsService.resolveEmailContent(emailTemplate, languageCode);
+                String htmlContent = internationalSettingsService.resolveHtmlContent(emailTemplate, languageCode);
+
+
+                Map<Object, Object> params = new HashMap<>();
+                params.put("batchEntityId", batchEntity.getId());
+                params.put("batchEntityStatus", batchEntity.getStatus());
+                params.put("batchEntityDescription", StringUtils.isNotBlank(batchEntity.getDescription()) ? batchEntity.getDescription() : "");
+                params.put("jobExecutionId", jobExecutionResult.getId() != null ? jobExecutionResult.getId() : "");
+                params.put("jobInstanceCode", batchEntity.getJobInstance() != null ? batchEntity.getJobInstance().getCode() : "");
+
+                String subject = StringUtils.isNotBlank(emailTemplate.getSubject()) ? evaluateExpression(emailSubject, params, String.class) : "";
+                String content = StringUtils.isNotBlank(emailTemplate.getTextContent()) ? evaluateExpression(emailContent, params, String.class) : "";
+                String contentHtml = StringUtils.isNotBlank(emailTemplate.getHtmlContent()) ? evaluateExpression(htmlContent, params, String.class) : "";
+
+                emailSender.send(from, asList(from), asList(to), subject, content, contentHtml);
+                //in the case of an exception, don't reject the batch entity and don't record an error or a warning but rather add a message in the reports.
+            } catch (Exception e) {
+                jobExecutionResult.addReport("Warning : can not send email (" + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()) + ")");
+            }
         }
-        String username = batchEntity.getAuditable().getCreator();
-        User user = userService.findByUsername(username, false);
-        if (user == null) {
-            log.warn("No user with username {} was found", username);
-            return;
-        }
-        String to = user.getEmail();
-        if (StringUtils.isBlank(to)) {
-            log.warn("Cannot send batch entity notification message to the creator {}, because he doesn't have an email", username);
-            return;
-        }
 
-        EmailTemplate emailTemplate = ofNullable(emailTemplateService.findById(emailTemplateId))
-                .orElseThrow(() -> new EntityDoesNotExistsException(EmailTemplate.class, emailTemplateId));
-        String localeAttribute = userService.getUserAttributeValue(username, "locale");
-        Locale locale = !StringUtils.isBlank(localeAttribute) ? new Locale(localeAttribute) : new Locale("en");
-        String languageCode = locale.getISO3Language().toUpperCase();
-
-        String emailSubject = internationalSettingsService.resolveSubject(emailTemplate, languageCode);
-        String emailContent = internationalSettingsService.resolveEmailContent(emailTemplate, languageCode);
-        String htmlContent = internationalSettingsService.resolveHtmlContent(emailTemplate, languageCode);
-
-
-        Map<Object, Object> params = new HashMap<>();
-        params.put("batchEntityId", batchEntity.getId());
-        params.put("batchEntityStatus", batchEntity.getStatus());
-        params.put("batchEntityDescription", StringUtils.isNotBlank(batchEntity.getDescription()) ? batchEntity.getDescription() : "");
-        params.put("jobExecutionId", jobExecutionResult.getId() != null ? jobExecutionResult.getId() : "");
-        params.put("jobInstanceCode", batchEntity.getJobInstance() != null ? batchEntity.getJobInstance().getCode() : "");
-
-        String subject = StringUtils.isNotBlank(emailTemplate.getSubject()) ? evaluateExpression(emailSubject, params, String.class) : "";
-        String content = StringUtils.isNotBlank(emailTemplate.getTextContent()) ? evaluateExpression(emailContent, params, String.class) : "";
-        String contentHtml = StringUtils.isNotBlank(emailTemplate.getHtmlContent()) ? evaluateExpression(htmlContent, params, String.class) : "";
-
-        emailSender.send(from, asList(from), asList(to), subject, content, contentHtml);
     }
 
     /**

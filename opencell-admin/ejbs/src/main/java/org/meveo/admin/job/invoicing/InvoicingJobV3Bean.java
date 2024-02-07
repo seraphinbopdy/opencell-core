@@ -195,7 +195,8 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			}
 			billingRun.setStatus(VALIDATED);
 		}
-		billingRun.setInvoiceNumber(result.getInvoiceCount());
+		int invoiceNumber = ofNullable(billingRun.getInvoiceNumber()).orElse(0);
+		billingRun.setInvoiceNumber(result.getInvoiceCount() + invoiceNumber);
 		billingRunService.update(billingRun);
 		billingRunService.updateBillingRunJobExecution(billingRun.getId(), result);
 	}

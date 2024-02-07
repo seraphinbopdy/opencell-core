@@ -27,7 +27,8 @@ public class TestRejectionActionScript extends Script {
 			throw new BusinessException(report);
 		}
 
-		context.put(Script.RESULT_VALUE, report);
+		context.put(Script.REJECTION_ACTION_REPORT, report);
+		context.put(Script.REJECTION_ACTION_RESULT, true);
 	}
 
 }

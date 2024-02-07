@@ -13657,6 +13657,21 @@ public class DummyPaymentGatewayScript extends Script {
 					valueComputed="(SELECT id from generic_sequence where code = 'payment_rejection_code_seq')"/>
 		</insert>
 	</changeSet>
+	
+	<changeSet id="INTRD-20890_20240201" author="aeljaouhari">
+		<insert tableName="meveo_job_instance">
+			<column name="id" valueSequenceNext="meveo_job_instance_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="job_category" value="PAYMENT" />
+			<column name="job_template" value="RejectionPaymentActionJob" />
+			<column name="code" value="RejectionPaymentActionJob" />
+			<column name="creator" value="applicationInitializer" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="description" value="Rejection Payment Action Job" />
+			<column name="uuid" value="RejectionPaymentActionJob_Job" />
+		</insert>
+	</changeSet>
 
 	<changeSet id="INTRD-15841_20230502" author="aeljaouhari" />
 	<changeSet id="INTRD-15899_20230505" author="aelmalki" />

@@ -917,4 +917,11 @@ public class AccountOperationService extends PersistenceService<AccountOperation
         // Executing the query and returning the result
         return query.getResultList();
     }
+
+    public List<RejectedPayment> findRejectedPaymentByStatus(RejectionActionStatus... statuses) {
+    	return getEntityManager().createNamedQuery("RejectedPayment.findByRejectionActionStatus", RejectedPayment.class)
+                .setParameter("RA_STATUS", Arrays.asList(statuses))
+                .getResultList();
+    }
+    
 }

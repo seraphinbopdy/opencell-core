@@ -131,7 +131,7 @@ public abstract class AccountDto extends BusinessEntityDto {
     protected TitleDto legalEntityType;
 	
 	@Schema(description = "list of registration numbers")
-	private Set<RegistrationNumberDto> registrationNumbers;
+		private Set<RegistrationNumberDto> registrationNumbers;
     /**
      * Instantiates a new account dto.
      */

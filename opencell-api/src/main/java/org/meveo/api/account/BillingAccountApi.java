@@ -337,9 +337,7 @@ public class BillingAccountApi extends AccountEntityApi {
 
         dtoToEntity(billingAccount, postData, checkCustomFields, businessAccountModel, null);
         processTags(postData,billingAccount);
-	    createOrUpdateRegistrationNumber(billingAccount, postData.getRegistrationNumbers());
-
-        billingAccount = billingAccountService.update(billingAccount);
+	    billingAccount = billingAccountService.update(billingAccount);
 
         // terminate discounts
         if (postData.getDiscountPlansForTermination() != null) {
@@ -639,13 +637,15 @@ public class BillingAccountApi extends AccountEntityApi {
             }
         }
 	    
-	    createOrUpdateRegistrationNumber(billingAccount, postData.getRegistrationNumbers());
-	    
 	    // Update payment method information in a customer account.
         // ONLY used to handle deprecated billingAccountDto.paymentMethod and billingAccountDto.bankCoordinates fields. Use
         createOrUpdatePaymentMethodInCA(postData, billingAccount);
 	    
-	    createOrUpdateRegistrationNumber(billingAccount, postData.getRegistrationNumbers());
+	    try {
+		    createOrUpdateRegistrationNumber(billingAccount, postData.getRegistrationNumbers());
+	    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+		    throw new BusinessException("Error when inserting register number", e);
+	    }
 	    
 	    // Validate and populate customFields
         try {
@@ -658,33 +658,6 @@ public class BillingAccountApi extends AccountEntityApi {
             throw e;
         }
     }
-	
-	private void createOrUpdateRegistrationNumber(BillingAccount billingAccount, Set<RegistrationNumberDto> registrationNumbers)  {
-		if(CollectionUtils.isNotEmpty(billingAccount.getRegistrationNumbers())) {
-			billingAccount.getRegistrationNumbers().forEach(registrationNumber -> registrationNumber.setBillingAccount(null));
-		}
-		if(CollectionUtils.isNotEmpty(registrationNumbers)) {
-			registrationNumbers.forEach(registrationNumberDto -> {
-				RegistrationNumber registrationNumber = registrationNumberService.findByRegistrationNo(registrationNumberDto.getRegistrationNo());
-				IsoIcd isoIcd = null;
-				
-				if(registrationNumber == null) {
-					registrationNumber = new RegistrationNumber(registrationNumberDto.getRegistrationNo(), isoIcd, billingAccount);
-				}else{
-					registrationNumber.setAccountEntity(billingAccount);
-				}
-				
-				if(org.meveo.commons.utils.StringUtils.isNotBlank(registrationNumberDto.getIsoIcdCode())){
-					isoIcd = isoIcdService.findByCode(registrationNumberDto.getIsoIcdCode());
-					if(isoIcd == null) {
-						throw new EntityDoesNotExistsException(IsoIcd.class, registrationNumberDto.getIsoIcdCode());
-					}
-					registrationNumber.setIsoIcd(isoIcd);
-				}
-				billingAccount.getRegistrationNumbers().add(registrationNumber);
-			});
-		}
-	}
 	
 	@SecuredBusinessEntityMethod(validate = @SecureMethodParameter(entityClass = BillingAccount.class))
     public BillingAccountDto find(String billingAccountCode) throws MeveoApiException {

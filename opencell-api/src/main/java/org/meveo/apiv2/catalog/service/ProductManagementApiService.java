@@ -7,18 +7,21 @@ import org.meveo.api.catalog.OneShotChargeTemplateApi;
 import org.meveo.api.catalog.PricePlanMatrixApi;
 import org.meveo.api.catalog.PricePlanMatrixVersionApi;
 import org.meveo.api.catalog.RecurringChargeTemplateApi;
+import org.meveo.api.catalog.UsageChargeTemplateApi;
 import org.meveo.api.cpq.ProductApi;
 import org.meveo.api.dto.catalog.ChargeTemplateDto;
 import org.meveo.api.dto.catalog.OneShotChargeTemplateDto;
 import org.meveo.api.dto.catalog.PricePlanMatrixDto;
 import org.meveo.api.dto.catalog.PricePlanMatrixVersionDto;
 import org.meveo.api.dto.catalog.RecurringChargeTemplateDto;
+import org.meveo.api.dto.catalog.UsageChargeTemplateDto;
 import org.meveo.api.dto.cpq.ProductChargeTemplateMappingDto;
 import org.meveo.api.dto.cpq.ProductDto;
 import org.meveo.api.dto.cpq.ProductVersionDto;
 import org.meveo.apiv2.catalog.SimpleChargeProductDto;
 import org.meveo.apiv2.catalog.SimpleOneshotProductDto;
 import org.meveo.apiv2.catalog.SimpleRecurrentProductDto;
+import org.meveo.apiv2.catalog.SimpleUsageProductDto;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
@@ -26,17 +29,15 @@ import org.meveo.model.catalog.ChargeTemplateStatusEnum;
 import org.meveo.model.catalog.OneShotChargeTemplate;
 import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.RecurringChargeTemplate;
+import org.meveo.model.catalog.UsageChargeTemplate;
 import org.meveo.model.cpq.enums.PriceVersionTypeEnum;
-import org.meveo.model.cpq.enums.ProductStatusEnum;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
-import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Stateless
 public class ProductManagementApiService extends BaseApi {
@@ -46,6 +47,9 @@ public class ProductManagementApiService extends BaseApi {
 
     @Inject
     private RecurringChargeTemplateApi recurringChargeTemplateApi;
+
+    @Inject
+    private UsageChargeTemplateApi usageChargeTemplateApi;
 
     @Inject
     private PricePlanMatrixApi pricePlanMatrixApi;
@@ -153,6 +157,49 @@ public class ProductManagementApiService extends BaseApi {
 
     }
 
+    public ProductDto createProductSimpleUsage(SimpleUsageProductDto postData) {
+        
+        UsageChargeTemplateDto usageChargeTemplateDto = buildUsageChargeTemplateDto(postData);
+        UsageChargeTemplate createdCharge = usageChargeTemplateApi.create(usageChargeTemplateDto);
+        EntityManager entityManager = emWrapper.getEntityManager();
+        entityManager.flush();
+
+        PricePlanMatrixDto pricePlanMatrixDto = new PricePlanMatrixDto();
+        pricePlanMatrixDto.setCode("PPM_"+usageChargeTemplateDto.getCode());
+        pricePlanMatrixDto.setEventCode(usageChargeTemplateDto.getCode());
+        PricePlanMatrix createdPP = pricePlanMatrixApi.create(pricePlanMatrixDto);
+        entityManager.flush();
+
+        PricePlanMatrixVersionDto pricePlanMatrixVersionDto = createPricePlanVersionDto(postData, pricePlanMatrixDto);
+        pricePlanMatrixVersionApi.create(pricePlanMatrixVersionDto);
+        entityManager.flush();
+
+
+        pricePlanMatrixVersionApi.updateProductVersionStatus(pricePlanMatrixDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        genericChargeTemplateApi.updateStatus(usageChargeTemplateDto.getCode(), ChargeTemplateStatusEnum.ACTIVE.name());
+
+        ProductDto productDto = new ProductDto();
+        productDto.setCode(postData.getProductCode());
+        productDto.setLabel(postData.getLabel());
+        productDto.setCurrentProductVersion(new ProductVersionDto());
+        productDto.getCurrentProductVersion().setCurrentVersion(1);
+        productDto.getCurrentProductVersion().setProductCode(postData.getProductCode());
+        productDto.getCurrentProductVersion().setStatus(VersionStatusEnum.DRAFT);
+        productDto.getCurrentProductVersion().setShortDescription("Product " + postData.getProductCode());
+        productDto.setProductChargeTemplateMappingDto(new ArrayList<>());
+        ProductChargeTemplateMappingDto mapping = new ProductChargeTemplateMappingDto();
+        mapping.setChargeCode(usageChargeTemplateDto.getCode());
+        mapping.setProductCode(productDto.getCode());
+        productDto.getProductChargeTemplateMappingDto().add(mapping);
+        ProductDto createdProduct = productApi.create(productDto);
+        entityManager.flush();
+
+        productApi.UpdateProductVersionStatus(productDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
+
+        createdProduct.setProductChargeTemplateMappingDto(List.of(mapping));
+        return createdProduct;
+    }
+
     private static PricePlanMatrixVersionDto createPricePlanVersionDto(SimpleChargeProductDto postData, PricePlanMatrixDto pricePlanMatrixDto) {
         PricePlanMatrixVersionDto pricePlanMatrixVersionDto = new PricePlanMatrixVersionDto();
         pricePlanMatrixVersionDto.setPricePlanMatrixCode(pricePlanMatrixDto.getCode());
@@ -187,6 +234,19 @@ public class ProductManagementApiService extends BaseApi {
         recurringChargeTemplate.setCalendar(postData.getCalendar());
         
         return recurringChargeTemplate;
+    }
+    
+    private UsageChargeTemplateDto buildUsageChargeTemplateDto(SimpleUsageProductDto postData) {
+        UsageChargeTemplateDto usageChargeTemplate = new UsageChargeTemplateDto();
+        
+        populateCommonsData(postData, usageChargeTemplate);
+        usageChargeTemplate.setCode(StringUtils.getDefaultIfEmpty(postData.getChargeCode(), "CH_USAGE_" + postData.getProductCode()));
+        usageChargeTemplate.setFilterParam1(postData.getFilterParam1());
+        usageChargeTemplate.setFilterParam2(postData.getFilterParam2());
+        usageChargeTemplate.setFilterParam3(postData.getFilterParam3());
+        usageChargeTemplate.setFilterParam4(postData.getFilterParam4());
+        
+        return usageChargeTemplate;
     }
 
     private void populateCommonsData(SimpleChargeProductDto postData, ChargeTemplateDto destData) {

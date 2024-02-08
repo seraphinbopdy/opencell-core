@@ -9236,5 +9236,28 @@ public class AgedBalanceReporting extends ReportExtractScript {
     <changeSet id="#INTRD-20127_add_index_attribute_instance" author="a.rouaguebe">
         <sql>CREATE INDEX IF NOT EXISTS cpq_attribute_instance_parent_id_idx ON cpq_attribute_instance(parent_id)</sql>
     </changeSet>
+    
+ 	<changeSet id="#INTRD-21087_20240208" author="AdilElJaouhari">
+		<addColumn tableName="billing_rated_transaction">
+			<column name="contract_id" type="bigint" />
+			<column name="contract_line_id" type="bigint" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			baseTableName="billing_rated_transaction"
+			baseColumnNames="contract_id"
+			constraintName="rt_contract_id_fk" 
+ 			referencedTableName="cpq_contract" referencedColumnNames="id" 
+ 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" />
+			
+		<addForeignKeyConstraint
+			baseTableName="billing_rated_transaction"
+			baseColumnNames="contract_line_id"
+			constraintName="rt_contract_line_id_fk"
+			referencedTableName="cpq_contract_item" referencedColumnNames="id"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" />
+	</changeSet>
 
 </databaseChangeLog>

@@ -61,6 +61,7 @@ import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.UnitOfMeasure;
 import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.contract.Contract;
+import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.tax.TaxClass;
@@ -686,6 +687,14 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
 
     @Column(name = "business_key")
     private String businessKey;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_id")
+    private Contract contract;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_line_id")
+    private ContractItem contractLine;
     
     public RatedTransaction() {
         super();
@@ -1868,6 +1877,22 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
 
 	public void setBusinessKey(String businessKey) {
 		this.businessKey = businessKey;
+	}
+
+	public Contract getContract() {
+		return contract;
+	}
+
+	public void setContract(Contract contract) {
+		this.contract = contract;
+	}
+
+	public ContractItem getContractLine() {
+		return contractLine;
+	}
+
+	public void setContractLine(ContractItem contractLine) {
+		this.contractLine = contractLine;
 	}
     
 }

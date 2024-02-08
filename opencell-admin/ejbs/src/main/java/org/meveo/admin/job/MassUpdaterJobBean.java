@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Job definition to do the mass update.
@@ -170,6 +171,7 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
      */
     private void processUpdateQueries(List<Long> interval, JobExecutionResultImpl jobExecutionResult) {
         if (isPessimisticUpdateLock(jobExecutionResult)) {
+            interval = interval.stream().distinct().collect(Collectors.toList());
             interval.removeAll(uniqueIds);
         }
         if (!interval.isEmpty()) {

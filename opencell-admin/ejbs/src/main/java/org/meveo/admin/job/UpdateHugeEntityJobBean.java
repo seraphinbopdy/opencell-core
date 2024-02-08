@@ -17,8 +17,6 @@
  */
 package org.meveo.admin.job;
 
-import org.meveo.admin.job.logging.JobLoggingInterceptor;
-import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.BatchEntityService;
@@ -27,7 +25,6 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.interceptor.Interceptors;
 
 /**
  * A job implementation to update huge entity
@@ -44,7 +41,6 @@ public class UpdateHugeEntityJobBean extends BaseJobBean {
     private BatchEntityService batchEntityService;
 
 
-    @Interceptors({JobLoggingInterceptor.class, PerformanceInterceptor.class})
     @TransactionAttribute(TransactionAttributeType.NEVER)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
         initJob(jobExecutionResult, jobInstance);

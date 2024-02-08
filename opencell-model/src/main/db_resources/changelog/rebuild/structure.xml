@@ -3525,6 +3525,8 @@
 			<column name="trading_currency_id" type="bigint" />
             <column name="discounted_amount" type="numeric(23,12)" />
             <column name="business_key" type="VARCHAR(255)" />
+            <column name="contract_id" type="bigint" />
+			<column name="contract_line_id" type="bigint" />
         </createTable>
         <modifySql dbms="postgresql">
         	<append value=" PARTITION BY LIST(status)"/>
@@ -21265,6 +21267,24 @@
                                  referencedTableName="billing_user_account"
                                  referencedColumnNames="id"/>
     </changeSet>
+    
+  	<changeSet id="#INTRD-21087_20240208_rebuild_fk" author="AdilElJaouhari">
+		<addForeignKeyConstraint
+			baseTableName="billing_rated_transaction"
+			baseColumnNames="contract_id"
+			constraintName="rt_contract_id_fk" 
+ 			referencedTableName="cpq_contract" referencedColumnNames="id" 
+ 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" />
+			
+		<addForeignKeyConstraint
+			baseTableName="billing_rated_transaction"
+			baseColumnNames="contract_line_id"
+			constraintName="rt_contract_line_id_fk"
+			referencedTableName="cpq_contract_item" referencedColumnNames="id"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" />
+	</changeSet>
 
    	<changeSet id="#20210623-INTRD-277-quoteValidationScript" author="TarikFA."/>
    	<changeSet id="#20210623-INTRD-277-orderAdvacementScript" author="TarikFA."/>
@@ -21415,6 +21435,7 @@
     <changeSet id="#INTRD-20847_20240202" author="zelmeliani" />
     <changeSet id="#INTRD-20052_20240117" author="TarikFA." />
     <changeSet id="#INTRD-20127_add_index_attribute_instance" author="a.rouaguebe" />
+    <changeSet id="#INTRD-21087_20240208" author="AdilElJaouhari" />
 
     <!--  !!! PLEASE KEEP THIS CHANGESET AT THE END OF FILE !!! -->
     <changeSet id="#liquibase_hack_structure" author="AbdelmounaimAkadid">

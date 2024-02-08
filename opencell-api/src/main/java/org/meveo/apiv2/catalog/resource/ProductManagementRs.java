@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.meveo.api.dto.response.cpq.GetProductDtoResponse;
 import org.meveo.apiv2.catalog.SimpleOneshotProductDto;
 import org.meveo.apiv2.catalog.SimpleRecurrentProductDto;
+import org.meveo.apiv2.catalog.SimpleUsageProductDto;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -22,7 +23,7 @@ public interface ProductManagementRs {
     
     @POST
     @Path("/createProductSimpleOneshot")
-    @Operation(summary = "This endpoint allows to create a new product",
+    @Operation(summary = "This endpoint allows to create a new product linked to a one-shot charge",
             tags = { "Product" },
             description ="creation of the product",
             responses = {
@@ -37,7 +38,7 @@ public interface ProductManagementRs {
 
     @POST
     @Path("/createProductSimpleRecurrent")
-    @Operation(summary = "This endpoint allows to create a new product",
+    @Operation(summary = "This endpoint allows to create a new product linked to a recurrent charge",
             tags = { "Product" },
             description ="creation of the product",
             responses = {
@@ -46,4 +47,19 @@ public interface ProductManagementRs {
                     @ApiResponse(responseCode = "400", description = "the product already existe with the given code")
             })
     Response createProductSimpleRecurrent(SimpleRecurrentProductDto postData);
+
+
+
+
+    @POST
+    @Path("/createProductSimpleUsage")
+    @Operation(summary = "This endpoint allows to create a new product linked to a usage charge",
+            tags = { "Product" },
+            description ="creation of the product",
+            responses = {
+                    @ApiResponse(responseCode="200", description = "the product successfully created",
+                            content = @Content(schema = @Schema(implementation = GetProductDtoResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "the product already existe with the given code")
+            })
+    Response createProductSimpleUsage(SimpleUsageProductDto postData);
 }

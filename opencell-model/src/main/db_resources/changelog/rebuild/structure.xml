@@ -18115,6 +18115,7 @@
     	<sql>CREATE INDEX idx_billing_invoice_agr_amount_on_aggr_id  ON billing_invoice_agr_amount (aggr_id)</sql>
     	<sql>CREATE INDEX idx_ar_ao_payment_histories__ao_id ON ar_ao_payment_histories(ao_id)</sql>
     	<sql>CREATE INDEX cpq_attribute_instance_service_instance_idx ON cpq_attribute_instance(service_instance_id)</sql>
+        <sql>CREATE INDEX IF NOT EXISTS cpq_attribute_instance_parent_id_idx ON cpq_attribute_instance(parent_id)</sql>
     	<sql>CREATE INDEX billing_wallet_operation_charge_instance_idx ON billing_wallet_operation(charge_instance_id)</sql>
         <sql>CREATE INDEX billing_dpi_si_index ON ${db.schema.adapted}billing_discount_plan_instance(service_instance_id)</sql>
         <sql>CREATE INDEX billing_redirection_rule_contract_index ON ${db.schema.adapted}billing_redirection_rule(contract_id)</sql>
@@ -21413,6 +21414,7 @@
     <changeSet id="#INTRD-15093_20230123" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-20847_20240202" author="zelmeliani" />
     <changeSet id="#INTRD-20052_20240117" author="TarikFA." />
+    <changeSet id="#INTRD-20127_add_index_attribute_instance" author="a.rouaguebe" />
 
     <!--  !!! PLEASE KEEP THIS CHANGESET AT THE END OF FILE !!! -->
     <changeSet id="#liquibase_hack_structure" author="AbdelmounaimAkadid">

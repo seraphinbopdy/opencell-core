@@ -9233,4 +9233,8 @@ public class AgedBalanceReporting extends ReportExtractScript {
 		</addColumn>
 	</changeSet>
 
+    <changeSet id="#INTRD-20127_add_index_attribute_instance" author="a.rouaguebe">
+        <sql>CREATE INDEX IF NOT EXISTS cpq_attribute_instance_parent_id_idx ON cpq_attribute_instance(parent_id)</sql>
+    </changeSet>
+
 </databaseChangeLog>

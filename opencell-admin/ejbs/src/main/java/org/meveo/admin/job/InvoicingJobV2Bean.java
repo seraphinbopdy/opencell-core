@@ -3,6 +3,7 @@ package org.meveo.admin.job;
 import static java.lang.String.format;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.meveo.model.billing.BillingProcessTypesEnum.AUTOMATIC;
 import static org.meveo.model.billing.BillingProcessTypesEnum.FULL_AUTOMATIC;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import javax.ejb.Stateless;
@@ -206,7 +208,8 @@ public class InvoicingJobV2Bean extends BaseJobBean {
                 billingRun.setStatus(REJECTED);
             }
         }
-		billingRun.setInvoiceNumber(result.getInvoiceCount());
+        int invoiceNumber = ofNullable(billingRun.getInvoiceNumber()).orElse(0);
+		billingRun.setInvoiceNumber(result.getInvoiceCount() + invoiceNumber);
         billingRunService.update(billingRun);
         billingRunService.updateBillingRunJobExecution(billingRun.getId(), result);
 

@@ -373,6 +373,9 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         if (batchEntity.isNotify() && emailTemplateWrapper != null && !StringUtils.isBlank(emailTemplateWrapper.getCode())) {
             try {
                 String emailTemplateCode = emailTemplateWrapper.getCode();
+                EmailTemplate emailTemplate = ofNullable(emailTemplateService.findByCode(emailTemplateCode))
+                        .orElseThrow(() -> new EntityDoesNotExistsException(EmailTemplate.class, emailTemplateCode));
+
                 String from = DEFAULT_EMAIL_ADDRESS;
                 Provider provider = providerService.getProvider();
                 if (provider != null && StringUtils.isNotBlank(provider.getEmail())) {
@@ -382,16 +385,13 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
                 User user = userService.findByUsername(username, false);
                 if (user == null) {
                     log.warn("No user with username {} was found", username);
-                    return;
+                    throw new BusinessException("No user with username " + username + " was found");
                 }
                 String to = user.getEmail();
                 if (StringUtils.isBlank(to)) {
                     log.warn("Cannot send batch entity notification message to the creator {}, because he doesn't have an email", username);
-                    return;
+                    throw new BusinessException("Cannot send batch entity notification message to the creator " + username + ", because he doesn't have an email");
                 }
-
-                EmailTemplate emailTemplate = ofNullable(emailTemplateService.findByCode(emailTemplateCode))
-                        .orElseThrow(() -> new EntityDoesNotExistsException(EmailTemplate.class, emailTemplateCode));
                 String localeAttribute = userService.getUserAttributeValue(username, "locale");
                 Locale locale = !StringUtils.isBlank(localeAttribute) ? new Locale(localeAttribute) : new Locale("en");
                 String languageCode = locale.getISO3Language().toUpperCase();

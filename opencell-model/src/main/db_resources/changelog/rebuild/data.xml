@@ -13424,6 +13424,19 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='ACCOUNTING_SCHEMES')" />
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-20847_20230214" author="zelmeliani">
+    	<insert tableName="ar_customer_balance">
+    		<column name="id" value="-2"/>
+		    <column name="version" value="0" />
+		    <column name="created" valueDate="${db.current.time}" />
+		    <column name="creator" value="applicationInitializer" />
+		    <column name="code" value="ARREARS_BALANCE" />
+		    <column name="description" value="arrears balance" />
+		    <column name="default_balance" value="0" />
+			<column name="balance_el" value="accountOperation.type = I and accountOperation.dueDate &lt; currentDate and (accountOperation.matchingStatus = O or accountOperation.matchingStatus = P)" />
+		</insert>
+	</changeSet>
 
 	<changeSet id="INTRD-15841_20230502" author="aeljaouhari" />
 	<changeSet id="INTRD-15899_20230505" author="aelmalki" />
@@ -13454,20 +13467,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 	<changeSet id="#INTRD-20753_20240118" author="aeljaouhari" />
 	<changeSet id="#INTRD-20962_add_missing_currencies" author="a.rouaguebe" />
     <changeSet id="#INTRD-21035_20240206" author="TarikFA." />
-
-    <changeSet id="#INTRD-20847_20230214" author="zelmeliani">
-    	<insert tableName="ar_customer_balance">
-    		<column name="id" value="-2"/>
-		    <column name="version" value="0" />
-		    <column name="created" valueDate="${db.current.time}" />
-		    <column name="creator" value="applicationInitializer" />
-		    <column name="code" value="ARREARS_BALANCE" />
-		    <column name="description" value="arrears balance" />
-		    <column name="default_balance" value="0" />
-			<column name="balance_el" value="accountOperation.type = I and accountOperation.dueDate &lt; currentDate and (accountOperation.matchingStatus = O or accountOperation.matchingStatus = P)" />
-		</insert>
-	</changeSet>
-
+    <changeSet id="#INTRD-19467_20240111" author="TarikFA." />
+    
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->
     <changeSet id="#liquibase_hack_data" author="AbdelmounaimAkadid">
         <sql>update databasechangelog set filename='src/main/db_resources/changelog/current/data.xml' where filename='src/main/db_resources/changelog/rebuild/data.xml'</sql>

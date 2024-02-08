@@ -84,7 +84,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 			nbThreads = (long) Runtime.getRuntime().availableProcessors();
 		}
 
-		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_NR_ITEMS_PER_TX, 10000);
+		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_NR_ITEMS_PER_TX, 10000L);
 		
 		useLastPartition = (Boolean) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_LAST_PARTITION_ONLY, true);
 		
@@ -140,7 +140,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	private void rerateByGroup(List<Long> reratingTree, JobExecutionResultImpl jobExecutionResult) {
     	final int maxValue = ParamBean.getInstance().getPropertyAsInteger("database.number.of.inlist.limit", reratingService.SHORT_MAX_VALUE);
     	List<List<Long>> subList = partition(reratingTree, maxValue);
-    	String lastEDRPartition = tablesPartitioningService.getLastPartitionDate(tablesPartitioningService.EDR_PARTITION_SOURCE);
+    	String lastEDRPartition = tablesPartitioningService.getLastPartitionDateAsString(tablesPartitioningService.EDR_PARTITION_SOURCE);
 		String edrDateCondition = useLastPartition ?  lastEDRPartition == null ? "" : " AND edr.eventDate>'" + lastEDRPartition+"'" : null;
 		subList.forEach(ids -> reratingService.applyMassRerate(ids, useSamePricePlan, jobExecutionResult, edrDateCondition));
 	}

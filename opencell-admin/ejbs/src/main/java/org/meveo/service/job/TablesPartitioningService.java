@@ -86,14 +86,17 @@ public class TablesPartitioningService extends NativePersistenceService {
 		return message;
 	}
 
-	public String getLastPartitionDate(String tableName) {
+	public String getLastPartitionDateAsString(String tableName) {
+		Date resultDate = getLastPartitionDate(tableName);
+		SimpleDateFormat dateFormat = new SimpleDateFormat(PARTITION_DATE_PATTERN);
+		return resultDate == null ? null : dateFormat.format(resultDate);
+	}
 
+	public Date getLastPartitionDate(String tableName) {
 		EntityManager entityManager = emWrapper.getEntityManager();
 		NativeQuery nativeQuery = (NativeQuery) entityManager.createNativeQuery(LIST_PARTITIONS_QUERY);
 		try {
-			SimpleDateFormat dateFormat = new SimpleDateFormat(PARTITION_DATE_PATTERN);
-			Date resultDate = (Date) nativeQuery.setParameter("tableName", tableName).setParameter("datePattern", PARTITION_SUFFIX_PATTERN).getSingleResult();
-			return resultDate == null ? null : dateFormat.format(resultDate);
+			return (Date) nativeQuery.setParameter("tableName", tableName).setParameter("datePattern", PARTITION_SUFFIX_PATTERN).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}

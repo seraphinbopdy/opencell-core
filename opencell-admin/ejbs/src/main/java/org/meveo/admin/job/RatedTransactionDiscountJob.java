@@ -17,6 +17,7 @@
  */
 package org.meveo.admin.job;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.job.Job;
+import org.meveo.service.job.TablesPartitioningService;
 
 /**
  * Job definition to link Open RatedTransaction to the
@@ -49,8 +51,13 @@ public class RatedTransactionDiscountJob extends Job {
 
 	public static final String CF_MASS_UPDATE_CHUNK = "CF_MASS_UPDATE_CHUNK";
 
+	private static final String CF_LAST_PARTITION_ONLY="CF_LAST_PARTITION_ONLY";
+
 	@Inject
 	private UpdateStepExecutor updateStepExecutor;
+	
+	@Inject
+	private TablesPartitioningService tablesPartitioningService; 
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.NEVER)
@@ -64,8 +71,15 @@ public class RatedTransactionDiscountJob extends Job {
 	private void initUpdateStepParams(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
 		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_CHUNK_SIZE,
 				(Long) getParamOrCFValue(jobInstance, RatedTransactionDiscountJob.CF_MASS_UPDATE_CHUNK, 100000L));
+		boolean useLastPartition = (Boolean) this.getParamOrCFValue(jobInstance, RatedTransactionDiscountJob.CF_LAST_PARTITION_ONLY, true);
+		String namedQuery = "RatedTransaction.massUpdateWithDiscountedRTStep"+(useLastPartition?"ForDate":"");
+		if(useLastPartition) {
+			Date operationDate = tablesPartitioningService.getLastPartitionDate(tablesPartitioningService.WO_PARTITION_SOURCE);
+			jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_QUERY_PARAMS,
+					(Map.of("operationDate", operationDate)));
+		}
 		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_NAMED_QUERY,
-				("RatedTransaction.massUpdateWithDiscountedRTStep" + (EntityManagerProvider.isDBOracle() ? "Oracle" : "")));
+				(namedQuery + (EntityManagerProvider.isDBOracle() ? "Oracle" : "")));
 		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_READ_INTERVAL_QUERY,
 				("select min(id), max(id) from RatedTransaction where status ='OPEN' and discountedRatedTransaction is null"));
 		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_NATIVE_QUERY, (false));
@@ -87,6 +101,8 @@ public class RatedTransactionDiscountJob extends Job {
 				"tab:Configuration:0;fieldGroup:Configuration:0;field:1", "0", JOB_INSTANCE_RATED_TRANSACTION_DISCOUNT_JOB));
 		result.put(CF_MASS_UPDATE_CHUNK, CustomFieldTemplateUtils.buildCF(CF_MASS_UPDATE_CHUNK, resourceMessages.getString("jobExecution.massUpdate.Size"), CustomFieldTypeEnum.LONG,
 				"tab:Configuration:0;fieldGroup:Configuration:0;field:3", "100000", JOB_INSTANCE_RATED_TRANSACTION_DISCOUNT_JOB));
+        result.put(CF_LAST_PARTITION_ONLY, CustomFieldTemplateUtils.buildCF(CF_LAST_PARTITION_ONLY, resourceMessages.getString("jobExecution.lastPartitionOnly"), CustomFieldTypeEnum.BOOLEAN,
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:4", "true", JOB_INSTANCE_RATED_TRANSACTION_DISCOUNT_JOB));
 
 		return result;
 	}

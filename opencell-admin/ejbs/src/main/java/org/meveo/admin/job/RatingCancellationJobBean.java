@@ -85,9 +85,9 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 
 		boolean useLastPartitions = (boolean) getParamOrCFValue(jobInstance, RatingCancellationJob.CF_LAST_PARTITION_ONLY, true);
 		
-		lastWOPartition = useLastPartitions ? tablesPartitioningService.getLastPartitionDate(tablesPartitioningService.WO_PARTITION_SOURCE) : null;
-		lastRTPartition = useLastPartitions ? tablesPartitioningService.getLastPartitionDate(tablesPartitioningService.RT_PARTITION_SOURCE) : null;
-		lastEDRPartition = useLastPartitions ? tablesPartitioningService.getLastPartitionDate(tablesPartitioningService.EDR_PARTITION_SOURCE) : null;
+		lastWOPartition = useLastPartitions ? tablesPartitioningService.getLastPartitionDateAsString(tablesPartitioningService.WO_PARTITION_SOURCE) : null;
+		lastRTPartition = useLastPartitions ? tablesPartitioningService.getLastPartitionDateAsString(tablesPartitioningService.RT_PARTITION_SOURCE) : null;
+		lastEDRPartition = useLastPartitions ? tablesPartitioningService.getLastPartitionDateAsString(tablesPartitioningService.EDR_PARTITION_SOURCE) : null;
 		
 		createViews(configuredNrPerTx, useExistingViews);
 		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();

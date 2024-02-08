@@ -1372,13 +1372,9 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             throw new RatingException("Unable to match an accounting article for a charge " + walletOperation.getChargeInstance().getId() + "/" + walletOperation.getChargeInstance().getCode());
         }
         walletOperation.setAccountingArticle(accountingArticle);
-        TaxInfo taxInfo = taxMappingService.determineTax(walletOperation);
-        if (taxInfo == null) {
+        if (taxMappingService.determineTax(walletOperation) == null) {
             throw new BusinessException("No tax found for the chargeInstance " + walletOperation.getChargeInstance().getCode());
         }
-        walletOperation.setTaxClass(taxInfo.taxClass);
-        walletOperation.setTax(taxInfo.tax);
-        walletOperation.setTaxPercent(taxInfo.tax.getPercent());
         // Unit prices and unit taxes are with higher precision
         BigDecimal[] unitAmounts = NumberUtils.computeDerivedAmounts(unitPrice, unitPrice, walletOperation.getTaxPercent(), appProvider.isEntreprise(), BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
         BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(amount, amount, walletOperation.getTaxPercent(), appProvider.isEntreprise(), rounding, roundingMode.getRoundingMode());

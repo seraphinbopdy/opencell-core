@@ -18,6 +18,7 @@
 
 package org.meveo.service.tax;
 
+import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.IncorrectChargeTemplateException;
@@ -335,7 +336,7 @@ public class TaxMappingService extends PersistenceService<TaxMapping> {
 	
 	private void setTaxForWallet(TaxInfo taxInfo, WalletOperation walletOperation) {
 		if(taxInfo != null){
-			walletOperation.setTaxClass(taxInfo.taxClass);
+			walletOperation.setTaxClass((TaxClass) Hibernate.unproxy(taxInfo.taxClass));
 			walletOperation.setTax(taxInfo.tax);
 			walletOperation.setTaxPercent(taxInfo.tax.getPercent());
 		}

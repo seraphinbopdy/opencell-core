@@ -2174,6 +2174,7 @@
 			<column name="error_detail" type="varchar(2000)" />
 			<column name="refunded_payment_id" type="bigint" />
             <column name="litigation_reason" type="varchar(2000)" />
+            <column name="source_account_operation_id" type="bigint" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-146">
@@ -17992,6 +17993,15 @@
 			referencedColumnNames="id" referencedTableName="cpq_order_product" />
 	</changeSet>
 
+    <changeSet id="#INTRD-21452_20240209_build" author="TarikFA.">
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="source_account_operation_id"
+                constraintName="source_account_operation_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+    </changeSet>
     <!-- end fk -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-constr-995">
@@ -21436,6 +21446,7 @@
     <changeSet id="#INTRD-20052_20240117" author="TarikFA." />
     <changeSet id="#INTRD-20127_add_index_attribute_instance" author="a.rouaguebe" />
     <changeSet id="#INTRD-21087_20240208" author="AdilElJaouhari" />
+    <changeSet id="#INTRD-21452_20240209" author="TarikFA." />
 
     <!--  !!! PLEASE KEEP THIS CHANGESET AT THE END OF FILE !!! -->
     <changeSet id="#liquibase_hack_structure" author="AbdelmounaimAkadid">

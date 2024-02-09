@@ -161,6 +161,9 @@ public class CustomerTreeBean extends BaseBean<AccountEntity> {
             public ICustomFieldEntity[] getParentCFEntities() {
                 return null;
             }
+	        public String getRegistrationNo() {
+		        return null;
+	        }
         };
     }
 

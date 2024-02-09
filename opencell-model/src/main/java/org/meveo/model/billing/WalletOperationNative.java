@@ -491,11 +491,11 @@ public class WalletOperationNative extends BaseEntity {
 //    @Column(name = "price_plan_matrix_line_id")
 //    private Long pricePlanMatrixLineId;
 
-//    @Column(name = "contract_id")
-//    private Long contractId;
-//
-//    @Column(name = "contract_line_id")
-//    private Long contractLineId;
+    @Column(name = "contract_id")
+    private Long contractId;
+
+    @Column(name = "contract_line_id")
+    private Long contractLineId;
     
     @Column(name = "business_key")
     private String businessKey;
@@ -1200,6 +1200,22 @@ public class WalletOperationNative extends BaseEntity {
     public void setRulesContractId(Long rulesContractId) {
         this.rulesContractId = rulesContractId;
     }
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
+	}
+
+	public Long getContractLineId() {
+		return contractLineId;
+	}
+
+	public void setContractLineId(Long contractLineId) {
+		this.contractLineId = contractLineId;
+	}
 
 	public String getBusinessKey() {
 		return businessKey;

@@ -901,4 +901,13 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     public void setPriceList(PriceList priceList) {
         this.priceList = priceList;
     }
+	
+	// check if the list of registration numbers is not empty
+	// get all registration numbers and join them with a comma
+	public String getRegistrationNo(){
+		if (isNotEmpty(registrationNumbers)) {
+			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+		}
+		return registrationNo;
+	}
 }

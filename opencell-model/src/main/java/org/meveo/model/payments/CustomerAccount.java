@@ -17,6 +17,7 @@
  */
 package org.meveo.model.payments;
 
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import java.math.BigDecimal;
@@ -839,4 +840,13 @@ public class CustomerAccount extends AccountEntity implements IInvoicingMinimumA
 	    	}
 	    	return customer.getSeller();
 	    }
+	
+	// check if the list of registration numbers is not empty
+	// get all registration numbers and join them with a comma
+	public String getRegistrationNo(){
+		if (isNotEmpty(registrationNumbers)) {
+			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+		}
+		return registrationNo;
+	}
 }

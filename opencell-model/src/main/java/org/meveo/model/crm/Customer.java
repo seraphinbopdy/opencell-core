@@ -17,6 +17,7 @@
  */
 package org.meveo.model.crm;
 
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import java.math.BigDecimal;
@@ -367,5 +368,13 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
 	public void setChildrenCustomers(List<Customer> childrenCustomers) {
 		this.childrenCustomers = childrenCustomers;
 	}
-    
+	
+	// check if the list of registration numbers is not empty
+	// get all registration numbers and join them with a comma
+	public String getRegistrationNo(){
+		if (isNotEmpty(registrationNumbers)) {
+			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+		}
+		return registrationNo;
+	}
 }

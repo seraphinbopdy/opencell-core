@@ -143,8 +143,8 @@ public abstract class AccountEntity extends BusinessCFEntity {
     /**
      * Registration number
      */
-    /*@Column(name = "registration_no", length = 100)
-    private String registrationNo;*/
+    @Transient
+    protected String registrationNo;
 
     /**
      * Expression to determine minimum amount value
@@ -390,4 +390,6 @@ public abstract class AccountEntity extends BusinessCFEntity {
     public String getAccountType() {
         return this.getClass().getSimpleName();
     }
+	
+	public abstract String getRegistrationNo();
 }

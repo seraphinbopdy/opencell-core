@@ -1213,10 +1213,12 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                     wo.setUnitAmountWithoutTax(priceWithoutTax);
                 }
                 if (ppmVersion.getPriceEL() != null) {
-                    priceWithoutTax = elUtils.evaluateAmountExpression(ppmVersion.getPriceEL(), wo, wo.getChargeInstance().getUserAccount(), null, priceWithoutTax).setScale(BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
-                    if (priceWithoutTax == null) {
-                        throw new PriceELErrorException("Can't evaluate price for price plan " + ppmVersion.getId() + " EL:" + ppmVersion.getPriceEL());
-                    }
+	                var priceTemp = elUtils.evaluateAmountExpression(ppmVersion.getPriceEL(), wo, wo.getChargeInstance().getUserAccount(), null, priceWithoutTax).setScale(BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
+                    if(appProvider.isEntreprise()) {
+						priceWithoutTax = priceTemp;
+					} else {
+						priceWithTax = priceTemp;
+					}
                 }
             } else {
                 PricePlanMatrixLine pricePlanMatrixLine = pricePlanSelectionService.determinePricePlanLine(ppmVersion, wo);
@@ -1232,7 +1234,12 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                     }
                     String amountEL = ppmVersion.getPriceEL();
                     if (!StringUtils.isBlank(amountEL)) {
-                        priceWithoutTax = elUtils.evaluateAmountExpression(amountEL, wo, wo.getChargeInstance().getUserAccount(), null, priceWithoutTax);
+	                    var priceTemp = elUtils.evaluateAmountExpression(amountEL, wo, wo.getChargeInstance().getUserAccount(), null, priceWithoutTax);
+	                    if(appProvider.isEntreprise()) {
+		                    priceWithoutTax = priceTemp;
+	                    } else {
+		                    priceWithTax = priceTemp;
+	                    }
                     }
                     String amountELPricePlanMatrixLine = pricePlanMatrixLine.getValueEL();
                     if (!StringUtils.isBlank(amountELPricePlanMatrixLine)) {

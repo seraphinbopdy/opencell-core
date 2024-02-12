@@ -1252,6 +1252,8 @@ public class SubscriptionApi extends BaseApi {
         		osho.getWalletOperations().stream().forEach(wo -> {
         		    RatedTransaction ratedTransaction = ratedTransactionService.createRatedTransaction(wo, false);
         		    ratedTransaction.setBusinessKey(wo.getBusinessKey());
+        		    ratedTransaction.setContract(wo.getContract());
+        		    ratedTransaction.setContractLine(wo.getContractLine());
         		});
         	}
         	 

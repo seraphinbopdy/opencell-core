@@ -864,6 +864,8 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.businessKey = walletOperation.getBusinessKey();
         this.orderInfo = walletOperation.getOrderInfo();
         this.tradingCurrency = walletOperation.getTradingCurrency();
+        this.contract = walletOperation.getContract();
+        this.contractLine = walletOperation.getContractLine();
     }
 
 
@@ -908,7 +910,6 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.ratingUnitOfMeasure = rateTransactionToDuplicate.getRatingUnitOfMeasure();
         this.accountingCode = rateTransactionToDuplicate.getAccountingCode();
         this.accountingArticle = rateTransactionToDuplicate.getAccountingArticle();
-        this.orderInfo = rateTransactionToDuplicate.getOrderInfo();
         this.invoicingDate = rateTransactionToDuplicate.getInvoicingDate();
         this.unityDescription = rateTransactionToDuplicate.getUnityDescription();
         this.ratingUnitDescription = rateTransactionToDuplicate.getRatingUnitDescription();
@@ -923,6 +924,8 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.rulesContract = rateTransactionToDuplicate.getRulesContract();
         this.businessKey = rateTransactionToDuplicate.getBusinessKey();
         this.orderInfo = rateTransactionToDuplicate.getOrderInfo();
+        this.contract = rateTransactionToDuplicate.getContract();
+        this.contractLine = rateTransactionToDuplicate.getContractLine();
     }
     
     public WalletInstance getWallet() {

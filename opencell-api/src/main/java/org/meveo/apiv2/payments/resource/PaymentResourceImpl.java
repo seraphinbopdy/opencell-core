@@ -280,4 +280,18 @@ public class PaymentResourceImpl implements PaymentResource {
                         ",\"message\":\"Payment rejection codes group successfully deleted\"}")
                 .build();
     }
+
+    /**
+     * Remove payment rejection code group based on filter
+     *
+     * @param filters PagingAndFiltering
+     */
+    @Override
+    public Response removeRejectionGroup(PagingAndFiltering filters) {
+        return ok()
+                .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Payment rejection codes group successfully deleted\"}" +
+                        ",\"numberOfDeletedGroups\":" + paymentApi.removeRejectionCodeGroup(filters))
+                .build();
+    }
 }

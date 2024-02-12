@@ -33,6 +33,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -1041,18 +1042,37 @@ public class PaymentApi extends BaseApi {
 	 * @param rejectionGroupId payment rejection code group id to remove
 	 */
 	public void removeRejectionCodeGroup(Long rejectionGroupId) {
-		final PaymentRejectionCodesGroup toRemove =
+		PaymentRejectionCodesGroup toRemove =
 				ofNullable(paymentRejectionCodesGroupService.findById(rejectionGroupId))
 						.orElseThrow(() -> new NotFoundException("Payment rejection codes group with id "
 								+ rejectionGroupId + " does not exists"));
 		try {
-			toRemove.getPaymentRejectionActions()
-					.forEach(paymentRejectionAction -> paymentRejectionAction.setPaymentRejectionCodesGroup(null));
-			toRemove.getPaymentRejectionCodes()
-					.forEach(paymentRejectionCode -> paymentRejectionCode.setPaymentRejectionCodesGroup(null));
+			removeDependencies(toRemove);
 			paymentRejectionCodesGroupService.remove(toRemove);
 		} catch (Exception exception) {
 			throw new BusinessApiException(exception.getMessage());
 		}
 	}
+
+	private void removeDependencies(PaymentRejectionCodesGroup toRemove) {
+		toRemove.getPaymentRejectionActions()
+				.forEach(paymentRejectionAction -> paymentRejectionAction.setPaymentRejectionCodesGroup(null));
+		toRemove.getPaymentRejectionCodes()
+				.forEach(paymentRejectionCode -> paymentRejectionCode.setPaymentRejectionCodesGroup(null));
+	}
+
+	public int removeRejectionCodeGroup(PagingAndFiltering filters) {
+		PaginationConfiguration configuration = new PaginationConfiguration(filters.getFilters());
+		List<PaymentRejectionCodesGroup> groups = paymentRejectionCodesGroupService.list(configuration);
+		if (groups == null || groups.isEmpty()) {
+			throw new NotFoundException("No payment rejection code found");
+		}
+		try {
+			groups.forEach(this::removeDependencies);
+			paymentRejectionCodesGroupService.remove(groups);
+			return groups.size();
+		} catch (Exception exception) {
+			throw new BusinessApiException(exception.getMessage());
+		}
+    }
 }

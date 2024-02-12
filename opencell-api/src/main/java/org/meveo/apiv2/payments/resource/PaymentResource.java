@@ -225,4 +225,16 @@ public interface PaymentResource {
             })
     Response removeRejectionGroup(@Parameter(description = "Rejection group id", required = true)
                                   @PathParam("id") Long rejectionGroupId);
+
+    @DELETE
+    @Path("/rejectionCodes/group")
+    @Operation(summary = "Delete Payment Rejection Codes Group based on filter",
+            tags = {"RejectionCodesGroup"},
+            description = "Delete Payment Rejection Codes Group based on filter",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "RejectionCodesGroup successfully deleted"),
+                    @ApiResponse(responseCode = "404", description = "Group does not exist"),
+                    @ApiResponse(responseCode = "400", description = "PaymentRejectionCodesGroup deletion failed")
+            })
+    Response removeRejectionGroup(@Parameter(required = true) PagingAndFiltering filters);
 }

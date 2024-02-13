@@ -28,5 +28,8 @@ public interface CustomerBalance extends Resource {
     }
 
     @Nullable
+    String getBalanceEl();
+
+    @Nullable
     List<Resource> getOccTemplates();
 }

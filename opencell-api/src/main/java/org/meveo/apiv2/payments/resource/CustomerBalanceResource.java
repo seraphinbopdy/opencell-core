@@ -5,6 +5,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.meveo.apiv2.payments.AccountOperationsDetails;
 import org.meveo.apiv2.payments.CustomerBalance;
 
 import javax.ws.rs.Consumes;
@@ -50,4 +51,13 @@ public interface CustomerBalanceResource {
             @ApiResponse(responseCode = "403", description = "Default customer balance can not be deleted"),
             @ApiResponse(responseCode = "404", description = "Customer balance doesn't exist") })
     Response delete(@PathParam("id") Long id);
+
+    @POST
+    @Path("/accountOperationsDetails")
+    @Operation(summary = "Get account operation details for a customer balance",
+            tags = {"Customer balance"},
+            description = "",
+            responses = {
+            })
+    Response getAccountOperations(@Parameter(required = true) AccountOperationsDetails resource);
 }

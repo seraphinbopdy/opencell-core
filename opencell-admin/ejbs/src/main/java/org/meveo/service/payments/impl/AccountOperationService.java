@@ -22,14 +22,7 @@ import java.math.BigInteger;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -62,6 +55,8 @@ import org.meveo.service.accounting.impl.AccountingPeriodService;
 import org.meveo.service.accounting.impl.SubAccountingPeriodService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.util.ApplicationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AccountOperation service implementation.
@@ -72,6 +67,8 @@ import org.meveo.util.ApplicationProvider;
  */
 @Stateless
 public class AccountOperationService extends PersistenceService<AccountOperation> {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(AccountOperationService.class);
 
     private static final String CLOSED_PERIOD_ERROR_DETAIL = "Closed period";
 
@@ -725,7 +722,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 
 	/**
 	 * @param status 
-	 * @param list
+	 * @param accountOperations
 	 */
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -870,5 +867,54 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 
         return results;
 
+    }
+
+    /**
+     * Retrieves a list of account operations based on the provided criteria.
+     *
+     * @param customerAccountId      The ID of the customer account.
+     * @param transactionalCurrencyId The ID of the transactional currency.
+     * @param linkedOccTemplates     List of OCC templates to include.
+     * @param occTemplatesToExcludes List of OCC templates to exclude.
+     * @return A list of {@link AccountOperation} objects matching the specified criteria.
+     */
+    public List<AccountOperation> getAccountOperations(Long customerAccountId, Long transactionalCurrencyId, List<String> linkedOccTemplates, List<String> occTemplatesToExcludes) {
+        LOGGER.info("BEGIN getAccountOperations - Customer Account Id: {}, Transaction Currency Id: {}, Linked OCC Templates: {}, OCC Template to excludes: {}", customerAccountId, transactionalCurrencyId, linkedOccTemplates, occTemplatesToExcludes);
+
+        // Constructing the JPQL query
+        StringBuilder queryString = new StringBuilder("SELECT ao FROM AccountOperation ao WHERE ao.customerAccount.id = :customerAccountId");
+
+        // Parameters to be used in the query
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("customerAccountId", customerAccountId);
+
+        // Appending conditions based on linkedOccTemplates
+        if (linkedOccTemplates != null && !linkedOccTemplates.isEmpty()) {
+            queryString.append(" AND ao.code IN (:linkedOccTemplates)");
+            parameters.put("linkedOccTemplates", linkedOccTemplates);
+        }
+
+        // Appending conditions based on occTemplatesToExcludes
+        if (occTemplatesToExcludes != null && !occTemplatesToExcludes.isEmpty()) {
+            queryString.append(" AND ao.code NOT IN (:occTemplatesToExcludes)");
+            parameters.put("occTemplatesToExcludes", occTemplatesToExcludes);
+        }
+
+        // Appending conditions based on transactionalCurrencyId
+        if (transactionalCurrencyId != null) {
+            queryString.append(" AND ao.transactionalCurrency.id = :transactionalCurrencyId");
+            parameters.put("transactionalCurrencyId", transactionalCurrencyId);
+        }
+
+        // Creating the query
+        Query query = getEntityManager().createQuery(queryString.toString());
+
+        // Setting parameters in the query
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            query.setParameter(entry.getKey(), entry.getValue());
+        }
+
+        // Executing the query and returning the result
+        return query.getResultList();
     }
 }

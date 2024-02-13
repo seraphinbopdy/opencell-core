@@ -9,29 +9,37 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.meveo.model.payments.OperationCategoryEnum.CREDIT;
 import static org.meveo.model.payments.OperationCategoryEnum.DEBIT;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.api.dto.CurrencyDto;
+import org.meveo.api.dto.account.CustomerAccountDto;
+import org.meveo.apiv2.payments.AccountOperationsDetails;
+import org.meveo.apiv2.payments.ImmutableAccountOperationsDetails;
+import org.meveo.apiv2.payments.ImmutableCustomerBalance;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.jpa.EntityManagerWrapper;
+import org.meveo.model.billing.TradingCurrency;
+import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.CustomerBalance;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.security.MeveoUser;
+import org.meveo.service.admin.impl.TradingCurrencyService;
+import org.meveo.service.payments.impl.AccountOperationService;
+import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.CustomerBalanceService;
 import org.meveo.service.payments.impl.OCCTemplateService;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,6 +66,15 @@ public class CustomerBalanceServiceTest {
 
     @Mock
     private MeveoUser meveoUser;
+
+    @Mock
+    private CustomerAccountService customerAccountService;
+
+    @Mock
+    private AccountOperationService accountOperationService;
+
+    @Mock
+    private TradingCurrencyService tradingCurrencyService;
 
     @Test
     public void shouldCreateCustomerBalance() {
@@ -180,6 +197,112 @@ public class CustomerBalanceServiceTest {
             customerBalance.setOccTemplates(templates);
         }
         return customerBalance;
+    }
+
+    @Test
+    public void shouldGetAccountOperations() {
+        CustomerAccountDto customerAccountDto = new CustomerAccountDto();
+        customerAccountDto.setId(1L);
+        customerAccountDto.setCode("CUST_001");
+
+        org.meveo.apiv2.payments.CustomerBalance customerBalanceDto = ImmutableCustomerBalance.builder().id(1L).build();
+        customerAccountDto.setId(1L);
+        customerAccountDto.setCode("CUST_001");
+
+        CurrencyDto currencyDto = new CurrencyDto();
+        currencyDto.setId(1L);
+
+        List<String> occToExcludes = List.of("INV_ADV");
+
+        AccountOperationsDetails accountOperationsDetails = ImmutableAccountOperationsDetails.builder()
+                .customerAccount(customerAccountDto)
+                .customerBalance(customerBalanceDto)
+                .transactionalCurrency(currencyDto)
+                .excludeAOs(occToExcludes)
+                .build();
+
+        OCCTemplate template = new OCCTemplate();
+        template.setId(1L);
+        template.setOccCategory(CREDIT);
+        template.setCode("ADJ_INV");
+        OCCTemplate template2 = new OCCTemplate();
+        template2.setId(2L);
+        template2.setOccCategory(DEBIT);
+        template2.setCode("REF_DDT");
+        CustomerBalance customerBalance = createCustomerBalance(true, asList(template, template2));
+        CustomerAccount customerAccount = new CustomerAccount();
+        customerAccount.setId(1L);
+        TradingCurrency tradingCurrency = new TradingCurrency();
+        tradingCurrency.setId(1L);
+
+        //When
+        when(customerAccountService.findById(1L)).thenReturn(customerAccount);
+        when(tradingCurrencyService.findById(1L)).thenReturn(tradingCurrency);
+        doReturn(customerBalance).when(customerBalanceService).findById(1L);
+
+        ArgumentCaptor<Long> customerAccountCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<Long> currencyCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<ArrayList<String>> linkedOccTemplates = ArgumentCaptor.forClass(ArrayList.class);
+        ArgumentCaptor<ArrayList<String>> occTemplatesToExclude = ArgumentCaptor.forClass(ArrayList.class);
+
+        customerBalanceService.getAccountOperations(accountOperationsDetails);
+
+        //Then
+        Mockito.verify(accountOperationService).getAccountOperations(customerAccountCaptor.capture(), currencyCaptor.capture(), linkedOccTemplates.capture(), occTemplatesToExclude.capture());
+        Assertions.assertThat(customerAccountCaptor.getValue()).isNotNull();
+        Assertions.assertThat(customerAccountCaptor.getValue()).isEqualTo(customerAccountDto.getId());
+        Assertions.assertThat(currencyCaptor.getValue()).isNotNull();
+        Assertions.assertThat(currencyCaptor.getValue()).isEqualTo(currencyDto.getId());
+        Assertions.assertThat(linkedOccTemplates.getValue()).isEqualTo(List.of("ADJ_INV", "REF_DDT"));
+        Assertions.assertThat(occTemplatesToExclude.getValue()).isEqualTo(List.of("INV_ADV"));
+    }
+
+    @Test
+    public void shouldThrowCustomerBalanceNotFoundExceptionWhenGetAccountOperations() {
+        //Given
+        org.meveo.apiv2.payments.CustomerBalance customerBalanceDto = ImmutableCustomerBalance.builder().id(1L).build();
+        AccountOperationsDetails accountOperationsDetails = ImmutableAccountOperationsDetails.builder()
+                .customerBalance(customerBalanceDto)
+                .build();
+
+        //When
+        doThrow(new BadRequestException("Customer Balance does not exist")).when(customerBalanceService).findById(1L);
+
+        //Then
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> customerBalanceService.getAccountOperations(accountOperationsDetails));
+        assertThat(exception.getMessage(), is("Customer Balance does not exist"));
+
+    }
+
+    @Test
+    public void shouldThrowCustomerAccountNotFoundExceptionWhenGetAccountOperations() {
+        //Given
+        org.meveo.apiv2.payments.CustomerBalance customerBalanceDto = ImmutableCustomerBalance.builder().id(1L).build();
+        CustomerAccountDto customerAccountDto = new CustomerAccountDto();
+        customerAccountDto.setId(1L);
+        customerAccountDto.setCode("CUST_001");
+        AccountOperationsDetails accountOperationsDetails = ImmutableAccountOperationsDetails.builder()
+                .customerBalance(customerBalanceDto)
+                .customerAccount(customerAccountDto)
+                .build();
+        OCCTemplate template = new OCCTemplate();
+        template.setId(1L);
+        template.setOccCategory(CREDIT);
+        template.setCode("ADJ_INV");
+        OCCTemplate template2 = new OCCTemplate();
+        template2.setId(2L);
+        template2.setOccCategory(DEBIT);
+        template2.setCode("REF_DDT");
+        CustomerBalance customerBalance = createCustomerBalance(true, asList(template, template2));
+
+        //When
+        doReturn(customerBalance).when(customerBalanceService).findById(1L);
+        doThrow(new BadRequestException("Customer Account does not exist")).when(customerAccountService).findById(1L);
+
+        //Then
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> customerBalanceService.getAccountOperations(accountOperationsDetails));
+        assertThat(exception.getMessage(), is("Customer Account does not exist"));
+
     }
 
     enum ErrorMessage {

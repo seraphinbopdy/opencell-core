@@ -514,7 +514,7 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
     @Column(name = "litigation_reason", length = 2000)
     private String litigationReason;
 	
-	@Column( name = "source_account_operation_id" )
+	@JoinColumn( name = "source_account_operation_id" )
 	@ManyToOne(fetch = FetchType.LAZY)
 	private AccountOperation sourceAccountOperation;
 

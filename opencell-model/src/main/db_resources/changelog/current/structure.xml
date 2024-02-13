@@ -9259,5 +9259,19 @@ public class AgedBalanceReporting extends ReportExtractScript {
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" />
 	</changeSet>
+    
+    <changeSet id="#INTRD-21452_20240209" author="TarikFA.">
+        <addColumn tableName="ar_account_operation">
+            <column name="source_account_operation_id" type="bigint" />
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="source_account_operation_id"
+                constraintName="source_account_operation_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+    </changeSet>
 
 </databaseChangeLog>

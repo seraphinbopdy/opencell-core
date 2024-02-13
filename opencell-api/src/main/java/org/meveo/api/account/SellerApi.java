@@ -416,7 +416,14 @@ public class SellerApi extends AccountEntityApi {
         if (businessAccountModel != null) {
             seller.setBusinessAccountModel(businessAccountModel);
         }
-
+	    seller.getRegistrationNumbers().forEach(registrationNumber -> {
+		    if(registrationNumber.getIsoIcd() == null){
+			    registrationNumber.setIsoIcd(appProvider.getIcdId());
+		    }
+		    if(registrationNumber.getId() == null) {
+			    registrationNumberService.create(registrationNumber);
+		    }
+	    });
         // populate customFields
         this.populateCustomFields(postData, checkCustomField, seller, false);
         seller = sellerService.update(seller);

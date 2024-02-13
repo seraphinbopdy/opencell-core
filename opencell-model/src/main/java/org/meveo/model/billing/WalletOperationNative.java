@@ -1089,7 +1089,15 @@ public class WalletOperationNative extends BaseEntity {
         this.orderLotId = orderLotId;
     }
 
-    public Long getDiscountPlanId() {
+    public Long getDiscountedWalletOperation() {
+		return discountedWalletOperation;
+	}
+
+	public void setDiscountedWalletOperation(Long discountedWalletOperation) {
+		this.discountedWalletOperation = discountedWalletOperation;
+	}
+
+	public Long getDiscountPlanId() {
         return discountPlanId;
     }
 

@@ -26,11 +26,9 @@ public class ProductManagementRsImpl implements ProductManagementRs {
     public Response createProductSimpleOneshot(SimpleOneshotProductDto postData) {
 
         ActionStatus actionStatus = new ActionStatus();
-        ProductDto productSimpleOneShot = productManagementApiService.createProductSimpleOneShot(postData);
-
-        SimpleChargeProductResponseDto simpleChargeProductResponseDto = new SimpleChargeProductResponseDto().setProduct(productSimpleOneShot);
-        simpleChargeProductResponseDto.setStatus(ActionStatusEnum.SUCCESS);
-        return Response.ok(simpleChargeProductResponseDto).build();
+        productManagementApiService.createProductSimpleOneShot(postData);
+        
+        return Response.ok(actionStatus).build();
     }
 
     @Override

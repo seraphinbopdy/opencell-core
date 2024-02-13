@@ -1250,7 +1250,7 @@ public class SubscriptionApi extends BaseApi {
         	
         	if(Boolean.TRUE.equals(postData.getGenerateRTs())) {
         		osho.getWalletOperations().stream().forEach(wo -> {
-        		    RatedTransaction ratedTransaction = ratedTransactionService.createRatedTransaction(wo, false);
+        		    RatedTransaction ratedTransaction = ratedTransactionService.createRatedTransaction(wo, isVirtual);
         		    ratedTransaction.setBusinessKey(wo.getBusinessKey());
         		    ratedTransaction.setContract(wo.getContract());
         		    ratedTransaction.setContractLine(wo.getContractLine());

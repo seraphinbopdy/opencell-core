@@ -334,8 +334,8 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             }
             create(ratedTransaction);
             walletOperation.setRatedTransaction(ratedTransaction);
+            walletOperationService.update(walletOperation);
         }
-        walletOperationService.update(walletOperation);
         return ratedTransaction;
     }
 

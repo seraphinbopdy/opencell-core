@@ -13434,7 +13434,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="code" value="ARREARS_BALANCE" />
 		    <column name="description" value="arrears balance" />
 		    <column name="default_balance" value="0" />
-			<column name="balance_el" value="accountOperation.type = I and accountOperation.dueDate &lt; currentDate and (accountOperation.matchingStatus = O or accountOperation.matchingStatus = P)" />
+			<column name="balance_el" value="#{ accountOperation.type == 'I' &amp;&amp; accountOperation.dueDate &lt; currentDate &amp;&amp; (accountOperation.matchingStatus == 'O' || accountOperation.matchingStatus == 'P') }" />
 		</insert>
 	</changeSet>
 
@@ -13468,6 +13468,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 	<changeSet id="#INTRD-20962_add_missing_currencies" author="a.rouaguebe" />
     <changeSet id="#INTRD-21035_20240206" author="TarikFA." />
     <changeSet id="#INTRD-19467_20240111" author="TarikFA." />
+    <changeSet id="#INTRD-20851_20240213" author="zelmeliani" />
+	</changeSet>
     
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->
     <changeSet id="#liquibase_hack_data" author="AbdelmounaimAkadid">

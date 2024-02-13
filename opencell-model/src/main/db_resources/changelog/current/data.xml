@@ -23784,4 +23784,11 @@ public class ImportJobNotification extends Script {
 			<column name="balance_el" value="accountOperation.type = I and accountOperation.dueDate &lt; currentDate and (accountOperation.matchingStatus = O or accountOperation.matchingStatus = P)" />
 		</insert>
 	</changeSet>
+
+	<changeSet id="#INTRD-20851_20240213" author="zelmeliani">
+    	<update tableName="ar_customer_balance">
+			<column name="balance_el" value="#{ accountOperation.type == 'I' &amp;&amp; accountOperation.dueDate &lt; currentDate &amp;&amp; (accountOperation.matchingStatus == 'O' || accountOperation.matchingStatus == 'P') }" />
+			<where>code='ARREARS_BALANCE'</where>
+		</update>
+	</changeSet>
 </databaseChangeLog>

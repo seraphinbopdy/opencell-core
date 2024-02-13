@@ -31,6 +31,7 @@ import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.RecurringChargeTemplate;
 import org.meveo.model.catalog.UsageChargeTemplate;
 import org.meveo.model.cpq.enums.PriceVersionTypeEnum;
+import org.meveo.model.cpq.enums.ProductStatusEnum;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
 
 import javax.ejb.Stateless;
@@ -67,7 +68,7 @@ public class ProductManagementApiService extends BaseApi {
     @Inject
     private EntityManagerWrapper emWrapper; 
     
-    public void createProductSimpleOneShot(SimpleOneshotProductDto postData) {
+    public ProductDto createProductSimpleOneShot(SimpleOneshotProductDto postData) {
 
         if(StringUtils.isBlank(postData.getChargeCode()) && StringUtils.isBlank(postData.getProductCode())) {
             throw new BusinessException("Either chargeCode or productCode must be provided");
@@ -111,6 +112,11 @@ public class ProductManagementApiService extends BaseApi {
         
         productApi.UpdateProductVersionStatus(productDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
         entityManager.flush();
+        productApi.updateStatus(productDto.getCode(), ProductStatusEnum.ACTIVE);
+        entityManager.flush();
+
+        createdProduct = productApi.findByCode(createdProduct.getCode());
+        return createdProduct;
     }
 
     public ProductDto createProductSimpleRecurrent(SimpleRecurrentProductDto postData) {
@@ -151,8 +157,11 @@ public class ProductManagementApiService extends BaseApi {
         entityManager.flush();
 
         productApi.UpdateProductVersionStatus(productDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        entityManager.flush();
+        productApi.updateStatus(productDto.getCode(), ProductStatusEnum.ACTIVE);
+        entityManager.flush();
         
-        createdProduct.setProductChargeTemplateMappingDto(List.of(mapping));
+        createdProduct = productApi.findByCode(createdProduct.getCode());
         return createdProduct;
 
     }
@@ -195,8 +204,11 @@ public class ProductManagementApiService extends BaseApi {
         entityManager.flush();
 
         productApi.UpdateProductVersionStatus(productDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        entityManager.flush();
+        productApi.updateStatus(productDto.getCode(), ProductStatusEnum.ACTIVE);
+        entityManager.flush();
 
-        createdProduct.setProductChargeTemplateMappingDto(List.of(mapping));
+        createdProduct = productApi.findByCode(createdProduct.getCode());
         return createdProduct;
     }
 

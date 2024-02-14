@@ -14,6 +14,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Entity
@@ -32,6 +33,13 @@ public class CustomerBalance extends BusinessEntity {
     @Column(name = "default_balance")
     private boolean defaultBalance;
 
+    /**
+     * 	An expression to decide whether the balance should be applied or not.
+     */
+    @Column(name = "balance_el", length = 2000)
+    @Size(max = 2000)
+    private String balanceEl;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "ar_customer_balance_templates",
             joinColumns = @JoinColumn(name = "customer_balance_id", referencedColumnName = "id"),
@@ -44,6 +52,14 @@ public class CustomerBalance extends BusinessEntity {
 
     public void setDefaultBalance(boolean defaultBalance) {
         this.defaultBalance = defaultBalance;
+    }
+
+    public String getBalanceEl() {
+        return balanceEl;
+    }
+
+    public void setBalanceEl(String balanceEl) {
+        this.balanceEl = balanceEl;
     }
 
     public List<OCCTemplate> getOccTemplates() {

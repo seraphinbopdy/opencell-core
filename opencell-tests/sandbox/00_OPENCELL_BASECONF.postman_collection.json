@@ -237,7 +237,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"EUR\",\r\n    \"countryCode\": \"FR\",\r\n    \"languageCode\": \"FRA\",\r\n    \"address\": {\r\n        \"address1\": \"14 rue Crespin du Gast\",\r\n        \"address2\": \"Esc. A\",\r\n        \"address3\": null,\r\n        \"zipCode\": \"75011\",\r\n        \"city\": \"PARIS\",\r\n        \"country\": \"FR\",\r\n        \"state\": null\r\n    },\r\n    \"isoICDCode\": \"0002\",\r\n    \"registrationNo\": \"123123123123\",\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
+													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"EUR\",\r\n    \"countryCode\": \"FR\",\r\n    \"languageCode\": \"FRA\",\r\n    \"address\": {\r\n        \"address1\": \"14 rue Crespin du Gast\",\r\n        \"address2\": \"Esc. A\",\r\n        \"address3\": null,\r\n        \"zipCode\": \"75011\",\r\n        \"city\": \"PARIS\",\r\n        \"country\": \"FR\",\r\n        \"state\": null\r\n    },\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
 												},
 												"url": {
 													"raw": "{{opencell.url}}/seller/createOrUpdate",
@@ -264,7 +264,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"USD\",\r\n    \"countryCode\": \"{{request.label.3}}\",\r\n    \"languageCode\": \"ENG\",\r\n    \"address\": {\r\n        \"address1\": \"7007 Sea World Dr\",\r\n        \"address2\": null,\r\n        \"address3\": null,\r\n        \"zipCode\": \"32821\",\r\n        \"city\": \"Orlando\",\r\n        \"country\": \"US\",\r\n        \"state\": \"FL\"\r\n    },\r\n    \"isoICDCode\": \"0002\",\r\n    \"registrationNo\": \"123123123123\",\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
+													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"USD\",\r\n    \"countryCode\": \"{{request.label.3}}\",\r\n    \"languageCode\": \"ENG\",\r\n    \"address\": {\r\n        \"address1\": \"7007 Sea World Dr\",\r\n        \"address2\": null,\r\n        \"address3\": null,\r\n        \"zipCode\": \"32821\",\r\n        \"city\": \"Orlando\",\r\n        \"country\": \"US\",\r\n        \"state\": \"FL\"\r\n    },\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
 												},
 												"url": {
 													"raw": "{{opencell.url}}/seller/createOrUpdate",
@@ -291,7 +291,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"AUD\",\r\n    \"countryCode\": \"{{request.label.3}}\",\r\n    \"languageCode\": \"ENG\",\r\n    \"address\": {\r\n        \"address1\": \"xxx xxxxxxx\",\r\n        \"address2\": \"xx\",\r\n        \"address3\": null,\r\n        \"zipCode\": \"xxxx\",\r\n        \"city\": \"Sydney\",\r\n        \"country\": \"UA\",\r\n        \"state\": null\r\n    },\r\n    \"isoICDCode\": \"0002\",\r\n    \"registrationNo\": \"123123123123\",\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
+													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"AUD\",\r\n    \"countryCode\": \"{{request.label.3}}\",\r\n    \"languageCode\": \"ENG\",\r\n    \"address\": {\r\n        \"address1\": \"xxx xxxxxxx\",\r\n        \"address2\": \"xx\",\r\n        \"address3\": null,\r\n        \"zipCode\": \"xxxx\",\r\n        \"city\": \"Sydney\",\r\n        \"country\": \"UA\",\r\n        \"state\": null\r\n    },\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
 												},
 												"url": {
 													"raw": "{{opencell.url}}/seller/createOrUpdate",
@@ -318,7 +318,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"CAD\",\r\n    \"countryCode\": \"{{request.label.3}}\",\r\n    \"languageCode\": \"ENG\",\r\n    \"address\": {\r\n        \"address1\": \"xxx xxxxxxx\",\r\n        \"address2\": \"xx\",\r\n        \"address3\": null,\r\n        \"zipCode\": \"xxxx\",\r\n        \"city\": \"Montreal\",\r\n        \"country\": \"CA\",\r\n        \"state\": null\r\n    },\r\n    \"isoICDCode\": \"0002\",\r\n    \"registrationNo\": \"123123123123\",\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
+													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"CAD\",\r\n    \"countryCode\": \"{{request.label.3}}\",\r\n    \"languageCode\": \"ENG\",\r\n    \"address\": {\r\n        \"address1\": \"xxx xxxxxxx\",\r\n        \"address2\": \"xx\",\r\n        \"address3\": null,\r\n        \"zipCode\": \"xxxx\",\r\n        \"city\": \"Montreal\",\r\n        \"country\": \"CA\",\r\n        \"state\": null\r\n    },\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
 												},
 												"url": {
 													"raw": "{{opencell.url}}/seller/createOrUpdate",
@@ -346,7 +346,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"description\": \"{{request.label.2}}\",\n    \"parentSeller\": \"{{request.label.3}}\",\n    \"currencyCode\": \"EUR\",\n    \"countryCode\": \"FR\",\n    \"languageCode\": \"FRA\",\n    \"contactInformation\": null,\n    \"address\": {\n        \"address1\": \"52 rue Kléber\",\n        \"address2\": null,\n        \"address3\": null,\n        \"zipCode\": \"92300\",\n        \"city\": \"Levallois-Perret\",\n        \"country\": \"FR\",\n        \"state\": null\n    },\n    \"isoICDCode\": \"0002\",\n    \"registrationNo\": \"123123123123\",\n    \"invoiceTypeSequences\": {\n        \"COM\": {\n            \"prefixEL\": \"{{request.label.1}}\",\n            \"sequenceSize\": 6\n        }\n    },\n    \"customFields\": {\n        \"customField\": []\n    }\n}",
+													"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"description\": \"{{request.label.2}}\",\n    \"parentSeller\": \"{{request.label.3}}\",\n    \"currencyCode\": \"EUR\",\n    \"countryCode\": \"FR\",\n    \"languageCode\": \"FRA\",\n    \"contactInformation\": null,\n    \"address\": {\n        \"address1\": \"52 rue Kléber\",\n        \"address2\": null,\n        \"address3\": null,\n        \"zipCode\": \"92300\",\n        \"city\": \"Levallois-Perret\",\n        \"country\": \"FR\",\n        \"state\": null\n    },\n      \"invoiceTypeSequences\": {\n        \"COM\": {\n            \"prefixEL\": \"{{request.label.1}}\",\n            \"sequenceSize\": 6\n        }\n    },\n    \"customFields\": {\n        \"customField\": []\n    }\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -378,7 +378,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"description\": \"{{request.label.2}}\",\n    \"parentSeller\": \"{{request.label.3}}\",\n    \"currencyCode\": \"EUR\",\n    \"countryCode\": \"FR\",\n    \"languageCode\": \"FRA\",\n    \"contactInformation\": null,\n    \"isoICDCode\": \"0002\",\n    \"registrationNo\": \"123123123123\",\n    \"vatNo\": \"VAT999999999\",\n    \"address\": {\n        \"address1\": \"52 rue Kléber\",\n        \"address2\": null,\n        \"address3\": null,\n        \"zipCode\": \"92300\",\n        \"city\": \"Levallois-Perret\",\n        \"country\": \"FR\",\n        \"state\": null\n    },\n    \"customFields\": {\n        \"customField\": []\n    }\n}"
+													"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"description\": \"{{request.label.2}}\",\n    \"parentSeller\": \"{{request.label.3}}\",\n    \"currencyCode\": \"EUR\",\n    \"countryCode\": \"FR\",\n    \"languageCode\": \"FRA\",\n    \"contactInformation\": null,\n   \"vatNo\": \"VAT999999999\",\n    \"address\": {\n        \"address1\": \"52 rue Kléber\",\n        \"address2\": null,\n        \"address3\": null,\n        \"zipCode\": \"92300\",\n        \"city\": \"Levallois-Perret\",\n        \"country\": \"FR\",\n        \"state\": null\n    },\n    \"customFields\": {\n        \"customField\": []\n    }\n}"
 												},
 												"url": {
 													"raw": "{{opencell.url}}/seller/createOrUpdate",

@@ -1346,8 +1346,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
     
 	private void createOrderProduct(List<OrderProductDto> orderProductDtos, OrderOffer orderOffer) {
 	    if(CollectionUtils.isEmpty(orderProductDtos)) { 
-	        missingParameters.add("orderProducts");
-	        handleMissingParameters();
+	    	throw new BusinessApiException("It is not allowed to create an order line with no product. \"orderProducts\" cannot be empty." );
 	    }
 		for (OrderProductDto orderProductDto : orderProductDtos) {  
 		    if(orderProductDto.getQuantity() == null || orderProductDto.getQuantity().equals(BigDecimal.ZERO) )

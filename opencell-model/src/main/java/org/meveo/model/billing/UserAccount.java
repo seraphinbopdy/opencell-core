@@ -55,6 +55,9 @@ import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.crm.IInvoicingMinimumApplicable;
 
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 /**
  * User account
  *
@@ -306,5 +309,12 @@ public class UserAccount extends AccountEntity implements IInvoicingMinimumAppli
 	    	}
 	    	return billingAccount.getSeller();
 	    }
-    
+	// check if the list of registration numbers is not empty
+	// get all registration numbers and join them with a comma
+	public String getRegistrationNo(){
+		if (isNotEmpty(registrationNumbers)) {
+			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+		}
+		return registrationNo;
+	}
 }

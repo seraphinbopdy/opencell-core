@@ -124,6 +124,7 @@ import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.commercial.OrderLot;
 import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.contract.Contract;
+import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.IInvoicingMinimumApplicable;
@@ -333,8 +334,8 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             }
             create(ratedTransaction);
             walletOperation.setRatedTransaction(ratedTransaction);
+            walletOperationService.update(walletOperation);
         }
-        walletOperationService.update(walletOperation);
         return ratedTransaction;
     }
 
@@ -502,6 +503,12 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             if (walletOperation.getTradingCurrencyId() != null) {
                 ratedTransaction.setTradingCurrency(em.getReference(TradingCurrency.class, walletOperation.getTradingCurrencyId()));
             }
+			if (walletOperation.getContractId() != null) {
+				ratedTransaction.setContract(em.getReference(Contract.class, walletOperation.getContractId()));
+			}
+			if (walletOperation.getContractLineId() != null) {
+				ratedTransaction.setContractLine(em.getReference(ContractItem.class, walletOperation.getContractLineId()));
+			}
 
             ratedTransaction.setBusinessKey(walletOperation.getBusinessKey());
 

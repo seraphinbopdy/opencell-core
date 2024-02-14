@@ -642,6 +642,12 @@ public class BillingAccountApi extends AccountEntityApi {
         createOrUpdatePaymentMethodInCA(postData, billingAccount);
 	    
 	    try {
+	    	if (StringUtils.isNotBlank(postData.getRegistrationNo())) {
+	    		RegistrationNumberDto registrationNumberDto = new RegistrationNumberDto();
+	    		registrationNumberDto.setRegistrationNo(postData.getRegistrationNo());
+	    		registrationNumberDto.setIsoIcdCode(postData.getIsoICDCode());
+	            postData.getRegistrationNumbers().add(registrationNumberDto);
+	        }
 		    createOrUpdateRegistrationNumber(billingAccount, postData.getRegistrationNumbers());
 	    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
 		    throw new BusinessException("Error when inserting register number", e);

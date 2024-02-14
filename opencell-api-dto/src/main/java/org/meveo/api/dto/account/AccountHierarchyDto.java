@@ -199,6 +199,9 @@ public class AccountHierarchyDto implements Serializable {
 	@Schema(description = "Job title. Account Entity")
     private String jobTitle;
 
+	@Schema(description = "Registration number")
+	private String registrationNo;
+	
     /**
      * Registration number. CUST.
      */
@@ -1117,8 +1120,26 @@ public class AccountHierarchyDto implements Serializable {
      */
     public void setTaxCategoryCode(String taxCategoryCode) {
         this.taxCategoryCode = taxCategoryCode;
+    } 
+    
+    /**
+     * Gets the registration no.
+     *
+     * @return the registration no
+     */
+    public String getRegistrationNo() {
+        return registrationNo;
     }
 
+    /**
+     * Sets the registration no.
+     *
+     * @param registrationNo the new registration no
+     */
+    public void setRegistrationNo(String registrationNo) {
+        this.registrationNo = registrationNo;
+    }
+    
     public String getGeneralClientAccountCode() {
         return generalClientAccountCode;
     }

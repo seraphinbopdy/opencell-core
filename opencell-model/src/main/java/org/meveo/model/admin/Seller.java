@@ -163,6 +163,9 @@ public class Seller extends AccountEntity implements IWFEntity {
 	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
 	
 	public List<RegistrationNumber> getRegistrationNumbers() {
+		if(registrationNumbers == null) {
+			registrationNumbers = new ArrayList<>();
+		}
 		return registrationNumbers;
 	}
 	

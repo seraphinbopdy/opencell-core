@@ -389,6 +389,11 @@ public class CustomerApi extends AccountEntityApi {
         }
 	    
 	    try {
+	    	if (StringUtils.isNotBlank(postData.getRegistrationNo())) {
+	    		RegistrationNumberDto registrationNumberDto = new RegistrationNumberDto();
+	    		registrationNumberDto.setRegistrationNo(postData.getRegistrationNo());
+	            postData.getRegistrationNumbers().add(registrationNumberDto);
+	        }
 		    createOrUpdateRegistrationNumber(customer, postData.getRegistrationNumbers());
 	    } catch (NoSuchMethodException  | InvocationTargetException | IllegalAccessException e) {
 		    throw new BusinessException("Error when inserting register number", e);

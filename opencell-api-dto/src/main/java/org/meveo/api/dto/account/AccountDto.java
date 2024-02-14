@@ -84,6 +84,11 @@ public abstract class AccountDto extends BusinessEntityDto {
     @Schema(description = "The vat no")
     private String vatNo;
     
+    /** Deprecated registration no., use registrationNumbers instead */
+    @Schema(description = "Deprecated registration no., use registrationNumbers instead")   
+    @Deprecated
+    private String registrationNo;
+    
     /** The contact information. */
     @Schema(description = "The contact information")
     private ContactInformationDto contactInformation;
@@ -131,8 +136,9 @@ public abstract class AccountDto extends BusinessEntityDto {
     protected TitleDto legalEntityType;
 	
 	@Schema(description = "list of registration numbers")
-		private Set<RegistrationNumberDto> registrationNumbers;
-    /**
+	private Set<RegistrationNumberDto> registrationNumbers;
+    
+	/**
      * Instantiates a new account dto.
      */
     public AccountDto() {
@@ -464,6 +470,16 @@ public abstract class AccountDto extends BusinessEntityDto {
 	 */
 	public void setLegalEntityType(TitleDto legalEntityType) {
 		this.legalEntityType = legalEntityType;
+	}
+	
+	@Deprecated
+	public String getRegistrationNo() {
+		return registrationNo;
+	}
+
+	@Deprecated
+	public void setRegistrationNo(String registrationNo) {
+		this.registrationNo = registrationNo;
 	}
 	
 	public Set<RegistrationNumberDto> getRegistrationNumbers() {

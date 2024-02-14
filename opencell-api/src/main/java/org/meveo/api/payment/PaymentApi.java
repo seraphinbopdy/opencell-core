@@ -20,6 +20,8 @@ package org.meveo.api.payment;
 
 import static java.util.Optional.ofNullable;
 import static org.meveo.apiv2.payments.ImmutableRejectionGroup.builder;
+import static org.meveo.apiv2.payments.SequenceActionType.DOWN;
+import static org.meveo.apiv2.payments.SequenceActionType.UP;
 import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.ENCODED_FILE_RESULT_LABEL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.EXPORT_SIZE_RESULT_LABEL;
@@ -33,7 +35,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -80,6 +81,7 @@ import org.meveo.apiv2.payments.RejectionCode;
 import org.meveo.apiv2.payments.RejectionCodesExportResult;
 import org.meveo.apiv2.payments.RejectionCodesImportResult;
 import org.meveo.apiv2.payments.RejectionGroup;
+import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.payments.resource.RejectionActionMapper;
 import org.meveo.apiv2.payments.resource.RejectionCodeMapper;
 import org.meveo.apiv2.payments.resource.RejectionGroupMapper;
@@ -133,6 +135,7 @@ import org.meveo.service.script.ScriptInstanceService;
 public class PaymentApi extends BaseApi {
 
 	private static final String DEFAULT_SORT_ORDER_ID = "id";
+	private static final int FIRST_ACTION_SEQUENCE = 0;
 
 	@Inject
     private PaymentService paymentService;
@@ -838,6 +841,14 @@ public class PaymentApi extends BaseApi {
 			if(rejectionAction.getRejectionCodeGroup() != null) {
 				entity.setPaymentRejectionCodesGroup(loadRejectionCodeGroup(rejectionAction.getRejectionCodeGroup()));
 			}
+			if(rejectionAction.getSequence() == null) {
+				if(entity.getPaymentRejectionCodesGroup() != null
+						&& entity.getPaymentRejectionCodesGroup().getPaymentRejectionActions() != null) {
+					entity.setSequence(entity.getPaymentRejectionCodesGroup().getPaymentRejectionActions().size());
+				} else {
+					entity.setSequence(FIRST_ACTION_SEQUENCE);
+				}
+			}
 			paymentRejectionActionService.create(entity);
 			return rejectionActionMapper.toResource(entity);
 		} catch (BusinessException exception) {
@@ -1061,6 +1072,11 @@ public class PaymentApi extends BaseApi {
 				.forEach(paymentRejectionCode -> paymentRejectionCode.setPaymentRejectionCodesGroup(null));
 	}
 
+	/**
+	 * Delete payment rejection code group based on filter
+	 *
+	 * @param filters PagingAndFiltering
+	 */
 	public int removeRejectionCodeGroup(PagingAndFiltering filters) {
 		PaginationConfiguration configuration = new PaginationConfiguration(filters.getFilters());
 		List<PaymentRejectionCodesGroup> groups = paymentRejectionCodesGroupService.list(configuration);
@@ -1075,4 +1091,48 @@ public class PaymentApi extends BaseApi {
 			throw new BusinessApiException(exception.getMessage());
 		}
     }
+
+	/**
+	 * Update payment action sequence
+	 *
+	 * @param actionId action id
+	 * @param sequenceAction sequence action
+	 */
+	public RejectionAction updateActionSequence(Long actionId, SequenceAction sequenceAction) {
+		PaymentRejectionAction actionToUpdate = ofNullable(paymentRejectionActionService.findById(actionId))
+				.orElseThrow(() -> new NotFoundException("Payment rejection action does not exists"));
+		if(actionToUpdate.getPaymentRejectionCodesGroup() == null) {
+			throw new BusinessApiException("No payment rejection group associated to the provided action");
+		}
+		List<PaymentRejectionAction> actions = actionToUpdate.getPaymentRejectionCodesGroup().getPaymentRejectionActions();
+		if(actions == null || actions.isEmpty()) {
+			throw new BadRequestException("Payment rejection group has no action");
+		}
+		if(actions.size() == 1) {
+			throw new BadRequestException("Payment rejection group has only one action");
+		}
+		actions.sort(Comparator.comparing(PaymentRejectionAction::getSequence));
+		int currentSequence = actionToUpdate.getSequence();
+		if(currentSequence == 0
+				&& UP == sequenceAction.getSequenceAction()) {
+			throw new BadRequestException("Update sequence can not be performed : no previous action found");
+		}
+		if(currentSequence == (actions.size() - 1)
+				&& DOWN == sequenceAction.getSequenceAction()) {
+			throw new BadRequestException("Update sequence can not be performed : no next action found");
+		}
+		PaymentRejectionAction actionToSwitch;
+		if(UP == sequenceAction.getSequenceAction()) {
+			actionToSwitch = actions.get(currentSequence - 1);
+			actionToSwitch.setSequence(currentSequence);
+			actionToUpdate.setSequence(currentSequence - 1);
+		} else {
+			actionToSwitch = actions.get(currentSequence + 1);
+			actionToSwitch.setSequence(currentSequence);
+			actionToUpdate.setSequence(currentSequence + 1);
+		}
+		paymentRejectionActionService.update(actionToUpdate);
+		paymentRejectionActionService.update(actionToSwitch);
+		return rejectionActionMapper.toResource(actionToUpdate);
+	}
 }

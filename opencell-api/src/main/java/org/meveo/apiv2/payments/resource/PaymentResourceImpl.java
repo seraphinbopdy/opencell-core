@@ -19,11 +19,13 @@ import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.payment.PaymentApi;
+import org.meveo.apiv2.models.Resource;
 import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
 import org.meveo.apiv2.payments.RejectionGroup;
+import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.refund.CardRefund;
 import org.meveo.model.payments.CreditCardTypeEnum;
 
@@ -292,6 +294,23 @@ public class PaymentResourceImpl implements PaymentResource {
                 .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
                         ",\"message\":\"Payment rejection codes group successfully deleted\"}" +
                         ",\"numberOfDeletedGroups\":" + paymentApi.removeRejectionCodeGroup(filters))
+                .build();
+    }
+
+    /**
+     * Update payment rejection action sequence
+     *
+     * @param actionId action id to update
+     * @param sequenceAction action type
+     */
+    @Override
+    public Response updateActionSequence(Long actionId, SequenceAction sequenceAction) {
+        RejectionAction updated = paymentApi.updateActionSequence(actionId, sequenceAction);
+        return ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Rejection action sequence successfully updated\"},\"id\":"
+                        + updated.getId() + ", \"code\": \""
+                        + updated.getCode() + "\", \"newSequence\": "
+                        + updated.getSequence() + "}")
                 .build();
     }
 }

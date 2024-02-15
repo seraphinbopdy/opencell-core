@@ -163,11 +163,11 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         if (StringUtils.isBlank(targetJob)) {
             throw new BusinessException("the target job is missing!");
         }
-        List<BatchEntity> batchEntities = getEntityManager().createNamedQuery("BatchEntity.getOpenedBatchEntity")
+        List<Long> batchEntityIds = getEntityManager().createNamedQuery("BatchEntity.getOpenedBatchEntityIds")
                 .setParameter("targetJob", targetJob).getResultList();
         JobInstance jobInstance = jobExecutionResult.getJobInstance();
-        for (BatchEntity batchEntity : batchEntities) {
-            processBatchEntity(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
+        for (Long batchEntityId : batchEntityIds) {
+            methodCallingUtils.callMethodInNewTx(() -> processBatchEntity(jobExecutionResult, jobInstance, batchEntityId, hugeEntityClass));
         }
     }
 
@@ -176,10 +176,11 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      *
      * @param jobExecutionResult job execution result
      * @param jobInstance        job instance
-     * @param batchEntity        batch entity
+     * @param batchEntityId      batch entity id
      * @param hugeEntityClass    huge entity class
      */
-    private void processBatchEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
+    private void processBatchEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, Long batchEntityId, Class hugeEntityClass) {
+        BatchEntity batchEntity = findById(batchEntityId);
         try {
             updateHugeEntity(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
         } catch (Exception e) {
@@ -321,14 +322,15 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @param hugeEntityClass    huge entity class
      */
     private void executeMassUpdaterJob(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
-        Long selectLimit = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_SELECT_LIMIT);
-        Long updateChunk = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK);
+        Long selectFetchSize = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_SELECT_FETCH_SIZE);
+        Long selectMaxResults = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_SELECT_MAX_RESULTS);
+        Long updateChunkSize = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK_SIZE);
         String defaultFilter = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER);
         Boolean isPessimisticUpdateLock = (Boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_PESSIMISTIC_UPDATE_LOCK);
 
         String selectQuery = getSelectQuery(hugeEntityClass, batchEntity.getFilters(), defaultFilter);
         String updateQuery = getUpdateQuery(jobExecutionResult, batchEntity, hugeEntityClass.getSimpleName());
-        massUpdaterJobBean.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunk, selectQuery, selectLimit, false, isPessimisticUpdateLock);
+        massUpdaterJobBean.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunkSize, selectQuery, selectFetchSize, selectMaxResults, false, isPessimisticUpdateLock);
     }
 
     /**

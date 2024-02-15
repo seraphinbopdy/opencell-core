@@ -48,8 +48,8 @@ import java.util.Map;
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
         parameters = {@Parameter(name = "sequence_name", value = "batch_entity_seq"),})
 @NamedQueries({
-        @NamedQuery(name = "BatchEntity.getOpenedBatchEntity",
-                query = "SELECT b FROM BatchEntity b WHERE b.status=org.meveo.model.billing.BatchEntityStatusEnum.OPEN and b.targetJob=:targetJob"),
+        @NamedQuery(name = "BatchEntity.getOpenedBatchEntityIds",
+                query = "SELECT b.id FROM BatchEntity b WHERE b.status=org.meveo.model.billing.BatchEntityStatusEnum.OPEN and b.targetJob=:targetJob"),
         @NamedQuery(name = "BatchEntity.cancelOpenedBatchEntity",
                 query = "UPDATE BatchEntity b set b.status=org.meveo.model.billing.BatchEntityStatusEnum.CANCELED where b.id=:id " +
                         "and b.status=org.meveo.model.billing.BatchEntityStatusEnum.OPEN")

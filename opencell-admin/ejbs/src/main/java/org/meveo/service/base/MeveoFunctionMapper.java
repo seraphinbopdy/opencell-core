@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -2048,8 +2049,7 @@ public class MeveoFunctionMapper extends FunctionMapper {
 				if(attributInstance.get().getDateValue()!=null) {
 					return attributInstance.get().getDateValue();  
 				}
-				final String dateValue = (String) getDefaultValue(attributeCode, attribute, attribute.getAttributeType());
-				if (dateValue != null) return dateValue;
+				if (defaultValue != null) return defaultValue;
 				break;
 			case BOOLEAN:
 				if(attributInstance.get().getBooleanValue()!=null) {
@@ -2086,7 +2086,14 @@ public class MeveoFunctionMapper extends FunctionMapper {
 			case TEXT:
 				return resultValue;
 			case DATE:
-				Date date = parseDate(resultValue.toString(), "MM/dd/yyyy");
+				List<String> dateFormats = Arrays.asList("MM/dd/yyyy", "dd/MM/yyyy", "yyyy/MM/dd", "MM/dd-yyyy", "dd-MM-yyyy", "yyyy-MM-dd");
+				Date date = null;
+				for(String dateFormat : dateFormats) {
+					date = parseDate(resultValue.toString(), dateFormat);
+					if(date != null) {
+						return date;
+					}
+				}
 				if(date == null)
 					date = parseDate(resultValue.toString(), null);
 				return date;

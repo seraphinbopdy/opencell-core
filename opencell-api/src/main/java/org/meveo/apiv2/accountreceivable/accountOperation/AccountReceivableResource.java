@@ -137,4 +137,16 @@ public interface AccountReceivableResource {
 					@ApiResponse(responseCode = "404", description = "Account operations don't exist")})
 	Response removeLitigation(@PathParam("id") Long accountOperationId,
 						   @Parameter(description = "Litigation dto", required = true) LitigationInput litigationInput);
+	
+	//add api to transfer amount from one account to another
+	@POST
+	@Path("{accountOperationId}/transferAmounts")
+	@Operation(summary = "Transfer amount from one account to another",
+			description = "Transfer amount from one account to another",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "Amounts successfully transferred"),
+					@ApiResponse(responseCode = "404", description = "Customer account code/id doesn’t exist."),
+					@ApiResponse(responseCode = "400", description = "Sum of dispatched amounts must be lower or equal to source account operation’s unmatched amount")})
+	Response transferAmounts(@PathParam("accountOperationId") Long accountOperationId,
+							 @Parameter(description = "Amounts to transfer", required = true) AmountsTransferDto amountsTransferDto);
 }

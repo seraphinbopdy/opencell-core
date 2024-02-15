@@ -69,10 +69,7 @@ public class StandardReportResourceImpl implements StandardReportResource {
                         agedReceivableMapper.toResourceAgedReceivable(agedReceivableMapper.toResource(agedReceivableDto)))
                 .toArray(ImmutableAgedReceivable[]::new);
 		Long count = functionalCurrency != null && !functionalCurrency.equals(appProvider.getCurrency().getCurrencyCode())
-						? 0
-						: standardReportApiService.getCountAgedReceivables(customerAccountCode,
-								customerAccountDescription, sellerCode, sellerDescription, invoiceNumber,
-								tradingCurrency, startDueDate, endDueDate, startDate);
+				? 0 : (long) agedReceivablesData.length;
         AgedReceivables agedReceivables = ImmutableAgedReceivables.builder()
                 .addData(agedReceivablesData)
                 .startDate(DateUtils.formatDateWithPattern(startDate, "dd/MM/yyyy"))
@@ -138,7 +135,7 @@ public class StandardReportResourceImpl implements StandardReportResource {
         calculateSums(input, agedReceivablesList);
 
 		filePath = genericExportManager.exportAgedTrialBalance("AgedReceivableDto", fileFormat, input.getGenericFieldDetails(), agedReceivablesList,
-		        input.getGenericFieldDetails().stream().map(GenericFieldDetails::getName).collect(Collectors.toList()), locale);
+		        input.getGenericFieldDetails().stream().map(GenericFieldDetails::getName).collect(Collectors.toList()), locale, input.getFilters().get("numberOfPeriods") != null ? (Integer) input.getFilters().get("numberOfPeriods") : 0);
         } catch(ParseException ex) {
             throw new BusinessApiException("Error occurred when listing aged balance report : " + ex.getMessage());
         }

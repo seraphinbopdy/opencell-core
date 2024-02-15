@@ -169,8 +169,8 @@ public class AttributeService extends BusinessService<Attribute>{
         // Dates values
         if (AttributeTypeEnum.DATE == pvAttribute.getAttribute().getAttributeType() ||
                 AttributeTypeEnum.CALENDAR == pvAttribute.getAttribute().getAttributeType()) {
-            if (!(attributeValue.getRealValue() instanceof Date) && !isValidDate(attributeValue.getRealValue())) {
-                throw new BusinessApiException("The attribute " + pvAttribute.getAttribute().getCode() + " has not a valid Date value '" + attributeValue.getRealValue() + "'");
+            if (!(attributeValue.getValue() instanceof Date) && !isValidDate(attributeValue.getValue())) {
+                throw new BusinessApiException("The attribute " + pvAttribute.getAttribute().getCode() + " has not a valid Date value '" + attributeValue.getValue() + "'");
             }
         }
     }
@@ -285,7 +285,7 @@ public class AttributeService extends BusinessService<Attribute>{
     }
 
     private boolean isValidNumber(Object value) {
-        if (value == null) {
+        if (StringUtils.isBlank(value)) {
             return true;
         }
         try {

@@ -122,7 +122,9 @@ import org.meveo.model.cpq.ProductVersion;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.commercial.OrderLot;
+import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.contract.Contract;
+import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.IInvoicingMinimumApplicable;
@@ -332,8 +334,8 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             }
             create(ratedTransaction);
             walletOperation.setRatedTransaction(ratedTransaction);
+            walletOperationService.update(walletOperation);
         }
-        walletOperationService.update(walletOperation);
         return ratedTransaction;
     }
 
@@ -456,7 +458,7 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 ratedTransaction.setAccountingArticle(em.getReference(AccountingArticle.class, walletOperation.getAccountingArticleId()));
             }
 
-            if (walletOperation.getOrderId() != null || walletOperation.getProductVersionId() != null || walletOperation.getOrderLotId() != null) {
+            if (walletOperation.getOrderId() != null || walletOperation.getProductVersionId() != null || walletOperation.getOrderLotId() != null || walletOperation.getOrderProductId() != null) {
                 OrderInfo orderInfo = new OrderInfo();
 
                 if (walletOperation.getOrderId() != null) {
@@ -468,7 +470,10 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 if (walletOperation.getOrderLotId() != null) {
                     orderInfo.setOrderLot(em.getReference(OrderLot.class, walletOperation.getOrderLotId()));
                 }
-                ratedTransaction.setInfoOrder(orderInfo);
+                if (walletOperation.getOrderProductId() != null) {
+                    orderInfo.setOrderProduct(em.getReference(OrderProduct.class, walletOperation.getOrderProductId()));
+                }
+                ratedTransaction.setOrderInfo(orderInfo);
             }
             ratedTransaction.setInvoicingDate(walletOperation.getInvoicingDate());
             ratedTransaction.setUnityDescription(walletOperation.getInputUnitDescription());
@@ -498,6 +503,12 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             if (walletOperation.getTradingCurrencyId() != null) {
                 ratedTransaction.setTradingCurrency(em.getReference(TradingCurrency.class, walletOperation.getTradingCurrencyId()));
             }
+			if (walletOperation.getContractId() != null) {
+				ratedTransaction.setContract(em.getReference(Contract.class, walletOperation.getContractId()));
+			}
+			if (walletOperation.getContractLineId() != null) {
+				ratedTransaction.setContractLine(em.getReference(ContractItem.class, walletOperation.getContractLineId()));
+			}
 
             ratedTransaction.setBusinessKey(walletOperation.getBusinessKey());
 
@@ -1812,14 +1823,14 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 + "                 rt.offerTemplate.id as offer_id, rt.serviceInstance.id as service_instance_id,"
                 + "                 rt.usageDate as usage_date, rt.startDate as start_date, rt.endDate as end_date,"
                 + "                 rt.orderNumber as order_number, rt.subscription.id as subscription_id, rt.taxPercent as tax_percent, rt.tax.id as tax_id, "
-                + "                 rt.infoOrder.order.id as order_id, rt.infoOrder.productVersion.id as product_version_id,"
-                + "                 rt.infoOrder.orderLot.id as order_lot_id, rt.chargeInstance.id as charge_instance_id, rt.accountingArticle.id as article_id, "
+                + "                 rt.orderInfo.order.id as order_id, rt.orderInfo.productVersion.id as product_version_id,"
+                + "                 rt.orderInfo.orderLot.id as order_lot_id, rt.chargeInstance.id as charge_instance_id, rt.accountingArticle.id as article_id, "
                 + "                 rt.discountedRatedTransaction as discounted_ratedtransaction_id  "
                 + " FROM RatedTransaction rt WHERE rt.id in (:ids) and rt.accountingArticle.ignoreAggregation = false"
                 + " GROUP BY rt.billingAccount.id, rt.accountingCode.id, rt.description, "
                 + "         rt.unitAmountWithoutTax, rt.unitAmountWithTax, rt.offerTemplate.id, rt.serviceInstance.id, rt.usageDate, rt.startDate,"
                 + "         rt.endDate, rt.orderNumber, rt.subscription.id, rt.taxPercent, rt.tax.id, "
-                + "         rt.infoOrder.order.id, rt.infoOrder.productVersion.id, rt.infoOrder.orderLot.id," +
+                + "         rt.orderInfo.order.id, rt.orderInfo.productVersion.id, rt.orderInfo.orderLot.id," +
                 "           rt.chargeInstance.id, rt.accountingArticle.id, rt.discountedRatedTransaction " +
                 "   order by rt.unitAmountWithoutTax desc";
         List<Map<String, Object>> groupedRTsWithAggregation = getSelectQueryAsMap(query, params);
@@ -1836,7 +1847,7 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 " rt.amountWithoutTax as sum_without_tax, rt.amountWithTax as sum_with_tax, rt.offerTemplate.id as offer_id, rt.serviceInstance.id as service_instance_id," +
                 " rt.startDate as start_date, rt.endDate as end_date, rt.orderNumber as order_number, " +
                 " s.id as subscription_id, s.order.id as commercial_order_id, rt.taxPercent as tax_percent, rt.tax.id as tax_id," +
-                " rt.infoOrder.order.id as order_id, rt.infoOrder.productVersion.id as product_version_id, rt.infoOrder.orderLot.id as order_lot_id," +
+                " rt.orderInfo.order.id as order_id, rt.orderInfo.productVersion.id as product_version_id, rt.orderInfo.orderLot.id as order_lot_id," +
                 " rt.chargeInstance.id as charge_instance_id, rt.parameter2 as parameter_2, rt.accountingArticle.id as article_id," +
                 " rt.discountedRatedTransaction as discounted_ratedtransaction_id," +
                 " rt.unitAmountWithoutTax as unit_amount_without_tax, rt.unitAmountWithTax as unit_amount_with_tax " +

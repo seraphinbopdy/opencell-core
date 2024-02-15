@@ -32,6 +32,7 @@ import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.AccountEntity;
 import org.meveo.model.ICustomFieldEntity;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.*;
@@ -449,10 +450,11 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
             userAccountTag.setAttribute("code", userAccount.getCode());
             userAccountTag.setAttribute("jobTitle", getDefaultIfNull(userAccount.getJobTitle(), ""));
             userAccountTag.setAttribute("description", getDefaultIfNull(userAccount.getDescription(), ""));
-            userAccountTag.setAttribute("registrationNo", getDefaultIfNull(userAccount.getRegistrationNo(), ""));
+            userAccountTag.setAttribute("registrationNo", getDefaultIfNull(getRegisterNumberJoining(userAccount.getRegistrationNumbers()), ""));
             userAccountTag.setAttribute("vatNo", getDefaultIfNull(userAccount.getVatNo(), ""));
             addCustomFields(userAccount, doc, userAccountTag);
         }
+	    userAccountTag.appendChild(createPartyIdentification(doc, userAccount.getRegistrationNumbers()));
         if (invoiceConfiguration.isDisplaySubscriptions()) {
             Element subscriptionsTag = createSubscriptionsSection(doc, userAccount, ratedTransactions, isVirtual, ignoreUA, null);
             if (subscriptionsTag != null) {
@@ -1253,7 +1255,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         int i = 1;
         for (InvoiceAgregate invoiceAgregate : invoice.getInvoiceAgregates()) {
             if (invoiceAgregate instanceof TaxInvoiceAgregate) {
-                if (mapTaxesIndexes.get(((TaxInvoiceAgregate) invoiceAgregate).getTax().getCode()) == null) {
+                if (((TaxInvoiceAgregate) invoiceAgregate).getTax() != null && mapTaxesIndexes.get(((TaxInvoiceAgregate) invoiceAgregate).getTax().getCode()) == null) {
                     mapTaxesIndexes.put(((TaxInvoiceAgregate) invoiceAgregate).getTax().getCode(), String.valueOf(i++));
                 }
             }
@@ -1680,6 +1682,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         invoiceTag.setAttribute("status", invoice.getStatus() != null ? invoice.getStatus().name() : "");
         invoiceTag.setAttribute("paymentStatus", invoice.getPaymentStatus() != null ? invoice.getPaymentStatus().name() : "");
         invoiceTag.setAttribute("paymentStatusDate", invoice.getPaymentStatusDate() != null ? DateUtils.formatDateWithPattern(invoice.getPaymentStatusDate(), invoiceDateFormat) : "");
+	    invoiceTag.setAttribute("certificateUncollectibilityNumber", invoice.getCertificateUncollectibilityNumber());
         ofNullable(invoice.getOpenOrderNumber()).ifPresent(oon -> invoiceTag.setAttribute("openOrderNumber", oon));
         ofNullable(invoice.getOrder()).ifPresent(order -> invoiceTag.setAttribute("orderNumber", order.getOrderNumber()));
         ofNullable(invoice.getExternalRef()).ifPresent(externalRef
@@ -1752,10 +1755,11 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         billingAccountTag.setAttribute("externalRef1", getDefaultIfNull(billingAccount.getExternalRef1(), ""));
         billingAccountTag.setAttribute("externalRef2", getDefaultIfNull(billingAccount.getExternalRef2(), ""));
         billingAccountTag.setAttribute("jobTitle", getDefaultIfNull(billingAccount.getJobTitle(), ""));
-        billingAccountTag.setAttribute("registrationNo", getDefaultIfNull(billingAccount.getRegistrationNo(), ""));
+        billingAccountTag.setAttribute("registrationNo", getDefaultIfNull(getRegisterNumberJoining(billingAccount.getRegistrationNumbers()), ""));
         billingAccountTag.setAttribute("vatPaymentOption", invoice.getInvoiceType().getUntdidVatPaymentOption() != null ? invoice.getInvoiceType().getUntdidVatPaymentOption().getCode2475() : "");
-        billingAccountTag.setAttribute("icd", billingAccount.getIcdId() != null ? billingAccount.getIcdId().getCode() : "");
+        //billingAccountTag.setAttribute("icd", billingAccount.getIcdId() != null ? billingAccount.getIcdId().getCode() : "");
         billingAccountTag.setAttribute("vatNo", getDefaultIfNull(billingAccount.getVatNo(), ""));
+	    billingAccountTag.appendChild(createPartyIdentification(doc, billingAccount.getRegistrationNumbers()));
         if (invoiceConfiguration.isDisplayBillingCycle()) {
             Element bcTag = createBillingCycleSection(doc, billingCycle);
             if (bcTag != null) {
@@ -1869,7 +1873,8 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         sellerTag.setAttribute("description", getDefaultIfNull(seller.getDescription(), ""));
         sellerTag.setAttribute("legalType", getDefaultIfNull(seller.getLegalType(), ""));
         sellerTag.setAttribute("vatNo", getDefaultIfNull(seller.getVatNo(), ""));
-        sellerTag.setAttribute("registrationNo", getDefaultIfNull(seller.getRegistrationNo(), ""));
+	    sellerTag.setAttribute("registrationNo", getDefaultIfNull(getRegisterNumberJoining(seller.getRegistrationNumbers()), ""));
+	    sellerTag.appendChild(createPartyIdentification(doc, seller.getRegistrationNumbers()));
         addCustomFields(seller, doc, sellerTag);
         Element addressTag = createAddressSection(doc, seller, invoice.getBillingAccount().getTradingLanguage().getLanguage().getLanguageCode());
         if (addressTag != null) {
@@ -1903,9 +1908,10 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         customerTag.setAttribute("brand", customerBrand != null ? customerBrand.getCode() : "");
         customerTag.setAttribute("category", customerCategory != null ? customerCategory.getCode() : "");
 //        customerTag.setAttribute("vatNo", getDefaultIfNull(customer.getVatNo(), ""));
-//        customerTag.setAttribute("registrationNo", getDefaultIfNull(customer.getRegistrationNo(), ""));
+        customerTag.setAttribute("registrationNo", getDefaultIfNull(getRegisterNumberJoining(customer.getRegistrationNumbers()), ""));
         customerTag.setAttribute("jobTitle", getDefaultIfNull(customer.getJobTitle(), ""));
         customerTag.setAttribute("contracts", getDefaultIfNull(buildContactsCodes(customer.getContracts()), ""));
+	    customerTag.appendChild(createPartyIdentification(doc, customer.getRegistrationNumbers()));
         addCustomFields(customer, doc, customerTag);
         Element nameTag = createNameSection(doc, customer, invoice.getBillingAccount().getTradingLanguage().getLanguage().getLanguageCode());
         if (nameTag != null) {
@@ -3128,9 +3134,10 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
             userAccountTag.setAttribute("code", userAccount.getCode());
             userAccountTag.setAttribute("jobTitle", getDefaultIfNull(userAccount.getJobTitle(), ""));
             userAccountTag.setAttribute("description", getDefaultIfNull(userAccount.getDescription(), ""));
-            userAccountTag.setAttribute("registrationNo", getDefaultIfNull(userAccount.getRegistrationNo(), ""));
+            userAccountTag.setAttribute("registrationNo", getDefaultIfNull(getRegisterNumberJoining(userAccount.getRegistrationNumbers()), ""));
             userAccountTag.setAttribute("vatNo", getDefaultIfNull(userAccount.getVatNo(), ""));
-            userAccountTag.setAttribute("ICD", userAccount.getIcdId() != null ? userAccount.getIcdId().getCode() : "");
+           // userAccountTag.setAttribute("ICD", userAccount.getIcdId() != null ? userAccount.getIcdId().getCode() : "");
+	        userAccountTag.appendChild( createPartyIdentification(doc, userAccount.getRegistrationNumbers()));
             addCustomFields(userAccount, doc, userAccountTag);
         }
         if (invoiceConfiguration.isDisplaySubscriptions()) {
@@ -3320,4 +3327,24 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return doc.createTextNode(Objects.requireNonNullElse(data, ""));
     }
 
+	private String getRegisterNumberJoining(List<RegistrationNumber> registrationNumbers){
+		if(CollectionUtils.isNotEmpty(registrationNumbers)){
+			return registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(Collectors.joining(","));
+		}
+		return "";
+	}
+	
+	private Element createPartyIdentification(Document doc, List<RegistrationNumber> registrationNumbers) {
+		final Element partyIdentification = doc.createElement("PartyIdentification");
+		registrationNumbers.forEach(registrationNumber -> {
+			Element companyId = doc.createElement("CompanyId");
+			companyId.setAttribute("schemeAgencyID" , "ISO/IEC 6523");
+			if(registrationNumber.getIsoIcd() != null) {
+				companyId.setAttribute("schemeID", registrationNumber.getIsoIcd().getCode());
+			}
+			companyId.appendChild(this.createTextNode(doc, registrationNumber.getRegistrationNo()));
+			partyIdentification.appendChild(companyId);
+		});
+		return partyIdentification;
+	}
 }

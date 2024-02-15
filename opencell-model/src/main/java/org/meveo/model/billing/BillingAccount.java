@@ -60,6 +60,7 @@ import org.meveo.model.ICounterEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IDiscountable;
 import org.meveo.model.IWFEntity;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.catalog.DiscountPlan;
@@ -386,12 +387,6 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     @Transient
     private List<InvoiceLine> minInvoiceLines;
 
-    /**
-     * IsoIcd
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "icd_id")
-    private IsoIcd icdId;
 
     /**
      * Default PriceList (Optional)
@@ -399,16 +394,18 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "price_list_id")
     private PriceList priceList;
-
-    public IsoIcd getIcdId() {
-        return icdId;
-    }
-
-    public void setIcdId(IsoIcd icdId) {
-        this.icdId = icdId;
-    }
-
-    public boolean isThresholdPerEntity() {
+	
+	@OneToMany(mappedBy = "billingAccount")
+	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+	
+	public List<RegistrationNumber> getRegistrationNumbers() {
+		return registrationNumbers;
+	}
+	
+	public void setRegistrationNumbers(List<RegistrationNumber> registrationNumbers) {
+		this.registrationNumbers = registrationNumbers;
+	}
+	public boolean isThresholdPerEntity() {
     	return thresholdPerEntity;
 	}
     
@@ -904,4 +901,13 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     public void setPriceList(PriceList priceList) {
         this.priceList = priceList;
     }
+	
+	// check if the list of registration numbers is not empty
+	// get all registration numbers and join them with a comma
+	public String getRegistrationNo(){
+		if (isNotEmpty(registrationNumbers)) {
+			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+		}
+		return registrationNo;
+	}
 }

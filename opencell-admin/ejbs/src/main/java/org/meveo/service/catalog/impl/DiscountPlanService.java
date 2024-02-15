@@ -57,6 +57,7 @@ import org.meveo.model.catalog.DiscountPlanTypeEnum;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.RoundingModeEnum;
 import org.meveo.model.cpq.Product;
+import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.tax.TaxMappingService;
@@ -197,7 +198,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     			discountWalletOperation = new WalletOperation();
     			discountAccountingArticle = discountPlanItem.getAccountingArticle();
                 DiscountPlan discountPlan = discountPlanItem.getDiscountPlan();
-    			if(discountAccountingArticle == null) {
+    			if (discountAccountingArticle == null) {
     				throw new EntityDoesNotExistsException("discount plan item "+discountPlanItem.getCode()+" has no accounting article  ");
     			}
 
@@ -222,6 +223,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 				discountWalletOperation.setSequence(discountPlanItem.getFinalSequence());
 				discountWalletOperation.setOrderNumber(walletOperation != null ? walletOperation.getOrderNumber() : null);
 				discountWalletOperation.setTradingCurrency(billingAccount.getTradingCurrency());
+			    discountWalletOperation.setEdr(walletOperation.getEdr());
 
 				TaxInfo taxInfo = taxMappingService.determineTax(discountAccountingArticle.getTaxClass(), seller, billingAccount, null, operationDate, discountWalletOperation, false, false, null);
     			taxPercent = taxInfo.tax.getPercent();
@@ -231,7 +233,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     					&& walletOperation.getDiscountedAmount().compareTo(BigDecimal.ZERO)>0) {
     				unitAmountWithoutTax=walletOperation.getDiscountedAmount();
     				discountedAmount=unitAmountWithoutTax;
-    			}else if(walletOperation!=null){
+				} else if (walletOperation != null) {
     				unitAmountWithoutTax=appProvider.isEntreprise() ? walletOperation.getUnitAmountWithoutTax() : walletOperation.getUnitAmountWithTax();
     				discountedAmount=walletOperation.getDiscountedAmount()!=null && walletOperation.getDiscountedAmount().compareTo(BigDecimal.ZERO)>0 ?walletOperation.getDiscountedAmount():unitAmountWithoutTax;
     			}
@@ -247,12 +249,12 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     		     log.info("calculateDiscountplanItems walletOperationDiscountAmount{},unitAmountWithoutTax{} ,discountValue{} ,discountedAmount{} ",walletOperationDiscountAmount,unitAmountWithoutTax,discountValue,discountedAmount);
     			
     		    discountWalletOperation.setUnitAmountTax(walletOperationDiscountAmount);
-				if(discountPlanItem.getDiscountPlanItemType() == DiscountPlanItemTypeEnum.PERCENTAGE){
+				if (discountPlanItem.getDiscountPlanItemType() == DiscountPlanItemTypeEnum.PERCENTAGE) {
 					discountWalletOperation.setAmountWithoutTax(quantity.compareTo(BigDecimal.ZERO)>0?amounts[0].multiply(walletOperation.getQuantity()):BigDecimal.ZERO);
 					discountWalletOperation.setAmountWithTax(amounts[1].multiply(walletOperation.getQuantity()));
 					discountWalletOperation.setAmountTax(amounts[2].multiply(walletOperation.getQuantity()));
 					discountWalletOperation.setDiscountValue(discountValue.multiply(walletOperation.getQuantity()));
-				}else{
+				} else {
 					discountWalletOperation.setAmountWithoutTax(amounts[0]);
 					discountWalletOperation.setAmountWithTax(amounts[1]);
 					discountWalletOperation.setAmountTax(amounts[2]);
@@ -265,11 +267,23 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 				discountWalletOperation.setTax(taxInfo.tax);
 				discountWalletOperation.setTaxClass(taxInfo.taxClass);
     			discountWalletOperation.setDiscountedAmount(discountedAmount);
-				if(walletOperation != null){
+				if (walletOperation != null) {
 					discountWalletOperation.setOrderNumber(walletOperation.getOrderNumber());
 					discountWalletOperation.setUuid(walletOperation.getUuid());
 					discountWalletOperation.setBusinessKey(walletOperation.getBusinessKey());
+					discountWalletOperation.setParameter1(walletOperation.getParameter1());
+					discountWalletOperation.setParameter2(walletOperation.getParameter2());
+					discountWalletOperation.setParameter3(walletOperation.getParameter3());
+					discountWalletOperation.setParameterExtra(walletOperation.getParameterExtra());
+					discountWalletOperation.setContract(walletOperation.getContract());
+					discountWalletOperation.setContractLine(walletOperation.getContractLine());
 				}
+				
+		        OrderInfo orderInfo = new OrderInfo();
+				orderInfo.setOrder(chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null);
+		        orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
+		        orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
+		        discountWalletOperation.setOrderInfo(orderInfo);
     			
     			if(!isVirtual) {
     				discountWalletOperation.setSubscription(subscription);

@@ -195,9 +195,12 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			}
 			billingRun.setStatus(VALIDATED);
 		}
+		int invoiceNumber = ofNullable(billingRun.getInvoiceNumber()).orElse(0);
+		billingRun.setInvoiceNumber(result.getInvoiceCount() + invoiceNumber);
+		updateBillingRunAmounts(billingRun);
 		billingRunService.update(billingRun);
-		billingRunService.updateBillingRunStatistics(billingRun);
 		billingRunService.updateBillingRunJobExecution(billingRun.getId(), result);
+		initAmounts();
 	}
 	private void createAggregatesAndInvoiceWithIl(BillingRun billingRun, long nbRuns, long waitingMillis,
 			Long jobInstanceId, boolean isFullAutomatic, BillingCycle billingCycle, JobExecutionResultImpl result)
@@ -219,6 +222,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			invoicingService.createAgregatesAndInvoiceForJob(item, billingRun, billingCycle, jobInstanceId,
 					lastCurrentUser, isFullAutomatic, result);
 		};
+
 		iteratorBasedJobProcessing.processItems(result,
 				new SynchronizedIterator<>(ListUtils.partition(bAIds, itemsPerSplit)), task, null, null, nbRuns,
 				waitingMillis, false, false);
@@ -307,5 +311,11 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 		amountTax = ZERO;
 		amountWithTax = ZERO;
 		amountWithoutTax = ZERO;
+	}
+
+	private void updateBillingRunAmounts(BillingRun billingRun) {
+		billingRun.setPrAmountWithTax(amountWithTax);
+		billingRun.setPrAmountWithoutTax(amountWithoutTax);
+		billingRun.setPrAmountTax(amountTax);
 	}
 }

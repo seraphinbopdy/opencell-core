@@ -36,6 +36,7 @@ import org.meveo.api.security.filter.ListFilter;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.api.security.parameter.ObjectPropertyParser;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.*;
 import org.meveo.model.crm.BusinessAccountModel;
@@ -44,6 +45,7 @@ import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.service.admin.impl.CountryService;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
+import org.meveo.service.admin.impl.RegistrationNumberService;
 import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.billing.impl.InvoiceSequenceService;
@@ -97,6 +99,9 @@ public class SellerApi extends AccountEntityApi {
 
     @Inject
     private IsoIcdService isoIcdService;
+	
+	@Inject
+	private RegistrationNumberService registrationNumberService;
     
     public Seller create(SellerDto postData) throws MeveoApiException, BusinessException {
         return create(postData, true);
@@ -169,6 +174,7 @@ public class SellerApi extends AccountEntityApi {
         this.updateTradingLanguage(seller, postData.getLanguageCode());
         // Parent seller
         this.updateParentSeller(seller, postData.getParentSeller());
+		
 
         if (businessAccountModel != null) {
             seller.setBusinessAccountModel(businessAccountModel);
@@ -178,9 +184,18 @@ public class SellerApi extends AccountEntityApi {
         this.populateCustomFields(postData, checkCustomField, seller, true);
 
         sellerService.create(seller);
+	    
+	    seller.getRegistrationNumbers().forEach(registrationNumber -> {
+		    if(registrationNumber.getIsoIcd() == null){
+			    registrationNumber.setIsoIcd(appProvider.getIcdId());
+		    }
+			if(registrationNumber.getId() == null) {
+				registrationNumberService.create(registrationNumber);
+			}
+	    });
         return seller;
     }
-
+	
     /**
      * Update the seller's address by the given addressDto.
      *
@@ -271,24 +286,19 @@ public class SellerApi extends AccountEntityApi {
         if (postData.getVatNo() != null) {
             seller.setVatNo(postData.getVatNo());
         }
-        if (postData.getIsoICDCode() != null) {            
-            IsoIcd isoIcd = isoIcdService.findByCode(postData.getIsoICDCode());
-            if (isoIcd == null) {
-                throw new EntityDoesNotExistsException(IsoIcd.class, postData.getIsoICDCode());
-            }           
-            seller.setIcdId(isoIcd);
-        }
-        if (postData.getRegistrationNo() != null) {
-            seller.setRegistrationNo(postData.getRegistrationNo());
-        }
         
-        if (!org.apache.commons.lang3.StringUtils.isEmpty(postData.getRegistrationNo()) 
-                && seller.getIcdId() == null
-                && org.apache.commons.lang3.StringUtils.isEmpty(postData.getIsoICDCode())
-            		) {
-        		//default value isoIcd
-            	IsoIcd isoIcd = isoIcdService.findByCode("0009");    
-                seller.setIcdId(isoIcd);
+        if (StringUtils.isNotBlank(postData.getRegistrationNo())) {
+        	RegistrationNumber registrationNumber = new RegistrationNumber();
+        	registrationNumber.setRegistrationNo(postData.getRegistrationNo());
+            
+            if (StringUtils.isNotBlank(postData.getIsoICDCode())) {            
+                IsoIcd isoIcd = isoIcdService.findByCode(postData.getIsoICDCode());
+                if (isoIcd == null) {
+                    throw new EntityDoesNotExistsException(IsoIcd.class, postData.getIsoICDCode());
+                }           
+                registrationNumber.setIsoIcd(isoIcd);
+            }
+            seller.getRegistrationNumbers().add(registrationNumber);
         }
         
         if (postData.getLegalText() != null) {
@@ -421,7 +431,14 @@ public class SellerApi extends AccountEntityApi {
         if (businessAccountModel != null) {
             seller.setBusinessAccountModel(businessAccountModel);
         }
-
+	    seller.getRegistrationNumbers().forEach(registrationNumber -> {
+		    if(registrationNumber.getIsoIcd() == null){
+			    registrationNumber.setIsoIcd(appProvider.getIcdId());
+		    }
+		    if(registrationNumber.getId() == null) {
+			    registrationNumberService.create(registrationNumber);
+		    }
+	    });
         // populate customFields
         this.populateCustomFields(postData, checkCustomField, seller, false);
         seller = sellerService.update(seller);

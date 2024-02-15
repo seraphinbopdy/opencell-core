@@ -8873,4 +8873,405 @@ public class AgedBalanceReporting extends ReportExtractScript {
         <sql>ALTER TABLE ${db.schema.adapted}finance_settings ALTER COLUMN use_auxiliary_accounting SET NOT NULL ;</sql>
     </changeSet>
     
+    <changeSet id="#INTRD-15093_20230123" author="AbdelmounaimAkadid">
+    	<update tableName="crm_provider_pay_methods">
+    		<column name="payment_method" value="PAYPALPAYMENTLINK" />
+    		<where>payment_method = 'PAYPAL'</where>
+    	</update>
+    	<update tableName="crm_provider_pay_methods">
+    		<column name="payment_method" value="STRIPEDIRECTLINK" />
+    		<where>payment_method = 'STRIPE'</where>
+    	</update>
+    </changeSet>
+
+    <changeSet id="#INTRD-20273_20231219" author="AndriusKarpavicius">
+        <addColumn tableName="meveo_job_instance">
+            <column name="limit_to_nr_of_nodes" type="int"/>
+        </addColumn>
+        <modifyDataType tableName="meveo_job_instance" columnName="run_on_nodes" newDataType="VARCHAR(500)"/>
+    </changeSet>
+
+    <changeSet id="#INTRD-19574_20230712" author="zbariki">
+        <addColumn tableName="ar_account_operation">
+            <column name="litigation_reason" type="varchar(2000)"/>
+        </addColumn>
+    </changeSet>
+    
+    <changeSet id="#INTRD-20181_28122023" author="Mbarek-Ay" failOnError="false">
+	<addColumn tableName="cpq_attribute_allowed_values">
+		<column name="order_idx" type="int4"/>
+	</addColumn>
+	<sql>UPDATE cpq_attribute_allowed_values AS attr SET order_idx = subquery.new_order_idx - 1 FROM (SELECT attribute_id, allowed_values,
+	    ROW_NUMBER() OVER (PARTITION BY attribute_id ORDER BY allowed_values) AS new_order_idx
+	    FROM cpq_attribute_allowed_values) AS subquery
+	    WHERE attr.attribute_id = subquery.attribute_id AND attr.allowed_values = subquery.allowed_values;
+     </sql>
+
+  </changeSet>
+
+    <changeSet id="#INTRD-19124_wo_partitioning_fct" author="a.rouaguebe">
+        <createSequence sequenceName="tech_wo_partition_log_seq" startValue="1" />
+        <createSequence sequenceName="tech_rt_partition_log_seq" startValue="1" />
+        <createSequence sequenceName="tech_edr_partition_log_seq" startValue="1" />
+        <createTable tableName="tech_wo_partition_log">
+            <column name="id" type="bigint" defaultValueSequenceNext="tech_wo_partition_log_seq">
+                <constraints nullable="false" primaryKeyName="tech_wo_partition_log_pk" />
+            </column>
+            <column name="partition_name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="range_from" type="datetime" />
+            <column name="range_to" type="datetime" />
+            <column name="purge_date" type="datetime" />
+        </createTable>
+        <createTable tableName="tech_rt_partition_log">
+            <column name="id" type="bigint" defaultValueSequenceNext="tech_rt_partition_log_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tech_rt_partition_log_pk" />
+            </column>
+            <column name="partition_name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="range_from" type="datetime" />
+            <column name="range_to" type="datetime" />
+            <column name="purge_date" type="datetime" />
+        </createTable>
+        <createTable tableName="tech_edr_partition_log">
+            <column name="id" type="bigint" defaultValueSequenceNext="tech_edr_partition_log_seq">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tech_wedrpartition_log_pk" />
+            </column>
+            <column name="partition_name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="range_from" type="datetime" />
+            <column name="range_to" type="datetime" />
+            <column name="purge_date" type="datetime" />
+        </createTable>
+        <sql splitStatements="false" stripComments="false" dbms="postgresql"><![CDATA[
+            CREATE OR REPLACE FUNCTION create_new_wo_partition(
+                p_source_table    text,
+                p_partition_name  text,
+                p_range_from      date
+            ) RETURNS void LANGUAGE plpgsql AS $$
+            DECLARE
+                l_partition_interval  integer;
+                l_range_to            date;
+            BEGIN
+
+                SELECT wo_partition_range_months
+                INTO l_partition_interval
+                FROM finance_settings limit 1;
+
+                IF l_partition_interval IS NULL THEN
+                    RAISE EXCEPTION 'Partition interval setting not found for table: %', p_source_table;
+                END IF;
+
+                l_range_to = p_range_from + l_partition_interval * interval '1 month';
+
+                IF EXISTS (SELECT 1 FROM tech_wo_partition_log t WHERE t.partition_name = p_partition_name) THEN
+                    RAISE EXCEPTION 'The partition name [%] already exists', p_partition_name;
+                end if;
+
+                IF EXISTS (SELECT 1 FROM tech_wo_partition_log t WHERE (t.range_from, t.range_to) OVERLAPS (p_range_from, l_range_to)) THEN
+                    RAISE EXCEPTION 'The period range [%, %[ already coverd by an existing partition', p_range_from, l_range_to;
+                end if;
+
+                execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
+                               p_partition_name,
+                               p_source_table,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+
+                execute format('insert into tech_wo_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
+                               p_partition_name,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+            END;
+            $$;
+            ]]></sql>
+        <sql splitStatements="false" stripComments="false" dbms="postgresql"><![CDATA[
+            CREATE OR REPLACE FUNCTION create_new_rt_partition(
+                p_source_table    text,
+                p_partition_name  text,
+                p_range_from      date
+            ) RETURNS void LANGUAGE plpgsql AS $$
+            DECLARE
+                l_partition_interval  integer;
+                l_range_to            date;
+            BEGIN
+
+                SELECT rt_partition_range_months
+                INTO l_partition_interval
+                FROM finance_settings limit 1;
+
+                IF l_partition_interval IS NULL THEN
+                    RAISE EXCEPTION 'Partition interval setting not found for table: %', p_source_table;
+                END IF;
+
+                l_range_to = p_range_from + l_partition_interval * interval '1 month';
+
+                IF EXISTS (SELECT 1 FROM tech_rt_partition_log t WHERE t.partition_name = p_partition_name) THEN
+                    RAISE EXCEPTION 'The partition name [%] already exists', p_partition_name;
+                end if;
+
+                IF EXISTS (SELECT 1 FROM tech_rt_partition_log t WHERE (t.range_from, t.range_to) OVERLAPS (p_range_from, l_range_to)) THEN
+                    RAISE EXCEPTION 'The period range [%, %[ already coverd by an existing partition', p_range_from, l_range_to;
+                end if;
+
+                execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
+                               p_partition_name,
+                               p_source_table,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+
+                execute format('insert into tech_rt_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
+                               p_partition_name,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+            END;
+            $$;
+            ]]></sql>
+        <sql splitStatements="false" stripComments="false" dbms="postgresql"><![CDATA[
+            CREATE OR REPLACE FUNCTION create_new_edr_partition(
+                p_source_table    text,
+                p_partition_name  text,
+                p_range_from      date
+            ) RETURNS void LANGUAGE plpgsql AS $$
+            DECLARE
+                l_partition_interval  integer;
+                l_range_to            date;
+            BEGIN
+
+                SELECT edr_partition_range_months
+                INTO l_partition_interval
+                FROM finance_settings limit 1;
+
+                IF l_partition_interval IS NULL THEN
+                    RAISE EXCEPTION 'Partition interval setting not found for table: %', p_source_table;
+                END IF;
+
+                l_range_to = p_range_from + l_partition_interval * interval '1 month';
+
+                IF EXISTS (SELECT 1 FROM tech_edr_partition_log t WHERE t.partition_name = p_partition_name) THEN
+                    RAISE EXCEPTION 'The partition name [%] already exists', p_partition_name;
+                end if;
+
+                IF EXISTS (SELECT 1 FROM tech_edr_partition_log t WHERE (t.range_from, t.range_to) OVERLAPS (p_range_from, l_range_to)) THEN
+                    RAISE EXCEPTION 'The period range [%, %[ already coverd by an existing partition', p_range_from, l_range_to;
+                end if;
+
+                execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
+                               p_partition_name,
+                               p_source_table,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+
+                execute format('insert into tech_edr_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
+                               p_partition_name,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
+            END;
+            $$;
+            ]]></sql>
+    </changeSet>
+
+    <changeSet id="#INTRD-19244_27102023" author="Mbarek-Ay" failOnError="false">
+		<addColumn tableName="cpq_quote_price">
+			<column name="tax_id"  type="bigint" />
+		</addColumn>
+		<addColumn tableName="order_price">
+			<column name="tax_id"  type="bigint" />
+		</addColumn>
+
+	   <addForeignKeyConstraint baseColumnNames="tax_id" baseTableName="cpq_quote_price" constraintName="fk_quote_price_tax"
+            referencedColumnNames="id" referencedTableName="billing_tax" />
+       <addForeignKeyConstraint baseColumnNames="tax_id" baseTableName="order_price" constraintName="fk_order_price_tax"
+            referencedColumnNames="id" referencedTableName="billing_tax" />
+
+      </changeSet>
+
+      <changeSet id="#INTRD-20460_20240104" author="zelmeliani">
+		<addColumn tableName="finance_settings">
+            <column name="handle_framework_agreement" type="${type.boolean}" defaultValueNumeric="1" />
+            <column name="handle_invoice_plan" type="${type.boolean}" defaultValueNumeric="1" />
+            <column name="handle_accounting_periods" type="${type.boolean}" defaultValueNumeric="1" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="#INTRD-20501_20240104" author="AdilElJaouhari">
+		<addColumn tableName="billing_wallet_operation">
+			<column name="order_product_id" type="bigint" />
+		</addColumn>
+		<addColumn tableName="billing_rated_transaction">
+			<column name="order_product_id" type="bigint" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			baseColumnNames="order_product_id"
+			baseTableName="billing_wallet_operation"
+			constraintName="fk_wallet_operation_order_product"
+			referencedColumnNames="id" referencedTableName="cpq_order_product" />
+		<addForeignKeyConstraint
+			baseColumnNames="order_product_id"
+			baseTableName="billing_rated_transaction"
+			constraintName="fk_rated_transaction_order_product"
+			referencedColumnNames="id" referencedTableName="cpq_order_product" />
+	</changeSet>
+	
+	<changeSet id="#INTRD-20725_20240112" author="AdilElJaouhari">
+		<addColumn tableName="billing_service_instance">
+			<column name="order_product_id" type="bigint" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			baseColumnNames="order_product_id"
+			baseTableName="billing_service_instance"
+			constraintName="fk_service_instance_order_product"
+			referencedColumnNames="id" referencedTableName="cpq_order_product" />
+	</changeSet>
+
+    <changeSet id="INTRD-20050_20231226_V2" author="TarikFA.">
+        <createSequence sequenceName="account_registration_number_seq" startValue="1" />
+        <createTable tableName="account_registration_number">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="account_registration_number_pkey" />
+            </column>
+            <column name="version" type="int4" />
+            <column name="created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="updated" type="datetime" />
+            <column name="creator" type="varchar(100)" />
+            <column name="updater" type="varchar(100)" />
+            <column name="registration_id" type="varchar(100)" />
+            <column name="icd_id" type="bigint" />
+            <column name="seller_id" type="bigint" />
+            <column name="billing_account_id" type="bigint" />
+            <column name="user_account_id" type="bigint" />
+            <column name="customer_account_id" type="bigint" />
+            <column name="customer_id" type="bigint" />
+
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="icd_id" baseTableName="account_registration_number"
+                                 constraintName="fk_icd_id"
+                                 referencedTableName="iso_icd"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="billing_account_id" baseTableName="account_registration_number"
+                                 constraintName="fk_account_entity_id_billing_account"
+                                 referencedTableName="billing_billing_account"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="customer_id" baseTableName="account_registration_number"
+                                 constraintName="fk_account_entity_id_crm_customer"
+                                 referencedTableName="crm_customer"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="customer_account_id" baseTableName="account_registration_number"
+                                 constraintName="fk_account_entity_id_ar_customer_account"
+                                 referencedTableName="ar_customer_account"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="seller_id" baseTableName="account_registration_number"
+                                 constraintName="fk_account_entity_id_crm_seller"
+                                 referencedTableName="crm_seller"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="account_registration_number"
+                                 constraintName="fk_account_entity_id_billing_user_account"
+                                 referencedTableName="billing_user_account"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="#INTRD-20052_20240117" author="TarikFA.">
+        <renameColumn tableName="account_registration_number" oldColumnName="registration_id" newColumnName="registration_no" />
+        <sql>
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, seller_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', s.registration_no, s.icd_id, s.id from ${db.schema.adapted}crm_seller s where s.icd_id is not null or s.registration_no is not null);
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, billing_account_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', ba.registration_no, ba.icd_id, ba.id from ${db.schema.adapted}billing_billing_account ba where ba.icd_id is not null or ba.registration_no is not null);
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, user_account_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', ua.registration_no, ua.icd_id, ua.id from ${db.schema.adapted}billing_user_account ua where ua.icd_id is not null or ua.registration_no is not null);
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, customer_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', c.registration_no, NULL, c.id from ${db.schema.adapted}crm_customer c where c.registration_no is not null);
+            INSERT INTO ${db.schema.adapted}account_registration_number (id, version, created, creator, registration_no, icd_id, customer_account_id) (select nextval('account_registration_number_seq'), 1, '${now()}', 'OPENCELL.ADMIN', ca.registration_no, NULL, ca.id from ${db.schema.adapted}ar_customer_account ca where ca.registration_no is not null);
+            UPDATE ${db.schema.adapted}account_registration_number ar set icd_id=p.icd_id from ${db.schema.adapted}crm_provider p where ar.customer_id is not null or ar.customer_account_id is not null
+        </sql>
+        <dropColumn tableName="crm_seller" columnName="registration_no" />
+        <dropColumn tableName="crm_seller" columnName="icd_id" />
+
+        <dropColumn tableName="billing_billing_account" columnName="registration_no" />
+        <dropColumn tableName="billing_billing_account" columnName="icd_id" />
+
+        <dropColumn tableName="billing_user_account" columnName="registration_no" />
+        <dropColumn tableName="billing_user_account" columnName="icd_id" />
+
+        <dropColumn tableName="crm_customer" columnName="registration_no" />
+        <dropColumn tableName="ar_customer_account" columnName="registration_no" />
+
+        <update tableName="iso_icd" >
+            <column name="code" value="SIREN" />
+            <where>code = '0002'</where>
+        </update>
+
+
+        <update tableName="iso_icd" >
+            <column name="code" value="SIRET" />
+            <where>code = '0009'</where>
+        </update>
+    </changeSet>
+    
+    <changeSet id="INTRD-20836-pp-cache" author="AndriusKarpavicius">
+        <sql>update ${db.schema.adapted}advanced_settings set property_type='java.lang.Integer',  property_value=case when property_value='false' then '0' else '2' end where code in ('pricePlanFilters.enableCriteria1Value', 'pricePlanFilters.enableCriteria2Value', 'pricePlanFilters.enableCriteria3Value')</sql>
+    </changeSet>
+
+    <changeSet id="#INTRD-20847_20240202" author="zelmeliani">
+		<addColumn tableName="ar_customer_balance">
+            <column name="balance_el" type="varchar(2000)" />
+		</addColumn>
+	</changeSet>
+
+    <changeSet id="#INTRD-20127_add_index_attribute_instance" author="a.rouaguebe">
+        <sql>CREATE INDEX IF NOT EXISTS cpq_attribute_instance_parent_id_idx ON cpq_attribute_instance(parent_id)</sql>
+    </changeSet>
+    
+ 	<changeSet id="#INTRD-21087_20240208" author="AdilElJaouhari">
+		<addColumn tableName="billing_rated_transaction">
+			<column name="contract_id" type="bigint" />
+			<column name="contract_line_id" type="bigint" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			baseTableName="billing_rated_transaction"
+			baseColumnNames="contract_id"
+			constraintName="rt_contract_id_fk" 
+ 			referencedTableName="cpq_contract" referencedColumnNames="id" 
+ 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" />
+			
+		<addForeignKeyConstraint
+			baseTableName="billing_rated_transaction"
+			baseColumnNames="contract_line_id"
+			constraintName="rt_contract_line_id_fk"
+			referencedTableName="cpq_contract_item" referencedColumnNames="id"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" />
+	</changeSet>
+    
+    <changeSet id="#INTRD-21452_20240209" author="TarikFA.">
+        <addColumn tableName="ar_account_operation">
+            <column name="source_account_operation_id" type="bigint" />
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="source_account_operation_id"
+                constraintName="source_account_operation_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+    </changeSet>
+
 </databaseChangeLog>

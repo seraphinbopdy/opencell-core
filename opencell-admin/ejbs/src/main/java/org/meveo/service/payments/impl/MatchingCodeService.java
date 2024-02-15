@@ -41,6 +41,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
+import org.meveo.admin.util.ResourceBundle;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.qualifier.Updated;
@@ -135,6 +136,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
 
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
     private final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN);
+	
+	@Inject
+	protected ResourceBundle resourceMessages;
 
     /**
      * Match account operations.
@@ -483,9 +487,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             }
         }
 
-        if (isToTriggerCollectionPlanLevelsJob) {
+        // Commented to avoid performance issues
+        /*if (isToTriggerCollectionPlanLevelsJob) {
             invoiceService.triggersCollectionPlanLevelsJob();
-        }
+        }*/
 
         matchingCode.setMatchingAmountDebit(amount);
         matchingCode.setMatchingAmountCredit(amount);
@@ -625,11 +630,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
         if (accountOperation == null) {
             throw new BusinessException("Cant find account operation by id:" + aoID);
         }
-        if (MatchingStatusEnum.L != accountOperation.getMatchingStatus() && MatchingStatusEnum.P != accountOperation.getMatchingStatus() ) {
-            throw new BusinessException("The account operation is unmatched");
+        List<MatchingAmount> matchingAmounts = accountOperation.getMatchingAmounts();
+        if (matchingAmounts != null && !matchingAmounts.isEmpty()) {
+            unmatching(matchingAmounts.get(0).getMatchingCode().getId());
         }
-        unmatching(accountOperation.getMatchingAmounts().get(0).getMatchingCode().getId());
-
     }
 
     /**
@@ -897,7 +901,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
         }
 
         if (cptPartialAllowed == 0) {
-            throw new BusinessException("matchingService.matchingImpossible");
+            throw new BusinessException(resourceMessages.getString("matchingService.matchingImpossible"));
         }
         log.info("matchOperations successful :  partial  (plusieurs idPartial possible)");
         matchingReturnObject.setOk(false);
@@ -950,10 +954,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             }
         }
         if (cptOccCredit == 0) {
-            throw new BusinessException("matchingService.noCreditOps");
+            throw new BusinessException(resourceMessages.getString("matchingService.noCreditOps"));
         }
         if (cptOccDebit == 0) {
-            throw new BusinessException("matchingService.noDebitOps");
+            throw new BusinessException(resourceMessages.getString("matchingService.noDebitOps"));
         }
             BigDecimal balance = amount.subtract(amoutCredit);
             balance = balance.abs();
@@ -966,25 +970,27 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                             || accountOperation instanceof OtherCreditAndCharge)
                     .findFirst()
                     .orElse(null);
-            PaymentHistory paymentHistory = paymentHistoryService.findHistoryByPaymentId(payment.getReference());
-            if (payment != null && paymentHistory != null) {
-                List<Long> aoIdsToPay = operationIds.stream().filter(aoId -> !aoId.equals(payment.getId())).collect(toList());
-                if (paymentHistory.getListAoPaid() == null || paymentHistory.getListAoPaid().isEmpty()) {
-                    List<AccountOperation> aoToPay = new ArrayList<>();
-                    for (Long aoId : aoIdsToPay) {
-                        aoToPay.add(accountOperationService.findById(aoId));
-                    }
-                    for (AccountOperation ao : aoToPay) {
-                        if (ao != null) {
-                            if (ao.getPaymentHistories() == null) {
-                                ao.setPaymentHistories(new ArrayList<>());
-                            }
-                            ao.getPaymentHistories().add(paymentHistory);
+            if(payment != null) {
+                PaymentHistory paymentHistory = paymentHistoryService.findHistoryByPaymentId(payment.getReference());
+                if (paymentHistory != null) {
+                    List<Long> aoIdsToPay = operationIds.stream().filter(aoId -> !aoId.equals(payment.getId())).collect(toList());
+                    if (paymentHistory.getListAoPaid() == null || paymentHistory.getListAoPaid().isEmpty()) {
+                        List<AccountOperation> aoToPay = new ArrayList<>();
+                        for (Long aoId : aoIdsToPay) {
+                            aoToPay.add(accountOperationService.findById(aoId));
+                        }
+                        for (AccountOperation ao : aoToPay) {
+                            if (ao != null) {
+                                if (ao.getPaymentHistories() == null) {
+                                    ao.setPaymentHistories(new ArrayList<>());
+                                }
+                                ao.getPaymentHistories().add(paymentHistory);
 
-                            if (paymentHistory.getListAoPaid() == null) {
-                                paymentHistory.setListAoPaid(new ArrayList<>());
+                                if (paymentHistory.getListAoPaid() == null) {
+                                    paymentHistory.setListAoPaid(new ArrayList<>());
+                                }
+                                paymentHistory.getListAoPaid().add(ao);
                             }
-                            paymentHistory.getListAoPaid().add(ao);
                         }
                     }
                 }
@@ -1040,7 +1046,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
         }
 
         if (cptPartialAllowed == 0) {
-            throw new BusinessException("matchingService.matchingImpossible");
+            throw new BusinessException(resourceMessages.getString(resourceMessages.getString("matchingService.matchingImpossible")));
         }
         log.info("matchOperations successful :  partial  (plusieurs idPartial possible)");
         matchingReturnObject.setOk(false);

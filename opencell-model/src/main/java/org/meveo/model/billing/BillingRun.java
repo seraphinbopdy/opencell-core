@@ -43,6 +43,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -150,11 +151,10 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     private BigDecimal producibleAmountTax;
 
     /**
-     * Deprecated in 5.3 for not use
+     * Number of generated invoice
      */
-    @Deprecated
     @Column(name = "nb_invoice")
-    private Integer InvoiceNumber;
+    private Integer invoiceNumber;
 
     /**
      * Deprecated in 5.3 for not use
@@ -600,11 +600,11 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     }
 
     public Integer getInvoiceNumber() {
-        return InvoiceNumber;
+        return invoiceNumber;
     }
 
     public void setInvoiceNumber(Integer invoiceNumber) {
-        InvoiceNumber = invoiceNumber;
+        this.invoiceNumber = invoiceNumber;
     }
 
     public BigDecimal getProducibleAmountWithTax() {
@@ -778,6 +778,7 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
      * setting uuid if null
      */
     @PrePersist
+    @PreUpdate
     public void setUUIDIfNull() {
         if (uuid == null) {
             uuid = UUID.randomUUID().toString();

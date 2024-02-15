@@ -19,6 +19,7 @@
 package org.meveo.api.account;
 
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.meveo.admin.exception.DuplicateDefaultAccountException;
 import org.meveo.api.MeveoApiErrorCodeEnum;
 import org.meveo.api.dto.GDPRInfoDto;
 import org.meveo.api.dto.account.ApplyProductRequestDto;
+import org.meveo.api.dto.account.RegistrationNumberDto;
 import org.meveo.api.dto.account.UserAccountDto;
 import org.meveo.api.dto.account.UserAccountsDto;
 import org.meveo.api.dto.billing.SubscriptionDto;
@@ -68,7 +70,6 @@ import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.ProductTemplate;
 import org.meveo.model.crm.BusinessAccountModel;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
-import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
 import org.meveo.service.admin.impl.SellerService;
@@ -336,16 +337,6 @@ public class UserAccountApi extends AccountEntityApi {
             }
             userAccount.setBillingAccount(billingAccount);
         }
-        if (postData.getIsoICDCode() != null) {
-            IsoIcd isoIcd = isoIcdService.findByCode(postData.getIsoICDCode());
-            if (isoIcd == null) {
-                throw new EntityDoesNotExistsException(IsoIcd.class, postData.getIsoICDCode());
-            }
-            userAccount.setIcdId(isoIcd);
-        }
-        else {
-            userAccount.setIcdId(userAccount.getBillingAccount().getIcdId());
-        }
         updateAccount(userAccount, postData, checkCustomFields);
 
         if (postData.getSubscriptionDate() != null) {
@@ -373,6 +364,19 @@ public class UserAccountApi extends AccountEntityApi {
             log.error("Failed to associate custom field instance to an entity", e);
             throw e;
         }
+	    
+	    try {
+	    	if (StringUtils.isNotBlank(postData.getRegistrationNo())) {
+	    		RegistrationNumberDto registrationNumberDto = new RegistrationNumberDto();
+	    		registrationNumberDto.setRegistrationNo(postData.getRegistrationNo());
+	    		registrationNumberDto.setIsoIcdCode(postData.getIsoICDCode());
+	            postData.getRegistrationNumbers().add(registrationNumberDto);
+	        }
+		    createOrUpdateRegistrationNumber(userAccount, postData.getRegistrationNumbers());
+	    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+		    throw new BusinessException("Error when inserting register number", e);
+	    }
+		
     }
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(entityClass = UserAccount.class))

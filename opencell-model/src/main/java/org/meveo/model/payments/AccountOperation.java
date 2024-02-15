@@ -511,6 +511,13 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
     @Column(name = "error_detail", length = 2000)
     private String errorDetail;
 
+    @Column(name = "litigation_reason", length = 2000)
+    private String litigationReason;
+	
+	@JoinColumn( name = "source_account_operation_id" )
+	@ManyToOne(fetch = FetchType.LAZY)
+	private AccountOperation sourceAccountOperation;
+
     public Date getDueDate() {
         return dueDate;
     }
@@ -1199,4 +1206,20 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
     public void setErrorDetail(String errorDetail) {
         this.errorDetail = errorDetail;
     }
+
+    public String getLitigationReason() {
+        return litigationReason;
+    }
+
+    public void setLitigationReason(String litigationReason) {
+        this.litigationReason = litigationReason;
+    }
+	
+	public AccountOperation getSourceAccountOperation() {
+		return sourceAccountOperation;
+	}
+	
+	public void setSourceAccountOperation(AccountOperation sourceAccountOperation) {
+		this.sourceAccountOperation = sourceAccountOperation;
+	}
 }

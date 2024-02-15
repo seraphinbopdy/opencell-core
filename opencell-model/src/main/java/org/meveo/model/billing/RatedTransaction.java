@@ -61,6 +61,7 @@ import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.UnitOfMeasure;
 import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.contract.Contract;
+import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.tax.TaxClass;
@@ -174,8 +175,8 @@ import org.meveo.model.tax.TaxClass;
         @NamedQuery(name = "RatedTransaction.listToInvoiceByBillingAccount", query = "SELECT r FROM RatedTransaction r left join fetch r.wallet where r.billingAccount.id=:billingAccountId AND r.status='OPEN' AND :firstTransactionDate<=r.usageDate AND r.usageDate<:lastTransactionDate and (r.invoicingDate is NULL or r.invoicingDate<:invoiceUpToDate) "),
         @NamedQuery(name = "RatedTransaction.moveToQuarantineBRByInvoiceIds", query = "update RatedTransaction r set r.billingRun= :billingRun where r.invoiceLine.id in (select il.id from InvoiceLine il where il.invoice.id IN (:invoiceIds))"),
 
-        @NamedQuery(name = "RatedTransaction.sumPositiveRTByBillingRun", query = "select sum(r.amountWithoutTax), sum(r.amountWithTax), r.subscription.id, r.infoOrder.order.id,  r.invoiceLine.invoice.id, r.billingAccount.id, r.billingAccount.customerAccount.id, r.billingAccount.customerAccount.customer.id "
-                + "FROM RatedTransaction r where r.billingRun.id=:billingRunId and r.amountWithoutTax > 0 and r.status='BILLED' group by r.subscription.id, r.infoOrder.order.id, r.invoiceLine.invoice.id, r.billingAccount.id, r.billingAccount.customerAccount.id, r.billingAccount.customerAccount.customer.id"),
+        @NamedQuery(name = "RatedTransaction.sumPositiveRTByBillingRun", query = "select sum(r.amountWithoutTax), sum(r.amountWithTax), r.subscription.id, r.orderInfo.order.id,  r.invoiceLine.invoice.id, r.billingAccount.id, r.billingAccount.customerAccount.id, r.billingAccount.customerAccount.customer.id "
+                + "FROM RatedTransaction r where r.billingRun.id=:billingRunId and r.amountWithoutTax > 0 and r.status='BILLED' group by r.subscription.id, r.orderInfo.order.id, r.invoiceLine.invoice.id, r.billingAccount.id, r.billingAccount.customerAccount.id, r.billingAccount.customerAccount.customer.id"),
         @NamedQuery(name = "RatedTransaction.unInvoiceByInvoiceIds", query = "update RatedTransaction r set r.status='OPEN', r.updated = :now, r.billingRun= null, r.invoiceLine=null, r.invoiceAgregateF=null where r.status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and r.invoiceLine.id IN (select il.id from InvoiceLine il where il.invoice.id IN (:invoiceIds))"),
         @NamedQuery(name = "RatedTransaction.deleteSupplementalRTByInvoiceIds", query = "DELETE from RatedTransaction r WHERE r.type='MINIMUM' and r.invoiceLine.id in (select il.id from InvoiceLine il where il.invoice.id IN (:invoicesIds))"),
         @NamedQuery(name = "RatedTransaction.detachRTsFromSubscription", query = "UPDATE RatedTransaction set serviceInstance = null where serviceInstance.id IN (SELECT id from ServiceInstance where subscription=:subscription)"),
@@ -206,10 +207,12 @@ import org.meveo.model.tax.TaxClass;
         @NamedQuery(name = "RatedTransaction.findAmountsPerSubscriptionBilledDetails", query = "SELECT rt.subscription.id, SUM(rt.amountWithoutTax) AS subscription_amount, COUNT(rt.id) FROM RatedTransaction rt WHERE rt.id in (:ids) GROUP BY rt.subscription.id ORDER BY subscription_amount DESC"),
         @NamedQuery(name = "RatedTransaction.findAmountsPerArticleBilledDetails", query = "SELECT rt.accountingArticle.id, SUM(rt.amountWithoutTax) AS article_amount, COUNT(rt.id) FROM RatedTransaction rt WHERE rt.id in (:ids) GROUP BY rt.accountingArticle.id ORDER BY article_amount DESC"),
         @NamedQuery(name = "RatedTransaction.findAmountsPerProductBilledDetails", query = "SELECT rt.serviceInstance.productVersion.product.id, SUM(rt.amountWithoutTax) AS product_amount, COUNT(rt.id) FROM RatedTransaction rt WHERE rt.id in (:ids) GROUP BY rt.serviceInstance.productVersion.product.id ORDER BY product_amount DESC"),
-        @NamedQuery(name = "RatedTransaction.findReportInitialDataDetails", query = "SELECT COUNT(DISTINCT rt), COUNT(DISTINCT rt.billingAccount), COUNT(DISTINCT rt.subscription), COUNT(DISTINCT rt.chargeInstance) FROM RatedTransaction rt WHERE rt.id in (:ids)")
+        @NamedQuery(name = "RatedTransaction.findReportInitialDataDetails", query = "SELECT COUNT(DISTINCT rt), COUNT(DISTINCT rt.billingAccount), COUNT(DISTINCT rt.subscription), COUNT(DISTINCT rt.chargeInstance) FROM RatedTransaction rt WHERE rt.id in (:ids)"),
+        @NamedQuery(name = "RatedTransaction.cancelRTs", query = "UPDATE RatedTransaction set status='CANCELED', rejectReason=:rejectReason, updated=:updatedDate where id in :ids")
 })
 
 @NamedNativeQueries({
+        @NamedNativeQuery(name = "RatedTransaction.rtSummaryForRerating", query = "select rt.id, rt.status, rt.amount_without_tax, rt.amount_with_tax, rt.amount_tax, rt.quantity, rt.invoice_line_id, il.status as ilstatus, il.billing_run_id from {h-schema}billing_rated_transaction rt left join {h-schema}billing_invoice_line il on rt.invoice_line_id=il.id where rt.status<>'CANCELED' and rt.id in :rtIds"),
         @NamedNativeQuery(name = "RatedTransaction.massUpdateWithDiscountedRT", query = "update {h-schema}billing_rated_transaction rt set discounted_ratedtransaction_id=discountedWO.rated_transaction_id , updated=now() from {h-schema}billing_wallet_operation discountWO, {h-schema}billing_wallet_operation discountedWO where discountWO.rated_transaction_id=rt.id and discountWO.discounted_wallet_operation_id=discountedWO.id and rt.status='OPEN' and rt.discounted_ratedtransaction_id is null and discountWO.id>=:minId and discountWO.id<=:maxId"),
         @NamedNativeQuery(name = "RatedTransaction.massUpdateWithDiscountedRTOracle", query = "UPDATE (SELECT rt.discounted_ratedtransaction_id, rt.updated FROM {h-schema}billing_rated_transaction rt, {h-schema}billing_wallet_operation discountWO, {h-schema}billing_wallet_operation discountedWO where discountWO.rated_transaction_id=rt.id and discountWO.discounted_wallet_operation_id=discountedWO.id and rt.status='OPEN' and rt.discounted_ratedtransaction_id is null and discountWO.id>=:minId and discountWO.id<=:maxId) SET rt.discounted_ratedtransaction_id=discountedWO.rated_transaction_id , updated=now()"),
 
@@ -610,7 +613,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     private AccountingArticle accountingArticle;
 
     @Embedded
-    private OrderInfo infoOrder;
+    private OrderInfo orderInfo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_line_id")
@@ -684,6 +687,14 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
 
     @Column(name = "business_key")
     private String businessKey;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_id")
+    private Contract contract;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_line_id")
+    private ContractItem contractLine;
     
     public RatedTransaction() {
         super();
@@ -830,7 +841,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.ratingUnitOfMeasure = walletOperation.getRatingUnitOfMeasure();
         this.accountingCode = walletOperation.getAccountingCode();
         this.accountingArticle = walletOperation.getAccountingArticle();
-        this.infoOrder = walletOperation.getOrderInfo();
+        this.orderInfo = walletOperation.getOrderInfo();
         this.invoicingDate = walletOperation.getInvoicingDate();
         this.unityDescription = walletOperation.getInputUnitDescription();
         this.ratingUnitDescription = walletOperation.getRatingUnitDescription();
@@ -851,6 +862,10 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.transactionalAmountWithoutTax = walletOperation.getTransactionalAmountWithoutTax();
         this.transactionalAmountWithTax = walletOperation.getTransactionalAmountWithTax();
         this.businessKey = walletOperation.getBusinessKey();
+        this.orderInfo = walletOperation.getOrderInfo();
+        this.tradingCurrency = walletOperation.getTradingCurrency();
+        this.contract = walletOperation.getContract();
+        this.contractLine = walletOperation.getContractLine();
     }
 
 
@@ -895,7 +910,6 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.ratingUnitOfMeasure = rateTransactionToDuplicate.getRatingUnitOfMeasure();
         this.accountingCode = rateTransactionToDuplicate.getAccountingCode();
         this.accountingArticle = rateTransactionToDuplicate.getAccountingArticle();
-        this.infoOrder = rateTransactionToDuplicate.getOrderInfo();
         this.invoicingDate = rateTransactionToDuplicate.getInvoicingDate();
         this.unityDescription = rateTransactionToDuplicate.getUnityDescription();
         this.ratingUnitDescription = rateTransactionToDuplicate.getRatingUnitDescription();
@@ -909,6 +923,9 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.sequence = rateTransactionToDuplicate.getSequence();
         this.rulesContract = rateTransactionToDuplicate.getRulesContract();
         this.businessKey = rateTransactionToDuplicate.getBusinessKey();
+        this.orderInfo = rateTransactionToDuplicate.getOrderInfo();
+        this.contract = rateTransactionToDuplicate.getContract();
+        this.contractLine = rateTransactionToDuplicate.getContractLine();
     }
     
     public WalletInstance getWallet() {
@@ -1639,17 +1656,17 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     }
 
     /**
-     * @return the infoOrder
+     * @return the orderInfo
      */
     public OrderInfo getOrderInfo() {
-        return infoOrder;
+        return orderInfo;
     }
 
     /**
-     * @param infoOrder the infoOrder to set
+     * @param orderInfo the orderInfo to set
      */
-    public void setOrderInfo(OrderInfo infoOrder) {
-        this.infoOrder = infoOrder;
+    public void setOrderInfo(OrderInfo orderInfo) {
+        this.orderInfo = orderInfo;
     }
 
     public InvoiceLine getInvoiceLine() {
@@ -1707,14 +1724,6 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     public void setDiscountedAmount(BigDecimal discountedAmount) {
         this.discountedAmount = discountedAmount;
     }
-
-	public OrderInfo getInfoOrder() {
-		return infoOrder;
-	}
-
-	public void setInfoOrder(OrderInfo infoOrder) {
-		this.infoOrder = infoOrder;
-	}
 
 	public Integer getSequence() {
 		return sequence;
@@ -1871,6 +1880,22 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
 
 	public void setBusinessKey(String businessKey) {
 		this.businessKey = businessKey;
+	}
+
+	public Contract getContract() {
+		return contract;
+	}
+
+	public void setContract(Contract contract) {
+		this.contract = contract;
+	}
+
+	public ContractItem getContractLine() {
+		return contractLine;
+	}
+
+	public void setContractLine(ContractItem contractLine) {
+		this.contractLine = contractLine;
 	}
     
 }

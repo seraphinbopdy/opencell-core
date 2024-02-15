@@ -47,6 +47,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.FlushMode;
@@ -88,6 +89,7 @@ import org.meveo.model.report.query.ReportQuery;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.model.transformer.AliasToEntityOrderedMapResultTransformer;
 import org.meveo.security.keycloak.CurrentUserProvider;
+import org.meveo.service.base.expressions.ExpressionFactory;
 import org.meveo.service.base.expressions.NativeExpressionFactory;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CustomEntityTemplateService;
@@ -169,7 +171,19 @@ public class NativePersistenceService extends BaseService {
      * @return A map of values with field name as a map key and field value as a map value. Or null if no record was found with such identifier.
      */
     public Map<String, Object> findById(String tableName, Long id) {
-        return findByIdWithouCheckCodeAndDescription(tableName, id, true);
+        return findById(tableName, id, null);
+    }
+
+    /**
+     * Find record by its identifier
+     *
+     * @param tableName Table name
+     * @param id        Identifier
+     * @param fields    A set of fields to return. If null or empty, only id field will be returned
+     * @return A map of values with field name as a map key and field value as a map value. Or null if no record was found with such identifier.
+     */
+    public Map<String, Object> findById(String tableName, Long id, Set<String> fields) {
+        return findByIdWithouCheckCodeAndDescription(tableName, id, fields, true);
     }
 
     /**
@@ -182,6 +196,20 @@ public class NativePersistenceService extends BaseService {
      */
     @SuppressWarnings({ "rawtypes", "deprecation" })
     public Map<String, Object> findByIdWithouCheckCodeAndDescription(String tableName, Long id, boolean canCheck) {
+        return findByIdWithouCheckCodeAndDescription(tableName, id, null, canCheck);
+    }
+
+    /**
+     * Find record by its identifier
+     *
+     * @param tableName Table name
+     * @param id        Identifier
+     * @param fields    A set of fields to return. Works only when canCheck is true
+     * @param canCheck When True it will get id, and the code of the customer table
+     * @return A map of values with field name as a map key and field value as a map value. Or null if no record was found with such identifier.
+     */
+    @SuppressWarnings({ "rawtypes", "deprecation" })
+    public Map<String, Object> findByIdWithouCheckCodeAndDescription(String tableName, Long id, Set<String> fields, boolean canCheck) {
         tableName = addCurrentSchema(tableName);
         try {
             Session session = getEntityManager().unwrap(Session.class);
@@ -190,6 +218,9 @@ public class NativePersistenceService extends BaseService {
             query.setParameter("id", id);
             if(canCheck) {
                 query.addScalar("id", new LongType());
+                if(!ListUtils.isEmtyCollection(fields)) {
+                    fields.stream().filter(f -> !f.equals("id")).forEach(f -> query.addScalar(f, new StringType()));
+                }
                 query.setFlushMode(FlushMode.COMMIT);
             }
 
@@ -996,14 +1027,20 @@ public class NativePersistenceService extends BaseService {
         }
         String distinct = config.isDistinctQuery() ? "distinct" : "";
 
+        Class<?> entityClass = null;
+        try {
+            entityClass = Class.forName(tableName);
+        } catch (ClassNotFoundException e) {
+            log.warn("The requested entity does not exist");
+        }
         QueryBuilder queryBuilder;
         if (leftJoinClause != null) {
             queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from "
-                    + tableName + " a " + leftJoinClause, "a");
+                    + tableName + " a " + leftJoinClause, "a", entityClass);
         }
         else {
             queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from "
-                    + tableName + " a ", "a");
+                    + tableName + " a ", "a", entityClass);
         }
 
         if (id != null) {
@@ -1019,12 +1056,21 @@ public class NativePersistenceService extends BaseService {
         }
         Map<String, Object> filters = config.getFilters();
 
+
+        Map<String, Object> cfFilters = PersistenceService.extractCustomFieldsFilters(filters);
+        if(MapUtils.isNotEmpty(cfFilters)) {
+            filters.putAll(cfFilters);
+        }
+
         if (filters != null && !filters.isEmpty()) {
-            NativeExpressionFactory nativeExpressionFactory = new NativeExpressionFactory(queryBuilder, "a");
+            NativeExpressionFactory nativeExpressionFactory = new ExpressionFactory(queryBuilder, "a");
             filters.keySet().stream()
             		.sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
-                    .filter(key -> filters.get(key) != null)
+                    .filter(key -> filters.get(key) != null && !"$OPERATOR".equalsIgnoreCase(key))
                     .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
+            for (String cft : cfFilters.keySet()) {
+                filters.remove(cft);
+            }
         }
 
         if (config.getOrderings() != null && config.getOrderings().length == 2) {
@@ -1500,10 +1546,14 @@ public class NativePersistenceService extends BaseService {
 
     @SuppressWarnings("rawtypes")
     public Map<String, Object> findByClassAndId(String className, Long id) {
+        return findByClassAndId(className, id, null);
+    }
+
+    public Map<String, Object> findByClassAndId(String className, Long id, Set<String> fields) {
         try {
             Class clazz = Class.forName(className);
             String tableName = getTableNameForClass(clazz);
-            return findById(tableName, id);
+            return findById(tableName, id, fields);
         } catch (ClassNotFoundException e) {
             throw new BusinessException("Exception when trying to get class with name: " + className);
         }

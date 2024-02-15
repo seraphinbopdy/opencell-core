@@ -208,9 +208,11 @@ public class UsageRatingService extends RatingService implements Serializable {
         try {
             RatingResult ratingResult = null;
             if (reservation == null) {
-                ratingResult = rateChargeAndInstantiateTriggeredEDRs(usageChargeInstance, edr.getEventDate(), quantityToCharge, null, null, null, null, null, null, edr, reservation, false, isVirtual);
+                ratingResult = rateChargeAndInstantiateTriggeredEDRs(usageChargeInstance, edr.getEventDate(), quantityToCharge, null,null,
+                        null, null, null, null, edr, reservation, false, isVirtual, null);
             } else {
-                ratingResult = rateCharge(usageChargeInstance, edr.getEventDate(), quantityToCharge, null, null, null, null, null, null, edr, reservation, isVirtual);
+                ratingResult = rateCharge(usageChargeInstance, edr.getEventDate(), quantityToCharge, null, null, null,
+                        null, null, null, edr, reservation, isVirtual, null);
             }
             ratingResult.setFullyRated(fullyRated);
             if (deducedCounter != null) {

@@ -24,6 +24,8 @@ import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXI
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.accountingScheme.JournalEntry;
 import org.meveo.model.accountingScheme.JournalEntryDirectionEnum;
@@ -47,9 +49,12 @@ import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.RecordedInvoice;
+import org.meveo.model.payments.WriteOff;
 import org.meveo.model.securityDeposit.AuxiliaryAccounting;
 import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.service.billing.impl.AccountingCodeService;
+import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
@@ -61,6 +66,7 @@ import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,6 +102,12 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 
     @Inject
     private FinanceSettingsService financeSettingsService;
+	
+	@Inject
+	private InvoiceService invoiceService;
+	
+	@Inject
+	private AccountingCodeService accountingCodeService;
 
     @Transactional
     public List<JournalEntry> createFromAccountOperation(AccountOperation ao, OCCTemplate occT) {
@@ -261,6 +273,27 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
             throw new BusinessException("AccountOperation with id=" + ao.getId() + " : Mandatory ContraAccountingCode2 not found for OCCTemplate id=" + occT.getId());
         }
     }
+	
+	/**
+	 * Check OCCTemplate fields
+	 *
+	 * @param ao             account operation
+	 * @param occT           occt.code = ao.code
+	 */
+	public void validateOccTForWritOff(AccountOperation ao, OCCTemplate occT) {
+		if (occT == null) {
+			log.warn("No OCCTemplate found for AccountOperation [id={}]", ao.getId());
+			throw new BusinessException("No OCCTemplate found for AccountOperation id=" + ao.getId());
+		}
+		if (occT.getAccountingCode() == null) {
+			log.warn("AccountOperation with id={} Mandatory AccountingCode not found for OCCTemplate id={}", ao.getId(), occT.getId());
+			throw new BusinessException("AccountOperation with id=" + ao.getId() + " : Mandatory AccountingCode not found for OCCTemplate id=" + occT.getId());
+		}
+		if (occT.getContraAccountingCode2() == null) {
+			log.warn("AccountOperation with id={} : Mandatory ContraAccountingCode2 not found for OCCTemplate id={}", ao.getId(), occT.getId());
+			throw new BusinessException("AccountOperation with id=" + ao.getId() + " : Mandatory ContraAccountingCode2 not found for OCCTemplate id=" + occT.getId());
+		}
+	}
 
     private JournalEntry buildJournalEntry(AccountOperation ao, AccountingCode code, OperationCategoryEnum categoryEnum, BigDecimal amount, Tax tax, Long operationNumber) {
         JournalEntry firstEntry = new JournalEntry();
@@ -276,7 +309,7 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
         firstEntry.setSeller(seller);
         firstEntry.setOperationNumber(operationNumber);
         firstEntry.setSellerCode(seller != null ? seller.getCode() : "");
-        firstEntry.setClientUniqueId(ao.getCustomerAccount() != null ? ao.getCustomerAccount().getRegistrationNo() : "");
+       // firstEntry.setClientUniqueId(ao.getCustomerAccount() != null ? ao.getCustomerAccount().getRegistrationNo() : "");
 
         Provider provider = providerService.getProvider();
         firstEntry.setCurrency(provider.getCurrency() != null ? provider.getCurrency().getCurrencyCode() : "");
@@ -567,7 +600,108 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
         }
 
     }
-
+	
+	public List<JournalEntry> createFromInvoice(AccountOperation ao, OCCTemplate occT){
+		AccountingCode accountingCode = ofNullable(fromCustomerAccount(ao.getCustomerAccount()))
+				.orElse(occT.getAccountingCode());
+		List<JournalEntry> saved = new ArrayList<>();
+		WriteOff writeOff = (WriteOff)ao;
+		
+		// 1- produce a Customer account entry line
+		JournalEntry customerAccountEntry = buildJournalEntry(writeOff, accountingCode, occT.getOccCategory(),
+				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount(), null, writeOff.getOperationNumber());
+		saved.add(customerAccountEntry);
+		
+		// 2 - procude tax accounting entry
+		List<JournalEntry> taxJournalEntries = buildTaxesJournalEntries(writeOff, occT);
+		saved.addAll(taxJournalEntries);
+		// 3 - procude dubt receivable
+		saved.addAll(createDoubtfulReceivable(writeOff));
+		// 4 - product bad debt write off
+		saved.add(createBadDebtWritOff(writeOff, occT.getAccountingCode(), taxJournalEntries.stream().map(JournalEntry::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)));
+		
+		saved.forEach(this::create);
+		return saved;
+	}
+	
+	private JournalEntry createBadDebtWritOff(WriteOff writeOff, AccountingCode accountingCode,  BigDecimal reduce) {
+		return  buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.DEBIT,
+				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount().subtract(reduce), null, writeOff.getOperationNumber());
+	}
+	
+	private List<JournalEntry> createDoubtfulReceivable(WriteOff writeOff) {
+		final String ACCOUNTING_CODE_KEY = "accounting.code.doubtful.receivable.key";
+		String accountingCodeFromProperty = ParamBeanFactory.getAppScopeInstance().getProperty(ACCOUNTING_CODE_KEY, "416000000");
+		AccountingCode accountingCode = ofNullable(accountingCodeService.findByCode(accountingCodeFromProperty))
+				.orElse(null);
+		if(accountingCode == null) {
+			throw new BusinessException("no accounting code found from key : " + ACCOUNTING_CODE_KEY);
+		}
+		JournalEntry journalEntryDoubtfulRecCredit = buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.CREDIT,
+				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount(), null, writeOff.getOperationNumber());
+		
+		JournalEntry journalEntryDoubtfulRecDebit = buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.DEBIT,
+				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount(), null, writeOff.getOperationNumber());
+		
+		return List.of(journalEntryDoubtfulRecCredit, journalEntryDoubtfulRecDebit);
+		
+	}
+	
+	
+	private List<JournalEntry> buildTaxesJournalEntries(WriteOff writeOff, OCCTemplate occT) {
+		Invoice invoice = invoiceService.findByInvoiceNumber(writeOff.getReference());
+		if(invoice == null){
+			throw new EntityDoesNotExistsException(Invoice.class, writeOff.getReference());
+		}
+		Query queryTax = getEntityManager().createQuery(
+						"SELECT taxAg" +
+								" FROM TaxInvoiceAgregate taxAg LEFT JOIN AccountingCode ac ON taxAg.accountingCode = ac" +
+								" WHERE taxAg.invoice.id = :" + PARAM_ID_INV)
+				.setParameter(PARAM_ID_INV, invoice.getId());
+		List<TaxInvoiceAgregate> taxResult = queryTax.getResultList();
+		if (taxResult != null && !taxResult.isEmpty()) {
+			log.info("Start creating taxes accounting entries for AO={} | INV_ID={} : {} invoice line to process",
+					writeOff.getId(), invoice.getId(), taxResult.size());
+			
+			// INTRD-6292 : if the acounting code related to an article is null then use occT.contraAccountingCode before grouping,
+			// otherwise the default accounting code should be assigned before grouping
+			Map<String, JournalEntry> accountingCodeJournal = new HashMap<>();
+			taxResult.forEach(taxAgr -> {
+				AccountingCode taxACC = taxAgr.getAccountingCode() != null ? taxAgr.getAccountingCode() : occT.getContraAccountingCode2();
+				if (taxACC == null) {
+					throw new BusinessException("AccountOperation with id=" + writeOff.getId() + " : " +
+							TAX_MANDATORY_ACCOUNTING_CODE_NOT_FOUND);
+				}
+				
+				String groupKey = taxACC.getCode() + (taxAgr.getTax() == null ? "" : taxAgr.getTax().getCode());
+				BigDecimal amoutTax = taxAgr.getAmountTax() == null ? BigDecimal.ZERO : taxAgr.getAmountTax();
+				BigDecimal transactionAmoutTax = taxAgr.getTransactionalAmountTax() == null ? BigDecimal.ZERO : taxAgr.getTransactionalAmountTax();
+				
+				if (amoutTax != null && amoutTax.compareTo(BigDecimal.ZERO) != 0) {
+					if (accountingCodeJournal.get(groupKey) == null) {
+						JournalEntry taxEntry = buildJournalEntry(writeOff, taxACC,
+								occT.getOccCategory() == OperationCategoryEnum.DEBIT ? OperationCategoryEnum.CREDIT : OperationCategoryEnum.DEBIT,
+								amoutTax,
+								taxAgr.getTax(), writeOff.getOperationNumber());
+						taxEntry.setTransactionalAmount(transactionAmoutTax);
+						accountingCodeJournal.put(groupKey, taxEntry);
+					} else {
+						JournalEntry entry = accountingCodeJournal.get(groupKey);
+						entry.setAmount(entry.getAmount().add(amoutTax));
+						entry.setTransactionalAmount(entry.getTransactionalAmount().add(transactionAmoutTax));
+					}
+				}
+			});
+			
+			return new ArrayList<>(accountingCodeJournal.values());
+			
+		} else {
+			log.info("No taxes accounting entries to create for AO={} | INV_ID={}",
+					writeOff.getId(), invoice.getId());
+		}
+		
+		return null;
+	}
     private List<JournalEntry> getJournalEntries(AccountOperation ao, List<JournalEntry> createdEntries) {
         if (CollectionUtils.isEmpty(createdEntries)) {
             return Collections.emptyList();

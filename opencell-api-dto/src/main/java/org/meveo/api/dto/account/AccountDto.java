@@ -31,6 +31,9 @@ import org.meveo.model.AccountEntity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * The Class AccountDto.
  *
@@ -81,10 +84,11 @@ public abstract class AccountDto extends BusinessEntityDto {
     @Schema(description = "The vat no")
     private String vatNo;
     
-    /** The registration no. */
-    @Schema(description = "The registration no")
+    /** Deprecated registration no., use registrationNumbers instead */
+    @Schema(description = "Deprecated registration no., use registrationNumbers instead")   
+    @Deprecated
     private String registrationNo;
-
+    
     /** The contact information. */
     @Schema(description = "The contact information")
     private ContactInformationDto contactInformation;
@@ -130,7 +134,11 @@ public abstract class AccountDto extends BusinessEntityDto {
 
     @Schema(description = "The legal entity type")
     protected TitleDto legalEntityType;
-    /**
+	
+	@Schema(description = "list of registration numbers")
+	private Set<RegistrationNumberDto> registrationNumbers;
+    
+	/**
      * Instantiates a new account dto.
      */
     public AccountDto() {
@@ -146,7 +154,6 @@ public abstract class AccountDto extends BusinessEntityDto {
         super(e);
 
         setVatNo(e.getVatNo());
-        setRegistrationNo(e.getVatNo());
         if (e.getContactInformation() != null) {
             setContactInformation(new ContactInformationDto(e.getContactInformation()));
         }
@@ -379,14 +386,6 @@ public abstract class AccountDto extends BusinessEntityDto {
 		this.vatNo = vatNo;
 	}
 
-	public String getRegistrationNo() {
-		return registrationNo;
-	}
-
-	public void setRegistrationNo(String registrationNo) {
-		this.registrationNo = registrationNo;
-	}
-
 	public ContactInformationDto getContactInformation() {
 		if (contactInformation == null) {
 			contactInformation = new ContactInformationDto();
@@ -471,5 +470,23 @@ public abstract class AccountDto extends BusinessEntityDto {
 	 */
 	public void setLegalEntityType(TitleDto legalEntityType) {
 		this.legalEntityType = legalEntityType;
+	}
+	
+	@Deprecated
+	public String getRegistrationNo() {
+		return registrationNo;
+	}
+
+	@Deprecated
+	public void setRegistrationNo(String registrationNo) {
+		this.registrationNo = registrationNo;
+	}
+	
+	public Set<RegistrationNumberDto> getRegistrationNumbers() {
+		return registrationNumbers;
+	}
+	
+	public void setRegistrationNumbers(Set<RegistrationNumberDto> registrationNumbers) {
+		this.registrationNumbers = registrationNumbers;
 	}
 }

@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Future;
@@ -153,6 +152,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
             BillingAccount billingAccount = getEntityManager().getReference(BillingAccount.class, billingAccountDetailsItem.getBillingAccountId());
             try {
                 createAggregatesAndInvoiceFromInvoicingItems(billingAccountDetailsItem, billingRun, invoices, billingCycle, billingAccount,isFullAutomatic);
+                result.incrementInvoiceNumber(invoices.size());
                 invoicesByBA.add(invoices);
                 result.addNbItemsCorrectlyProcessed(invoices.size());
             } catch (Exception e) {
@@ -171,6 +171,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         evalDueDate(invoice, billingCycle, null, billingAccountDetailsItem.getCaDueDateDelayEL(), billingRun.isExceptionalBR());
         invoiceService.setInitialCollectionDate(invoice, billingCycle, billingRun);
         invoice.setSubCategoryInvoiceAgregate(invoiceSCAs);
+        InvoicingJobV3Bean.addNewAmounts(invoice.getAmountTax(), invoice.getAmountWithoutTax(), invoice.getAmountWithTax());
         invoices.add(invoice);
     }
     private void writeInvoicingData(BillingRun billingRun, boolean isFullAutomatic, List<List<Invoice>> invoicesbyBA, BillingCycle billingCycle) {

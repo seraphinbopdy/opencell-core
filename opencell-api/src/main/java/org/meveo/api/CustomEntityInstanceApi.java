@@ -23,13 +23,13 @@ import static org.meveo.service.base.NativePersistenceService.FIELD_ID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.CustomEntityInstanceDto;
 import org.meveo.api.dto.CustomFieldDto;
@@ -42,10 +42,10 @@ import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.model.crm.CustomFieldTemplate;
-import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.model.customEntities.CustomEntityTemplate;
+import org.meveo.service.admin.impl.UserService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CustomEntityInstanceService;
 import org.meveo.service.custom.CustomEntityTemplateService;
@@ -65,6 +65,9 @@ public class CustomEntityInstanceApi extends BaseApi {
 
     @Inject
     private CustomFieldTemplateService customFieldTemplateService;
+
+    @Inject
+    private UserService userService;
 
     public void create(CustomEntityInstanceDto dto) throws MeveoApiException, BusinessException {
 
@@ -198,8 +201,17 @@ public class CustomEntityInstanceApi extends BaseApi {
 
         handleMissingParameters();
 
-        if (!currentUser.hasRoles(CustomEntityTemplate.getReadPermission(cetCode), "ReadAllCE")) {
-            throw new ActionForbiddenException("User does not have permission '" + CustomEntityTemplate.getReadPermission(cetCode) + "'");
+        if(currentUser.getRoles().isEmpty()) {
+            Set<String> roles = userService.findByUsername(currentUser.getUserName(), true, false, true).getRoles();
+            if(!roles.contains(CustomEntityTemplate.getReadPermission(cetCode)) && !roles.contains("ReadAllCE")) {
+                if (!currentUser.hasRoles(CustomEntityTemplate.getReadPermission(cetCode), "ReadAllCE")) {
+                    throw new ActionForbiddenException("User does not have permission '" + CustomEntityTemplate.getReadPermission(cetCode) + "'");
+                }
+            }
+        } else {
+            if (!currentUser.hasRoles(CustomEntityTemplate.getReadPermission(cetCode), "ReadAllCE")) {
+                throw new ActionForbiddenException("User does not have permission '" + CustomEntityTemplate.getReadPermission(cetCode) + "'");
+            }
         }
 
         if (pagingAndFiltering == null) {

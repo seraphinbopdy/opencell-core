@@ -18,6 +18,7 @@
 
 package org.meveo.api.account;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +33,7 @@ import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.MeveoApiErrorCodeEnum;
@@ -39,6 +41,7 @@ import org.meveo.api.dto.GDPRInfoDto;
 import org.meveo.api.dto.LanguageDescriptionDto;
 import org.meveo.api.dto.account.BillingAccountDto;
 import org.meveo.api.dto.account.BillingAccountsDto;
+import org.meveo.api.dto.account.RegistrationNumberDto;
 import org.meveo.api.dto.billing.DiscountPlanInstanceDto;
 import org.meveo.api.dto.catalog.DiscountPlanDto;
 import org.meveo.api.dto.invoice.InvoiceDto;
@@ -63,6 +66,7 @@ import org.meveo.api.security.filter.ListFilter;
 import org.meveo.api.security.parameter.ObjectPropertyParser;
 import org.meveo.commons.utils.BeanUtils;
 import org.meveo.commons.utils.PersistenceUtils;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.billing.BankCoordinates;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.BillingCycle;
@@ -91,6 +95,7 @@ import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.pricelist.PriceList;
 import org.meveo.model.shared.Title;
 import org.meveo.model.tax.TaxCategory;
+import org.meveo.service.admin.impl.RegistrationNumberService;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.BillingCycleService;
@@ -139,9 +144,6 @@ public class BillingAccountApi extends AccountEntityApi {
 
     @Inject
     private TradingLanguageService tradingLanguageService;
-
-    @Inject
-    private IsoIcdService isoIcdService;
     
     @Inject
     private CustomerAccountService customerAccountService;
@@ -202,6 +204,7 @@ public class BillingAccountApi extends AccountEntityApi {
 
     @Inject
     private PriceListService priceListService;
+	
 
     public BillingAccount create(BillingAccountDto postData) throws MeveoApiException, BusinessException {
         return create(postData, true);
@@ -334,8 +337,7 @@ public class BillingAccountApi extends AccountEntityApi {
 
         dtoToEntity(billingAccount, postData, checkCustomFields, businessAccountModel, null);
         processTags(postData,billingAccount);
-
-        billingAccount = billingAccountService.update(billingAccount);
+	    billingAccount = billingAccountService.update(billingAccount);
 
         // terminate discounts
         if (postData.getDiscountPlansForTermination() != null) {
@@ -614,20 +616,6 @@ public class BillingAccountApi extends AccountEntityApi {
         		titleService.create(title);
         	billingAccount.setLegalEntityType(title);
         }
-        
-        if (postData.getIsoICDCode() != null) {
-            IsoIcd isoIcd = isoIcdService.findByCode(postData.getIsoICDCode());
-            if (isoIcd == null) {
-                throw new EntityDoesNotExistsException(IsoIcd.class, postData.getIsoICDCode());
-            }
-            billingAccount.setIcdId(isoIcd);
-        }
-        else {
-            if(providerService.getProvider() != null) {
-                billingAccount.setIcdId(providerService.getProvider().getIcdId());
-            }            
-        }
-
         // exemptionReason is mandatory billingAccount.taxCategory==EXEMPTED
         if ("EXEMPTED".equalsIgnoreCase(postData.getTaxCategoryCode()) && StringUtils.isBlank(postData.getExemptionReason())) {
             throw new BusinessApiException("Exemption Reason is mandatory for EXEMPTED TaxCategory");
@@ -648,12 +636,24 @@ public class BillingAccountApi extends AccountEntityApi {
                 billingAccount.setPriceList(priceList);
             }
         }
-
-        // Update payment method information in a customer account.
+	    
+	    // Update payment method information in a customer account.
         // ONLY used to handle deprecated billingAccountDto.paymentMethod and billingAccountDto.bankCoordinates fields. Use
         createOrUpdatePaymentMethodInCA(postData, billingAccount);
-
-        // Validate and populate customFields
+	    
+	    try {
+	    	if (StringUtils.isNotBlank(postData.getRegistrationNo())) {
+	    		RegistrationNumberDto registrationNumberDto = new RegistrationNumberDto();
+	    		registrationNumberDto.setRegistrationNo(postData.getRegistrationNo());
+	    		registrationNumberDto.setIsoIcdCode(postData.getIsoICDCode());
+	            postData.getRegistrationNumbers().add(registrationNumberDto);
+	        }
+		    createOrUpdateRegistrationNumber(billingAccount, postData.getRegistrationNumbers());
+	    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+		    throw new BusinessException("Error when inserting register number", e);
+	    }
+	    
+	    // Validate and populate customFields
         try {
             populateCustomFields(postData.getCustomFields(), billingAccount, isNew, checkCustomFields);
         } catch (MissingParameterException | InvalidParameterException e) {
@@ -663,10 +663,9 @@ public class BillingAccountApi extends AccountEntityApi {
             log.error("Failed to associate custom field instance to an entity", e);
             throw e;
         }
-
     }
-
-    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(entityClass = BillingAccount.class))
+	
+	@SecuredBusinessEntityMethod(validate = @SecureMethodParameter(entityClass = BillingAccount.class))
     public BillingAccountDto find(String billingAccountCode) throws MeveoApiException {
         return find(billingAccountCode, CustomFieldInheritanceEnum.INHERIT_NO_MERGE, false);
     }

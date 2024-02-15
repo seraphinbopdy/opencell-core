@@ -47,6 +47,7 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IWFEntity;
 import org.meveo.model.ObservableEntity;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.billing.GeneralLedger;
 import org.meveo.model.billing.InvoiceType;
@@ -60,6 +61,9 @@ import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.crm.CustomerSequence;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.PaymentGateway;
+
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 /**
  * Seller
@@ -104,13 +108,6 @@ public class Seller extends AccountEntity implements IWFEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trading_language_id")
     private TradingLanguage tradingLanguage;
-
-    /**
-     * The seller registration No
-     */
-    @Size(max = 100)
-    @Column(name = "registration_no", length = 100)
-    private String registrationNo;
 
     /**
      * A legal text for the seller
@@ -161,21 +158,20 @@ public class Seller extends AccountEntity implements IWFEntity {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "billing_seller_media", joinColumns = @JoinColumn(name = "seller_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
     private List<Media> medias = new ArrayList<>();
-    
-    /**
-     * IsoIcd
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "icd_id")
-    private IsoIcd icdId;
-    
-    public IsoIcd getIcdId() {
-        return icdId;
-    }
-
-    public void setIcdId(IsoIcd icdId) {
-        this.icdId = icdId;
-    }
+	
+	@OneToMany(mappedBy = "seller")
+	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+	
+	public List<RegistrationNumber> getRegistrationNumbers() {
+		if(registrationNumbers == null) {
+			registrationNumbers = new ArrayList<>();
+		}
+		return registrationNumbers;
+	}
+	
+	public void setRegistrationNumbers(List<RegistrationNumber> registrationNumbers) {
+		this.registrationNumbers = registrationNumbers;
+	}
     
     public List<Contract> getContracts() {
         return contracts;
@@ -207,25 +203,6 @@ public class Seller extends AccountEntity implements IWFEntity {
 
     public void setTradingLanguage(TradingLanguage tradingLanguage) {
         this.tradingLanguage = tradingLanguage;
-    }
-
-    /**
-     * Gets the seller's registration No
-     * 
-     * @return a registration No
-     *
-     */
-    public String getRegistrationNo() {
-        return registrationNo;
-    }
-
-    /**
-     * Sets the seller's registration No
-     * 
-     * @param registrationNo new registration No
-     */
-    public void setRegistrationNo(String registrationNo) {
-        this.registrationNo = registrationNo;
     }
 
     /**
@@ -383,5 +360,14 @@ public class Seller extends AccountEntity implements IWFEntity {
 	 */
 	public void setMedias(List<Media> medias) {
 		this.medias = medias;
+	}
+	
+	// check if the list of registration numbers is not empty
+	// get all registration numbers and join them with a comma
+	public String getRegistrationNo(){
+		if (isNotEmpty(registrationNumbers)) {
+			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+		}
+		return registrationNo;
 	}
 }

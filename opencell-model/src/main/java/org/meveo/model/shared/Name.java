@@ -38,9 +38,8 @@ public class Name implements Serializable, Cloneable {
     /**
      * Title
      */
-    //@ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "title_id")
-    @Transient
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "title_id")
     private Title title;
 
     /**

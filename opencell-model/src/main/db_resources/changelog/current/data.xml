@@ -3285,7 +3285,6 @@ public class SubscriptionImportScript extends GenericImportScript {
             <column name="code" value="ProcessCustomerPaymentsFileJob" />
             <column name="description" value="Process customer payments file job"/>
             <column name="creator" value="OPENCELL.ADMIN" />
-            <column name="job_speed" value="NORMAL" />
             <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
             <column name="verbose_report" valueNumeric="1" />
             <column name="disabled" valueNumeric="0" />
@@ -9068,7 +9067,6 @@ Only offer actually present on invoice will be tested."}'/>
 			<column name="job_template" value="MediationJobV2" />
 			<column name="creator" value="opencell.admin" />
 			<column name="updater" value="opencell.admin" />
-			<column name="job_speed" value="NORMAL" />
 			<column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
 			<column name="verbose_report" valueNumeric="1" />
 		</insert>
@@ -9648,7 +9646,6 @@ public class CdrMassImportScript extends GenericMassImportScript {
 			<column name="job_template" value="FlatFileProcessingJob" />
 			<column name="code" value="CsvImportCDR" />
 			<column name="creator" value="opencell.admin" />
-			<column name="job_speed" value="NORMAL" />
 			<column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
 			<column name="verbose_report" valueNumeric="1" />
 			<column name="disabled" valueNumeric="0" />
@@ -10562,7 +10559,6 @@ public class CustomerJobNotification extends Script {
 			<column name="job_template" value="FlatFileProcessingJob" />
 			<column name="code" value="massImportCustomerJob" />
 			<column name="creator" value="opencell.admin" />
-			<column name="job_speed" value="NORMAL" />
 			<column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
 			<column name="verbose_report" valueNumeric="1" />
 			<column name="disabled" valueNumeric="0" />
@@ -10582,7 +10578,6 @@ public class CustomerJobNotification extends Script {
 			<column name="job_template" value="FlatFileProcessingJob" />
 			<column name="code" value="massImportCustomerAccountJob" />
 			<column name="creator" value="opencell.admin" />
-			<column name="job_speed" value="NORMAL" />
 			<column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
 			<column name="verbose_report" valueNumeric="1" />
 			<column name="disabled" valueNumeric="0" />
@@ -10602,7 +10597,6 @@ public class CustomerJobNotification extends Script {
 			<column name="job_template" value="FlatFileProcessingJob" />
 			<column name="code" value="massImportPaymentMethodJob" />
 			<column name="creator" value="opencell.admin" />
-			<column name="job_speed" value="NORMAL" />
 			<column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
 			<column name="verbose_report" valueNumeric="1" />
 			<column name="disabled" valueNumeric="0" />
@@ -10622,7 +10616,6 @@ public class CustomerJobNotification extends Script {
 			<column name="job_template" value="FlatFileProcessingJob" />
 			<column name="code" value="massImportBillingAccountJob" />
 			<column name="creator" value="opencell.admin" />
-			<column name="job_speed" value="NORMAL" />
 			<column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
 			<column name="verbose_report" valueNumeric="1" />
 			<column name="disabled" valueNumeric="0" />
@@ -10642,7 +10635,6 @@ public class CustomerJobNotification extends Script {
 			<column name="job_template" value="FlatFileProcessingJob" />
 			<column name="code" value="massImportUserAccountJob" />
 			<column name="creator" value="opencell.admin" />
-			<column name="job_speed" value="NORMAL" />
 			<column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
 			<column name="verbose_report" valueNumeric="1" />
 			<column name="disabled" valueNumeric="0" />
@@ -11462,7 +11454,6 @@ public class SubscriptionJobNotification extends Script {
             <column name="job_template" value="FlatFileProcessingJob" />
             <column name="code" value="massImportSubscriptionJob" />
             <column name="creator" value="opencell.admin" />
-            <column name="job_speed" value="NORMAL" />
             <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
             <column name="verbose_report" valueNumeric="1" />
             <column name="disabled" valueNumeric="0" />
@@ -11482,7 +11473,6 @@ public class SubscriptionJobNotification extends Script {
             <column name="job_template" value="FlatFileProcessingJob" />
             <column name="code" value="massImportServiceInstanceJob" />
             <column name="creator" value="opencell.admin" />
-            <column name="job_speed" value="NORMAL" />
             <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
             <column name="verbose_report" valueNumeric="1" />
             <column name="disabled" valueNumeric="0" />
@@ -11502,7 +11492,6 @@ public class SubscriptionJobNotification extends Script {
             <column name="job_template" value="FlatFileProcessingJob" />
             <column name="code" value="massImportAttributeInstance" />
             <column name="creator" value="opencell.admin" />
-            <column name="job_speed" value="NORMAL" />
             <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
             <column name="verbose_report" valueNumeric="1" />
             <column name="disabled" valueNumeric="0" />
@@ -11522,7 +11511,6 @@ public class SubscriptionJobNotification extends Script {
             <column name="job_template" value="FlatFileProcessingJob" />
             <column name="code" value="massImportAccessPoint" />
             <column name="creator" value="opencell.admin" />
-            <column name="job_speed" value="NORMAL" />
             <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
             <column name="verbose_report" valueNumeric="1" />
             <column name="disabled" valueNumeric="0" />
@@ -21926,8 +21914,8 @@ public class ImportJobNotification extends Script {
 		    <column name="created" valueComputed="${db.current.time}"/>
 		    <column name="category" value="performance"/>
 		    <column name="property_group" value="pricePlanFilters"/>
-		    <column name="property_type" value="java.lang.Boolean"/>
-		    <column name="property_value" value="false"/>
+		    <column name="property_type" value="java.lang.Integer"/>
+		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria1Value"/>
 		    <column name="description" value="pricePlanFilters.enableCriteria1Value"/>
@@ -21939,8 +21927,8 @@ public class ImportJobNotification extends Script {
 		    <column name="created" valueComputed="${db.current.time}"/>
 		    <column name="category" value="performance"/>
 		    <column name="property_group" value="pricePlanFilters"/>
-		    <column name="property_type" value="java.lang.Boolean"/>
-		    <column name="property_value" value="false"/>
+		    <column name="property_type" value="java.lang.Integer"/>
+		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria2Value"/>
 		    <column name="description" value="pricePlanFilters.enableCriteria2Value"/>
@@ -21952,8 +21940,8 @@ public class ImportJobNotification extends Script {
 		    <column name="created" valueComputed="${db.current.time}"/>
 		    <column name="category" value="performance"/>
 		    <column name="property_group" value="pricePlanFilters"/>
-		    <column name="property_type" value="java.lang.Boolean"/>
-		    <column name="property_value" value="false"/>
+		    <column name="property_type" value="java.lang.Integer"/>
+		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria3Value"/>
 		    <column name="description" value="pricePlanFilters.enableCriteria3Value"/>
@@ -22074,7 +22062,7 @@ public class ImportJobNotification extends Script {
             </column>
         </insert>
     </changeSet>
-    
+
     <changeSet id="#INTRD-19685_20231208" author="AbdellatifBARI">
     	<update tableName="com_message_template">
     		<column name="subject">#{batchEntityStatus} Mark to rerate wallet operations batch #{batchEntityId}</column>
@@ -23325,4 +23313,1676 @@ public class ImportJobNotification extends Script {
         <sql>update dunning_policy_level set sequence = 3 where dunning_policy_id = (SELECT id from dunning_policy where policy_name = 'B2C FR') and dunning_level_id = (SELECT id from dunning_level where code = 'B2C 4 FR')</sql>
     </changeSet>
 
+    <changeSet id="#INTRD-19367_20231212" author="aeljaouhari">
+		<insert tableName="meveo_script_instance_cat">
+			<column name="id" valueSequenceNext="meveo_script_instance_cat_seq"/>
+			<column name="version" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="code" value="RATING" />
+			<column name="description" value="Rating" />
+			<column name="description_i18n" value='{"FR":"Valorisation","EN":"Rating"}' />
+		</insert>
+	</changeSet>
+
+	<changeSet id="#INTRD-19862_20231214" author="zelmeliani">
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="758100000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'RND_INC'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="658100000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'RND_EXP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="445510000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'TAX')" />
+            <where>code = 'TAX_VAT_00'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="445510000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'TAX')" />
+            <where>code = 'TAX_VAT_05'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="445510000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'TAX')" />
+            <where>code = 'TAX_VAT_10'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="445510000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'TAX')" />
+            <where>code = 'TAX_VAT_20'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="account_code_client_side" value="511200000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REJ_CHK'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="account_code_client_side" value="511011000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REJ_CRD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="account_code_client_side" value="512000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REJ_DDT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="account_code_client_side" value="511011000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REJ_RCR'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="account_code_client_side" value="512000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REJ_RDD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="account_code_client_side" value="511000610" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REJ_TIP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="account_code_client_side" value="512010000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'PAY_REC'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="account_code_client_side" value="512010000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'PAY_NID'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="account_code_client_side" value="512010000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'PAY_DEP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="512000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'PAY_DDT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="511011000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'PAY_CRD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="511200000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'PAY_CHK'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="511000610" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'PAY_TIP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="512000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'PAY_BATCH'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="512010000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REF_CASH'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="511200000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REF_CHK'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="511011000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REF_CRD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="512000000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REF_DDT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="511011000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REF_SD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="511000610" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'REF_TIP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="701000000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'SAL')" />
+            <where>code = 'INV_STD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="701000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'SAL')" />
+            <where>code = 'INV_REB'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="701000000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'SAL')" />
+            <where>code = 'INV_FEE'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="701000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'SAL')" />
+            <where>code = 'INV_DIS'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="701000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'SAL')" />
+            <where>code = 'INV_CRN'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="701000000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'SAL')" />
+            <where>code = 'INV_ADV'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '701010000')" />
+            <column name="account_code_client_side" value="411000000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+            <where>code = 'DEB_SD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512010000')" />
+            <column name="account_code_client_side" value="411000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'CRD_SD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512010000')" />
+            <column name="account_code_client_side" value="411000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'CRD_TRS'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512010000')" />
+            <column name="account_code_client_side" value="411000000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'DBT_TRS'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '654100000')" />
+            <column name="account_code_client_side" value="411000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'EXP_WRT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="658000000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'RND_EXP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="758000000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'RND_INC'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="416011000" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'PPL_CREATION'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="account_code_client_side" value="416011000" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <where>code = 'PPL_INSTALLMENT'</where>
+        </update>
+    </changeSet>
+
+	<changeSet id="#INTRD-19862_20231220" author="zelmeliani">
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+			<column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '758100000')" />
+            <where>code = 'RND_INC'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+			<column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '658100000')" />
+            <where>code = 'RND_EXP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '445510000')" />
+            <where>code = 'TAX_VAT_00'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '445510000')" />
+            <where>code = 'TAX_VAT_05'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '445510000')" />
+            <where>code = 'TAX_VAT_10'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '445510000')" />
+            <where>code = 'TAX_VAT_20'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+			<column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511200000')" />
+            <where>code = 'REJ_CHK'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511011000')" />
+            <where>code = 'REJ_CRD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512000000')" />
+            <where>code = 'REJ_DDT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511011000')" />
+            <where>code = 'REJ_RCR'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512000000')" />
+            <where>code = 'REJ_RDD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511000610')" />
+            <where>code = 'REJ_TIP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="419120000" />
+			<column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '419100000')" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512010000')" />
+            <where>code = 'PAY_REC'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="419120000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512010000')" />
+            <where>code = 'PAY_NID'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="419110000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512010000')" />
+            <where>code = 'PAY_DEP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512000000')" />
+            <where>code = 'PAY_DDT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511011000')" />
+            <where>code = 'PAY_CRD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511200000')" />
+            <where>code = 'PAY_CHK'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511000610')" />
+            <where>code = 'PAY_TIP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="null" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512000000')" />
+            <where>code = 'PAY_BATCH'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512010000')" />
+            <where>code = 'REF_CASH'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511200000')" />
+            <where>code = 'REF_CHK'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511011000')" />
+            <where>code = 'REF_CRD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512000000')" />
+            <where>code = 'REF_DDT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="512010000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511011000')" />
+            <where>code = 'REF_SD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '511000610')" />
+            <where>code = 'REF_TIP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="null" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '701000000')" />
+            <where>code = 'INV_STD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="709000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '701000000')" />
+            <where>code = 'INV_REB'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="763100000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '701000000')" />
+            <where>code = 'INV_FEE'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="709000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '701000000')" />
+            <where>code = 'INV_DIS'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="null" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '701000000')" />
+            <where>code = 'INV_CRN'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="null" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '701000000')" />
+            <where>code = 'INV_ADV'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="41100000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <where>code = 'DEB_SD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="165000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <where>code = 'CRD_SD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <where>code = 'CRD_TRS'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <where>code = 'DBT_TRS'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <where>code = 'EXP_WRT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '658100000')" />
+            <where>code = 'RND_EXP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="411000000" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '758100000')" />
+            <where>code = 'RND_INC'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="null" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '416000000')" />
+            <where>code = 'PPL_CREATION'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="account_code_client_side" value="null" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '416000000')" />
+            <where>code = 'PPL_INSTALLMENT'</where>
+        </update>
+    </changeSet>
+
+	<changeSet id="INTRD-19853_20231213" author="zelmeliani">
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='CRD_SD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='CRD_TRS'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='DBT_TRS'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='DEB_SD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='EXP_WRT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Invoice and Credit Note')" />
+            <where>code='INV_DIS'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Invoice and Credit Note')" />
+            <where>code='INV_REB'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Invoice and Credit Note')" />
+            <where>code='INV_FEE'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REF_CHK'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REF_CRD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REF_DDT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REF_SD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REF_TIP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REJ_CHK'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REJ_CRD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REJ_DDT'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REJ_RCR'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REJ_RDD'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='REJ_TIP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='RND_EXP'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='RND_INC'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='TAX_VAT_00'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='TAX_VAT_05'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='TAX_VAT_10'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='TAX_VAT_20'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='PPL_CREATION'</where>
+        </update>
+        <update tableName="ar_occ_template">
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+            <where>code='PPL_INSTALLMENT'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="INTRD-19464_20231204" author="TarikFA.">
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq" />
+            <column name="version" valueNumeric="1" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="job_category" value="MEDIATION" />
+            <column name="job_template" value="FlatFileProcessingJob" />
+            <column name="code" value="massWrittingOffInvoicesJob" />
+            <column name="description" value="mass writting off invoices job"/>
+            <column name="creator" value="opencell.admin" />
+            <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
+            <column name="verbose_report" valueNumeric="1" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="cf_values">
+                <![CDATA[
+				{"nbRuns": [{"long": 1}], "oneFilePerJob": [{"boolean": false}], "sortingOption": [{"string": "ALPHA"}], "waitingMillis": [{"long": 0}], "FlatFileProcessingJob_inputDir": [{"string": "/imports/writeOff/inputs"}], "FlatFileProcessingJob_outputDir": [{"string": "/imports/writeOff/outputs"}], "FlatFileProcessingJob_archiveDir": [{"string": "/imports/writeOff/archives"}], "FlatFileProcessingJob_errorAction": [{"string": "CONTINUE"}], "FlatFileProcessingJob_mappingConf": [{"string": "<beanio\r\n\txmlns=\"http://www.beanio.org/2012/03\"\r\n\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n  xsi:schemaLocation=\"http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd\">\r\n\t<stream name=\"record\" format=\"csv\">\r\n\t\t<parser>\r\n\t\t\t<property name=\"delimiter\" value=\";\" />\r\n\t\t\t<property name=\"comments\" value=\"END\" />\r\n\t\t\t<property name=\"multilineEnabled\" value=\"true\" />\r\n\t\t</parser>\r\n\t\t<record name=\"header\" minOccurs=\"1\" maxOccurs=\"1\" class=\"map\">\r\n\t\t\t<field name=\"INVOICE_NUMBER\" ignore=\"true\"/>\r\n\t\t\t<field name=\"INVOICE_AMOUNT\" ignore=\"true\"/>\r\n\t\t\t<field name=\"UNCOLLECTIBILITY_CERTIFICATE_NUMBER\" ignore=\"true\"/>\r\n\t\t</record>\r\n\t\t<record name=\"details\" minOccurs=\"1\" maxOccurs=\"unbounded\" class=\"map\">\r\n\t\t\t<field name=\"INVOICE_NUMBER\" required=\"true\"/>\r\n\t\t\t<field name=\"INVOICE_AMOUNT\" required=\"true\"/>\r\n\t\t\t<field name=\"UNCOLLECTIBILITY_CERTIFICATE_NUMBER\" required=\"true\"/>\r\n\t\t</record>\r\n\t</stream>\r\n</beanio>"}], "FlatFileProcessingJob_scriptsFlow": [{"string": "org.meveo.service.script.MassWrittingOffInvoicesScript"}], "FlatFileProcessingJob_formatTransfo": [{"string": "None"}], "FlatFileProcessingJob_originFilename": [{"string": "origin_filename"}], "FlatFileProcessingJob_nbLinesToProcess": [{"long": 1}], "FlatFileProcessingJob_fileNameExtension": [{"string": "csv"}], "FlatFileProcessingJob_recordVariableName": [{"string": "record"}]}
+				]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="code" value="org.meveo.service.script.MassWrittingOffInvoicesScript" />
+            <column name="script">
+                <![CDATA[   package org.meveo.service.script;
+            		public class MassWrittingOffInvoices extends MassWrittingOffInvoicesScript {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="OPENCELL.ADMIN" />
+            <column name="version" valueNumeric="1" />
+            <column name="src_type" value="JAVA" />
+        </insert>
+    </changeSet>
+    <changeSet id="#INTRD-19464_20231220" author="TarikFA.">
+        <update tableName="meveo_script_instance" >
+            <column name="script">
+                <![CDATA[   package org.meveo.service.script;
+            		public class  MassWrittingOffInvoicesScript extends MassWrittingOffInvoices {}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.MassWrittingOffInvoicesScript'</where>
+        </update>
+    </changeSet>
+    <changeSet id="#INTRD-20344_20240102" author="aeljaouhari">
+    	<insert tableName="audit_data_config">
+            <column name="id" valueSequenceNext="audit_data_config_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="opencell.admin"/>
+            <column name="entity_class" value="org.meveo.model.catalog.OfferTemplate"/>
+            <column name="entity_fields" value="allowedDiscountPlans,allowedOffersChange,attachments,auditable,autoEndOfEngagement,businessAccountModels,businessOfferModel,cfValues,channels,code,commercialRules,customerCategories,description,descriptionI18n,disabled,display,document,generateQuoteEdrPerProduct,globalRatingScriptInstance,id,imagePath,isModel,isOfferChangeRestricted,lifeCycleStatus,longDescription,longDescriptionI18n,medias,minimumAmountEl,minimumArticle,minimumChargeTemplate,minimumInvoiceSubCategory,minimumLabelEl,name,offerAttributes,offerComponents,offerModel,offerProductTemplates,offerServiceTemplates,offerTemplateCategories,sellers,sequence,statusDate,subscriptionRenewal,tags,uuid,validity,version"/>
+        </insert>
+    </changeSet>
+    <changeSet id="#INTRD-20278_20240109" author="AbdellatifBARI">
+        <update tableName="ar_occ_template">
+            <column name="occ_category" value="DEBIT" />
+            <where>code in ('REJ_CHK','REJ_DDT','REJ_TIP','REJ_CRD')</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-19279_update-currencies" author="a.rouaguebe">
+        <sql>update adm_currency set description_i18n = '{"ENG": "Afghan Afghani", "FRA": "afghani afghan"}', symbol = 'AFN' where currency_code = 'AFN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "South African Rand", "FRA": "rand sud-africain"}', symbol = 'ZAR' where currency_code = 'ZAR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Albanian Lek", "FRA": "lek albanais"}', symbol = 'ALL' where currency_code = 'ALL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Algerian Dinar", "FRA": "dinar algérien"}', symbol = 'DZD' where currency_code = 'DZD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Euro", "FRA": "euro"}', symbol = '€' where currency_code = 'EUR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Angolan Kwanza", "FRA": "kwanza angolais"}', symbol = 'AOA' where currency_code = 'AOA'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "East Caribbean Dollar", "FRA": "dollar des Caraïbes orientales"}', symbol = 'EC$' where currency_code = 'XCD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Netherlands Antillean Guilder", "FRA": "florin antillais"}', symbol = 'ANG' where currency_code = 'ANG'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Saudi Riyal", "FRA": "riyal saoudien"}', symbol = 'SAR' where currency_code = 'SAR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Argentine Peso", "FRA": "peso argentin"}', symbol = 'ARS' where currency_code = 'ARS'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Armenian Dram", "FRA": "dram arménien"}', symbol = 'AMD' where currency_code = 'AMD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Aruban Florin", "FRA": "florin arubais"}', symbol = 'AWG' where currency_code = 'AWG'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Australian Dollar", "FRA": "dollar australien"}', symbol = 'A$' where currency_code = 'AUD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Azerbaijani Manat", "FRA": "manat azéri"}', symbol = 'AZN' where currency_code = 'AZN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Bahamian Dollar", "FRA": "dollar bahaméen"}', symbol = 'BSD' where currency_code = 'BSD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Bahraini Dinar", "FRA": "dinar bahreïni"}', symbol = 'BHD' where currency_code = 'BHD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Bangladeshi Taka", "FRA": "taka bangladeshi"}', symbol = 'BDT' where currency_code = 'BDT'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Barbadian Dollar", "FRA": "dollar barbadien"}', symbol = 'BBD' where currency_code = 'BBD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Belize Dollar", "FRA": "dollar bélizéen"}', symbol = 'BZD' where currency_code = 'BZD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "West African CFA Franc", "FRA": "franc CFA (BCEAO)"}', symbol = 'F CFA' where currency_code = 'XOF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Bermudian Dollar", "FRA": "dollar bermudien"}', symbol = 'BMD' where currency_code = 'BMD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Bhutanese Ngultrum", "FRA": "ngultrum bouthanais"}', symbol = 'BTN' where currency_code = 'BTN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Belarusian Rouble", "FRA": "rouble biélorusse"}', symbol = 'BYN' where currency_code = 'BYN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Bolivian Boliviano", "FRA": "boliviano bolivien"}', symbol = 'BOB' where currency_code = 'BOB'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Bosnia-Herzegovina Convertible Mark", "FRA": "mark convertible bosniaque"}', symbol = 'BAM' where currency_code = 'BAM'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Botswanan Pula", "FRA": "pula botswanais"}', symbol = 'BWP' where currency_code = 'BWP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Brazilian Real", "FRA": "réal brésilien"}', symbol = 'R$' where currency_code = 'BRL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Brunei Dollar", "FRA": "dollar brunéien"}', symbol = 'BND' where currency_code = 'BND'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Bulgarian Lev", "FRA": "lev bulgare"}', symbol = 'BGN' where currency_code = 'BGN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Burundian Franc", "FRA": "franc burundais"}', symbol = 'BIF' where currency_code = 'BIF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Norwegian Krone", "FRA": "couronne norvégienne"}', symbol = 'NOK' where currency_code = 'NOK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Cayman Islands Dollar", "FRA": "dollar des îles Caïmans"}', symbol = 'KYD' where currency_code = 'KYD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Cambodian Riel", "FRA": "riel cambodgien"}', symbol = 'KHR' where currency_code = 'KHR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Central African CFA Franc", "FRA": "franc CFA (BEAC)"}', symbol = 'FCFA' where currency_code = 'XAF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Canadian Dollar", "FRA": "dollar canadien"}', symbol = 'CA$' where currency_code = 'CAD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Cape Verdean Escudo", "FRA": "escudo capverdien"}', symbol = 'CVE' where currency_code = 'CVE'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Chilean Peso", "FRA": "peso chilien"}', symbol = 'CLP' where currency_code = 'CLP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Chinese Yuan", "FRA": "yuan renminbi chinois"}', symbol = 'CN¥' where currency_code = 'CNY'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Cypriot Pound", "FRA": "livre chypriote"}', symbol = 'CYP' where currency_code = 'CYP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Colombian Peso", "FRA": "peso colombien"}', symbol = 'COP' where currency_code = 'COP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Comorian Franc", "FRA": "franc comorien"}', symbol = 'KMF' where currency_code = 'KMF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Congolese Franc", "FRA": "franc congolais"}', symbol = 'CDF' where currency_code = 'CDF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "South Korean Won", "FRA": "won sud-coréen"}', symbol = '₩' where currency_code = 'KRW'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "North Korean Won", "FRA": "won nord-coréen"}', symbol = 'KPW' where currency_code = 'KPW'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Costa Rican Colón", "FRA": "colón costaricain"}', symbol = 'CRC' where currency_code = 'CRC'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Croatian Kuna", "FRA": "kuna croate"}', symbol = 'HRK' where currency_code = 'HRK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Cuban Peso", "FRA": "peso cubain"}', symbol = 'CUP' where currency_code = 'CUP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "US Dollar", "FRA": "dollar des États-Unis"}', symbol = '$' where currency_code = 'USD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Danish Krone", "FRA": "couronne danoise"}', symbol = 'DKK' where currency_code = 'DKK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Djiboutian Franc", "FRA": "franc djiboutien"}', symbol = 'DJF' where currency_code = 'DJF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Dominican Peso", "FRA": "peso dominicain"}', symbol = 'DOP' where currency_code = 'DOP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Egyptian Pound", "FRA": "livre égyptienne"}', symbol = 'EGP' where currency_code = 'EGP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "United Arab Emirates Dirham", "FRA": "dirham des Émirats arabes unis"}', symbol = 'AED' where currency_code = 'AED'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Eritrean Nakfa", "FRA": "nafka érythréen"}', symbol = 'ERN' where currency_code = 'ERN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Estonian Kroon", "FRA": "couronne estonienne"}', symbol = 'EEK' where currency_code = 'EEK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Ethiopian Birr", "FRA": "birr éthiopien"}', symbol = 'ETB' where currency_code = 'ETB'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Falkland Islands Pound", "FRA": "livre des îles Malouines"}', symbol = 'FKP' where currency_code = 'FKP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Fijian Dollar", "FRA": "dollar fidjien"}', symbol = 'FJD' where currency_code = 'FJD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Gambian Dalasi", "FRA": "dalasi gambien"}', symbol = 'GMD' where currency_code = 'GMD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Georgian Lari", "FRA": "lari géorgien"}', symbol = 'GEL' where currency_code = 'GEL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Ghanaian Cedi", "FRA": "cédi ghanéen"}', symbol = 'GHS' where currency_code = 'GHS'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Gibraltar Pound", "FRA": "livre de Gibraltar"}', symbol = 'GIP' where currency_code = 'GIP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Guatemalan Quetzal", "FRA": "quetzal guatémaltèque"}', symbol = 'GTQ' where currency_code = 'GTQ'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "British Pound", "FRA": "livre sterling"}', symbol = '£' where currency_code = 'GBP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Guinean Franc", "FRA": "franc guinéen"}', symbol = 'GNF' where currency_code = 'GNF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Guyanaese Dollar", "FRA": "dollar du Guyana"}', symbol = 'GYD' where currency_code = 'GYD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Haitian Gourde", "FRA": "gourde haïtienne"}', symbol = 'HTG' where currency_code = 'HTG'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Honduran Lempira", "FRA": "lempira hondurien"}', symbol = 'HNL' where currency_code = 'HNL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Hong Kong Dollar", "FRA": "dollar de Hong Kong"}', symbol = 'HK$' where currency_code = 'HKD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Hungarian Forint", "FRA": "forint hongrois"}', symbol = 'HUF' where currency_code = 'HUF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "New Zealand Dollar", "FRA": "dollar néo-zélandais"}', symbol = 'NZ$' where currency_code = 'NZD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Indian Rupee", "FRA": "roupie indienne"}', symbol = '₹' where currency_code = 'INR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Indonesian Rupiah", "FRA": "roupie indonésienne"}', symbol = 'IDR' where currency_code = 'IDR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Iranian Rial", "FRA": "riyal iranien"}', symbol = 'IRR' where currency_code = 'IRR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Iraqi Dinar", "FRA": "dinar irakien"}', symbol = 'IQD' where currency_code = 'IQD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Icelandic Króna", "FRA": "couronne islandaise"}', symbol = 'ISK' where currency_code = 'ISK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Israeli New Shekel", "FRA": "nouveau shekel israélien"}', symbol = '₪' where currency_code = 'ILS'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Jamaican Dollar", "FRA": "dollar jamaïcain"}', symbol = 'JMD' where currency_code = 'JMD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Japanese Yen", "FRA": "yen japonais"}', symbol = '¥' where currency_code = 'JPY'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Jordanian Dinar", "FRA": "dinar jordanien"}', symbol = 'JOD' where currency_code = 'JOD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Kazakhstani Tenge", "FRA": "tenge kazakh"}', symbol = 'KZT' where currency_code = 'KZT'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Kenyan Shilling", "FRA": "shilling kényan"}', symbol = 'KES' where currency_code = 'KES'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Kyrgystani Som", "FRA": "som kirghize"}', symbol = 'KGS' where currency_code = 'KGS'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Kuwaiti Dinar", "FRA": "dinar koweïtien"}', symbol = 'KWD' where currency_code = 'KWD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Laotian Kip", "FRA": "kip loatien"}', symbol = 'LAK' where currency_code = 'LAK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Lesotho Loti", "FRA": "loti lesothan"}', symbol = 'LSL' where currency_code = 'LSL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Latvian Lats", "FRA": "lats letton"}', symbol = 'LVL' where currency_code = 'LVL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Lebanese Pound", "FRA": "livre libanaise"}', symbol = 'LBP' where currency_code = 'LBP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Liberian Dollar", "FRA": "dollar libérien"}', symbol = 'LRD' where currency_code = 'LRD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Libyan Dinar", "FRA": "dinar libyen"}', symbol = 'LYD' where currency_code = 'LYD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Swiss Franc", "FRA": "franc suisse"}', symbol = 'CHF' where currency_code = 'CHF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Lithuanian Litas", "FRA": "litas lituanien"}', symbol = 'LTL' where currency_code = 'LTL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Macanese Pataca", "FRA": "pataca macanaise"}', symbol = 'MOP' where currency_code = 'MOP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Macedonian Denar", "FRA": "denar macédonien"}', symbol = 'MKD' where currency_code = 'MKD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Malagasy Ariary", "FRA": "ariary malgache"}', symbol = 'MGA' where currency_code = 'MGA'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Malagasy Franc", "FRA": "franc malgache"}', symbol = 'MGF' where currency_code = 'MGF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Malaysian Ringgit", "FRA": "ringgit malais"}', symbol = 'MYR' where currency_code = 'MYR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Malawian Kwacha", "FRA": "kwacha malawite"}', symbol = 'MWK' where currency_code = 'MWK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Maldivian Rufiyaa", "FRA": "rufiyaa maldivien"}', symbol = 'MVR' where currency_code = 'MVR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Maltese Lira", "FRA": "lire maltaise"}', symbol = 'MTL' where currency_code = 'MTL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Moroccan Dirham", "FRA": "dirham marocain"}', symbol = 'MAD' where currency_code = 'MAD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Mauritian Rupee", "FRA": "roupie mauricienne"}', symbol = 'MUR' where currency_code = 'MUR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Mauritanian Ouguiya", "FRA": "ouguiya mauritanien"}', symbol = 'MRU' where currency_code = 'MRU'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Mexican Peso", "FRA": "peso mexicain"}', symbol = 'MX$' where currency_code = 'MXN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Moldovan Leu", "FRA": "leu moldave"}', symbol = 'MDL' where currency_code = 'MDL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Mongolian Tugrik", "FRA": "tugrik mongol"}', symbol = 'MNT' where currency_code = 'MNT'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Mozambican Metical (1980–2006)", "FRA": "métical"}', symbol = 'MZM' where currency_code = 'MZM'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Myanmar Kyat", "FRA": "kyat myanmarais"}', symbol = 'MMK' where currency_code = 'MMK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Namibian Dollar", "FRA": "dollar namibien"}', symbol = 'NAD' where currency_code = 'NAD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Nepalese Rupee", "FRA": "roupie népalaise"}', symbol = 'NPR' where currency_code = 'NPR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Nicaraguan Córdoba", "FRA": "córdoba oro nicaraguayen"}', symbol = 'NIO' where currency_code = 'NIO'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Nigerian Naira", "FRA": "naira nigérian"}', symbol = 'NGN' where currency_code = 'NGN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "CFP Franc", "FRA": "franc CFP"}', symbol = 'CFPF' where currency_code = 'XPF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Omani Rial", "FRA": "riyal omanais"}', symbol = 'OMR' where currency_code = 'OMR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Gold", "FRA": "or"}', symbol = 'XAU' where currency_code = 'XAU'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Ugandan Shilling", "FRA": "shilling ougandais"}', symbol = 'UGX' where currency_code = 'UGX'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Uzbekistani Som", "FRA": "sum ouzbek"}', symbol = 'UZS' where currency_code = 'UZS'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Pakistani Rupee", "FRA": "roupie pakistanaise"}', symbol = 'PKR' where currency_code = 'PKR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Panamanian Balboa", "FRA": "balboa panaméen"}', symbol = 'PAB' where currency_code = 'PAB'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Papua New Guinean Kina", "FRA": "kina papouan-néo-guinéen"}', symbol = 'PGK' where currency_code = 'PGK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Paraguayan Guarani", "FRA": "guaraní paraguayen"}', symbol = 'PYG' where currency_code = 'PYG'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Peruvian Sol", "FRA": "sol péruvien"}', symbol = 'PEN' where currency_code = 'PEN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Philippine Peso", "FRA": "peso philippin"}', symbol = '₱' where currency_code = 'PHP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Polish Zloty", "FRA": "zloty polonais"}', symbol = 'PLN' where currency_code = 'PLN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Qatari Rial", "FRA": "riyal qatari"}', symbol = 'QAR' where currency_code = 'QAR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Romanian Leu", "FRA": "leu roumain"}', symbol = 'RON' where currency_code = 'RON'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Romanian Leu (1952–2006)", "FRA": "ancien leu roumain"}', symbol = 'ROL' where currency_code = 'ROL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Russian Rouble", "FRA": "rouble russe"}', symbol = 'RUB' where currency_code = 'RUB'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Rwandan Franc", "FRA": "franc rwandais"}', symbol = 'RWF' where currency_code = 'RWF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Solomon Islands Dollar", "FRA": "dollar des îles Salomon"}', symbol = 'SBD' where currency_code = 'SBD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Salvadoran Colón", "FRA": "colón salvadorien"}', symbol = 'SVC' where currency_code = 'SVC'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Samoan Tala", "FRA": "tala samoan"}', symbol = 'WST' where currency_code = 'WST'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "São Tomé &amp; Príncipe Dobra", "FRA": "dobra santoméen"}', symbol = 'STN' where currency_code = 'STN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Serbian Dinar (2002–2006)", "FRA": "dinar serbo-monténégrin"}', symbol = 'CSD' where currency_code = 'CSD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Seychellois Rupee", "FRA": "roupie des Seychelles"}', symbol = 'SCR' where currency_code = 'SCR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Sierra Leonean Leone", "FRA": "leone sierra-léonais"}', symbol = 'SLL' where currency_code = 'SLL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Singapore Dollar", "FRA": "dollar de Singapour"}', symbol = 'SGD' where currency_code = 'SGD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Slovak Koruna", "FRA": "couronne slovaque"}', symbol = 'SKK' where currency_code = 'SKK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Slovenian Tolar", "FRA": "tolar slovène"}', symbol = 'SIT' where currency_code = 'SIT'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Somali Shilling", "FRA": "shilling somalien"}', symbol = 'SOS' where currency_code = 'SOS'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Sudanese Pound", "FRA": "livre soudanaise"}', symbol = 'SDG' where currency_code = 'SDG'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Sri Lankan Rupee", "FRA": "roupie srilankaise"}', symbol = 'LKR' where currency_code = 'LKR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "St Helena Pound", "FRA": "livre de Sainte-Hélène"}', symbol = 'SHP' where currency_code = 'SHP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Swedish Krona", "FRA": "couronne suédoise"}', symbol = 'SEK' where currency_code = 'SEK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Surinamese Dollar", "FRA": "dollar surinamais"}', symbol = 'SRD' where currency_code = 'SRD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Swazi Lilangeni", "FRA": "lilangeni swazi"}', symbol = 'SZL' where currency_code = 'SZL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Syrian Pound", "FRA": "livre syrienne"}', symbol = 'SYP' where currency_code = 'SYP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Tajikistani Somoni", "FRA": "somoni tadjik"}', symbol = 'TJS' where currency_code = 'TJS'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "New Taiwan Dollar", "FRA": "nouveau dollar taïwanais"}', symbol = 'NT$' where currency_code = 'TWD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Tanzanian Shilling", "FRA": "shilling tanzanien"}', symbol = 'TZS' where currency_code = 'TZS'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Czech Koruna", "FRA": "couronne tchèque"}', symbol = 'CZK' where currency_code = 'CZK'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Thai Baht", "FRA": "baht thaïlandais"}', symbol = 'THB' where currency_code = 'THB'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Tongan Paʻanga", "FRA": "pa’anga tongan"}', symbol = 'TOP' where currency_code = 'TOP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Trinidad &amp; Tobago Dollar", "FRA": "dollar de Trinité-et-Tobago"}', symbol = 'TTD' where currency_code = 'TTD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Tunisian Dinar", "FRA": "dinar tunisien"}', symbol = 'TND' where currency_code = 'TND'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Turkmenistani Manat", "FRA": "nouveau manat turkmène"}', symbol = 'TMT' where currency_code = 'TMT'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Turkish Lira", "FRA": "livre turque"}', symbol = 'TRY' where currency_code = 'TRY'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Turkish Lira (1922–2005)", "FRA": "livre turque (1844–2005)"}', symbol = 'TRL' where currency_code = 'TRL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Ukrainian Hryvnia", "FRA": "hryvnia ukrainienne"}', symbol = 'UAH' where currency_code = 'UAH'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Uruguayan Peso", "FRA": "peso uruguayen"}', symbol = 'UYU' where currency_code = 'UYU'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Vanuatu Vatu", "FRA": "vatu vanuatuan"}', symbol = 'VUV' where currency_code = 'VUV'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Venezuelan Bolívar (2008–2018)", "FRA": "bolivar vénézuélien (2008–2018)"}', symbol = 'VEF' where currency_code = 'VEF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Vietnamese Dong", "FRA": "dông vietnamien"}', symbol = '₫' where currency_code = 'VND'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Yemeni Rial", "FRA": "riyal yéménite"}', symbol = 'YER' where currency_code = 'YER'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Zambian Kwacha", "FRA": "kwacha zambien"}', symbol = 'ZMW' where currency_code = 'ZMW'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Zimbabwean Dollar (2009)", "FRA": "dollar zimbabwéen (2009)"}', symbol = 'ZWL' where currency_code = 'ZWL'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Bolivian Mvdol", "FRA": "mvdol bolivien"}', symbol = 'BOV' where currency_code = 'BOV'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "WIR Euro", "FRA": "euro WIR"}', symbol = 'CHE' where currency_code = 'CHE'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "WIR Franc", "FRA": "franc WIR"}', symbol = 'CHW' where currency_code = 'CHW'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Chilean Unit of Account (UF)", "FRA": "unité d’investissement chilienne"}', symbol = 'CLF' where currency_code = 'CLF'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Colombian Real Value Unit", "FRA": "unité de valeur réelle colombienne"}', symbol = 'COU' where currency_code = 'COU'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Cuban Convertible Peso", "FRA": "peso cubain convertible"}', symbol = 'CUC' where currency_code = 'CUC'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Mexican Investment Unit", "FRA": "unité de conversion mexicaine (UDI)"}', symbol = 'MXV' where currency_code = 'MXV'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Serbian Dinar", "FRA": "dinar serbe"}', symbol = 'RSD' where currency_code = 'RSD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "South Sudanese Pound", "FRA": "livre sud-soudanaise"}', symbol = 'SSP' where currency_code = 'SSP'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "US Dollar (Next day)", "FRA": "dollar des Etats-Unis (jour suivant)"}', symbol = 'USN' where currency_code = 'USN'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Uruguayan Peso (Indexed Units)", "FRA": "peso uruguayen (unités indexées)"}', symbol = 'UYI' where currency_code = 'UYI'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Venezuelan Bolívar", "FRA": "bolivar vénézuélien"}', symbol = 'VES' where currency_code = 'VES'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Silver", "FRA": "argent"}', symbol = 'XAG' where currency_code = 'XAG'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "European Composite Unit", "FRA": "unité européenne composée"}', symbol = 'XBA' where currency_code = 'XBA'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "European Monetary Unit", "FRA": "unité monétaire européenne"}', symbol = 'XBB' where currency_code = 'XBB'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "European Unit of Account (XBC)", "FRA": "unité de compte européenne (XBC)"}', symbol = 'XBC' where currency_code = 'XBC'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "European Unit of Account (XBD)", "FRA": "unité de compte européenne (XBD)"}', symbol = 'XBD' where currency_code = 'XBD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Special Drawing Rights", "FRA": "droit de tirage spécial"}', symbol = 'XDR' where currency_code = 'XDR'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Palladium", "FRA": "palladium"}', symbol = 'XPD' where currency_code = 'XPD'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Platinum", "FRA": "platine"}', symbol = 'XPT' where currency_code = 'XPT'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Sucre", "FRA": "Sucre"}', symbol = 'XSU' where currency_code = 'XSU'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Testing Currency Code", "FRA": "(devise de test)"}', symbol = 'XTS' where currency_code = 'XTS'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "ADB Unit of Account", "FRA": "ADB Unit of Account"}', symbol = 'XUA' where currency_code = 'XUA'</sql>
+        <sql>update adm_currency set description_i18n = '{"ENG": "Unknown Currency", "FRA": "devise inconnue ou non valide"}', symbol = '¤' where currency_code = 'XXX'</sql>
+    </changeSet>
+    <changeSet id="#INTRD-19227_20231115" author="AbdellatifBARI">
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="job_category" value="UTILS"/>
+            <column name="job_template" value="PurgeAuditLogJob"/>
+            <column name="code" value="PurgeAuditLogJob"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="description" value="Purge audit logs records from (audit_data_log, audit_data_log_rec, audit_field_changes_history, audit_log)"/>
+            <column name="uuid" value="PurgeAuditLogJob"/>
+            <column name="timerentity_id" valueNumeric="-3"/>
+            <column name="cf_values">
+                <![CDATA[
+            		{"maxAgeDays":[{"long":30}]}
+            	]]>
+            </column>
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-20752_20240115" author="zelmeliani">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+			<column name="disabled" value="0" />
+            <column name="code" value="org.meveo.service.script.dunning.DunningSuspendSubscriptionScript" />
+            <column name="src_type" value="JAVA_CLASS" />
+            <column name="description" value="Dunning Suspend Subscription Script - To Suspend a subscription linked to a dunning"/>
+            <column name="created" valueDate="${db.current.time}" />
+			<column name="script_instance_cat_id" value="-2" />
+        </insert>
+	</changeSet>
+
+    <changeSet id="#INTRD-19467_20240111" author="TarikFA.">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript" />
+            <column name="src_type" value="JAVA_CLASS" />
+            <column name="description" value="Invoice Write off Journal entry builder, from AccountOperation"/>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='ACCOUNTING_SCHEMES')" />
+        </insert>
+        <insert tableName="ar_accounting_scheme">
+            <column name="id" valueSequenceNext="ar_accounting_scheme_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="Invoice and Writeoff" />
+            <column name="description" value="Default Accounting Scheme"/>
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript')"/>
+        </insert>
+    </changeSet>
+
+	<changeSet id="#INTRD-20785_20240117" author="zelmeliani">
+        <update tableName="meveo_script_instance">
+            <column name="description" value="The invoice's subscription is suspended when the TriggerCollectionPlanLevelsJob launch a dunning level with a script type action"/>
+            <column name="description_i18n">
+				<![CDATA[{"ENG": "<p>The invoice's subscription is suspended when the TriggerCollectionPlanLevelsJob launch a dunning level with a script type action.</p>", "FRA": "<p>La souscription liée à la facture est suspendu lorsque le TriggerCollectionPlanLevelsJob lance un niveau avec une action de type script.</p>"}]]>
+			</column>
+            <where>code = 'org.meveo.service.script.dunning.DunningSuspendSubscriptionScript'</where>
+        </update>
+    </changeSet>
+    
+   <changeSet id="#INTRD-20753_20240118" author="aeljaouhari">
+   		<sql>update adm_country set description_i18n = '{"ENG": "Andorra", "FRA": "Andorre"}', description =  'Andorra' where country_code = 'AD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "United Arab Emirates", "FRA": "Emirats arabes unis"}', description =  'United Arab Emirates' where country_code = 'AE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Afghanistan", "FRA": "Afghanistan"}', description =  'Afghanistan' where country_code = 'AF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Antigua and Barbuda", "FRA": "Antigua-et-Barbuda"}', description =  'Antigua and Barbuda' where country_code = 'AG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Anguilla", "FRA": "Anguilla"}', description =  'Anguilla' where country_code = 'AI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Albania", "FRA": "Albanie"}', description =  'Albania' where country_code = 'AL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Armenia", "FRA": "Arménie"}', description =  'Armenia' where country_code = 'AM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Angola", "FRA": "Angola"}', description =  'Angola' where country_code = 'AO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Antarctica", "FRA": "Antarctique"}', description =  'Antarctica' where country_code = 'AQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Argentina", "FRA": "Argentine"}', description =  'Argentina' where country_code = 'AR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "American Samoa", "FRA": "Samoa américaines"}', description =  'American Samoa' where country_code = 'AS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Austria", "FRA": "Autriche"}', description =  'Austria' where country_code = 'AT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Australia", "FRA": "Australie"}', description =  'Australia' where country_code = 'AU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Aruba", "FRA": "Aruba"}', description =  'Aruba' where country_code = 'AW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Aland Islands", "FRA": "Iles Aland"}', description =  'Aland Islands' where country_code = 'AX'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Azerbaijan", "FRA": "Azerbaïdjan"}', description =  'Azerbaijan' where country_code = 'AZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bosnia and Herzegovina", "FRA": "Bosnie-Herzégovine"}', description =  'Bosnia and Herzegovina' where country_code = 'BA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Barbados", "FRA": "Barbade"}', description =  'Barbados' where country_code = 'BB'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bangladesh", "FRA": "Bangladesh"}', description =  'Bangladesh' where country_code = 'BD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Belgium", "FRA": "Belgique"}', description =  'Belgium' where country_code = 'BE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Burkina Faso", "FRA": "Burkina Faso"}', description =  'Burkina Faso' where country_code = 'BF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bulgaria", "FRA": "Bulgarie"}', description =  'Bulgaria' where country_code = 'BG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bahrain", "FRA": "Bahreïn"}', description =  'Bahrain' where country_code = 'BH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Burundi", "FRA": "Burundi"}', description =  'Burundi' where country_code = 'BI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Benin", "FRA": "Bénin"}', description =  'Benin' where country_code = 'BJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Barthélemy", "FRA": "Saint-Barthélemy"}', description =  'St. Barthélemy' where country_code = 'BL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bermuda", "FRA": "Bermudes"}', description =  'Bermuda' where country_code = 'BM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Brunei", "FRA": "Brunéi Darussalam"}', description =  'Brunei' where country_code = 'BN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bolivia", "FRA": "Bolivie"}', description =  'Bolivia' where country_code = 'BO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Caribbean Netherlands", "FRA": "Pays-Bas caribéens"}', description =  'Caribbean Netherlands' where country_code = 'BQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Brazil", "FRA": "Brésil"}', description =  'Brazil' where country_code = 'BR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bahamas", "FRA": "Bahamas"}', description =  'Bahamas' where country_code = 'BS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bhutan", "FRA": "Bhoutan"}', description =  'Bhutan' where country_code = 'BT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Bouvet Island", "FRA": "Ile Bouvet"}', description =  'Bouvet Island' where country_code = 'BV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Botswana", "FRA": "Botswana"}', description =  'Botswana' where country_code = 'BW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Belarus", "FRA": "Biélorussie"}', description =  'Belarus' where country_code = 'BY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Belize", "FRA": "Belize"}', description =  'Belize' where country_code = 'BZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Canada", "FRA": "Canada"}', description =  'Canada' where country_code = 'CA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cocos (Keeling) Islands", "FRA": "Iles Cocos"}', description =  'Cocos (Keeling) Islands' where country_code = 'CC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Congo - Kinshasa", "FRA": "Congo-Kinshasa"}', description =  'Congo - Kinshasa' where country_code = 'CD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Central African Republic", "FRA": "République centrafricaine"}', description =  'Central African Republic' where country_code = 'CF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Congo - Brazzaville", "FRA": "Congo-Brazzaville"}', description =  'Congo - Brazzaville' where country_code = 'CG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Switzerland", "FRA": "Suisse"}', description =  'Switzerland' where country_code = 'CH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Côte d’Ivoire", "FRA": "Côte d’Ivoire"}', description =  'Côte d’Ivoire' where country_code = 'CI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cook Islands", "FRA": "Iles Cook"}', description =  'Cook Islands' where country_code = 'CK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Chile", "FRA": "Chili"}', description =  'Chile' where country_code = 'CL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cameroon", "FRA": "Cameroun"}', description =  'Cameroon' where country_code = 'CM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "China", "FRA": "Chine"}', description =  'China' where country_code = 'CN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Colombia", "FRA": "Colombie"}', description =  'Colombia' where country_code = 'CO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Costa Rica", "FRA": "Costa Rica"}', description =  'Costa Rica' where country_code = 'CR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cuba", "FRA": "Cuba"}', description =  'Cuba' where country_code = 'CU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cape Verde", "FRA": "Cap-Vert"}', description =  'Cape Verde' where country_code = 'CV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Curaçao", "FRA": "Curaçao"}', description =  'Curaçao' where country_code = 'CW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Christmas Island", "FRA": "Ile Christmas"}', description =  'Christmas Island' where country_code = 'CX'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cyprus", "FRA": "Chypre"}', description =  'Cyprus' where country_code = 'CY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Czechia", "FRA": "Tchéquie"}', description =  'Czechia' where country_code = 'CZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Germany", "FRA": "Allemagne"}', description =  'Germany' where country_code = 'DE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Djibouti", "FRA": "Djibouti"}', description =  'Djibouti' where country_code = 'DJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Denmark", "FRA": "Danemark"}', description =  'Denmark' where country_code = 'DK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Dominica", "FRA": "Dominique"}', description =  'Dominica' where country_code = 'DM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Dominican Republic", "FRA": "République dominicaine"}', description =  'Dominican Republic' where country_code = 'DO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Algeria", "FRA": "Algérie"}', description =  'Algeria' where country_code = 'DZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ecuador", "FRA": "Equateur"}', description =  'Ecuador' where country_code = 'EC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Estonia", "FRA": "Estonie"}', description =  'Estonia' where country_code = 'EE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Egypt", "FRA": "Egypte"}', description =  'Egypt' where country_code = 'EG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Western Sahara", "FRA": "Sahara occidental"}', description =  'Western Sahara' where country_code = 'EH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Eritrea", "FRA": "Erythrée"}', description =  'Eritrea' where country_code = 'ER'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Spain", "FRA": "Espagne"}', description =  'Spain' where country_code = 'ES'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ethiopia", "FRA": "Ethiopie"}', description =  'Ethiopia' where country_code = 'ET'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Finland", "FRA": "Finlande"}', description =  'Finland' where country_code = 'FI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Fiji", "FRA": "Fidji"}', description =  'Fiji' where country_code = 'FJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Falkland Islands", "FRA": "Iles Malouines"}', description =  'Falkland Islands' where country_code = 'FK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Micronesia", "FRA": "Etats fédérés de Micronésie"}', description =  'Micronesia' where country_code = 'FM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Faroe Islands", "FRA": "Iles Féroé"}', description =  'Faroe Islands' where country_code = 'FO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "France", "FRA": "France"}', description =  'France' where country_code = 'FR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Gabon", "FRA": "Gabon"}', description =  'Gabon' where country_code = 'GA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "United Kingdom", "FRA": "Royaume-Uni"}', description =  'United Kingdom' where country_code = 'GB'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Grenada", "FRA": "Grenade"}', description =  'Grenada' where country_code = 'GD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Georgia", "FRA": "Géorgie"}', description =  'Georgia' where country_code = 'GE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "French Guiana", "FRA": "Guyane française"}', description =  'French Guiana' where country_code = 'GF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guernsey", "FRA": "Guernesey"}', description =  'Guernsey' where country_code = 'GG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ghana", "FRA": "Ghana"}', description =  'Ghana' where country_code = 'GH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Gibraltar", "FRA": "Gibraltar"}', description =  'Gibraltar' where country_code = 'GI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Greenland", "FRA": "Groenland"}', description =  'Greenland' where country_code = 'GL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Gambia", "FRA": "Gambie"}', description =  'Gambia' where country_code = 'GM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guinea", "FRA": "Guinée"}', description =  'Guinea' where country_code = 'GN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guadeloupe", "FRA": "Guadeloupe"}', description =  'Guadeloupe' where country_code = 'GP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Equatorial Guinea", "FRA": "Guinée équatoriale"}', description =  'Equatorial Guinea' where country_code = 'GQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Greece", "FRA": "Grèce"}', description =  'Greece' where country_code = 'GR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "South Georgia and South Sandwich Islands", "FRA": "Géorgie du Sud et îles Sandwich du Sud"}', description =  'South Georgia and South Sandwich Islands' where country_code = 'GS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guatemala", "FRA": "Guatemala"}', description =  'Guatemala' where country_code = 'GT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guam", "FRA": "Guam"}', description =  'Guam' where country_code = 'GU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guinea-Bissau", "FRA": "Guinée-Bissau"}', description =  'Guinea-Bissau' where country_code = 'GW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Guyana", "FRA": "Guyana"}', description =  'Guyana' where country_code = 'GY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Hong Kong SAR China", "FRA": "R.A.S. chinoise de Hong Kong"}', description =  'Hong Kong SAR China' where country_code = 'HK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Heard and McDonald Islands", "FRA": "Iles Heard et McDonald"}', description =  'Heard and McDonald Islands' where country_code = 'HM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Honduras", "FRA": "Honduras"}', description =  'Honduras' where country_code = 'HN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Croatia", "FRA": "Croatie"}', description =  'Croatia' where country_code = 'HR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Haiti", "FRA": "Haïti"}', description =  'Haiti' where country_code = 'HT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Hungary", "FRA": "Hongrie"}', description =  'Hungary' where country_code = 'HU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Indonesia", "FRA": "Indonésie"}', description =  'Indonesia' where country_code = 'ID'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ireland", "FRA": "Irlande"}', description =  'Ireland' where country_code = 'IE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Israel", "FRA": "Israël"}', description =  'Israel' where country_code = 'IL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Isle of Man", "FRA": "Ile de Man"}', description =  'Isle of Man' where country_code = 'IM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "India", "FRA": "Inde"}', description =  'India' where country_code = 'IN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "British Indian Ocean Territory", "FRA": "Territoire britannique de l’océan Indien"}', description =  'British Indian Ocean Territory' where country_code = 'IO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Iraq", "FRA": "Irak"}', description =  'Iraq' where country_code = 'IQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Iran", "FRA": "Iran"}', description =  'Iran' where country_code = 'IR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Iceland", "FRA": "Islande"}', description =  'Iceland' where country_code = 'IS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Italy", "FRA": "Italie"}', description =  'Italy' where country_code = 'IT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Jersey", "FRA": "Jersey"}', description =  'Jersey' where country_code = 'JE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Jamaica", "FRA": "Jamaïque"}', description =  'Jamaica' where country_code = 'JM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Jordan", "FRA": "Jordanie"}', description =  'Jordan' where country_code = 'JO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Japan", "FRA": "Japon"}', description =  'Japan' where country_code = 'JP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kenya", "FRA": "Kenya"}', description =  'Kenya' where country_code = 'KE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kyrgyzstan", "FRA": "Kirghizistan"}', description =  'Kyrgyzstan' where country_code = 'KG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cambodia", "FRA": "Cambodge"}', description =  'Cambodia' where country_code = 'KH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kiribati", "FRA": "Kiribati"}', description =  'Kiribati' where country_code = 'KI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Comoros", "FRA": "Comores"}', description =  'Comoros' where country_code = 'KM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Kitts and Nevis", "FRA": "Saint-Christophe-et-Niévès"}', description =  'St. Kitts and Nevis' where country_code = 'KN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "North Korea", "FRA": "Corée du Nord"}', description =  'North Korea' where country_code = 'KP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "South Korea", "FRA": "Corée du Sud"}', description =  'South Korea' where country_code = 'KR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kuwait", "FRA": "Koweït"}', description =  'Kuwait' where country_code = 'KW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Cayman Islands", "FRA": "Iles Caïmans"}', description =  'Cayman Islands' where country_code = 'KY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Kazakhstan", "FRA": "Kazakhstan"}', description =  'Kazakhstan' where country_code = 'KZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Laos", "FRA": "Laos"}', description =  'Laos' where country_code = 'LA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Lebanon", "FRA": "Liban"}', description =  'Lebanon' where country_code = 'LB'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Lucia", "FRA": "Sainte-Lucie"}', description =  'St. Lucia' where country_code = 'LC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Liechtenstein", "FRA": "Liechtenstein"}', description =  'Liechtenstein' where country_code = 'LI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sri Lanka", "FRA": "Sri Lanka"}', description =  'Sri Lanka' where country_code = 'LK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Liberia", "FRA": "Libéria"}', description =  'Liberia' where country_code = 'LR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Lesotho", "FRA": "Lesotho"}', description =  'Lesotho' where country_code = 'LS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Lithuania", "FRA": "Lituanie"}', description =  'Lithuania' where country_code = 'LT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Luxembourg", "FRA": "Luxembourg"}', description =  'Luxembourg' where country_code = 'LU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Latvia", "FRA": "Lettonie"}', description =  'Latvia' where country_code = 'LV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Libya", "FRA": "Libye"}', description =  'Libya' where country_code = 'LY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Morocco", "FRA": "Maroc"}', description =  'Morocco' where country_code = 'MA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Monaco", "FRA": "Monaco"}', description =  'Monaco' where country_code = 'MC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Moldova", "FRA": "Moldavie"}', description =  'Moldova' where country_code = 'MD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Montenegro", "FRA": "Monténégro"}', description =  'Montenegro' where country_code = 'ME'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Martin", "FRA": "Saint-Martin"}', description =  'St. Martin' where country_code = 'MF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Madagascar", "FRA": "Madagascar"}', description =  'Madagascar' where country_code = 'MG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Marshall Islands", "FRA": "Iles Marshall"}', description =  'Marshall Islands' where country_code = 'MH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Macedonia", "FRA": "Macédoine"}', description =  'Macedonia' where country_code = 'MK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mali", "FRA": "Mali"}', description =  'Mali' where country_code = 'ML'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Myanmar (Burma)", "FRA": "Myanmar (Birmanie)"}', description =  'Myanmar (Burma)' where country_code = 'MM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mongolia", "FRA": "Mongolie"}', description =  'Mongolia' where country_code = 'MN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Macau SAR China", "FRA": "R.A.S. chinoise de Macao"}', description =  'Macau SAR China' where country_code = 'MO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Northern Mariana Islands", "FRA": "Iles Mariannes du Nord"}', description =  'Northern Mariana Islands' where country_code = 'MP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Martinique", "FRA": "Martinique"}', description =  'Martinique' where country_code = 'MQ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mauritania", "FRA": "Mauritanie"}', description =  'Mauritania' where country_code = 'MR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Montserrat", "FRA": "Montserrat"}', description =  'Montserrat' where country_code = 'MS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Malta", "FRA": "Malte"}', description =  'Malta' where country_code = 'MT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mauritius", "FRA": "Maurice"}', description =  'Mauritius' where country_code = 'MU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Maldives", "FRA": "Maldives"}', description =  'Maldives' where country_code = 'MV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Malawi", "FRA": "Malawi"}', description =  'Malawi' where country_code = 'MW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mexico", "FRA": "Mexique"}', description =  'Mexico' where country_code = 'MX'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Malaysia", "FRA": "Malaisie"}', description =  'Malaysia' where country_code = 'MY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mozambique", "FRA": "Mozambique"}', description =  'Mozambique' where country_code = 'MZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Namibia", "FRA": "Namibie"}', description =  'Namibia' where country_code = 'NA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "New Caledonia", "FRA": "Nouvelle-Calédonie"}', description =  'New Caledonia' where country_code = 'NC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Niger", "FRA": "Niger"}', description =  'Niger' where country_code = 'NE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Norfolk Island", "FRA": "Ile Norfolk"}', description =  'Norfolk Island' where country_code = 'NF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Nigeria", "FRA": "Nigéria"}', description =  'Nigeria' where country_code = 'NG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Nicaragua", "FRA": "Nicaragua"}', description =  'Nicaragua' where country_code = 'NI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Netherlands", "FRA": "Pays-Bas"}', description =  'Netherlands' where country_code = 'NL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Norway", "FRA": "Norvège"}', description =  'Norway' where country_code = 'NO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Nepal", "FRA": "Népal"}', description =  'Nepal' where country_code = 'NP'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Nauru", "FRA": "Nauru"}', description =  'Nauru' where country_code = 'NR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Niue", "FRA": "Niue"}', description =  'Niue' where country_code = 'NU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "New Zealand", "FRA": "Nouvelle-Zélande"}', description =  'New Zealand' where country_code = 'NZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Oman", "FRA": "Oman"}', description =  'Oman' where country_code = 'OM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Panama", "FRA": "Panama"}', description =  'Panama' where country_code = 'PA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Peru", "FRA": "Pérou"}', description =  'Peru' where country_code = 'PE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "French Polynesia", "FRA": "Polynésie française"}', description =  'French Polynesia' where country_code = 'PF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Papua New Guinea", "FRA": "Papouasie-Nouvelle-Guinée"}', description =  'Papua New Guinea' where country_code = 'PG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Philippines", "FRA": "Philippines"}', description =  'Philippines' where country_code = 'PH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Pakistan", "FRA": "Pakistan"}', description =  'Pakistan' where country_code = 'PK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Poland", "FRA": "Pologne"}', description =  'Poland' where country_code = 'PL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Pierre and Miquelon", "FRA": "Saint-Pierre-et-Miquelon"}', description =  'St. Pierre and Miquelon' where country_code = 'PM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Pitcairn Islands", "FRA": "Iles Pitcairn"}', description =  'Pitcairn Islands' where country_code = 'PN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Puerto Rico", "FRA": "Porto Rico"}', description =  'Puerto Rico' where country_code = 'PR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Palestinian Territories", "FRA": "Territoires palestiniens"}', description =  'Palestinian Territories' where country_code = 'PS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Portugal", "FRA": "Portugal"}', description =  'Portugal' where country_code = 'PT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Palau", "FRA": "Palaos"}', description =  'Palau' where country_code = 'PW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Paraguay", "FRA": "Paraguay"}', description =  'Paraguay' where country_code = 'PY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Qatar", "FRA": "Qatar"}', description =  'Qatar' where country_code = 'QA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Réunion", "FRA": "La Réunion"}', description =  'Réunion' where country_code = 'RE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Romania", "FRA": "Roumanie"}', description =  'Romania' where country_code = 'RO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Serbia", "FRA": "Serbie"}', description =  'Serbia' where country_code = 'RS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Russia", "FRA": "Russie"}', description =  'Russia' where country_code = 'RU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Rwanda", "FRA": "Rwanda"}', description =  'Rwanda' where country_code = 'RW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Saudi Arabia", "FRA": "Arabie saoudite"}', description =  'Saudi Arabia' where country_code = 'SA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Solomon Islands", "FRA": "Iles Salomon"}', description =  'Solomon Islands' where country_code = 'SB'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Seychelles", "FRA": "Seychelles"}', description =  'Seychelles' where country_code = 'SC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sudan", "FRA": "Soudan"}', description =  'Sudan' where country_code = 'SD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sweden", "FRA": "Suède"}', description =  'Sweden' where country_code = 'SE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Singapore", "FRA": "Singapour"}', description =  'Singapore' where country_code = 'SG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Helena", "FRA": "Sainte-Hélène"}', description =  'St. Helena' where country_code = 'SH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Slovenia", "FRA": "Slovénie"}', description =  'Slovenia' where country_code = 'SI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Svalbard and Jan Mayen", "FRA": "Svalbard et Jan Mayen"}', description =  'Svalbard and Jan Mayen' where country_code = 'SJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Slovakia", "FRA": "Slovaquie"}', description =  'Slovakia' where country_code = 'SK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sierra Leone", "FRA": "Sierra Leone"}', description =  'Sierra Leone' where country_code = 'SL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "San Marino", "FRA": "Saint-Marin"}', description =  'San Marino' where country_code = 'SM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Senegal", "FRA": "Sénégal"}', description =  'Senegal' where country_code = 'SN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Somalia", "FRA": "Somalie"}', description =  'Somalia' where country_code = 'SO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Suriname", "FRA": "Suriname"}', description =  'Suriname' where country_code = 'SR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "South Sudan", "FRA": "Soudan du Sud"}', description =  'South Sudan' where country_code = 'SS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sao Tomé and Príncipe", "FRA": "Sao Tomé-et-Principe"}', description =  'Sao Tomé and Príncipe' where country_code = 'ST'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "El Salvador", "FRA": "Salvador"}', description =  'El Salvador' where country_code = 'SV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Sint Maarten", "FRA": "Saint-Martin (partie néerlandaise)"}', description =  'Sint Maarten' where country_code = 'SX'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Syria", "FRA": "Syrie"}', description =  'Syria' where country_code = 'SY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Swaziland", "FRA": "Swaziland"}', description =  'Swaziland' where country_code = 'SZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Turks and Caicos Islands", "FRA": "Iles Turques-et-Caïques"}', description =  'Turks and Caicos Islands' where country_code = 'TC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Chad", "FRA": "Tchad"}', description =  'Chad' where country_code = 'TD'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "French Southern Territories", "FRA": "Terres australes françaises"}', description =  'French Southern Territories' where country_code = 'TF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Togo", "FRA": "Togo"}', description =  'Togo' where country_code = 'TG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Thailand", "FRA": "Thaïlande"}', description =  'Thailand' where country_code = 'TH'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tajikistan", "FRA": "Tadjikistan"}', description =  'Tajikistan' where country_code = 'TJ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tokelau", "FRA": "Tokélaou"}', description =  'Tokelau' where country_code = 'TK'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Timor-Leste", "FRA": "Timor oriental"}', description =  'Timor-Leste' where country_code = 'TL'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Turkmenistan", "FRA": "Turkménistan"}', description =  'Turkmenistan' where country_code = 'TM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tunisia", "FRA": "Tunisie"}', description =  'Tunisia' where country_code = 'TN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tonga", "FRA": "Tonga"}', description =  'Tonga' where country_code = 'TO'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Turkey", "FRA": "Turquie"}', description =  'Turkey' where country_code = 'TR'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Trinidad and Tobago", "FRA": "Trinité-et-Tobago"}', description =  'Trinidad and Tobago' where country_code = 'TT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tuvalu", "FRA": "Tuvalu"}', description =  'Tuvalu' where country_code = 'TV'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Taiwan", "FRA": "Taïwan"}', description =  'Taiwan' where country_code = 'TW'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Tanzania", "FRA": "Tanzanie"}', description =  'Tanzania' where country_code = 'TZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Ukraine", "FRA": "Ukraine"}', description =  'Ukraine' where country_code = 'UA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Uganda", "FRA": "Ouganda"}', description =  'Uganda' where country_code = 'UG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "U.S. Outlying Islands", "FRA": "Iles mineures éloignées des Etats-Unis"}', description =  'U.S. Outlying Islands' where country_code = 'UM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "United States", "FRA": "Etats-Unis"}', description =  'United States' where country_code = 'US'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Uruguay", "FRA": "Uruguay"}', description =  'Uruguay' where country_code = 'UY'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Uzbekistan", "FRA": "Ouzbékistan"}', description =  'Uzbekistan' where country_code = 'UZ'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Vatican City", "FRA": "Etat de la Cité du Vatican"}', description =  'Vatican City' where country_code = 'VA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "St. Vincent and Grenadines", "FRA": "Saint-Vincent-et-les-Grenadines"}', description =  'St. Vincent and Grenadines' where country_code = 'VC'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Venezuela", "FRA": "Venezuela"}', description =  'Venezuela' where country_code = 'VE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "British Virgin Islands", "FRA": "Iles Vierges britanniques"}', description =  'British Virgin Islands' where country_code = 'VG'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "U.S. Virgin Islands", "FRA": "Iles Vierges des Etats-Unis"}', description =  'U.S. Virgin Islands' where country_code = 'VI'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Vietnam", "FRA": "Vietnam"}', description =  'Vietnam' where country_code = 'VN'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Vanuatu", "FRA": "Vanuatu"}', description =  'Vanuatu' where country_code = 'VU'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Wallis and Futuna", "FRA": "Wallis-et-Futuna"}', description =  'Wallis and Futuna' where country_code = 'WF'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Samoa", "FRA": "Samoa"}', description =  'Samoa' where country_code = 'WS'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Yemen", "FRA": "Yémen"}', description =  'Yemen' where country_code = 'YE'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Mayotte", "FRA": "Mayotte"}', description =  'Mayotte' where country_code = 'YT'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "South Africa", "FRA": "Afrique du Sud"}', description =  'South Africa' where country_code = 'ZA'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Zambia", "FRA": "Zambie"}', description =  'Zambia' where country_code = 'ZM'</sql>
+		<sql>update adm_country set description_i18n = '{"ENG": "Zimbabwe", "FRA": "Zimbabwe"}', description =  'Zimbabwe' where country_code = 'ZW'</sql>
+    </changeSet>
+    <changeSet id="#INTRD-20962_add_missing_currencies" author="a.rouaguebe">
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-193" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ADP" />
+            <column name="description_en" value="Andorran Peseta" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Andorran Peseta", "FRA" : "peseta andorrane"}' />
+            <column name="symbol" value="ADP" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-194" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="SDD" />
+            <column name="description_en" value="Sudanese Dinar (1992–2007)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Sudanese Dinar (1992–2007)", "FRA" : "dinar soudanais"}' />
+            <column name="symbol" value="SDD" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-195" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="PTE" />
+            <column name="description_en" value="Portuguese Escudo" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Portuguese Escudo", "FRA" : "escudo portugais"}' />
+            <column name="symbol" value="PTE" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-196" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="DEM" />
+            <column name="description_en" value="German Mark" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "German Mark", "FRA" : "mark allemand"}' />
+            <column name="symbol" value="DEM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-197" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="VEB" />
+            <column name="description_en" value="Venezuelan Bolívar (1871–2008)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Venezuelan Bolívar (1871–2008)", "FRA" : "bolivar vénézuélien (1871–2008)"}' />
+            <column name="symbol" value="VEB" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-198" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="GWP" />
+            <column name="description_en" value="Guinea-Bissau Peso" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Guinea-Bissau Peso", "FRA" : "peso bissau-guinéen"}' />
+            <column name="symbol" value="GWP" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-199" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ZWN" />
+            <column name="description_en" value="ZWN" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "ZWN", "FRA" : "ZWN"}' />
+            <column name="symbol" value="ZWN" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-200" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="MRO" />
+            <column name="description_en" value="Mauritanian Ouguiya (1973–2017)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Mauritanian Ouguiya (1973–2017)", "FRA" : "ouguiya mauritanien (1973–2017)"}' />
+            <column name="symbol" value="MRO" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-201" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="FIM" />
+            <column name="description_en" value="Finnish Markka" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Finnish Markka", "FRA" : "mark finlandais"}' />
+            <column name="symbol" value="FIM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-202" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="GRD" />
+            <column name="description_en" value="Greek Drachma" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Greek Drachma", "FRA" : "drachme grecque"}' />
+            <column name="symbol" value="GRD" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-203" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ZWR" />
+            <column name="description_en" value="Zimbabwean Dollar (2008)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Zimbabwean Dollar (2008)", "FRA" : "dollar zimbabwéen (2008)"}' />
+            <column name="symbol" value="ZWR" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-204" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ZWD" />
+            <column name="description_en" value="Zimbabwean Dollar (1980–2008)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Zimbabwean Dollar (1980–2008)", "FRA" : "dollar zimbabwéen"}' />
+            <column name="symbol" value="ZWD" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-205" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ZMK" />
+            <column name="description_en" value="Zambian Kwacha (1968–2012)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Zambian Kwacha (1968–2012)", "FRA" : "kwacha zambien (1968–2012)"}' />
+            <column name="symbol" value="ZMK" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-206" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="TMM" />
+            <column name="description_en" value="Turkmenistani Manat (1993–2009)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Turkmenistani Manat (1993–2009)", "FRA" : "manat turkmène"}' />
+            <column name="symbol" value="TMM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-207" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="BGL" />
+            <column name="description_en" value="Bulgarian Hard Lev" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Bulgarian Hard Lev", "FRA" : "lev bulgare (1962–1999)"}' />
+            <column name="symbol" value="BGL" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-208" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="IEP" />
+            <column name="description_en" value="Irish Pound" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Irish Pound", "FRA" : "livre irlandaise"}' />
+            <column name="symbol" value="IEP" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-209" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="AYM" />
+            <column name="description_en" value="AYM" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "AYM", "FRA" : "AYM"}' />
+            <column name="symbol" value="AYM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-210" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="XFO" />
+            <column name="description_en" value="French Gold Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "French Gold Franc", "FRA" : "franc or"}' />
+            <column name="symbol" value="XFO" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-211" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="TPE" />
+            <column name="description_en" value="Timorese Escudo" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Timorese Escudo", "FRA" : "escudo timorais"}' />
+            <column name="symbol" value="TPE" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-212" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ATS" />
+            <column name="description_en" value="Austrian Schilling" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Austrian Schilling", "FRA" : "schilling autrichien"}' />
+            <column name="symbol" value="ATS" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-213" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="GHC" />
+            <column name="description_en" value="Ghanaian Cedi (1979–2007)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Ghanaian Cedi (1979–2007)", "FRA" : "cédi"}' />
+            <column name="symbol" value="GHC" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-214" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ESP" />
+            <column name="description_en" value="Spanish Peseta" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Spanish Peseta", "FRA" : "peseta espagnole"}' />
+            <column name="symbol" value="ESP" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-215" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="ITL" />
+            <column name="description_en" value="Italian Lira" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Italian Lira", "FRA" : "lire italienne"}' />
+            <column name="symbol" value="ITL" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-216" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="BYR" />
+            <column name="description_en" value="Belarusian Rouble (2000–2016)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Belarusian Rouble (2000–2016)", "FRA" : "rouble biélorusse (2000–2016)"}' />
+            <column name="symbol" value="BYR" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-217" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="VED" />
+            <column name="description_en" value="Venezuelan Bolívar Soberano" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Venezuelan Bolívar Soberano", "FRA" : "Venezuelan Bolívar Soberano"}' />
+            <column name="symbol" value="VED" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-218" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="RUR" />
+            <column name="description_en" value="Russian Rouble (1991–1998)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Russian Rouble (1991–1998)", "FRA" : "rouble russe (1991–1998)"}' />
+            <column name="symbol" value="RUR" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-219" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="FRF" />
+            <column name="description_en" value="French Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "French Franc", "FRA" : "franc français"}' />
+            <column name="symbol" value="FRF" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-220" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="AZM" />
+            <column name="description_en" value="Azerbaijani Manat (1993–2006)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Azerbaijani Manat (1993–2006)", "FRA" : "manat azéri (1993–2006)"}' />
+            <column name="symbol" value="AZM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-221" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="AFA" />
+            <column name="description_en" value="Afghan Afghani (1927–2002)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Afghan Afghani (1927–2002)", "FRA" : "afghani (1927–2002)"}' />
+            <column name="symbol" value="AFA" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-222" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="BYB" />
+            <column name="description_en" value="Belarusian New Rouble (1994–1999)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Belarusian New Rouble (1994–1999)", "FRA" : "nouveau rouble biélorusse (1994–1999)"}' />
+            <column name="symbol" value="BYB" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-223" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="BEF" />
+            <column name="description_en" value="Belgian Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Belgian Franc", "FRA" : "franc belge"}' />
+            <column name="symbol" value="BEF" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-224" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="XFU" />
+            <column name="description_en" value="French UIC-Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "French UIC-Franc", "FRA" : "franc UIC"}' />
+            <column name="symbol" value="XFU" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-225" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="SRG" />
+            <column name="description_en" value="Surinamese Guilder" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Surinamese Guilder", "FRA" : "florin surinamais"}' />
+            <column name="symbol" value="SRG" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-226" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="YUM" />
+            <column name="description_en" value="Yugoslavian New Dinar (1994–2002)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Yugoslavian New Dinar (1994–2002)", "FRA" : "dinar yougoslave Noviy"}' />
+            <column name="symbol" value="YUM" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-227" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="USS" />
+            <column name="description_en" value="US Dollar (Same day)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "US Dollar (Same day)", "FRA" : "dollar des Etats-Unis (jour même)"}' />
+            <column name="symbol" value="USS" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-228" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="MZN" />
+            <column name="description_en" value="Mozambican Metical" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Mozambican Metical", "FRA" : "metical mozambicain"}' />
+            <column name="symbol" value="MZN" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-229" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="LUF" />
+            <column name="description_en" value="Luxembourgian Franc" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Luxembourgian Franc", "FRA" : "franc luxembourgeois"}' />
+            <column name="symbol" value="LUF" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-230" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="NLG" />
+            <column name="description_en" value="Dutch Guilder" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Dutch Guilder", "FRA" : "florin néerlandais"}' />
+            <column name="symbol" value="NLG" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-231" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="SLE" />
+            <column name="description_en" value="Sierra Leonean Leone" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "Sierra Leonean Leone", "FRA" : "Sierra Leonean Leone"}' />
+            <column name="symbol" value="SLE" />
+        </insert>
+        <insert tableName="adm_currency">
+            <column name="id" valueNumeric="-232" />
+            <column name="created" valueDate="2023-02-15 00:04:03.53" />
+            <column name="version" valueNumeric="1" />
+            <column name="currency_code" value="STD" />
+            <column name="description_en" value="São Tomé &amp; Príncipe Dobra (1977–2017)" />
+            <column name="system_currency" valueNumeric="1" />
+            <column name="description_i18n" value='{"ENG" : "São Tomé &amp; Príncipe Dobra (1977–2017)", "FRA" : "dobra santoméen (1977–2017)"}' />
+            <column name="symbol" value="STD" />
+        </insert>
+    </changeSet>
+    <changeSet id="#INTRD-20796_20240122" author="AbdellatifBARI">
+        <update tableName="meveo_job_instance">
+            <column name="job_category" value="UTILS"/>
+            <column name="job_template" value="UpdateHugeEntityJob"/>
+            <column name="uuid" value="MarkWOToRerateJob"/>
+            <column name="cf_values"><![CDATA[{
+                "UpdateHugeEntityJob_targetJob":[{"string":"MarkWOToRerateJob"}],
+                "UpdateHugeEntityJob_entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
+                "UpdateHugeEntityJob_fieldsToUpdate":[{"string": "status='TO_RERATE'"}],
+                "UpdateHugeEntityJob_defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
+                "UpdateHugeEntityJob_selectLimit":[{"long":10000000}],
+                "UpdateHugeEntityJob_updateChunk":[{"long":32767}],
+                "ReRatingJobBean_emailTemplate": [{"entity": {"id": 8, "code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
+                }]]></column>
+            <where>code='MarkWOToRerateJob'</where>
+        </update>
+    </changeSet>
+    <changeSet id="#INTRD-20796_20240201" author="AbdellatifBARI">
+        <update tableName="meveo_job_instance">
+            <column name="cf_values"><![CDATA[{
+                "nbRuns":[{"long":-1}],
+                "waitingMillis":[{"long":0}],
+                "UpdateHugeEntityJob_targetJob":[{"string":"MarkWOToRerateJob"}],
+                "UpdateHugeEntityJob_entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
+                "UpdateHugeEntityJob_fieldsToUpdate":[{"string": "status='TO_RERATE'"}],
+                "UpdateHugeEntityJob_defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
+                "UpdateHugeEntityJob_selectLimit":[{"long":1000000}],
+                "UpdateHugeEntityJob_updateChunk":[{"long":32767}],
+                "UpdateHugeEntityJob_isPessimisticUpdateLock":[{"boolean":false}],
+                "UpdateHugeEntityJob_emailTemplate": [{"entity": {"id": 8, "code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
+                }]]></column>
+            <where>code='MarkWOToRerateJob'</where>
+        </update>
+    </changeSet>
+    <changeSet id="#INTRD-20796_20240207" author="AbdellatifBARI">
+        <update tableName="meveo_job_instance">
+            <column name="cf_values"><![CDATA[{
+                "nbRuns":[{"long":-1}],
+                "waitingMillis":[{"long":0}],
+                "UpdateHugeEntityJob_targetJob":[{"string":"MarkWOToRerateJob"}],
+                "UpdateHugeEntityJob_entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
+                "UpdateHugeEntityJob_fieldsToUpdate":[{"string": "status='TO_RERATE'"}],
+                "UpdateHugeEntityJob_defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
+                "UpdateHugeEntityJob_selectLimit":[{"long":1000000}],
+                "UpdateHugeEntityJob_updateChunk":[{"long":32767}],
+                "UpdateHugeEntityJob_isPessimisticUpdateLock":[{"boolean":false}],
+                "UpdateHugeEntityJob_emailTemplate": [{"entity": {"code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
+                }]]></column>
+            <where>code='MarkWOToRerateJob'</where>
+        </update>
+    </changeSet>
+    
+    <changeSet id="#INTRD_21035_20240202" author="TarikFA.">
+        <update tableName="ar_occ_template">
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="contra_accounting_code2_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '445710000')" />
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Invoice and Writeoff')" />
+            <where>code='EXP_WRT'</where>
+        </update>
+    </changeSet>
+
+	<changeSet id="#INTRD-21035_20240206" author="TarikFA.">
+		<update tableName="meveo_script_instance" >
+			<column name="code" value="org.meveo.service.script.accountingscheme.InvoiceWriteOffAccountingSchemeScript" />
+			<column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code = 'ACCOUNTING_SCHEMES')" />
+			<where>code='org.meveo.service.script.accountingscheme.InvoiceWritOffAccountingSchemeScript'</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="#INTRD-20847_20230214" author="zelmeliani">
+    	<insert tableName="ar_customer_balance">
+    		<column name="id" value="-2"/>
+		    <column name="version" value="0" />
+		    <column name="created" valueDate="${db.current.time}" />
+		    <column name="creator" value="applicationInitializer" />
+		    <column name="code" value="ARREARS_BALANCE" />
+		    <column name="description" value="arrears balance" />
+		    <column name="default_balance" value="0" />
+			<column name="balance_el" value="accountOperation.type = I and accountOperation.dueDate &lt; currentDate and (accountOperation.matchingStatus = O or accountOperation.matchingStatus = P)" />
+		</insert>
+	</changeSet>
+
+	<changeSet id="#INTRD-20851_20240213" author="zelmeliani">
+    	<update tableName="ar_customer_balance">
+			<column name="balance_el" value="#{ accountOperation.type == 'I' &amp;&amp; accountOperation.dueDate &lt; currentDate &amp;&amp; (accountOperation.matchingStatus == 'O' || accountOperation.matchingStatus == 'P') }" />
+			<where>code='ARREARS_BALANCE'</where>
+		</update>
+	</changeSet>
 </databaseChangeLog>

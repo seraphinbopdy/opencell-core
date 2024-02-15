@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.meveo.admin.exception.BusinessException;
@@ -43,7 +45,6 @@ import org.meveo.api.dto.UsersDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
 import org.meveo.api.exception.ActionForbiddenException;
-import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.api.exception.MeveoApiException;
@@ -52,7 +53,8 @@ import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.SecuredEntity;
 import org.meveo.model.admin.User;
 import org.meveo.model.security.Role;
-import org.meveo.model.shared.Name;
+import org.meveo.model.shared.NameInfo;
+import org.meveo.security.client.KeycloakAdminClientService;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.admin.impl.RoleService;
 import org.meveo.service.admin.impl.UserService;
@@ -84,6 +86,9 @@ public class UserApi extends BaseApi {
     @Inject
     private SecuredBusinessEntityService securedBusinessEntityService;
 
+    @Inject
+    KeycloakAdminClientService keycloakAdminClientService;
+
     public void create(UserDto postData) throws MeveoApiException, BusinessException {
         create(postData, false);
     }
@@ -108,11 +113,6 @@ public class UserApi extends BaseApi {
 
             handleMissingParameters();
 
-            // check if the user already exists
-            if (userService.findByUsername(postData.getUsername(), false, false) != null) {
-                throw new EntityAlreadyExistsException(User.class, postData.getUsername(), "username");
-            }
-
             boolean isManagingSelf = currentUser.hasRole(ROLE_API_USER_SELF_MANAGEMENT);
             boolean isUsersManager = currentUser.hasRole(ROLE_API_USER_MANAGEMENT);
 
@@ -134,13 +134,25 @@ public class UserApi extends BaseApi {
             user.setUserName(postData.getUsername().toUpperCase());
             user.setPassword(postData.getPassword());
             user.setEmail((postData.getEmail()));
-            user.setName(new Name(null, postData.getFirstName(), postData.getLastName()));
-            user.setRoles(new HashSet<>(postData.getRoles()));
+            user.setName(new NameInfo(null, postData.getFirstName(), postData.getLastName()));
+            if(postData.getRoles()!=null && !postData.getRoles().isEmpty()) {
+                Set<Role> roles = postData.getRoles().stream()
+                        .map(roleCode -> {
+                            Role role = roleService.findByName(roleCode);
+                            if (role == null && !userService.canSynchroWithKC()) //throw an exception only when the master is OC
+                                throw new EntityDoesNotExistsException(Role.class, roleCode);
+                            return role;
+                        }).collect(Collectors.toSet());
+                roles.removeIf(Objects::isNull);
+                user.getUserRoles().addAll(roles);
+            }
             user.setUserLevel(postData.getUserLevel());
             if (postData.getCustomFields() != null) {
                 super.populateCustomFields(postData.getCustomFields(), user, true, true);
             }
             userService.create(user);
+
+            keycloakAdminClientService.addOrUpdateRoleToUserInKeycloak(postData.getUsername(), postData.getRoles(), postData.getClientRoles(), postData.getReplaceRoles() != null ? postData.getReplaceRoles() : Boolean.FALSE, false);
 
             // Save secured entities
             securedBusinessEntityService.syncSecuredEntitiesForUser(securedEntities, postData.getUsername());
@@ -155,7 +167,7 @@ public class UserApi extends BaseApi {
         handleMissingParameters();
 
         // find user
-        User user = userService.findByUsername(postData.getUsername(), false, true);
+        User user = userService.findByUsername(postData.getUsername(), false, true, false);
 
         if (user == null) {
             throw new EntityDoesNotExistsException(User.class, postData.getUsername(), "username");
@@ -194,7 +206,7 @@ public class UserApi extends BaseApi {
 
         if (postData.getFirstName() != null || postData.getLastName() != null) {
             if (user.getName() == null) {
-                user.setName(new Name());
+                user.setName(new NameInfo());
             }
             if (postData.getFirstName() != null) {
                 user.getName().setFirstName(postData.getFirstName());
@@ -203,7 +215,7 @@ public class UserApi extends BaseApi {
                 user.getName().setLastName(postData.getLastName());
             }
         }
-        if (postData.getRoles() != null) {
+        if(postData.getRoles()!=null && !postData.getRoles().isEmpty()) {
             user.setRoles(new HashSet<>(postData.getRoles()));
         }
 
@@ -215,6 +227,9 @@ public class UserApi extends BaseApi {
         }
 
         userService.updateUserWithAttributes(user, postData.getAttributes());
+        
+        addUserRoles(user.getId(), postData.getRoles());
+        keycloakAdminClientService.addOrUpdateRoleToUserInKeycloak(postData.getUsername(), postData.getRoles(), postData.getClientRoles(), postData.getReplaceRoles() != null ? postData.getReplaceRoles() : Boolean.FALSE, true);
 
         // Save secured entities
         if (securedEntities != null) {
@@ -245,7 +260,7 @@ public class UserApi extends BaseApi {
     }
 
     public void remove(String username) throws MeveoApiException, BusinessException {
-        User user = userService.findByUsername(username, false, false);
+        User user = userService.findByUsername(username, false, false, false);
 
         if (user == null) {
             throw new EntityDoesNotExistsException(User.class, username, "username");
@@ -265,7 +280,7 @@ public class UserApi extends BaseApi {
         handleMissingParameters();
         checkPermissions(username);
 
-        User user = userService.findByUsername(username, true, false);
+        User user = userService.findByUsername(username, true, false, false);
 
         if (user == null) {
             throw new EntityDoesNotExistsException(User.class, username, "username");
@@ -273,6 +288,7 @@ public class UserApi extends BaseApi {
 
         UserDto userDto = new UserDto(user);
         getKeycloakAttributesByUsername(userDto);
+        keycloakAdminClientService.fillClientRoles(userDto);
 
         List<SecuredEntity> securedEntities = securedBusinessEntityService.getSecuredEntitiesForUser(username);
         if (securedEntities != null) {
@@ -321,7 +337,7 @@ public class UserApi extends BaseApi {
     }
 
     public void createOrUpdate(UserDto postData) throws MeveoApiException, BusinessException {
-        User user = userService.findByUsername(postData.getUsername(), false, false);
+        User user = userService.findByUsername(postData.getUsername(), false, false, false);
         if (user == null) {
             create(postData);
         } else {
@@ -377,6 +393,7 @@ public class UserApi extends BaseApi {
                     }
                 }
                 userDto.setCustomFields(entityToDtoConverter.getCustomFieldsDTO(user));
+                keycloakAdminClientService.fillClientRoles(userDto);
                 result.getUsers().add(userDto);
             }
         }
@@ -447,5 +464,77 @@ public class UserApi extends BaseApi {
         user.getUserRoles().addAll(roles);
         userService.update(user);
     }
+    
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void addUserRoles(Long userId, List<String> roleCodes){
+        if(!userService.canSynchroWithKC()) {
+            if(roleCodes!=null && !roleCodes.isEmpty()) {
+                User user = userService.findById(userId);
+                if(user == null)
+                    throw new EntityDoesNotExistsException(User.class, userId);
+                Set<Role> roles = roleCodes.stream()
+                        .map(roleCode -> {
+                            Role role = roleService.findByName(roleCode);
+                            if (role == null && !userService.canSynchroWithKC()) //throw an exception only when the master is OC
+                                throw new EntityDoesNotExistsException(Role.class, roleCode);
+                            return role;
+                        }).collect(Collectors.toSet());
+                roles.removeIf(Objects::isNull);
+                user.getUserRoles().addAll(roles);
+                userService.update(user);
+            }
+        }
+    }
+	
+	@JpaAmpNewTx
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void cleanAllAccessibleEntities(Long id){
+		User user = userService.findById(id);
+		if(user == null)
+			throw new EntityDoesNotExistsException(User.class, id);
+		var securedEntity = securedBusinessEntityService.getSecuredEntitiesForUser(user.getUserName());
+		if(CollectionUtils.isNotEmpty(securedEntity))
+			securedBusinessEntityService.remove(securedEntity.stream().map(SecuredEntity::getId).collect(Collectors.toSet()));
+	}
+	
+	@JpaAmpNewTx
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void removeAccessibleEntity(Long id, Long securedEntityId){
+		if(securedEntityId == null){
+			missingParameters.add("username");
+		}
+		handleMissingParameters();
+		User user = userService.findById(id);
+		if(user == null)
+			throw new EntityDoesNotExistsException(User.class, id);
+		SecuredEntity securedEntity = securedBusinessEntityService.findById(securedEntityId);
+		if(securedEntity == null){
+			throw new EntityDoesNotExistsException(SecuredEntity.class, securedEntityId);
+		}
+		securedBusinessEntityService.remove(securedEntity);
+	}
+	
+	@JpaAmpNewTx
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void addAccessibleEntity(Long id,  SecuredEntityDto securedEntity){
+		User user = userService.findById(id);
+		if(user == null)
+			throw new EntityDoesNotExistsException(User.class, id);
+		List<SecuredEntity> securedEntities =  extractSecuredEntities(List.of(securedEntity));
+		securedBusinessEntityService.addSecuredEntityForUser(securedEntities.get(0), user.getUserName());
+	}
+	
+	@JpaAmpNewTx
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void addAccessibleEntities(Long id, List<SecuredEntityDto> securedEntitiesDtos){
+		if(CollectionUtils.isNotEmpty(securedEntitiesDtos)){
+			List<SecuredEntity> securedEntities =  extractSecuredEntities(securedEntitiesDtos);
+			User user = userService.findById(id);
+			if(user == null)
+				throw new EntityDoesNotExistsException(User.class, id);
+			securedEntities.forEach(securedEntity -> securedBusinessEntityService.addSecuredEntityForUser(securedEntity, user.getUserName()));
+		}
+	}
 
 }

@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Any;
@@ -42,7 +43,8 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.SecuredEntity;
 import org.meveo.model.admin.User;
-import org.meveo.model.shared.Name;
+import org.meveo.model.security.Role;
+import org.meveo.model.shared.NameInfo;
 import org.meveo.security.UserGroup;
 import org.meveo.service.admin.impl.RoleService;
 import org.meveo.service.admin.impl.UserService;
@@ -138,11 +140,11 @@ public class UserBean extends CustomFieldBean<User> {
     @Override
     public User initEntity() {
         if (username != null) {
-            entity = userService.findByUsername(username, true, true);
+            entity = userService.findByUsername(username, true, true, false);
 
         } else {
             entity = new User();
-            entity.setName(new Name());
+            entity.setName(new NameInfo());
         }
 
         return entity;
@@ -223,8 +225,8 @@ public class UserBean extends CustomFieldBean<User> {
             getEntity().setUserLevel(userGroup.getName());
         }
 
-        getEntity().getRoles().clear();
-        getEntity().getRoles().addAll(rolesDM.getTarget());
+        getEntity().getUserRoles().clear();
+        getEntity().getUserRoles().addAll(rolesDM.getTarget().stream().map(codeRole -> roleService.findByName(codeRole)).collect(Collectors.toList()));
 
         return super.saveOrUpdate(killConversation);
     }
@@ -246,8 +248,8 @@ public class UserBean extends CustomFieldBean<User> {
         if (rolesDM == null) {
             List<String> perksSource = new ArrayList<String>(roleService.listRoleNames((PaginationConfiguration) null));
             List<String> perksTarget = new ArrayList<String>();
-            if (getEntity().getRoles() != null) {
-                perksTarget.addAll(getEntity().getRoles());
+            if (getEntity().getUserRoles() != null) {
+                perksTarget.addAll(getEntity().getUserRoles().stream().map(Role::getName).collect(Collectors.toList()));
             }
             perksSource.removeAll(perksTarget);
             rolesDM = new DualListModel<String>(perksSource, perksTarget);

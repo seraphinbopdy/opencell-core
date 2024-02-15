@@ -17,6 +17,7 @@
  */
 package org.meveo.model.crm;
 
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import java.math.BigDecimal;
@@ -52,6 +53,7 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IWFEntity;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
@@ -155,7 +157,13 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
 
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     private List<Contract> contracts = new ArrayList<>();
-    
+	
+	@OneToMany(mappedBy = "customer")
+	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+	
+	public List<RegistrationNumber> getRegistrationNumbers() {
+		return registrationNumbers;
+	}
     public List<Contract> getContracts() {
         return contracts;
     }
@@ -360,5 +368,13 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
 	public void setChildrenCustomers(List<Customer> childrenCustomers) {
 		this.childrenCustomers = childrenCustomers;
 	}
-    
+	
+	// check if the list of registration numbers is not empty
+	// get all registration numbers and join them with a comma
+	public String getRegistrationNo(){
+		if (isNotEmpty(registrationNumbers)) {
+			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+		}
+		return registrationNo;
+	}
 }

@@ -12,6 +12,7 @@ import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -430,7 +431,13 @@ public class InvoiceLine extends AuditableCFEntity {
      */
     @Type(type = "json")
     @Column(name = "additional_agg_fields", columnDefinition = "jsonb")
-    private Map<String, String> additionalAggregationFields ;
+    private Map<String, String> additionalAggregationFields;
+
+	@Transient
+	private RoundingModeEnum roundingMode;
+
+	@Transient
+	private int invoiceRounding;
 
 	public InvoiceLine() {
 	}
@@ -488,6 +495,8 @@ public class InvoiceLine extends AuditableCFEntity {
 		this.taxMode = copy.taxMode;
 		this.status = InvoiceLineStatusEnum.OPEN;
 		this.adjustmentStatus = copy.adjustmentStatus;
+		this.additionalAggregationFields = copy.additionalAggregationFields;
+		this.cfValues = copy.cfValues;
 	}
 
 	public Invoice getInvoice() {
@@ -959,14 +968,14 @@ public class InvoiceLine extends AuditableCFEntity {
 	@PreUpdate
 	public void prePersistOrUpdate() {
 		BigDecimal appliedRate = this.invoice != null ? this.invoice.getAppliedRate() : ONE;
-		Integer decimalPalces = this.invoice != null ? this.invoice.getTradingCurrency().getDecimalPlaces() : BaseEntity.NB_DECIMALS;
+		this.roundingMode = this.roundingMode != null ? this.roundingMode : RoundingModeEnum.NEAREST;
 		if (this.transactionalUnitPrice == null || (!this.useSpecificPriceConversion && !this.conversionFromBillingCurrency)) {
-			setTransactionalAmountWithoutTax(toTransactional(amountWithoutTax, appliedRate, decimalPalces));
-			setTransactionalAmountWithTax(toTransactional(amountWithTax, appliedRate, decimalPalces));
-			setTransactionalAmountTax(toTransactional(amountTax, appliedRate, decimalPalces));
-			setTransactionalDiscountAmount(toTransactional(discountAmount, appliedRate, decimalPalces));
-			setTransactionalRawAmount(toTransactional(rawAmount, appliedRate, decimalPalces));
-			setTransactionalUnitPrice(toTransactional(unitPrice, appliedRate, decimalPalces));
+			setTransactionalAmountWithoutTax(toTransactional(amountWithoutTax, appliedRate));
+			setTransactionalAmountWithTax(toTransactional(amountWithTax, appliedRate));
+			setTransactionalAmountTax(toTransactional(amountTax, appliedRate));
+			setTransactionalDiscountAmount(toTransactional(discountAmount, appliedRate));
+			setTransactionalRawAmount(toTransactional(rawAmount, appliedRate));
+			setTransactionalUnitPrice(toTransactional(unitPrice, appliedRate));
 		} else if (this.useSpecificPriceConversion) {
 			setAmountWithoutTax(toFunctional(transactionalAmountWithoutTax, appliedRate));
 			setAmountWithTax(toFunctional(transactionalAmountWithTax, appliedRate));
@@ -996,12 +1005,12 @@ public class InvoiceLine extends AuditableCFEntity {
 		return 961 + ("InvoiceLine" + getId()).hashCode();
 	}
 	
-	private BigDecimal toTransactional(BigDecimal amount, BigDecimal rate, Integer decimalPlaces) {
-		return amount != null ? amount.multiply(rate).setScale(decimalPlaces, RoundingMode.HALF_UP) : ZERO;
+	private BigDecimal toTransactional(BigDecimal amount, BigDecimal rate) {
+		return amount != null ? amount.multiply(rate).setScale(invoiceRounding, roundingMode.getRoundingMode()) : ZERO;
 	}
 
 	private BigDecimal toFunctional(BigDecimal amount, BigDecimal rate) {
-		return amount != null ? amount.divide(rate, BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP) : ZERO;
+		return amount != null ? amount.divide(rate, invoiceRounding, roundingMode.getRoundingMode()) : ZERO;
 	}
 
 	public Map<String, String> getAdditionalAggregationFields() {
@@ -1010,5 +1019,21 @@ public class InvoiceLine extends AuditableCFEntity {
 
 	public void setAdditionalAggregationFields(Map<String, String> additionalAggregationFields) {
 		this.additionalAggregationFields = additionalAggregationFields;
+	}
+
+	public RoundingModeEnum getRoundingMode() {
+		return roundingMode;
+	}
+
+	public void setRoundingMode(RoundingModeEnum roundingMode) {
+		this.roundingMode = roundingMode;
+	}
+
+	public int getInvoiceRounding() {
+		return invoiceRounding;
+	}
+
+	public void setInvoiceRounding(int invoiceRounding) {
+		this.invoiceRounding = invoiceRounding;
 	}
 }

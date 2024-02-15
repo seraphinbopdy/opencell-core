@@ -86,7 +86,7 @@ public class AttributeValue<T extends AttributeValue> extends AuditableCFEntity 
 			    
 			    break;
 			default:
-				this.stringValue = value.toString();
+				this.stringValue = value != null ? value.toString() : null;
 				break;
 			}
 		}
@@ -216,6 +216,6 @@ public class AttributeValue<T extends AttributeValue> extends AuditableCFEntity 
 
     @Override
     public String toString() {
-        return attribute.getCode()+"="+getValue();
+        return attribute.getCode()+"="+getRealValue();
     }	
 }

@@ -491,14 +491,17 @@ public class WalletOperationNative extends BaseEntity {
 //    @Column(name = "price_plan_matrix_line_id")
 //    private Long pricePlanMatrixLineId;
 
-//    @Column(name = "contract_id")
-//    private Long contractId;
-//
-//    @Column(name = "contract_line_id")
-//    private Long contractLineId;
+    @Column(name = "contract_id")
+    private Long contractId;
+
+    @Column(name = "contract_line_id")
+    private Long contractLineId;
     
     @Column(name = "business_key")
     private String businessKey;
+    
+    @Column(name = "order_product_id")
+    private Long orderProductId;
 
     /**
      * Constructor
@@ -1086,7 +1089,15 @@ public class WalletOperationNative extends BaseEntity {
         this.orderLotId = orderLotId;
     }
 
-    public Long getDiscountPlanId() {
+    public Long getDiscountedWalletOperation() {
+		return discountedWalletOperation;
+	}
+
+	public void setDiscountedWalletOperation(Long discountedWalletOperation) {
+		this.discountedWalletOperation = discountedWalletOperation;
+	}
+
+	public Long getDiscountPlanId() {
         return discountPlanId;
     }
 
@@ -1198,12 +1209,36 @@ public class WalletOperationNative extends BaseEntity {
         this.rulesContractId = rulesContractId;
     }
 
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
+	}
+
+	public Long getContractLineId() {
+		return contractLineId;
+	}
+
+	public void setContractLineId(Long contractLineId) {
+		this.contractLineId = contractLineId;
+	}
+
 	public String getBusinessKey() {
 		return businessKey;
 	}
 
 	public void setBusinessKey(String businessKey) {
 		this.businessKey = businessKey;
+	}
+
+	public Long getOrderProductId() {
+		return orderProductId;
+	}
+
+	public void setOrderProductId(Long orderProductId) {
+		this.orderProductId = orderProductId;
 	}
     
 }

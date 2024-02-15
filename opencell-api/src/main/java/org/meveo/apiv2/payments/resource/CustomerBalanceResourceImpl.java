@@ -4,6 +4,7 @@ import static java.util.Optional.ofNullable;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.logging.WsRestApiInterceptor;
+import org.meveo.apiv2.payments.AccountOperationsDetails;
 import org.meveo.apiv2.payments.CustomerBalance;
 import org.meveo.apiv2.report.ImmutableSuccessResponse;
 import org.meveo.service.payments.impl.CustomerBalanceService;
@@ -26,12 +27,10 @@ public class CustomerBalanceResourceImpl implements CustomerBalanceResource {
     public Response create(CustomerBalance resource) {
         org.meveo.model.payments.CustomerBalance customerBalance = mapper.toEntity(resource);
         if(customerBalanceService.findByCode(customerBalance.getCode()) != null) {
-            throw new BadRequestException("Customer balance with code "
-                    + customerBalance.getCode() + " already exists");
+            throw new BadRequestException("Customer balance with code " + customerBalance.getCode() + " already exists");
         }
-        if (customerBalance.getOccTemplates() == null
-                || customerBalance.getOccTemplates().isEmpty()) {
-            throw new BadRequestException("Occ templates should not be null or empty");
+        if ((customerBalance.getOccTemplates() == null || customerBalance.getOccTemplates().isEmpty()) && (customerBalance.getBalanceEl() == null || customerBalance.getBalanceEl().isEmpty())) {
+            throw new BadRequestException("At least one of the two fields must be filled in - Occ templates list and balanceEL");
         }
         try {
             customerBalanceService.create(customerBalance);
@@ -49,6 +48,9 @@ public class CustomerBalanceResourceImpl implements CustomerBalanceResource {
     public Response update(Long id, CustomerBalance resource) {
         org.meveo.model.payments.CustomerBalance customerBalance = mapper.toEntity(resource);
         customerBalance.setId(id);
+        if ((customerBalance.getOccTemplates() == null || customerBalance.getOccTemplates().isEmpty()) && (customerBalance.getBalanceEl() == null || customerBalance.getBalanceEl().isEmpty())) {
+            throw new BadRequestException("At least one of the two fields must be filled in - Occ templates list and balanceEL");
+        }
         customerBalanceService.update(customerBalance);
         return Response
                 .ok(ImmutableSuccessResponse.builder()
@@ -73,5 +75,14 @@ public class CustomerBalanceResourceImpl implements CustomerBalanceResource {
                         .message("Customer balance successfully deleted")
                         .build())
                 .build();
+    }
+    
+    @Override
+    public Response getAccountOperations(AccountOperationsDetails resource) {
+        if(resource != null) {
+            return Response.ok().entity(customerBalanceService.getAccountOperations(resource)).build();
+        } else {
+            throw new BadRequestException("The customerBalance and customerAccount are mandatory to get the AccountOperations");
+        }
     }
 }

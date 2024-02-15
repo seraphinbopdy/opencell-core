@@ -18,6 +18,7 @@
 
 package org.meveo.api.account;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,12 +30,14 @@ import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.MeveoApiErrorCodeEnum;
 import org.meveo.api.dto.GDPRInfoDto;
 import org.meveo.api.dto.account.CreditCategoryDto;
 import org.meveo.api.dto.account.CustomerAccountDto;
 import org.meveo.api.dto.account.CustomerAccountsDto;
+import org.meveo.api.dto.account.RegistrationNumberDto;
 import org.meveo.api.dto.account.TransferCustomerAccountDto;
 import org.meveo.api.dto.payment.AccountOperationDto;
 import org.meveo.api.dto.payment.PaymentMethodDto;
@@ -366,6 +369,17 @@ public class CustomerAccountApi extends AccountEntityApi {
         } else {
             customerAccount.setGeneralClientAccount(null);
         }
+	    
+	    try {
+	    	if (StringUtils.isNotBlank(postData.getRegistrationNo())) {
+	    		RegistrationNumberDto registrationNumberDto = new RegistrationNumberDto();
+	    		registrationNumberDto.setRegistrationNo(postData.getRegistrationNo());
+	            postData.getRegistrationNumbers().add(registrationNumberDto);
+	        }
+		    createOrUpdateRegistrationNumber(customerAccount, postData.getRegistrationNumbers());
+	    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+		    throw new BusinessException("Error when inserting register number", e);
+	    }
 
     }
 
@@ -668,8 +682,8 @@ public class CustomerAccountApi extends AccountEntityApi {
             if (!StringUtils.isBlank(customerAccountDto.getVatNo())) {
                 existedCustomerAccountDto.setVatNo(customerAccountDto.getVatNo());
             }
-            if (!StringUtils.isBlank(customerAccountDto.getRegistrationNo())) {
-                existedCustomerAccountDto.setRegistrationNo(customerAccountDto.getRegistrationNo());
+            if (!CollectionUtils.isNotEmpty(customerAccountDto.getRegistrationNumbers())) {
+                existedCustomerAccountDto.setRegistrationNumbers(customerAccountDto.getRegistrationNumbers());
             }
             accountHierarchyApi.populateNameAddress(existedCustomerAccountDto, customerAccountDto);
             if (customerAccountDto.getCustomFields() != null && !customerAccountDto.getCustomFields().isEmpty()) {

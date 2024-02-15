@@ -152,6 +152,7 @@ public class OrderValidationScript extends Script {
         }
         serviceInstance.setRateUntilDate(subscription.getEndAgreementDate());
         serviceInstance.setProductVersion(orderProduct.getProductVersion());
+        serviceInstance.setOrderProduct(orderProduct);
 
         serviceInstance.setSubscription(subscription);
         serviceInstance.setQuoteProduct(orderProduct.getQuoteProduct());

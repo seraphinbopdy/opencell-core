@@ -588,7 +588,7 @@ public class MediationApiService {
                         continue;
                     }
                     RatedTransaction ratedTransaction = ratedTransactionService.createRatedTransaction(walletOperation, false);
-					if(walletOperation.getDiscountPlan() != null && discountedRated.get(walletOperation.getDiscountedWalletOperation()) != null) {
+					if (discountedRated.get(walletOperation.getDiscountedWalletOperation()) != null) {
 						ratedTransaction.setDiscountedRatedTransaction(discountedRated.get(walletOperation.getDiscountedWalletOperation()).getId());
 					}
 					discountedRated.put(walletOperation.getId(), ratedTransaction);
@@ -633,7 +633,7 @@ public class MediationApiService {
             BigDecimal amountTax = BigDecimal.ZERO;
             for (WalletOperation walletOperation : walletOperations) {
                 if (returnWalletOperationDetails) {
-                    WalletOperationDto walletOperationDto = new WalletOperationDto(walletOperation);
+                    WalletOperationDto walletOperationDto = new WalletOperationDto(walletOperation, walletOperation.getAccountingArticle());
                     result.getWalletOperations().add(walletOperationDto);
 
                 } else if (returnWalletOperations && walletOperation.getId() != null) {

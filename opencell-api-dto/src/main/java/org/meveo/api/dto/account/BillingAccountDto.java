@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -249,16 +250,18 @@ public class BillingAccountDto extends AccountDto {
     /**
      * The iso ICD Code
      */
+    @Deprecated
     @Schema(description = "The iso ICD Code")
     private String isoICDCode;
-
+    
     /** The exemption reason. */
     @Schema(description = "The exemption reason")
     private String exemptionReason;
 
     @Schema(description = "The default Price List")
     private String priceListCode;
-
+   
+    @Deprecated
     public String getIsoICDCode() {
         return isoICDCode;
     }
@@ -266,7 +269,7 @@ public class BillingAccountDto extends AccountDto {
     public void setIsoICDCode(String isoICDCode) {
         this.isoICDCode = isoICDCode;
     }
-
+    	
     public Boolean isThresholdPerEntity() {
 		return thresholdPerEntity;
 	}
@@ -343,7 +346,7 @@ public class BillingAccountDto extends AccountDto {
         setMailingType(e.getMailingType() != null ? e.getMailingType().getLabel() : null);
         setEmailTemplate(e.getEmailTemplate() != null ? e.getEmailTemplate().getCode() : null);
         setCcedEmails(e.getCcedEmails());
-        setRegistrationNo(e.getRegistrationNo());
+        setRegistrationNumbers(e.getRegistrationNumbers().stream().map(RegistrationNumberDto::new).collect(Collectors.toSet()));
         setVatNo(e.getVatNo());
 
         if (e.getTaxCategory() != null) {
@@ -354,10 +357,6 @@ public class BillingAccountDto extends AccountDto {
             setPrimaryContact(e.getPrimaryContact().getCode());
         }
         
-        if(e.getIcdId() != null) {
-            setIsoICDCode(e.getIcdId().getCode());
-        }
-
         // Start compatibility with pre-4.6 versions
         PaymentMethod paymentMethod = e.getCustomerAccount().getPreferredPaymentMethod();
         if(Objects.nonNull(e.getPaymentMethod())){

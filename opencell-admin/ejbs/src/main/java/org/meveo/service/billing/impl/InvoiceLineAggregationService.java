@@ -9,14 +9,18 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,17 +31,23 @@ import org.hibernate.StatelessSession;
 import org.hibernate.query.Query;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.AggregationConfiguration;
+import org.meveo.admin.util.pagination.FilterOperatorEnum;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
+import org.meveo.api.generics.PersistenceServiceHelper;
+import org.meveo.api.generics.filter.FactoryFilterMapper;
+import org.meveo.api.generics.filter.FilterMapper;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
+import org.meveo.model.IEntity;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingEntityTypeEnum;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.DateAggregationOption;
 import org.meveo.model.billing.DiscountAggregationModeEnum;
+import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.crm.Provider;
 import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.base.PersistenceService;
@@ -197,24 +207,24 @@ public class InvoiceLineAggregationService implements Serializable {
             fieldToFetch = new ArrayList<>(
                 asList("id as rated_transaction_ids", "billingAccount.id as billing_account__id", "description as label", "quantity as quantity", unitAmount + " as unit_amount_without_tax",
                     "amountWithoutTax as sum_without_tax", "amountWithTax as sum_with_tax", "offerTemplate.id as offer_id", "serviceInstance.id as service_instance_id", "usageDate as usage_date",
-                    "startDate as start_date", "endDate as end_date", "orderNumber as order_number", "infoOrder.order.id as commercial_order_id", "infoOrder.order.id as order_id", "taxPercent as tax_percent",
-                    "tax.id as tax_id", "infoOrder.productVersion.id as product_version_id", "infoOrder.orderLot.id as order_lot_id", "chargeInstance.id as charge_instance_id", "accountingArticle.id as article_id",
+                    "startDate as start_date", "endDate as end_date", "orderNumber as order_number", "orderInfo.order.id as commercial_order_id", "orderInfo.order.id as order_id", "taxPercent as tax_percent",
+                    "tax.id as tax_id", "orderInfo.productVersion.id as product_version_id", "orderInfo.orderLot.id as order_lot_id", "chargeInstance.id as charge_instance_id", "accountingArticle.id as article_id",
                     "discountedRatedTransaction as discounted_ratedtransaction_id", "discountPlanType as discount_plan_type", "discountValue as discount_value", "subscription.id as subscription_id", "userAccount.id as user_account_id"));
 
         } else {
             fieldToFetch = new ArrayList<>(
                 asList("string_agg_long(a.id) as rated_transaction_ids", "billingAccount.id as billing_account__id", "SUM(a.quantity) as quantity", unitAmountAggregationFunction + " as unit_amount_without_tax",
                     "SUM(a.amountWithoutTax) as sum_without_tax", "SUM(a.amountWithTax) as sum_with_tax", "offerTemplate.id as offer_id", usageDateAggregationFunction + " as usage_date", "min(a.startDate) as start_date",
-                    "max(a.endDate) as end_date", "taxPercent as tax_percent", "tax.id as tax_id", "infoOrder.productVersion.id as product_version_id", "accountingArticle.id as article_id", "count(a.id) as rt_count"));
+                    "max(a.endDate) as end_date", "taxPercent as tax_percent", "tax.id as tax_id", "orderInfo.productVersion.id as product_version_id", "accountingArticle.id as article_id", "count(a.id) as rt_count"));
 
             fieldToFetch.add("discountedRatedTransaction as discounted_ratedtransaction_id");
             fieldToFetch.add("discountPlanType as discount_plan_type");
             fieldToFetch.add("discountValue as discount_value");
 
             if (!aggregationConfiguration.isIgnoreOrders()) {
-                fieldToFetch.add("infoOrder.order.id as commercial_order_id");
+                fieldToFetch.add("orderInfo.order.id as commercial_order_id");
                 fieldToFetch.add("orderNumber as order_number");
-                fieldToFetch.add("infoOrder.order.id as order_id");
+                fieldToFetch.add("orderInfo.order.id as order_id");
             }
             
             if(!aggregationConfiguration.isIgnoreUserAccounts()) {
@@ -255,12 +265,45 @@ public class InvoiceLineAggregationService implements Serializable {
 
         Set<String> groupBy = getAggregationQueryGroupBy(aggregationConfiguration);
 
-        PaginationConfiguration searchConfig = new PaginationConfiguration(null, null, bcFilter, null, fieldToFetch, groupBy, (Set<String>) null, "billingAccount.id", SortOrder.ASCENDING);
+        PaginationConfiguration searchConfig = new PaginationConfiguration(null, null, evaluateFilters(bcFilter, RatedTransaction.class), null, fieldToFetch, groupBy, (Set<String>) null, "billingAccount.id", SortOrder.ASCENDING);
 
         String extraCondition = (billingRun.getLastTransactionDate() != null ? " a.usageDate < :lastTransactionDate and " : " ") + QUERY_FILTER;
 
         QueryBuilder queryBuilder = nativePersistenceService.getAggregateQuery("RatedTransaction", searchConfig, null, extraCondition, null);
         return queryBuilder.getQueryAsString();
+    }
+
+
+
+    private Map<String, Object> evaluateFilters(Map<String, Object> filters, Class<? extends IEntity> entity) {
+        return Stream.of(filters.keySet().toArray())
+                     .map(key -> {
+                         String keyObject = (String) key;
+                         if(keyObject.matches("\\$filter[0-9]+$")) {
+                             return Collections.singletonMap(keyObject, evaluateFilters((Map<String, Object>)filters.get(key), entity));
+                         } else if(!keyObject.startsWith("SQL") && !"$FILTER".equalsIgnoreCase(keyObject) && !"$OPERATOR".equalsIgnoreCase(keyObject)){
+
+                             String fieldName = keyObject.contains(" ") ? keyObject.substring(keyObject.indexOf(" ")).trim() : keyObject;
+                             String[] fields=fieldName.split(" ");
+                             FilterMapper filterMapper=null;
+                             for(String field:fields) {
+                                 filterMapper=new FactoryFilterMapper().create(field, filters.get(key), (String) filters.get("cetCode"), PersistenceServiceHelper.getPersistenceService(), entity);
+                             }
+                             return Collections.singletonMap(keyObject, filterMapper.map());
+                         } else if ("$OPERATOR".equalsIgnoreCase(keyObject)) {
+                             String filterOperator = (String) filters.get(keyObject);
+                             try {
+                                 FilterOperatorEnum enumValue = FilterOperatorEnum.valueOf(filterOperator);
+                                 return Collections.singletonMap(keyObject, enumValue);
+                             } catch (IllegalArgumentException e) {
+                                 throw new IllegalArgumentException("Invalid $operator value. Accepted value : 'OR', 'AND'", e);
+                             }
+                         }
+                         return Collections.singletonMap(keyObject, filters.get(key));
+                     })
+                     .flatMap (map -> map.entrySet().stream())
+                     .filter(stringObjectEntry -> Objects.nonNull(stringObjectEntry.getValue()))
+                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private String buildJoinWithILQuery(Long billingRunId, List<String> aggregationFields, AggregationConfiguration aggregationConfiguration) {
@@ -305,7 +348,7 @@ public class InvoiceLineAggregationService implements Serializable {
         groupBy.add("accountingArticle.id");
         groupBy.add("tax.id");
         groupBy.add("taxPercent");
-        groupBy.add("infoOrder.productVersion.id");
+        groupBy.add("orderInfo.productVersion.id");
         groupBy.add("discountedRatedTransaction");
         groupBy.add("discountValue");
         groupBy.add("discountPlanType");
@@ -324,7 +367,7 @@ public class InvoiceLineAggregationService implements Serializable {
         }
 
         if (!aggregationConfiguration.isIgnoreOrders()) {
-            groupBy.add("infoOrder.order.id");
+            groupBy.add("orderInfo.order.id");
             groupBy.add("orderNumber");
         }
         

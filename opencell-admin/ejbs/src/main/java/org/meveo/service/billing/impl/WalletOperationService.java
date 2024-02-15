@@ -35,6 +35,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -80,6 +81,7 @@ import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.transformer.AliasToAggregatedWalletOperationResultTransformer;
 import org.meveo.service.admin.impl.CurrencyService;
 import org.meveo.service.admin.impl.SellerService;
+import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.catalog.impl.CalendarService;
@@ -136,7 +138,12 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
 
     @Inject
     private RecurringChargeTemplateService recurringChargeTemplateService;
-    
+
+    @Inject
+    @Named
+    private NativePersistenceService nativePersistenceService;
+
+
     /**
      *
      * @param ids
@@ -461,11 +468,11 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
      * Gets wallet operations list to rerate
      *
      * @param reratingTarget Rerating target
-     * @param targetBatches  Target batchs
+     * @param targetBatches  Target batch codes
      * @param nbToRetrieve   Number of wallet operations to retrieve
      * @return The wallet operations list to rerate
      */
-    public List<Long> listToRerate(String reratingTarget, List<Long> targetBatches, int nbToRetrieve) {
+    public List<Long> listToRerate(String reratingTarget, List<String> targetBatches, int nbToRetrieve) {
         // null | ALL
         TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletOperation.listToRerate", Long.class);
         if (ReratingTargetEnum.NO_BATCH.name().equals(reratingTarget)) {
@@ -473,8 +480,7 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
         } else if (ReratingTargetEnum.WITH_BATCH.name().equals(reratingTarget)) {
             if (CollectionUtils.isNotEmpty(targetBatches)) {
                 query = getEntityManager().createNamedQuery("WalletOperation.listToRerateWithBatches", Long.class)
-                        .setParameter("targetBatches", targetBatches)
-                        .setParameter("targetJob", ReRatingJob.class.getSimpleName());
+                        .setParameter("targetBatches", targetBatches);
             } else {
                 query = getEntityManager().createNamedQuery("WalletOperation.listToRerateAllBatches", Long.class);
             }
@@ -715,7 +721,7 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
                 }
 
                 wo = new WalletOperation(chargeInstance, dto.getQuantity(), ratingQuantity, dto.getOperationDate(), dto.getOrderNumber(), dto.getParameter1(), dto.getParameter2(), dto.getParameter3(),
-                    dto.getParameterExtra(), tax, dto.getStartDate(), dto.getEndDate(), null, invoicingDate);
+                    dto.getParameterExtra(), tax, dto.getStartDate(), dto.getEndDate(), null, invoicingDate, null);
 
             } else {
                 Seller seller = null;
@@ -1064,6 +1070,17 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
                 .createNamedQuery("WalletOperation.findWalletOperationTradingCurrency")
                 .setParameter("walletOperationIds", walletOperationsIds)
                 .getResultList();
+    }
+
+    /**
+     * Mark a multiple Wallet operations to rerate
+     *
+     * @param updateQuery the update query which mark Wallet operations to rerate
+     * @param ids         the ids of Wallet operations to be marked
+     * @return the number of updated Wallet operations
+     */
+    public int markWoToRerate(StringBuilder updateQuery, List<Long> ids) {
+        return nativePersistenceService.update(updateQuery, ids);
     }
 
 }

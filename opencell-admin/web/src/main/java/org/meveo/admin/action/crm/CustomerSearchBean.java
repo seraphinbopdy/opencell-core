@@ -74,6 +74,10 @@ public class CustomerSearchBean extends BaseBean<AccountEntity> {
             public ICustomFieldEntity[] getParentCFEntities() {
                 return null;
             }
+			@Override
+			public String getRegistrationNo() {
+				return null;
+			}
 		};
 	}
 

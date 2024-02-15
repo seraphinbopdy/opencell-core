@@ -70,6 +70,7 @@ import org.meveo.model.catalog.PricePlanMatrixLine;
 import org.meveo.model.catalog.PricePlanMatrixVersion;
 import org.meveo.model.catalog.RoundingModeEnum;
 import org.meveo.model.catalog.UnitOfMeasure;
+import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
@@ -111,7 +112,7 @@ import org.meveo.model.tax.TaxClass;
         @NamedQuery(name = "WalletOperation.listToRerate", query = "SELECT o.id FROM WalletOperation o WHERE o.status='TO_RERATE'"),
         @NamedQuery(name = "WalletOperation.listToRerateNoBatch", query = "SELECT o.id FROM WalletOperation o WHERE o.status='TO_RERATE' and o.reratingBatch is null"),
         @NamedQuery(name = "WalletOperation.listToRerateAllBatches", query = "SELECT o.id FROM WalletOperation o WHERE o.status='TO_RERATE' and o.reratingBatch is not null"),
-        @NamedQuery(name = "WalletOperation.listToRerateWithBatches", query = "SELECT o.id FROM WalletOperation o join o.reratingBatch b WHERE o.status='TO_RERATE' and b.id in (:targetBatches) and b.targetJob=:targetJob"),
+        @NamedQuery(name = "WalletOperation.listToRerateWithBatches", query = "SELECT o.id FROM WalletOperation o join o.reratingBatch b WHERE o.status='TO_RERATE' and b.code in (:targetBatches)"),
 
         @NamedQuery(name = "WalletOperation.getBalancesForWalletInstance", query = "SELECT sum(case when o.status in ('OPEN','TREATED') then o.amountWithTax else 0 end), sum(o.amountWithTax) FROM WalletOperation o WHERE o.wallet.id=:walletId and o.status in ('OPEN','RESERVED','TREATED')"),
         @NamedQuery(name = "WalletOperation.getBalancesForCache", query = "SELECT o.wallet.id, sum(case when o.status in ('OPEN','TREATED') then o.amountWithTax else 0 end), sum(o.amountWithTax) FROM WalletOperation o WHERE o.status in ('OPEN','RESERVED','TREATED') and o.wallet.walletTemplate.walletType='PREPAID' group by o.wallet.id"),
@@ -178,7 +179,7 @@ import org.meveo.model.tax.TaxClass;
         @NamedQuery(name = "WalletOperation.cancelTriggerEdr", query = "UPDATE WalletOperation o SET o.status='TO_RERATE' where o.id in (ids)"),
         @NamedQuery(name = "WalletOperation.cancelDisountedWallet", query = "UPDATE WalletOperation o SET o.status='CANCELED' where o.discountedWalletOperation in (:walletOperationIds)"),
         @NamedQuery(name = "WalletOperation.findWalletOperationTradingCurrency", query = "SELECT wo.id, wo.tradingCurrency.id FROM WalletOperation wo WHERE wo.id in (:walletOperationIds)"),
-        @NamedQuery(name = "WalletOperation.findWalletOperationByChargeInstance", query = "SELECT wo.id FROM WalletOperation wo LEFT JOIN wo.ratedTransaction rt WHERE wo.subscription.id = :subscriptionId AND wo.chargeInstance.id = :chargeInstanceId AND wo.status IN ('OPEN', 'TREATED') AND (wo.startDate < :dateToCharge AND wo.endDate > :dateToCharge )AND (wo.ratedTransaction.id IN (SELECT rt.id FROM RatedTransaction rt WHERE rt.status = 'OPEN' AND rt.subscription.id = :subscriptionId AND rt.chargeInstance.id = :chargeInstanceId) OR wo.ratedTransaction.id IS NULL)"),
+        @NamedQuery(name = "WalletOperation.findWalletOperationByChargeInstance", query = "SELECT wo.id FROM WalletOperation wo LEFT JOIN wo.ratedTransaction rt WHERE wo.subscription.id = :subscriptionId AND wo.chargeInstance.id = :chargeInstanceId AND wo.status IN ('OPEN', 'TREATED') AND ( wo.endDate > :dateToCharge )AND (wo.ratedTransaction.id IN (SELECT rt.id FROM RatedTransaction rt WHERE rt.status = 'OPEN' AND rt.subscription.id = :subscriptionId AND rt.chargeInstance.id = :chargeInstanceId) OR wo.ratedTransaction.id IS NULL)"),
         @NamedQuery(name = "WalletOperation.cancelWOs", query = "UPDATE WalletOperation set status='CANCELED', rejectReason=:rejectReason, updated=:updatedDate where id in :ids")
 })
 
@@ -599,7 +600,7 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
     private String rejectReason;
 
     @Embedded
-    private OrderInfo infoOrder;
+    private OrderInfo orderInfo;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "accounting_article_id")
@@ -728,9 +729,10 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
      * @param endDate Operation date range - end date
      * @param accountingCode Accounting code
      * @param invoicingDate Date from which operation can be included in an invoice
+     * @param commercialOrder commercial order
      */
     public WalletOperation(ChargeInstance chargeInstance, BigDecimal inputQuantity, BigDecimal quantityInChargeUnits, Date operationDate, String orderNumber, String criteria1, String criteria2, String criteria3,
-            String criteriaExtra, Tax tax, Date startDate, Date endDate, AccountingCode accountingCode, Date invoicingDate) {
+                           String criteriaExtra, Tax tax, Date startDate, Date endDate, AccountingCode accountingCode, Date invoicingDate, CommercialOrder commercialOrder) {
 
         ChargeTemplate chargeTemplate = chargeInstance.getChargeTemplate();
 
@@ -751,8 +753,10 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
         this.parameterExtra = criteriaExtra;
         this.inputQuantity = inputQuantity;
         OrderInfo orderInfo = new OrderInfo();
-        orderInfo.setOrder(chargeInstance.getSubscription()!= null ? chargeInstance.getSubscription().getOrder() : null );
-        this.infoOrder = orderInfo;
+        orderInfo.setOrder(commercialOrder != null ? commercialOrder : (chargeInstance.getSubscription()!= null ? chargeInstance.getSubscription().getOrder() : null) );
+        orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
+        orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
+        this.orderInfo = orderInfo;
 
         // TODO AKK in what case prevails customized description of chargeInstance??
 
@@ -1270,6 +1274,7 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
         result.setAccountingCode(accountingCode);
         result.setTradingCurrency(tradingCurrency);
         result.setReratingBatch(reratingBatch);
+        result.setOrderInfo(orderInfo);
 
         return result;
     }
@@ -1654,18 +1659,12 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
             quantity, unitAmountWithoutTax, amountWithoutTax);
     }
 
-    /**
-     * @return the infoOrder
-     */
     public OrderInfo getOrderInfo() {
-        return infoOrder;
+        return orderInfo;
     }
 
-    /**
-     * @param infoOrder the infoOrder to set
-     */
-    public void setOrderInfo(OrderInfo infoOrder) {
-        this.infoOrder = infoOrder;
+    public void setOrderInfo(OrderInfo orderInfo) {
+        this.orderInfo = orderInfo;
     }
 
     public AccountingArticle getAccountingArticle() {
@@ -1690,14 +1689,6 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
 	
 	public void setDiscountPlan(DiscountPlan discountPlan) {
 		this.discountPlan = discountPlan;
-	}
-
-	public OrderInfo getInfoOrder() {
-		return infoOrder;
-	}
-
-	public void setInfoOrder(OrderInfo infoOrder) {
-		this.infoOrder = infoOrder;
 	}
 
 	public BigDecimal getDiscountValue() {

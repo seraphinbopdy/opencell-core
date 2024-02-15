@@ -1282,7 +1282,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         return fieldName.contains(FROM_JSON_FUNCTION) ? fieldName : "a." + fieldName;
     }
 
-    private Map<String, Object> extractCustomFieldsFilters(Map<String, Object> filters) {
+    static public Map<String, Object> extractCustomFieldsFilters(Map<String, Object> filters) {
         Map<String, Object> cftFilters = new TreeMap<String, Object>();
         for (Entry<String, Object> entry : filters.entrySet()) {
             Object filterValue = entry.getValue();
@@ -1335,7 +1335,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
     }
 
     //check if search by the CF value should use or not the encrypted value
-    private CustomFieldValues checkCFValuesShouldBeEncrypted(CustomFieldValues customFieldValues) {
+    static private CustomFieldValues checkCFValuesShouldBeEncrypted(CustomFieldValues customFieldValues) {
         if (!encryptCFSetting) {
             return customFieldValues;
         }
@@ -1344,7 +1344,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         return new CustomFieldValues(cfValues);
     }
 
-    private String extractCustomFieldSyntax(String type, Class clazz, String transformedFilter, String fieldName, String nestedFields) {
+    static private String extractCustomFieldSyntax(String type, Class clazz, String transformedFilter, String fieldName, String nestedFields) {
 		nestedFields=nestedFields==null?"":nestedFields;
 		String searchFunction = getCustomFieldSearchFunctionPrefix(clazz);
 		transformedFilter = transformedFilter + searchFunction + FROM_JSON_FUNCTION+nestedFields+"cfValues," + fieldName + "," + type + ") ";
@@ -1585,7 +1585,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
      * @param clazz Data type
      * @return xxxFromJson function prefix - xxx part
      */
-    private String getCustomFieldSearchFunctionPrefix(Class<?> clazz) {
+    static private String getCustomFieldSearchFunctionPrefix(Class<?> clazz) {
         if (clazz == Date.class) {
             return "timestamp";
         } else if (clazz == EntityReferenceWrapper.class) {

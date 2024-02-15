@@ -1,0 +1,942 @@
+{
+	"info": {
+		"_postman_id": "edd46ade-c5fc-4427-8109-3ab6e556a3b2",
+		"name": "INTRD-8415 - Simple Catalog - Create a product with price in single API call",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26920418"
+	},
+	"item": [
+		{
+			"name": "Oneshot Product",
+			"item": [
+				{
+					"name": "set timestamp",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ts\", new Date().getTime());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{opencell.url}}/v2/version",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create Oneshot Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Http status is 200 and json.status is 'SUCCESS'\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().status).to.equal('SUCCESS');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chargeCode\": \"{{chargeCode}}\",\n    \"productCode\": \"{{productCode}}\",\n    \"label\": \"Price for subscription fee\",\n    \"price\": 500,\n    \"oneShotChargeTemplateType\": \"SUBSCRIPTION\",\n    \"validity\": {\n        \"from\": \"2024-01-01\",\n        \"to\": \"2024-01-31\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/catalog/productManagement/createProductSimpleOneshot",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"catalog",
+								"productManagement",
+								"createProductSimpleOneshot"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Oneshot Charge",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let charge;",
+									"let chargeCode = pm.collectionVariables.get(\"chargeCode\");",
+									"pm.test(\"Check Oneshot Charge\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().total).to.equal(1);",
+									"    pm.expect(pm.response.json().data.length).to.equal(1);",
+									"    charge = pm.response.json().data[0];",
+									"    pm.expect(charge.code).to.equal(chargeCode);",
+									"    pm.expect(charge.status).to.equal(\"ACTIVE\");",
+									"    pm.expect(charge.oneShotChargeTemplateType).to.equal(\"SUBSCRIPTION\");",
+									"});",
+									"",
+									"pm.test(\"Check Associated Price Plan\", function () {",
+									"    pm.expect(charge.pricePlans.length).to.equal(1);",
+									"    pm.expect(charge.pricePlans[0].code).is.equal(\"PPM_\" + chargeCode)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"code\": \"{{chargeCode}}\"\n    },\n    \"nestedEntities\": [\n        \"pricePlans\",\n        \"pricePlans.versions\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/oneshotChargeTemplate",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"oneshotChargeTemplate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Price Plan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let ppm;",
+									"let ppmv",
+									"let chargeCode = pm.collectionVariables.get(\"chargeCode\");",
+									"pm.test(\"Check created PPM\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().total).to.equal(1);",
+									"    pm.expect(pm.response.json().data.length).to.equal(1);",
+									"    ppm = pm.response.json().data[0];",
+									"    pm.expect(ppm.versions.length).to.equal(1);",
+									"    ppmv = ppm.versions[0]",
+									"});",
+									"",
+									"pm.test(\"Check PPM Version\", function () {",
+									"    pm.expect(ppmv.status).to.equal(\"PUBLISHED\");",
+									"    pm.expect(ppmv.price).to.equal(500);",
+									"    pm.expect(ppmv.amountWithoutTax).to.equal(500);",
+									"    pm.expect(ppmv.amountWithTax).to.equal(500);",
+									"    pm.expect(ppmv.priceVersionType).to.equal(\"FIXED\");",
+									"    pm.expect(ppmv.matrix).to.equal(false);",
+									"",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"code\": \"PPM_{{chargeCode}}\"\n    },\n    \"nestedEntities\": [\n        \"versions\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/pricePlanMatrix",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"pricePlanMatrix"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let productCode = pm.collectionVariables.get(\"productCode\");",
+									"pm.test(\"Check Product\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().total).to.equal(1);",
+									"    pm.expect(pm.response.json().data.length).to.equal(1);",
+									"    let product = pm.response.json().data[0];",
+									"    pm.expect(product.productCharges.length).to.equal(1);",
+									"    pm.expect(product.productCharges[0].chargeTemplate.code).to.equal(pm.collectionVariables.get(\"chargeCode\"));",
+									"",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"code\": \"{{productCode}}\"\n    },\n    \"nestedEntities\": [\n        \"productCharges.chargeTemplate\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/product",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"product"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"let ts = pm.collectionVariables.get(\"ts\");",
+							"",
+							"pm.collectionVariables.set(\"chargeCode\", \"CH_OS_AUTO_\" + ts);",
+							"pm.collectionVariables.set(\"productCode\", \"PR_OS_AUTO_\" + ts);"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Recurrent Product",
+			"item": [
+				{
+					"name": "set timestamp",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ts\", new Date().getTime());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{opencell.url}}/v2/version",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create Recurrent Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Http status is 200 and json.status is 'SUCCESS'\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().status).to.equal('SUCCESS');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chargeCode\": \"{{chargeCode}}\",\n    \"productCode\": \"{{productCode}}\",\n    \"label\": \"Recurring charge\",\n    \"price\": 100,\n    \"calendar\": \"MONTHLY\",\n    \"subscriptionProrata\": true,\n    \"terminationProrata\": true,\n    \"applyInAdvance\": true,\n    \"anticipateEndOfSubscription\": true,\n    \"validity\": {\n        \"from\": \"2024-01-01\",\n        \"to\": \"2024-01-31\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/catalog/productManagement/createProductSimpleRecurrent",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"catalog",
+								"productManagement",
+								"createProductSimpleRecurrent"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Recurrent Charge",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let charge;",
+									"let chargeCode = pm.collectionVariables.get(\"chargeCode\");",
+									"pm.test(\"Check Oneshot Charge\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().total).to.equal(1);",
+									"    pm.expect(pm.response.json().data.length).to.equal(1);",
+									"    charge = pm.response.json().data[0];",
+									"    pm.expect(charge.code).to.equal(chargeCode);",
+									"    pm.expect(charge.status).to.equal(\"ACTIVE\");",
+									"    pm.expect(charge.calendar.code).to.equal(\"MONTHLY\");",
+									"    pm.expect(charge.subscriptionProrata).to.equal(true);",
+									"    pm.expect(charge.terminationProrata).to.equal(true);",
+									"    pm.expect(charge.applyInAdvance).to.equal(true);",
+									"    pm.expect(charge.anticipateEndOfSubscription).to.equal(true);",
+									"});",
+									"",
+									"pm.test(\"Check Associated Price Plan\", function () {",
+									"    pm.expect(charge.pricePlans.length).to.equal(1);",
+									"    pm.expect(charge.pricePlans[0].code).is.equal(\"PPM_\" + chargeCode)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"code\": \"{{chargeCode}}\"\n    },\n    \"nestedEntities\": [\n        \"calendar\",\n        \"pricePlans\",\n        \"pricePlans.versions\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/recurringChargeTemplate",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"recurringChargeTemplate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Price Plan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let ppm;",
+									"let ppmv",
+									"let chargeCode = pm.collectionVariables.get(\"chargeCode\");",
+									"pm.test(\"Check created PPM\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().total).to.equal(1);",
+									"    pm.expect(pm.response.json().data.length).to.equal(1);",
+									"    ppm = pm.response.json().data[0];",
+									"    pm.expect(ppm.versions.length).to.equal(1);",
+									"    ppmv = ppm.versions[0]",
+									"});",
+									"",
+									"pm.test(\"Check PPM Version\", function () {",
+									"    pm.expect(ppmv.status).to.equal(\"PUBLISHED\");",
+									"    pm.expect(ppmv.price).to.equal(100);",
+									"    pm.expect(ppmv.amountWithoutTax).to.equal(100);",
+									"    pm.expect(ppmv.amountWithTax).to.equal(100);",
+									"    pm.expect(ppmv.priceVersionType).to.equal(\"FIXED\");",
+									"    pm.expect(ppmv.matrix).to.equal(false);",
+									"",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"code\": \"PPM_{{chargeCode}}\"\n    },\n    \"nestedEntities\": [\n        \"versions\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/pricePlanMatrix",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"pricePlanMatrix"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let productCode = pm.collectionVariables.get(\"productCode\");",
+									"pm.test(\"Check Product\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().total).to.equal(1);",
+									"    pm.expect(pm.response.json().data.length).to.equal(1);",
+									"    let product = pm.response.json().data[0];",
+									"    pm.expect(product.productCharges.length).to.equal(1);",
+									"    pm.expect(product.productCharges[0].chargeTemplate.code).to.equal(pm.collectionVariables.get(\"chargeCode\"));",
+									"",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"code\": \"{{productCode}}\"\n    },\n    \"nestedEntities\": [\n        \"productCharges.chargeTemplate\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/product",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"product"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"let ts = pm.collectionVariables.get(\"ts\");",
+							"",
+							"pm.collectionVariables.set(\"chargeCode\", \"CH_REC_AUTO_\" + ts);",
+							"pm.collectionVariables.set(\"productCode\", \"PR_REC_AUTO_\" + ts);"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Usage Product",
+			"item": [
+				{
+					"name": "set timestamp",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ts\", new Date().getTime());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{opencell.url}}/v2/version",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create Usage Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Http status is 200 and json.status is 'SUCCESS'\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().status).to.equal('SUCCESS');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chargeCode\": \"{{chargeCode}}\",\n    \"productCode\": \"{{productCode}}\",\n    \"label\": \"Usage charge\",\n    \"price\": 100,\n    \"filterParam1\": \"p1\",\n    \"filterParam2\": \"p2\",\n    \"filterParam3\": \"p3\",\n    \"filterParam4\": \"p4\",\n    \"validity\": {\n        \"from\": \"2024-01-01\",\n        \"to\": \"2024-01-31\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/catalog/productManagement/createProductSimpleUsage",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"catalog",
+								"productManagement",
+								"createProductSimpleUsage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Usage Charge",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let charge;",
+									"let chargeCode = pm.collectionVariables.get(\"chargeCode\");",
+									"pm.test(\"Check Oneshot Charge\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().total).to.equal(1);",
+									"    pm.expect(pm.response.json().data.length).to.equal(1);",
+									"    charge = pm.response.json().data[0];",
+									"    pm.expect(charge.code).to.equal(chargeCode);",
+									"    pm.expect(charge.status).to.equal(\"ACTIVE\");",
+									"    pm.expect(charge.filterParam1).to.equal(\"p1\");",
+									"    pm.expect(charge.filterParam2).to.equal(\"p2\");",
+									"    pm.expect(charge.filterParam3).to.equal(\"p3\");",
+									"    pm.expect(charge.filterParam4).to.equal(\"p4\");",
+									"});",
+									"",
+									"pm.test(\"Check Associated Price Plan\", function () {",
+									"    pm.expect(charge.pricePlans.length).to.equal(1);",
+									"    pm.expect(charge.pricePlans[0].code).is.equal(\"PPM_\" + chargeCode)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"code\": \"{{chargeCode}}\"\n    },\n    \"nestedEntities\": [\n        \"pricePlans\",\n        \"pricePlans.versions\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/usageChargeTemplate",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"usageChargeTemplate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Price Plan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let ppm;",
+									"let ppmv",
+									"let chargeCode = pm.collectionVariables.get(\"chargeCode\");",
+									"pm.test(\"Check created PPM\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().total).to.equal(1);",
+									"    pm.expect(pm.response.json().data.length).to.equal(1);",
+									"    ppm = pm.response.json().data[0];",
+									"    pm.expect(ppm.versions.length).to.equal(1);",
+									"    ppmv = ppm.versions[0]",
+									"});",
+									"",
+									"pm.test(\"Check PPM Version\", function () {",
+									"    pm.expect(ppmv.status).to.equal(\"PUBLISHED\");",
+									"    pm.expect(ppmv.price).to.equal(100);",
+									"    pm.expect(ppmv.amountWithoutTax).to.equal(100);",
+									"    pm.expect(ppmv.amountWithTax).to.equal(100);",
+									"    pm.expect(ppmv.priceVersionType).to.equal(\"FIXED\");",
+									"    pm.expect(ppmv.matrix).to.equal(false);",
+									"",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"code\": \"PPM_{{chargeCode}}\"\n    },\n    \"nestedEntities\": [\n        \"versions\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/pricePlanMatrix",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"pricePlanMatrix"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let productCode = pm.collectionVariables.get(\"productCode\");",
+									"pm.test(\"Check Product\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    pm.expect(pm.response.json().total).to.equal(1);",
+									"    pm.expect(pm.response.json().data.length).to.equal(1);",
+									"    let product = pm.response.json().data[0];",
+									"    pm.expect(product.productCharges.length).to.equal(1);",
+									"    pm.expect(product.productCharges[0].chargeTemplate.code).to.equal(pm.collectionVariables.get(\"chargeCode\"));",
+									"",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"code\": \"{{productCode}}\"\n    },\n    \"nestedEntities\": [\n        \"productCharges.chargeTemplate\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/product",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"product"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"let ts = pm.collectionVariables.get(\"ts\");",
+							"",
+							"pm.collectionVariables.set(\"chargeCode\", \"CH_USG_AUTO_\" + ts);",
+							"pm.collectionVariables.set(\"productCode\", \"PR_USG_AUTO_\" + ts);"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{opencell.password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{opencell.username}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "ts",
+			"value": ""
+		},
+		{
+			"key": "chargeCode",
+			"value": ""
+		},
+		{
+			"key": "productCode",
+			"value": ""
+		}
+	]
+}

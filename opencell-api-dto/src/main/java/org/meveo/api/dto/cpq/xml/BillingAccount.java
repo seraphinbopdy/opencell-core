@@ -6,6 +6,9 @@ import javax.xml.bind.annotation.XmlAttribute;
 
 import org.meveo.api.dto.CustomFieldDto;
 import org.meveo.api.dto.CustomFieldsDto;
+import org.meveo.model.RegistrationNumber;
+
+import java.util.stream.Collectors;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class BillingAccount {
@@ -45,7 +48,6 @@ public class BillingAccount {
         this.externalRef1 = billingAccount.getExternalRef1();
         this.externalRef2 = billingAccount.getExternalRef2();
         this.jobTitle = billingAccount.getJobTitle();
-        this.registrationNo = billingAccount.getRegistrationNo();
         this.vatNo = billingAccount.getVatNo();
         this.name = new Name(billingAccount.getName());
         this.address = new Address(billingAccount.getAddress());
@@ -59,6 +61,7 @@ public class BillingAccount {
     	this.paymentMethod=paymentMethod;
         this.country = billingAccount.getTradingCountry() != null ? billingAccount.getTradingCountry().getCode() : "";
         this.lang = billingAccount.getTradingLanguage() != null ? billingAccount.getTradingLanguage().getLanguageCode() : "";
+		this.registrationNo = billingAccount.getRegistrationNumbers().isEmpty() ? "" : billingAccount.getRegistrationNumbers().stream().map(RegistrationNumber::getRegistrationNo).collect(Collectors.joining(","));
     }
 
     public String getBillingCycleCode() {

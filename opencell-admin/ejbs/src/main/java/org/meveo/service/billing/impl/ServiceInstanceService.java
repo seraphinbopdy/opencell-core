@@ -270,6 +270,10 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         if (offer != null && !offer.containsServiceTemplate(serviceInstance.getServiceTemplate()) && !offer.haveProduct(serviceInstance.getCode())) {
             throw new ValidationException("Service " + serviceInstance.getCode() + " is not associated with Offer");
         }
+        
+		if (offer != null && offer.isDisabled() && serviceInstance.getSubscription().getOrder() == null) {
+			throw new BusinessException(String.format("OfferTemplate[code=%s] is disabled and cannot be subscription to. Please select another offer.", offer.getCode()));
+		}
 
         if (offer != null && serviceInstance != null) {
             log.debug("check service {} is associated with offer {}", serviceInstance.getCode(), offer.getCode());
@@ -560,7 +564,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
                 if (applySubscriptionCharges) {
 
                     ratingResult = oneShotRatingService.rateOneShotCharge(oneShotChargeInstance, oneShotChargeInstance.getQuantity(), null, serviceInstance.getSubscriptionDate(),
-                        serviceInstance.getOrderNumber(), ChargeApplicationModeEnum.SUBSCRIPTION, false, false);
+                        serviceInstance.getOrderNumber(), ChargeApplicationModeEnum.SUBSCRIPTION, false, false, null);
                     if(ratingResult != null) {
                     	eligibleFixedDiscountItems.addAll(ratingResult.getEligibleFixedDiscountItems());
                     }
@@ -768,7 +772,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
                     }
 
                     RatingResult ratingResult = oneShotRatingService.rateOneShotCharge(oneShotChargeInstance, oneShotChargeInstance.getQuantity(), null, terminationDate, orderNumber,
-                        ChargeApplicationModeEnum.SUBSCRIPTION, false, false);
+                        ChargeApplicationModeEnum.SUBSCRIPTION, false, false, null);
 
                     // Uncomment if want to rate with failSilently=true and there is a job that that will rate failed to rate one shot charges afterwards
 //                    // If failed to rate, charge instance status is left as active
@@ -795,7 +799,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
                     log.info("Reimbursing the subscription charge {}", oneShotChargeInstance.getId());
 
                     // Left as failSilently=false, as currently there is no way of applying a one shot charge in another way that mode=SUBSCRIPTION
-                    oneShotRatingService.rateOneShotCharge(oneShotChargeInstance,  oneShotChargeInstance.getQuantity().negate(), null, terminationDate, orderNumber, ChargeApplicationModeEnum.REIMBURSMENT, false, false);
+                    oneShotRatingService.rateOneShotCharge(oneShotChargeInstance,  oneShotChargeInstance.getQuantity().negate(), null, terminationDate, orderNumber, ChargeApplicationModeEnum.REIMBURSMENT, false, false, null);
                     oneShotChargeInstance.setStatus(InstanceStatusEnum.TERMINATED);
                     oneShotChargeInstanceService.update(oneShotChargeInstance);
                 }

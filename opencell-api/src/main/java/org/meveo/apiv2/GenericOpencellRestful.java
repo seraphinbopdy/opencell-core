@@ -24,6 +24,7 @@ import org.meveo.apiv2.accountreceivable.accountOperation.AccountReceivableResou
 import org.meveo.apiv2.accountreceivable.deferralPayments.AccountReceivableDeferralPaymentsResourceImpl;
 import org.meveo.apiv2.accounts.impl.AccountsManagementResourceImpl;
 import org.meveo.apiv2.accounts.impl.UserAccountsResourceImpl;
+import org.meveo.apiv2.admin.impl.FilesResourceImpl;
 import org.meveo.apiv2.admin.impl.SellerResourceImpl;
 import org.meveo.apiv2.admin.providers.ProviderResourceImpl;
 import org.meveo.apiv2.article.impl.AccountingArticleResourceImpl;
@@ -44,9 +45,12 @@ import org.meveo.apiv2.billing.service.RollbackOnErrorExceptionMapper;
 import org.meveo.apiv2.catalog.resource.DiscountPlanResourceImpl;
 import org.meveo.apiv2.catalog.resource.PricePlanMatrixResourceImpl;
 import org.meveo.apiv2.catalog.resource.PricePlanResourceImpl;
+import org.meveo.apiv2.catalog.resource.ProductManagementRs;
+import org.meveo.apiv2.catalog.resource.ProductManagementRsImpl;
 import org.meveo.apiv2.catalog.resource.pricelist.CatalogPriceListResourceImpl;
 import org.meveo.apiv2.catalog.resource.pricelist.PriceListLineResourceImpl;
 import org.meveo.apiv2.catalog.resource.pricelist.PriceListResourceImpl;
+import org.meveo.apiv2.commons.hugeentities.impl.HugeEntityResourceImpl;
 import org.meveo.apiv2.communication.impl.InternationalSettingsResourceImpl;
 import org.meveo.apiv2.cpq.impl.CommercialOrderResourceImpl;
 import org.meveo.apiv2.cpq.impl.CpqContractResourceImpl;
@@ -165,7 +169,8 @@ public class GenericOpencellRestful extends Application {
                 ContactCategoryResourceImpl.class, WalletOperationResourceImpl.class, InvoiceValidationRulesResourceImpl.class, InternationalSettingsResourceImpl.class,
                 CustomTableResourceImpl.class, AdvancedSettingsResourceImpl.class, CustomerBalanceResourceImpl.class, FileTypeResourceImpl.class, DocumentCategoryResourceImpl.class, 
                 ElectronicInvoicingResourceImpl.class,PaymentResourceImpl.class, PriceListResourceImpl.class, SellerResourceImpl.class, PriceListLineResourceImpl.class, CatalogPriceListResourceImpl.class,
-				        SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class)
+				SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
+                ProductManagementRsImpl.class, HugeEntityResourceImpl.class)
                 .collect(Collectors.toSet());
         if (GENERIC_API_REQUEST_LOGGING_CONFIG.equalsIgnoreCase("true")) {
             resources.add(GenericApiLoggingFilter.class);

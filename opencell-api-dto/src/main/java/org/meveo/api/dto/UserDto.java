@@ -69,7 +69,7 @@ public class UserDto extends AuditableEntityDto {
 
     /** The first name. */
     @Schema(description = "first name")
-    private String firstName;
+	    private String firstName;
 
     /** The last name. */
     @Schema(description = "last name")
@@ -106,6 +106,10 @@ public class UserDto extends AuditableEntityDto {
     @XmlElement()
     private Map<String, String> attributes;
 
+    private Map<String, List<String>> clientRoles;
+
+    private Boolean replaceRoles;
+
     /**
      * Instantiates a new user dto.
      */
@@ -116,7 +120,6 @@ public class UserDto extends AuditableEntityDto {
      * Instantiates a new user dto.
      *
      * @param user the user
-     * @param includeSecuredEntities the include secured entities
      */
     public UserDto(User user) {
         super(user);
@@ -322,8 +325,25 @@ public class UserDto extends AuditableEntityDto {
     public Map<String, String> getAttributes() {
         return attributes;
     }
+
     public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
+    }
+
+    public Map<String, List<String>> getClientRoles() {
+        return clientRoles;
+    }
+
+    public void setClientRoles(Map<String, List<String>> clientRoles) {
+        this.clientRoles = clientRoles;
+    }
+
+    public Boolean getReplaceRoles() {
+        return replaceRoles;
+    }
+
+    public void setReplaceRoles(Boolean replaceRoles) {
+        this.replaceRoles = replaceRoles;
     }
 
     @Override

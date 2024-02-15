@@ -908,7 +908,14 @@
           "id": "617cc9fc-c02e-4f6e-a5de-3a9b2a6df9af",
           "name": "ModifyAllCE",
           "description": "Allows to modify any Custom entity",
-          "composite": false,
+          "composite": true,
+          "composites": {
+            "client": {
+              "opencell-web": [
+                "ReadAllCE"
+              ]
+            }
+          },
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
           "attributes": {}

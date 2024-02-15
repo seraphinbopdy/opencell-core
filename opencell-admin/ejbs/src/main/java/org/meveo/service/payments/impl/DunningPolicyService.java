@@ -464,4 +464,24 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         }
         return EMPTY_LIST;
     }
+
+    /**
+     * Update Dunning Policies after creating a new setting of Dunning
+     * Set true in active field if the DunningTemplates have the same DunningMode as DunningSettings else false in the active field
+     * @param dunningModeEnum {@link DunningModeEnum}
+     */
+    public void updateDunningPoliciesByDunningMode(DunningModeEnum dunningModeEnum) throws BusinessException {
+        final List<DunningPolicy> dunningPolicies = super.list();
+        dunningPolicies.forEach((dunningPolicy -> {
+            if(dunningPolicy.getType().equals(dunningModeEnum)) {
+                dunningPolicy.setIsActivePolicy(true);
+                dunningPolicy.getAuditable().setUpdated(new Date());
+                super.update(dunningPolicy);
+            } else {
+                dunningPolicy.setIsActivePolicy(false);
+                dunningPolicy.getAuditable().setUpdated(new Date());
+                super.update(dunningPolicy);
+            }
+        }));
+    }
 }

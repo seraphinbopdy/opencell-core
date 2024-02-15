@@ -279,12 +279,30 @@ public abstract class BaseApi {
 
         List<CustomFieldDto> customFieldDtos = null;
         if (customFieldsDto != null) {
+            //check custom fields before populate
+            checkCFBeforePopulate(customFieldsDto);
             customFieldDtos = customFieldsDto.getCustomField();
         } else {
             customFieldDtos = new ArrayList<CustomFieldDto>();
         }
 
         return populateCustomFields(customFieldTemplates, customFieldDtos, entity, isNewEntity, checkCustomField);
+    }
+
+    /**
+     * Check custom field before populate
+     * @param customFieldsDto {@link CustomFieldsDto}
+     */
+    private void checkCFBeforePopulate(CustomFieldsDto customFieldsDto) {
+    	if(customFieldsDto!=null && customFieldsDto.getCustomField()!=null) {
+    		customFieldsDto.getCustomField()
+            .forEach(cf -> {
+                if (cf.getStringValue() != null && cf.getStringValue().trim().isEmpty()) {
+                    cf.setStringValue(null);
+                }
+            });
+    	}
+        
     }
 
     /**

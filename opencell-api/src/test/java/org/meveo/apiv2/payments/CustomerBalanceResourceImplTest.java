@@ -81,6 +81,21 @@ public class CustomerBalanceResourceImplTest {
                 .code("CODE")
                 .label("LABEL")
                 .occTemplates(Collections.emptyList())
+                .balanceEl(null)
+                .build();
+
+        customerBalanceResource.create(customerBalance);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void shouldNotCreateCustomerBalanceIfOccTemplateAndBalanceElAreMissing() {
+        CustomerBalance customerBalance = ImmutableCustomerBalance
+                .builder()
+                .defaultBalance(true)
+                .code("CODE")
+                .label("LABEL")
+                .occTemplates(null)
+                .balanceEl(null)
                 .build();
 
         customerBalanceResource.create(customerBalance);

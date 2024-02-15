@@ -37,8 +37,7 @@ public class DunningSettingsResourceImpl implements DunningSettingResource {
 	public Response create(org.meveo.apiv2.dunning.DunningSettings dunningSettings) {
 		var entity = mapper.toEntity(dunningSettings);
 		var savedDunning = dunningSettingsApiService.create(entity);
-
-		//Update DunningTemplate after creating a new DunningSettings
+		//Update Dunning Templates after creating a new Setting of Dunning
 		dunningTemplateService.updateDunningTemplateByDunningMode(dunningSettings.getDunningMode());
 
 		//Activate and Deactivate DunningLevel by DunningSettings
@@ -56,8 +55,7 @@ public class DunningSettingsResourceImpl implements DunningSettingResource {
 	@Override
 	public Response update(org.meveo.apiv2.dunning.DunningSettings dunningSettings, Long dunningId) {
 		var updated = dunningSettingsApiService.update(dunningId, mapper.toEntity(dunningSettings)).get();
-
-		//Update DunningTemplate after creating a new DunningSettings
+		//Update Dunning Templates after creating a new Setting of Dunning
 		dunningTemplateService.updateDunningTemplateByDunningMode(dunningSettings.getDunningMode());
 
 		//Activate and Deactivate DunningLevel by DunningSettings

@@ -17,6 +17,7 @@
  */
 package org.meveo.model.payments;
 
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import java.math.BigDecimal;
@@ -58,6 +59,7 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IWFEntity;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.audit.AuditChangeTypeEnum;
@@ -259,7 +261,6 @@ public class CustomerAccount extends AccountEntity implements IInvoicingMinimumA
 
 	@OneToMany(mappedBy = "customerAccount", fetch = FetchType.LAZY)
     private List<Contract> contracts = new ArrayList<>();
-	
 	public List<Contract> getContracts() {
         return contracts;
     }
@@ -283,6 +284,17 @@ public class CustomerAccount extends AccountEntity implements IInvoicingMinimumA
 	 */
 	@OneToMany(mappedBy = "customerAccount", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
 	private Set<PaymentPlan> paymentPlans = new HashSet<>();
+	
+	@OneToMany(mappedBy = "customerAccount")
+	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+	
+	public List<RegistrationNumber> getRegistrationNumbers() {
+		return registrationNumbers;
+	}
+	
+	public void setRegistrationNumbers(List<RegistrationNumber> registrationNumbers) {
+		this.registrationNumbers = registrationNumbers;
+	}
 
 	/**
 	 * This method is called implicitly by hibernate, used to enable encryption for
@@ -828,4 +840,13 @@ public class CustomerAccount extends AccountEntity implements IInvoicingMinimumA
 	    	}
 	    	return customer.getSeller();
 	    }
+	
+	// check if the list of registration numbers is not empty
+	// get all registration numbers and join them with a comma
+	public String getRegistrationNo(){
+		if (isNotEmpty(registrationNumbers)) {
+			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+		}
+		return registrationNo;
+	}
 }

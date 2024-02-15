@@ -263,7 +263,7 @@ public class BillingCycleApi extends BaseCrudApi<BillingCycle, BillingCycleDto> 
 	            switch (dto.getType()){
 	                case BILLINGACCOUNT: filters.put("billingAccount.billingCycle.code", dto.getCode()); entity.setFilters(filters);break;
 	                case SUBSCRIPTION: filters.put("subscription.billingCycle.code", dto.getCode()); entity.setFilters(filters); break;
-	                case ORDER: filters.put("infoOrder.order.billingCycle.code", dto.getCode()); entity.setFilters(filters); break;
+	                case ORDER: filters.put("orderInfo.order.billingCycle.code", dto.getCode()); entity.setFilters(filters); break;
 	            }
         	}
 

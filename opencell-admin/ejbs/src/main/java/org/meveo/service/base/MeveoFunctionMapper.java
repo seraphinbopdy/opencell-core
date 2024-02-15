@@ -1097,9 +1097,10 @@ public class MeveoFunctionMapper extends FunctionMapper {
         }
         if (result != null && result.containsKey(Script.RESULT_VALUE)) {
             return result.get(Script.RESULT_VALUE);
+        
+        } else {
+            return null;
         }
-
-        return result;
     }
 
     /**
@@ -2007,7 +2008,7 @@ public class MeveoFunctionMapper extends FunctionMapper {
 			case COUNT :
 			case NUMERIC :
 			case INTEGER:
-				
+			case LIST_NUMERIC:
 				if(attributInstance.get().getDoubleValue()!=null) {
 					return attributInstance.get().getDoubleValue(); 
 				}

@@ -24,6 +24,8 @@ import org.meveo.admin.job.MassUpdaterJobBean;
 import org.meveo.admin.job.UpdateHugeEntityJob;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.api.generics.GenericRequestMapper;
+import org.meveo.api.generics.PersistenceServiceHelper;
 import org.meveo.apiv2.common.HugeEntity;
 import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.QueryBuilder;
@@ -56,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
@@ -155,7 +158,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @param jobExecutionResult Job execution result
      */
     public void updateHugeEntity(JobExecutionResultImpl jobExecutionResult) {
-        String entityClassName = getHugeEntityClassName(jobExecutionResult);
+        Class hugeEntityClass = getHugeEntityClass(jobExecutionResult);
         String targetJob = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_TARGET_JOB);
         if (StringUtils.isBlank(targetJob)) {
             throw new BusinessException("the target job is missing!");
@@ -164,7 +167,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
                 .setParameter("targetJob", targetJob).getResultList();
         JobInstance jobInstance = jobExecutionResult.getJobInstance();
         for (BatchEntity batchEntity : batchEntities) {
-            processBatchEntity(jobExecutionResult, jobInstance, batchEntity, entityClassName);
+            processBatchEntity(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
         }
     }
 
@@ -174,11 +177,11 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @param jobExecutionResult job execution result
      * @param jobInstance        job instance
      * @param batchEntity        batch entity
-     * @param entityClassName    entity class name
+     * @param hugeEntityClass    huge entity class
      */
-    private void processBatchEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, String entityClassName) {
+    private void processBatchEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
         try {
-            updateHugeEntity(jobExecutionResult, jobInstance, batchEntity, entityClassName);
+            updateHugeEntity(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
         } catch (Exception e) {
             log.error("Failed to process the entity batch id : {}", batchEntity.getId(), e);
             jobExecutionResult.registerError(e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
@@ -234,14 +237,14 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     }
 
     /**
-     * Get the class name of huge entity
+     * Get the class of huge entity
      *
      * @param jobExecutionResult the job execution result
      * @return the class name of huge entity
      */
-    public String getHugeEntityClassName(JobExecutionResultImpl jobExecutionResult) {
+    public Class getHugeEntityClass(JobExecutionResultImpl jobExecutionResult) {
         String targetEntity = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME);
-        return (getHugeEntityClass(targetEntity)).getSimpleName();
+        return getHugeEntityClass(targetEntity);
     }
 
     /**
@@ -269,10 +272,10 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @param jobExecutionResult job execution result
      * @param jobInstance        job instance
      * @param batchEntity        batch entity
-     * @param entityClassName    entity class name
+     * @param hugeEntityClass    huge entity class
      */
-    private void updateHugeEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, String entityClassName) {
-        executeMassUpdaterJob(jobExecutionResult, jobInstance, batchEntity, entityClassName);
+    private void updateHugeEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
+        executeMassUpdaterJob(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
         if (isRunningAsJobManager(jobExecutionResult)) {
             //Execute the email sending in an isolated transaction ==> if there is an exception, we don't position the batch in FAILURE status.
             methodCallingUtils.callMethodInNewTx(() -> sendEmail(batchEntity, jobExecutionResult));
@@ -283,13 +286,12 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     /**
      * Add the default filter to batch filters
      *
-     * @param jobExecutionResult the job execution result
-     * @param filters            batch filters
+     * @param defaultFilter the default filter
+     * @param filters       batch filters
      * @return all filters (new + default)
      */
-    private Map<String, Object> addFilters(JobExecutionResultImpl jobExecutionResult, Map<String, Object> filters) {
+    public Map<String, Object> addFilters(String defaultFilter, Map<String, Object> filters) {
         Map<String, Object> mergedFilters = new HashMap<>(filters);
-        String defaultFilter = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER);
         if (!StringUtils.isBlank(defaultFilter)) {
             try {
                 Map<String, Object> result = new ObjectMapper().readValue(defaultFilter, HashMap.class);
@@ -316,17 +318,16 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @param jobExecutionResult the job execution result
      * @param jobInstance        the job instance
      * @param batchEntity        the batch entity
-     * @param entityClassName    entity class name
+     * @param hugeEntityClass    huge entity class
      */
-    private void executeMassUpdaterJob(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, String entityClassName) {
+    private void executeMassUpdaterJob(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
         Long selectLimit = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_SELECT_LIMIT);
         Long updateChunk = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK);
+        String defaultFilter = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER);
         Boolean isPessimisticUpdateLock = (Boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_PESSIMISTIC_UPDATE_LOCK);
 
-        Map<String, Object> filters = addFilters(jobExecutionResult, batchEntity.getFilters());
-
-        String selectQuery = getSelectQuery(entityClassName, filters);
-        String updateQuery = getUpdateQuery(jobExecutionResult, batchEntity, entityClassName);
+        String selectQuery = getSelectQuery(hugeEntityClass, batchEntity.getFilters(), defaultFilter);
+        String updateQuery = getUpdateQuery(jobExecutionResult, batchEntity, hugeEntityClass.getSimpleName());
         massUpdaterJobBean.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunk, selectQuery, selectLimit, false, isPessimisticUpdateLock);
     }
 
@@ -352,14 +353,19 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     /**
      * Gets the select query
      *
-     * @param entityClassName the entity class name
+     * @param hugeEntityClass the hug entity class
      * @param filters         the filters
+     * @param defaultFilter   the default filter
      * @return the select query
      */
-    private String getSelectQuery(String entityClassName, Map<String, Object> filters) {
-        PaginationConfiguration searchConfig = new PaginationConfiguration(filters);
+    public String getSelectQuery(Class hugeEntityClass, Map<String, Object> filters, String defaultFilter) {
+        Map<String, Object> mergedFilters = addFilters(defaultFilter, filters);
+        GenericRequestMapper mapper = new GenericRequestMapper(hugeEntityClass, PersistenceServiceHelper.getPersistenceService());
+        mergedFilters = mapper.evaluateFilters(Objects.requireNonNull(mergedFilters), hugeEntityClass);
+
+        PaginationConfiguration searchConfig = new PaginationConfiguration(mergedFilters);
         searchConfig.setFetchFields(Arrays.asList("id"));
-        return nativePersistenceService.getQuery(entityClassName, searchConfig, null).getQueryAsString();
+        return nativePersistenceService.getQuery(hugeEntityClass.getSimpleName(), searchConfig, null).getQueryAsString();
     }
 
     /**
@@ -435,5 +441,16 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
             code = serviceSingleton.getGenericCode(customGenericEntityCode);
         }
         return code;
+    }
+
+    /**
+     * Update entities through their ids
+     *
+     * @param updateQuery the update query which will be executed
+     * @param ids         the ids of entities to be updated
+     * @return the number of updated Wallet operations
+     */
+    public int update(StringBuilder updateQuery, List<Long> ids) {
+        return nativePersistenceService.update(updateQuery, ids);
     }
 }

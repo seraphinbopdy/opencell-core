@@ -18,7 +18,6 @@
 package org.meveo.apiv2.commons.hugeentities.impl;
 
 import org.meveo.admin.job.UpdateHugeEntityJob;
-import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -26,28 +25,21 @@ import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.common.HugeEntity;
 import org.meveo.apiv2.commons.hugeentities.resource.HugeEntityResource;
-import org.meveo.apiv2.generic.core.GenericRequestMapper;
-import org.meveo.apiv2.generic.services.PersistenceServiceHelper;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.jobs.JobInstance;
-import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.billing.impl.BatchEntityService;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import static java.util.Optional.ofNullable;
 
@@ -76,13 +68,14 @@ public class HugeEntityResourceImpl implements HugeEntityResource {
     @Inject
     private BatchEntityService batchEntityService;
 
-    @Inject
-    @Named
-    private NativePersistenceService nativePersistenceService;
-
     @Override
     public Response update(HugeEntity hugeEntity) {
         ActionStatus result = new ActionStatus(ActionStatusEnum.SUCCESS, "");
+
+        //Filters
+        if (hugeEntity.getFilters().isEmpty()) {
+            throw new MissingParameterException("filters");
+        }
 
         //targetJob
         String targetJob = hugeEntity.getTargetJob();
@@ -93,30 +86,21 @@ public class HugeEntityResourceImpl implements HugeEntityResource {
         String targetEntity = (String) customFieldInstanceService.getCFValue(jobInstance, UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME);
         Class hugeEntityClass = batchEntityService.getHugeEntityClass(targetEntity);
         String hugeEntityClassName = hugeEntityClass.getSimpleName();
-        GenericRequestMapper mapper = new GenericRequestMapper(hugeEntityClass, PersistenceServiceHelper.getPersistenceService());
-
-
-        //Filters
-        if (hugeEntity.getFilters().isEmpty()) {
-            throw new MissingParameterException("filters");
-        }
-        Map<String, Object> filters = mapper.evaluateFilters(Objects.requireNonNull(hugeEntity.getFilters()), hugeEntityClass);
 
         boolean isEntityWithHugeVolume = financeSettingsService.isEntityWithHugeVolume(hugeEntityClassName);
         if (isEntityWithHugeVolume) {
-            batchEntityService.create(hugeEntity, filters, hugeEntityClassName);
+            batchEntityService.create(hugeEntity, hugeEntity.getFilters(), hugeEntityClassName);
             result.setMessage("Entity " + hugeEntityClassName + " is marked as \"huge\". " +
                     "Your filter is recorded as a batch and will be processed later by a " + targetJob + " job. " +
                     "You will receive a notification email when the batch has been processed.");
             return Response.status(Response.Status.ACCEPTED).entity(result).build();
         } else {
-            PaginationConfiguration configuration = new PaginationConfiguration(filters);
-            configuration.setFetchFields(Arrays.asList("id"));
-            QueryBuilder queryBuilder = batchEntityService.getQuery(configuration);
-            List<Long> ids = queryBuilder.getQuery(entityManagerWrapper.getEntityManager()).getResultList();
+            String defaultFilter = (String) customFieldInstanceService.getCFValue(jobInstance, UpdateHugeEntityJob.CF_DEFAULT_FILTER);
+            String selectQuery = batchEntityService.getSelectQuery(hugeEntityClass, hugeEntity.getFilters(), defaultFilter);
+            List<Long> ids = entityManagerWrapper.getEntityManager().createQuery(selectQuery).getResultList();
 
-            StringBuilder updateQuery = new StringBuilder("UPDATE " + hugeEntityClassName + " SET ")
-                    .append(", updated=").append(QueryBuilder.paramToString(new Date()));
+            StringBuilder updateQuery = new StringBuilder("UPDATE ").append(hugeEntityClassName).append(" SET ")
+                    .append("updated=").append(QueryBuilder.paramToString(new Date()));
 
             String fieldsToUpdate = (String) customFieldInstanceService.getCFValue(jobInstance, UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE);
             if (StringUtils.isBlank(hugeEntityClassName)) {
@@ -124,7 +108,7 @@ public class HugeEntityResourceImpl implements HugeEntityResource {
             }
             updateQuery.append(", ").append(fieldsToUpdate);
 
-            int updated = nativePersistenceService.update(updateQuery, ids);
+            int updated = batchEntityService.update(updateQuery, ids);
             if (updated > 0) {
                 result.setMessage(updated + " elements updated");
             } else {

@@ -17,36 +17,6 @@
  */
 package org.meveo.service.base;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.Query;
-
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -95,6 +65,35 @@ import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CustomEntityTemplateService;
 import org.meveo.service.notification.GenericNotificationService;
 import org.meveo.util.MeveoParamBean;
+
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
+import javax.persistence.Query;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.collections4.ListUtils.partition;
@@ -191,10 +190,10 @@ public class NativePersistenceService extends BaseService {
      *
      * @param tableName Table name
      * @param id        Identifier
-     * @param canCheck When True it will get id, and the code of the customer table
+     * @param canCheck  When True it will get id, and the code of the customer table
      * @return A map of values with field name as a map key and field value as a map value. Or null if no record was found with such identifier.
      */
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({"rawtypes", "deprecation"})
     public Map<String, Object> findByIdWithouCheckCodeAndDescription(String tableName, Long id, boolean canCheck) {
         return findByIdWithouCheckCodeAndDescription(tableName, id, null, canCheck);
     }
@@ -205,10 +204,10 @@ public class NativePersistenceService extends BaseService {
      * @param tableName Table name
      * @param id        Identifier
      * @param fields    A set of fields to return. Works only when canCheck is true
-     * @param canCheck When True it will get id, and the code of the customer table
+     * @param canCheck  When True it will get id, and the code of the customer table
      * @return A map of values with field name as a map key and field value as a map value. Or null if no record was found with such identifier.
      */
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({"rawtypes", "deprecation"})
     public Map<String, Object> findByIdWithouCheckCodeAndDescription(String tableName, Long id, Set<String> fields, boolean canCheck) {
         tableName = addCurrentSchema(tableName);
         try {
@@ -216,9 +215,9 @@ public class NativePersistenceService extends BaseService {
             StringBuilder selectQuery = new StringBuilder("select * from ").append(tableName).append(" e where id=:id");
             SQLQuery query = session.createSQLQuery(selectQuery.toString());
             query.setParameter("id", id);
-            if(canCheck) {
+            if (canCheck) {
                 query.addScalar("id", new LongType());
-                if(!ListUtils.isEmtyCollection(fields)) {
+                if (!ListUtils.isEmtyCollection(fields)) {
                     fields.stream().filter(f -> !f.equals("id")).forEach(f -> query.addScalar(f, new StringType()));
                 }
                 query.setFlushMode(FlushMode.COMMIT);
@@ -672,7 +671,7 @@ public class NativePersistenceService extends BaseService {
 
     /**
      * Delete multiple records. Note: There is no check done that records exists.
-     * Will call find by id and check if it has a code or description field other will throw 
+     * Will call find by id and check if it has a code or description field other will throw
      * excpetion
      *
      * @param tableName Table name to delete from
@@ -692,7 +691,7 @@ public class NativePersistenceService extends BaseService {
 //        ids.stream().forEach(id -> deletionService.checkTableNotreferenced(tableName, id));
 //        return getEntityManager().createNativeQuery("delete from " + tableName + " where id in :ids").setParameter("ids", ids).executeUpdate();
     }
-    
+
     /**
      * Delete multiple records. Note: There is no check done that records exists.
      * Will not check Code or description field, it will find the table by id and then delete
@@ -843,38 +842,38 @@ public class NativePersistenceService extends BaseService {
      *
      * @param tableName A name of a table to query
      * @param config    Data filtering, sorting and pagination criteria
-     * @param id Id field value to explicitly extract data by ID 
+     * @param id        Id field value to explicitly extract data by ID
      * @return Query builder to filter entities according to pagination configuration data.
      */
     public QueryBuilder getQuery(String tableName, PaginationConfiguration config, Long id) {
         tableName = addCurrentSchema(tableName);
         Predicate<String> predicate = field -> this.checkAggFunctions(field.toUpperCase().trim());
         String aggFields = (config != null && config.getFetchFields() != null) ? aggregationFields(config.getFetchFields(), predicate) : "";
-        if(!aggFields.isEmpty()) {
+        if (!aggFields.isEmpty()) {
             config.getFetchFields().remove("id");
         }
 
         List<String> fetch = (config != null && config.getFetchFields() != null) ? config.getFetchFields().stream().filter(s -> s.contains(".")).map(s -> s.substring(0, s.lastIndexOf("."))).distinct().collect(Collectors.toList()) : Collections.emptyList();
         Map<String, String> fetchAlias = fetch.stream().collect(Collectors.toMap(Function.identity(), s -> QueryBuilder.getJoinAlias("a", s)));
 
-         String fieldsToRetrieve = (config != null && config.getFetchFields() != null) ? retrieveFields(config.getFetchFields(), predicate.negate()) : "";
-        if(fieldsToRetrieve.isEmpty() && aggFields.isEmpty()) {
+        String fieldsToRetrieve = (config != null && config.getFetchFields() != null) ? retrieveFields(config.getFetchFields(), predicate.negate()) : "";
+        if (fieldsToRetrieve.isEmpty() && aggFields.isEmpty()) {
             fieldsToRetrieve = "*";
         }
         StringBuilder fetchSql = new StringBuilder();
         if (!ListUtils.isEmtyCollection(fetch)) {
-        	for (String fetchField : fetch) {
-				String joinAlias = fetchField.contains(QueryBuilder.JOIN_AS) ? "" : QueryBuilder.JOIN_AS + fetchAlias.get(fetchField);
-				fetchSql.append(" left join " + "a" + "." + fetchField + joinAlias);
+            for (String fetchField : fetch) {
+                String joinAlias = fetchField.contains(QueryBuilder.JOIN_AS) ? "" : QueryBuilder.JOIN_AS + fetchAlias.get(fetchField);
+                fetchSql.append(" left join " + "a" + "." + fetchField + joinAlias);
             }
         }
         StringBuilder sql = new StringBuilder("select " + buildFields(fieldsToRetrieve, aggFields) + " from " + tableName + " a ");
         sql.append(fetchSql);
         sql.append(" ");
-		QueryBuilder queryBuilder = new QueryBuilder(sql.toString(), "a");
-        
-        if(id != null) {
-        	queryBuilder.addSql(" a.id ='"+id+"'");
+        QueryBuilder queryBuilder = new QueryBuilder(sql.toString(), "a");
+
+        if (id != null) {
+            queryBuilder.addSql(" a.id ='" + id + "'");
         }
 
         if (config == null) {
@@ -885,13 +884,13 @@ public class NativePersistenceService extends BaseService {
         if (filters != null && !filters.isEmpty()) {
             NativeExpressionFactory nativeExpressionFactory = new NativeExpressionFactory(queryBuilder, "a");
             filters.keySet().stream()
-            		.sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
+                    .sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
                     .filter(key -> filters.get(key) != null)
                     .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
 
         }
 
-        if(aggFields.isEmpty()) {
+        if (aggFields.isEmpty()) {
             queryBuilder.addPaginationConfiguration(config, "a");
         }
         if (!aggFields.isEmpty() && !fieldsToRetrieve.isEmpty()) {
@@ -907,22 +906,22 @@ public class NativePersistenceService extends BaseService {
 
     /**
      * Get Query without adding dependencies left join
-     * 
+     *
      * @param tableName Table name
-     * @param config {@link PaginationConfiguration}
-     * @param id Id
+     * @param config    {@link PaginationConfiguration}
+     * @param id        Id
      * @return {@link QueryBuilder}
      */
     public QueryBuilder getQueryWithoutDependencies(String tableName, PaginationConfiguration config, Long id) {
         tableName = addCurrentSchema(tableName);
         Predicate<String> predicate = field -> this.checkAggFunctions(field.toUpperCase().trim());
         String aggFields = (config != null && config.getFetchFields() != null) ? aggregationFields(config.getFetchFields(), predicate) : "";
-        if(!aggFields.isEmpty()) {
+        if (!aggFields.isEmpty()) {
             config.getFetchFields().remove("id");
         }
 
         String fieldsToRetrieve = (config != null && config.getFetchFields() != null) ? retrieveFields(config.getFetchFields(), predicate.negate()) : "";
-        if(fieldsToRetrieve.isEmpty() && aggFields.isEmpty()) {
+        if (fieldsToRetrieve.isEmpty() && aggFields.isEmpty()) {
             fieldsToRetrieve = "*";
         }
 
@@ -930,8 +929,8 @@ public class NativePersistenceService extends BaseService {
         sql.append(" ");
         QueryBuilder queryBuilder = new QueryBuilder(sql.toString(), "a");
 
-        if(id != null) {
-            queryBuilder.addSql(" a.id ='"+id+"'");
+        if (id != null) {
+            queryBuilder.addSql(" a.id ='" + id + "'");
         }
 
         if (config == null) {
@@ -947,7 +946,7 @@ public class NativePersistenceService extends BaseService {
 
         }
 
-        if(aggFields.isEmpty()) {
+        if (aggFields.isEmpty()) {
             queryBuilder.addPaginationConfiguration(config, "a");
         }
         if (!aggFields.isEmpty() && !fieldsToRetrieve.isEmpty()) {
@@ -960,10 +959,11 @@ public class NativePersistenceService extends BaseService {
 
     /**
      * Specific getQuery
-     * @param tableName entity name
+     *
+     * @param tableName                entity name
      * @param defaultLeftJoinWithAlias if needed, add left join alias when using SQL criteria with OR criteria
-     * @param config PaginationConfoguration
-     * @param id id
+     * @param config                   PaginationConfoguration
+     * @param id                       id
      * @return QueryBuilder
      */
     public QueryBuilder getQuery(String tableName, String defaultLeftJoinWithAlias, PaginationConfiguration config, Long id) {
@@ -996,7 +996,7 @@ public class NativePersistenceService extends BaseService {
         if (filters != null && !filters.isEmpty()) {
             NativeExpressionFactory nativeExpressionFactory = new NativeExpressionFactory(queryBuilder, "a");
             filters.keySet().stream()
-            		.sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
+                    .sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
                     .filter(key -> filters.get(key) != null)
                     .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
 
@@ -1037,8 +1037,7 @@ public class NativePersistenceService extends BaseService {
         if (leftJoinClause != null) {
             queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from "
                     + tableName + " a " + leftJoinClause, "a", entityClass);
-        }
-        else {
+        } else {
             queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from "
                     + tableName + " a ", "a", entityClass);
         }
@@ -1058,14 +1057,14 @@ public class NativePersistenceService extends BaseService {
 
 
         Map<String, Object> cfFilters = PersistenceService.extractCustomFieldsFilters(filters);
-        if(MapUtils.isNotEmpty(cfFilters)) {
+        if (MapUtils.isNotEmpty(cfFilters)) {
             filters.putAll(cfFilters);
         }
 
         if (filters != null && !filters.isEmpty()) {
             NativeExpressionFactory nativeExpressionFactory = new ExpressionFactory(queryBuilder, "a");
             filters.keySet().stream()
-            		.sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
+                    .sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
                     .filter(key -> filters.get(key) != null && !"$OPERATOR".equalsIgnoreCase(key))
                     .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
             for (String cft : cfFilters.keySet()) {
@@ -1102,8 +1101,8 @@ public class NativePersistenceService extends BaseService {
 
     private String buildFields(String fieldsToRetrieve, String aggFields) {
         if (!fieldsToRetrieve.isEmpty() && !aggFields.isEmpty()) {
-            return String.join("," , fieldsToRetrieve, aggFields);
-        } else if(!fieldsToRetrieve.isEmpty()) {
+            return String.join(",", fieldsToRetrieve, aggFields);
+        } else if (!fieldsToRetrieve.isEmpty()) {
             return fieldsToRetrieve;
         } else {
             return aggFields;
@@ -1116,41 +1115,40 @@ public class NativePersistenceService extends BaseService {
                     .stream()
                     .map(x -> {
                         if (x.toLowerCase().trim().contains("->>string"))
-                            return "varcharFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
+                            return "varcharFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
                         else if (x.toLowerCase().trim().contains("->>double"))
-                            return "numericFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
+                            return "numericFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
                         else if (x.toLowerCase().trim().contains("->>long"))
-                            return "bigIntFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
+                            return "bigIntFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
                         else if (x.toLowerCase().trim().contains("->>date"))
-                            return "timestampFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
+                            return "timestampFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
                         else if (x.toLowerCase().trim().contains("->>boolean"))
-                            return "booleanFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
+                            return "booleanFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
                         else if (x.toLowerCase().trim().contains("->>entity"))
-                            return "entityFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
+                            return "entityFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
                         else if (checkAggFunctions(x.toUpperCase().trim()))
                             return x;
                         else
                             return "a." + x;
                     })
                     .collect(joining(","));
-        }
-        else {
+        } else {
             return fields
                     .stream()
                     .filter(predicate)
                     .map(x -> {
                         if (x.toLowerCase().trim().contains("->>string"))
-                            return "varcharFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
-                        else if(x.toLowerCase().trim().contains("->>double"))
-                            return "numericFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
-                        else if(x.toLowerCase().trim().contains("->>long"))
-                            return "bigIntFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
-                        else if(x.toLowerCase().trim().contains("->>date"))
-                            return "timestampFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
-                        else if(x.toLowerCase().trim().contains("->>boolean"))
-                            return "booleanFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
-                        else if(x.toLowerCase().trim().contains("->>entity"))
-                            return "entityFromJson(a.cfValues,"+x.split("->>")[0]+","+x.split("->>")[1]+")";
+                            return "varcharFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
+                        else if (x.toLowerCase().trim().contains("->>double"))
+                            return "numericFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
+                        else if (x.toLowerCase().trim().contains("->>long"))
+                            return "bigIntFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
+                        else if (x.toLowerCase().trim().contains("->>date"))
+                            return "timestampFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
+                        else if (x.toLowerCase().trim().contains("->>boolean"))
+                            return "booleanFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
+                        else if (x.toLowerCase().trim().contains("->>entity"))
+                            return "entityFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
                         else
                             return "a." + x;
                     })
@@ -1160,8 +1158,8 @@ public class NativePersistenceService extends BaseService {
 
     private String aggregationFields(List<String> fields, Predicate<String> predicate) {
         return fields.stream()
-                    .filter(predicate)
-                    .collect(joining(","));
+                .filter(predicate)
+                .collect(joining(","));
     }
 
     private boolean checkAggFunctions(String field) {
@@ -1183,9 +1181,9 @@ public class NativePersistenceService extends BaseService {
      */
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> list(String tableName, PaginationConfiguration config) {
-        
+
         tableName = tableName.toLowerCase();
-        
+
         tableName = addCurrentSchema(tableName);
         QueryBuilder queryBuilder = getQuery(tableName, config, null);
         SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
@@ -1251,12 +1249,12 @@ public class NativePersistenceService extends BaseService {
     /**
      * Execute a search query with optional parameters
      *
-     * @param sql A query to execute
+     * @param sql        A query to execute
      * @param maxResults Number of records to retrieve. Optional.
      * @param parameters Query parameters
      * @return A list of Object[] values for each record
      */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({"rawtypes"})
     public List listAsObjects(String sql, Integer maxResults, Map<String, Object> parameters) {
 
         Query query = getEntityManager().createNativeQuery(sql);
@@ -1326,7 +1324,7 @@ public class NativePersistenceService extends BaseService {
      */
     public EntityManager getEntityManager() {
         return emWrapper.getEntityManager();
-        
+
         // Original comment: RE #5414 SQL request to create a new CT on second tenant issue
         //return entityManagerProvider.getEntityManager().getEntityManager();
     }
@@ -1609,19 +1607,19 @@ public class NativePersistenceService extends BaseService {
 
     /**
      * Add a DB schema name to the table if not using a main provider
-     * 
+     *
      * @param tableName DB table name
      * @return DB Table name prefixed with a schema name
      */
     public String addCurrentSchema(String tableName) {
-    	String currentproviderCode = CurrentUserProvider.getCurrentTenant();
+        String currentproviderCode = CurrentUserProvider.getCurrentTenant();
         return addCurrentSchema(tableName, currentproviderCode);
     }
 
     /**
      * Add a DB schema name to the table if not using a main provider
-     * 
-     * @param tableName DB table name
+     *
+     * @param tableName    DB table name
      * @param providerCode Provider code
      * @return DB Table name prefixed with a schema name
      */
@@ -1654,60 +1652,60 @@ public class NativePersistenceService extends BaseService {
     }
 
     public QueryBuilder generatedAdvancedQuery(ReportQuery reportQuery) {
-    	
-    	Class<?> entityClass = GenericHelper.getEntityClass(reportQuery.getTargetEntity());
+
+        Class<?> entityClass = GenericHelper.getEntityClass(reportQuery.getTargetEntity());
         GenericRequestMapper genericRequestMapper = new GenericRequestMapper(entityClass, PersistenceServiceHelper.getPersistenceService());
         GenericPagingAndFiltering genericPagingAndFilter = buildGenericPagingAndFiltering(reportQuery);
         PaginationConfiguration searchConfig = genericRequestMapper.mapTo(genericPagingAndFilter);
         searchConfig.setQueryReportQuery(true);
         QueryBuilder qb;
-    	List<String> genericFields = (List<String>) reportQuery.getAdvancedQuery().getOrDefault("genericFields", new ArrayList<>());
-		if(isAggregationQueries(genericPagingAndFilter.getGenericFields())){
-    		searchConfig.setFetchFields(genericFields);
-    		qb = this.getAggregateQuery(entityClass.getCanonicalName(), searchConfig, null);
-    	} else if(isCustomFieldQuery(genericPagingAndFilter.getGenericFields())){
-    		searchConfig.setFetchFields(genericFields);
-    		qb = this.getQuery(entityClass.getCanonicalName(), searchConfig, null);
-    	} else {
-    		qb = PersistenceServiceHelper.getPersistenceService(entityClass, searchConfig).listQueryBuilder(searchConfig);
-    		String fieldsToRetrieve = !genericFields.isEmpty() ? retrieveFields(genericFields, null) : "";
-    		if(!fieldsToRetrieve.isBlank()) {
-    			qb.setQ(new StringBuilder("select " + buildFields(fieldsToRetrieve, "") + " ").append(qb.getSqlStringBuffer()));
-    		}
-    	}
+        List<String> genericFields = (List<String>) reportQuery.getAdvancedQuery().getOrDefault("genericFields", new ArrayList<>());
+        if (isAggregationQueries(genericPagingAndFilter.getGenericFields())) {
+            searchConfig.setFetchFields(genericFields);
+            qb = this.getAggregateQuery(entityClass.getCanonicalName(), searchConfig, null);
+        } else if (isCustomFieldQuery(genericPagingAndFilter.getGenericFields())) {
+            searchConfig.setFetchFields(genericFields);
+            qb = this.getQuery(entityClass.getCanonicalName(), searchConfig, null);
+        } else {
+            qb = PersistenceServiceHelper.getPersistenceService(entityClass, searchConfig).listQueryBuilder(searchConfig);
+            String fieldsToRetrieve = !genericFields.isEmpty() ? retrieveFields(genericFields, null) : "";
+            if (!fieldsToRetrieve.isBlank()) {
+                qb.setQ(new StringBuilder("select " + buildFields(fieldsToRetrieve, "") + " ").append(qb.getSqlStringBuffer()));
+            }
+        }
 
-    	return qb;
+        return qb;
     }
 
     private GenericPagingAndFiltering buildGenericPagingAndFiltering(ReportQuery reportQuery) {
-		Builder builder = ImmutableGenericPagingAndFiltering.builder()
-				.filters((Map<String, Object>) reportQuery.getAdvancedQuery().getOrDefault("filters", new HashMap<>()))
-				.groupBy((List<String>) reportQuery.getAdvancedQuery().getOrDefault("groupBy", new ArrayList<>()))
-				.nestedEntities((List<String>) reportQuery.getAdvancedQuery().getOrDefault("nestedEntities", new ArrayList<>()))
-				.genericFields((List<String>) reportQuery.getAdvancedQuery().getOrDefault("genericFields", new ArrayList<>()))
-				.having((List<String>) reportQuery.getAdvancedQuery().getOrDefault("having", new ArrayList<>()));
-    	String sortBy = (String) reportQuery.getAdvancedQuery().get("sortBy");
-    	if(org.meveo.commons.utils.StringUtils.isNotBlank(sortBy)) {
-    		builder.sortBy(sortBy);
-    	}
-    	String sortOrder = (String) reportQuery.getAdvancedQuery().get("sortOrder");
-    	if(org.meveo.commons.utils.StringUtils.isNotBlank(sortOrder)) {
-    		builder.sortOrder(sortOrder);
-    	}
-    	
-		return builder.build();
-    	
+        Builder builder = ImmutableGenericPagingAndFiltering.builder()
+                .filters((Map<String, Object>) reportQuery.getAdvancedQuery().getOrDefault("filters", new HashMap<>()))
+                .groupBy((List<String>) reportQuery.getAdvancedQuery().getOrDefault("groupBy", new ArrayList<>()))
+                .nestedEntities((List<String>) reportQuery.getAdvancedQuery().getOrDefault("nestedEntities", new ArrayList<>()))
+                .genericFields((List<String>) reportQuery.getAdvancedQuery().getOrDefault("genericFields", new ArrayList<>()))
+                .having((List<String>) reportQuery.getAdvancedQuery().getOrDefault("having", new ArrayList<>()));
+        String sortBy = (String) reportQuery.getAdvancedQuery().get("sortBy");
+        if (org.meveo.commons.utils.StringUtils.isNotBlank(sortBy)) {
+            builder.sortBy(sortBy);
+        }
+        String sortOrder = (String) reportQuery.getAdvancedQuery().get("sortOrder");
+        if (org.meveo.commons.utils.StringUtils.isNotBlank(sortOrder)) {
+            builder.sortOrder(sortOrder);
+        }
+
+        return builder.build();
+
     }
 
     public boolean isAggregationField(String field) {
         return field.startsWith("SUM(") || field.startsWith("COUNT(") || field.startsWith("AVG(")
                 || field.startsWith("MAX(") || field.startsWith("MIN(") || field.startsWith("COALESCE(SUM(");
     }
-    
+
     private boolean isCustomField(String field) {
         return field.contains("->>");
     }
-    
+
     public boolean isCustomFieldQuery(Set<String> genericFields) {
         return genericFields.stream()
                 .filter(genericField -> isCustomField(genericField))
@@ -1724,7 +1722,7 @@ public class NativePersistenceService extends BaseService {
 
     /**
      * Refresh native table field to data type mapping. Used in NativePersistenceService to determine a field data type when caching is enabled.
-     * 
+     *
      * @param tableName Table name to refresh mapping for. Optional. If not provided, mapping for all tables will be refreshed.
      */
     public void refreshTableFieldMapping(String tableName) {
@@ -1767,7 +1765,7 @@ public class NativePersistenceService extends BaseService {
 
     /**
      * Check if event of a given type is enabled for a given table
-     * 
+     *
      * @param tableName Table name to check
      * @param eventType Event type
      * @return True if events of such event type exist for a given table
@@ -1821,8 +1819,6 @@ public class NativePersistenceService extends BaseService {
                             .append(sublist.stream().map(String::valueOf).collect(joining(",")))
                             .append(")");
                     updated.addAndGet(getEntityManager().createQuery(updateQuery.toString()).executeUpdate());
-                    getEntityManager().flush();
-                    getEntityManager().clear();
                 }
             });
         }

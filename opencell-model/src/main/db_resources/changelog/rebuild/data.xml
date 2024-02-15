@@ -13032,8 +13032,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
                 "UpdateHugeEntityJob_entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
                 "UpdateHugeEntityJob_fieldsToUpdate":[{"string": "status='TO_RERATE'"}],
                 "UpdateHugeEntityJob_defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
-                "UpdateHugeEntityJob_selectLimit":[{"long":1000000}],
-                "UpdateHugeEntityJob_updateChunk":[{"long":32767}],
+                "UpdateHugeEntityJob_selectFetchSize":[{"long":1000000}],
+                "UpdateHugeEntityJob_updateChunkSize":[{"long":32767}],
                 "UpdateHugeEntityJob_isPessimisticUpdateLock":[{"boolean":false}],
                 "UpdateHugeEntityJob_emailTemplate": [{"entity": {"code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
                 }]]></column>

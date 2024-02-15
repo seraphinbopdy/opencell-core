@@ -17,35 +17,10 @@
  */
 package org.meveo.service.billing.impl;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-import static org.meveo.commons.utils.NumberUtils.round;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
 import com.google.common.collect.Lists;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.InsufficientBalanceException;
-import org.meveo.admin.job.ReRatingJob;
 import org.meveo.api.dto.billing.WalletOperationDto;
 import org.meveo.cache.WalletCacheContainerProvider;
 import org.meveo.commons.utils.QueryBuilder;
@@ -91,6 +66,27 @@ import org.meveo.service.catalog.impl.RecurringChargeTemplateService;
 import org.meveo.service.catalog.impl.TaxService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.filter.FilterService;
+
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static java.util.Collections.emptyList;
+import static org.meveo.commons.utils.NumberUtils.round;
 
 /**
  * Service class for WalletOperation entity
@@ -1071,16 +1067,4 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
                 .setParameter("walletOperationIds", walletOperationsIds)
                 .getResultList();
     }
-
-    /**
-     * Mark a multiple Wallet operations to rerate
-     *
-     * @param updateQuery the update query which mark Wallet operations to rerate
-     * @param ids         the ids of Wallet operations to be marked
-     * @return the number of updated Wallet operations
-     */
-    public int markWoToRerate(StringBuilder updateQuery, List<Long> ids) {
-        return nativePersistenceService.update(updateQuery, ids);
-    }
-
 }

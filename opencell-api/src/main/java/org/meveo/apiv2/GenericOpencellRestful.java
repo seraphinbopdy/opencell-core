@@ -103,7 +103,6 @@ import org.meveo.apiv2.ordering.resource.product.ProductResourceImpl;
 import org.meveo.apiv2.payments.resource.PaymentPlanResourceImpl;
 import org.meveo.apiv2.payments.resource.PaymentResourceImpl;
 import org.meveo.apiv2.quote.impl.QuoteOfferResourceImpl;
-import org.meveo.apiv2.rating.impl.WalletOperationResourceImpl;
 import org.meveo.apiv2.refund.RefundResourceImpl;
 import org.meveo.apiv2.report.query.impl.ReportQueryResourceImpl;
 import org.meveo.apiv2.securityDeposit.financeSettings.impl.FinanceSettingsResourceImpl;
@@ -166,7 +165,7 @@ public class GenericOpencellRestful extends Application {
                 OpenOrderTemplateResourceImpl.class, AccountingResourceImpl.class, PaymentPlanResourceImpl.class, MediationSettingResourceImpl.class,
                 OpenOrderQuoteResourceImpl.class, CpqQuoteResourceImpl.class, CommercialOrderResourceImpl.class,
                 InvoiceLinesResourceImpl.class, CpqContractResourceImpl.class, OpenOrderResourceImpl.class,
-                ContactCategoryResourceImpl.class, WalletOperationResourceImpl.class, InvoiceValidationRulesResourceImpl.class, InternationalSettingsResourceImpl.class,
+                ContactCategoryResourceImpl.class, InvoiceValidationRulesResourceImpl.class, InternationalSettingsResourceImpl.class,
                 CustomTableResourceImpl.class, AdvancedSettingsResourceImpl.class, CustomerBalanceResourceImpl.class, FileTypeResourceImpl.class, DocumentCategoryResourceImpl.class, 
                 ElectronicInvoicingResourceImpl.class,PaymentResourceImpl.class, PriceListResourceImpl.class, SellerResourceImpl.class, PriceListLineResourceImpl.class, CatalogPriceListResourceImpl.class,
 				SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,

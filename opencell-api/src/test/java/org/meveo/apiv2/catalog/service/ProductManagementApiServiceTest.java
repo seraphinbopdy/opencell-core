@@ -89,6 +89,8 @@ public class ProductManagementApiServiceTest extends TestCase {
 
 
         when(emWrapper.getEntityManager()).thenReturn(entityManager);
+
+        when(productApi.create(any())).thenReturn(new ProductDto());
         // when
         productManagementApiService.createProductSimpleOneShot(postData);
         

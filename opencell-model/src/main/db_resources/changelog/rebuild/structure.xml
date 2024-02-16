@@ -12024,6 +12024,8 @@
 	            <column name="dunning_collection_plan_status_id" type="bigint"/>
 	            <column name="level_status" type="varchar(255)" />
 	            <column name="dunning_level_id" type="bigint" />
+                <column name="invoice_id" type="bigint" />
+                <column name="customer_account_id" type="bigint" />
 			</createTable>
 
 			<createTable tableName="dunning_action_instance">
@@ -21296,6 +21298,22 @@
 			onUpdate="NO ACTION" />
 	</changeSet>
 
+    <changeSet id="#INTRD-20987_20240216_rebuild_fk" author="zelmeliani">
+		<addForeignKeyConstraint
+			baseTableName="dunning_level_instance"
+			baseColumnNames="invoice_id"
+			constraintName="fk_dunning_level_instance_billing_invoice" 
+ 			referencedTableName="billing_invoice" referencedColumnNames="id" 
+ 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" />
+			
+		<addForeignKeyConstraint
+			baseTableName="dunning_level_instance"
+			baseColumnNames="customer_account_id"
+			constraintName="fk_dunning_level_instance_ar_customer_account" 
+ 			referencedTableName="ar_customer_account" referencedColumnNames="id" 
+ 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" />
+	</changeSet>
+
    	<changeSet id="#20210623-INTRD-277-quoteValidationScript" author="TarikFA."/>
    	<changeSet id="#20210623-INTRD-277-orderAdvacementScript" author="TarikFA."/>
     <changeSet id="#INTRD-13326_20230227" author="zelmeliani" />
@@ -21447,6 +21465,7 @@
     <changeSet id="#INTRD-20127_add_index_attribute_instance" author="a.rouaguebe" />
     <changeSet id="#INTRD-21087_20240208" author="AdilElJaouhari" />
     <changeSet id="#INTRD-21452_20240209" author="TarikFA." />
+    <changeSet id="#INTRD-20987_20240216" author="zelmeliani" />
 
     <!--  !!! PLEASE KEEP THIS CHANGESET AT THE END OF FILE !!! -->
     <changeSet id="#liquibase_hack_structure" author="AbdelmounaimAkadid">

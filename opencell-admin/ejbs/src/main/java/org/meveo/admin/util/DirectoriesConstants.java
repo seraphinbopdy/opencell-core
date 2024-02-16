@@ -47,5 +47,11 @@ public class DirectoriesConstants {
 	 * jasper Root Folder
 	 */
 	public static final String JASPER_ROOT_FOLDER = "jasper";
+	
+	
+	/**
+	 * jasper Root Folder
+	 */
+	public static final String INVOICE_WRITEOF_ARCHIVE_ROOT_FOLDER = "archives";
 
 }

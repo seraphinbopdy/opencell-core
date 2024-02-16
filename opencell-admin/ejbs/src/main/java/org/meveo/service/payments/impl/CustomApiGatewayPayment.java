@@ -207,6 +207,7 @@ public class CustomApiGatewayPayment implements GatewayPaymentInterface {
         scriptContext.put(PaymentScript.CONTEXT_TOKEN, paymentToken);
         scriptContext.put(PaymentScript.CONTEXT_AMOUNT_CTS, ctsAmount);
         scriptContext.put(PaymentScript.CONTEXT_ADDITIONAL_INFOS, additionalParams);
+        scriptContext.put(PaymentScript.RESULT_PAYMENT_STATUS, PaymentStatusEnum.ACCEPTED);
 
         paymentScriptInterface.doPaymentSepa(scriptContext);
 

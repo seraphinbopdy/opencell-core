@@ -9440,41 +9440,6 @@
         </insert>                   
     </changeSet>
 
-    <changeSet id="#INTRD-292_20210816" author="HatimOUDAD">
-        <insert tableName="journal">
-            <column name="id" valueNumeric="-1"/>
-            <column name="version" valueNumeric="0"/>
-            <column name="created" valueDate="2021-08-16 00:04:19.913"/>
-            <column name="code" value="SAL"/>
-            <column name="description" value="Sales Journal"/>
-            <column name="creator" value="OPENCELL.ADMIN"/>
-        </insert>
-        <insert tableName="journal">
-            <column name="id" valueNumeric="-2"/>
-            <column name="version" valueNumeric="0"/>
-            <column name="created" valueDate="2021-08-16 00:04:19.913"/>
-            <column name="code" value="BAN"/>
-            <column name="description" value="Bank Journal"/>
-            <column name="creator" value="OPENCELL.ADMIN"/>
-        </insert>
-        <insert tableName="journal">
-            <column name="id" valueNumeric="-3"/>
-            <column name="version" valueNumeric="0"/>
-            <column name="created" valueDate="2021-08-16 00:04:19.913"/>
-            <column name="code" value="MSC"/>
-            <column name="description" value="Miscellaneous Journal"/>
-            <column name="creator" value="OPENCELL.ADMIN"/>
-        </insert>
-        <insert tableName="journal">
-            <column name="id" valueNumeric="-4"/>
-            <column name="version" valueNumeric="0"/>
-            <column name="created" valueDate="2021-08-16 00:04:19.913"/>
-            <column name="code" value="TAX"/>
-            <column name="description" value="Tax Journal"/>
-            <column name="creator" value="OPENCELL.ADMIN"/>
-        </insert>
-    </changeSet>
-
     <changeSet author="AndriusKarpavicius" id="rebuild-data-occTemplates">
         <insert tableName="ar_occ_template">
             <column name="id" valueNumeric="-25" />
@@ -9537,6 +9502,7 @@
         </insert> 
 	</changeSet>
 
+    <changeSet id="#INTRD-292_20210816" author="HatimOUDAD" />
     <changeSet id="#540_563_20210607" author="TarikFA."/>
     <changeSet id="#5890-2021-02-02_42" author="ZBariki" />
     <changeSet id="#5921-2021-02-02_43" author="ZBariki" />

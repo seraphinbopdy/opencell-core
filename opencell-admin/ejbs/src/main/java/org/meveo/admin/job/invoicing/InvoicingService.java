@@ -63,6 +63,8 @@ import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.RejectedBillingAccountService;
 import org.meveo.service.billing.impl.ServiceSingleton;
+import org.meveo.service.catalog.impl.DiscountPlanItemService;
+import org.meveo.service.catalog.impl.DiscountPlanService;
 import org.meveo.service.catalog.impl.InvoiceSubCategoryService;
 import org.meveo.service.script.billing.TaxScriptService;
 import com.google.common.collect.Lists;
@@ -94,6 +96,11 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private Map<Long, TradingLanguage> tradingLanguages=new TreeMap<Long, TradingLanguage>();
     private Map<Long, DiscountPlan> discountPlans=new TreeMap<Long, DiscountPlan>();
     private Map<String, String> descriptionMap = new HashMap<>();
+	
+	@Inject
+	private DiscountPlanService discountPlanService;
+	@Inject
+	private DiscountPlanItemService discountPlanItemService;
     
 	/** Creates the aggregates and invoice async. group of BAs at a time in a separate transaction.
 	 * 
@@ -372,7 +379,16 @@ public class InvoicingService extends PersistenceService<Invoice> {
         if (discountPlanInstances != null && !discountPlanInstances.isEmpty()) {
             applicableDiscountPlanItems.addAll(getApplicableDiscountPlanItems(billingAccountDetailsItem, discountPlanInstances,invoice));
         }
-        return applicableDiscountPlanItems;
+		List<DiscountPlanItem> getApplicableDiscountPlanItems = new ArrayList<>();
+	    applicableDiscountPlanItems.forEach(discountPlanItem -> {
+			BillingAccount billingAccount = invoice.getBillingAccount();
+		    if(invoice.getDiscountPlan()!=null && discountPlanService.isDiscountPlanApplicable(billingAccount, discountPlanItem.getDiscountPlan(), invoice.getInvoiceDate())) {
+			    List<DiscountPlanItem> discountItems = discountPlanItemService.getApplicableDiscountPlanItems(billingAccount, discountPlanItem.getDiscountPlan(),
+					    null, null, null, null, invoice.getInvoiceDate());
+			    getApplicableDiscountPlanItems.addAll(discountItems);
+		    }
+	    });
+        return getApplicableDiscountPlanItems;
     }
     private List<DiscountPlanInstance> subscriptionDiscountPlanInstancesfromBillingAccount(BillingAccount billingAccount) {
         return billingAccount.getUsersAccounts().stream().map(userAccount -> userAccount.getSubscriptions())

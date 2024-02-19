@@ -923,5 +923,16 @@ public class AccountOperationService extends PersistenceService<AccountOperation
                 .setParameter("RA_STATUS", Arrays.asList(statuses))
                 .getResultList();
     }
-    
+
+    /**
+     * Find Account operation by externalId
+     *
+     * @param externalId AO externalId
+     * @return A list of {@link AccountOperation} objects matching the specified externalId.
+     */
+    public List<AccountOperation> findByExternalId(String externalId) {
+        return getEntityManager().createNamedQuery("RejectedPayment.findByExternalId", AccountOperation.class)
+                .setParameter("externalId", externalId)
+                .getResultList();
+    }
 }

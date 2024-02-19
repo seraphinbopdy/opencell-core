@@ -1093,4 +1093,18 @@ public class PaymentService extends PersistenceService<Payment> {
         	paymentRejectionActionReportService.create(actionReport);
         });
 	}
+
+    /**
+     * Find Account operation by externalId and paymentGateway
+     *
+     * @param externalId AO externalId
+     * @param paymentGatewayCode paymentGateway code
+     * @return A list of {@link AccountOperation} objects matching the specified externalId.
+     */
+    public List<Payment> findByExternalIdAndPaymentGateWay(String externalId, String paymentGatewayCode) {
+        return getEntityManager().createNamedQuery("RejectedPayment.findByExternalIdAndPaymentGateWay", Payment.class)
+                .setParameter("externalId", externalId)
+                .setParameter("paymentGatewayCode", paymentGatewayCode)
+                .getResultList();
+    }
 }

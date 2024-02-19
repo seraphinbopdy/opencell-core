@@ -24,6 +24,7 @@ import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
 import org.meveo.apiv2.payments.RejectionGroup;
+import org.meveo.apiv2.payments.RejectionPayment;
 import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.refund.CardRefund;
 import org.meveo.model.payments.CreditCardTypeEnum;
@@ -313,6 +314,21 @@ public class PaymentResourceImpl implements PaymentResource {
                         + updated.getId() + ", \"code\": \""
                         + updated.getCode() + "\", \"newSequence\": "
                         + updated.getSequence() + "}")
+                .build();
+    }
+
+    /**
+     * Create rejection payment
+     *
+     * @param rejectionPayment rejection payment input
+     */
+    @Override
+    public Response createRejectionPayment(RejectionPayment rejectionPayment) {
+        RejectionPayment created = paymentApi.createRejectionPayment(rejectionPayment);
+        return ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Rejection payment successfully created\"},\"id\":"
+                        + created.getId() + ", \"code\": \""
+                        + created.getCode() + "\"}")
                 .build();
     }
 }

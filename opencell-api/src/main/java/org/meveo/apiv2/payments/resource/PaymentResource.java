@@ -19,6 +19,7 @@ import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
 import org.meveo.apiv2.payments.RejectionGroup;
+import org.meveo.apiv2.payments.RejectionPayment;
 import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.refund.CardRefund;
 
@@ -247,9 +248,21 @@ public interface PaymentResource {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Rejection action sequence successfully updated"),
                     @ApiResponse(responseCode = "404", description = "Rejection action does not exist"),
-                    @ApiResponse(responseCode = "400", description = "Rejection action sequence update failed")
+                    @ApiResponse(responseCode = "400", description = "Rejection payment creation failed")
             })
     Response updateActionSequence(@Parameter(description = "Rejection action id", required = true)
                                   @PathParam("id") Long actionId,
                                   @Parameter(required = true) SequenceAction sequenceAction);
+
+    @POST
+    @Path("/rejection")
+    @Operation(summary = "Create rejection payment",
+            tags = {"RejectionPayment"},
+            description = "Create rejection payment",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Rejection payment successfully updated"),
+                    @ApiResponse(responseCode = "404", description = "Rejection action does not exist"),
+                    @ApiResponse(responseCode = "500", description = "Rejection action sequence update failed")
+            })
+    Response createRejectionPayment(@Parameter(required = true) RejectionPayment rejectionPayment);
 }

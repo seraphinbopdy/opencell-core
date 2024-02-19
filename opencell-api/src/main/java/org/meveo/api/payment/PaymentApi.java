@@ -45,6 +45,7 @@ import javax.interceptor.Interceptors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
@@ -82,6 +83,7 @@ import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
 import org.meveo.apiv2.payments.RejectionCodesExportResult;
 import org.meveo.apiv2.payments.RejectionGroup;
+import org.meveo.apiv2.payments.RejectionPayment;
 import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.payments.resource.RejectionActionMapper;
 import org.meveo.apiv2.payments.resource.RejectionCodeMapper;
@@ -108,6 +110,8 @@ import org.meveo.model.payments.PaymentRejectionCode;
 import org.meveo.model.payments.PaymentRejectionCodesGroup;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.RecordedInvoice;
+import org.meveo.model.payments.RejectedPayment;
+import org.meveo.model.payments.RejectedType;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.payments.impl.AccountOperationService;
@@ -712,6 +716,7 @@ public class PaymentApi extends BaseApi {
 	 */
 	public RejectionCode updatePaymentRejectionCode(Long id, RejectionCode resource) {
 		PaymentGateway paymentGateway = null;
+		boolean checkCodeGatewayConstraint = false;
 		if (resource.getPaymentGateway() != null) {
 			paymentGateway = loadPaymentGateway(resource.getPaymentGateway());
 			if (paymentGateway == null) {
@@ -720,16 +725,22 @@ public class PaymentApi extends BaseApi {
 		}
 		PaymentRejectionCode rejectionCodeToUpdate = ofNullable(rejectionCodeService.findById(id))
 				.orElseThrow(() -> new NotFoundException(PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE));
-		if(resource.getCode() != null || paymentGateway != null) {
-			rejectionCodeService.findByCodeAndPaymentGateway(resource.getCode() != null ? resource.getCode() : rejectionCodeToUpdate.getCode(),
-							paymentGateway != null ? paymentGateway.getId() : rejectionCodeToUpdate.getPaymentGateway().getId())
+		if(resource.getCode() != null && !resource.getCode().equals(rejectionCodeToUpdate.getCode())) {
+			checkCodeGatewayConstraint = true;
+			rejectionCodeToUpdate.setCode(resource.getCode());
+		}
+		ofNullable(resource.getDescription()).ifPresent(rejectionCodeToUpdate::setDescription);
+		ofNullable(resource.getDescriptionI18n()).ifPresent(rejectionCodeToUpdate::setDescriptionI18n);
+		if (paymentGateway != null && rejectionCodeToUpdate.getPaymentGateway() != null
+				&& !paymentGateway.getId().equals(rejectionCodeToUpdate.getPaymentGateway().getId())) {
+			checkCodeGatewayConstraint = true;
+			rejectionCodeToUpdate.setPaymentGateway(paymentGateway);
+		}
+		if(checkCodeGatewayConstraint) {
+			rejectionCodeService.findByCodeAndPaymentGateway(rejectionCodeToUpdate.getCode(), rejectionCodeToUpdate.getPaymentGateway().getId())
 					.ifPresent(rejectionCode -> { throw new BusinessApiException(format("Rejection code with code %s already exists in gateway %s",
 							rejectionCode.getCode(), rejectionCode.getPaymentGateway().getCode()));});
 		}
-		ofNullable(resource.getCode()).ifPresent(rejectionCodeToUpdate::setCode);
-		ofNullable(resource.getDescription()).ifPresent(rejectionCodeToUpdate::setDescription);
-		ofNullable(resource.getDescriptionI18n()).ifPresent(rejectionCodeToUpdate::setDescriptionI18n);
-		ofNullable(paymentGateway).ifPresent(rejectionCodeToUpdate::setPaymentGateway);
 
 		return rejectionCodeMapper.toResource(rejectionCodeService.update(rejectionCodeToUpdate));
 	}
@@ -998,8 +1009,8 @@ public class PaymentApi extends BaseApi {
 								rejectionCodeResource.getId() != null
                                 ? rejectionCodeResource.getId() : rejectionCodeResource.getCode())));
 				if(rejectionCodeEntity.getPaymentRejectionCodesGroup() != null) {
-					throw new BusinessApiException(format("Rejection code %s already associated with paymentRejectionGroup %s",
-							rejectionCodeEntity.getCode(), rejectionCodeEntity.getPaymentRejectionCodesGroup().getCode()));
+					throw new BusinessApiException(format("Rejection code %s can't be added to several rejection sets",
+							rejectionCodeEntity.getCode()));
 				}
 				rejectionCodeEntity.setPaymentRejectionCodesGroup(rejectionCodesGroupEntity);
 				paymentRejectionCodes.add(rejectionCodeEntity);
@@ -1149,5 +1160,79 @@ public class PaymentApi extends BaseApi {
 		paymentRejectionActionService.update(actionToUpdate);
 		paymentRejectionActionService.update(actionToSwitch);
 		return rejectionActionMapper.toResource(actionToUpdate);
+	}
+
+	/**
+	 * Create rejection payment
+	 *
+	 * @param rejectionPayment rejection payment input
+	 * @return RejectionPayment
+	 */
+	public RejectionPayment createRejectionPayment(RejectionPayment rejectionPayment) {
+		if (rejectionPayment.getId() == null
+				&& StringUtils.isBlank(rejectionPayment.getExternalPaymentId())) {
+			throw new MissingParameterException("Id or externalId are required");
+		}
+		Payment payment = rejectionPayment.getId() != null
+				? loadRejectionPaymentById(rejectionPayment) : loadRejectionPaymentByExternalId(rejectionPayment);
+		if (payment.getPaymentGateway() == null && isBlank(rejectionPayment.getPaymentGatewayCode())) {
+			throw new BadRequestException("Payment has no gateway. Please provide a paymentGatewayCode");
+		}
+		PaymentRejectionCode paymentRejectionCode = rejectionCodeService.findByCode(rejectionPayment.getRejectionCode());
+		ofNullable(paymentRejectionCode)
+				.orElseThrow(() -> new NotFoundException("Rejection code "
+						+ rejectionPayment.getRejectionCode() + " not found for gateway[code=" + rejectionPayment.getPaymentGatewayCode()));
+		if(payment.getPaymentGateway() == null) {
+			payment.setPaymentGateway(paymentRejectionCode.getPaymentGateway());
+		}
+		RejectedPayment rejectedPayment = new RejectedPayment();
+		rejectedPayment.setRejectedType(RejectedType.M);
+		rejectedPayment.setBankReference(payment.getBankReference());
+		rejectedPayment.setRejectedDate(new Date());
+		accountOperationService.create(rejectedPayment);
+		if(!rejectionPayment.getSkipRejectionActions()) {
+			paymentService.createRejectionActions(rejectedPayment);
+		}
+		return RejectionPayment.from(rejectedPayment);
+	}
+
+	private Payment loadRejectionPaymentById(RejectionPayment rejectionPayment) {
+		AccountOperation accountOperation
+				= accountOperationService.findById(rejectionPayment.getId());
+		if (accountOperation == null) {
+			throw new NotFoundException("Payment[id=" + rejectionPayment.getId() + "] does not exist");
+		}
+		if (!(accountOperation instanceof Payment)) {
+			throw new BadRequestException("AccountOperation[id=" + rejectionPayment.getId() + "] is not a payment");
+		} else {
+			return (Payment) accountOperation;
+		}
+	}
+
+	private Payment loadRejectionPaymentByExternalId(RejectionPayment rejectionPayment) {
+		if (!isBlank(rejectionPayment.getPaymentGatewayCode())) {
+			List<Payment> payments = paymentService.
+					findByExternalIdAndPaymentGateWay(rejectionPayment.getExternalPaymentId(), rejectionPayment.getPaymentGatewayCode());
+			if (payments == null || payments.isEmpty()) {
+				throw new NotFoundException("Payment[externalPaymentId=" + rejectionPayment.getExternalPaymentId()
+						+ "}, paymentGateway=" + rejectionPayment.getPaymentGatewayCode() + "] does not exists");
+			}
+			return payments.get(0);
+		} else {
+			List<AccountOperation> accountOperations =
+					accountOperationService.findByExternalId(rejectionPayment.getExternalPaymentId());
+			if (accountOperations == null || accountOperations.isEmpty()) {
+				throw new NotFoundException("Payment[externalPaymentId=" + rejectionPayment.getExternalPaymentId() + "] does not exist");
+			}
+			if (accountOperations.size() > 1) {
+				throw new BadRequestException("Several payments found with externalPaymentId="
+						+ rejectionPayment.getExternalPaymentId() + ". Please provide either internal id or paymentGatewayCode");
+			}
+			if(!(accountOperations.get(0) instanceof Payment)) {
+				throw new BadRequestException("AccountOperation[externalPaymentId="
+						+ rejectionPayment.getExternalPaymentId() + "] is not a payment");
+			}
+			return (Payment) accountOperations.get(0);
+		}
 	}
 }

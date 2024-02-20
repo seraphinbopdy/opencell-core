@@ -141,7 +141,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
     	final int maxValue = ParamBean.getInstance().getPropertyAsInteger("database.number.of.inlist.limit", reratingService.SHORT_MAX_VALUE);
     	List<List<Long>> subList = partition(reratingTree, maxValue);
     	String lastEDRPartition = tablesPartitioningService.getLastPartitionDateAsString(tablesPartitioningService.EDR_PARTITION_SOURCE);
-		String edrDateCondition = useLastPartition ?  lastEDRPartition == null ? "" : " AND edr.eventDate>'" + lastEDRPartition+"'" : null;
+		String edrDateCondition = useLastPartition && lastEDRPartition != null ? " AND edr.eventDate>'" + lastEDRPartition+"'" : "";
 		subList.forEach(ids -> reratingService.applyMassRerate(ids, useSamePricePlan, jobExecutionResult, edrDateCondition));
 	}
 
@@ -183,5 +183,10 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		Object[] count = (Object[]) entityManager.createNativeQuery("select sum(count_wo), count(id) from " + viewName).getSingleResult();
 		nrOfInitialWOs = count[0] != null ? ((Number) count[0]).longValue() : 0;
 	}
+	
+	@Override
+    protected boolean isProcessItemInNewTx() {
+        return false;
+    }
 
 }

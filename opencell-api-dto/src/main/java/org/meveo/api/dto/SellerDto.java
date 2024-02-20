@@ -88,9 +88,21 @@ public class SellerDto extends BusinessEntityDto {
     private String vatNo;
 
     /**
-     * The seller registration No
+     * The seller registration Numbers
      */
     private Set<RegistrationNumberDto> registrationNumbers;
+
+    /**
+     * The seller registration No
+     */
+    @Deprecated
+    private String registrationNo;
+    
+    /**
+     * The iso ICD Code
+     */
+    @Deprecated
+    private String isoICDCode;
 
     /**
      * A legal text for the seller
@@ -399,6 +411,35 @@ public class SellerDto extends BusinessEntityDto {
      */
     public void setLegalType(String legalType) {
         this.legalType = legalType;
+    }
+    
+    /**
+     * Gets the seller's registration No
+     * @return a registration No
+     *
+     */
+    @Deprecated
+    public String getRegistrationNo() {
+        return registrationNo;
+    }
+
+    /**
+     * Sets the seller's registration No
+     * @param registrationNo  new registration No
+     */
+    @Deprecated
+    public void setRegistrationNo(String registrationNo) {
+        this.registrationNo = registrationNo;
+    }
+    
+    @Deprecated
+    public String getIsoICDCode() {
+        return isoICDCode;
+    }
+
+    @Deprecated
+    public void setIsoICDCode(String isoICDCode) {
+        this.isoICDCode = isoICDCode;
     }
 
     @Override

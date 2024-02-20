@@ -22,6 +22,8 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
 import org.hibernate.type.LongType;
 import org.jgroups.JChannel;
 import org.meveo.admin.async.SynchronizedMultiItemIterator;
@@ -78,21 +80,23 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
      * @param jobInstance             the job instance
      * @param namedQuery              the named query
      * @param updateQuery             the update query
-     * @param updateChunk             the chunk of update query
+     * @param updateChunkSize         the chunk size of update query
      * @param selectQuery             the select query
-     * @param selectLimit             the limit of select query
+     * @param selectFetchSize         the fetch size of select query
+     * @param selectMaxResults        the max results of select query
      * @param isNativeQuery           indicates if the query is native or not
      * @param isPessimisticUpdateLock indicates if all update queries will be run on distinct IDs or whether it doesn't matter.
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, String namedQuery, String updateQuery, Long updateChunk,
-                        String selectQuery, Long selectLimit, Boolean isNativeQuery, Boolean isPessimisticUpdateLock) {
+    public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, String namedQuery, String updateQuery, Long updateChunkSize,
+                        String selectQuery, Long selectFetchSize, Long selectMaxResults, Boolean isNativeQuery, Boolean isPessimisticUpdateLock) {
 
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_NAMED_QUERY, namedQuery);
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_UPDATE_QUERY, updateQuery);
-        jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_UPDATE_CHUNK, updateChunk);
+        jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_UPDATE_CHUNK_SIZE, updateChunkSize);
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_SELECT_QUERY, selectQuery);
-        jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_SELECT_LIMIT, selectLimit);
+        jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_SELECT_FETCH_SIZE, selectFetchSize);
+        jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_SELECT_MAX_RESULTS, selectMaxResults);
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_IS_NATIVE_QUERY, isNativeQuery);
         jobExecutionResult.addJobParam(MassUpdaterJob.PARAM_IS_PESSIMISTIC_UPDATE_LOCK, isPessimisticUpdateLock);
         execute(jobExecutionResult, jobInstance);
@@ -114,8 +118,9 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
         String namedQuery = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_NAMED_QUERY);
         String updateString = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_UPDATE_QUERY);
         String selectQuery = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_SELECT_QUERY);
-        Long selectLimit = (Long) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_SELECT_LIMIT);
-        Long updateChunk = (Long) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_UPDATE_CHUNK);
+        Long selectFetchSize = (Long) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_SELECT_FETCH_SIZE);
+        Long selectMaxResults = (Long) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_SELECT_MAX_RESULTS);
+        Long updateChunk = (Long) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_UPDATE_CHUNK_SIZE);
 
         //Check the mandatory settings for mass update processing
         if (StringUtils.isEmpty(selectQuery) || (StringUtils.isBlank(updateString) && StringUtils.isBlank(namedQuery))) {
@@ -123,8 +128,8 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
             return Optional.empty();
         }
         Long size = ((long) Runtime.getRuntime().availableProcessors()) * Long.valueOf(NativePersistenceService.SHORT_MAX_VALUE);
-        if (selectLimit == null) {
-            selectLimit = size;
+        if (selectFetchSize == null) {
+            selectFetchSize = size;
         }
         updateChunk = (updateChunk != null) ? Math.min(updateChunk, NativePersistenceService.SHORT_MAX_VALUE) : Long.valueOf(NativePersistenceService.SHORT_MAX_VALUE);
 
@@ -140,7 +145,7 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
         }
 
 
-        scrollableResults = getScrollableResult(jobExecutionResult, selectQuery, selectLimit);
+        scrollableResults = getScrollableResult(jobExecutionResult, selectQuery, selectFetchSize, selectMaxResults);
         Long finalUpdateChunk = updateChunk;
         return Optional.of(new SynchronizedMultiItemIterator<>(scrollableResults, -1) {
             long totalItemCount = 0L;
@@ -247,29 +252,40 @@ public class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>> {
      *
      * @param jobExecutionResult the job execution result
      * @param selectQuery        the select query
-     * @param selectLimit        the select limit
+     * @param selectFetchSize    the select fetch size
+     * @param selectMaxResults   the select max results
      * @return the scrollable results
      */
-    public ScrollableResults getScrollableResult(JobExecutionResultImpl jobExecutionResult, String selectQuery, Long selectLimit) {
+    public ScrollableResults getScrollableResult(JobExecutionResultImpl jobExecutionResult, String selectQuery, Long selectFetchSize, Long selectMaxResults) {
         String namedQuery = (String) jobExecutionResult.getJobParam(MassUpdaterJob.PARAM_NAMED_QUERY);
         statelessSession = emWrapper.getEntityManager().unwrap(Session.class).getSessionFactory().openStatelessSession();
+
         if (!StringUtils.isBlank(namedQuery)) {
-            scrollableResults = statelessSession.createNamedQuery(namedQuery)
-                    .setFetchSize(selectLimit.intValue())
+            Query query = statelessSession.createNamedQuery(selectQuery);
+            if (selectMaxResults != null) {
+                query.setMaxResults(selectMaxResults.intValue());
+            }
+            scrollableResults = query.setFetchSize(selectFetchSize.intValue())
                     .setReadOnly(true)
                     .setCacheable(false)
                     .scroll(ScrollMode.FORWARD_ONLY);
         } else {
             if (isNativeQuery(jobExecutionResult)) {
-                scrollableResults = statelessSession.createNativeQuery(selectQuery)
-                        .setFetchSize(selectLimit.intValue())
+                NativeQuery query = statelessSession.createNativeQuery(selectQuery);
+                if (selectMaxResults != null) {
+                    query.setMaxResults(selectMaxResults.intValue());
+                }
+                scrollableResults = query.setFetchSize(selectFetchSize.intValue())
                         .setReadOnly(true)
                         .setCacheable(false)
                         .addScalar("id", new LongType())
                         .scroll(ScrollMode.FORWARD_ONLY);
             } else {
-                scrollableResults = statelessSession.createQuery(selectQuery)
-                        .setFetchSize(selectLimit.intValue())
+                Query query = statelessSession.createQuery(selectQuery);
+                if (selectMaxResults != null) {
+                    query.setMaxResults(selectMaxResults.intValue());
+                }
+                scrollableResults = query.setFetchSize(selectFetchSize.intValue())
                         .setReadOnly(true)
                         .setCacheable(false)
                         .scroll(ScrollMode.FORWARD_ONLY);

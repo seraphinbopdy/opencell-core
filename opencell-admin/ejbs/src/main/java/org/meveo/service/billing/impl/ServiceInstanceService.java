@@ -78,6 +78,7 @@ import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.cpq.AgreementDateSettingEnum;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.enums.PriceVersionDateSettingEnum;
+import org.meveo.model.cpq.offer.OfferComponent;
 import org.meveo.model.payments.PaymentScheduleTemplate;
 import org.meveo.model.persistence.JacksonUtil;
 import org.meveo.model.shared.DateUtils;
@@ -542,10 +543,6 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
         checkServiceAssociatedWithOffer(serviceInstance);
 
-        if (subscription.getStatus() != SubscriptionStatusEnum.ACTIVE) {
-            subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
-        }
-
         if (serviceInstance.getSubscriptionDate() == null) {
             serviceInstance.setSubscriptionDate(new Date());
         }
@@ -644,6 +641,26 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         	String description = StringUtils.isBlank(serviceInstance.getDescription()) ? serviceInstance.getCode() : serviceInstance.getDescription();
             discountPlanService.calculateDiscountplanItems(eligibleFixedDiscountItems, subscription.getSeller(), subscription.getUserAccount().getBillingAccount(), new Date(), serviceInstance.getQuantity(), null , 
             												serviceInstance.getCode(), subscription.getUserAccount().getWallet(), subscription.getOffer(), null, subscription, description, false, null, null, DiscountPlanTypeEnum.PRODUCT);
+        }
+        
+        if(!SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus())) {
+
+            List<String> mandatoryProducts = subscription.getOffer()
+                                                         .getOfferComponents()
+                                                         .stream()
+                                                         .filter(OfferComponent::isMandatory)
+                                                         .map(oc -> oc.getProduct()
+                                                                      .getCode())
+                                                         .collect(Collectors.toList());
+
+            boolean allMandatorySIActive = mandatoryProducts.isEmpty() || subscription.getServiceInstances()
+                                                       .stream()
+                                                       .filter(si -> mandatoryProducts.contains(si.getProductVersion().getProduct().getCode()))
+                                                       .allMatch(si -> InstanceStatusEnum.ACTIVE.equals(si.getStatus()));
+
+            if(allMandatorySIActive) {
+                subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
+            }
         }
         
         return ratingResult;

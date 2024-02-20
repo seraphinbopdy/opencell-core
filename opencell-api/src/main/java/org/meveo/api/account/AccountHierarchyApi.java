@@ -71,8 +71,10 @@ import javax.interceptor.Interceptors;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Creates the customer hierarchy including : - Trading Country - Trading Currency - Trading Language - Customer Brand - Customer Category - Seller - Customer - Customer Account -
@@ -255,7 +257,18 @@ public class AccountHierarchyApi extends BaseApi {
 
         CustomerDto customerDto = new CustomerDto();
         customerDto.setCode(customerCode);
-        customerDto.setRegistrationNumbers(postData.getRegistrationNumbers());
+        
+        Set<RegistrationNumberDto> registrationNumbers = new HashSet<>();
+        if(postData.getRegistrationNumbers() != null) {
+        	registrationNumbers.addAll(postData.getRegistrationNumbers());
+        }
+        if(StringUtils.isNotBlank(postData.getRegistrationNo())) {
+	        RegistrationNumberDto registrationNumberDto = new RegistrationNumberDto();
+	        registrationNumberDto.setRegistrationNo(postData.getRegistrationNo());
+	        registrationNumbers.add(registrationNumberDto);
+        }
+        
+        customerDto.setRegistrationNumbers(registrationNumbers);
         customerDto.setVatNo(postData.getVatNo());
         customerDto.setJobTitle(postData.getJobTitle());
 

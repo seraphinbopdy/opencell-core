@@ -247,13 +247,29 @@ public class BillingAccountDto extends AccountDto {
     @Schema(description = "The primary contact")
     private String primaryContact;
 
+    /**
+     * The iso ICD Code
+     */
+    @Deprecated
+    @Schema(description = "The iso ICD Code")
+    private String isoICDCode;
+    
     /** The exemption reason. */
     @Schema(description = "The exemption reason")
     private String exemptionReason;
 
     @Schema(description = "The default Price List")
     private String priceListCode;
+   
+    @Deprecated
+    public String getIsoICDCode() {
+        return isoICDCode;
+    }
 
+    public void setIsoICDCode(String isoICDCode) {
+        this.isoICDCode = isoICDCode;
+    }
+    	
     public Boolean isThresholdPerEntity() {
 		return thresholdPerEntity;
 	}

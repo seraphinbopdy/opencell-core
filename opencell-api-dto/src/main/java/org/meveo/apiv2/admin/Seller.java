@@ -53,6 +53,9 @@ public interface Seller extends Resource{
 	@Nullable
 	TitleDto getLegalType();
 	
+ 	@Nullable
+	String getRegistrationNo();
+ 	
 	@Nullable
 	Set<RegistrationNumberDto> getRegistrationNumbers();
 	@Nullable

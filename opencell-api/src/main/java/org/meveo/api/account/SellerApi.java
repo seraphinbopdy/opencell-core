@@ -36,6 +36,7 @@ import org.meveo.api.security.filter.ListFilter;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.api.security.parameter.ObjectPropertyParser;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.RegistrationNumber;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.*;
 import org.meveo.model.crm.BusinessAccountModel;
@@ -284,6 +285,20 @@ public class SellerApi extends AccountEntityApi {
         }
         if (postData.getVatNo() != null) {
             seller.setVatNo(postData.getVatNo());
+        }
+        
+        if (StringUtils.isNotBlank(postData.getRegistrationNo())) {
+        	RegistrationNumber registrationNumber = new RegistrationNumber();
+        	registrationNumber.setRegistrationNo(postData.getRegistrationNo());
+            
+            if (StringUtils.isNotBlank(postData.getIsoICDCode())) {            
+                IsoIcd isoIcd = isoIcdService.findByCode(postData.getIsoICDCode());
+                if (isoIcd == null) {
+                    throw new EntityDoesNotExistsException(IsoIcd.class, postData.getIsoICDCode());
+                }           
+                registrationNumber.setIsoIcd(isoIcd);
+            }
+            seller.getRegistrationNumbers().add(registrationNumber);
         }
         
         if (postData.getLegalText() != null) {

@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -50,7 +51,9 @@ import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.cpq.Attribute;
+import org.meveo.model.cpq.ProductVersionAttribute;
 import org.meveo.model.cpq.QuoteAttribute;
+import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.offer.QuoteOffer;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.quote.QuoteProduct;
@@ -68,7 +71,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
@@ -2003,6 +2005,7 @@ public class MeveoFunctionMapper extends FunctionMapper {
     	Optional<AttributeInstance> attributInstance=serviceInstance.getAttributeInstances().stream().filter(qt -> qt.getAttribute().getCode().equals(attributeCode)).findFirst();
     	
     	if(attribute.getAttributeType()!=null && attributInstance.isPresent()) {
+			Object defaultValue = getDefaultValue(attributeCode, attribute, attribute.getAttributeType());
     		switch (attribute.getAttributeType()) {
 			case TOTAL :
 			case COUNT :
@@ -2015,7 +2018,8 @@ public class MeveoFunctionMapper extends FunctionMapper {
 				if(NumberUtils.isCreatable(attributInstance.get().toString().trim())) {
 					return Double.valueOf(attributInstance.get().toString().trim());
 				}
-				
+				// from attribute product version attribute loop from attribute product attribute
+				if (defaultValue != null) return defaultValue;
 				break;
 				
 			case LIST_MULTIPLE_TEXT:
@@ -2023,7 +2027,9 @@ public class MeveoFunctionMapper extends FunctionMapper {
 			case TEXT:	
 				if(!StringUtils.isBlank(attributInstance.get().getStringValue())) {
 					return attributInstance.get().getStringValue();  
-				}break;
+				}
+				if (defaultValue != null) return defaultValue;
+				break;
 				
 			case EXPRESSION_LANGUAGE :
 				String value=null;
@@ -2042,11 +2048,15 @@ public class MeveoFunctionMapper extends FunctionMapper {
 			case DATE:
 				if(attributInstance.get().getDateValue()!=null) {
 					return attributInstance.get().getDateValue();  
-				}break;
+				}
+				if (defaultValue != null) return defaultValue;
+				break;
 			case BOOLEAN:
 				if(attributInstance.get().getBooleanValue()!=null) {
 					return attributInstance.get().getBooleanValue();  
-				}break;
+				}
+				if (defaultValue != null) return defaultValue;
+				break;
 			default:
 				break;  
 			}
@@ -2054,9 +2064,48 @@ public class MeveoFunctionMapper extends FunctionMapper {
     	
     	return null;
     }
-    
-    
-    public static Object getSubscriptionProductAttributeValue(Subscription subscription,String productCode,String attributeCode) { 
+	
+	private static Object getDefaultValue(String attributeCode, Attribute attribute, AttributeTypeEnum attributeType) {
+		Object resultValue = null;
+		for(ProductVersionAttribute productVersionAttribute : attribute.getProductVersionAttributes()) {
+			if(productVersionAttribute.getAttribute().getCode().equals(attributeCode)) {
+				if(productVersionAttribute.getDefaultValue()!=null) {
+					resultValue =  productVersionAttribute.getDefaultValue();
+				}
+			}
+		}
+		switch (attributeType){
+			case TOTAL :
+			case COUNT :
+			case NUMERIC :
+			case INTEGER:
+			case LIST_NUMERIC:
+				return  Double.valueOf(resultValue.toString());
+			case LIST_MULTIPLE_TEXT:
+			case LIST_TEXT:
+			case TEXT:
+				return resultValue;
+			case DATE:
+				List<String> dateFormats = Arrays.asList("MM/dd/yyyy", "dd/MM/yyyy", "yyyy/MM/dd", "MM/dd-yyyy", "dd-MM-yyyy", "yyyy-MM-dd");
+				Date date = null;
+				for(String dateFormat : dateFormats) {
+					date = parseDate(resultValue.toString(), dateFormat);
+					if(date != null) {
+						return date;
+					}
+				}
+				if(date == null)
+					date = parseDate(resultValue.toString(), null);
+				return date;
+			case BOOLEAN:
+				return Boolean.valueOf(resultValue.toString());
+			default:
+				return null;
+		}
+	}
+	
+	
+	public static Object getSubscriptionProductAttributeValue(Subscription subscription,String productCode,String attributeCode) {
     	Optional<AttributeInstance> attributInstance=Optional.empty();
     	Attribute  attribute =getAttributeService().findByCode(attributeCode);
     	if(attribute == null)

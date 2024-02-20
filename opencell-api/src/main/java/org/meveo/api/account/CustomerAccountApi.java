@@ -37,6 +37,7 @@ import org.meveo.api.dto.GDPRInfoDto;
 import org.meveo.api.dto.account.CreditCategoryDto;
 import org.meveo.api.dto.account.CustomerAccountDto;
 import org.meveo.api.dto.account.CustomerAccountsDto;
+import org.meveo.api.dto.account.RegistrationNumberDto;
 import org.meveo.api.dto.account.TransferCustomerAccountDto;
 import org.meveo.api.dto.payment.AccountOperationDto;
 import org.meveo.api.dto.payment.PaymentMethodDto;
@@ -370,6 +371,11 @@ public class CustomerAccountApi extends AccountEntityApi {
         }
 	    
 	    try {
+	    	if (StringUtils.isNotBlank(postData.getRegistrationNo())) {
+	    		RegistrationNumberDto registrationNumberDto = new RegistrationNumberDto();
+	    		registrationNumberDto.setRegistrationNo(postData.getRegistrationNo());
+	            postData.getRegistrationNumbers().add(registrationNumberDto);
+	        }
 		    createOrUpdateRegistrationNumber(customerAccount, postData.getRegistrationNumbers());
 	    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
 		    throw new BusinessException("Error when inserting register number", e);

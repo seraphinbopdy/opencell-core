@@ -118,6 +118,10 @@ public class CRMAccountHierarchyDto extends BaseEntityDto {
     /** The customer brand. */
     private String customerBrand;
     
+    /** Deprecated registration no., use registrationNumbers list instead */
+    @Deprecated
+    private String registrationNo;
+    
     /** The registration no. */
     private Set<RegistrationNumberDto> registrationNumbers = new HashSet<>();
     
@@ -1061,6 +1065,26 @@ public class CRMAccountHierarchyDto extends BaseEntityDto {
      */
     public void setJobTitle(String jobTitle) {
         this.jobTitle = jobTitle;
+    }
+    
+    /**
+     * Gets the registration no.
+     *
+     * @return the registration no
+     */
+    @Deprecated
+    public String getRegistrationNo() {
+        return registrationNo;
+    }
+
+    /**
+     * Sets the registration no.
+     *
+     * @param registrationNo the new registration no
+     */
+    @Deprecated
+    public void setRegistrationNo(String registrationNo) {
+        this.registrationNo = registrationNo;
     }
     
     @Override

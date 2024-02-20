@@ -185,6 +185,14 @@ public class SellerMapper extends ResourceMapper<org.meveo.apiv2.admin.Seller, S
 				seller.getRegistrationNumbers().add(registrationNumber);
 			});
 		}
+		
+		
+		if(StringUtils.isNotBlank(resource.getRegistrationNo())) {
+			RegistrationNumber registrationNumber = new RegistrationNumber();
+			registrationNumber.setRegistrationNo(resource.getRegistrationNo());
+			seller.getRegistrationNumbers().add(registrationNumber);
+		}
+		
 		if(resource.getLegalType() != null && StringUtils.isNotBlank(resource.getLegalType().getCode())) {
 			var legalEntityType = titleService.findByCode(resource.getLegalType().getCode());
 			if(legalEntityType == null) {

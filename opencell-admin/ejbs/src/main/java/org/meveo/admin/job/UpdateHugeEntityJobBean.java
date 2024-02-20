@@ -22,8 +22,6 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.BatchEntityService;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 /**
@@ -40,8 +38,6 @@ public class UpdateHugeEntityJobBean extends BaseJobBean {
     @Inject
     private BatchEntityService batchEntityService;
 
-
-    @TransactionAttribute(TransactionAttributeType.NEVER)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
         initJob(jobExecutionResult, jobInstance);
         batchEntityService.updateHugeEntity(jobExecutionResult);
@@ -58,8 +54,9 @@ public class UpdateHugeEntityJobBean extends BaseJobBean {
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_DEFAULT_FILTER));
-        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_SELECT_LIMIT, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_SELECT_LIMIT));
-        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_UPDATE_CHUNK));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_SELECT_FETCH_SIZE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_SELECT_FETCH_SIZE));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_SELECT_MAX_RESULTS, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_SELECT_MAX_RESULTS));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK_SIZE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_UPDATE_CHUNK_SIZE));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_PESSIMISTIC_UPDATE_LOCK, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_PESSIMISTIC_UPDATE_LOCK));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_EMAIL_TEMPLATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_EMAIL_TEMPLATE));
     }

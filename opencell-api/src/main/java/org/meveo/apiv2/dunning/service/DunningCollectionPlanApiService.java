@@ -5,6 +5,8 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.meveo.model.payments.PaymentMethodEnum.CARD;
+import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -42,6 +44,7 @@ import org.meveo.apiv2.dunning.SwitchDunningCollectionPlan;
 import org.meveo.apiv2.dunning.UpdateLevelInstanceInput;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.apiv2.ordering.services.ApiService;
+import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.dunning.DunningAction;
 import org.meveo.model.dunning.DunningActionInstance;
@@ -56,9 +59,12 @@ import org.meveo.model.dunning.DunningPolicyLevel;
 import org.meveo.model.dunning.DunningStopReason;
 import org.meveo.model.payments.ActionModeEnum;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
+import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.audit.logging.AuditLogService;
+import org.meveo.service.billing.impl.BillingAccountService;
+import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.DunningActionInstanceService;
 import org.meveo.service.payments.impl.DunningActionService;
 import org.meveo.service.payments.impl.DunningAgentService;
@@ -114,6 +120,12 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
 
     @Inject
     private AuditLogService auditLogService;
+    
+    @Inject
+    private CustomerAccountService customerAccountService;
+    
+    @Inject
+    private BillingAccountService billingAccountService;
 
     private static final String NO_DUNNING_FOUND = "No Dunning Plan collection found with id : ";
 
@@ -278,8 +290,11 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         if (dunningPauseReason == null) {
             throw new EntityDoesNotExistsException("dunning Pause Reason with id " + dunningCollectionPlanPause.getDunningPauseReason().getId() + " does not exits");
         }
+        if (dunningCollectionPlanPause.getRetryPaymentOnResumeDate()) {
+        	checkPreferredMethodPayment(collectionPlanToPause);
+        }
         collectionPlanToPause = dunningCollectionPlanService.pauseCollectionPlan(dunningCollectionPlanPause.getForcePause(), dunningCollectionPlanPause.getPauseUntil(),
-            collectionPlanToPause, dunningPauseReason);
+            collectionPlanToPause, dunningPauseReason, dunningCollectionPlanPause.getRetryPaymentOnResumeDate());
 
         auditLogService.trackOperation("PAUSE Reason : " + dunningPauseReason.getPauseReason(), new Date(), collectionPlanToPause, collectionPlanToPause.getCollectionPlanNumber());
         return of(collectionPlanToPause);
@@ -301,7 +316,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     throw new EntityDoesNotExistsException("Dunning collection plan with id " + collectionPlanResource.getId() + " does not exits");
                 }
                 dunningCollectionPlanService.pauseCollectionPlan(massPauseDunningCollectionPlan.getForcePause(), massPauseDunningCollectionPlan.getPauseUntil(), collectionPlan,
-                    pauseReason);
+                    pauseReason, false);
 
                 auditLogService.trackOperation("PAUSE Reason : " + pauseReason.getPauseReason(), new Date(), collectionPlan, collectionPlan.getCollectionPlanNumber());
             }
@@ -958,6 +973,21 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         // the daysOverdue is less than the current dunningLevelInstance daysOverdue
         if (currentLevelInstance != null && newDaysOverdue < currentLevelInstance.getDaysOverdue()) {
             throw new ActionForbiddenException("The daysOverdue is less than the current dunningLevelInstance daysOverdue");
+        }
+    }
+    
+    private void checkPreferredMethodPayment (DunningCollectionPlan collectionPlan) {
+    	BillingAccount billingAccount =billingAccountService.refreshOrRetrieve(collectionPlan.getBillingAccount());
+        if (billingAccount != null && billingAccount.getCustomerAccount() != null) {
+            PaymentMethod preferredPaymentMethod = customerAccountService.getPreferredPaymentMethod(billingAccount.getCustomerAccount().getId());
+
+            if (preferredPaymentMethod == null) {
+            	throw new MeveoApiException("No preferred payment method found for billing account " + billingAccount.getCode());
+            }
+            
+            if (!(preferredPaymentMethod.getPaymentType().equals(DIRECTDEBIT) || preferredPaymentMethod.getPaymentType().equals(CARD))) {
+            	throw new MeveoApiException("retryPaymentOnResumeDate can be true only if payment method is CARD or DIRECT DEBIT");
+            }
         }
     }
 }

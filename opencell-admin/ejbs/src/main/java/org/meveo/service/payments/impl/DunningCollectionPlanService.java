@@ -283,7 +283,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
     }
     
     public DunningCollectionPlan pauseCollectionPlan(boolean forcePause, Date pauseUntil,
-			DunningCollectionPlan collectionPlanToPause, DunningPauseReason dunningPauseReason) {
+			DunningCollectionPlan collectionPlanToPause, DunningPauseReason dunningPauseReason, boolean retryPaymentOnResumeDate) {
     	collectionPlanToPause = dunningCollectionPlanService.refreshOrRetrieve(collectionPlanToPause);
 		collectionPlanToPause = refreshLevelInstances(collectionPlanToPause);
 		DunningCollectionPlanStatus dunningCollectionPlanStatus = dunningCollectionPlanStatusService.refreshOrRetrieve(collectionPlanToPause.getStatus());
@@ -314,6 +314,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		collectionPlanToPause.setStatus(collectionPlanStatus);
 		collectionPlanToPause.setPausedUntilDate(pauseUntil);
 		collectionPlanToPause.setPauseReason(dunningPauseReason);
+		collectionPlanToPause.setRetryPaymentOnResumeDate(retryPaymentOnResumeDate);
 		collectionPlanToPause.addPauseDuration((int) daysBetween(new Date(),collectionPlanToPause.getPausedUntilDate()));
 		update(collectionPlanToPause);
 		return collectionPlanToPause; 

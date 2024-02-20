@@ -199,7 +199,9 @@ public class InvoicingJobV2Bean extends BaseJobBean {
                 }
             }
         }
-        
+        if(result.getInvoiceCount() == 0) {
+            result.setInvoiceCount(billingRun.getInvoiceNumber());
+        }
         if(!firstPassAutomatic || billingRun.getStatus() == POSTVALIDATED) {
             assignInvoiceNumberAndIncrementBAInvoiceDatesAndGenerateAO(billingRun, result);
             if(!billingRunService.isBillingRunContainingRejectedInvoices(billingRun.getId())) {

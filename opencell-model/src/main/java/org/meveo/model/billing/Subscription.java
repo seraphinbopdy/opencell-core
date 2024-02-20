@@ -42,6 +42,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.NamedQueries;
@@ -362,8 +363,21 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
      */
     @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY)
     private List<DunningDocument> dunningDocuments;
+    
+    /**
+     * Invoices produced by the subscription
+     */
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "subscriptions")
+    private List<Invoice> invoices = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    public List<Invoice> getInvoices() {
+		return invoices;
+	}
+
+	public void setInvoices(List<Invoice> invoices) {
+		this.invoices = invoices;
+	}
+	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "email_template_id")
     private EmailTemplate emailTemplate;
 

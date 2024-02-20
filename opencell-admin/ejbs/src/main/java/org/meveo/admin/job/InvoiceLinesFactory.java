@@ -206,6 +206,9 @@ public class InvoiceLinesFactory {
                             -> additionalAggregationFields.put(additionalFields, (String) data.get(additionalFields)));
             invoiceLine.setAdditionalAggregationFields(additionalAggregationFields);
         }
+        invoiceLine.setInvoiceRounding(appProvider.getInvoiceRounding());
+        invoiceLine.setRoundingMode(appProvider.getRoundingMode());
+        InvoiceLine.setRoundingConfig(appProvider.getInvoiceRounding(), appProvider.getRoundingMode());
         return invoiceLine;
     }
 

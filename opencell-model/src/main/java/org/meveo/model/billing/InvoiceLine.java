@@ -439,6 +439,10 @@ public class InvoiceLine extends AuditableCFEntity {
 	@Transient
 	private int invoiceRounding;
 
+	private static RoundingModeEnum ROUNDING_MODE;
+
+	private static int INVOICING_ROUNDING;
+
 	public InvoiceLine() {
 	}
 
@@ -968,7 +972,8 @@ public class InvoiceLine extends AuditableCFEntity {
 	@PreUpdate
 	public void prePersistOrUpdate() {
 		BigDecimal appliedRate = this.invoice != null ? this.invoice.getAppliedRate() : ONE;
-		this.roundingMode = this.roundingMode != null ? this.roundingMode : RoundingModeEnum.NEAREST;
+		this.roundingMode = this.roundingMode != null ? this.roundingMode : ROUNDING_MODE != null ? ROUNDING_MODE : RoundingModeEnum.NEAREST;
+		this.invoiceRounding = this.invoiceRounding != 0 ? this.invoiceRounding : INVOICING_ROUNDING != 0 ? INVOICING_ROUNDING : 2;
 		if (this.transactionalUnitPrice == null || (!this.useSpecificPriceConversion && !this.conversionFromBillingCurrency)) {
 			setTransactionalAmountWithoutTax(toTransactional(amountWithoutTax, appliedRate));
 			setTransactionalAmountWithTax(toTransactional(amountWithTax, appliedRate));
@@ -1006,11 +1011,11 @@ public class InvoiceLine extends AuditableCFEntity {
 	}
 	
 	private BigDecimal toTransactional(BigDecimal amount, BigDecimal rate) {
-		return amount != null ? amount.multiply(rate).setScale(invoiceRounding, roundingMode.getRoundingMode()) : ZERO;
+		return amount != null ? amount.multiply(rate).setScale(INVOICING_ROUNDING, ROUNDING_MODE.getRoundingMode()) : ZERO;
 	}
 
 	private BigDecimal toFunctional(BigDecimal amount, BigDecimal rate) {
-		return amount != null ? amount.divide(rate, invoiceRounding, roundingMode.getRoundingMode()) : ZERO;
+		return amount != null ? amount.divide(rate, INVOICING_ROUNDING, ROUNDING_MODE.getRoundingMode()) : ZERO;
 	}
 
 	public Map<String, String> getAdditionalAggregationFields() {
@@ -1020,6 +1025,7 @@ public class InvoiceLine extends AuditableCFEntity {
 	public void setAdditionalAggregationFields(Map<String, String> additionalAggregationFields) {
 		this.additionalAggregationFields = additionalAggregationFields;
 	}
+
 
 	public RoundingModeEnum getRoundingMode() {
 		return roundingMode;
@@ -1035,5 +1041,10 @@ public class InvoiceLine extends AuditableCFEntity {
 
 	public void setInvoiceRounding(int invoiceRounding) {
 		this.invoiceRounding = invoiceRounding;
+	}
+
+	public static void setRoundingConfig(int invoiceRounding, RoundingModeEnum roundingModeEnum) {
+		INVOICING_ROUNDING = invoiceRounding;
+		ROUNDING_MODE = roundingModeEnum;
 	}
 }

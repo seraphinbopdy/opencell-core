@@ -902,6 +902,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         }
         invoiceLine.setInvoiceRounding(appProvider.getInvoiceRounding());
         invoiceLine.setRoundingMode(appProvider.getInvoiceRoundingMode());
+        InvoiceLine.setRoundingConfig(appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode());
 
         return invoiceLine;
     }

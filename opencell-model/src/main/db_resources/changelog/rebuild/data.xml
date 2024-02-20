@@ -10887,7 +10887,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="code" value="DunningCollectionPlan_Job" />
 
 			<column name="creator" value="OPENCELL.ADMIN" />
-			<column name="timerentity_id" valueNumeric="-1" />
+			<column name="timerentity_id" valueComputed="(SELECT id from meveo_timer where code = 'Daily-midnight')" />
 			<column name="uuid" value="DunningCollectionPlanJob_Job" />
 		</insert>
 	</changeSet>
@@ -10917,7 +10917,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="code" value="TriggerReminderDunningLevel_Job" />
 
 			<column name="creator" value="OPENCELL.ADMIN" />
-			<column name="timerentity_id" valueNumeric="-1" />
+			<column name="timerentity_id" valueComputed="(SELECT id from meveo_timer where code = 'Daily-midnight')" />
 			<column name="uuid" value="TriggerReminderDunningLevelJob_Job" />
 		</insert>
 	</changeSet>
@@ -10933,6 +10933,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="code" value="ResumeDunningCollectionPlan_Job" />
 			<column name="creator" value="OPENCELL.ADMIN" />
 			<column name="uuid" value="ResumeDunningCollectionPlan_Job" />
+			<column name="timerentity_id" valueComputed="(SELECT id from meveo_timer where code = 'Daily-midnight')" />
 		</insert>
 	</changeSet>
 
@@ -10946,7 +10947,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="job_template" value="TriggerCollectionPlanLevelsJob" />
 			<column name="code" value="TriggerCollectionPlanLevelsJob" />
 			<column name="creator" value="OPENCELL.ADMIN" />
-			<column name="timerentity_id" valueNumeric="-1" />
+			<column name="timerentity_id" valueComputed="(SELECT id from meveo_timer where code = 'Daily-midnight')" />
 			<column name="uuid" value="TriggerCollectionPlanLevelsJob" />
 		</insert>
 	</changeSet>
@@ -14396,6 +14397,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
     <changeSet id="#INTRD-21035_20240206" author="TarikFA." />
     <changeSet id="#INTRD-19467_20240111" author="TarikFA." />
     <changeSet id="#INTRD-20851_20240213" author="zelmeliani" />
+    <changeSet id="#INTRD-18910_20240216" author="aeljaouhari" />
     
 	
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->

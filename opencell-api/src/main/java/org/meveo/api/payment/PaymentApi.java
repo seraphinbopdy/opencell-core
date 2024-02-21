@@ -18,6 +18,7 @@
 
 package org.meveo.api.payment;
 
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.meveo.apiv2.payments.ImmutableRejectionGroup.builder;
 import static org.meveo.apiv2.payments.SequenceActionType.DOWN;
@@ -63,6 +64,7 @@ import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
+import org.meveo.api.rest.exception.AlreadyExistException;
 import org.meveo.api.security.Interceptor.SecuredBusinessEntityMethodInterceptor;
 import org.meveo.api.security.config.annotation.FilterProperty;
 import org.meveo.api.security.config.annotation.FilterResults;
@@ -720,6 +722,12 @@ public class PaymentApi extends BaseApi {
 		}
 		PaymentRejectionCode rejectionCodeToUpdate = ofNullable(rejectionCodeService.findById(id))
 				.orElseThrow(() -> new NotFoundException(PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE));
+		if(resource.getCode() != null || paymentGateway != null) {
+			rejectionCodeService.findByCodeAndPaymentGateway(resource.getCode() != null ? resource.getCode() : rejectionCodeToUpdate.getCode(),
+							paymentGateway != null ? paymentGateway.getId() : rejectionCodeToUpdate.getPaymentGateway().getId())
+					.ifPresent(rejectionCode -> { throw new BusinessApiException(format("Rejection code with code %s already exists in gateway %s",
+							rejectionCode.getCode(), rejectionCode.getPaymentGateway().getCode()));});
+		}
 		ofNullable(resource.getCode()).ifPresent(rejectionCodeToUpdate::setCode);
 		ofNullable(resource.getDescription()).ifPresent(rejectionCodeToUpdate::setDescription);
 		ofNullable(resource.getDescriptionI18n()).ifPresent(rejectionCodeToUpdate::setDescriptionI18n);

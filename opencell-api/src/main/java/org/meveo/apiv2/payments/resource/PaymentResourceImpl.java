@@ -19,7 +19,6 @@ import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.payment.PaymentApi;
-import org.meveo.apiv2.models.Resource;
 import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;

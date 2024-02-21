@@ -1,6 +1,7 @@
 package org.meveo.apiv2.accountreceivable;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.api.dto.payment.UnMatchingOperationRequestDto;
@@ -23,6 +24,7 @@ import org.meveo.model.payments.AccountOperationStatus;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.payments.OtherCreditAndCharge;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
@@ -407,12 +409,12 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		// check that all customer accounts exist
 		checkCustomerAccountsExist(amountsTransferDto);
 		// return account operation by id
-		AccountOperation accountOperation = accountOperationService.findById(accountOperationId);
+		AccountOperation accountOperation = accountOperationService.findById(accountOperationId, List.of("customerAccount"));
 		if(accountOperation == null) {
 			throw new EntityDoesNotExistsException(AccountOperation.class, accountOperationId);
 		}
 		// check that all customer accounts have the same currency
-		checkCustomerAccountsCurrency(accountOperation.getCustomerAccount(), amountsTransferDto);
+		checkCustomerAccountsCurrency((org.meveo.model.payments.CustomerAccount) Hibernate.unproxy(accountOperation.getCustomerAccount()), amountsTransferDto);
 		// check that sum of amount are lower of equal to source’s unmatched amount
 		checkAmountsToTransfer(accountOperation, amountsTransferDto);
 		// transfer amounts
@@ -426,9 +428,9 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 	private void transferAmountsForCustomerAccounts(AccountOperation accountOperation, AmountsTransferDto amountsTransferDto) {
 		final String CRD_TRS = "CRD_TRS";
 		final String DBT_TRS = "DBT_TRS";
-		OCCTemplate occTemplateCrdTrs = occTemplateService.findByCode(CRD_TRS);
-		OCCTemplate occTemplateDebTrs = occTemplateService.findByCode(DBT_TRS);
-		if(occTemplateCrdTrs == null && occTemplateDebTrs == null) {
+		OCCTemplate occTemplateCrdTrs = occTemplateService.findByCode(CRD_TRS, List.of("accountingCode"));
+		OCCTemplate occTemplateDebTrs = occTemplateService.findByCode(DBT_TRS, List.of("accountingCode"));
+		if(occTemplateCrdTrs == null || occTemplateDebTrs == null) {
 			throw new EntityDoesNotExistsException(AccountingCode.class, CRD_TRS +"/"+ DBT_TRS);
 		}
 		// for each amount to transfer
@@ -460,13 +462,13 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 	                                    org.meveo.model.payments.CustomerAccount customerAccountTarget,
 	                                    OperationCategoryEnum operationCategoryEnum, OCCTemplate occTemplate, BigDecimal amountToTransfer) {
 		Date currentDate = new Date();
-		AccountOperation accountOperationToTransfer = new AccountOperation();
+		OtherCreditAndCharge accountOperationToTransfer = new OtherCreditAndCharge();
 		accountOperationToTransfer.setCode(occTemplate.getCode());
 		accountOperationToTransfer.setDescription(occTemplate.getAccountingCode() != null ? occTemplate.getAccountingCode().getDescription(): null);
 		accountOperationToTransfer.setAccountingCode(accountOperation.getAccountingCode());
 		accountOperationToTransfer.setAccountingDate(currentDate);
 		accountOperationToTransfer.setAmount(amountToTransfer);
-		accountOperationToTransfer.setTransactionalAmount(amountToTransfer);
+		accountOperationToTransfer.setTransactionalUnMatchingAmount(amountToTransfer);
 		accountOperationToTransfer.setCustomerAccount(customerAccountTarget);
 		accountOperationToTransfer.setMatchingStatus(MatchingStatusEnum.O);
 		accountOperationToTransfer.setStatus(AccountOperationStatus.POSTED);
@@ -481,16 +483,17 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		
 		accountOperationService.create(accountOperationToTransfer);
 		
-		if((accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT && occTemplate.getCode().equals("DBT_TRS") ) ||
+		/*if((accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT && occTemplate.getCode().equals("DBT_TRS") ) ||
 				(accountOperation.getTransactionCategory() == OperationCategoryEnum.DEBIT && occTemplate.getCode().equals("CRD_TRS")) ) {
 			try {
 				List<Long> operationIds = new ArrayList<>();
+				operationIds.add(accountOperation.getId());
 				operationIds.add(accountOperationToTransfer.getId());
 				matchingCodeService.matchOperations(accountOperation.getCustomerAccount().getId(), null, operationIds, null);
 			} catch (Exception e) {
 				throw new BusinessException(e.getMessage(), e);
 			}
-		}
+		}*/
 	}
 	/**
 	 * Check that sum of amount are lower of equal to source’s unmatched amount

@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Value.Immutable
 @Value.Style(jdkOnly = true)
-@JsonDeserialize(builder = ImmutableAmountToTransferDto.class)
+@JsonDeserialize(as = ImmutableAmountToTransferDto.class)
 public interface AmountToTransferDto {
 	
 	@Schema(description = "Customer account to transfer amount to")

@@ -1,0 +1,1651 @@
+{
+	"info": {
+		"_postman_id": "ed678c2c-2451-4817-a1a9-633f169559a7",
+		"name": "INTRD-20791",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4732430",
+		"_collection_link": "https://grey-comet-717407.postman.co/workspace/OpenCell~f2ec3afc-604a-47ad-b692-222adcce092d/collection/4732430-ed678c2c-2451-4817-a1a9-633f169559a7?action=share&source=collection_link&creator=4732430"
+	},
+	"item": [
+		{
+			"name": "create-customer",
+			"item": [
+				{
+					"name": "new C",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an object with entityId and entityCode properties\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('object');\r",
+									"    pm.expect(jsonData).to.have.property('entityId');\r",
+									"    pm.expect(jsonData).to.have.property('entityCode');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"address\": {\r\n        \"country\": \"\"\r\n    },\r\n    \"code\": \"{{customerCode}}\",\r\n    \"customerCategory\": \"B2B\",\r\n    \"customFields\": {\r\n        \"customField\": []\r\n    },\r\n    \"description\": \"\",\r\n    \"isCompany\": true,\r\n    \"name\": {\r\n        \"title\": \"\"\r\n    },\r\n    \"parentCustomerCode\": \"\",\r\n    \"seller\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/customer",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new CA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an object with entityId and entityCode properties\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('object');\r",
+									"    pm.expect(jsonData).to.have.property('entityId');\r",
+									"    pm.expect(jsonData).to.have.property('entityCode');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"address\": {\r\n\t\t\"country\": \"\"\r\n\t},\r\n\t\"code\": \"CA_{{customerCode}}\",\r\n\t\"contactInformation\": {},\r\n\t\"currency\": \"EUR\",\r\n\t\"customer\": \"{{customerCode}}\",\r\n\t\"customFields\": {\r\n\t\t\"customField\": []\r\n\t},\r\n\t\"description\": \"\",\r\n\t\"dueDateDelayEL\": \"\",\r\n\t\"generalClientAccountCode\": \"411000000\",\r\n\t\"isCompany\": true,\r\n\t\"language\": \"FRA\",\r\n\t\"methodOfPayment\": [\r\n\t\t{\r\n\t\t\t\"disabled\": false,\r\n\t\t\t\"paymentMethodType\": \"CHECK\",\r\n\t\t\t\"preferred\": true\r\n\t\t}\r\n\t],\r\n\t\"name\": {\r\n\t\t\"title\": \"\"\r\n\t}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/customerAccount",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"customerAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new BA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an object with entityId and entityCode properties\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('object');\r",
+									"    pm.expect(jsonData).to.have.property('entityId');\r",
+									"    pm.expect(jsonData).to.have.property('entityCode');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"address\": {\r\n        \"country\": \"\"\r\n    },\r\n    \"billingCycle\": \"{{billingCycle}}\",\r\n    \"ccedEmails\": \"\",\r\n    \"code\": \"BA_{{customerCode}}\",\r\n    \"contactInformation\": {\r\n        \"address\": {},\r\n        \"email\": \"{{emailCustomer}}\"\r\n    },\r\n    \"country\": \"FR\",\r\n    \"customerAccount\": \"CA_{{customerCode}}\",\r\n    \"description\": \"CA_{{customerCode}}\",\r\n    \"discountPlanForInstantiation\": [],\r\n    \"discountPlanForTermination\": [],\r\n    \"discountPlanInstance\": [],\r\n    \"electronicBilling\": \"\",\r\n    \"email\": \"{{emailCustomer}}\",\r\n    \"emailTemplate\": \"\",\r\n    \"exemptionReason\": \"\",\r\n    \"externalRef1\": \"\",\r\n    \"invoicingThreshold\": \"\",\r\n    \"isCompany\": true,\r\n    \"language\": \"FRA\",\r\n    \"legalEntityType\": {\r\n        \"code\": \"SARL\"\r\n    },\r\n    \"mailingType\": \"\",\r\n    \"minimumAmountEl\": \"\",\r\n    \"minimumLabelEl\": \"\",\r\n    \"name\": {\r\n        \"title\": \"\"\r\n    },\r\n    \"paymentMethod\": null,\r\n    \"priceListCode\": \"\",\r\n    \"registrationNo\": \"\",\r\n    \"tradingCurrency\": \"EUR\",\r\n    \"vatNo\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/billingAccount",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"billingAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new CA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response is an object with entityId and entityCode properties\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.expect(jsonData).to.be.an('object');\r",
+									"    pm.expect(jsonData).to.have.property('entityId');\r",
+									"    pm.expect(jsonData).to.have.property('entityCode');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"address\": {},\r\n\t\"billingAccount\": \"BA_{{customerCode}}\",\r\n\t\"code\": \"CA_{{customerCode}}\",\r\n\t\"description\": \"CA_{{customerCode}}\",\r\n\t\"isCompany\": true,\r\n\t\"isConsumer\": true,\r\n\t\"name\": {},\r\n\t\"parentUserAccountCode\": null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/userAccount",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"userAccount"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "customer_who_will_recieve",
+			"item": [
+				{
+					"name": "new C",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an object with entityId and entityCode properties\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('object');\r",
+									"    pm.expect(jsonData).to.have.property('entityId');\r",
+									"    pm.expect(jsonData).to.have.property('entityCode');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"address\": {\r\n        \"country\": \"\"\r\n    },\r\n    \"code\": \"RC_{{customerCode}}\",\r\n    \"customerCategory\": \"B2B\",\r\n    \"customFields\": {\r\n        \"customField\": []\r\n    },\r\n    \"description\": \"\",\r\n    \"isCompany\": true,\r\n    \"name\": {\r\n        \"title\": \"\"\r\n    },\r\n    \"parentCustomerCode\": \"\",\r\n    \"seller\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/customer",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new CA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an object with entityId and entityCode properties\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('object');\r",
+									"    pm.expect(jsonData).to.have.property('entityId');\r",
+									"    pm.expect(jsonData).to.have.property('entityCode');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"address\": {\r\n\t\t\"country\": \"\"\r\n\t},\r\n\t\"code\": \"RC_CA_{{customerCode}}\",\r\n\t\"contactInformation\": {},\r\n\t\"currency\": \"EUR\",\r\n\t\"customer\": \"RC_{{customerCode}}\",\r\n\t\"customFields\": {\r\n\t\t\"customField\": []\r\n\t},\r\n\t\"description\": \"\",\r\n\t\"dueDateDelayEL\": \"\",\r\n\t\"generalClientAccountCode\": \"411000000\",\r\n\t\"isCompany\": true,\r\n\t\"language\": \"FRA\",\r\n\t\"methodOfPayment\": [\r\n\t\t{\r\n\t\t\t\"disabled\": false,\r\n\t\t\t\"paymentMethodType\": \"CHECK\",\r\n\t\t\t\"preferred\": true\r\n\t\t}\r\n\t],\r\n\t\"name\": {\r\n\t\t\"title\": \"\"\r\n\t}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/customerAccount",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"customerAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new BA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response is an object with entityId and entityCode properties\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"     pm.response.to.have.status(200);\r",
+									"    pm.expect(jsonData).to.be.an('object');\r",
+									"    pm.expect(jsonData).to.have.property('entityId');\r",
+									"    pm.expect(jsonData).to.have.property('entityCode');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"address\": {\r\n        \"country\": \"\"\r\n    },\r\n    \"billingCycle\": \"{{billingCycle}}\",\r\n    \"ccedEmails\": \"\",\r\n    \"code\": \"RC_BA_{{customerCode}}\",\r\n    \"contactInformation\": {\r\n        \"address\": {},\r\n        \"email\": \"{{emailCustomer}}\"\r\n    },\r\n    \"country\": \"FR\",\r\n    \"customerAccount\": \"RC_CA_{{customerCode}}\",\r\n    \"description\": \"RC_CA_{{customerCode}}\",\r\n    \"discountPlanForInstantiation\": [],\r\n    \"discountPlanForTermination\": [],\r\n    \"discountPlanInstance\": [],\r\n    \"electronicBilling\": \"\",\r\n    \"email\": \"RC_{{emailCustomer}}\",\r\n    \"emailTemplate\": \"\",\r\n    \"exemptionReason\": \"\",\r\n    \"externalRef1\": \"\",\r\n    \"invoicingThreshold\": \"\",\r\n    \"isCompany\": true,\r\n    \"language\": \"FRA\",\r\n    \"legalEntityType\": {\r\n        \"code\": \"SARL\"\r\n    },\r\n    \"mailingType\": \"\",\r\n    \"minimumAmountEl\": \"\",\r\n    \"minimumLabelEl\": \"\",\r\n    \"name\": {\r\n        \"title\": \"\"\r\n    },\r\n    \"paymentMethod\": null,\r\n    \"priceListCode\": \"\",\r\n    \"registrationNo\": \"\",\r\n    \"tradingCurrency\": \"EUR\",\r\n    \"vatNo\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/billingAccount",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"billingAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new CA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response is an object with entityId and entityCode properties\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.expect(jsonData).to.be.an('object');\r",
+									"    pm.expect(jsonData).to.have.property('entityId');\r",
+									"    pm.expect(jsonData).to.have.property('entityCode');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"address\": {},\r\n\t\"billingAccount\": \"RC_BA_{{customerCode}}\",\r\n\t\"code\": \"RC_CA_{{customerCode}}\",\r\n\t\"description\": \"CA_{{customerCode}}\",\r\n\t\"isCompany\": true,\r\n\t\"isConsumer\": true,\r\n\t\"name\": {},\r\n\t\"parentUserAccountCode\": null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/userAccount",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"userAccount"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "catalogs",
+			"item": [
+				{
+					"name": "charges",
+					"item": [
+						{
+							"name": "usages",
+							"item": [
+								{
+									"name": "new",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response is an object with status property equal to 'SUCCESS'\", function () {\r",
+													"    pm.expect(pm.response.json()).to.be.an('object').that.has.property('status', 'SUCCESS');\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"code\": \"{{usageCode}}\",\r\n\t\"filterParam1\": null,\r\n\t\"filterParam2\": null,\r\n\t\"filterParam3\": null,\r\n\t\"filterParam4\": null,\r\n\t\"linkedAttributes\": [],\r\n\t\"pricePlanCodes\": [],\r\n\t\"usageQuantityAttributeCode\": null\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/usageChargeTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"usageChargeTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "new PPM",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response is an object with status property equal to 'SUCCESS'\", function () {\r",
+													"    pm.expect(pm.response.json()).to.be.an('object').that.has.property('status', 'SUCCESS');\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"code\": \"PPM_{{usageCode}}\",\r\n\t\"eventCode\": \"{{usageCode}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/pricePlan/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "new PPMV",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response is an object with actionStatus and pricePlanVersion properties\", function () {\r",
+													"    pm.expect(pm.response.json()).to.be.an('object').that.has.all.keys('actionStatus', 'pricePlanVersion');\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Action Status is equal to SUCCESS\", function () {\r",
+													"    pm.expect(pm.response.json().actionStatus.status).to.equal(\"SUCCESS\");\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Price Plan Version has a statusEnum equal to DRAFT\", function () {\r",
+													"    pm.expect(pm.response.json().pricePlanVersion.statusEnum).to.equal(\"DRAFT\");\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"isMatrix\": false,\r\n    \"label\": \"simple price\",\r\n    \"price\": 10000,\r\n    \"pricePlanMatrixCode\": \"PPM_{{usageCode}}\",\r\n    \"priceVersionType\": \"FIXED\",\r\n    \"validity\": {}\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/pricePlan/pricePlanMatrixVersion",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan",
+												"pricePlanMatrixVersion"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "publish PPMV activate",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"StatusEnum has value PUBLISHED\", function () {\r",
+													"    pm.expect(pm.response.json().pricePlanVersion.statusEnum).to.equal(\"PUBLISHED\");\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/pricePlan/PPM_{{usageCode}}/pricePlanMatrixVersions/1/status/PUBLISHED",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan",
+												"PPM_{{usageCode}}",
+												"pricePlanMatrixVersions",
+												"1",
+												"status",
+												"PUBLISHED"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "activate charge",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response is an object with status property equal to SUCCESS\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData).to.be.an('object').that.has.property('status').that.equals('SUCCESS');\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/chargeTemplates/{{usageCode}}/status/ACTIVE",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"chargeTemplates",
+												"{{usageCode}}",
+												"status",
+												"ACTIVE"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "products",
+					"item": [
+						{
+							"name": "new | attach usage charge",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Check status code is 200\r",
+											"pm.test(\"Response status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"// Check if the response has the currentProductVersion property and its status is DRAFT\r",
+											"pm.test(\"Response has currentProductVersion property with status DRAFT\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.currentProductVersion).to.have.property('status', 'DRAFT');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\t\"agreementDateSetting\": \"MANUAL\",\r\n\t\"code\": \"{{productCode}}\",\r\n\t\"commercialRuleCodes\": [],\r\n\t\"currentProductVersion\": null,\r\n\t\"discountListCodes\": [],\r\n\t\"label\": \"iphone\",\r\n\t\"mediaCodes\": [],\r\n\t\"modelChildren\": [],\r\n\t\"priceVersionDateSetting\": \"DELIVERY\",\r\n\t\"productChargeTemplateMappingDto\": [\r\n\t\t{\r\n\t\t\t\"chargeCode\": \"{{usageCode}}\",\r\n\t\t\t\"productCode\": \"{{productCode}}\"\r\n\t\t}\r\n\t]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/products",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "activate product version",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Check status code is 200\r",
+											"pm.test(\"Response status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"// Check if the response has the currentProductVersion property and its status is DRAFT\r",
+											"pm.test(\"Response has currentProductVersion property with status DRAFT\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('status', 'PUBLISHED');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/products/{{productCode}}/productVersions/1/status/PUBLISHED",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"products",
+										"{{productCode}}",
+										"productVersions",
+										"1",
+										"status",
+										"PUBLISHED"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "activate product",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Check status code is 200\r",
+											"pm.test(\"Response status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"// Check if the response has the currentProductVersion property and its status is DRAFT\r",
+											"pm.test(\"Response has currentProductVersion property with status DRAFT\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.actionStatus).to.have.property('status', 'SUCCESS');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/products/{{productCode}}/status/ACTIVE",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"products",
+										"{{productCode}}",
+										"status",
+										"ACTIVE"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "offer",
+					"item": [
+						{
+							"name": "new",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is an object with status property equal to 'success'\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.be.an('object').that.has.property('status').that.equals('SUCCESS');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"code\": \"{{offerCode}}\",\r\n    \"name\": \"Offer SmartPhone {{offerCode}}\",\r\n    \"allowedDiscountPlans\": [],\r\n    \"allowedOfferChange\": [],\r\n    \"attributes\": [],\r\n    \"autoEndOfEngagement\": false,\r\n    \"channel\": [],\r\n    \"commercialRuleCodes\": [],\r\n    \"customFields\": {},\r\n    \"isOfferChangeRestricted\": false,\r\n    \"mediaCodes\": [],\r\n    \"newValidFrom\": null,\r\n    \"newValidTo\": null,\r\n    \"offerAttributes\": [],\r\n    \"offerProducts\": [\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{productCode}}\"\r\n            }\r\n        }\r\n    ],\r\n    \"offerTemplateCategory\": [],\r\n    \"renewalRule\": {\r\n        \"autoRenew\": true,\r\n        \"endOfTermAction\": \"SUSPEND\",\r\n        \"extendAgreementPeriodToSubscribedTillDate\": true,\r\n        \"initialTermType\": \"RECURRING\",\r\n        \"initialyActiveForUnit\": \"MONTH\",\r\n        \"renewalTermType\": \"RECURRING\"\r\n    },\r\n    \"seller\": [],\r\n    \"tagCodes\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/offerTemplate",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"offerTemplate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "activate",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is an object with status property equal to SUCCESS\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.be.an('object').that.has.property('status', 'SUCCESS');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/offerTemplate/{{offerCode}}/update/status?status=ACTIVE",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"offerTemplate",
+										"{{offerCode}}",
+										"update",
+										"status"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "ACTIVE"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "sousciption",
+			"item": [
+				{
+					"name": "new",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status equals to SUCCESS\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(jsonData.status).to.equal(\"SUCCESS\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"code\": \"{{subscriptionCode}}\",\r\n\t\"customFields\": {},\r\n\t\"discountPlanForInstantiation\": [],\r\n\t\"discountPlanForTermination\": [],\r\n\t\"offerTemplate\": \"{{offerCode}}\",\r\n\t\"paymentMethod\": null,\r\n\t\"priceListCode\": \"\",\r\n\t\"productToInstantiateDto\": [\r\n\t\t{\r\n\t\t\t\"attributeInstances\": [],\r\n\t\t\t\"deliveryDate\": {{dateDelivery}},\r\n\t\t\t\"productCode\": \"{{productCode}}\",\r\n\t\t\t\"quantity\": 1\r\n\t\t}\r\n\t],\r\n\t\"renewalRule\": {},\r\n\t\"salesPersonName\":\"opencell.admin\",\r\n\t\"seller\": \"MAIN_SELLER\",\r\n\t\"subscriptionDate\": {{dateNow}},\r\n\t\"userAccount\": \"CA_{{customerCode}}\",\r\n\t\"validityDate\": {{dateNow}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/billing/subscription/subscribeAndInstantiateProducts",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"billing",
+								"subscription",
+								"subscribeAndInstantiateProducts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "activate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status equals to SUCCESS\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(jsonData.status).to.equal(\"SUCCESS\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"servicesToActivate\": {\r\n\t\t\"service\": [\r\n\t\t\t{\r\n\t\t\t\t\"code\": \"{{productCode}}\",\r\n\t\t\t\t\"quantity\": 1,\r\n\t\t\t\t\"subscriptionDate\": {{subscriptionDate}}\r\n\t\t\t}\r\n\t\t]\r\n\t},\r\n\t\"subscription\": \"{{subscriptionCode}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/billing/subscription/activateServices",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"billing",
+								"subscription",
+								"activateServices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new access",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status equals to SUCCESS\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(jsonData.status).to.equal(\"SUCCESS\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"code\": \"{{subscriptionCode}}\",\r\n\t\"subscription\": \"{{subscriptionCode}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/access",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"access"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "valorisation",
+			"item": [
+				{
+					"name": "inject CDR",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cdrs\": [\r\n        \"{{cdrDateNow}};1;{{subscriptionCode}};P1;USA;P3;;;;;;;;;;;;;;;\"\r\n    ],\r\n    \"isVirtual\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/mediation/cdrs/chargeCdrList",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"mediation",
+								"cdrs",
+								"chargeCdrList"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RT job",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\" : \"RT_Job\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/job/execute",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"job",
+								"execute"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "invoicing",
+			"item": [
+				{
+					"name": "new billing run",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response is an object with status property equal to SUCCESS\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('object').that.has.property('status', 'SUCCESS');\r",
+									"    pm.collectionVariables.set(\"billingRun\", jsonData.message);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"aggregateUnitAmounts\": false,\r\n\t\"billingCycleCode\": \"{{billingCycle}}\",\r\n\t\"billingRunTypeEnum\": \"AUTOMATIC\",\r\n\t\"dateAggregation\": \"NO_DATE_AGGREGATION\",\r\n\t\"disableAggregation\": true,\r\n\t\"discountAggregation\": \"FULL_AGGREGATION\",\r\n\t\"generateAO\": true,\r\n\t\"ignoreOrders\": true,\r\n\t\"ignoreSubscriptions\": true,\r\n\t\"ignoreUserAccounts\": true,\r\n\t\"incrementalInvoiceLines\": false,\r\n\t\"invoiceDate\": {{dateNow}},\r\n\t\"lastTransactionDate\": {{dateLastTransaction}},\r\n\t\"preReportAutoOnCreate\": false,\r\n\t\"preReportAutoOnInvoiceLinesJob\": false,\r\n\t\"referenceDate\": \"TODAY\",\r\n\t\"useAccountingArticleLabel\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/billing/invoicing/createBillingRun",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"billing",
+								"invoicing",
+								"createBillingRun"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "run  billing run",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"Function.prototype.sleep = function(delay, ...args) {\r",
+									"    setTimeout(() => this(...args), delay)\r",
+									"}\r",
+									"\r",
+									"console.log.sleep(2000, 'Hello, World!!')"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/billing/invoicing/{{billingRun}}/advanceStatus?executeInvoicingJob=true",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"billing",
+								"invoicing",
+								"{{billingRun}}",
+								"advanceStatus"
+							],
+							"query": [
+								{
+									"key": "executeInvoicingJob",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get invoice to validate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Get the id from the data\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.expect(pm.response.json()).to.be.an('object').that.has.property('data');\r",
+									"    pm.expect(pm.response.json().data).to.be.an('array').that.has.lengthOf(1);\r",
+									"    pm.expect(pm.response.json().data[0].id).to.be.a('number');\r",
+									"    pm.collectionVariables.set(\"invoiceId\", pm.response.json().data[0].id )\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"filters\" : {\r\n        \"billingAccount.code\" : \"BA_{{customerCode}}\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/Invoice",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"Invoice"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "validate invoice",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"generateAO\": true,\r\n\t\"invoiceId\": \"{{invoiceId}}\",\r\n\t\"refreshExchangeRate\": false,\r\n\t\"skipValidation\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/invoice/validate",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"invoice",
+								"validate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "finance",
+			"item": [
+				{
+					"name": "add new currency",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"code\": \"{{currencyCode}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/currency/addFunctionalCurrency",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"currency",
+								"addFunctionalCurrency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add payment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response is an object with status property equal to SUCCESS\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('object').that.has.property('status', 'SUCCESS');\r",
+									"    pm.collectionVariables.set(\"paymentId\", jsonData.paymentId)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"amount\": 500,\r\n\t\"bankCollectionDate\": {{dateNow}},\r\n\t\"bankLot\": \"@today-opencell.admin\",\r\n\t\"customerAccountCode\": \"CA_{{customerCode}}\",\r\n\t\"dueDate\": {{dateNow}},\r\n\t\"isToMatching\": false,\r\n\t\"occTemplateCode\": \"PAY_DDT\",\r\n\t\"paymentInfo\": \"opencell.admin\",\r\n\t\"paymentMethod\": \"DIRECTDEBIT\",\r\n\t\"reference\": \"REF\",\r\n\t\"transactionalCurrency\": \"{{currencyCode}}\",\r\n\t\"transactionDate\": {{dateNow}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/payment",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"payment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "transfer amount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"amountsToTransfer\": [\r\n        {\r\n            \"customerAccount\": {\r\n                \"code\": \"RC_CA_{{customerCode}}\"\r\n            },\r\n            \"amount\": 300\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/accountReceivable/accountOperation/{{paymentId}}/transferAmounts",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"accountReceivable",
+								"accountOperation",
+								"{{paymentId}}",
+								"transferAmounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check that 2 OCC war creatred",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Data array has 2 elements\", function () {\r",
+									"    pm.expect(pm.response.json().data).to.be.an('array').with.lengthOf(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"filters\" : {\r\n        \"customerAccount.code\" : \"RC_CA_{{customerCode}}\"\r\n    }\r\n    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/OtherCreditAndCharge",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"OtherCreditAndCharge"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{opencell.password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{opencell.username}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"let indesNumeric = 1;",
+					"let index = \"_INTRD20791_00\" + indesNumeric;",
+					"",
+					"// customers & billing cycle",
+					"const customerCode = \"Cust\" + index;",
+					"const billingCycle = \"CYC_INV_MT_1\"",
+					"const emailCustomer = \"email.test\" + index + \"@yopmail.com\";",
+					"",
+					"",
+					"pm.collectionVariables.set(\"customerCode\", customerCode);",
+					"pm.collectionVariables.set(\"billingCycle\", billingCycle);",
+					"pm.collectionVariables.set(\"emailCustomer\", emailCustomer);",
+					"",
+					"",
+					"// charges usages / oneshot / recurring",
+					"const usageCode = \"USG_CH\" + index;",
+					"",
+					"pm.collectionVariables.set(\"usageCode\", usageCode);",
+					"",
+					"// products",
+					"",
+					"const productCode = \"product\" + index;",
+					"const nameOfProduct = \"Iphone \" + indesNumeric;",
+					"",
+					"pm.collectionVariables.set(\"productCode\", productCode);",
+					"",
+					"// offers ",
+					"const offerCode = \"OFF\" + index",
+					"",
+					"pm.collectionVariables.set(\"offerCode\", offerCode);",
+					"",
+					"// subscription",
+					"const subscriptionCode = \"SUB\" + index;",
+					"const subscriptionDate = new Date();",
+					"",
+					"const dateNow = new Date();",
+					"pm.collectionVariables.set(\"subscriptionDate\", dateNow[Symbol.toPrimitive]('number'))",
+					"pm.collectionVariables.set(\"cdrDateNow\", dateNow.toISOString())",
+					"pm.collectionVariables.set(\"subscriptionCode\", subscriptionCode);",
+					"",
+					"",
+					"",
+					"// current date",
+					"dateNow.setTime(0);",
+					"pm.collectionVariables.set(\"dateNow\", dateNow[Symbol.toPrimitive]('number'))",
+					"pm.collectionVariables.set(\"dateNowISO\", dateNow.toISOString())",
+					"",
+					"var dateLastTransaction = new Date();",
+					"dateLastTransaction.setDate(dateLastTransaction.getDate() + 1);",
+					"dateLastTransaction.setTime(0);",
+					"pm.collectionVariables.set(\"dateLastTransaction\", dateLastTransaction[Symbol.toPrimitive]('number'))",
+					"",
+					"",
+					"const dateDelivery = new Date();",
+					"dateDelivery.setMonth(dateDelivery.getMonth() + 3);",
+					"pm.collectionVariables.set(\"dateDelivery\", dateDelivery[Symbol.toPrimitive]('number'))",
+					"",
+					"",
+					"// currency used",
+					"pm.collectionVariables.set(\"currencyCode\", \"EUR\");"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "customerCode",
+			"value": ""
+		},
+		{
+			"key": "billingCycle",
+			"value": ""
+		},
+		{
+			"key": "emailCustomer",
+			"value": ""
+		},
+		{
+			"key": "usageCode",
+			"value": ""
+		},
+		{
+			"key": "productCode",
+			"value": ""
+		},
+		{
+			"key": "offerCode",
+			"value": ""
+		},
+		{
+			"key": "subscriptionCode",
+			"value": ""
+		},
+		{
+			"key": "dateNow",
+			"value": ""
+		},
+		{
+			"key": "dateDelivery",
+			"value": ""
+		},
+		{
+			"key": "dateNowISO",
+			"value": ""
+		},
+		{
+			"key": "invoiceId",
+			"value": ""
+		},
+		{
+			"key": "paymentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "currencyCode",
+			"value": ""
+		},
+		{
+			"key": "billingRun",
+			"value": "7"
+		},
+		{
+			"key": "dateOnly",
+			"value": ""
+		},
+		{
+			"key": "dateLastTransaction",
+			"value": ""
+		},
+		{
+			"key": "subscriptionDate",
+			"value": ""
+		},
+		{
+			"key": "cdrDateNow",
+			"value": ""
+		}
+	]
+}

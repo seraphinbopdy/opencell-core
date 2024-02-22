@@ -1,0 +1,545 @@
+{
+	"info": {
+		"_postman_id": "64792a4a-0a2c-4f41-8bbb-d8a0464c8e58",
+		"name": "INTRD-20318",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3053202"
+	},
+	"item": [
+		{
+			"name": "400 - At Least One Criteria",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"CODE\",\n    \"label\": \"DESCRIPTION\",\n    \"defaultBalance\": true,\n    \"balanceEl\": \"\",\n    \"occTemplates\": [\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - One Default Customer Balance",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"CODE\",\n    \"label\": \"DESCRIPTION\",\n    \"defaultBalance\": true,\n    \"balanceEl\": \"\",\n    \"occTemplates\": [\n        {\n            \"id\": 1\n        },\n        {\n            \"id\": 2\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - OCC Template doesn't exists",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"ZEI_CB_01\",\n    \"label\": \"ZEI_CB_DESC_01\",\n    \"defaultBalance\": true,\n    \"balanceEl\": \"\",\n    \"occTemplates\": [\n        {\n            \"id\": 1\n        },\n        {\n            \"id\": 2\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Create Customer Balance With Occ Template and balance EL",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"ZEI_CB_01\",\n    \"label\": \"ZEI_CB_DESC_01\",\n    \"defaultBalance\": true,\n    \"balanceEl\": \"#{ accountOperation.type == 'I' }\",\n    \"occTemplates\": [\n        {\n            \"id\": -27\n        },\n        {\n            \"id\": -52\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - Customer Balance with the same code already exists",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"ZEI_CB_01\",\n    \"label\": \"ZEI_CB_DESC_01\",\n    \"defaultBalance\": true,\n    \"balanceEl\": \"\",\n    \"occTemplates\": [\n        {\n            \"id\": 1\n        },\n        {\n            \"id\": 2\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - Max of customer balance reached",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"ZEI_CB_02\",\n    \"label\": \"ZEI_CB_DESC_02\",\n    \"defaultBalance\": true,\n    \"balanceEl\": \"\",\n    \"occTemplates\": [\n        {\n            \"id\": 1\n        },\n        {\n            \"id\": 2\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - At Least One Criteria",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"ZEI_CB_01\",\n    \"label\": \"ZEI_CB_DESC_01\",\n    \"defaultBalance\": true,\n    \"balanceEl\": \"\",\n    \"occTemplates\": [\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/7",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"7"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Update Customer Balance with new Balance EL",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"ZEI_CB_01\",\n    \"label\": \"ZEI_CB_DESC_01\",\n    \"defaultBalance\": true,\n    \"balanceEl\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut odio a purus tincidunt sollicitudin. Morbi feugiat, tortor id lobortis convallis, nisl quam fringilla justo, vitae convallis nulla dolor in justo. Phasellus at aliquam elit. Nam at lacinia quam. Fusce mattis, velit et fermentum sodales, sapien nisi sollicitudin mauris, non interdum enim odio at nisi. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Vestibulum sed consequat dui, eu ultrices nunc. Nam at erat pretium, ullamcorper nunc sit amet, rhoncus elit. Phasellus pharetra erat sed dui elementum, id malesuada risus ultricies. Integer tincidunt quam sit amet enim mattis, et ullamcorper sapien convallis. Aenean vel augue lorem. Sed laoreet, enim et laoreet dictum, turpis lorem pellentesque elit, in tristique dui velit eu velit. Curabitur nec purus eget felis auctor dapibus. Duis in risus at odio auctor tristique a a nisi. Sed dignissim augue magna, nec cursus nulla dignissim et. Suspendisse potenti. Quisque pellentesque bibendum lacinia. Proin fermentum ultricies arcu, quis tincidunt nisl sodales non. Aliquam erat volutpat. Quisque ultrices magna in consectetur aliquet. Proin ac justo id lectus ultricies dignissim. Donec sed accumsan felis, nec euismod lorem. Duis vitae pharetra ante. Mauris vel nunc id nunc tempus mollis. Sed vulputate nisl vitae metus iaculis vestibulum. Aenean volutpat semper leo, non lobortis sapien tincidunt et. Integer sit amet bibendum nisl. Phasellus euismod ex nisi, et elementum justo euismod nec. Suspendisse potenti. Aliquam ac blandit felis. Fusce vehicula nec purus sit amet faucibus. In hac habitasse platea dictumst. Morbi convallis, nunc a volutpat volutpat, purus orci tincidunt lacus, non ullamcorper nulla metus in eros. Nulla facilisi. Curabitur sollicitudin urna eget luctus dictum. Integer fermentum risus id enim bibendum, non tincidunt lectus malesuada. Maecenas nec sollicitudin libero. Phasellus accumsan, justo non tempus venenatis, mauris libero condimentum metus, et sodales eros lacus eu ipsum. Morbi tincidunt eros eget ex pellentesque, eget volutpat lectus sollicitudin. Sed hendrerit nulla vel tortor convallis, sit amet malesuada elit ultricies. Sed et justo ut turpis egestas ultricies in vel felis. Sed eget dolor a nisi elementum commodo in sed ligula. Mauris eleifend justo a dui varius, vel posuere velit efficitur. Suspendisse potenti. Fusce efficitur volutpat arcu, at aliquet dolor consequat in. Nulla dictum semper ante, eget efficitur elit efficitur et. Sed tincidunt, magna sit amet vulputate rhoncus, felis sem ultricies odio, non tristique lacus nunc sit amet mauris. Pellentesque at libero a libero rutrum finibus non et sapien. Vestibulum id tincidunt nulla. Sed id consequat eros. Duis sodales ante id leo elementum aliquam. Integer in gravida nulla. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean vitae ante lacus. Proin at ante tincidunt, malesuada nunc at, iaculis tortor. Nulla id dapibus odio. Curabitur laoreet, est et efficitur iaculis, dolor nunc commodo lacus, at venenatis lacus dui a enim. Integer ut justo felis. Aenean in ultricies metus. Nam a tincidunt erat. Vivamus id magna sed quam sodales euismod eget sed purus. Integer sollicitudin bibendum tempor. Nulla quis sapien nec ipsum finibus lacinia. Donec in nunc turpis. Fusce vitae velit condimentum, aliquam eros vel, finibus metus. Vestibulum sodales urna quis fringilla malesuada. Phasellus sollicitudin risus sit amet nisl malesuada, in efficitur sapien luctus. Nulla facilisi. Maecenas varius blandit nunc non convallis. Aenean at libero in nunc laoreet cursus nec quis lorem. Nullam sit amet nisl tellus. Integer condimentum nunc quis magna tristique, vel laoreet sapien commodo. Donec sit amet justo at turpis commodo elementum. Fusce varius ullamcorper justo, eget consectetur dui ultricies at. Sed consequat sapien ac neque tincidunt, id vehicula velit convallis. Nullam molestie sem vitae diam commodo, sed aliquet arcu gravida. Nulla varius, urna sit amet interdum tristique, odio tortor commodo ligula, vel ullamcorper est sem at lacus. Curabitur tincidunt in ipsum ac fermentum. Nullam vitae est quis orci varius varius. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nam fringilla, eros et malesuada pellentesque, lacus magna commodo nunc, nec tempor odio leo in sem. Donec in sapien nec nunc auctor euismod. Ut ullamcorper vulputate sapien, nec finibus elit gravida in. Aliquam lobortis dui non ipsum facilisis, vel accumsan mauris volutpat. Phasellus sed sollicitudin eros. Donec bibendum vestibulum ipsum. Mauris fringilla, nulla non vestibulum vestibulum, dui mi varius lectus, nec eleifend nunc odio a felis. In nec enim nec odio fermentum fermentum. Curabitur id vehicula nulla. Proin faucibus fringilla nulla, sit amet cursus odio venenatis vitae. Vivamus id magna lectus. Ut sed accumsan tortor. Fusce vitae nunc eros. Vivamus sit amet ultricies odio. Nullam tincidunt lectus id dolor congue euismod. Duis nec odio rhoncus, efficitur nisl at, fermentum velit. Nam pulvinar, dui id dictum efficitur, odio risus feugiat libero, vel\",\n    \"occTemplates\": [\n        {\n            \"id\": -27\n        },\n        {\n            \"id\": -52\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/7",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"7"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Generic - Get All Customer Balance",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nestedEntities\": [\n        \"occTemplates\"\n    ],\n    \"limit\": 20,\n    \"offset\": 0,\n    \"sortBy\": \"id\",\n    \"sortOrder\": \"ASCENDING\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/generic/all/CustomerBalance",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"generic",
+						"all",
+						"CustomerBalance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Generic - Get All OCC Template",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nestedEntities\": [],\n    \"filters\": {\n        \"not-inList code\": [\n            \"DEB_SD\",\n            \"REF_SD\",\n            \"CRD_SD\",\n            \"ADJ_SD\"\n        ]\n    },\n    \"limit\": 20,\n    \"offset\": 0,\n    \"sortBy\": \"id\",\n    \"sortOrder\": \"ASCENDING\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/generic/all/OCCTemplate",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"generic",
+						"all",
+						"OCCTemplate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - Required Customer Balance",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerAccount\" : {\n        \"id\": 30,\n        \"code\": \"KOQ4685\"\n    },\n    \"transactionalCurrency\" : {\n        \"id\": -2\n    },\n    \"excludeAOs\": [\n        \"DEB_SD\",\n        \"REF_SD\",\n        \"CRD_SD\",\n        \"ADJ_SD\",\n        \"INV_ADV\",\n        \"CAN_SD\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/accountOperationsDetails",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"accountOperationsDetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - Required Customer Account",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerBalance\" : {\n        \"id\": 5\n    },\n    \"transactionalCurrency\" : {\n        \"id\": -2\n    },\n    \"excludeAOs\": [\n        \"DEB_SD\",\n        \"REF_SD\",\n        \"CRD_SD\",\n        \"ADJ_SD\",\n        \"INV_ADV\",\n        \"CAN_SD\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/accountOperationsDetails",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"accountOperationsDetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - Customer Account doesn't exists",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerAccount\" : {\n        \"id\": 3000,\n        \"code\": \"KOQ4685\"\n    },\n    \"customerBalance\" : {\n        \"id\": 5\n    },\n    \"transactionalCurrency\" : {\n        \"id\": -2\n    },\n    \"excludeAOs\": [\n        \"DEB_SD\",\n        \"REF_SD\",\n        \"CRD_SD\",\n        \"ADJ_SD\",\n        \"INV_ADV\",\n        \"CAN_SD\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/accountOperationsDetails",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"accountOperationsDetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - Customer Balance doesn't exists",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerAccount\" : {\n        \"id\": 30,\n        \"code\": \"KOQ4685\"\n    },\n    \"customerBalance\" : {\n        \"id\": 500\n    },\n    \"transactionalCurrency\" : {\n        \"id\": -2\n    },\n    \"excludeAOs\": [\n        \"DEB_SD\",\n        \"REF_SD\",\n        \"CRD_SD\",\n        \"ADJ_SD\",\n        \"INV_ADV\",\n        \"CAN_SD\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/accountOperationsDetails",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"accountOperationsDetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 - Currency doesn't exists",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerAccount\" : {\n        \"id\": 30,\n        \"code\": \"KOQ4685\"\n    },\n    \"customerBalance\" : {\n        \"id\": 5\n    },\n    \"transactionalCurrency\" : {\n        \"id\": -200\n    },\n    \"excludeAOs\": [\n        \"DEB_SD\",\n        \"REF_SD\",\n        \"CRD_SD\",\n        \"ADJ_SD\",\n        \"INV_ADV\",\n        \"CAN_SD\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/accountOperationsDetails",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"accountOperationsDetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Get Account Operations without excluding AOs",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerAccount\" : {\n        \"id\": 30,\n        \"code\": \"KOQ4685\"\n    },\n    \"customerBalance\" : {\n        \"id\": 7\n    },\n    \"transactionalCurrency\" : {\n        \"id\": -2\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/accountOperationsDetails",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"accountOperationsDetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Get Account Operations with excluding AOs",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerAccount\" : {\n        \"id\": 30,\n        \"code\": \"KOQ4685\"\n    },\n    \"customerBalance\" : {\n        \"id\": 7\n    },\n    \"transactionalCurrency\" : {\n        \"id\": -2\n    },\n    \"excludeAOs\": [\n        \"DEB_SD\",\n        \"REF_SD\",\n        \"CRD_SD\",\n        \"ADJ_SD\",\n        \"INV_ADV\",\n        \"CAN_SD\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/accountOperationsDetails",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"accountOperationsDetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Get Account Operations with excluding AOs (ADJ_INV)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerAccount\" : {\n        \"id\": 30,\n        \"code\": \"KOQ4685\"\n    },\n    \"customerBalance\" : {\n        \"id\": 7\n    },\n    \"transactionalCurrency\" : {\n        \"id\": -2\n    },\n    \"excludeAOs\": [\n        \"DEB_SD\",\n        \"REF_SD\",\n        \"CRD_SD\",\n        \"ADJ_SD\",\n        \"ADJ_INV\",\n        \"INV_CRN\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/customerBalance/accountOperationsDetails",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"customerBalance",
+						"accountOperationsDetails"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "opencell.admin",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "opencell.admin",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

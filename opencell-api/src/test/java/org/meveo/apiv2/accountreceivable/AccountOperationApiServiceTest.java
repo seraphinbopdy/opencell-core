@@ -18,7 +18,9 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.admin.util.ResourceBundle;
+import org.meveo.api.dto.account.CustomerAccountDto;
 import org.meveo.api.exception.BusinessApiException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.apiv2.AcountReceivable.*;
 import org.meveo.apiv2.AcountReceivable.CustomerAccount;
 import org.meveo.model.MatchingReturnObject;
@@ -30,6 +32,7 @@ import org.meveo.service.payments.impl.*;
 import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -43,6 +46,9 @@ public class AccountOperationApiServiceTest {
 
     @Mock
     private AccountOperationService accountOperationService;
+	
+	@Mock
+	private OCCTemplateService occTemplateService;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CustomerAccountService customerAccountService;
@@ -205,6 +211,174 @@ public class AccountOperationApiServiceTest {
         
         assertTrue(exception.getMessage().contains("The amount to match must be less than : "));
     }
+	
+	@Test
+	public void shouldReturnEntityDoesNotExistsExceptionForTransferAmountsCoustmerAccountNotFoundById() {
+		//given
+		CustomerAccount customerAccountDto = ImmutableCustomerAccount.builder().id(100L).build();
+		AmountToTransferDto amountToTransferDto = ImmutableAmountToTransferDto.builder().amount(new BigDecimal(100.0d)).customerAccount(customerAccountDto).build();
+		AmountsTransferDto amountsTransferDto = ImmutableAmountsTransferDto.builder().amountsToTransfer(List.of(amountToTransferDto)).build();
+		//when
+		Mockito.when(customerAccountService.findById(100L)).thenReturn(null);
+		assertThrows(EntityDoesNotExistsException.class, () -> {
+			accountOperationApiService.transferAmounts(1L, amountsTransferDto);
+		});
+	}
+	
+	@Test
+	public void shouldReturnEntityDoesNotExistsExceptionForTransferAmountsCoustmerAccountNotFoundByCode() {
+		//given
+		CustomerAccount customerAccountDto = ImmutableCustomerAccount.builder().code("CODE").build();
+		AmountToTransferDto amountToTransferDto = ImmutableAmountToTransferDto.builder().amount(new BigDecimal(100.0d)).customerAccount(customerAccountDto).build();
+		AmountsTransferDto amountsTransferDto = ImmutableAmountsTransferDto.builder().amountsToTransfer(List.of(amountToTransferDto)).build();
+		//when
+		Mockito.when(customerAccountService.findByCode("CODE")).thenReturn(null);
+		assertThrows(EntityDoesNotExistsException.class, () -> {
+			accountOperationApiService.transferAmounts(1L, amountsTransferDto);
+		});
+	}
+	
+	@Test
+	public void shouldReturnBadRequestExceptionAmountsToTransferGreaterThanUnmatchedAmount() {
+		//given
+		CustomerAccount customerAccountDto = ImmutableCustomerAccount.builder().code("CODE").build();
+		AmountToTransferDto amountToTransferDto = ImmutableAmountToTransferDto.builder().amount(new BigDecimal(100.0d)).customerAccount(customerAccountDto).build();
+		AmountsTransferDto amountsTransferDto = ImmutableAmountsTransferDto.builder().amountsToTransfer(List.of(amountToTransferDto)).build();
+		AccountOperation accountOperation = new AccountOperation();
+		accountOperation.setUnMatchingAmount(new BigDecimal(50));
+		
+		TradingCurrency tradingCurrency = new TradingCurrency();
+		tradingCurrency.setId(1L);
+		Currency currency = new Currency();
+		currency.setCurrencyCode("USD");
+		tradingCurrency.setCurrency(currency);
+		
+		var customerAccountForAccount = new org.meveo.model.payments.CustomerAccount();
+		customerAccountForAccount.setTradingCurrency(tradingCurrency);
+		accountOperation.setCustomerAccount(customerAccountForAccount);
+		var customerAccount = new org.meveo.model.payments.CustomerAccount();
+		customerAccount.setTradingCurrency(tradingCurrency);
+		//when
+		Mockito.when(customerAccountService.findByCode("CODE")).thenReturn(customerAccount);
+		Mockito.when(accountOperationService.findById(2L)).thenReturn(accountOperation);
+		assertThrows(BadRequestException.class, () -> {
+			accountOperationApiService.transferAmounts(2L, amountsTransferDto);
+		});
+	}
+	
+	@Test
+	public void shouldPassOnAmountsToTransferGreaterThanUnmatchedAmount() {
+		//given
+		CustomerAccount customerAccountDto = ImmutableCustomerAccount.builder().code("CODE").build();
+		AmountToTransferDto amountToTransferDto = ImmutableAmountToTransferDto.builder().amount(new BigDecimal(100.0d)).customerAccount(customerAccountDto).build();
+		AmountsTransferDto amountsTransferDto = ImmutableAmountsTransferDto.builder().amountsToTransfer(List.of(amountToTransferDto)).build();
+		AccountOperation accountOperation = new AccountOperation();
+		accountOperation.setUnMatchingAmount(new BigDecimal(50));
+		
+		TradingCurrency tradingCurrency = new TradingCurrency();
+		tradingCurrency.setId(1L);
+		Currency currency = new Currency();
+		currency.setCurrencyCode("USD");
+		tradingCurrency.setCurrency(currency);
+		
+		var customerAccountForAccount = new org.meveo.model.payments.CustomerAccount();
+		customerAccountForAccount.setTradingCurrency(tradingCurrency);
+		accountOperation.setCustomerAccount(customerAccountForAccount);
+		accountOperation.setUnMatchingAmount(new BigDecimal(250));
+		var customerAccount = new org.meveo.model.payments.CustomerAccount();
+		customerAccount.setTradingCurrency(tradingCurrency);
+		//when
+		Mockito.when(customerAccountService.findByCode("CODE")).thenReturn(customerAccount);
+		Mockito.when(accountOperationService.findById(2L)).thenReturn(accountOperation);
+		
+		assertThrows(EntityDoesNotExistsException.class, () -> {
+			accountOperationApiService.transferAmounts(2L, amountsTransferDto);
+		});
+	}
+	
+	@Test
+	public void shouldReturnEntityDoesNotExistsExceptionTransferAmountsForCustomerAccounts(){
+		//given
+		CustomerAccount customerAccountDto = ImmutableCustomerAccount.builder().code("CODE").build();
+		AmountToTransferDto amountToTransferDto = ImmutableAmountToTransferDto.builder().amount(new BigDecimal(20.0d)).customerAccount(customerAccountDto).build();
+		AmountsTransferDto amountsTransferDto = ImmutableAmountsTransferDto.builder().amountsToTransfer(List.of(amountToTransferDto)).build();
+		AccountOperation accountOperation = new AccountOperation();
+		accountOperation.setUnMatchingAmount(new BigDecimal(50));
+		
+		TradingCurrency tradingCurrency = new TradingCurrency();
+		tradingCurrency.setId(1L);
+		Currency currency = new Currency();
+		currency.setCurrencyCode("USD");
+		tradingCurrency.setCurrency(currency);
+		
+		var customerAccountForAccount = new org.meveo.model.payments.CustomerAccount();
+		customerAccountForAccount.setTradingCurrency(tradingCurrency);
+		accountOperation.setCustomerAccount(customerAccountForAccount);
+		var customerAccount = new org.meveo.model.payments.CustomerAccount();
+		customerAccount.setTradingCurrency(tradingCurrency);
+		//when
+		Mockito.when(customerAccountService.findByCode("CODE")).thenReturn(customerAccount);
+		Mockito.when(accountOperationService.findById(2L)).thenReturn(accountOperation);
+		Mockito.when(occTemplateService.findByCode("CRD_TRS")).thenReturn(null);
+		assertThrows(EntityDoesNotExistsException.class, () -> {
+			accountOperationApiService.transferAmounts(2L, amountsTransferDto);
+		});
+	}
+	@Test
+	public void shouldTransferAmountsForCustomerAccountsForCreditAO() throws Exception {
+		//given
+		CustomerAccount customerAccountDto = ImmutableCustomerAccount.builder().code("CODE").build();
+		AmountToTransferDto amountToTransferDto = ImmutableAmountToTransferDto.builder().amount(new BigDecimal(20.0d)).customerAccount(customerAccountDto).build();
+		AmountsTransferDto amountsTransferDto = ImmutableAmountsTransferDto.builder().amountsToTransfer(List.of(amountToTransferDto)).build();
+		AccountOperation accountOperation = new AccountOperation();
+		accountOperation.setId(1L);
+		accountOperation.setUnMatchingAmount(new BigDecimal(50));
+		
+		TradingCurrency tradingCurrency = new TradingCurrency();
+		tradingCurrency.setId(1L);
+		Currency currency = new Currency();
+		currency.setCurrencyCode("USD");
+		tradingCurrency.setCurrency(currency);
+		
+		var customerAccountForAccount = new org.meveo.model.payments.CustomerAccount();
+		customerAccountForAccount.setId(35L);
+		customerAccountForAccount.setTradingCurrency(tradingCurrency);
+		accountOperation.setCustomerAccount(customerAccountForAccount);
+		accountOperation.setTransactionCategory(OperationCategoryEnum.CREDIT);
+		var customerAccount = new org.meveo.model.payments.CustomerAccount();
+		customerAccount.setTradingCurrency(tradingCurrency);
+		
+		OCCTemplate occTemplateCredit = new OCCTemplate();
+		occTemplateCredit.setCode("CRD_TRS");
+		occTemplateCredit.setOccCategory(OperationCategoryEnum.CREDIT);
+		occTemplateCredit.setDescription("Credit transfer");
+		
+		
+		OCCTemplate occTemplateDebit = new OCCTemplate();
+		occTemplateDebit.setCode("DBT_TRS");
+		occTemplateDebit.setOccCategory(OperationCategoryEnum.DEBIT);
+		occTemplateDebit.setDescription("Debit transfer");
+		// after creating a new account operation, set a random id to it
+		AccountOperation newAccountOperation = new AccountOperation();
+		newAccountOperation.setId(Math.round(Math.random() * 1000));
+		//when
+		Mockito.when(customerAccountService.findByCode("CODE")).thenReturn(customerAccount);
+		Mockito.when(accountOperationService.findById(2L)).thenReturn(accountOperation);
+		Mockito.when(occTemplateService.findByCode("CRD_TRS")).thenReturn(occTemplateCredit);
+		Mockito.when(occTemplateService.findByCode("DBT_TRS")).thenReturn(occTemplateDebit);
+		Mockito.when(matchingCodeService.matchOperations(customerAccount.getId(), null, null, null)).thenReturn(null);
+		
+		accountOperationApiService.transferAmounts(2L, amountsTransferDto);
+	}
+	@Test
+	public void shouldReturnBadRequestExceptionForTransferAmountsCoustmerAccountAccountRequired() {
+		//given
+		AmountsTransferDto amountsTransferDto = ImmutableAmountsTransferDto.builder().amountsToTransfer(null).build();
+		//when
+		assertThrows(BadRequestException.class, () -> {
+			accountOperationApiService.transferAmounts(1L, amountsTransferDto);
+		});
+	}
 
     private List<AccountOperationAndSequence> initOperationSequence() {
         List<AccountOperationAndSequence> sequence = new ArrayList<>();
@@ -231,5 +405,7 @@ public class AccountOperationApiServiceTest {
         ao.getCustomerAccount().setCode("CODE");
         return ao;
     }
+	
+	
 
 }

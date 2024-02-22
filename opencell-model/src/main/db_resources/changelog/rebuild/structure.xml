@@ -19357,15 +19357,6 @@
         <addPrimaryKey columnNames="invoice_id, subscription_id" constraintName="billing_invoices_subscriptions_pkey" tableName="billing_invoices_subscriptions" />
         <addForeignKeyConstraint baseColumnNames="invoice_id" baseTableName="billing_invoices_subscriptions" constraintName="fk_invoice_id_bill_invoices-subscriptions" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="billing_invoice" />
         <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_invoices_subscriptions" constraintName="fk_subscription_id_bill_invoices-subscriptions" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="billing_subscription" />
-            <sql>
-		        <![CDATA[
-		            INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id)
-		            SELECT DISTINCT il.invoice_id, rt.subscription_id
-		            FROM billing_rated_transaction rt
-		            INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id
-		            WHERE rt.status = 'BILLED' AND il.invoice_id IS NOT NULL;
-		        ]]>
-		    </sql>
     </changeSet>
     
      <changeSet id="#INTRD-18792_advanced_settings" author="Mohammed_ElAzzouzi">

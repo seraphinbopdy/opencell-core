@@ -7487,6 +7487,14 @@
             </column>
         </createTable>
     </changeSet>
+    
+    <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-348">
+        <createTable tableName="billing_invoices_orders">
+            <column name="invoice_id" type="bigint" />
+            <column name="order_id" type="bigint" />
+        </createTable>
+        <addPrimaryKey columnNames="invoice_id, order_id" constraintName="billing_invoices_orders_pkey" tableName="billing_invoices_orders" />
+    </changeSet>
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-349">
         <createTable tableName="cat_product_templ_charge_templ">

@@ -20,6 +20,8 @@ package org.meveo.api.payment;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.*;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static org.meveo.apiv2.payments.ImmutableRejectionGroup.builder;
 import static org.meveo.apiv2.payments.SequenceActionType.DOWN;
 import static org.meveo.apiv2.payments.SequenceActionType.UP;
@@ -926,7 +928,7 @@ public class PaymentApi extends BaseApi {
 	 * @param filters PagingAndFiltering
 	 */
 	public int removeRejectionCode(PagingAndFiltering filters) {
-		PaginationConfiguration configuration = new PaginationConfiguration(filters.getFilters());
+		PaginationConfiguration configuration = new PaginationConfiguration(castFilters(filters.getFilters()));
 		List<PaymentRejectionCode> paymentRejectionCodes = rejectionCodeService.list(configuration);
 		if (paymentRejectionCodes == null || paymentRejectionCodes.isEmpty()) {
 			throw new NotFoundException("No payment rejection code found");
@@ -937,6 +939,20 @@ public class PaymentApi extends BaseApi {
 		} catch (Exception exception) {
 			throw new BusinessApiException(exception.getMessage());
 		}
+	}
+
+	private Map<String, Object> castFilters(Map<String, Object> filters) {
+		for (Map.Entry<String, Object> entry : filters.entrySet()) {
+			if (containsIgnoreCase(entry.getKey(), "id")) {
+				List<Long> ids = ((List<Object>) entry.getValue())
+						.stream()
+						.map(Object::toString)
+						.map(Long::valueOf)
+						.collect(toList());
+				entry.setValue(ids);
+			}
+		}
+		return filters;
 	}
 
 	/**
@@ -1086,7 +1102,7 @@ public class PaymentApi extends BaseApi {
 	 * @param filters PagingAndFiltering
 	 */
 	public int removeRejectionCodeGroup(PagingAndFiltering filters) {
-		PaginationConfiguration configuration = new PaginationConfiguration(filters.getFilters());
+		PaginationConfiguration configuration = new PaginationConfiguration(castFilters(filters.getFilters()));
 		List<PaymentRejectionCodesGroup> groups = paymentRejectionCodesGroupService.list(configuration);
 		if (groups == null || groups.isEmpty()) {
 			throw new NotFoundException("No payment rejection code found");

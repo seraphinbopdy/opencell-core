@@ -232,7 +232,7 @@ public class PaymentResourceImpl implements PaymentResource {
         final int deletedCodeCount = paymentApi.removeRejectionCode(filters);
         return ok()
                 .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
-                        ",\"message\":\"Rejection action successfully deleted\"," +
+                        ",\"message\":\"Payment rejection codes successfully deleted\"," +
                         " \"numberOfDeletedCodes\":" + deletedCodeCount + "}")
                 .build();
     }

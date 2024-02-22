@@ -192,9 +192,14 @@ public class CustomerBalanceService extends BusinessService<CustomerBalance> {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal balance = debit.subtract(credit);
 
+        List<Long> aoIds = new ArrayList<>();
+        for (AccountOperationDto accountOperationDto : result) {
+            aoIds.add(accountOperationDto.getId());
+        }
+
         // Build and return the result
         return ImmutableAccountOperationsResult.builder()
-                .accountOperations(result)
+                .accountOperationIds(aoIds)
                 .totalCredit(credit)
                 .totalDebit(debit)
                 .balance(balance)
@@ -285,6 +290,7 @@ public class CustomerBalanceService extends BusinessService<CustomerBalance> {
      */
     private List<AccountOperationDto> filterAccountOperations(List<AccountOperation> accountOperations, CustomerBalance customerBalance) {
         List<AccountOperationDto> filteredOperations = new ArrayList<>();
+
         for (AccountOperation operation : accountOperations) {
             if (customerBalance.getBalanceEl() != null && !customerBalance.getBalanceEl().isEmpty()) {
                 Map<Object, Object> expressionMap = new HashMap<>();
@@ -300,6 +306,9 @@ public class CustomerBalanceService extends BusinessService<CustomerBalance> {
                     AccountOperationDto operationDto = new AccountOperationDto(operation, entityToDtoConverter.getCustomFieldsDTO(operation, CustomFieldInheritanceEnum.INHERIT_NO_MERGE));
                     filteredOperations.add(operationDto);
                 }
+            } else {
+                AccountOperationDto operationDto = new AccountOperationDto(operation, entityToDtoConverter.getCustomFieldsDTO(operation, CustomFieldInheritanceEnum.INHERIT_NO_MERGE));
+                filteredOperations.add(operationDto);
             }
         }
         return filteredOperations;

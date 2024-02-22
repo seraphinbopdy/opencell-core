@@ -3,13 +3,18 @@ package org.meveo.service.payments.impl;
 import static java.lang.Math.abs;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.PAID;
 import static org.meveo.model.dunning.DunningLevelInstanceStatusEnum.DONE;
 import static org.meveo.model.dunning.DunningLevelInstanceStatusEnum.TO_BE_DONE;
+import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.SUCCESS;
+import static org.meveo.model.payments.PaymentMethodEnum.CARD;
+import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
 import static org.meveo.model.shared.DateUtils.daysBetween;
 import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -24,6 +29,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.jpa.JpaAmpNewTx;
@@ -43,7 +49,11 @@ import org.meveo.model.dunning.DunningPolicy;
 import org.meveo.model.dunning.DunningPolicyLevel;
 import org.meveo.model.dunning.DunningStopReason;
 import org.meveo.model.payments.ActionModeEnum;
+import org.meveo.model.payments.CardPaymentMethod;
+import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
+import org.meveo.model.payments.PaymentGateway;
+import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.InvoiceService;
@@ -83,6 +93,12 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
     @Inject
     private InternationalSettingsService internationalSettingsService;
+    
+    @Inject
+    private PaymentService paymentService;
+
+    @Inject
+    private PaymentGatewayService paymentGatewayService;
 
     private static final String STOP_REASON = "Changement de politique de recouvrement";
 
@@ -354,7 +370,8 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
     	collectionPlanToResume = retrieveIfNotManaged(collectionPlanToResume);
     	collectionPlanToResume = refreshLevelInstances(collectionPlanToResume);
     	DunningCollectionPlanStatus dunningCollectionPlanStatus = dunningCollectionPlanStatusService.refreshOrRetrieve(collectionPlanToResume.getStatus());
-		if(validate) {
+		
+    	if (validate) {
 			if(!dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.PAUSED)) {
 				throw new BusinessApiException("Collection Plan with id "+collectionPlanToResume.getId()+" cannot be resumed, the collection plan is not paused");
 			}
@@ -363,20 +380,30 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 			}
 		}
 		
-		Optional<DunningLevelInstance> dunningLevelInstance = collectionPlanToResume.getDunningLevelInstances()
-				.stream().max(Comparator.comparing(DunningLevelInstance::getId));
-		if(dunningLevelInstance.isEmpty()) {
-			throw new BusinessApiException("No dunning level instances found for the collection plan with id "+collectionPlanToResume.getId());
-		}
-		DunningCollectionPlanStatus collectionPlanStatus=null;
-		if(collectionPlanToResume.getPausedUntilDate() != null && collectionPlanToResume.getPausedUntilDate().after(DateUtils.addDaysToDate(collectionPlanToResume.getStartDate(), dunningLevelInstance.get().getDaysOverdue()))) {
-			collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED);
+		if (collectionPlanToResume.getRelatedInvoice().getPaymentStatus() == PAID) {
+			collectionPlanToResume.setStatus(dunningCollectionPlanStatusService.findByStatus(SUCCESS));
 		} else {
-			collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
-			collectionPlanToResume.setPauseReason(null);
+
+			if (collectionPlanToResume.isRetryPaymentOnResumeDate() && collectionPlanToResume.getRelatedInvoice().getNetToPay().compareTo(BigDecimal.ZERO) > 0) {
+				launchPaymentAction(collectionPlanToResume);
+			}
+
+			Optional<DunningLevelInstance> dunningLevelInstance = collectionPlanToResume.getDunningLevelInstances().stream().max(Comparator.comparing(DunningLevelInstance::getId));
+			if (dunningLevelInstance.isEmpty()) {
+				throw new BusinessApiException("No dunning level instances found for the collection plan with id " + collectionPlanToResume.getId());
+			}
+			
+			DunningCollectionPlanStatus collectionPlanStatus = null;
+			if (collectionPlanToResume.getPausedUntilDate() != null && collectionPlanToResume.getPausedUntilDate().after(DateUtils.addDaysToDate(collectionPlanToResume.getStartDate(), dunningLevelInstance.get().getDaysOverdue()))) {
+				collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED);
+			} else {
+				collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
+				collectionPlanToResume.setPauseReason(null);
+			}
+			collectionPlanToResume.setStatus(collectionPlanStatus);
+			collectionPlanToResume.addPauseDuration((int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date()));
 		}
-		collectionPlanToResume.setStatus(collectionPlanStatus);
-		collectionPlanToResume.addPauseDuration((int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date()));
+		
 		update(collectionPlanToResume);
 		return collectionPlanToResume;
 	}
@@ -454,5 +481,63 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                 .createNamedQuery("DunningCollectionPlan.findPaused", DunningCollectionPlan.class)
                 .setParameter("id", id)
                 .getResultList();
+    }
+    
+    /**
+     * Launch payment Action or retry payment
+     * @param collectionPlan
+     */
+    public void launchPaymentAction(DunningCollectionPlan collectionPlan) {
+        BillingAccount billingAccount = collectionPlan.getBillingAccount();
+        if (billingAccount != null && billingAccount.getCustomerAccount() != null
+                && billingAccount.getCustomerAccount().getPaymentMethods() != null) {
+            PaymentMethod preferredPaymentMethod = billingAccount.getCustomerAccount()
+                    .getPaymentMethods()
+                    .stream()
+                    .filter(PaymentMethod::isPreferred)
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
+                            + billingAccount.getCustomerAccount().getCode()));
+            CustomerAccount customerAccount = billingAccount.getCustomerAccount();
+            //PaymentService.doPayment consider amount to pay in cent so amount should be * 100
+            long amountToPay = collectionPlan.getRelatedInvoice().getNetToPay().multiply(BigDecimal.valueOf(100)).longValue();
+            Invoice invoice = collectionPlan.getRelatedInvoice();
+            if (invoice.getRecordedInvoice() == null) {
+                throw new BusinessException("No getRecordedInvoice for the invoice "
+                        + (invoice.getInvoiceNumber() != null ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber()));
+            }
+            List<Long> ids = new ArrayList<>();
+            ids.add(invoice.getRecordedInvoice().getId());
+            PaymentGateway paymentGateway = paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
+            doPayment(preferredPaymentMethod, customerAccount, amountToPay, ids, paymentGateway);
+        }
+    }
+
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void doPayment(PaymentMethod preferredPaymentMethod, CustomerAccount customerAccount, long amountToPay, List<Long> accountOperationsToPayIds, PaymentGateway paymentGateway) {
+        if (preferredPaymentMethod.getPaymentType().equals(DIRECTDEBIT) || preferredPaymentMethod.getPaymentType().equals(CARD)) {
+            try {
+                if (accountOperationsToPayIds != null && !accountOperationsToPayIds.isEmpty()) {
+                    if (preferredPaymentMethod.getPaymentType().equals(CARD)) {
+                        if (preferredPaymentMethod instanceof HibernateProxy) {
+                            preferredPaymentMethod = (PaymentMethod) ((HibernateProxy) preferredPaymentMethod).getHibernateLazyInitializer().getImplementation();
+                        }
+                        CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
+                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
+                                true, true, paymentGateway, paymentMethod.getCardNumber(),
+                                paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
+                                paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
+                                true, preferredPaymentMethod.getPaymentType());
+                    } else {
+                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
+                                true, true, paymentGateway, null, null,
+                                null, null, null, true, preferredPaymentMethod.getPaymentType());
+                    }
+                }
+            } catch (Exception exception) {
+                throw new BusinessException("Error occurred during payment process for customer " + customerAccount.getCode(), exception);
+            }
+        }
     }
 }

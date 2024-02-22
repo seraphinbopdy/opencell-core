@@ -315,8 +315,11 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 if (collectionPlan == null) {
                     throw new EntityDoesNotExistsException("Dunning collection plan with id " + collectionPlanResource.getId() + " does not exits");
                 }
+                if (massPauseDunningCollectionPlan.getRetryPaymentOnResumeDate()) {
+                	checkPreferredMethodPayment(collectionPlan);
+                }
                 dunningCollectionPlanService.pauseCollectionPlan(massPauseDunningCollectionPlan.getForcePause(), massPauseDunningCollectionPlan.getPauseUntil(), collectionPlan,
-                    pauseReason, false);
+                    pauseReason, massPauseDunningCollectionPlan.getRetryPaymentOnResumeDate());
 
                 auditLogService.trackOperation("PAUSE Reason : " + pauseReason.getPauseReason(), new Date(), collectionPlan, collectionPlan.getCollectionPlanNumber());
             }
@@ -977,7 +980,8 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
     }
     
     private void checkPreferredMethodPayment (DunningCollectionPlan collectionPlan) {
-    	BillingAccount billingAccount =billingAccountService.refreshOrRetrieve(collectionPlan.getBillingAccount());
+    	// customerAccount can be directly retrieved from collectionPlan : INTRD-21493
+    	BillingAccount billingAccount = billingAccountService.refreshOrRetrieve(collectionPlan.getBillingAccount());
         if (billingAccount != null && billingAccount.getCustomerAccount() != null) {
             PaymentMethod preferredPaymentMethod = customerAccountService.getPreferredPaymentMethod(billingAccount.getCustomerAccount().getId());
 
@@ -986,7 +990,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             }
             
             if (!(preferredPaymentMethod.getPaymentType().equals(DIRECTDEBIT) || preferredPaymentMethod.getPaymentType().equals(CARD))) {
-            	throw new MeveoApiException("retryPaymentOnResumeDate can be true only if payment method is CARD or DIRECT DEBIT");
+            	throw new MeveoApiException("retryPaymentOnResumeDate can be true only if payment method is CARD or DIRECT DEBIT for collection plan " + collectionPlan.getId());
             }
         }
     }

@@ -10,11 +10,8 @@ import static org.meveo.model.payments.ActionChannelEnum.LETTER;
 import static org.meveo.model.payments.ActionModeEnum.AUTOMATIC;
 import static org.meveo.model.payments.ActionTypeEnum.*;
 import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.*;
-import static org.meveo.model.payments.PaymentMethodEnum.CARD;
-import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
 
-import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.admin.Seller;
@@ -41,7 +38,6 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import java.io.File;
-import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -66,12 +62,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
     @Inject
     private ScriptInstanceService scriptInstanceService;
-
-    @Inject
-    private PaymentService paymentService;
-
-    @Inject
-    private PaymentGatewayService paymentGatewayService;
 
     @Inject
     private InvoiceService invoiceService;
@@ -243,7 +233,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                         collectionPlan.getRelatedInvoice(), collectionPlan.getLastActionDate());
         }
         if (actionInstance.getActionType().equals(RETRY_PAYMENT)) {
-            launchPaymentAction(collectionPlan);
+        	collectionPlanService.launchPaymentAction(collectionPlan);
         }
     }
 
@@ -317,60 +307,4 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         }
     }
 
-    private void launchPaymentAction(DunningCollectionPlan collectionPlan) {
-        BillingAccount billingAccount = collectionPlan.getBillingAccount();
-        if (billingAccount != null && billingAccount.getCustomerAccount() != null
-                && billingAccount.getCustomerAccount().getPaymentMethods() != null) {
-            PaymentMethod preferredPaymentMethod = billingAccount.getCustomerAccount()
-                    .getPaymentMethods()
-                    .stream()
-                    .filter(PaymentMethod::isPreferred)
-                    .findFirst()
-                    .orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
-                            + billingAccount.getCustomerAccount().getCode()));
-            CustomerAccount customerAccount = billingAccount.getCustomerAccount();
-            //PaymentService.doPayment consider amount to pay in cent so amount should be * 100
-            long amountToPay = collectionPlan.getRelatedInvoice().getNetToPay().multiply(BigDecimal.valueOf(100)).longValue();
-            Invoice invoice = collectionPlan.getRelatedInvoice();
-            if (invoice.getRecordedInvoice() == null) {
-                throw new BusinessException("No getRecordedInvoice for the invoice "
-                        + (invoice.getInvoiceNumber() != null ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber()));
-            }
-            List<Long> ids = new ArrayList<>();
-            ids.add(invoice.getRecordedInvoice().getId());
-            PaymentGateway paymentGateway =
-                    paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
-            jobBean.doPayment(preferredPaymentMethod, customerAccount, amountToPay, ids, paymentGateway);
-        }
-    }
-
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void doPayment(PaymentMethod preferredPaymentMethod, CustomerAccount customerAccount,
-                          long amountToPay, List<Long> accountOperationsToPayIds, PaymentGateway paymentGateway) {
-        if (preferredPaymentMethod.getPaymentType().equals(DIRECTDEBIT) || preferredPaymentMethod.getPaymentType().equals(CARD)) {
-            try {
-                if (accountOperationsToPayIds != null && !accountOperationsToPayIds.isEmpty()) {
-                    if (preferredPaymentMethod.getPaymentType().equals(CARD)) {
-                        if (preferredPaymentMethod instanceof HibernateProxy) {
-                            preferredPaymentMethod = (PaymentMethod) ((HibernateProxy) preferredPaymentMethod).getHibernateLazyInitializer()
-                                    .getImplementation();
-                        }
-                        CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
-                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
-                                true, true, paymentGateway, paymentMethod.getCardNumber(),
-                                paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
-                                paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-                                true, preferredPaymentMethod.getPaymentType());
-                    } else {
-                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
-                                true, true, paymentGateway, null, null,
-                                null, null, null, true, preferredPaymentMethod.getPaymentType());
-                    }
-                }
-            } catch (Exception exception) {
-                throw new BusinessException("Error occurred during payment process for customer " + customerAccount.getCode(), exception);
-            }
-        }
-    }
 }

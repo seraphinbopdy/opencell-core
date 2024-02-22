@@ -260,7 +260,7 @@ public class AccountOperationApiServiceTest {
 		customerAccount.setTradingCurrency(tradingCurrency);
 		//when
 		Mockito.when(customerAccountService.findByCode("CODE")).thenReturn(customerAccount);
-		Mockito.when(accountOperationService.findById(2L)).thenReturn(accountOperation);
+		Mockito.when(accountOperationService.findById(2L, List.of("customerAccount"))).thenReturn(accountOperation);
 		assertThrows(BadRequestException.class, () -> {
 			accountOperationApiService.transferAmounts(2L, amountsTransferDto);
 		});
@@ -289,7 +289,6 @@ public class AccountOperationApiServiceTest {
 		customerAccount.setTradingCurrency(tradingCurrency);
 		//when
 		Mockito.when(customerAccountService.findByCode("CODE")).thenReturn(customerAccount);
-		Mockito.when(accountOperationService.findById(2L)).thenReturn(accountOperation);
 		
 		assertThrows(EntityDoesNotExistsException.class, () -> {
 			accountOperationApiService.transferAmounts(2L, amountsTransferDto);
@@ -318,8 +317,6 @@ public class AccountOperationApiServiceTest {
 		customerAccount.setTradingCurrency(tradingCurrency);
 		//when
 		Mockito.when(customerAccountService.findByCode("CODE")).thenReturn(customerAccount);
-		Mockito.when(accountOperationService.findById(2L)).thenReturn(accountOperation);
-		Mockito.when(occTemplateService.findByCode("CRD_TRS")).thenReturn(null);
 		assertThrows(EntityDoesNotExistsException.class, () -> {
 			accountOperationApiService.transferAmounts(2L, amountsTransferDto);
 		});
@@ -363,9 +360,9 @@ public class AccountOperationApiServiceTest {
 		newAccountOperation.setId(Math.round(Math.random() * 1000));
 		//when
 		Mockito.when(customerAccountService.findByCode("CODE")).thenReturn(customerAccount);
-		Mockito.when(accountOperationService.findById(2L)).thenReturn(accountOperation);
-		Mockito.when(occTemplateService.findByCode("CRD_TRS")).thenReturn(occTemplateCredit);
-		Mockito.when(occTemplateService.findByCode("DBT_TRS")).thenReturn(occTemplateDebit);
+		Mockito.when(accountOperationService.findById(2L,List.of("customerAccount"))).thenReturn(accountOperation);
+		Mockito.when(occTemplateService.findByCode("CRD_TRS", List.of("accountingCode"))).thenReturn(occTemplateCredit);
+		Mockito.when(occTemplateService.findByCode("DBT_TRS", List.of("accountingCode"))).thenReturn(occTemplateDebit);
 		Mockito.when(matchingCodeService.matchOperations(customerAccount.getId(), null, null, null)).thenReturn(null);
 		
 		accountOperationApiService.transferAmounts(2L, amountsTransferDto);

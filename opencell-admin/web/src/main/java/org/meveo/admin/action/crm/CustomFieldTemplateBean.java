@@ -44,6 +44,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.web.interceptor.ActionMethod;
+import org.meveo.cache.CustomFieldsCacheContainerProvider;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.User;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -173,9 +174,11 @@ public class CustomFieldTemplateBean extends UpdateMapTypeFieldBean<CustomFieldT
         if (entity.getCalendar() != null) {
             entity.setCalendar(calendarService.retrieveIfNotManaged(entity.getCalendar()));
         }
+	    customFieldsCacheContainerProvider.addUpdateCustomFieldTemplate(entity);
         return super.saveOrUpdate(killConversation);
     }
-
+	@Inject
+	private CustomFieldsCacheContainerProvider customFieldsCacheContainerProvider;
     @Override
     protected IPersistenceService<CustomFieldTemplate> getPersistenceService() {
         return customFieldTemplateService;

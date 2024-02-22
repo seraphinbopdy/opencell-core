@@ -132,7 +132,7 @@ public class PaymentResourceImpl implements PaymentResource {
         paymentApi.removeRejectionCode(id);
         return ok()
                 .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
-                        ",\"message\":\"Rejection code successfully deleted\"}")
+                        ",\"message\":\"Rejection code successfully deleted\"}}")
                 .build();
     }
 
@@ -155,8 +155,11 @@ public class PaymentResourceImpl implements PaymentResource {
      */
     @Override
     public Response importRejectionCodes(ImportRejectionCodeInput importRejectionCodeInput) {
+        int numberOfImportedCodes = paymentApi.importRejectionCodes(importRejectionCodeInput);
         return ok()
-                .entity(paymentApi.importRejectionCodes(importRejectionCodeInput))
+                .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Rejection codes successfully imported\"}," +
+                        " \"numberOfImportedLines\":" + numberOfImportedCodes + "}")
                 .build();
     }
 
@@ -232,7 +235,7 @@ public class PaymentResourceImpl implements PaymentResource {
         final int deletedCodeCount = paymentApi.removeRejectionCode(filters);
         return ok()
                 .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
-                        ",\"message\":\"Payment rejection codes successfully deleted\"," +
+                        ",\"message\":\"Payment rejection codes successfully deleted\"}," +
                         " \"numberOfDeletedCodes\":" + deletedCodeCount + "}")
                 .build();
     }

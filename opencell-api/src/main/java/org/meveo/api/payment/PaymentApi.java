@@ -66,7 +66,6 @@ import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
-import org.meveo.api.rest.exception.AlreadyExistException;
 import org.meveo.api.security.Interceptor.SecuredBusinessEntityMethodInterceptor;
 import org.meveo.api.security.config.annotation.FilterProperty;
 import org.meveo.api.security.config.annotation.FilterResults;
@@ -77,13 +76,11 @@ import org.meveo.apiv2.models.Resource;
 import org.meveo.apiv2.payments.ClearingResponse;
 import org.meveo.apiv2.payments.ImmutableClearingResponse;
 import org.meveo.apiv2.payments.ImmutableRejectionCodesExportResult;
-import org.meveo.apiv2.payments.ImmutableRejectionCodesImportResult;
 import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
 import org.meveo.apiv2.payments.RejectionCodesExportResult;
-import org.meveo.apiv2.payments.RejectionCodesImportResult;
 import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.payments.resource.RejectionActionMapper;
@@ -125,7 +122,6 @@ import org.meveo.service.payments.impl.PaymentRejectionCodeService;
 import org.meveo.service.payments.impl.PaymentRejectionCodesGroupService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
-import org.meveo.service.payments.impl.RejectionCodeImportResult;
 import org.meveo.service.script.ScriptInstanceService;
 
 /**
@@ -218,7 +214,7 @@ public class PaymentApi extends BaseApi {
             throw new BusinessException("Cannot find OCC Template with code=" + paymentDto.getOccTemplateCode());
         }
         if (!occTemplate.isManualCreationEnabled()) {
-            throw new BusinessException(String.format("Creation is prohibited; occTemplate %s is not allowed for manual creation", paymentDto.getOccTemplateCode()));
+            throw new BusinessException(format("Creation is prohibited; occTemplate %s is not allowed for manual creation", paymentDto.getOccTemplateCode()));
         }
 
         Payment payment = new Payment();
@@ -806,9 +802,9 @@ public class PaymentApi extends BaseApi {
 	 * Import rejection codes by payment gateway
 	 *
 	 * @param importRejectionCodeInput Import data
-	 * @return RejectionCodesExportResult
+	 * @return number of imported lines
 	 */
-	public RejectionCodesImportResult importRejectionCodes(ImportRejectionCodeInput importRejectionCodeInput) {
+	public int importRejectionCodes(ImportRejectionCodeInput importRejectionCodeInput) {
 		if (isBlank(importRejectionCodeInput.getBase64csv())) {
 			throw new BusinessApiException("Encoded file should not be null or empty");
 		}
@@ -816,15 +812,7 @@ public class PaymentApi extends BaseApi {
 				new ImportRejectionCodeConfig(importRejectionCodeInput.getBase64csv(),
 						importRejectionCodeInput.getIgnoreLanguageErrors(),
 						importRejectionCodeInput.getMode());
-		RejectionCodeImportResult importResult = rejectionCodeService.importRejectionCodes(config);
-		return ImmutableRejectionCodesImportResult.builder()
-				.linesCount(importResult.getLineToImportCount())
-				.successfullyImportedCodes(importResult.getSuccessCount())
-				.errorCount(importResult.getErrorCount())
-				.errors(importResult.getErrors())
-				.importedFile(importRejectionCodeInput.getBase64csv())
-				.importMode(importRejectionCodeInput.getMode())
-				.build();
+		return rejectionCodeService.importRejectionCodes(config);
 	}
 
 	/**
@@ -1006,10 +994,13 @@ public class PaymentApi extends BaseApi {
 				rejectionCodeEntity.setId(rejectionCodeResource.getId());
 				rejectionCodeEntity.setCode(rejectionCodeResource.getCode());
 				rejectionCodeEntity = ofNullable(rejectionCodeService.findByIdOrCode(rejectionCodeEntity))
-						.orElseThrow(() -> new NotFoundException("Payment rejection code "
-								+ (rejectionCodeResource.getId() != null
-								? rejectionCodeResource.getId() : rejectionCodeResource.getCode())
-								+ " does not exists"));
+						.orElseThrow(() -> new NotFoundException(format("Payment rejection code %s does not exists",
+								rejectionCodeResource.getId() != null
+                                ? rejectionCodeResource.getId() : rejectionCodeResource.getCode())));
+				if(rejectionCodeEntity.getPaymentRejectionCodesGroup() != null) {
+					throw new BusinessApiException(format("Rejection code %s already associated with paymentRejectionGroup %s",
+							rejectionCodeEntity.getCode(), rejectionCodeEntity.getPaymentRejectionCodesGroup().getCode()));
+				}
 				rejectionCodeEntity.setPaymentRejectionCodesGroup(rejectionCodesGroupEntity);
 				paymentRejectionCodes.add(rejectionCodeEntity);
 			}

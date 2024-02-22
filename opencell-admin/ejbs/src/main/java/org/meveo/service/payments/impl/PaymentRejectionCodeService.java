@@ -1,7 +1,6 @@
 package org.meveo.service.payments.impl;
 
 import static java.io.File.separator;
-import static java.lang.Math.abs;
 import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Collections.emptyList;
@@ -11,14 +10,12 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.readFileToByteArray;
-import static org.apache.commons.lang3.StringUtils.split;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.meveo.apiv2.payments.RejectionCodeImportMode.UPDATE;
 import static org.meveo.commons.utils.StringUtils.EMPTY;
-import static org.meveo.service.payments.impl.RejectionCodeImportResult.EMPTY_IMPORT_RESULT;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
-import org.meveo.api.exception.BusinessApiException;
 import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentRejectionCode;
 import org.meveo.service.base.BusinessService;
@@ -49,7 +46,7 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
 
     private static final String EXPORT_DATE_FORMAT_PATTERN = "yyyyMMdd_HHmmss";
     private static final String DESCRIPTION_I18N_REGEX = "Description ([a-zA-Z]*$)";
-    private static final String SEPARATOR = ";\"";
+    private static final String DELIMITER = ";";
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat(EXPORT_DATE_FORMAT_PATTERN);
 
     @Inject
@@ -181,7 +178,7 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
     }
 
     public String convertToCSV(String... data) {
-        return join(";", data);
+        return join(DELIMITER, data);
     }
 
     private String getAvailableTradingLanguages(List<Object[]> languagesDetails) {
@@ -194,26 +191,25 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         return tradingLanguages;
     }
 
-    public RejectionCodeImportResult importRejectionCodes(ImportRejectionCodeConfig config) {
+    public int importRejectionCodes(ImportRejectionCodeConfig config) {
         byte[] importStream = Base64.getDecoder().decode(config.getBase64Csv());
         String[] lines = new String(importStream).split("\\n");
-        List<String> errors = new ArrayList<>();
-        RejectionCodeImportResult rejectionCodeImportResult = EMPTY_IMPORT_RESULT;
+        int resultCount = 0;
         if (lines.length > 0) {
-            String[] header = split(lines[0].trim(), SEPARATOR);
+            String[] header = lines[0].trim().split(DELIMITER);
             List<Object[]> languagesDetails = getAvailableTradingLanguage();
             validateHeader(header, languagesDetails);
-            List<PaymentRejectionCode> rejectionCodes =
-                    createCodesFromLines(lines, header, languagesDetails, errors, config);
-            rejectionCodeImportResult = processDataAndSave(rejectionCodes, errors, config, lines.length - 1);
+            List<PaymentRejectionCode> rejectionCodes = createCodesFromLines(lines, header, languagesDetails, config);
+            processDataAndSave(rejectionCodes, config);
+            resultCount = rejectionCodes.size();
         }
-        return rejectionCodeImportResult;
+        return resultCount;
     }
 
     private void validateHeader(String[] header, List<Object[]> languagesDetails) {
         if(!header[0].equalsIgnoreCase("Payment gateway")
                 || !header[1].equalsIgnoreCase("Rejection code")) {
-            throw new BusinessApiException("Incorrect header, please export existing settings to get correct headers");
+            throw new BusinessException("Incorrect header, please export existing settings to get correct headers");
         }
         for (int index = 2; index < header.length; index++) {
             String language = header[index];
@@ -222,49 +218,58 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                 boolean match = languagesDetails.stream()
                         .anyMatch(lang -> ((String) lang[2]).equalsIgnoreCase(languageCode));
                 if(!match) {
-                    throw new BusinessApiException("Language " + languageCode + " is not a defined trading language");
+                    throw new BusinessException(format("Language %s is not a defined trading language", languageCode));
                 }
             }
         }
     }
 
     private  List<PaymentRejectionCode> createCodesFromLines(String[] lines, String[] header,
-                                                                     List<Object[]> languagesDetails,
-                                                                     List<String> errors, ImportRejectionCodeConfig config) {
+                                                             List<Object[]> languagesDetails, ImportRejectionCodeConfig config) {
         List<PaymentRejectionCode> rejectionCodes = new ArrayList<>();
         for (int index = 1; index < lines.length; index++) {
-            String[] line = split(lines[index].trim(), SEPARATOR);
-            PaymentRejectionCode paymentRejectionCode =  createFromImportData(line, header);
+            String[] line = lines[index].trim().split(DELIMITER);
+            PaymentRejectionCode paymentRejectionCode = createFromImportData(line, header, index);
             if(!config.isIgnoreLanguageErrors()) {
                 String languagesValidation =
                         checkDescriptionI18(paymentRejectionCode.getDescriptionI18n(), languagesDetails);
                 if(!languagesValidation.isBlank()) {
-                    errors.add(format("Error occurred during importing line %d, error : %s", index, languagesValidation));
-                } else {
-                    rejectionCodes.add(paymentRejectionCode);
+                    throw new BusinessException(format("Error occurred during importing line %d, %s",
+                            index, languagesValidation));
                 }
-            } else {
-                rejectionCodes.add(paymentRejectionCode);
             }
+            rejectionCodes.add(paymentRejectionCode);
         }
         return rejectionCodes;
     }
 
-    private PaymentRejectionCode createFromImportData(String[] line, String[] header) {
+    private PaymentRejectionCode createFromImportData(String[] line, String[] header, int lineNumber) {
         PaymentRejectionCode rejectionCode = new PaymentRejectionCode();
         Map<String, String> inputLanguages = new HashMap<>();
-        for (int i = 0; i < line.length; i++) {
-            if ("payment gateway".equalsIgnoreCase(header[i])) {
-                rejectionCode.setPaymentGateway(paymentGatewayService.findByCode(line[i].trim()));
+        for (int index = 0; index < line.length; index++) {
+            if ("payment gateway".equalsIgnoreCase(header[index])) {
+                String gatewayCode = line[index].trim();
+                if(isBlank(gatewayCode)) {
+                    throw new BusinessException(format("Error importing line %d, payment gateway is mandatory", lineNumber));
+                }
+                PaymentGateway paymentGateway = paymentGatewayService.findByCode(line[index].trim());
+                if(paymentGateway == null) {
+                    throw new BusinessException(format("Error importing line %d, payment Gateway %s does not exist",
+                            lineNumber, gatewayCode));
+                }
+                rejectionCode.setPaymentGateway(paymentGateway);
             }
-            if ("rejection code".equalsIgnoreCase(header[i])) {
-                rejectionCode.setCode(line[i].trim());
+            if ("rejection code".equalsIgnoreCase(header[index])) {
+                if(isBlank(line[index].trim())) {
+                    throw new BusinessException(format("Error importing line %d, rejection code is mandatory", lineNumber));
+                }
+                rejectionCode.setCode(line[index].trim());
             }
-            if ("description".equalsIgnoreCase(header[i])) {
-                rejectionCode.setDescription(line[i]);
+            if ("description".equalsIgnoreCase(header[index])) {
+                rejectionCode.setDescription(line[index]);
             }
-            if (header[i] != null && header[i].matches(DESCRIPTION_I18N_REGEX)) {
-                inputLanguages.put(header[i].split(" ")[1], line[i].trim());
+            if (header[index] != null && header[index].matches(DESCRIPTION_I18N_REGEX)) {
+                inputLanguages.put(header[index].split(" ")[1], line[index].trim());
             }
         }
         rejectionCode.setDescriptionI18n(inputLanguages);
@@ -281,23 +286,12 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                 .collect(joining("\\n"));
     }
 
-    private RejectionCodeImportResult processDataAndSave(List<PaymentRejectionCode> rejectionCodes,
-                                                         List<String> errors, ImportRejectionCodeConfig config, int lineCount) {
+    private void processDataAndSave(List<PaymentRejectionCode> rejectionCodes, ImportRejectionCodeConfig config) {
+        Map<String, PaymentRejectionCode> rejectionCodeMemoryStore = new HashMap<>();
         if (rejectionCodes != null && !rejectionCodes.isEmpty()) {
             if (UPDATE.equals(config.getMode())) {
                 for (PaymentRejectionCode paymentRejectionCode : rejectionCodes) {
-                    Optional<PaymentRejectionCode> rejectionCode = findByCodeAndPaymentGateway(paymentRejectionCode.getCode(),
-                            paymentRejectionCode.getPaymentGateway().getId());
-                    if (rejectionCode.isPresent()) {
-                        PaymentRejectionCode rejectionCodeToUpdate = rejectionCode.get();
-                        rejectionCodeToUpdate.setDescription(paymentRejectionCode.getDescription());
-                        rejectionCodeToUpdate.setDescriptionI18n(paymentRejectionCode.getDescriptionI18n());
-                        rejectionCodeToUpdate.setPaymentGateway(paymentRejectionCode.getPaymentGateway());
-                        update(rejectionCodeToUpdate);
-                    } else {
-                        create(paymentRejectionCode);
-                    }
-                    getEntityManager().flush();
+                    createOrUpdateCode(paymentRejectionCode, paymentRejectionCode.getPaymentGateway(), rejectionCodeMemoryStore);
                 }
             } else {
                 Map<PaymentGateway, List<PaymentRejectionCode>> groupedCodes = rejectionCodes.stream()
@@ -305,18 +299,32 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                 for (Map.Entry<PaymentGateway, List<PaymentRejectionCode>> entry : groupedCodes.entrySet()) {
                     clearAll(entry.getKey());
                     entry.getValue().forEach(rejectionCodesCode -> {
-                        if(findByCodeAndPaymentGateway(rejectionCodesCode.getCode(), entry.getKey().getId()).isPresent()) {
-                            errors.add(format("Error occurred during importing rejection code, %s already exists in paymentGateway %s",
-                                    rejectionCodesCode.getCode(), entry.getKey().getCode()));
-                        } else {
-                            create(rejectionCodesCode);
-                            getEntityManager().flush();
-                        }
+                        createOrUpdateCode(rejectionCodesCode, entry.getKey(), rejectionCodeMemoryStore);
                     });
                 }
             }
         }
-        return new RejectionCodeImportResult(lineCount, abs(lineCount - errors.size()), errors.size(), errors);
+    }
+
+    private void createOrUpdateCode(PaymentRejectionCode rejectionCode, PaymentGateway paymentGateway,
+                                    Map<String, PaymentRejectionCode> rejectionCodeMemoryStore) {
+        Optional<PaymentRejectionCode> rejectionCodeToSave =
+                findByCodeAndPaymentGateway(rejectionCode.getCode(), paymentGateway.getId());
+        String key = rejectionCode.getCode() + rejectionCode.getPaymentGateway().getCode();
+        if(rejectionCodeToSave.isEmpty() && rejectionCodeMemoryStore.containsKey(key)) {
+            rejectionCodeToSave = of(rejectionCodeMemoryStore.get(key));
+        }
+        if (rejectionCodeToSave.isPresent()) {
+            PaymentRejectionCode rejectionCodeToUpdate = rejectionCodeToSave.get();
+            rejectionCodeToUpdate.setDescription(rejectionCode.getDescription());
+            rejectionCodeToUpdate.setDescriptionI18n(rejectionCode.getDescriptionI18n());
+            rejectionCodeToUpdate.setPaymentGateway(rejectionCode.getPaymentGateway());
+            rejectionCodeMemoryStore.put(key, rejectionCodeToUpdate);
+            update(rejectionCodeToUpdate);
+        } else {
+            rejectionCodeMemoryStore.put(key, rejectionCode);
+            super.create(rejectionCode);
+        }
     }
 
     /**

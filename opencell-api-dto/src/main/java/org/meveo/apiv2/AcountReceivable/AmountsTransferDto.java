@@ -10,7 +10,7 @@ import java.util.List;
 
 @Immutable
 @Style(jdkOnly = true)
-@JsonDeserialize(builder = ImmutableAmountsTransferDto.class)
+@JsonDeserialize(as = ImmutableAmountsTransferDto.class)
 public interface AmountsTransferDto {
 	@Schema(description = "List of amounts to transfer")
 	@Nullable

@@ -107,9 +107,9 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "Invoice.draftNoXml", query = "select inv.id from Invoice inv where inv.xmlFilename IS NULL  and inv.invoiceNumber IS NULL and inv.temporaryInvoiceNumber IS NOT NULL"),
         @NamedQuery(name = "Invoice.allNoXml", query = "select inv.id from Invoice inv where inv.xmlFilename IS NULL"),
 
-        @NamedQuery(name = "Invoice.validatedNoPdf", query = "select inv.id from Invoice inv where inv.invoiceNumber IS NOT NULL and inv.pdfFilename IS NULL and inv.xmlFilename IS NOT NULL and (inv.billingRun IS NULL OR inv.billingRun.disabled = false)"),
-        @NamedQuery(name = "Invoice.draftNoPdf", query = "select inv.id from Invoice inv where inv.invoiceNumber IS NULL and inv.temporaryInvoiceNumber IS NOT NULL and inv.pdfFilename IS NULL and inv.xmlFilename IS NOT NULL and (inv.billingRun IS NULL OR inv.billingRun.disabled = false)"),
-        @NamedQuery(name = "Invoice.allNoPdf", query = "select inv.id from Invoice inv where inv.pdfFilename IS NULL and inv.xmlFilename IS NOT NULL and (inv.billingRun IS NULL OR inv.billingRun.disabled = false)"),
+        @NamedQuery(name = "Invoice.validatedNoPdf", query = "select inv.id from Invoice inv left join inv.billingRun where inv.invoiceNumber IS NOT NULL and inv.pdfFilename IS NULL and inv.xmlFilename IS NOT NULL and (inv.billingRun IS NULL OR inv.billingRun.disabled = false)"),
+        @NamedQuery(name = "Invoice.draftNoPdf", query = "select inv.id from Invoice inv left join inv.billingRun where inv.invoiceNumber IS NULL and inv.temporaryInvoiceNumber IS NOT NULL and inv.pdfFilename IS NULL and inv.xmlFilename IS NOT NULL and (inv.billingRun IS NULL OR inv.billingRun.disabled = false)"),
+        @NamedQuery(name = "Invoice.allNoPdf", query = "select inv.id from Invoice inv left join inv.billingRun where inv.pdfFilename IS NULL and inv.xmlFilename IS NOT NULL and (inv.billingRun IS NULL OR inv.billingRun.disabled = false)"),
 
         @NamedQuery(name = "Invoice.validatedNoPdfByBR", query = "select inv.id from Invoice inv where inv.invoiceNumber IS NOT NULL and inv.pdfFilename IS NULL and inv.xmlFilename IS NOT NULL and inv.billingRun.id=:billingRunId and inv.billingRun.disabled = false"),
         @NamedQuery(name = "Invoice.draftNoPdfByBR", query = "select inv.id from Invoice inv where inv.invoiceNumber IS NULL and inv.temporaryInvoiceNumber IS NOT NULL and inv.pdfFilename IS NULL and inv.xmlFilename IS NOT NULL and inv.billingRun.id=:billingRunId and inv.billingRun.disabled = false"),

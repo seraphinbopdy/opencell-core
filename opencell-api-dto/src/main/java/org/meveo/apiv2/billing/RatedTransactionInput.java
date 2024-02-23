@@ -34,6 +34,8 @@ public interface RatedTransactionInput extends Resource {
 	@Nullable
 	Date getUsageDate();
 
+	@Nullable
+	@Deprecated
 	BigDecimal getUnitAmountWithoutTax();
 
 	BigDecimal getQuantity();
@@ -56,4 +58,7 @@ public interface RatedTransactionInput extends Resource {
 	
 	@Nullable
 	String getBusinessKey();
+
+	@Nullable
+	BigDecimal getUnitPrice();
 }

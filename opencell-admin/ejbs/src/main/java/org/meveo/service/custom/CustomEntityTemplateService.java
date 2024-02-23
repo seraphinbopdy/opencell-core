@@ -487,7 +487,8 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
     @Override
     public CustomEntityTemplate findByIdIgnoringCache(Long id, List<String> fetchFields) {
         CustomEntityTemplate cet = super.findByIdIgnoringCache(id, fetchFields);
-        if(cet != null && !currentUser.hasRole(cet.getReadPermission())) {
+	    ParamBean paramBean = paramBeanFactory.getInstance();
+	    if(cet != null && !currentUser.hasRoles(cet.getReadPermission(), paramBean.getProperty("role.readAllCE", "ReadAllCE"))) {
             throw new ActionForbiddenException("User does not have permission to read data from '" + cet.getCode() + "'");
         }
         return cet;

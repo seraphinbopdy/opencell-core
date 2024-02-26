@@ -120,9 +120,15 @@ public class FilesApi extends BaseApi {
         importDir = getProviderRootDir() + File.separator + DirectoriesConstants.IMPORTS_ROOT_FOLDER + File.separator + "cdr" + File.separator + "flatFile" + File.separator;
         String cdrFlatFileDirIn = importDir + DirectoriesConstants.INPUT_SUBFOLDER;
         String cdrFlatFileDirOut = importDir + DirectoriesConstants.OUTPUT_SUBFOLDER;
+	    importDir = getProviderRootDir() + File.separator + DirectoriesConstants.IMPORTS_ROOT_FOLDER + File.separator + "writeOff" + File.separator;
+	    String writeOffDirIN = importDir + DirectoriesConstants.INPUT_SUBFOLDER;
+	    String writeOffDirOUT = importDir + DirectoriesConstants.OUTPUT_SUBFOLDER;
+	    String writeOffDirKO = importDir + DirectoriesConstants.REJECT_SUBFOLDER;
+	    String writeOffDirArchiv = importDir + DirectoriesConstants.INVOICE_WRITEOF_ARCHIVE_ROOT_FOLDER;
         
         List<String> filePaths = Arrays.asList("", customerDirIN, customerDirOUT, customerDirERR, customerDirWARN, customerDirKO, accountDirIN, accountDirOUT, accountDirERR, accountDirWARN, accountDirKO, subDirIN,
-            subDirOUT, subDirERR, subDirWARN, catDirIN, catDirOUT, catDirKO, subDirKO, meterDirIN, meterDirOUT, meterDirKO, invoicePdfDir, invoiceXmlDir, jasperDir, priceplanVersionsDir, cdrFlatFileDirIn, cdrFlatFileDirOut);
+            subDirOUT, subDirERR, subDirWARN, catDirIN, catDirOUT, catDirKO, subDirKO, meterDirIN, meterDirOUT, meterDirKO, invoicePdfDir, invoiceXmlDir, jasperDir, priceplanVersionsDir, cdrFlatFileDirIn, cdrFlatFileDirOut
+        , writeOffDirIN, writeOffDirOUT, writeOffDirKO, writeOffDirArchiv);
         for (String custDirs : filePaths) {
             File subDir = new File(custDirs);
             if (!StorageFactory.existsDirectory(subDir)) {

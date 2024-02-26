@@ -3698,6 +3698,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @throws BusinessException General business exception
      */
     public void postCreate(Invoice invoice) throws BusinessException {
+        if(invoice.getBillingRun() == null) {
+        	linkInvoiceSubscriptions(invoice);
+        }
 
         entityCreatedEventProducer.fire((BaseEntity) invoice);
 
@@ -4271,12 +4274,20 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
         }
         
-        if(invoice.getBillingRun() == null && invoice.getInvoiceType() != null && !invoice.getInvoiceType().getCode().equals("ADV")) {
-            applyAdvanceInvoice(invoice, checkAdvanceInvoice(invoice));
+        if(invoice.getBillingRun()==null &&invoice.getInvoiceType() != null && !invoice.getInvoiceType().getCode().equals("ADV")) {
+        	applyAdvanceInvoice(invoice, checkAdvanceInvoice(invoice));
         }
     }
 
-    private void calculateDerivedTaxAggregateAmounts( Map<String, TaxInvoiceAgregate> taxAggregates) {
+    private void linkInvoiceSubscriptions(Invoice invoice) {
+    	getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
+	}
+    
+    public void linkInvoicesToSubscriptionsByBR(BillingRun billingRun) {
+    	getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByBR").setParameter("billingRunId", billingRun.getId()).executeUpdate();
+	}
+
+	private void calculateDerivedTaxAggregateAmounts( Map<String, TaxInvoiceAgregate> taxAggregates) {
         BigDecimal[] amounts;
         for (TaxInvoiceAgregate taxAggregate : taxAggregates.values()) {
 

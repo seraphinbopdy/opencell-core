@@ -49,9 +49,9 @@ import java.util.Map;
 public class UpdateHugeEntityJob extends Job {
 
     /**
-     * Default value of limit of select query
+     * Default value of fetch size of select query
      */
-    public static final Long DEFAULT_SELECT_LIMIT = 1000000L; //1M
+    public static final Long DEFAULT_SELECT_FETCH_SIZE = 1000000L; //1M
 
     /**
      * Job instance name with which all custom fields will be applied
@@ -79,14 +79,19 @@ public class UpdateHugeEntityJob extends Job {
     public static final String CF_DEFAULT_FILTER = "UpdateHugeEntityJob_defaultFilter";
 
     /**
-     * Custom field that contains the select limit value
+     * Custom field that contains the select fetch size value
      */
-    public static final String CF_SELECT_LIMIT = "UpdateHugeEntityJob_selectLimit";
+    public static final String CF_SELECT_FETCH_SIZE = "UpdateHugeEntityJob_selectFetchSize";
 
     /**
-     * Custom field that contains update query chunk value
+     * Custom field that contains the select max results value
      */
-    public static final String CF_UPDATE_CHUNK = "UpdateHugeEntityJob_updateChunk";
+    public static final String CF_SELECT_MAX_RESULTS = "UpdateHugeEntityJob_selectMaxResults";
+
+    /**
+     * Custom field that contains update query chunk size value
+     */
+    public static final String CF_UPDATE_CHUNK_SIZE = "UpdateHugeEntityJob_updateChunkSize";
 
     /**
      * Custom field containing the flag whether all update queries will be run on distinct IDs or whether it doesn't matter.
@@ -179,23 +184,28 @@ public class UpdateHugeEntityJob extends Job {
         defaultFilter.setAllowEdit(false);
         result.put(CF_DEFAULT_FILTER, defaultFilter);
 
-        result.put(CF_SELECT_LIMIT,
-                CustomFieldTemplateUtils.buildCF(CF_SELECT_LIMIT,
-                        resourceMessages.getString("jobExecution.updateHugeEntity.selectLimit"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:6", String.valueOf(DEFAULT_SELECT_LIMIT), APPLIES_TO));
+        result.put(CF_SELECT_FETCH_SIZE,
+                CustomFieldTemplateUtils.buildCF(CF_SELECT_FETCH_SIZE,
+                        resourceMessages.getString("jobExecution.updateHugeEntity.selectFetchSize"), CustomFieldTypeEnum.LONG,
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:6", String.valueOf(DEFAULT_SELECT_FETCH_SIZE), APPLIES_TO));
 
-        result.put(CF_UPDATE_CHUNK,
-                CustomFieldTemplateUtils.buildCF(CF_UPDATE_CHUNK,
-                        resourceMessages.getString("jobExecution.updateHugeEntity.updateChunk"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:7", String.valueOf(NativePersistenceService.SHORT_MAX_VALUE), APPLIES_TO));
+        result.put(CF_SELECT_MAX_RESULTS,
+                CustomFieldTemplateUtils.buildCF(CF_SELECT_MAX_RESULTS,
+                        resourceMessages.getString("jobExecution.updateHugeEntity.selectMaxResults"), CustomFieldTypeEnum.LONG,
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:7", APPLIES_TO));
+
+        result.put(CF_UPDATE_CHUNK_SIZE,
+                CustomFieldTemplateUtils.buildCF(CF_UPDATE_CHUNK_SIZE,
+                        resourceMessages.getString("jobExecution.updateHugeEntity.updateChunkSize"), CustomFieldTypeEnum.LONG,
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:8", String.valueOf(NativePersistenceService.SHORT_MAX_VALUE), APPLIES_TO));
 
         result.put(CF_IS_PESSIMISTIC_UPDATE_LOCK,
                 CustomFieldTemplateUtils.buildCF(CF_IS_PESSIMISTIC_UPDATE_LOCK,
                         resourceMessages.getString("jobExecution.updateHugeEntity.isPessimisticUpdateLock"), CustomFieldTypeEnum.BOOLEAN,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:8", "false", APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:9", "false", APPLIES_TO));
 
         CustomFieldTemplate emailTemplateCF = CustomFieldTemplateUtils.buildCF(CF_EMAIL_TEMPLATE, resourceMessages.getString("jobExecution.updateHugeEntity.emailTemplate"), CustomFieldTypeEnum.ENTITY,
-                "tab:Configuration:0;fieldGroup:Configuration:0;field:9", null, false, null, EmailTemplate.class.getName(), APPLIES_TO, null);
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:10", null, false, null, EmailTemplate.class.getName(), APPLIES_TO, null);
         emailTemplateCF.setDataFilterEL("{\"media\":\"EMAIL\"}");
         result.put(CF_EMAIL_TEMPLATE, emailTemplateCF);
         return result;

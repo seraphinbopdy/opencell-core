@@ -618,7 +618,7 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 		// 3 - procude dubt receivable
 		saved.addAll(createDoubtfulReceivable(writeOff));
 		// 4 - product bad debt write off
-		saved.add(createBadDebtWritOff(writeOff, occT.getAccountingCode(), taxJournalEntries.stream().map(JournalEntry::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)));
+		saved.add(createBadDebtWritOff(writeOff, occT.getContraAccountingCode(), taxJournalEntries.stream().map(JournalEntry::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)));
 		
 		saved.forEach(this::create);
 		return saved;

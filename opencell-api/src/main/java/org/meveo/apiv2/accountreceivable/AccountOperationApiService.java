@@ -1,35 +1,15 @@
 package org.meveo.apiv2.accountreceivable;
 
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
-import static org.meveo.model.payments.AccountOperationStatus.EXPORTED;
-import static org.meveo.model.payments.AccountOperationStatus.POSTED;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.api.dto.payment.UnMatchingOperationRequestDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.apiv2.AcountReceivable.AccountOperationAndSequence;
+import org.meveo.apiv2.AcountReceivable.AmountToTransferDto;
+import org.meveo.apiv2.AcountReceivable.AmountsTransferDto;
 import org.meveo.apiv2.AcountReceivable.CustomerAccount;
 import org.meveo.apiv2.AcountReceivable.LitigationInput;
 import org.meveo.apiv2.AcountReceivable.UnMatchingAccountOperationDetail;
@@ -37,17 +17,52 @@ import org.meveo.apiv2.generic.exception.ConflictException;
 import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.model.MatchingReturnObject;
 import org.meveo.model.PartialMatchingOccToSelect;
+import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.AccountOperationStatus;
 import org.meveo.model.payments.MatchingStatusEnum;
+import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.payments.OtherCreditAndCharge;
 import org.meveo.model.payments.RecordedInvoice;
-import org.meveo.service.payments.impl.*;
+import org.meveo.service.payments.impl.AccountOperationService;
+import org.meveo.service.payments.impl.CustomerAccountService;
+import org.meveo.service.payments.impl.MatchingCodeService;
+import org.meveo.service.payments.impl.OCCTemplateService;
+import org.meveo.service.payments.impl.PaymentPlanService;
+import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.securityDeposit.impl.SecurityDepositTransactionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static org.meveo.model.payments.AccountOperationStatus.EXPORTED;
+import static org.meveo.model.payments.AccountOperationStatus.POSTED;
 
 public class AccountOperationApiService implements ApiService<AccountOperation> {
-
+	
+	protected static Logger log = LoggerFactory.getLogger(AccountOperationApiService.class);
     @Inject
     protected ResourceBundle resourceMessages;
     
@@ -68,6 +83,9 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 
 	@Inject
 	private RecordedInvoiceService recordedInvoiceService;
+	
+	@Inject
+	private OCCTemplateService occTemplateService;
 
 	@Override
 	public List<AccountOperation> list(Long offset, Long limit, String sort, String orderBy, String filter) {
@@ -381,5 +399,159 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		} catch (BusinessException exception) {
 			throw new BusinessApiException(exception.getMessage());
 		}
+	}
+	
+	public void transferAmounts(Long accountOperationId, AmountsTransferDto amountsTransferDto) {
+		if(amountsTransferDto.getAmountsToTransfer() == null || amountsTransferDto.getAmountsToTransfer().size() == 0) {
+			throw new BadRequestException("Amounts to transfer are required");
+		}
+		log.info("start transfering amount from account operation id : " + accountOperationId + " to customer accounts ");
+		// check that all customer accounts exist
+		checkCustomerAccountsExist(amountsTransferDto);
+		// return account operation by id
+		AccountOperation accountOperation = accountOperationService.findById(accountOperationId, List.of("customerAccount"));
+		if(accountOperation == null) {
+			throw new EntityDoesNotExistsException(AccountOperation.class, accountOperationId);
+		}
+		// check that all customer accounts have the same currency
+		checkCustomerAccountsCurrency((org.meveo.model.payments.CustomerAccount) Hibernate.unproxy(accountOperation.getCustomerAccount()), amountsTransferDto);
+		// check that sum of amount are lower of equal to source’s unmatched amount
+		checkAmountsToTransfer(accountOperation, amountsTransferDto);
+		// transfer amounts
+		transferAmountsForCustomerAccounts(accountOperation, amountsTransferDto);
+	}
+	/**
+	 * Transfer amounts for customer accounts
+	 * @param accountOperation : account operation
+	 * @param amountsTransferDto : amounts to transfer
+	 */
+	private void transferAmountsForCustomerAccounts(AccountOperation accountOperation, AmountsTransferDto amountsTransferDto) {
+		final String CRD_TRS = "CRD_TRS";
+		final String DBT_TRS = "DBT_TRS";
+		OCCTemplate occTemplateCrdTrs = occTemplateService.findByCode(CRD_TRS, List.of("accountingCode"));
+		OCCTemplate occTemplateDebTrs = occTemplateService.findByCode(DBT_TRS, List.of("accountingCode"));
+		if(occTemplateCrdTrs == null || occTemplateDebTrs == null) {
+			throw new EntityDoesNotExistsException(AccountingCode.class, CRD_TRS +"/"+ DBT_TRS);
+		}
+		// for each amount to transfer
+		amountsTransferDto.getAmountsToTransfer().forEach(amountToTransferDto -> {
+			// get customer account to transfer
+			org.meveo.model.payments.CustomerAccount customerAccountTarget = getCustomerAccount(amountToTransferDto.getCustomerAccount());
+			// if account operation is CREDIT
+			// create a OCC of type  DEB_TRS on source Customer Account and match it with the OCC of type CREDIT
+			// create a OCC of type  CRD_TRS on target Customer Account and match it with the OCC of type DEBIT
+			if (OperationCategoryEnum.CREDIT == accountOperation.getTransactionCategory()) {
+				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.DEBIT, occTemplateDebTrs, amountToTransferDto.getAmount());
+				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.CREDIT, occTemplateCrdTrs, amountToTransferDto.getAmount());
+			} else {
+				// if account operation is DEBIT
+				// create a OCC of type  CRD_TRS on source Customer Account and match it with the OCC of type DEBIT
+				// create a OCC of type  DEB_TRS on target Customer Account and match it with the OCC of type CREDIT
+				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.CREDIT, occTemplateCrdTrs, amountToTransferDto.getAmount());
+				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.DEBIT, occTemplateDebTrs, amountToTransferDto.getAmount());
+			}
+		});
+	}
+	
+	/**
+	 * Create account operation
+	 * @param accountOperation : account operation
+	 * @param operationCategoryEnum : operation category CREDIT/DEBIT
+	 */
+	private void createAccountOperation(AccountOperation accountOperation,
+	                                    org.meveo.model.payments.CustomerAccount customerAccountTarget,
+	                                    OperationCategoryEnum operationCategoryEnum, OCCTemplate occTemplate, BigDecimal amountToTransfer) {
+		Date currentDate = new Date();
+		OtherCreditAndCharge accountOperationToTransfer = new OtherCreditAndCharge();
+		accountOperationToTransfer.setCode(occTemplate.getCode());
+		accountOperationToTransfer.setDescription(occTemplate.getAccountingCode() != null ? occTemplate.getAccountingCode().getDescription(): null);
+		accountOperationToTransfer.setAccountingCode(accountOperation.getAccountingCode());
+		accountOperationToTransfer.setAccountingDate(currentDate);
+		accountOperationToTransfer.setAmount(amountToTransfer);
+		accountOperationToTransfer.setTransactionalUnMatchingAmount(amountToTransfer);
+		accountOperationToTransfer.setCustomerAccount(customerAccountTarget);
+		accountOperationToTransfer.setMatchingStatus(MatchingStatusEnum.O);
+		accountOperationToTransfer.setStatus(AccountOperationStatus.POSTED);
+		accountOperationToTransfer.setTransactionCategory(operationCategoryEnum);
+		accountOperationToTransfer.setTransactionDate(currentDate);
+		accountOperationToTransfer.setUnMatchingAmount(amountToTransfer);
+		accountOperationToTransfer.setReference(operationCategoryEnum.toString().substring(0, 1) + "_" + accountOperation.getId() + "_" + accountOperation.getReference()) ;
+		accountOperationToTransfer.setSourceAccountOperation(accountOperation);
+		accountOperationToTransfer.setUuid(UUID.randomUUID().toString());
+		accountOperationToTransfer.setSeller(accountOperation.getSeller());
+		accountOperationToTransfer.setJournal(occTemplate.getJournal());
+		
+		accountOperationService.create(accountOperationToTransfer);
+		
+		/*if((accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT && occTemplate.getCode().equals("DBT_TRS") ) ||
+				(accountOperation.getTransactionCategory() == OperationCategoryEnum.DEBIT && occTemplate.getCode().equals("CRD_TRS")) ) {
+			try {
+				List<Long> operationIds = new ArrayList<>();
+				operationIds.add(accountOperation.getId());
+				operationIds.add(accountOperationToTransfer.getId());
+				matchingCodeService.matchOperations(accountOperation.getCustomerAccount().getId(), null, operationIds, null);
+			} catch (Exception e) {
+				throw new BusinessException(e.getMessage(), e);
+			}
+		}*/
+	}
+	/**
+	 * Check that sum of amount are lower of equal to source’s unmatched amount
+	 * @param accountOperation : account operation
+	 * @param amountsTransferDto : amounts to transfer
+	 * @throws BadRequestException if sum of amount are greater to source’s unmatched amount
+	 */
+	private void checkAmountsToTransfer(AccountOperation accountOperation, AmountsTransferDto amountsTransferDto) {
+		log.info("check if sum of amount are lower of equal to source’s unmatched amount : start");
+		BigDecimal sumOfAmounts = BigDecimal.ZERO;
+		for (AmountToTransferDto amountToTransferDto : amountsTransferDto.getAmountsToTransfer()) {
+			sumOfAmounts = sumOfAmounts.add(amountToTransferDto.getAmount());
+		}
+		if (sumOfAmounts.compareTo(accountOperation.getUnMatchingAmount()) > 0) {
+			log.info("check if sum of amount are lower of equal to source’s unmatched amount : error, sum are greater");
+			throw new BadRequestException("Sum of dispatched amounts must be lower or equal to source account operation’s unmatched amount : " + accountOperation.getUnMatchingAmount().doubleValue());
+		}
+		log.info("check if sum of amount are lower of equal to source’s unmatched amount : sum are lower");
+	}
+	/**
+	 * Check that all customer accounts exist
+	 * @param amountsTransferDto : amounts to transfer
+	 * @throws EntityDoesNotExistsException if customer account does not exist
+	 */
+	private void checkCustomerAccountsExist(AmountsTransferDto amountsTransferDto) {
+		log.info("check if all customer exist : start");
+			for (AmountToTransferDto amountToTransferDto : amountsTransferDto.getAmountsToTransfer()) {
+				if (amountToTransferDto.getCustomerAccount() != null) {
+					org.meveo.model.payments.CustomerAccount customerAccountToTransfer = getCustomerAccount(amountToTransferDto.getCustomerAccount());
+					if (customerAccountToTransfer == null) {
+						log.error("check if all customer exist : rollback ");
+						throw new EntityDoesNotExistsException(CustomerAccount.class, amountToTransferDto.getCustomerAccount().getId());
+					}
+				}else {
+					throw new BadRequestException("Customer account is required");
+				}
+			}
+		log.info("check if all customer exist : all customer exist");
+	}
+	/*
+	 * Check that all customer accounts have the same currency
+	 * @param customerAccount : customer account
+	 * @param amountsTransferDto : amounts to transfer
+	 * @throws BadRequestException if customer accounts have different currencies
+	 */
+	private void checkCustomerAccountsCurrency(org.meveo.model.payments.CustomerAccount customerAccount, AmountsTransferDto amountsTransferDto) {
+		log.info("check if all customer have same currency : start");
+		TradingCurrency tradingCurrency = customerAccount.getTradingCurrency();
+		for (AmountToTransferDto amountToTransferDto : amountsTransferDto.getAmountsToTransfer()) {
+			org.meveo.model.payments.CustomerAccount customerAccountToTransfer = getCustomerAccount(amountToTransferDto.getCustomerAccount());
+			if (customerAccountToTransfer != null) {
+				if (!tradingCurrency.getId().equals(customerAccountToTransfer.getTradingCurrency().getId())) {
+					log.info("check if all customer have same currency : error customer accounts : " + customerAccountToTransfer.getCode() + "have different currencies : ");
+					throw new BadRequestException("Customer accounts have different currencies");
+				}
+				
+			}
+		}
+		log.info("check if all customer have same currency : all customer have same currency");
 	}
 }

@@ -150,6 +150,7 @@ public class InvoicingJobV2Bean extends BaseJobBean {
             prevalidatedAutomaticPrevBRStatus = true;
             billingRunService.applyThreshold(billingRun.getId());
             invoiceService.applyligibleInvoiceForAdvancement(billingRun.getId());
+            invoiceService.linkInvoicesToSubscriptionsByBR(billingRun);
         }
         if(billingRun.getStatus() == DRAFT_INVOICES && billingRun.getProcessType() == FULL_AUTOMATIC) {
             billingRun.setStatus(POSTVALIDATED);
@@ -199,7 +200,9 @@ public class InvoicingJobV2Bean extends BaseJobBean {
                 }
             }
         }
-        
+        if(result.getInvoiceCount() == 0) {
+            result.setInvoiceCount(billingRun.getInvoiceNumber());
+        }
         if(!firstPassAutomatic || billingRun.getStatus() == POSTVALIDATED) {
             assignInvoiceNumberAndIncrementBAInvoiceDatesAndGenerateAO(billingRun, result);
             if(!billingRunService.isBillingRunContainingRejectedInvoices(billingRun.getId())) {

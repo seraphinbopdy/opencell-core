@@ -363,8 +363,9 @@ public class AccountOperationApi extends BaseApi {
             accountOperation.setPaymentMethod(PaymentMethodEnum.valueOf(postData.getPaymentMethod()));
         }
         accountOperation.setOrderNumber(postData.getOrderNumber());
-        accountOperation.setCollectionDate(postData.getCollectionDate() == null ? postData.getBankCollectionDate() : postData.getCollectionDate());
 
+        accountOperation.setCollectionDate(Optional.ofNullable(postData.getCollectionDate()).orElse(Optional.ofNullable(postData.getDueDate()).orElse(postData.getBankCollectionDate())));
+        
         if (!StringUtils.isBlank(postData.getJournalCode())) {
         	Journal journal = journalService.findByCode(postData.getJournalCode());
             if (journal == null) {

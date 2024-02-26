@@ -103,6 +103,7 @@ public class CustomFieldTemplateApi extends BaseApi {
             missingParameters.add("matrixColumns");
 
         } else if (postData.getStorageType() == CustomFieldStorageTypeEnum.MATRIX) {
+	        postData.setDefaultValue(null);
             for (CustomFieldMatrixColumnDto columnDto : postData.getMatrixColumns()) {
                 if (StringUtils.isBlank(columnDto.getCode())) {
                     missingParameters.add("matrixColumns/code");

@@ -276,4 +276,10 @@ public class AccountReceivableResourceImpl implements AccountReceivableResource 
                         "\"message\":\"litigation successfully removed\"},\"id\":" + accountOperationID + "}")
                 .build();
     }
+	
+	@Override
+	public Response transferAmounts(Long accountOperationId, AmountsTransferDto amountsTransferDto) {
+		accountOperationServiceApi.transferAmounts(accountOperationId, amountsTransferDto);
+		return Response.status(Response.Status.OK).build();
+	}
 }

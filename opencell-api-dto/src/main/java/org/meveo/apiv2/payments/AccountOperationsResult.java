@@ -2,7 +2,6 @@ package org.meveo.apiv2.payments;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.immutables.value.Value;
-import org.meveo.api.dto.payment.AccountOperationDto;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -19,5 +18,5 @@ public interface AccountOperationsResult {
     @Nullable
     BigDecimal balance();
     @Nullable
-    List<AccountOperationDto> accountOperations();
+    List<Long> accountOperationIds();
 }

@@ -1,5 +1,6 @@
 package org.meveo.model.billing;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -7,8 +8,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class AccountingArticleAssignmentItem {
-    private Long chargeTemplateId;
+public class AccountingArticleAssignmentItem implements Serializable {
+	
+    private static final long serialVersionUID = 1L;
+	private Long chargeTemplateId;
     private Long offerTemplateId;
     private Long serviceInstanceId;
     private List<Long> chargeInstancesIDs = new ArrayList<>();

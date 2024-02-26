@@ -13,21 +13,25 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.response.job.JobExecutionResultResponseDto;
+import org.meveo.api.exception.ActionForbiddenException;
+import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.rest.exception.BadRequestException;
 import org.meveo.apiv2.billing.DuplicateRTResult;
 import org.meveo.apiv2.billing.ProcessCdrListResult.Statistics;
 import org.meveo.apiv2.billing.ProcessingModeEnum;
+import org.meveo.apiv2.billing.RatedTransactionInput;
 import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.RatedTransactionStatusEnum;
-import org.meveo.model.crm.custom.CustomFieldValues;
+import org.meveo.model.crm.Provider;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
+import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +65,10 @@ public class RatedTransactionApiService implements ApiService<RatedTransaction> 
 	
 	@Inject
 	private FinanceSettingsService financeSettingsService;
+
+    @Inject
+    @ApplicationProvider
+    protected Provider appProvider;
 	
 	@Override
 	public Optional<RatedTransaction> findById(Long id) {
@@ -107,9 +115,15 @@ public class RatedTransactionApiService implements ApiService<RatedTransaction> 
 	 * @return
 	 */
 	public RatedTransaction create(org.meveo.apiv2.billing.RatedTransactionInput input) {
+
+		checkUnitPrices(input);
+
+		BigDecimal unitAmountWithoutTax = appProvider.isEntreprise() ? Optional.ofNullable(input.getUnitPrice()).orElse(input.getUnitAmountWithoutTax()) : null;
+		BigDecimal unitAmountWithTax = appProvider.isEntreprise() ? null : input.getUnitPrice();
+		
 		return ratedTransactionService.createRatedTransaction(input.getBillingAccountCode(), input.getUserAccountCode(),
 				input.getSubscriptionCode(), input.getServiceInstanceCode(), input.getChargeInstanceCode(), input.getUsageDate(),
-				input.getUnitAmountWithoutTax(), input.getQuantity(), input.getParameter1(), input.getParameter2(),
+				unitAmountWithoutTax, unitAmountWithTax, input.getQuantity(), input.getParameter1(), input.getParameter2(),
 				input.getParameter3(), input.getParameterExtra(), input.getDescription(), input.getBusinessKey());
 	}
 
@@ -144,6 +158,46 @@ public class RatedTransactionApiService implements ApiService<RatedTransaction> 
 		ratedTransactionService.updateRatedTransaction(ratedTransaction,
 				description, unitAmountWithoutTax, quantity, param1, param2, param3, paramExtra, usageDate, businessKey);
 	}
+
+
+
+	/**
+	 * update Rated Transaction
+	 *
+	 * @param id
+	 * @param postData
+	 */
+	public void update(Long id, RatedTransactionInput postData) {
+		RatedTransaction ratedTransaction = findById(id).orElseThrow(NotFoundException::new);
+		if(!RatedTransactionStatusEnum.OPEN.equals(ratedTransaction.getStatus())) {
+			throw new ActionForbiddenException("Can only edit ratedTransaction in statuses OPEN. current ratedTransaction status is :"+ratedTransaction.getStatus().name()) ;
+		}
+
+		checkUnitPrices(postData);
+
+		BigDecimal unitAmountWithoutTax = appProvider.isEntreprise() ? Optional.ofNullable(postData.getUnitPrice()).orElse(postData.getUnitAmountWithoutTax()) : null;
+		BigDecimal unitAmountWithTax = appProvider.isEntreprise() ? null : postData.getUnitPrice();
+
+		ratedTransactionService.updateRatedTransaction(ratedTransaction, postData.getDescription(), unitAmountWithoutTax, unitAmountWithTax, postData.getQuantity(), postData.getParameter1(),
+				postData.getParameter2(), postData.getParameter3(), postData.getParameterExtra(), postData.getUsageDate(), postData.getBusinessKey());
+	}
+
+	private void checkUnitPrices(RatedTransactionInput postData) {
+		// INTRD-21623: for entreprise, unitPrice (used as without tax amount) is mandatory and unitAmountWithoutTax is deprecated
+		if(appProvider.isEntreprise()) {
+			if (postData.getUnitPrice() != null && postData.getUnitAmountWithoutTax() != null && postData.getUnitPrice().compareTo(postData.getUnitAmountWithoutTax()) != 0) {
+				throw new BusinessException("unitPrice and unitAmountWithoutTax must be equal. Furthermore, ‘unitAmountWithoutTax' is deprecated, you should only send 'unitPrice’.");
+			}
+
+			if (postData.getUnitPrice() == null && postData.getUnitAmountWithoutTax() == null) {
+				throw new MissingParameterException("Missing mandatory field 'unitPrice'");
+			}
+		} else if(postData.getUnitPrice() == null) {
+			throw new MissingParameterException("Missing mandatory field 'unitPrice'");
+		}
+	}
+    
+    
 
 	public Object duplication(Map<String, Object> filters, ProcessingModeEnum mode, boolean negateAmount, boolean returnRts, boolean startJob) {
 		DuplicateRTResult result = new DuplicateRTResult();
@@ -247,7 +301,7 @@ public class RatedTransactionApiService implements ApiService<RatedTransaction> 
 	}
 
 	public Entry<String, String> cancelRatedTransactions(Map<String, Object> filters,
-														  boolean failOnIncorrectStatus, boolean returnRTs) {
+															 boolean failOnIncorrectStatus, boolean returnRTs) {
 		StringBuilder response = new StringBuilder();
 		if (failOnIncorrectStatus) {
 			List<RatedTransaction> validationResult = getRatedTransactionsList(filters, true);

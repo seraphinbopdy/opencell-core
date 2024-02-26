@@ -33,6 +33,7 @@ import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -58,7 +59,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.meveo.admin.async.SubListCreator;
@@ -67,9 +67,9 @@ import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.job.InvoiceLinesFactory;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.RatedTransactionDto;
-import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.generics.GenericRequestMapper;
 import org.meveo.api.generics.PersistenceServiceHelper;
+import org.meveo.commons.utils.NumberUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.QueryBuilder;
@@ -1677,6 +1677,16 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         getEntityManager().createNamedQuery("RatedTransaction.invalidateRTByInvoice").setParameter("invoice", invoice).executeUpdate();
     }
 
+    @Deprecated
+    public RatedTransaction createRatedTransaction(String billingAccountCode, String userAccountCode,
+                                                   String subscriptionCode, String serviceInstanceCode, String chargeInstanceCode,
+                                                   Date usageDate, BigDecimal unitAmountWithoutTax, BigDecimal quantity,
+                                                   String param1, String param2, String param3,
+                                                   String paramExtra, String description, String businessKey) {
+        return createRatedTransaction(billingAccountCode, userAccountCode, subscriptionCode, serviceInstanceCode, chargeInstanceCode, usageDate,
+                unitAmountWithoutTax, unitAmountWithoutTax, quantity, param1, param2, param3, paramExtra, description, businessKey);
+    }
+
     /**
      * @param billingAccountCode
      * @param userAccountCode
@@ -1689,8 +1699,8 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
      * @return
      */
     public RatedTransaction createRatedTransaction(String billingAccountCode, String userAccountCode,
-            String subscriptionCode, String serviceInstanceCode, String chargeInstanceCode,
-                                                   Date usageDate, BigDecimal unitAmountWithoutTax, BigDecimal quantity,
+                                                   String subscriptionCode, String serviceInstanceCode, String chargeInstanceCode,
+                                                   Date usageDate, BigDecimal unitAmountWithoutTax, BigDecimal unitAmountWithTax, BigDecimal quantity,
                                                    String param1, String param2, String param3,
                                                    String paramExtra, String description, String businessKey) {
         String errors = "";
@@ -1729,10 +1739,11 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         TaxClass taxClass = taxInfo.taxClass;
 
         final BigDecimal taxPercent = taxInfo.tax.getPercent();
-        BigDecimal[] unitAmounts = computeDerivedAmounts(unitAmountWithoutTax, unitAmountWithoutTax,
-                taxPercent, appProvider.isEntreprise(), NB_DECIMALS, HALF_UP);
-        BigDecimal amountWithoutTax = unitAmountWithoutTax.multiply(quantity);
-        BigDecimal[] amounts = computeDerivedAmounts(amountWithoutTax, amountWithoutTax, taxPercent,
+        BigDecimal[] unitAmounts = NumberUtils.computeDerivedAmounts(unitAmountWithoutTax, unitAmountWithTax,
+                taxPercent, appProvider.isEntreprise(), BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
+        BigDecimal amountWithoutTax = unitAmountWithoutTax != null ? unitAmountWithoutTax.multiply(quantity) : null;
+        BigDecimal amountWithTax = unitAmountWithTax != null ? unitAmountWithTax.multiply(quantity) : null;
+        BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(amountWithoutTax, amountWithTax, taxPercent,
                 appProvider.isEntreprise(), appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
         ChargeTemplate chargeTemplate = chargeInstance.getChargeTemplate();
         String rtDescription = description != null && !description.isBlank()
@@ -1753,6 +1764,12 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         return rt;
     }
 
+    @Deprecated
+    public void updateRatedTransaction(RatedTransaction ratedTransaction, String description, BigDecimal unitAmountWithoutTax,
+                                       BigDecimal quantity, String param1, String param2, String param3, String paramExtra, Date usageDate, String businessKey) {
+        updateRatedTransaction(ratedTransaction, description, unitAmountWithoutTax, unitAmountWithoutTax, quantity, param1, param2, param3, paramExtra, usageDate, businessKey);
+    }
+
     /**
      * Update the rated transaction
      *
@@ -1766,16 +1783,15 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
      * @param paramExtra the param extra
      * @param usageDate RT usage date
      */
-    public void updateRatedTransaction(RatedTransaction ratedTransaction, String description,
-                                       BigDecimal unitAmountWithoutTax, BigDecimal quantity, String param1,
-                                       String param2, String param3, String paramExtra, Date usageDate, String businessKey) {
+    public void updateRatedTransaction(RatedTransaction ratedTransaction, String description, BigDecimal unitAmountWithoutTax, BigDecimal unitAmountWithTax,
+            BigDecimal quantity, String param1, String param2, String param3, String paramExtra, Date usageDate, String businessKey) {
         ratedTransaction.setDescription(description);
-        BigDecimal[] unitAmounts = computeDerivedAmounts(unitAmountWithoutTax, unitAmountWithoutTax,
-                ratedTransaction.getTaxPercent(), appProvider.isEntreprise(), NB_DECIMALS, HALF_UP);
-        BigDecimal amountWithoutTax = unitAmountWithoutTax.multiply(quantity);
-        BigDecimal[] amounts = computeDerivedAmounts(amountWithoutTax, amountWithoutTax,
-                ratedTransaction.getTaxPercent(), appProvider.isEntreprise(), appProvider.getRounding(),
-                appProvider.getRoundingMode().getRoundingMode());
+        BigDecimal[] unitAmounts = NumberUtils.computeDerivedAmounts(unitAmountWithoutTax, unitAmountWithTax,
+                ratedTransaction.getTaxPercent(), appProvider.isEntreprise(), BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
+        BigDecimal amountWithoutTax = unitAmountWithoutTax != null ? unitAmountWithoutTax.multiply(quantity) : null;
+        BigDecimal amountWithTax = unitAmountWithTax != null ? unitAmountWithTax.multiply(quantity) : null;
+        BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(amountWithoutTax, amountWithTax, ratedTransaction.getTaxPercent(),
+                appProvider.isEntreprise(), appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
         ratedTransaction.setUnitAmountWithoutTax(unitAmounts[0]);
         ratedTransaction.setUnitAmountWithTax(unitAmounts[1]);
         ratedTransaction.setUnitAmountTax(unitAmounts[2]);

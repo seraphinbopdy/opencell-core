@@ -13412,19 +13412,6 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			</column>
 		</insert>
 	</changeSet>
-
-    <changeSet id="#INTRD-19467_20240111_build" author="TarikFA.">
-        <insert tableName="meveo_script_instance">
-            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="code" value="org.meveo.service.script.accountingscheme.InvoiceWriteOffAccountingSchemeScript" />
-            <column name="src_type" value="JAVA_CLASS" />
-            <column name="description" value="Invoice Write off Journal entry builder, from AccountOperation"/>
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='ACCOUNTING_SCHEMES')" />
-        </insert>
-    </changeSet>
-    
     <changeSet id="#INTRD-20847_20230214" author="zelmeliani">
     	<insert tableName="ar_customer_balance">
     		<column name="id" value="-2"/>

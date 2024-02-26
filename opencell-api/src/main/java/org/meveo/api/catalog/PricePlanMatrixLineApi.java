@@ -250,6 +250,9 @@ public class PricePlanMatrixLineApi extends BaseApi {
             case LIST_MULTIPLE_NUMERIC: {
                 return Arrays.asList("=", "!=", "like", "in").contains(operator.toLowerCase());
             }
+            case EXPRESSION_LANGUAGE:{
+                return "=".equals(operator);
+            }
             default:
                 return false;
         }

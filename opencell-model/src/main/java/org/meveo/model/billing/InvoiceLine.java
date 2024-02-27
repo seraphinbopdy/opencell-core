@@ -1011,11 +1011,11 @@ public class InvoiceLine extends AuditableCFEntity {
 	}
 	
 	private BigDecimal toTransactional(BigDecimal amount, BigDecimal rate) {
-		return amount != null ? amount.multiply(rate).setScale(INVOICING_ROUNDING, ROUNDING_MODE.getRoundingMode()) : ZERO;
+		return amount != null ? amount.multiply(rate).setScale(invoiceRounding, roundingMode.getRoundingMode()) : ZERO;
 	}
 
 	private BigDecimal toFunctional(BigDecimal amount, BigDecimal rate) {
-		return amount != null ? amount.divide(rate, INVOICING_ROUNDING, ROUNDING_MODE.getRoundingMode()) : ZERO;
+		return amount != null ? amount.divide(rate, invoiceRounding, roundingMode.getRoundingMode()) : ZERO;
 	}
 
 	public Map<String, String> getAdditionalAggregationFields() {

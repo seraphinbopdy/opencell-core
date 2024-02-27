@@ -673,8 +673,23 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         ratedTransaction.setStartDate(aggregatedWo.getStartDate());
         ratedTransaction.setEndDate(aggregatedWo.getEndDate());
         ratedTransaction.setCreated(new Date());
-        if(aggregatedWo.getRulesContract() != null && aggregatedWo.getRulesContract().getId() != null) {
+        if (aggregatedWo.getRulesContract() != null && aggregatedWo.getRulesContract().getId() != null) {
             ratedTransaction.setRulesContract(contractService.refreshOrRetrieve(aggregatedWo.getRulesContract()));
+        }
+        OrderInfo orderInfo = new OrderInfo();
+        if (aggregatedWo.getProductVersion() != null && aggregatedWo.getProductVersion().getId() != null) {
+        	orderInfo.setProductVersion(getEntityManager().getReference(ProductVersion.class, aggregatedWo.getProductVersion().getId()));
+        }
+        if (aggregatedWo.getOrderProduct() != null && aggregatedWo.getOrderProduct().getId() != null) {
+        	orderInfo.setOrderProduct(getEntityManager().getReference(OrderProduct.class, aggregatedWo.getOrderProduct().getId()));
+        }
+        ratedTransaction.setOrderInfo(orderInfo);
+        ratedTransaction.setBusinessKey(aggregatedWo.getBusinessKey());
+        if (aggregatedWo.getContract() != null && aggregatedWo.getContract().getId() != null) {
+        	ratedTransaction.setContract(getEntityManager().getReference(Contract.class, aggregatedWo.getContract().getId()));
+        }
+        if (aggregatedWo.getContractLine() != null && aggregatedWo.getContractLine().getId() != null) {
+        	ratedTransaction.setContractLine(getEntityManager().getReference(ContractItem.class, aggregatedWo.getContractLine().getId()));
         }
         // ratedTransaction.setEdr(aggregatedWo.getEdr());
         WalletInstance wallet = walletService.refreshOrRetrieve(aggregatedWo.getWallet());

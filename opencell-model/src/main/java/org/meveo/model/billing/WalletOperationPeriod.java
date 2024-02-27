@@ -61,7 +61,10 @@ import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.RoundingModeEnum;
 import org.meveo.model.catalog.UnitOfMeasure;
+import org.meveo.model.cpq.ProductVersion;
+import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.contract.Contract;
+import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.tax.TaxClass;
@@ -491,6 +494,52 @@ public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEnt
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rules_contract_id")
     private Contract rulesContract;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_version_id")
+    private ProductVersion productVersion;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_product_id")
+    private OrderProduct orderProduct;
+    
+    @Column(name = "use_specific_price_conversion")
+    @Type(type = "numeric_boolean")
+    private boolean useSpecificPriceConversion;
+    
+    @Column(name = "transactional_amount_without_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal transactionalAmountWithoutTax;
+    
+    @Column(name = "transactional_amount_with_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal transactionalAmountWithTax;
+    
+    @Column(name = "transactional_amount_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal transactionalAmountTax;
+    
+    @Column(name = "transactional_unit_amount_without_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal transactionalUnitAmountWithoutTax;
+    
+    @Column(name = "transactional_unit_amount_with_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal transactionalUnitAmountWithTax;
+    
+    @Column(name = "transactional_unit_amount_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal transactionalUnitAmountTax;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trading_currency_id")
+    private TradingCurrency tradingCurrency;
+    
+    @Column(name = "business_key")
+    private String businessKey;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_id")
+    private Contract contract;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_line_id")
+    private ContractItem contractLine;
+
 
     /**
      * Constructor
@@ -1204,4 +1253,109 @@ public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEnt
     public void setRulesContract(Contract rulesContract) {
         this.rulesContract = rulesContract;
     }
+
+	public ProductVersion getProductVersion() {
+		return productVersion;
+	}
+
+	public void setProductVersion(ProductVersion productVersion) {
+		this.productVersion = productVersion;
+	}
+
+	public OrderProduct getOrderProduct() {
+		return orderProduct;
+	}
+
+	public void setOrderProduct(OrderProduct orderProduct) {
+		this.orderProduct = orderProduct;
+	}
+
+	public boolean isUseSpecificPriceConversion() {
+		return useSpecificPriceConversion;
+	}
+
+	public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
+		this.useSpecificPriceConversion = useSpecificPriceConversion;
+	}
+
+	public BigDecimal getTransactionalAmountWithoutTax() {
+		return transactionalAmountWithoutTax;
+	}
+
+	public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
+		this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
+	}
+
+	public BigDecimal getTransactionalAmountWithTax() {
+		return transactionalAmountWithTax;
+	}
+
+	public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
+		this.transactionalAmountWithTax = transactionalAmountWithTax;
+	}
+
+	public BigDecimal getTransactionalAmountTax() {
+		return transactionalAmountTax;
+	}
+
+	public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
+		this.transactionalAmountTax = transactionalAmountTax;
+	}
+
+	public BigDecimal getTransactionalUnitAmountWithoutTax() {
+		return transactionalUnitAmountWithoutTax;
+	}
+
+	public void setTransactionalUnitAmountWithoutTax(BigDecimal transactionalUnitAmountWithoutTax) {
+		this.transactionalUnitAmountWithoutTax = transactionalUnitAmountWithoutTax;
+	}
+
+	public BigDecimal getTransactionalUnitAmountWithTax() {
+		return transactionalUnitAmountWithTax;
+	}
+
+	public void setTransactionalUnitAmountWithTax(BigDecimal transactionalUnitAmountWithTax) {
+		this.transactionalUnitAmountWithTax = transactionalUnitAmountWithTax;
+	}
+
+	public BigDecimal getTransactionalUnitAmountTax() {
+		return transactionalUnitAmountTax;
+	}
+
+	public void setTransactionalUnitAmountTax(BigDecimal transactionalUnitAmountTax) {
+		this.transactionalUnitAmountTax = transactionalUnitAmountTax;
+	}
+
+	public TradingCurrency getTradingCurrency() {
+		return tradingCurrency;
+	}
+
+	public void setTradingCurrency(TradingCurrency tradingCurrency) {
+		this.tradingCurrency = tradingCurrency;
+	}
+
+	public String getBusinessKey() {
+		return businessKey;
+	}
+
+	public void setBusinessKey(String businessKey) {
+		this.businessKey = businessKey;
+	}
+
+	public Contract getContract() {
+		return contract;
+	}
+
+	public void setContract(Contract contract) {
+		this.contract = contract;
+	}
+
+	public ContractItem getContractLine() {
+		return contractLine;
+	}
+
+	public void setContractLine(ContractItem contractLine) {
+		this.contractLine = contractLine;
+	}
+    
 }

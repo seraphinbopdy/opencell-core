@@ -55,7 +55,7 @@ public class Payment extends AccountOperation {
     private BigDecimal transactionalFees = BigDecimal.ZERO;
 
     /**
-     * if a payment is done as part of a dunning process
+     * Payment gateway
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_gateway_id")

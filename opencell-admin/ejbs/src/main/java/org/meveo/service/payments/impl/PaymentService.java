@@ -42,7 +42,6 @@ import org.meveo.api.exception.MeveoApiException;
 import org.meveo.audit.logging.annotations.MeveoAudit;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.billing.ExchangeRate;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.payments.AccountOperation;
@@ -475,9 +474,9 @@ public class PaymentService extends PersistenceService<Payment> {
     	 if (createAO) {
 
              if (isPayment) {
-                 aoPaymentId = createPaymentAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay);
+                 aoPaymentId = createPaymentAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, paymentGateway);
              } else {
-                 aoPaymentId = refundService.createRefundAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay);
+                 aoPaymentId = refundService.createRefundAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, paymentGateway);
              }
              doPaymentResponseDto.setAoCreated(true);
              if (matchingAO ) {
@@ -575,7 +574,6 @@ public class PaymentService extends PersistenceService<Payment> {
      * @param cvv cvv number
      * @param expiryDate expiry date
      * @param cardType card type
-     * @param isPayment if true is a payment else is a refund.
      * @param paymentMethodType payment method to use, CARD or DIRECTDEIBT.
      * @return id Refund
      */
@@ -629,7 +627,7 @@ public class PaymentService extends PersistenceService<Payment> {
         }
         Refund refund = new Refund();
         try {
-            aoPaymentId = refundService.createSDRefundAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, refund);
+            aoPaymentId = refundService.createSDRefundAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, refund, paymentGateway);
             doPaymentResponseDto.setAoCreated(true);
         } catch (Exception e) {
             log.warn("Cant create Account operation payment :", e);
@@ -714,16 +712,17 @@ public class PaymentService extends PersistenceService<Payment> {
     /**
      * Create the payment account operation for the payment that was processed.
      *
-     * @param customerAccount customer account
-     * @param ctsAmount amount in cent.
-     * @param doPaymentResponseDto payment responsse dto
-     * @param paymentMethodType payment method used
-     * @param aoIdsToPay list AO to paid
+     * @param customerAccount      customer account
+     * @param ctsAmount            amount in cent.
+     * @param doPaymentResponseDto payment response dto
+     * @param paymentMethodType    payment method used
+     * @param aoIdsToPay           list AO to paid
+     * @param paymentGateway       paymentGateway
      * @return the AO id created
      * @throws BusinessException business exception.
      */
     public Long createPaymentAO(CustomerAccount customerAccount, Long ctsAmount, PaymentResponseDto doPaymentResponseDto, PaymentMethodEnum paymentMethodType,
-            List<Long> aoIdsToPay) throws BusinessException {
+                                List<Long> aoIdsToPay, PaymentGateway paymentGateway) throws BusinessException {
         ParamBean paramBean = paramBeanFactory.getInstance();
         String occTemplateCode = paramBean.getProperty("occ.payment.card", "PAY_CRD");
         if (paymentMethodType == PaymentMethodEnum.DIRECTDEBIT) {
@@ -761,6 +760,7 @@ public class PaymentService extends PersistenceService<Payment> {
         payment.setCollectionDate(new Date());
         payment.setAccountingDate(new Date());
         setSumAndOrdersNumber(payment, aoIdsToPay);
+        payment.setPaymentGateway(paymentGateway);
         accountOperationService.handleAccountingPeriods(payment);
         create(payment);
         return payment.getId();

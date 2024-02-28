@@ -82,7 +82,6 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 
 	@Override
 	protected AgedReceivableDto toEntity(AgedReceivable resource) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -297,7 +296,7 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 			agedReceivableDto.setSellerCode((String) agedReceivable[++startingSumIndex]);
 			agedReceivableDto.setDueDate(agedReceivable[++startingSumIndex] == null ? null : ((Date) agedReceivable[startingSumIndex]));
 			agedReceivableDto.setTradingCurrency((String) agedReceivable[++startingSumIndex]);
-			BigDecimal generalTotal = agedReceivableDto.getTotalAmountByPeriod()
+			BigDecimal generalTotal = agedReceivableDto.getTransactionalTotalAmountByPeriod()
 					.stream()
 					.reduce(ZERO, BigDecimal::add);
 			agedReceivableDto.setGeneralTotal(generalTotal);

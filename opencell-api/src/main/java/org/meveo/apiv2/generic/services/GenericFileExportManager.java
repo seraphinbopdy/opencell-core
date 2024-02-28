@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,8 +43,6 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.meveo.api.dto.AgedReceivableDto;
 import org.meveo.apiv2.generic.GenericFieldDetails;
 import org.meveo.commons.utils.CsvBuilder;
@@ -242,7 +239,6 @@ public class GenericFileExportManager {
                                 }
                             }
 
-                            //cell.setCellValue(applyTransformation(fieldDetails.get(key), value));
                             if (value instanceof Integer || value instanceof BigInteger) {
                                 cell.setCellStyle(excelCellStyles.get(wb.hashCode() + ExcelStylesEnum.NUMERIC_FORMAT.name()));
                             } else if (value instanceof Long || value instanceof BigDecimal || value instanceof Double || value instanceof Float) {
@@ -384,7 +380,7 @@ public class GenericFileExportManager {
                                          List<AgedReceivableDto> agedReceivablesList, List<String> orderedColumn, String locale, Integer numberOfPeriods){
         log.info("Export Aged Balance - Entity Name: {}, File Type: {}, Locale: {}", entityName, fileType, locale);
 
-        String filename = FR_AGED_BALANCE_FILENAME;;
+        String filename = FR_AGED_BALANCE_FILENAME;
         DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendValue(DAY_OF_MONTH, 2).appendValue(MONTH_OF_YEAR, 2).appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
                 .appendLiteral('-').appendValue(HOUR_OF_DAY, 2).appendValue(MINUTE_OF_HOUR, 2).appendValue(SECOND_OF_MINUTE, 2).toFormatter();
         SimpleDateFormat format = new SimpleDateFormat(FR_DATE_FORMAT);
@@ -408,7 +404,7 @@ public class GenericFileExportManager {
         Map<String, GenericFieldDetails> fieldDetails = getFieldDetailsMap(genericFieldDetails);
         
         // Format Fields
-        formatFields(map, format, locale);
+        formatFields(map, format);
 
         // If the map is not empty then save As Record to export - CSV, EXCEL or PDF
         if (!map.isEmpty()) {
@@ -445,7 +441,7 @@ public class GenericFileExportManager {
                 }
 
                 IntStream.range(0, numberOfPeriods)
-                        .forEach(i -> map.put("period" + (i + 1), o.getTotalAmountByPeriod().get(i)));
+                        .forEach(i -> map.put("period" + (i + 1), o.getTransactionalTotalAmountByPeriod().get(i)));
 
                 listOfMap.add(map);
             }
@@ -459,7 +455,7 @@ public class GenericFileExportManager {
      * @param mapResult List of Map
      * @param format Date Format
      */
-    private static void formatFields(List<Map<String, Object>> mapResult, SimpleDateFormat format, String locale) {
+    private static void formatFields(List<Map<String, Object>> mapResult, SimpleDateFormat format) {
         for (Map<String, Object> item : mapResult) {
             for (Map.Entry<String, Object> entry : item.entrySet()) {
                 if(entry.getKey().equals("dueDate")) {

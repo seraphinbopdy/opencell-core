@@ -156,7 +156,7 @@ public class StandardReportResourceImpl implements StandardReportResource {
 		agedReceivablesList.forEach(ag -> {
         	if(input.getFilters().get("numberOfPeriods") != null) {
         		Integer num = (Integer) input.getFilters().get("numberOfPeriods");
-        		if(ag.getTotalAmountByPeriod().size() > 0) {
+        		if(!ag.getTransactionalTotalAmountByPeriod().isEmpty()) {
         			if(num > 0) {
             			ag.setSum1To30(ag.getTransactionalTotalAmountByPeriod().get(0));
             		}
@@ -173,7 +173,6 @@ public class StandardReportResourceImpl implements StandardReportResource {
             			ag.setSum90Up(ag.getTransactionalTotalAmountByPeriod().get(3));
             		}
         		}
-        		
         	}
         });
 	}

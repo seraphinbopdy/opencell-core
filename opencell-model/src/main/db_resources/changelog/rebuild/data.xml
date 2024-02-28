@@ -13035,6 +13035,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
                 "UpdateHugeEntityJob_selectFetchSize":[{"long":1000000}],
                 "UpdateHugeEntityJob_updateChunkSize":[{"long":32767}],
                 "UpdateHugeEntityJob_isPessimisticUpdateLock":[{"boolean":false}],
+                "UpdateHugeEntityJob_isUsingView":[{"boolean":true}],
+                "UpdateHugeEntityJob_isOpenCursor":[{"boolean":true}],
                 "UpdateHugeEntityJob_emailTemplate": [{"entity": {"code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
                 }]]></column>
 		</insert>

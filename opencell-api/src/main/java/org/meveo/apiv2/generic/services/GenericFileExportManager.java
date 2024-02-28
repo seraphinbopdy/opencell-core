@@ -441,7 +441,7 @@ public class GenericFileExportManager {
                 }
 
                 IntStream.range(0, numberOfPeriods)
-                        .forEach(i -> map.put("period" + (i + 1), o.getTotalAmountByPeriod().get(i)));
+                        .forEach(i -> map.put("period" + (i + 1), o.getTransactionalTotalAmountByPeriod().get(i)));
 
                 listOfMap.add(map);
             }

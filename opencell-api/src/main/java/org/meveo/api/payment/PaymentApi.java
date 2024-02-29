@@ -19,6 +19,8 @@
 package org.meveo.api.payment;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
@@ -34,7 +36,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -325,7 +326,7 @@ public class PaymentApi extends BaseApi {
 			}
 			aosToPaid.add(ao);
 		}
-		 Collections.sort(aosToPaid, Comparator.comparing(AccountOperation::getDueDate));
+		 Collections.sort(aosToPaid, comparing(AccountOperation::getDueDate));
 		if(checkAccountOperationCurrency(aosToPaid, paymentDto.getTransactionalCurrency())) {
 			throw new BusinessApiException("Transaction currency is different from account operation currency");
 		}
@@ -850,18 +851,34 @@ public class PaymentApi extends BaseApi {
 			if(rejectionAction.getRejectionCodeGroup() != null) {
 				entity.setPaymentRejectionCodesGroup(loadRejectionCodeGroup(rejectionAction.getRejectionCodeGroup()));
 			}
-			if(rejectionAction.getSequence() == null) {
-				if(entity.getPaymentRejectionCodesGroup() != null
-						&& entity.getPaymentRejectionCodesGroup().getPaymentRejectionActions() != null) {
-					entity.setSequence(entity.getPaymentRejectionCodesGroup().getPaymentRejectionActions().size());
-				} else {
-					entity.setSequence(FIRST_ACTION_SEQUENCE);
-				}
+			List<PaymentRejectionAction> actions = ((entity.getPaymentRejectionCodesGroup() != null)
+					&& (entity.getPaymentRejectionCodesGroup().getPaymentRejectionActions() != null)) ?
+					entity.getPaymentRejectionCodesGroup().getPaymentRejectionActions() : emptyList();
+			int actionCount = actions.size();
+			if(rejectionAction.getSequence() != null) {
+				computeSequence(entity, actionCount, actions);
+			} else {
+				entity.setSequence(actionCount);
 			}
 			paymentRejectionActionService.create(entity);
 			return rejectionActionMapper.toResource(entity);
 		} catch (BusinessException exception) {
 			throw new BadRequestException(exception.getMessage());
+		}
+	}
+
+	private void computeSequence(PaymentRejectionAction entity, int actionCount, List<PaymentRejectionAction> actions) {
+		if(entity.getSequence() >= 0 && entity.getSequence() <= actionCount) {
+			if(actions.isEmpty()) {
+				entity.setSequence(FIRST_ACTION_SEQUENCE);
+			} else {
+				actions.sort(comparing(PaymentRejectionAction::getSequence));
+				for (int index = entity.getSequence(); index < actions.size(); index++) {
+					actions.get(index).setSequence(actions.get(index).getSequence() + 1);
+				}
+			}
+		} else {
+			throw new BadRequestException("Provided sequence should be between 0 and total action number");
 		}
 	}
 
@@ -892,7 +909,6 @@ public class PaymentApi extends BaseApi {
 		}
 		ofNullable(rejectionAction.getCode()).ifPresent(toUpdate::setCode);
 		ofNullable(rejectionAction.getDescription()).ifPresent(toUpdate::setDescription);
-		ofNullable(rejectionAction.getSequence()).ifPresent(toUpdate::setSequence);
 		ofNullable(rejectionAction.getScriptParameters()).ifPresent(toUpdate::setScriptParameters);
 		if (rejectionAction.getScriptInstance() != null) {
 			final Resource script = rejectionAction.getScriptInstance();
@@ -906,6 +922,21 @@ public class PaymentApi extends BaseApi {
 		}
 		if(rejectionAction.getRejectionCodeGroup() != null) {
 			toUpdate.setPaymentRejectionCodesGroup(loadRejectionCodeGroup(rejectionAction.getRejectionCodeGroup()));
+		}
+		if(rejectionAction.getSequence() != null) {
+			List<PaymentRejectionAction> actions = ((toUpdate.getPaymentRejectionCodesGroup() != null)
+					&& (toUpdate.getPaymentRejectionCodesGroup().getPaymentRejectionActions() != null)) ?
+					toUpdate.getPaymentRejectionCodesGroup().getPaymentRejectionActions() : emptyList();
+			int actionCount = actions.size();
+			if(rejectionAction.getSequence() > actionCount - 1 || rejectionAction.getSequence() < 0) {
+				throw new BadRequestException("Provided sequence should be between 0 and " + (actionCount - 1));
+			} else {
+				if(toUpdate.getSequence() != rejectionAction.getSequence()) {
+					actions.sort(comparing(PaymentRejectionAction::getSequence));
+					actions.get(rejectionAction.getSequence()).setSequence(toUpdate.getSequence());
+					toUpdate.setSequence(rejectionAction.getSequence());
+				}
+			}
 		}
 		return rejectionActionMapper.toResource(paymentRejectionActionService.update(toUpdate));
 	}
@@ -1137,7 +1168,7 @@ public class PaymentApi extends BaseApi {
 		if(actions.size() == 1) {
 			throw new BadRequestException("Payment rejection group has only one action");
 		}
-		actions.sort(Comparator.comparing(PaymentRejectionAction::getSequence));
+		actions.sort(comparing(PaymentRejectionAction::getSequence));
 		int currentSequence = actionToUpdate.getSequence();
 		if(currentSequence == 0
 				&& UP == sequenceAction.getSequenceAction()) {

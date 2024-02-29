@@ -802,7 +802,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                 }
             }
             	
-            	if (unitPriceWithoutTax == null) {
+            	if (unitPriceWithoutTax == null && unitPriceWithTax == null) {
                  	//Get the PriceList from subscription
                  	PriceList priceList =  bareWalletOperation.getChargeInstance().getServiceInstance().getSubscription().getPriceList();
 
@@ -841,7 +841,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
              		}
                  }
             	
-            	if(unitPriceWithoutTax==null) {
+            	if(unitPriceWithoutTax==null && unitPriceWithTax == null) {
             		BigDecimal amount= BigDecimal.ZERO;
             		BigDecimal discountRate=null;
             		PricePlanMatrixLine pricePlanMatrixLine =null;

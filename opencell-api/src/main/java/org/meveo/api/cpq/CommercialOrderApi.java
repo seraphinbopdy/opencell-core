@@ -976,7 +976,9 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
         	Subscription subscription = subscriptionService.findByCode(orderOfferDto.getSubscriptionCode());
         	if(subscription == null) {
         		throw new EntityDoesNotExistsException("Subscription with code "+orderOfferDto.getSubscriptionCode()+" does not exist");
-        	}
+        	} else if (!SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus())) {
+				throw new BusinessApiException("Only ACTIVE subscription allowed for this operation");
+			}
         	orderOffer.setSubscription(subscription);
         }else {
         	orderOffer.setOrderLineType(OfferLineTypeEnum.CREATE);

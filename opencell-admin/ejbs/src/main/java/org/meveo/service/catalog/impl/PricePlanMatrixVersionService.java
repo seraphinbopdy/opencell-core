@@ -780,8 +780,8 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             final String fileNameSeparator = "_-_";
             StringBuilder fileName = new StringBuilder();
             fileName.append(ppmv.getId());
-            if (ppmv.getPricePlanMatrix() != null && !ListUtils.isEmtyCollection(ppmv.getPricePlanMatrix().getChargeTemplates())) {
-                if(ppmv.getPricePlanMatrix().getChargeTemplates().size() == 1) {
+            if (ppmv.getPricePlanMatrix() != null) {
+                if(!ListUtils.isEmtyCollection(ppmv.getPricePlanMatrix().getChargeTemplates()) && ppmv.getPricePlanMatrix().getChargeTemplates().size() == 1) {
                     ChargeTemplate chargeTemplate = ppmv.getPricePlanMatrix().getChargeTemplates().iterator().next();
                     fileName.append(fileNameSeparator + chargeTemplate.getId());
                     fileName.append(fileNameSeparator + chargeTemplate.getDescription()).append(fileNameSeparator + chargeTemplate.getCode());
@@ -804,6 +804,10 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                 if (ppmv.getValidity().getTo() != null) {
                     fileName.append(ppmv.getValidity().getTo().getTime());
                 }
+            }
+            // remove separator if it's at the end of the file name
+            if (fileName.lastIndexOf(fileNameSeparator) == fileName.length() - fileNameSeparator.length()) {
+                fileName.delete(fileName.length() - fileNameSeparator.length(), fileName.length());
             }
             return File.separator + fileName.toString().replaceAll("null", "").replaceAll("[/: ]", "-");
         }
@@ -937,7 +941,10 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
         private LinkedHashMap<String, Object> toCSVLineRecords(PricePlanMatrixVersion ppv, List<Map<String, Object>> ppmvMaps) {
             LinkedHashMap<String, Object> CSVLineRecords = new LinkedHashMap<>();
             CSVLineRecords.put("label", ppv.getLabel());
-            CSVLineRecords.put("amount", ppv.getPrice());            
+            CSVLineRecords.put("amount", ppv.getPrice());
+            CSVLineRecords.put("status", ppv.getStatus());
+            CSVLineRecords.put("version", ppv.getVersion());
+
             for (Map<String, Object> ppmvMap : ppmvMaps)
             {
                 Long ppvId = (Long) ppmvMap.get("ppvId");

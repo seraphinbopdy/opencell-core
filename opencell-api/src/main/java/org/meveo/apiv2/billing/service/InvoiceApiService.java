@@ -489,6 +489,14 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
             throw new ForbiddenException("Invoice should be Validated");
         }
 
+		if(invoice.getLinkedInvoices() != null && !invoice.getLinkedInvoices().isEmpty()) {
+			invoice.getLinkedInvoices().forEach(relatedInvoice -> {
+				if(VALIDATED == relatedInvoice.getLinkedInvoiceValue().getStatus()) {
+					throw new ForbiddenException("You cannot create ADJ on invoice with an already validated ADJ");
+				}
+			});
+		}
+
 		String invoiceType = invoice.getInvoiceType() != null ? invoice.getInvoiceType().getCode() : "";
 		boolean invoiceTypeForbidden = invoiceTypeService.getListAdjustementCode().contains(invoiceType);
 		if(invoiceTypeForbidden) {

@@ -54,10 +54,13 @@ public class UpdateHugeEntityJobBean extends BaseJobBean {
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_DEFAULT_FILTER));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_EMAIL_TEMPLATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_EMAIL_TEMPLATE));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_SELECT_FETCH_SIZE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_SELECT_FETCH_SIZE));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_SELECT_MAX_RESULTS, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_SELECT_MAX_RESULTS));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK_SIZE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_UPDATE_CHUNK_SIZE));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_PESSIMISTIC_UPDATE_LOCK, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_PESSIMISTIC_UPDATE_LOCK));
-        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_EMAIL_TEMPLATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_EMAIL_TEMPLATE));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_USING_VIEW, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_USING_VIEW));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_OPEN_CURSOR, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_OPEN_CURSOR));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE));
     }
 }

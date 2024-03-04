@@ -1184,6 +1184,8 @@ public class SubscriptionApi extends BaseApi {
             missingParameters.add("subscription");
         }
 
+        checkOneShotChargeInstancePrice(postData);
+        
         handleMissingParametersAndValidate(postData);
 
         Date operationDate = postData.getOperationDate();
@@ -1269,7 +1271,33 @@ public class SubscriptionApi extends BaseApi {
 
     }
 
-    /**
+    private void checkOneShotChargeInstancePrice(ApplyOneShotChargeInstanceRequestDto postData) {
+    	if(appProvider.isEntreprise()) {
+    		if (postData.getUnitPrice() != null && postData.getAmountWithoutTax() != null && postData.getUnitPrice().compareTo(postData.getAmountWithoutTax()) != 0) {
+    			throw new MeveoApiException("unitPrice and amountWithoutTax must be equal. Futhermore, ‘amountWithoutTax' is deprecated, you should only send 'unitPrice’.");
+    		}
+    		if (postData.getUnitPrice() == null && postData.getAmountWithoutTax() == null && postData.getAmountWithTax() != null) {
+    			throw new MeveoApiException("Provider is in B2B mode (entreprise=true). This means that unit prices are without tax. Furthermore, ‘amountWithTax’ is deprecated, you should send ‘unitPrice’.");
+    		}
+    		if (postData.getUnitPrice() != null) {
+    			postData.setAmountWithoutTax(postData.getUnitPrice());
+    		}
+    		postData.setAmountWithTax(null);
+    	} else {
+    		if (postData.getUnitPrice() != null && postData.getAmountWithTax() != null && postData.getUnitPrice().compareTo(postData.getAmountWithTax()) != 0) {
+    			throw new MeveoApiException("unitPrice and amountWithTax must be equal. Furthermore, ‘amountWithTax' is deprecated, you should only send 'unitPrice’.");
+    		}
+    		if (postData.getUnitPrice() == null && postData.getAmountWithTax() == null && postData.getAmountWithoutTax() != null) {
+    			throw new MeveoApiException("Provider is in B2C mode (entreprise=false). This means that unit prices are with tax. Furthermore, ‘amountWithoutTax’ is deprecated, you should send ‘unitPrice’.");
+    		}
+    		if (postData.getUnitPrice() != null) {
+    			postData.setAmountWithTax(postData.getUnitPrice());
+    		}
+    		postData.setAmountWithoutTax(null);
+    	}
+	}
+
+	/**
      * Apply a product charge on a subscription
      *
      * @param postData Apply product request dto

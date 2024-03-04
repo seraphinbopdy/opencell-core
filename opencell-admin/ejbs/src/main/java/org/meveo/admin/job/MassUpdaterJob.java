@@ -28,8 +28,6 @@ import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.job.Job;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,6 +88,16 @@ public class MassUpdaterJob extends Job {
     public static final String PARAM_IS_PESSIMISTIC_UPDATE_LOCK = "MassUpdaterJob_isPessimisticUpdateLock";
 
     /**
+     * Custom field containing the flag that indicates if the job will use the view or not.
+     */
+    public static final String PARAM_IS_USING_VIEW = "MassUpdaterJob_isUsingView";
+
+    /**
+     * Custom field containing the flag that indicates if the job will use open cursor or not.
+     */
+    public static final String PARAM_IS_OPEN_CURSOR = "MassUpdaterJob_isOpenCursor";
+
+    /**
      * Custom field that contains the named query name
      */
     public static final String PARAM_NAMED_QUERY = "MassUpdaterJob_namedQuery";
@@ -98,21 +106,58 @@ public class MassUpdaterJob extends Job {
      * Job bean
      */
     @Inject
-    private MassUpdaterJobBean massUpdaterJobBean;
+    private MassUpdaterOpenCursorJobBean massUpdaterOpenCursorJobBean;
+
+    /**
+     * Job bean
+     */
+    @Inject
+    private MassUpdaterOfflineJobBean massUpdaterOfflineJobBean;
+
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.NEVER)
     protected JobExecutionResultImpl execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) throws BusinessException {
-
         String updateQuery = (String) getParamOrCFValue(jobInstance, PARAM_UPDATE_QUERY);
         Long updateChunkSize = (Long) getParamOrCFValue(jobInstance, PARAM_UPDATE_CHUNK_SIZE);
         String selectQuery = (String) getParamOrCFValue(jobInstance, PARAM_SELECT_QUERY);
         Long selectFetchSize = (Long) getParamOrCFValue(jobInstance, PARAM_SELECT_FETCH_SIZE);
         Long selectMaxResults = (Long) getParamOrCFValue(jobInstance, PARAM_SELECT_MAX_RESULTS);
         Boolean isNativeQuery = (Boolean) getParamOrCFValue(jobInstance, PARAM_IS_NATIVE_QUERY, false);
-        Boolean isPessimisticLock = (Boolean) getParamOrCFValue(jobInstance, PARAM_IS_PESSIMISTIC_UPDATE_LOCK, false);
-        massUpdaterJobBean.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunkSize, selectQuery, selectFetchSize, selectMaxResults, isNativeQuery, isPessimisticLock);
+        Boolean isPessimisticUpdateLock = (Boolean) getParamOrCFValue(jobInstance, PARAM_IS_PESSIMISTIC_UPDATE_LOCK, false);
+        Boolean isUsingView = (Boolean) getParamOrCFValue(jobInstance, PARAM_IS_USING_VIEW, false);
+        Boolean isOpenCursor = (Boolean) getParamOrCFValue(jobInstance, PARAM_IS_OPEN_CURSOR, false);
+
+        execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunkSize, selectQuery, selectFetchSize, selectMaxResults, isNativeQuery,
+                isPessimisticUpdateLock, isUsingView, isOpenCursor);
+
         return jobExecutionResult;
+    }
+
+    /**
+     * Execute job
+     *
+     * @param jobExecutionResult      the job execution result
+     * @param jobInstance             the job instance
+     * @param namedQuery              the named query
+     * @param updateQuery             the update query
+     * @param updateChunkSize         the chunk size of update query
+     * @param selectQuery             the select query
+     * @param selectFetchSize         the fetch size of select query
+     * @param selectMaxResults        the max results of select query
+     * @param isNativeQuery           indicates if the query is native or not
+     * @param isPessimisticUpdateLock indicates if all update queries will be run on distinct IDs or whether it doesn't matter.
+     * @param isUsingView             indicates if the job will be use the view or not.
+     * @param isOpenCursor            indicates if the job will use open cursor or not.
+     */
+    public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, String namedQuery, String updateQuery, Long updateChunkSize, String selectQuery,
+                        Long selectFetchSize, Long selectMaxResults, Boolean isNativeQuery, Boolean isPessimisticUpdateLock, Boolean isUsingView, Boolean isOpenCursor) {
+        if (isOpenCursor) {
+            massUpdaterOpenCursorJobBean.execute(jobExecutionResult, jobInstance, namedQuery, updateQuery, updateChunkSize, selectQuery, selectFetchSize,
+                    selectMaxResults, isNativeQuery, isPessimisticUpdateLock, isUsingView);
+        } else {
+            massUpdaterOfflineJobBean.execute(jobExecutionResult, jobInstance, namedQuery, updateQuery, updateChunkSize, selectQuery, selectFetchSize,
+                    selectMaxResults, isNativeQuery, isPessimisticUpdateLock);
+        }
     }
 
     @Override
@@ -159,6 +204,14 @@ public class MassUpdaterJob extends Job {
                 CustomFieldTemplateUtils.buildCF(PARAM_IS_PESSIMISTIC_UPDATE_LOCK,
                         resourceMessages.getString("jobExecution.massUpdate.isPessimisticUpdateLock"), CustomFieldTypeEnum.BOOLEAN,
                         "tab:Configuration:0;fieldGroup:Configuration:0;field:8", "false", APPLIES_TO));
+        result.put(PARAM_IS_USING_VIEW,
+                CustomFieldTemplateUtils.buildCF(PARAM_IS_USING_VIEW,
+                        resourceMessages.getString("jobExecution.massUpdate.isUsingView"), CustomFieldTypeEnum.BOOLEAN,
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:9", "false", APPLIES_TO));
+        result.put(PARAM_IS_OPEN_CURSOR,
+                CustomFieldTemplateUtils.buildCF(PARAM_IS_OPEN_CURSOR,
+                        resourceMessages.getString("jobExecution.massUpdate.isOpenCursor"), CustomFieldTypeEnum.BOOLEAN,
+                        "tab:Configuration:0;fieldGroup:Configuration:0;field:10", "true", APPLIES_TO));
         return result;
     }
 }

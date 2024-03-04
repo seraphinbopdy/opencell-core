@@ -96,7 +96,7 @@ public class HugeEntityResourceImpl implements HugeEntityResource {
             return Response.status(Response.Status.ACCEPTED).entity(result).build();
         } else {
             String defaultFilter = (String) customFieldInstanceService.getCFValue(jobInstance, UpdateHugeEntityJob.CF_DEFAULT_FILTER);
-            String selectQuery = batchEntityService.getSelectQuery(hugeEntityClass, hugeEntity.getFilters(), defaultFilter);
+            String selectQuery = batchEntityService.getSelectQuery(hugeEntityClass, hugeEntity.getFilters(), defaultFilter, false);
             List<Long> ids = entityManagerWrapper.getEntityManager().createQuery(selectQuery).getResultList();
 
             StringBuilder updateQuery = new StringBuilder("UPDATE ").append(hugeEntityClassName).append(" SET ")

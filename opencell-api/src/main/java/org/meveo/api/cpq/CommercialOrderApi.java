@@ -198,7 +198,7 @@ public class CommercialOrderApi extends BaseApi {
 			order.setCode(customGenericEntityCodeService.getGenericEntityCode(order));
 		}
 		if(!Strings.isEmpty(orderDto.getDescription())){
-			order.setCode(orderDto.getDescription());
+			order.setDescription(orderDto.getDescription());
 		}
 		if(!Strings.isEmpty(orderDto.getQuoteCode())) {
 			order.setQuote(loadEntityByCode(cpqQuoteService, orderDto.getQuoteCode(), CpqQuote.class));

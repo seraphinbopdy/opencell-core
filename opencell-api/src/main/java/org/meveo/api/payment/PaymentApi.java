@@ -105,6 +105,7 @@ import org.meveo.model.payments.OtherCreditAndCharge;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentHistory;
+import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentRejectionAction;
 import org.meveo.model.payments.PaymentRejectionCode;
@@ -266,7 +267,8 @@ public class PaymentApi extends BaseApi {
         }
 
 		payment.setJournal(journalService.findByCode("BAN"));
-        paymentService.create(payment);
+		setPaymentGateway(payment, customerAccount);
+		paymentService.create(payment);
 
 		paymentHistoryService.addHistory(customerAccount,
 				payment,
@@ -283,6 +285,15 @@ public class PaymentApi extends BaseApi {
         return payment.getId();
 
     }
+
+	private void setPaymentGateway(Payment payment, CustomerAccount customerAccount) {
+		if(payment.getPaymentGateway() == null && payment.getCustomerAccount() != null) {
+			PaymentMethod preferredPaymentMethod = payment.getCustomerAccount().getPreferredPaymentMethod();
+			PaymentGateway paymentGateway =
+					paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
+			ofNullable(paymentGateway).ifPresent(payment::setPaymentGateway);
+		}
+	}
 
 	private ExchangeRate getExchangeRate(TradingCurrency tradingCurrency, TradingCurrency functionalCurrency, Date transactionDate) {
 		Date exchangeDate = transactionDate != null ? transactionDate : new Date();

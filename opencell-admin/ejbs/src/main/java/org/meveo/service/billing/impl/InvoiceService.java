@@ -925,7 +925,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
             rts.addAll(walletOperationService.listToRate(entityToInvoice, invoiceUpToDate).stream()
                 .filter(wo -> wo.getOperationDate().before(lastTransactionDate) && (wo.getOperationDate().after(firstTransactionDate) || wo.getOperationDate().equals(firstTransactionDate))).map(RatedTransaction::new)
-                .collect(Collectors.toList()));
+                .collect(toList()));
         }
 
         return rts;
@@ -946,17 +946,17 @@ public class InvoiceService extends PersistenceService<Invoice> {
     private List<RatedTransaction> getDraftRatedTransactions(IBillableEntity entityToInvoice, Date firstTransactionDate, Date lastTransactionDate, Date invoiceUpToDate) {
         return walletOperationService.listToRate(entityToInvoice, invoiceUpToDate).stream()
             .filter(wo -> wo.getOperationDate().before(lastTransactionDate) && (wo.getOperationDate().after(firstTransactionDate) || wo.getOperationDate().equals(firstTransactionDate))).map(RatedTransaction::new)
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     private List<Long> getDrafWalletOperationIds(IBillableEntity entityToInvoice, Date firstTransactionDate, Date lastTransactionDate, Date invoiceUpToDate) {
         return walletOperationService.listToRate(entityToInvoice, invoiceUpToDate).stream()
             .filter(wo -> wo.getOperationDate().before(lastTransactionDate) && (wo.getOperationDate().after(firstTransactionDate) || wo.getOperationDate().equals(firstTransactionDate))).map(BaseEntity::getId)
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     private List<RatedTransaction> getDraftRatedTransactions(List<Long> walletOperationsIds) {
-        return walletOperationService.findByIds(walletOperationsIds).stream().map(RatedTransaction::new).collect(Collectors.toList());
+        return walletOperationService.findByIds(walletOperationsIds).stream().map(RatedTransaction::new).collect(toList());
     }
 
     /**
@@ -1440,7 +1440,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     private void applyAutomaticInvoiceCheck(Invoice invoice, boolean automaticInvoiceCheck, boolean save) {
         log.debug("Will apply automatic invoice check. invId={}, automaticInvoiceCheck={}, save={}",
                 invoice.getId(), automaticInvoiceCheck, save);
-    	InvoiceType invoiceType = invoiceTypeService.refreshOrRetrieve(invoice.getInvoiceType());
+    	InvoiceType invoiceType = invoiceTypeService.findById(invoice.getInvoiceType().getId(),List.of("invoiceValidationRules"));
         if (automaticInvoiceCheck && invoiceType != null && (invoiceType.getInvoiceValidationScript() != null || invoiceType.getInvoiceValidationRules() != null)) {
             if (invoiceType.getInvoiceValidationScript() != null) {
                 ScriptInstance scriptInstance = invoiceType.getInvoiceValidationScript();
@@ -1462,10 +1462,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
                         }
                     }
                 }
-            } else if (invoiceType.getInvoiceValidationRules() != null && !invoiceType.getInvoiceValidationRules().isEmpty()) {
-				List<InvoiceValidationRule> invoiceValidationRules = invoice.getInvoiceType().getInvoiceValidationRules()
-						.stream().filter(rule -> Objects.isNull(rule.getParentRule())).collect(Collectors.toList());
-                sort(invoiceValidationRules, comparingInt(InvoiceValidationRule::getPriority));
+            } else if (invoiceType.getInvoiceValidationRules() != null
+                    && !invoiceType.getInvoiceValidationRules().isEmpty()) {
+				List<InvoiceValidationRule> invoiceValidationRules = invoiceType.getInvoiceValidationRules()
+                        .stream().filter(rule -> Objects.isNull(rule.getParentRule()))
+                        .sorted(comparingInt(InvoiceValidationRule::getPriority))
+                        .collect(toList());
                 Iterator<InvoiceValidationRule> validationRuleIterator = invoiceValidationRules.iterator();
                 RuleValidationEnum currentRuleValidation = RuleValidationEnum.RULE_TRUE;
                 Map<String, Object> methodContext = initContext(invoice);
@@ -3014,7 +3016,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         List<Invoice> invoices = extractInvalidInvoiceList(billingRunId, invoiceIds, Arrays.asList(InvoiceStatusEnum.REJECTED, InvoiceStatusEnum.SUSPECT));
         BillingRun nextBR = billingRunService.findOrCreateNextQuarantineBR(billingRunId, null);
         if (CollectionUtils.isEmpty(invoiceIds) && !CollectionUtils.isEmpty(invoices)) {
-            invoiceIds = invoices.stream().map(invoice -> invoice.getId()).collect(Collectors.toList());
+            invoiceIds = invoices.stream().map(invoice -> invoice.getId()).collect(toList());
         }
         getEntityManager().createNamedQuery("Invoice.moveToBRByIds").setParameter("billingRun", nextBR).setParameter("invoiceIds", invoiceIds).executeUpdate();
         return nextBR.getId();
@@ -3026,7 +3028,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @return billingRunId the id of the new billing run.
      */
     public Long moveInvoices(List<Invoice> invoices, Long billingRunId) {
-        return moveInvoices(billingRunId, invoices.stream().map(x -> x.getId()).collect(Collectors.toList()));
+        return moveInvoices(billingRunId, invoices.stream().map(x -> x.getId()).collect(toList()));
     }
 
     private List<Invoice> extractInvalidInvoiceList(Long billingRunId, List<Long> invoiceIds, List<InvoiceStatusEnum> statusList) throws BusinessException {
@@ -4065,7 +4067,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             List<InvoiceLine> erronedLines = scAggregate.getInvoiceLinesToAssociate()
                     .stream()
                     .filter(invoiceLine -> invoiceLine.getTax() == null && !invoiceLine.getTaxMode().equals(InvoiceLineTaxModeEnum.RATE))
-                    .collect(Collectors.toList());
+                    .collect(toList());
             if (!erronedLines.isEmpty()) {
                 String message = erronedLines.stream().map(x -> x.getAccountingArticle().getCode()).collect(Collectors.joining(", "));
                 throw new BusinessException("the articles " + message + " has no corresponding tax ");
@@ -6857,7 +6859,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         if (CollectionUtils.isNotEmpty(invoiceResource.getListLinkedInvoices())) {
             List<Long> toUpdateLinkedInvoice = toUpdate.getLinkedInvoices().stream()
-                    .map(li -> li.getLinkedInvoiceValue().getId()).collect(Collectors.toList());
+                    .map(li -> li.getLinkedInvoiceValue().getId()).collect(toList());
             
             List<Long> linkedInvoiceToAdd = new ArrayList<>(invoiceResource.getListLinkedInvoices());
             List<Long> linkedInvoiceToRemove = new ArrayList<>(toUpdateLinkedInvoice);
@@ -7307,7 +7309,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     
     private void addApplicableDiscount(List<DiscountPlanItem> applicableDiscountPlanItems,List<DiscountPlanInstance> discountPlanInstances, BillingAccount billingAccount, CustomerAccount customerAccount, Invoice invoice) {
         if(invoice.getInvoiceLines() != null && !invoice.getInvoiceLines().isEmpty()) {
-            var filtredDiscountPlanInstanes= discountPlanInstances.stream().filter(dpi -> DiscountPlanTypeEnum.INVOICE == dpi.getDiscountPlan().getDiscountPlanType()).collect(Collectors.toList());
+            var filtredDiscountPlanInstanes= discountPlanInstances.stream().filter(dpi -> DiscountPlanTypeEnum.INVOICE == dpi.getDiscountPlan().getDiscountPlanType()).collect(toList());
             // use getApplicableDiscountPlanItemsV11 instead of getApplicableDiscountPlanItems after merging DP US INTRD-5730
             applicableDiscountPlanItems.addAll(getApplicableDiscountPlanItemsV11(billingAccount, filtredDiscountPlanInstanes, invoice, customerAccount));
         }else{
@@ -7581,7 +7583,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                         li.setTransactionalAmount(ZERO);
 					});
 				}
-				List<LinkedInvoice> lis = invoice.getLinkedInvoices().stream().filter(advFilter).filter(li -> ZERO.compareTo(li.getTransactionalAmount()) < 0).collect(Collectors.toList());
+				List<LinkedInvoice> lis = invoice.getLinkedInvoices().stream().filter(advFilter).filter(li -> ZERO.compareTo(li.getTransactionalAmount()) < 0).collect(toList());
 					for(LinkedInvoice li : lis) {
 						Invoice oldAdvanceInvoice = li.getLinkedInvoiceValue();
                         oldAdvanceInvoice.setTransactionalInvoiceBalance(oldAdvanceInvoice.getTransactionalInvoiceBalance().add(li.getTransactionalAmount()));

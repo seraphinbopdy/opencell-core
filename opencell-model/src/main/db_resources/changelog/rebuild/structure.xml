@@ -21459,6 +21459,8 @@
     <changeSet id="#INTRD-20127_add_index_attribute_instance" author="a.rouaguebe" />
     <changeSet id="#INTRD-21087_20240208" author="AdilElJaouhari" />
     <changeSet id="#INTRD-21452_20240209" author="TarikFA." />
+    <changeSet id="INTRD-21616_20240228_pg" author="AdilElJaouhari" dbms="postgresql" />
+    <changeSet id="INTRD-21616_20240228_oracle" author="AdilElJaouhari" dbms="oracle" />
 
     <!--  !!! PLEASE KEEP THIS CHANGESET AT THE END OF FILE !!! -->
     <changeSet id="#liquibase_hack_structure" author="AbdelmounaimAkadid">

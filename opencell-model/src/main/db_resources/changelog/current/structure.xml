@@ -9293,7 +9293,7 @@ public class AgedBalanceReporting extends ReportExtractScript {
                 onUpdate="NO ACTION" />
     </changeSet>
 
-	<changeSet id="INTRD-21616_20240228_pg" author="AdilElJaouhari" dbms="postgres">
+	<changeSet id="INTRD-21616_20240228_pg" author="AdilElJaouhari" dbms="postgresql">
         <dropView viewName="billing_wallet_operation_period" />
         <createView viewName="billing_wallet_operation_period">
             select o.*, SUM(o.flag) over (partition by o.seller_id order by o.charge_instance_id ) as period

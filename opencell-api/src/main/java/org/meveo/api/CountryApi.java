@@ -241,12 +241,13 @@ public class CountryApi extends BaseApi {
             tradingCountry.setDescription(postData.getName());
             country.setCurrency(currency);
             country.setDescription(postData.getName());
-            if(postData.getLanguageDescriptions() != null) {
-                country.setDescriptionI18n(convertMultiLanguageToMapOfValues(postData.getLanguageDescriptions(), null));
-            }
             if (language != null) {
                 country.setLanguage(language);
             }
+        }
+
+        if(postData.getLanguageDescriptions() != null) {
+            country.setDescriptionI18n(convertMultiLanguageToMapOfValues(postData.getLanguageDescriptions(), null));
         }
 
         TradingCurrency tradingCurrency = tradingCurrencyService.findByTradingCurrencyCode(postData.getCurrencyCode());

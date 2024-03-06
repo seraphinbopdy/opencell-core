@@ -165,11 +165,11 @@ import org.meveo.model.shared.DateUtils;
 	@NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
 			+ "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt "
 			+ "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
-			+ "	WHERE rt.status = 'BILLED' and il.invoice_id=:invoiceId"),
+			+ "	WHERE il.status = 'BILLED' and il.invoice_id=:invoiceId"),
 	@NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
 			+ "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt "
 			+ "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
-			+ "	WHERE rt.status = 'BILLED' and il.billing_run_id=:billingRunId")
+			+ "	WHERE il.status = 'BILLED' and il.billing_run_id=:billingRunId")
 
 })
 public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISearchable {

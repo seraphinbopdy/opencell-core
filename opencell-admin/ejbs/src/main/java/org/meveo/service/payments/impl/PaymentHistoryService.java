@@ -132,14 +132,15 @@ public class PaymentHistoryService extends PersistenceService<PaymentHistory> {
 		}
 		super.create(paymentHistory);
 	}
-    
+
     public PaymentHistory findHistoryByPaymentId(String paymentId) {
         try {
             QueryBuilder qb = new QueryBuilder(PaymentHistory.class, "a");
             qb.addCriterion("externalPaymentId", "=", paymentId, false);
-            return (PaymentHistory) qb.getQuery(getEntityManager()).getSingleResult();
+			List<PaymentHistory> paymentHistories = (List<PaymentHistory>) qb.getQuery(getEntityManager()).getResultList();
+            return paymentHistories != null && !paymentHistories.isEmpty() ? paymentHistories.get(0) : null;
         } catch (NoResultException ne) {
             return null;
-        } 
+        }
     }
 }

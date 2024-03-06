@@ -9233,12 +9233,14 @@ public class AgedBalanceReporting extends ReportExtractScript {
 		</addColumn>
 	</changeSet>
 
-    <changeSet author="MohammedELAZZOUZI" id="INTRD-21540_20240220">
+    <changeSet author="ME" id="INTRD_20240220">
         <createTable tableName="billing_invoices_subscriptions">
-            <column name="invoice_id" type="bigint" />
-            <column name="subscription_id" type="bigint" />
+            <column name="invoice_id" type="BIGINT">
+            	<constraints nullable="false" />
+            </column>
+            <column name="subscription_id" type="BIGINT"/>
         </createTable>
-        <addPrimaryKey columnNames="invoice_id, subscription_id" constraintName="billing_invoices_subscriptions_pkey" tableName="billing_invoices_subscriptions" />
+		<sql>CREATE UNIQUE INDEX billing_invoices_subscriptions__uk_subscription_id_not_null ON billing_invoices_subscriptions (invoice_id, subscription_id) WHERE subscription_id IS NOT NULL</sql>
         <addForeignKeyConstraint baseColumnNames="invoice_id" baseTableName="billing_invoices_subscriptions" constraintName="fk_invoice_id_bill_invoices-subscriptions" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="billing_invoice" />
         <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_invoices_subscriptions" constraintName="fk_subscription_id_bill_invoices-subscriptions" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="billing_subscription" />
             <sql>

@@ -73,7 +73,8 @@ import org.meveo.service.payments.impl.DunningStopReasonsService;
 
 public class DunningCollectionPlanApiService implements ApiService<DunningCollectionPlan> {
 
-    public static final String SWITCH = "SWITCH";
+    private static final String SWITCH = "SWITCH";
+
     @Inject
     private GlobalSettingsVerifier globalSettingsVerifier;
 

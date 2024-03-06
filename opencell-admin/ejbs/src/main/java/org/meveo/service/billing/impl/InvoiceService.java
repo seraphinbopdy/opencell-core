@@ -6247,6 +6247,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
             }
             invoiceAggregateProcessingInfo.invoice.assignTemporaryInvoiceNumber();
+            update(invoiceAggregateProcessingInfo.invoice);
             applyAutomaticInvoiceCheck(invoiceAggregateProcessingInfo.invoice, automaticInvoiceCheck);
             postCreate(invoiceAggregateProcessingInfo.invoice);
         }

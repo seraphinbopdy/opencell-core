@@ -73,6 +73,8 @@ import org.meveo.service.payments.impl.DunningStopReasonsService;
 
 public class DunningCollectionPlanApiService implements ApiService<DunningCollectionPlan> {
 
+    private static final String SWITCH = "SWITCH";
+
     @Inject
     private GlobalSettingsVerifier globalSettingsVerifier;
 
@@ -179,7 +181,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         }
         Optional<DunningCollectionPlan> optional = of(dunningCollectionPlanService.switchCollectionPlan(oldCollectionPlan, policy, policyLevel));
 
-        auditLogService.trackOperation("SWITCH", new Date(), oldCollectionPlan, oldCollectionPlan.getCollectionPlanNumber());
+        auditLogService.trackOperation(SWITCH, new Date(), oldCollectionPlan, oldCollectionPlan.getCollectionPlanNumber());
+
+        optional.ifPresent(dunningCollectionPlan -> auditLogService.trackOperation(SWITCH, new Date(), dunningCollectionPlan, dunningCollectionPlan.getCollectionPlanNumber()));
         return optional;
     }
 

@@ -13,10 +13,8 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Stateless
 public class DunningCollectionPlanJobBean extends BaseJobBean {
@@ -31,10 +29,18 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
         List<DunningPolicy> policies = policyService.getPolicies(true);
         jobExecutionResult.setNbItemsToProcess(policies.size());
+
         if (policies != null && !policies.isEmpty()) {
             Map<DunningPolicy, List<Invoice>> eligibleInvoicesByPolicy = new HashMap<>();
+
+            // Sort policies by isDefaultPolicy and policyPriority
+            List<DunningPolicy> sortedPolicies = policies.stream()
+                    .sorted(Comparator.comparing(DunningPolicy::getIsDefaultPolicy).reversed()
+                            .thenComparing(DunningPolicy::getPolicyPriority, Comparator.nullsLast(Comparator.naturalOrder())))
+                    .collect(Collectors.toList());
+
             try {
-                for (DunningPolicy policy : policies) {
+                for (DunningPolicy policy : sortedPolicies) {
                     List<Invoice> eligibleInvoice = policyService.findEligibleInvoicesForPolicy(policy);
                     if (eligibleInvoice != null && !eligibleInvoice.isEmpty()) {
                         List<Invoice> invoicesWithDebitTransaction = new ArrayList<>();
@@ -50,7 +56,7 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
                     }
                 }
                 policyService.processEligibleInvoice(eligibleInvoicesByPolicy, jobExecutionResult);
-                jobExecutionResult.addNbItemsCorrectlyProcessed(policies.size()
+                jobExecutionResult.addNbItemsCorrectlyProcessed(sortedPolicies.size()
                         - jobExecutionResult.getNbItemsProcessedWithError());
             } catch (Exception exception) {
                 jobExecutionResult.addErrorReport(exception.getMessage());

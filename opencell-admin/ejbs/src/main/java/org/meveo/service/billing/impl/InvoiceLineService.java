@@ -760,7 +760,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 		if(invoiceLine.getQuantity() == null) {
             invoiceLine.setQuantity(new BigDecimal(1));
         }
-		
+
 		invoiceLine.setConversionFromBillingCurrency(false);
         if (StringUtils.isNotBlank(resource.getUnitPriceCurrency())) {
             String tradingCurrency = invoiceLine.getInvoice().getTradingCurrency()!= null ? invoiceLine.getInvoice().getTradingCurrency().getCurrencyCode() : null;
@@ -777,19 +777,26 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 			}
         }
 
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if(invoiceLine.getDiscountRate() != null && invoiceLine.getUnitPrice().compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal discountRate = invoiceLine.getDiscountRate().divide(new BigDecimal(100), appProvider.getRounding(),
+                    appProvider.getRoundingMode().getRoundingMode());
+            discountAmount = invoiceLine.getUnitPrice().multiply(discountRate);
+            invoiceLine.setDiscountAmount(discountAmount);
+        }
         if(invoiceLine.getUnitPrice() == null) {
             if (accountingArticle != null && accountingArticle.getUnitPrice() != null) {
                 invoiceLine.setUnitPrice(accountingArticle.getUnitPrice());
                 if(resource.getQuantity() != null) {
-                    invoiceLine.setAmountWithoutTax(accountingArticle.getUnitPrice().multiply(resource.getQuantity()));
-                    invoiceLine.setAmountWithTax(accountingArticle.getUnitPrice().multiply(resource.getQuantity()));
+                    invoiceLine.setAmountWithoutTax((accountingArticle.getUnitPrice().multiply(resource.getQuantity())).subtract(discountAmount));
+                    invoiceLine.setAmountWithTax((accountingArticle.getUnitPrice().multiply(resource.getQuantity())).subtract(discountAmount));
                 }
             } else {
                 throw new BusinessException("You cannot create an invoice line without a price " +
                         "if unit price is not set on article with code : " + resource.getAccountingArticleCode());
             }
         } else {
-            invoiceLine.setAmountWithoutTax(invoiceLine.getUnitPrice().multiply(resource.getQuantity()));
+            invoiceLine.setAmountWithoutTax((invoiceLine.getUnitPrice().multiply(resource.getQuantity())).subtract(discountAmount));
             invoiceLine.setAmountWithTax(NumberUtils.computeTax(invoiceLine.getAmountWithoutTax(),
                     invoiceLine.getTaxRate(), appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode().getRoundingMode()).add(invoiceLine.getAmountWithoutTax()));
         }

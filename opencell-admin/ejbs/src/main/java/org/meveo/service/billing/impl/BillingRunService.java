@@ -1568,7 +1568,17 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                     newDescriptionsTranslated.add(languageDescriptionFr);
                     quarantineBillingRun.setDescriptionI18n(convertMultiLanguageToMapOfValues(newDescriptionsTranslated ,null));                    
                 }
-
+                
+                if (billingRun.getAdditionalAggregationFields() != null && !billingRun.getAdditionalAggregationFields().isEmpty()) {
+                    if (quarantineBillingRun.getAdditionalAggregationFields() == null) {
+                    	quarantineBillingRun.setAdditionalAggregationFields(new ArrayList<>());
+                    } else {
+                    	quarantineBillingRun.getAdditionalAggregationFields().clear();
+                    }
+                    quarantineBillingRun.getAdditionalAggregationFields().addAll(billingRun.getAdditionalAggregationFields());
+                } else {
+                	quarantineBillingRun.setAdditionalAggregationFields(null);
+                }
                 create(quarantineBillingRun);
                 billingRun.setRejectionReason(null);
                 billingRun.setNextBillingRun(quarantineBillingRun);

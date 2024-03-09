@@ -176,7 +176,13 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
      * @return A new level instance
      */
     private DunningLevelInstance launchActions(Invoice invoice, DunningPolicyLevel pDunningPolicyLevel) {
-        DunningLevelInstance dunningLevelInstance = createLevelInstance(pDunningPolicyLevel, DunningLevelInstanceStatusEnum.IN_PROGRESS);
+        // Get billing account and customer account from invoice
+        BillingAccount billingAccount = billingAccountService.findById(invoice.getBillingAccount().getId(), List.of("customerAccount"));
+        CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
+
+        // Create a new level instance
+        DunningLevelInstance dunningLevelInstance = createLevelInstance(invoice, customerAccount, pDunningPolicyLevel);
+
         for (DunningActionInstance action : dunningLevelInstance.getActions()) {
             if (action.getActionMode().equals(AUTOMATIC) && (action.getActionType().equals(SCRIPT) || action.getActionType().equals(SEND_NOTIFICATION))) {
                 if (action.getActionType().equals(SCRIPT)) {
@@ -188,8 +194,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
 
                 if (action.getActionType().equals(SEND_NOTIFICATION) && (action.getDunningAction().getActionChannel().equals(EMAIL)
                         || action.getDunningAction().getActionChannel().equals(LETTER))) {
-                    sendReminderEmail(action.getDunningAction().getActionNotificationTemplate(), invoice);
-
+                    sendReminderEmail(action.getDunningAction().getActionNotificationTemplate(), invoice, billingAccount, customerAccount);
                 }
 
                 action.setActionStatus(DunningActionInstanceStatusEnum.DONE);
@@ -205,14 +210,12 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
      * @param emailTemplate Email template
      * @param invoice       Invoice
      */
-    private void sendReminderEmail(EmailTemplate emailTemplate, Invoice invoice) {
+    private void sendReminderEmail(EmailTemplate emailTemplate, Invoice invoice, BillingAccount billingAccount, CustomerAccount customerAccount) {
         if(invoice.getSeller() != null && invoice.getSeller().getContactInformation() != null
                 && invoice.getSeller().getContactInformation().getEmail() != null
                 && !invoice.getSeller().getContactInformation().getEmail().isBlank()) {
             Seller seller = invoice.getSeller();
             Map<Object, Object> params = new HashMap<>();
-            BillingAccount billingAccount =
-                    billingAccountService.findById(invoice.getBillingAccount().getId(), asList("customerAccount"));
             params.put("billingAccountDescription", billingAccount.getDescription());
             params.put("billingAccountAddressAddress1",
                     billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
@@ -230,7 +233,6 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                 params.put("contactInformationMobile",  contactInformation.getMobile()  != null ?
                         contactInformation.getMobile() : "");
             }
-            CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
             params.put("customerAccountFirstName",  customerAccount.getName() != null ?
                     customerAccount.getName().getFirstName() : "");
             params.put("customerAccountLastName",  customerAccount.getName() != null ?
@@ -283,23 +285,26 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
     }
 
     /**
-     * Create a new level instance
+     * Create a level instance
      *
-     * @param policyLevel Policy level
-     * @param status      Status
+     * @param pInvoice           Invoice
+     * @param pCustomerAccount   Customer account
+     * @param pDunningPolicyLevel Policy level
      * @return A new level instance
      */
-    private DunningLevelInstance createLevelInstance(DunningPolicyLevel policyLevel, DunningLevelInstanceStatusEnum status) {
+    private DunningLevelInstance createLevelInstance(Invoice pInvoice, CustomerAccount pCustomerAccount, DunningPolicyLevel pDunningPolicyLevel) {
         DunningLevelInstance levelInstance = new DunningLevelInstance();
-        levelInstance.setLevelStatus(status);
-        levelInstance.setSequence(policyLevel.getSequence());
-        levelInstance.setDunningLevel(policyLevel.getDunningLevel());
-        levelInstance.setDaysOverdue(policyLevel.getDunningLevel().getDaysOverdue());
+        levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+        levelInstance.setSequence(pDunningPolicyLevel.getSequence());
+        levelInstance.setDunningLevel(pDunningPolicyLevel.getDunningLevel());
+        levelInstance.setDaysOverdue(pDunningPolicyLevel.getDunningLevel().getDaysOverdue());
+        levelInstance.setInvoice(pInvoice);
+        levelInstance.setCustomerAccount(pCustomerAccount);
         levelInstanceService.create(levelInstance);
 
-        if (policyLevel.getDunningLevel().getDunningActions() != null
-                && !policyLevel.getDunningLevel().getDunningActions().isEmpty()) {
-            levelInstance.setActions(createDunningActionInstances(policyLevel, levelInstance));
+        if (pDunningPolicyLevel.getDunningLevel().getDunningActions() != null
+                && !pDunningPolicyLevel.getDunningLevel().getDunningActions().isEmpty()) {
+            levelInstance.setActions(createDunningActionInstances(pDunningPolicyLevel, levelInstance));
             levelInstanceService.update(levelInstance);
         }
 

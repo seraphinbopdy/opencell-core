@@ -20,6 +20,8 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
+import org.meveo.model.billing.Invoice;
+import org.meveo.model.payments.CustomerAccount;
 
 @Entity
 @Table(name = "dunning_level_instance")
@@ -66,6 +68,13 @@ public class DunningLevelInstance extends AuditableEntity {
     @JoinColumn(name = "dunning_level_id")
     @NotNull
     private DunningLevel dunningLevel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_account_id")
+    private CustomerAccount customerAccount;
 
     public DunningLevelInstance() {
         super();
@@ -125,5 +134,19 @@ public class DunningLevelInstance extends AuditableEntity {
 
     public void setDunningLevel(DunningLevel dunningLevel) {
         this.dunningLevel = dunningLevel;
+    }
+    public Invoice getInvoice() {
+        return invoice;
+    }
+    public DunningLevelInstance setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+        return this;
+    }
+    public CustomerAccount getCustomerAccount() {
+        return customerAccount;
+    }
+    public DunningLevelInstance setCustomerAccount(CustomerAccount customerAccount) {
+        this.customerAccount = customerAccount;
+        return this;
     }
 }

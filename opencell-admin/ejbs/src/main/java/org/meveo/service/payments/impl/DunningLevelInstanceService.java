@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ejb.Stateless;
 
+import org.meveo.model.billing.Invoice;
 import org.meveo.model.dunning.DunningCollectionPlan;
 import org.meveo.model.dunning.DunningLevelInstance;
 import org.meveo.service.base.PersistenceService;
@@ -86,7 +87,7 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
 
     public void incrementSequecesGreaterThanDaysOverdue(DunningCollectionPlan collectionPlan, Integer daysOverdue) {
         getEntityManager()
-            .createNamedQuery("DunningLevelInstance.incrementSequecesByDaysOverdue")
+            .createNamedQuery("DunningLevelInstance.incrementSequencesByDaysOverdue")
             .setParameter("collectionPlan", collectionPlan)
             .setParameter("daysOverdue", daysOverdue)
             .executeUpdate();
@@ -94,9 +95,26 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
 
     public void decrementSequecesGreaterThanDaysOverdue(DunningCollectionPlan collectionPlan, Integer daysOverdue) {
         getEntityManager()
-            .createNamedQuery("DunningLevelInstance.decrementSequecesByDaysOverdue")
+            .createNamedQuery("DunningLevelInstance.decrementSequencesByDaysOverdue")
             .setParameter("collectionPlan", collectionPlan)
             .setParameter("daysOverdue", daysOverdue)
             .executeUpdate();
+    }
+
+    /**
+     * Find dunning level instance by invoice.
+     *
+     * @param pInvoice the invoice
+     * @return the list of DunningLevelInstance
+     */
+    public List<DunningLevelInstance> findByInvoice(Invoice pInvoice) {
+        try {
+            return getEntityManager()
+                    .createNamedQuery("DunningLevelInstance.findByInvoice", entityClass)
+                    .setParameter("invoice", pInvoice)
+                    .getResultList();
+        } catch (Exception exception) {
+            return null;
+        }
     }
 }

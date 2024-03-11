@@ -84,6 +84,9 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
     @Inject
     private InternationalSettingsService internationalSettingsService;
 
+    @Inject
+    private DunningLevelInstanceService dunningLevelInstanceService;
+
     private static final String STOP_REASON = "Changement de politique de recouvrement";
 
     public DunningCollectionPlan findByPolicy(DunningPolicy dunningPolicy) {
@@ -214,7 +217,25 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                     collectionPlanStatus, dayOverDue));
         }
         collectionPlan.setCollectionPlanNumber("C" + collectionPlan.getId());
+
+        // Check and update dunning level instance attached to the invoice
+        updateDunningLevelInstance(invoice, collectionPlan);
         return update(collectionPlan);
+    }
+
+    /**
+     * Update dunning level instance
+     * @param pInvoice Invoice
+     * @param pCollectionPlan DunningCollectionPlan
+     */
+    private void updateDunningLevelInstance(Invoice pInvoice, DunningCollectionPlan pCollectionPlan) {
+        List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByInvoice(pInvoice);
+        if (dunningLevelInstances != null && !dunningLevelInstances.isEmpty()) {
+            dunningLevelInstances.forEach(dunningLevelInstance -> {
+                dunningLevelInstance.setCollectionPlan(pCollectionPlan);
+                dunningLevelInstanceService.update(dunningLevelInstance);
+            });
+        }
     }
 
     private DunningLevel findLevelBySequence(List<DunningPolicyLevel> policyLevels, int sequence) {

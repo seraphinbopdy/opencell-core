@@ -229,7 +229,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
      * @param pCollectionPlan DunningCollectionPlan
      */
     private void updateDunningLevelInstance(Invoice pInvoice, DunningCollectionPlan pCollectionPlan) {
-        List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByInvoice(pInvoice);
+        List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByInvoiceAndEmptyCollectionPlan(pInvoice);
         if (dunningLevelInstances != null && !dunningLevelInstances.isEmpty()) {
             dunningLevelInstances.forEach(dunningLevelInstance -> {
                 dunningLevelInstance.setCollectionPlan(pCollectionPlan);

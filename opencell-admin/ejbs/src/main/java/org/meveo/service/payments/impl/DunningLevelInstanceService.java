@@ -102,6 +102,23 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
     }
 
     /**
+     * Find dunning level instance by invoice when collection plan is null.
+     *
+     * @param pInvoice the invoice
+     * @return the list of DunningLevelInstance
+     */
+    public List<DunningLevelInstance> findByInvoiceAndEmptyCollectionPlan(Invoice pInvoice) {
+        try {
+            return getEntityManager()
+                    .createNamedQuery("DunningLevelInstance.findByInvoiceAndEmptyCollectionPlan", entityClass)
+                    .setParameter("invoice", pInvoice)
+                    .getResultList();
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+
+    /**
      * Find dunning level instance by invoice.
      *
      * @param pInvoice the invoice

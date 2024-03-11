@@ -180,6 +180,17 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
         BillingAccount billingAccount = billingAccountService.findById(invoice.getBillingAccount().getId(), List.of("customerAccount"));
         CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
 
+        // Check if a dunning level instance already exists for the invoice
+        List<DunningLevelInstance> dunningLevelInstances = levelInstanceService.findByInvoice(invoice);
+        if (dunningLevelInstances != null && !dunningLevelInstances.isEmpty()) {
+            // Check if we have already processed the invoice for the current level
+            for (DunningLevelInstance dunningLevelInstance : dunningLevelInstances) {
+                if (dunningLevelInstance.getDunningLevel().getId().equals(pDunningPolicyLevel.getDunningLevel().getId())) {
+                    return dunningLevelInstance;
+                }
+            }
+        }
+
         // Create a new level instance
         DunningLevelInstance dunningLevelInstance = createLevelInstance(invoice, customerAccount, pDunningPolicyLevel);
 

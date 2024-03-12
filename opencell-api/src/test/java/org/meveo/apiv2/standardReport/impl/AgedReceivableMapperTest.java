@@ -5,7 +5,6 @@ import static java.math.BigDecimal.ZERO;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 
-import jdk.dynalink.Operation;
 import org.junit.Before;
 import org.junit.Test;
 import org.meveo.api.dto.AgedReceivableDto;

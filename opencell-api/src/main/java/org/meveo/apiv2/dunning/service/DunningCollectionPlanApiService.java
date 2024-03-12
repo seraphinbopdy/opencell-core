@@ -529,6 +529,18 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             Integer minSequence = dunningLevelInstanceService.getMinSequenceByDaysOverdue(collectionPlan, daysOverdue);
             newDunningLevelInstance.setSequence(minSequence.intValue());
 
+            if (collectionPlan != null) {
+                // Check the related invoice and set it to the level instance
+                if (collectionPlan.getRelatedInvoice() != null) {
+                    newDunningLevelInstance.setInvoice(collectionPlan.getRelatedInvoice());
+                }
+
+                // Check the related customer account and set it to the level instance
+                if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
+                    newDunningLevelInstance.setCustomerAccount(collectionPlan.getBillingAccount().getCustomerAccount());
+                }
+            }
+
             dunningLevelInstanceService.create(newDunningLevelInstance);
 
             // 3- update dunningLevelInstances
@@ -592,6 +604,18 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     fields.add("levelStatus");
                 }
                 levelInstanceToUpdate.setLevelStatus(updateLevelInstanceInput.getLevelStatus());
+            }
+
+            if (collectionPlan != null) {
+                // Check the related invoice and set it to the level instance
+                if (collectionPlan.getRelatedInvoice() != null) {
+                    levelInstanceToUpdate.setInvoice(collectionPlan.getRelatedInvoice());
+                }
+
+                // Check the related customer account and set it to the level instance
+                if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
+                    levelInstanceToUpdate.setCustomerAccount(collectionPlan.getBillingAccount().getCustomerAccount());
+                }
             }
 
             dunningLevelInstanceService.update(levelInstanceToUpdate);

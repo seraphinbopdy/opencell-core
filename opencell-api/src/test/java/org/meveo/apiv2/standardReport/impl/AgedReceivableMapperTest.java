@@ -5,12 +5,14 @@ import static java.math.BigDecimal.ZERO;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 
+import jdk.dynalink.Operation;
 import org.junit.Before;
 import org.junit.Test;
 import org.meveo.api.dto.AgedReceivableDto;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.DunningLevelEnum;
+import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 
@@ -43,7 +45,7 @@ public class AgedReceivableMapperTest {
                 ZERO, ZERO, ZERO,
                 DunningLevelEnum.R1, new Name(new Title(), "TEST", "TEST"),
                 "CA_DESCRIPTION", "SELLER_DESCRIPTION", "SELLER_CODE",
-                new Date(), "EUR", 1L, "INV_1000", new BigDecimal(100), "CA_CODE", new BigDecimal(100), 1L};
+                new Date(), "EUR", 1L, "INV_1000", new BigDecimal(100), "CA_CODE", new BigDecimal(100), 1L, OperationCategoryEnum.DEBIT};
         input.add(agedReceivable);
         List<AgedReceivableDto> response = mapper.buildDynamicResponse(input, 2);
 

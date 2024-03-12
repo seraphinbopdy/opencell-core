@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.meveo.model.BaseEntity;
 import org.meveo.model.payments.DunningLevelEnum;
+import org.meveo.model.payments.OperationCategoryEnum;
 
 public class AgedReceivableDto extends BaseEntity {
 
@@ -55,6 +56,8 @@ public class AgedReceivableDto extends BaseEntity {
 	private List<BigDecimal> transactionalTaxAmountByPeriod = new ArrayList<>();
 
 	private List<BigDecimal> transactionalTotalAmountByPeriod = new ArrayList<>();
+
+	private OperationCategoryEnum transactionCategory;
 
 	public AgedReceivableDto() {
 		super();
@@ -318,5 +321,13 @@ public class AgedReceivableDto extends BaseEntity {
 
 	public void setTransactionalTotalAmountByPeriod(List<BigDecimal> transactionalTotalAmountByPeriod) {
 		this.transactionalTotalAmountByPeriod = transactionalTotalAmountByPeriod;
+	}
+
+	public OperationCategoryEnum getTransactionCategory() {
+		return transactionCategory;
+	}
+
+	public void setTransactionCategory(OperationCategoryEnum transactionCategory) {
+		this.transactionCategory = transactionCategory;
 	}
 }

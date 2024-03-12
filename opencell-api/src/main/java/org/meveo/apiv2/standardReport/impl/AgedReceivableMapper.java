@@ -34,6 +34,7 @@ import org.meveo.apiv2.standardReport.ImmutableAgedReceivable;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.DunningLevelEnum;
+import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.shared.Name;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -76,6 +77,7 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 				.transactional_TotalAmountByPeriod(agedReceivableDto.getTransactionalTotalAmountByPeriod())
 				.transactional_NetAmountByPeriod(agedReceivableDto.getTransactionalNetAmountByPeriod())
 				.transactional_TaxAmountByPeriod(agedReceivableDto.getTransactionalTaxAmountByPeriod())
+				.transactionCategory(agedReceivableDto.getTransactionCategory())
 				.build();
     }
 
@@ -239,6 +241,7 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 				agedReceivableDto.setBilledAmount((BigDecimal) agedList[38]);
 
 			agedReceivableDto.setCustomerId((Long) agedList[39]);
+			agedReceivableDto.setTransactionCategory(agedList[40] == null ? null : (OperationCategoryEnum) agedList[40]);
 			agedReceivableDto.setFuncCurrency(ofNullable(appProvider.getCurrency()).map(Currency::getCurrencyCode).orElse(null));
 			dtoList.add(agedReceivableDto);
 		}
@@ -311,6 +314,7 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 			}
 
 			agedReceivableDto.setCustomerId((Long) agedReceivable[++startingSumIndex]);
+			agedReceivableDto.setTransactionCategory((OperationCategoryEnum) agedReceivable[++startingSumIndex]);
 			BigDecimal transactionalGeneralTotal = agedReceivableDto.getTransactionalTotalAmountByPeriod()
 					.stream()
 					.reduce(ZERO, BigDecimal::add);

@@ -1570,12 +1570,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 }
                 
                 if (billingRun.getAdditionalAggregationFields() != null && !billingRun.getAdditionalAggregationFields().isEmpty()) {
-                    if (quarantineBillingRun.getAdditionalAggregationFields() == null) {
-                    	quarantineBillingRun.setAdditionalAggregationFields(new ArrayList<>());
-                    } else {
-                    	quarantineBillingRun.getAdditionalAggregationFields().clear();
-                    }
-                    quarantineBillingRun.getAdditionalAggregationFields().addAll(billingRun.getAdditionalAggregationFields());
+                    quarantineBillingRun.setAdditionalAggregationFields(new ArrayList<String>(billingRun.getAdditionalAggregationFields()));
                 } else {
                 	quarantineBillingRun.setAdditionalAggregationFields(null);
                 }

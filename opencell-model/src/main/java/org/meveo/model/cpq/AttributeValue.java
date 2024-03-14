@@ -187,10 +187,16 @@ public class AttributeValue<T extends AttributeValue> extends AuditableCFEntity 
 				case NUMERIC :
 				case INTEGER: return this.getDoubleValue();
 				case LIST_MULTIPLE_TEXT:
+				case LIST_MULTIPLE_NUMERIC:
+				case LIST_NUMERIC:
 				case LIST_TEXT:
 				case EXPRESSION_LANGUAGE :
+				case EMAIL:
+				case INFO:
+				case PHONE:
 				case TEXT:	return this.getStringValue();  
-				case DATE: return this.getDateValue();  
+				case DATE: return this.getDateValue();
+				case BOOLEAN: return this.getBooleanValue();
 			}
 		}
 		return null;

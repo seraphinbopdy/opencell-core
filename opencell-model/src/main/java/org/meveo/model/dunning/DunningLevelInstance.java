@@ -20,6 +20,8 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
+import org.meveo.model.billing.Invoice;
+import org.meveo.model.payments.CustomerAccount;
 
 @Entity
 @Table(name = "dunning_level_instance")
@@ -32,8 +34,10 @@ import org.meveo.model.AuditableEntity;
         @NamedQuery(name = "DunningLevelInstance.findLastLevelInstance", query = "SELECT li FROM DunningLevelInstance li LEFT JOIN li.dunningLevel d where li.collectionPlan = :collectionPlan and d.isEndOfDunningLevel = true"),
         @NamedQuery(name = "DunningLevelInstance.checkDaysOverdueIsAlreadyExist", query = "SELECT count(li) FROM DunningLevelInstance li where li.collectionPlan = :collectionPlan and li.daysOverdue = :daysOverdue"),
         @NamedQuery(name = "DunningLevelInstance.minSequenceByDaysOverdue", query = "SELECT min(li.sequence) FROM DunningLevelInstance li where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue"),
-        @NamedQuery(name = "DunningLevelInstance.incrementSequecesByDaysOverdue", query = "UPDATE DunningLevelInstance li set li.sequence = li.sequence+1 where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue"),
-        @NamedQuery(name = "DunningLevelInstance.decrementSequecesByDaysOverdue", query = "UPDATE DunningLevelInstance li set li.sequence = li.sequence-1 where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue") })
+        @NamedQuery(name = "DunningLevelInstance.findByInvoiceAndEmptyCollectionPlan", query = "SELECT li FROM DunningLevelInstance li where li.invoice = :invoice and li.collectionPlan is NULL"),
+        @NamedQuery(name = "DunningLevelInstance.findByInvoice", query = "SELECT li FROM DunningLevelInstance li where li.invoice = :invoice"),
+        @NamedQuery(name = "DunningLevelInstance.incrementSequencesByDaysOverdue", query = "UPDATE DunningLevelInstance li set li.sequence = li.sequence+1 where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue"),
+        @NamedQuery(name = "DunningLevelInstance.decrementSequencesByDaysOverdue", query = "UPDATE DunningLevelInstance li set li.sequence = li.sequence-1 where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue") })
 public class DunningLevelInstance extends AuditableEntity {
 
     private static final long serialVersionUID = -5809793412586160209L;
@@ -66,6 +70,13 @@ public class DunningLevelInstance extends AuditableEntity {
     @JoinColumn(name = "dunning_level_id")
     @NotNull
     private DunningLevel dunningLevel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_account_id")
+    private CustomerAccount customerAccount;
 
     public DunningLevelInstance() {
         super();
@@ -125,5 +136,19 @@ public class DunningLevelInstance extends AuditableEntity {
 
     public void setDunningLevel(DunningLevel dunningLevel) {
         this.dunningLevel = dunningLevel;
+    }
+    public Invoice getInvoice() {
+        return invoice;
+    }
+    public DunningLevelInstance setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+        return this;
+    }
+    public CustomerAccount getCustomerAccount() {
+        return customerAccount;
+    }
+    public DunningLevelInstance setCustomerAccount(CustomerAccount customerAccount) {
+        this.customerAccount = customerAccount;
+        return this;
     }
 }

@@ -804,7 +804,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             	
             	if (unitPriceWithoutTax == null && unitPriceWithTax == null) {
                  	//Get the PriceList from subscription
-                 	PriceList priceList =  bareWalletOperation.getChargeInstance().getServiceInstance().getSubscription().getPriceList();
+                    PriceList priceList = getPriceList(bareWalletOperation.getChargeInstance());
 
                  	//Check the PriceList is not null and status is ACTIVE and compare wallet operation date with applicationStartDate and applicationEndDate of the PriceList
                  	if(priceList != null && priceList.getStatus() != null && PriceListStatusEnum.ACTIVE.equals(priceList.getStatus()) &&
@@ -869,7 +869,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                     bareWalletOperation.setTransactionalUnitAmountWithoutTax(transationalUnitPrices.getAmountWithoutTax());
                     bareWalletOperation.setTransactionalUnitAmountWithTax(transationalUnitPrices.getAmountWithTax());
 
-                    PriceList priceList =  bareWalletOperation.getChargeInstance().getServiceInstance().getSubscription().getPriceList();
+                    PriceList priceList = getPriceList(bareWalletOperation.getChargeInstance());
 
             		//Check the PriceList is not null and status is ACTIVE and compare wallet operation date with applicationStartDate and applicationEndDate of the PriceList
             		if(priceList != null && priceList.getStatus() != null && PriceListStatusEnum.ACTIVE.equals(priceList.getStatus()) &&
@@ -1932,5 +1932,21 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             }
 		}
 	}
+
+    /**
+     * Get the price list
+     *
+     * @param chargeInstance the charge instance
+     * @return the price list
+     */
+    private PriceList getPriceList(ChargeInstance chargeInstance) {
+        ServiceInstance serviceInstance = chargeInstance != null ? chargeInstance.getServiceInstance() : null;
+        Subscription subscription = serviceInstance != null ? serviceInstance.getSubscription() : null;
+        PriceList priceList = null;
+        if (subscription != null) {
+            priceList = subscription.getPriceList();
+        }
+        return priceList;
+    }
 	
 }

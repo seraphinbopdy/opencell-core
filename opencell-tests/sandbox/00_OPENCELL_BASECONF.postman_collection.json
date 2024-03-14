@@ -3399,6 +3399,21 @@
 									"item": [
 										{
 											"name": "CET|CT_STRING_ONE_ENTRY|CT String with one entry|String CustomTable",
+                                            "event": [
+                                              {
+                                                "listen": "test",
+                                                "script": {
+                                                  "exec": [
+                                                    "  setTimeout(function(){\r",
+                                                    "          console.log(\"Sleeping for 1 seconds before next request.\");\r",
+                                                    "  }, 1000);\r",
+                                                    "pm.variables.set(\"access_token\", null);\r",
+                                                    ""
+                                                  ],
+                                                  "type": "text/javascript"
+                                                }
+                                              }
+                                            ],
 											"request": {
 												"method": "POST",
 												"header": [

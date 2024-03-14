@@ -1997,10 +1997,14 @@ public class MeveoFunctionMapper extends FunctionMapper {
     public static Object getProductAttributeValue(ServiceInstance serviceInstance, String attributeCode) { 
     	return getProductElAttributeValue(serviceInstance, attributeCode,null);
     }
-    public static Object getProductElAttributeValue(ServiceInstance serviceInstance, String attributeCode,WalletOperation walletOperation) { 
-    	Attribute  attribute =getAttributeService().findByCode(attributeCode);
-    	if(attribute == null)
-    		throw new EntityDoesNotExistsException(Attribute.class, attributeCode);
+    public static Object getProductElAttributeValue(ServiceInstance serviceInstance, String attributeCode,WalletOperation walletOperation) {
+        if (serviceInstance == null) {
+            throw new EntityDoesNotExistsException("The service instance passed as parameter to 'mv:getProductAttributeValue' function is null.");
+        }
+        Attribute attribute = getAttributeService().findByCode(attributeCode);
+        if (attribute == null) {
+            throw new EntityDoesNotExistsException(Attribute.class, attributeCode);
+        }
 
     	Optional<AttributeInstance> attributInstance=serviceInstance.getAttributeInstances().stream().filter(qt -> qt.getAttribute().getCode().equals(attributeCode)).findFirst();
     	

@@ -2078,6 +2078,9 @@ public class MeveoFunctionMapper extends FunctionMapper {
 				}
 			}
 		}
+        if(resultValue == null) {
+        	return null;
+        }
 		switch (attributeType){
 			case TOTAL :
 			case COUNT :

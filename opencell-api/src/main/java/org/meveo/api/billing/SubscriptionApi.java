@@ -470,7 +470,7 @@ public class SubscriptionApi extends BaseApi {
                 throw new EntityDoesNotExistsException(OfferTemplate.class, postData.getOfferTemplate() + " / " + DateUtils.formatDateWithPattern(postData.getSubscriptionDate(), paramBean.getDateTimeFormat()));
             } else if (subscription.getServiceInstances() != null && !subscription.getServiceInstances().isEmpty() && !subscription.getOffer().equals(offerTemplate)) {
                 throw new InvalidParameterException("Cannot change the offer of subscription once the services are instantiated");
-            } else if (offerTemplate.isDisabled()) {
+            } else if (subscription.getOffer()!=null && subscription.getOffer().equals(offerTemplate) && offerTemplate.isDisabled() && subscription.getOrder() == null) {
                 throw new InvalidParameterException("Cannot subscribe to disabled offer");
             }
             subscription.setOffer(offerTemplate);

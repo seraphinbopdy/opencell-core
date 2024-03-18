@@ -125,7 +125,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
     private boolean processInvoices(List<Invoice> invoices, DunningPolicyLevel policyLevel, DunningSettings pDunningSettings, DunningPolicy pDunningPolicy) {
         Date today = new Date();
         boolean processed = false;
-        DunningLevel reminderLevel = levelService.findById(policyLevel.getDunningLevel().getId(), asList("dunningActions"));
+        DunningLevel reminderLevel = levelService.findById(policyLevel.getDunningLevel().getId(), List.of("dunningActions"));
 
         if(pDunningSettings != null) {
             if (pDunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {
@@ -137,7 +137,8 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                             markInvoiceAsReminderAlreadySent(invoice);
                             updateDunningLevelInstance(dunningLevelInstance);
                             processed = true;
-
+                        } else {
+                            creatDraftDunningLevelInstance(invoice, policyLevel);
                         }
                     }
                 } else if (pDunningPolicy.getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_OR_BALANCE_THRESHOLD)) {
@@ -149,6 +150,8 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                             markInvoiceAsReminderAlreadySent(invoice);
                             updateDunningLevelInstance(dunningLevelInstance);
                             processed = true;
+                        } else {
+                            creatDraftDunningLevelInstance(invoice, policyLevel);
                         }
                     }
                 }
@@ -156,6 +159,37 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
         }
 
         return processed;
+    }
+
+    /**
+     * Create a draft level instance
+     *
+     * @param pInvoice           Invoice
+     * @param pDunningPolicyLevel Policy level
+     */
+    private void creatDraftDunningLevelInstance(Invoice pInvoice, DunningPolicyLevel pDunningPolicyLevel) {
+        // Get billing account and customer account from invoice
+        BillingAccount billingAccount = billingAccountService.findById(pInvoice.getBillingAccount().getId(), List.of("customerAccount"));
+        CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
+
+        boolean alreadyProcessed = false;
+
+        // Check if a dunning level instance already exists for the invoice
+        List<DunningLevelInstance> dunningLevelInstances = levelInstanceService.findByInvoice(pInvoice);
+        if (dunningLevelInstances != null && !dunningLevelInstances.isEmpty()) {
+            // Check if we have already processed the invoice for the current level
+            for (DunningLevelInstance dunningLevelInstance : dunningLevelInstances) {
+                if (dunningLevelInstance.getDunningLevel().getId().equals(pDunningPolicyLevel.getDunningLevel().getId())) {
+                    alreadyProcessed = true;
+                    break;
+                }
+            }
+        }
+
+        // Create a new level instance
+        if (!alreadyProcessed) {
+            createLevelInstance(pInvoice, customerAccount, pDunningPolicyLevel, DunningLevelInstanceStatusEnum.IGNORED);
+        }
     }
 
     /**
@@ -192,7 +226,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
         }
 
         // Create a new level instance
-        DunningLevelInstance dunningLevelInstance = createLevelInstance(invoice, customerAccount, pDunningPolicyLevel);
+        DunningLevelInstance dunningLevelInstance = createLevelInstance(invoice, customerAccount, pDunningPolicyLevel, DunningLevelInstanceStatusEnum.IN_PROGRESS);
 
         for (DunningActionInstance action : dunningLevelInstance.getActions()) {
             if (action.getActionMode().equals(AUTOMATIC) && (action.getActionType().equals(SCRIPT) || action.getActionType().equals(SEND_NOTIFICATION))) {
@@ -303,9 +337,9 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
      * @param pDunningPolicyLevel Policy level
      * @return A new level instance
      */
-    private DunningLevelInstance createLevelInstance(Invoice pInvoice, CustomerAccount pCustomerAccount, DunningPolicyLevel pDunningPolicyLevel) {
+    private DunningLevelInstance createLevelInstance(Invoice pInvoice, CustomerAccount pCustomerAccount, DunningPolicyLevel pDunningPolicyLevel, DunningLevelInstanceStatusEnum status) {
         DunningLevelInstance levelInstance = new DunningLevelInstance();
-        levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+        levelInstance.setLevelStatus(status);
         levelInstance.setSequence(pDunningPolicyLevel.getSequence());
         levelInstance.setDunningLevel(pDunningPolicyLevel.getDunningLevel());
         levelInstance.setDaysOverdue(pDunningPolicyLevel.getDunningLevel().getDaysOverdue());

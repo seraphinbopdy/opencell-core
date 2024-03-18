@@ -1,6 +1,14 @@
-package org.meveo.admin.job.partitioning;
+package org.meveo.admin.job;
 
-import org.meveo.admin.job.BaseJobBean;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.inject.Inject;
+
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.admin.partitioning.EdrPartitionLog;
@@ -13,17 +21,11 @@ import org.meveo.service.tech.EdrPartitionLogService;
 import org.meveo.service.tech.RtPartitionLogService;
 import org.meveo.service.tech.WoPartitionLogService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.inject.Inject;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Stateless
 public class PartitionPurgeJobBean extends BaseJobBean {
-    
+
+    private static final long serialVersionUID = -8751310974272041976L;
+
     @Inject
     private FinanceSettingsService financeSettingsService;
     

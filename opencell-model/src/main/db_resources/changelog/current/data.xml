@@ -23816,4 +23816,46 @@ public class ImportJobNotification extends Script {
             <column name="version" value="1" />
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-21883_20240318" author="aeljaouhari">
+    	<insert tableName="advanced_settings">
+		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
+		    <column name="version" value="0"/>
+		    <column name="disabled" valueNumeric="0"/>
+		    <column name="created" valueComputed="${db.current.time}"/>
+		    <column name="category" value="performance"/>
+		    <column name="property_group" value="standardExports"/>
+		    <column name="property_type" value="java.lang.String"/>
+		    <column name="property_value" value=","/>
+		    <column name="creator" value="applicationInitializer"/>
+		    <column name="code" value="standardExports.fieldsSeparator"/>
+		    <column name="description" value="standardExports.fieldsSeparator"/>
+		</insert>
+		<insert tableName="advanced_settings">
+		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
+		    <column name="version" value="0"/>
+		    <column name="disabled" valueNumeric="0"/>
+		    <column name="created" valueComputed="${db.current.time}"/>
+		    <column name="category" value="performance"/>
+		    <column name="property_group" value="standardExports"/>
+		    <column name="property_type" value="java.lang.String"/>
+		    <column name="property_value" value="."/>
+		    <column name="creator" value="applicationInitializer"/>
+		    <column name="code" value="standardExports.decimalSeparator"/>
+		    <column name="description" value="standardExports.decimalSeparator"/>
+		</insert>
+		<insert tableName="advanced_settings">
+		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
+		    <column name="version" value="0"/>
+		    <column name="disabled" valueNumeric="0"/>
+		    <column name="created" valueComputed="${db.current.time}"/>
+		    <column name="category" value="performance"/>
+		    <column name="property_group" value="standardExports"/>
+		    <column name="property_type" value="java.lang.String"/>
+		    <column name="property_value" value="csv"/>
+		    <column name="creator" value="applicationInitializer"/>
+		    <column name="code" value="standardExports.fileNameExtension"/>
+		    <column name="description" value="standardExports.fileNameExtension"/>
+		</insert>
+	</changeSet>
 </databaseChangeLog>

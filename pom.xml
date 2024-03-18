@@ -63,7 +63,7 @@
         <!-- </repository> -->
         <repository>
             <id>opencell-repo</id>
-            <url>http://libs.opencellsoft.com/</url>
+            <url>https://libs.opencellsoft.com/</url>
         </repository>
         <repository>
             <id>opencell-nexus</id>

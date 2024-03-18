@@ -1772,6 +1772,11 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         rt.setAccountingArticle(accountingArticle);
         rt.setBusinessKey(businessKey);
         
+        OrderInfo orderInfo = new OrderInfo();
+		orderInfo.setProductVersion(serviceInstance.getProductVersion());
+		orderInfo.setOrderProduct(serviceInstance.getOrderProduct());
+		rt.setOrderInfo(orderInfo);
+        
         if (financeSettingsService.isBillingRedirectionRulesEnabled()) {
             applyInvoicingRules(rt);
         }

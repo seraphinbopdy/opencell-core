@@ -44,5 +44,6 @@
 
     <include file="rebuild/structure.xml" relativeToChangelogFile="true" />
     <include file="rebuild/data.xml" relativeToChangelogFile="true" />
+    <include file="rebuild/finalize_rebuild.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

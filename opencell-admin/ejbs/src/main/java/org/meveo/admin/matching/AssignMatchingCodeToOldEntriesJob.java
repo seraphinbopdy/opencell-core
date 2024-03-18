@@ -51,6 +51,9 @@ public class AssignMatchingCodeToOldEntriesJob extends Job {
         result.put(CF_WAITING_MILLIS, CustomFieldTemplateUtils.buildCF(CF_WAITING_MILLIS, resourceMessages.getString("jobExecution.waitingMillis"),
                 CustomFieldTypeEnum.LONG, "tab:Configuration:0;field:1", "0", APPLIES_TO_NAME));
 
+        result.put("onlyClosedPeriods", CustomFieldTemplateUtils.buildCF("onlyClosedPeriods", "Only closed periods",
+            CustomFieldTypeEnum.BOOLEAN, "tab:Configuration:0;field:2", "0", APPLIES_TO_NAME));
+
         return result;
     }
 }

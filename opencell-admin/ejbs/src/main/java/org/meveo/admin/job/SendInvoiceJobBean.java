@@ -76,7 +76,7 @@ public class SendInvoiceJobBean extends IteratorBasedJobBean<Invoice> {
         Date invoiceDateRangeFrom = null;
         Date invoiceDateRangeTo = null;
 
-        if (this.getParamOrCFValue(jobExecutionResult.getJobInstance(), "SendInvoiceJob_billingCycle") != null) {
+        if (this.getParamOrCFValue(jobExecutionResult.getJobInstance(), "SendInvoiceJob_billingRun") != null) {
             billingRunCodes = ((List<EntityReferenceWrapper>) this.getParamOrCFValue(jobExecutionResult.getJobInstance(), "SendInvoiceJob_billingRun")).stream().map(EntityReferenceWrapper::getCode)
                 .collect(Collectors.toList());
 

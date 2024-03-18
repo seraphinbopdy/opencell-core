@@ -2,6 +2,7 @@ package org.meveo.apiv2.payments.resource;
 
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 import static javax.ws.rs.core.Response.ok;
 
@@ -13,9 +14,11 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.payment.PayByCardOrSepaDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
+import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.payment.PaymentApi;
@@ -23,6 +26,7 @@ import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
+import org.meveo.apiv2.payments.RejectionCodeDeleteInput;
 import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.payments.RejectionPayment;
 import org.meveo.apiv2.payments.SequenceAction;
@@ -129,11 +133,22 @@ public class PaymentResourceImpl implements PaymentResource {
      * @param id payment rejection code id
      */
     @Override
-    public Response removeRejectionCode(Long id) {
-        paymentApi.removeRejectionCode(id);
-        return ok()
-                .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
-                        ",\"message\":\"Rejection code successfully deleted\"}}")
+    public Response removeRejectionCode(Long id, RejectionCodeDeleteInput rejectionCodeDeleteInput) {
+        try {
+            paymentApi.removeRejectionCode(id, rejectionCodeDeleteInput.getForce());
+            return ok()
+                    .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                            ",\"message\":\"Rejection code successfully deleted\"}}")
+                    .build();
+        } catch (MeveoApiException exception) {
+            return buildErrorResponse(exception.getMessage());
+        }
+    }
+
+    private static Response buildErrorResponse(String message) {
+        return Response.status(CONFLICT)
+                .entity("{\"actionStatus\":{\"status\":\"ERROR\"" +
+                        ",\"message\":\"" + message + "\"}}")
                 .build();
     }
 

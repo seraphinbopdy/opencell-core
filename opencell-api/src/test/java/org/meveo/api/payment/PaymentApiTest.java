@@ -193,10 +193,11 @@ public class PaymentApiTest {
         PaymentRejectionCode entity = new PaymentRejectionCode();
         entity.setCode("CODE_RC");
         entity.setId(1L);
+        entity.setPaymentRejectionCodesGroup(new PaymentRejectionCodesGroup());
 
         when(paymentRejectionCodeService.findById(any())).thenReturn(entity);
 
-        paymentApi.removeRejectionCode(1L);
+        paymentApi.removeRejectionCode(1L, true);
 
         verify(paymentRejectionCodeService, times(1)).remove(entity);
     }

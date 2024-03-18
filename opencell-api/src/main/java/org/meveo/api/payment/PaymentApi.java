@@ -82,6 +82,7 @@ import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
+import org.meveo.apiv2.payments.RejectionCodeDeleteInput;
 import org.meveo.apiv2.payments.RejectionCodesExportResult;
 import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.payments.RejectionPayment;
@@ -761,11 +762,23 @@ public class PaymentApi extends BaseApi {
 	 * Delete rejection code
 	 *
 	 * @param id payment rejection code id
+	 * @param forceDelete force rejection code delete
 	 */
-	public void removeRejectionCode(Long id) {
+	public void removeRejectionCode(Long id, boolean forceDelete) {
 		PaymentRejectionCode rejectionCode = ofNullable(rejectionCodeService.findById(id))
 				.orElseThrow(() -> new NotFoundException(PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE));
-		rejectionCodeService.remove(rejectionCode);
+		if(rejectionCode.getPaymentRejectionCodesGroup() != null && forceDelete) {
+			PaymentRejectionCodesGroup rejectionCodesGroup = rejectionCode.getPaymentRejectionCodesGroup();
+			if(rejectionCodesGroup.getPaymentRejectionCodes() != null
+					&& rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
+				removeRejectionCodeGroup(rejectionCodesGroup.getId());
+			} else {
+				rejectionCodeService.remove(rejectionCode);
+			}
+		} else if(rejectionCode.getPaymentRejectionCodesGroup() != null) {
+			throw new MeveoApiException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group." +
+					" Use ‘force:true’ to override. If the group becomes empty, it will be deleted too");
+		}
 	}
 
 	/**

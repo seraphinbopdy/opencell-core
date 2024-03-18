@@ -18,6 +18,7 @@ import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
+import org.meveo.apiv2.payments.RejectionCodeDeleteInput;
 import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.payments.RejectionPayment;
 import org.meveo.apiv2.payments.SequenceAction;
@@ -101,7 +102,8 @@ public interface PaymentResource {
                     @ApiResponse(responseCode = "412", description = "Missing parameters"),
                     @ApiResponse(responseCode = "400", description = "RejectionCode deletion failed")
             })
-    Response removeRejectionCode(@Parameter(description = "Rejection code id", required = true) @PathParam("id") Long id);
+    Response removeRejectionCode(@Parameter(description = "Rejection code id", required = true) @PathParam("id") Long id,
+                                 @Parameter RejectionCodeDeleteInput rejectionCodeDeleteInput);
 
     @DELETE
     @Path("/rejectionCodes/clearAll")

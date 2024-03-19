@@ -14,7 +14,6 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.payment.PayByCardOrSepaDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
@@ -26,6 +25,7 @@ import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
+import org.meveo.apiv2.payments.RejectionCodeClearInput;
 import org.meveo.apiv2.payments.RejectionCodeDeleteInput;
 import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.payments.RejectionPayment;
@@ -155,13 +155,17 @@ public class PaymentResourceImpl implements PaymentResource {
     /**
      * Clear rejection codes by gateway
      *
-     * @param paymentGatewayInput payment gateway
+     * @param clearInput payment gateway
      */
     @Override
-    public Response clearAll(PaymentGatewayInput paymentGatewayInput) {
-        return ok()
-                .entity(paymentApi.clearAll(paymentGatewayInput))
-                .build();
+    public Response clearAll(RejectionCodeClearInput clearInput) {
+        try {
+            return ok()
+                    .entity(paymentApi.clearAll(clearInput))
+                    .build();
+        } catch (MeveoApiException exception) {
+            return buildErrorResponse(exception.getMessage());
+        }
     }
 
     /**

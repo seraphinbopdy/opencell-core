@@ -18,6 +18,7 @@ import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
+import org.meveo.apiv2.payments.RejectionCodeClearInput;
 import org.meveo.apiv2.payments.RejectionCodeDeleteInput;
 import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.payments.RejectionPayment;
@@ -115,7 +116,7 @@ public interface PaymentResource {
                     @ApiResponse(responseCode = "404", description = "Payment gateway does not exist"),
                     @ApiResponse(responseCode = "400", description = "RejectionCode clearing failed")
             })
-    Response clearAll(@Parameter(required = true) PaymentGatewayInput paymentGatewayInput);
+    Response clearAll(@Parameter(required = true) RejectionCodeClearInput paymentGatewayInput);
 
     @POST
     @Path("/rejectionCodes/import")

@@ -82,7 +82,7 @@ import org.meveo.apiv2.payments.ImportRejectionCodeInput;
 import org.meveo.apiv2.payments.PaymentGatewayInput;
 import org.meveo.apiv2.payments.RejectionAction;
 import org.meveo.apiv2.payments.RejectionCode;
-import org.meveo.apiv2.payments.RejectionCodeDeleteInput;
+import org.meveo.apiv2.payments.RejectionCodeClearInput;
 import org.meveo.apiv2.payments.RejectionCodesExportResult;
 import org.meveo.apiv2.payments.RejectionGroup;
 import org.meveo.apiv2.payments.RejectionPayment;
@@ -767,15 +767,16 @@ public class PaymentApi extends BaseApi {
 	public void removeRejectionCode(Long id, boolean forceDelete) {
 		PaymentRejectionCode rejectionCode = ofNullable(rejectionCodeService.findById(id))
 				.orElseThrow(() -> new NotFoundException(PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE));
-		if(rejectionCode.getPaymentRejectionCodesGroup() != null && forceDelete) {
+		if(rejectionCode.getPaymentRejectionCodesGroup() == null ||
+				(rejectionCode.getPaymentRejectionCodesGroup() != null && forceDelete)) {
 			PaymentRejectionCodesGroup rejectionCodesGroup = rejectionCode.getPaymentRejectionCodesGroup();
-			if(rejectionCodesGroup.getPaymentRejectionCodes() != null
+			if(rejectionCodesGroup != null
+					&& rejectionCodesGroup.getPaymentRejectionCodes() != null
 					&& rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
 				removeRejectionCodeGroup(rejectionCodesGroup.getId());
-			} else {
-				rejectionCodeService.remove(rejectionCode);
 			}
-		} else if(rejectionCode.getPaymentRejectionCodesGroup() != null) {
+			rejectionCodeService.remove(rejectionCode);
+		} else if(rejectionCode.getPaymentRejectionCodesGroup() != null && !forceDelete) {
 			throw new MeveoApiException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group." +
 					" Use ‘force:true’ to override. If the group becomes empty, it will be deleted too");
 		}
@@ -784,15 +785,25 @@ public class PaymentApi extends BaseApi {
 	/**
 	 * Clear rejectionCodes by gateway
 	 *
-	 * @param paymentGatewayInput payment gateway
+	 * @param rejectionCodeClearInput RejectionCodeClearInput
+	 * @return ClearingResponse
 	 */
-	public ClearingResponse clearAll(PaymentGatewayInput paymentGatewayInput) {
+	public ClearingResponse clearAll(RejectionCodeClearInput rejectionCodeClearInput) {
 		PaymentGateway paymentGateway = null;
-		if (paymentGatewayInput != null && paymentGatewayInput.getPaymentGateway() != null) {
-			paymentGateway = ofNullable(loadPaymentGateway(paymentGatewayInput.getPaymentGateway()))
+		if (rejectionCodeClearInput != null && rejectionCodeClearInput.getPaymentGateway() != null) {
+			paymentGateway = ofNullable(loadPaymentGateway(rejectionCodeClearInput.getPaymentGateway()))
 					.orElseThrow(() -> new NotFoundException(PAYMENT_GATEWAY_NOT_FOUND_ERROR_MESSAGE));
 		}
-		return buildResponse(rejectionCodeService.clearAll(paymentGateway), paymentGateway);
+		List<PaymentRejectionCode> rejectionCodesToRemove = paymentGateway != null
+				? rejectionCodeService.findBYPaymentGateway(paymentGateway.getId())
+				: rejectionCodeService.list();
+		if(rejectionCodesToRemove == null || rejectionCodesToRemove.isEmpty()) {
+			throw new BadRequestException("No rejection code found to clear");
+		}
+		int numberOfCodesToClear = rejectionCodesToRemove.size();
+		rejectionCodesToRemove.forEach(paymentRejectionCode
+				-> removeRejectionCode(paymentRejectionCode.getId(), rejectionCodeClearInput.getForce()));
+		return buildResponse(numberOfCodesToClear, paymentGateway);
 	}
 
 	private ClearingResponse buildResponse(int clearedCodesCount, PaymentGateway paymentGateway) {
@@ -803,15 +814,9 @@ public class PaymentApi extends BaseApi {
 		if(paymentGateway != null) {
 			builder.associatedPaymentGatewayCode(paymentGateway.getCode());
 		}
-		if(clearedCodesCount == 0) {
-			return builder
-					.massage("No rejection code found to clear")
-					.build();
-		} else {
-			return builder
-					.massage("Rejection codes successfully cleared")
-					.build();
-		}
+		return builder
+				.massage("Rejection codes successfully cleared")
+				.build();
 	}
 
 	/**

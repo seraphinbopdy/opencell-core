@@ -47,6 +47,7 @@ import org.meveo.cache.JobCacheContainerProvider;
 import org.meveo.cache.JobExecutionStatus;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.crm.Provider;
+import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobExecutionResultStatusEnum;
 import org.meveo.model.jobs.JobInstance;
@@ -107,10 +108,13 @@ public class JobApi extends BaseApi {
         }
 
         jobInstanceService.createMissingCustomFieldTemplates(jobInstance);
-        
+
         // populate customFields
         try {
+            CustomFieldValues cfValues = jobInstance.getCfValues() != null ? jobInstance.getCfValues().clone() : null;
             populateCustomFields(jobExecution.getCustomFields(), jobInstance, true);
+            jobInstance.setRunTimeCfValues(jobInstance.getCfValues());
+            jobInstance.setCfValues(cfValues);
         } catch (MissingParameterException | InvalidParameterException e) {
             log.error("Failed to associate custom field instance to an entity: {}", e.getMessage());
             throw e;

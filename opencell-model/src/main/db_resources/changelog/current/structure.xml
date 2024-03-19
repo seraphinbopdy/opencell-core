@@ -9332,4 +9332,13 @@ public class AgedBalanceReporting extends ReportExtractScript {
         </createView>
     </changeSet>
 
+    <changeSet id="#INTRD-19736_20240315" author="AbdellatifBARI">
+        <addColumn tableName="job_execution">
+            <column name="cf_values" type="${type.json}"></column>
+            <column name="uuid" type="varchar(60)" defaultValueComputed="${uuid_function}"></column>
+        </addColumn>
+        <sql>update ${db.schema.adapted}job_execution set uuid = 'job_execution'||id</sql>
+        <addNotNullConstraint tableName="job_execution" columnName="uuid" columnDataType="varchar(60)"/>
+    </changeSet>
+
 </databaseChangeLog>

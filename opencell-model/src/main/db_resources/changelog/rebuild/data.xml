@@ -13028,16 +13028,16 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="cf_values"><![CDATA[{
                 "nbRuns":[{"long":-1}],
                 "waitingMillis":[{"long":0}],
-                "UpdateHugeEntityJob_targetJob":[{"string":"MarkWOToRerateJob"}],
-                "UpdateHugeEntityJob_entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
-                "UpdateHugeEntityJob_fieldsToUpdate":[{"string": "status='TO_RERATE'"}],
-                "UpdateHugeEntityJob_defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
-                "UpdateHugeEntityJob_selectFetchSize":[{"long":1000000}],
-                "UpdateHugeEntityJob_updateChunkSize":[{"long":32767}],
-                "UpdateHugeEntityJob_isPessimisticUpdateLock":[{"boolean":false}],
-                "UpdateHugeEntityJob_isUsingView":[{"boolean":true}],
-                "UpdateHugeEntityJob_isOpenCursor":[{"boolean":true}],
-                "UpdateHugeEntityJob_emailTemplate": [{"entity": {"code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
+                "targetJob":[{"string":"MarkWOToRerateJob"}],
+                "entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
+                "fieldsToUpdate":[{"string": "status='TO_RERATE'"}],
+                "defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
+                "selectFetchSize":[{"long":1000000}],
+                "updateChunkSize":[{"long":32767}],
+                "isPessimisticUpdateLock":[{"boolean":false}],
+                "isUsingView":[{"boolean":true}],
+                "isOpenCursor":[{"boolean":true}],
+                "emailTemplate": [{"entity": {"code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
                 }]]></column>
 		</insert>
 	</changeSet>

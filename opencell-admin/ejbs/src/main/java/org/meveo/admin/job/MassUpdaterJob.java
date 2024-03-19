@@ -55,52 +55,52 @@ public class MassUpdaterJob extends Job {
     /**
      * Custom field that contains the update query value
      */
-    public static final String PARAM_UPDATE_QUERY = "MassUpdaterJob_updateQuery";
+    public static final String PARAM_UPDATE_QUERY = "updateQuery";
 
     /**
      * Custom field that contains the update chunk value
      */
-    public static final String PARAM_UPDATE_CHUNK_SIZE = "MassUpdaterJob_updateChunkSize";
+    public static final String PARAM_UPDATE_CHUNK_SIZE = "updateChunkSize";
 
     /**
      * Custom field that contains the select query value
      */
-    public static final String PARAM_SELECT_QUERY = "MassUpdaterJob_selectQuery";
+    public static final String PARAM_SELECT_QUERY = "selectQuery";
 
     /**
      * Custom field that contains the select fetch size value
      */
-    public static final String PARAM_SELECT_FETCH_SIZE = "MassUpdaterJob_selectFetchSize";
+    public static final String PARAM_SELECT_FETCH_SIZE = "selectFetchSize";
 
     /**
      * Custom field that contains the select max results value
      */
-    public static final String PARAM_SELECT_MAX_RESULTS = "MassUpdaterJob_selectMaxResults";
+    public static final String PARAM_SELECT_MAX_RESULTS = "selectMaxResults";
 
     /**
      * Custom field that contains the flag that indicates if query select and update one are native or not.
      */
-    public static final String PARAM_IS_NATIVE_QUERY = "MassUpdaterJob_isNativeQuery";
+    public static final String PARAM_IS_NATIVE_QUERY = "isNativeQuery";
 
     /**
      * Custom field containing the flag whether all update queries will be run on distinct IDs or whether it doesn't matter.
      */
-    public static final String PARAM_IS_PESSIMISTIC_UPDATE_LOCK = "MassUpdaterJob_isPessimisticUpdateLock";
+    public static final String PARAM_IS_PESSIMISTIC_UPDATE_LOCK = "isPessimisticUpdateLock";
 
     /**
      * Custom field containing the flag that indicates if the job will use the view or not.
      */
-    public static final String PARAM_IS_USING_VIEW = "MassUpdaterJob_isUsingView";
+    public static final String PARAM_IS_USING_VIEW = "isUsingView";
 
     /**
      * Custom field containing the flag that indicates if the job will use open cursor or not.
      */
-    public static final String PARAM_IS_OPEN_CURSOR = "MassUpdaterJob_isOpenCursor";
+    public static final String PARAM_IS_OPEN_CURSOR = "isOpenCursor";
 
     /**
      * Custom field that contains the named query name
      */
-    public static final String PARAM_NAMED_QUERY = "MassUpdaterJob_namedQuery";
+    public static final String PARAM_NAMED_QUERY = "namedQuery";
 
     /**
      * Job bean

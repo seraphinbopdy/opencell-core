@@ -61,62 +61,62 @@ public class UpdateHugeEntityJob extends Job {
     /**
      * Custom field that contains the target job value
      */
-    public static final String CF_TARGET_JOB = "UpdateHugeEntityJob_targetJob";
+    public static final String CF_TARGET_JOB = "targetJob";
 
     /**
      * Custom field that contains the huge entity on which the job will update
      */
-    public static final String CF_ENTITY_ClASS_NAME = "UpdateHugeEntityJob_entityClassName";
+    public static final String CF_ENTITY_ClASS_NAME = "entityClassName";
 
     /**
      * Custom field that contains the fields to update (list of fields separated by commas and their values, example: status='OPEN', amount =10)
      */
-    public static final String CF_FIELDS_TO_UPDATE = "UpdateHugeEntityJob_fieldsToUpdate";
+    public static final String CF_FIELDS_TO_UPDATE = "fieldsToUpdate";
 
     /**
      * Custom field that contains the default filter for the update query which will be executed by the job to update huge entites.
      */
-    public static final String CF_DEFAULT_FILTER = "UpdateHugeEntityJob_defaultFilter";
+    public static final String CF_DEFAULT_FILTER = "defaultFilter";
 
     /**
      * Custom field that contains notification message which will send when job is done
      */
-    public static final String CF_EMAIL_TEMPLATE = "UpdateHugeEntityJob_emailTemplate";
+    public static final String CF_EMAIL_TEMPLATE = "emailTemplate";
 
     /**
      * Custom field that contains the select fetch size value
      */
-    public static final String CF_SELECT_FETCH_SIZE = "UpdateHugeEntityJob_selectFetchSize";
+    public static final String CF_SELECT_FETCH_SIZE = "selectFetchSize";
 
     /**
      * Custom field that contains the select max results value
      */
-    public static final String CF_SELECT_MAX_RESULTS = "UpdateHugeEntityJob_selectMaxResults";
+    public static final String CF_SELECT_MAX_RESULTS = "selectMaxResults";
 
     /**
      * Custom field that contains update query chunk size value
      */
-    public static final String CF_UPDATE_CHUNK_SIZE = "UpdateHugeEntityJob_updateChunkSize";
+    public static final String CF_UPDATE_CHUNK_SIZE = "updateChunkSize";
 
     /**
      * Custom field containing the flag whether all update queries will be run on distinct IDs or whether it doesn't matter.
      */
-    public static final String CF_IS_PESSIMISTIC_UPDATE_LOCK = "UpdateHugeEntityJob_isPessimisticUpdateLock";
+    public static final String CF_IS_PESSIMISTIC_UPDATE_LOCK = "isPessimisticUpdateLock";
 
     /**
      * Custom field containing the flag that indicates if the job will be use the view or not.
      */
-    public static final String CF_IS_USING_VIEW = "UpdateHugeEntityJob_isUsingView";
+    public static final String CF_IS_USING_VIEW = "isUsingView";
 
     /**
      * Custom field containing the flag that indicates if the job will use open cursor or not.
      */
-    public static final String CF_IS_OPEN_CURSOR = "UpdateHugeEntityJob_isOpenCursor";
+    public static final String CF_IS_OPEN_CURSOR = "isOpenCursor";
 
     /**
      * Custom field containing the flag that indicates if the select query should use strict checking to compare two strings or not.
      */
-    public static final String CF_IS_CASE_SENSITIVE = "UpdateHugeEntityJob_isCaseSensitive";
+    public static final String CF_IS_CASE_SENSITIVE = "isCaseSensitive";
 
 
     /**

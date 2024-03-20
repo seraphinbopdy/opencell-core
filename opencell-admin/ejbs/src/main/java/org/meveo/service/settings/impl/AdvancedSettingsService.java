@@ -36,6 +36,9 @@ public class AdvancedSettingsService extends BusinessService<AdvancedSettings> {
 	}
 
 	private void checkParameters(AdvancedSettings setting) {
+		if (setting.getCode().equals("standardExports.decimalSeparator") && !List.of(",",".").contains(setting.getValue())) {
+			throw new InvalidParameterException("For decimal separator,  only '.' (point) and ',' (comma) are accepted");
+		}
 		parseValue(setting);
 	}
 

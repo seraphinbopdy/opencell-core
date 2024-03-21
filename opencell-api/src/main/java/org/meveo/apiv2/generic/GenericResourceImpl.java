@@ -193,7 +193,7 @@ public class GenericResourceImpl implements GenericResource {
     }
     
     @Override
-    public Response export(String entityName, String fileFormat, String locale, GenericPagingAndFiltering searchConfig) throws ClassNotFoundException {
+    public Response export(String entityName, String fileFormat, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension, GenericPagingAndFiltering searchConfig) throws ClassNotFoundException {
         Set<String> genericFields = null;
         List<GenericFieldDetails> genericFieldDetails = null;
 
@@ -211,15 +211,24 @@ public class GenericResourceImpl implements GenericResource {
             genericFieldDetails = searchConfig.getGenericFieldDetails();
             
         }
-        if(!fileFormat.equals("CSV") && !fileFormat.equals("EXCEL") && !fileFormat.equalsIgnoreCase("pdf")){
-            throw new BadRequestException("Accepted formats for export are (CSV, pdf or EXCEL).");
+        if(!fileFormat.equalsIgnoreCase("CSV") && !fileFormat.equalsIgnoreCase("EXCEL") && !fileFormat.equalsIgnoreCase("PDF")){
+            throw new BadRequestException("Accepted formats for export are (CSV, PDF or EXCEL).");
         }
         if (StringUtils.isBlank(locale)) {
             locale = "EN"; // default value EN
         }
+        if (StringUtils.isBlank(fieldsSeparator)) {
+        	fieldsSeparator = "EN";
+        }
+        if (StringUtils.isBlank(decimalSeparator)) {
+        	decimalSeparator = "EN"; 
+        }
+        if (StringUtils.isBlank(fileNameExtension)) {
+        	fileNameExtension = "EN"; 
+        }
         Class entityClass = GenericHelper.getEntityClass(entityName);
         GenericRequestMapper genericRequestMapper = new GenericRequestMapper(entityClass, PersistenceServiceHelper.getPersistenceService());
-        String filePath = loadService.export(entityClass, genericRequestMapper.mapTo(searchConfig), genericFields, genericFieldDetails, fileFormat, entityName, locale);
+        String filePath = loadService.export(entityClass, genericRequestMapper.mapTo(searchConfig), genericFields, genericFieldDetails, fileFormat, entityName, locale, fieldsSeparator, decimalSeparator, fileNameExtension);
         return Response.ok()
                 .entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"\"}, \"data\":{ \"filePath\":\""+ filePath +"\"}}")
                 .build();

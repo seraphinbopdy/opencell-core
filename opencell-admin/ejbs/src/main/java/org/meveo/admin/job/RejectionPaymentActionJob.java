@@ -15,37 +15,38 @@
  * For more information on the GNU Affero General Public License, please consult
  * <https://www.gnu.org/licenses/agpl-3.0.en.html>.
  */
-package org.meveo.model.payments;
+package org.meveo.admin.job;
 
-public enum RejectedType {
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 
-    A(1, "RejectedType.Automatic"), M(2, "RejectedType.Manual");
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.model.jobs.JobCategoryEnum;
+import org.meveo.model.jobs.JobExecutionResultImpl;
+import org.meveo.model.jobs.JobInstance;
+import org.meveo.model.jobs.MeveoJobCategoryEnum;
+import org.meveo.service.job.Job;
 
-    private String label;
-    private Integer id;
+/**
+ * Job definition to process rejectedPayments having pending status
+ */
+@Stateless
+public class RejectionPaymentActionJob extends Job {
 
-    RejectedType(Integer id, String label) {
-        this.label = label;
-        this.id = id;
+    @Inject
+    private RejectionPaymentActionJobBean rejectionPaymentActionJobBean;
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.NEVER)
+    protected JobExecutionResultImpl execute(JobExecutionResultImpl result, JobInstance jobInstance) throws BusinessException {
+    	rejectionPaymentActionJobBean.execute(result, jobInstance);
+        return result;
     }
 
-    public String getLabel() {
-        return this.label;
+    @Override
+    public JobCategoryEnum getJobCategory() {
+        return MeveoJobCategoryEnum.PAYMENT;
     }
-
-    public Integer getId() {
-        return this.id;
-    }
-
-    public static RejectedType getValue(Integer id) {
-        if (id != null) {
-            for (RejectedType status : values()) {
-                if (id.equals(status.getId())) {
-                    return status;
-                }
-            }
-        }
-        return null;
-    }
-
 }

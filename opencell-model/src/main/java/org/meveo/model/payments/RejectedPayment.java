@@ -73,6 +73,13 @@ public class RejectedPayment extends AccountOperation {
     List<AccountOperation> listAaccountOperationSupposedPaid = new ArrayList<AccountOperation>();
 
     private PaymentMethodEnum paymentMethod;
+    
+    @Column(name = "rejection_actions_status")
+    @Enumerated(EnumType.STRING)
+    private RejectionActionStatus rejectionActionsStatus = RejectionActionStatus.NO_ACTION;
+    
+    @OneToMany(mappedBy = "rejectedPayment")
+    List<PaymentRejectionActionReport> paymentRejectionActionReports = new ArrayList<PaymentRejectionActionReport>();
 
     public Date getRejectedDate() {
         return rejectedDate;
@@ -151,5 +158,21 @@ public class RejectedPayment extends AccountOperation {
     public void setPaymentMethod(PaymentMethodEnum paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
+
+	public RejectionActionStatus getRejectionActionsStatus() {
+		return rejectionActionsStatus;
+	}
+
+	public void setRejectionActionsStatus(RejectionActionStatus rejectionActionsStatus) {
+		this.rejectionActionsStatus = rejectionActionsStatus;
+	}
+
+	public List<PaymentRejectionActionReport> getPaymentRejectionActionReports() {
+		return paymentRejectionActionReports;
+	}
+
+	public void setPaymentRejectionActionReports(List<PaymentRejectionActionReport> paymentRejectionActionReports) {
+		this.paymentRejectionActionReports = paymentRejectionActionReports;
+	}
 
 }

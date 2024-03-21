@@ -34,6 +34,7 @@ import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.Payment;
+import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.Refund;
 import org.meveo.service.base.PersistenceService;
@@ -64,16 +65,16 @@ public class RefundService extends PersistenceService<Refund> {
     }
 
     /**
-     * 
-     * @param customerAccount customer account (Security Deposit)
-     * @param ctsAmount amount in cent
+     * @param customerAccount      customer account (Security Deposit)
+     * @param ctsAmount            amount in cent
      * @param doPaymentResponseDto payment by card dto
-     * @param paymentMethodType payment Method Type
-     * @param aoIdsToPay list AO to refunded
+     * @param paymentMethodType    payment Method Type
+     * @param aoIdsToPay           list AO to refunded
+     * @param paymentGateway
      * @return the AO id created
      * @throws BusinessException business exception.
      */
-    public Long createSDRefundAO(CustomerAccount customerAccount, Long ctsAmount, PaymentResponseDto doPaymentResponseDto, PaymentMethodEnum paymentMethodType, List<Long> aoIdsToPay, Refund refund)
+    public Long createSDRefundAO(CustomerAccount customerAccount, Long ctsAmount, PaymentResponseDto doPaymentResponseDto, PaymentMethodEnum paymentMethodType, List<Long> aoIdsToPay, Refund refund, PaymentGateway paymentGateway)
             throws BusinessException {
         String occTemplateCode = paramBeanFactory.getInstance().getProperty("occ.refund.securitydeposit", "REF_SD");
         OCCTemplate occTemplate = oCCTemplateService.findByCode(occTemplateCode);
@@ -81,12 +82,12 @@ public class RefundService extends PersistenceService<Refund> {
             throw new BusinessException("Cannot find OCC Template with code=" + occTemplateCode);
         }
         
-        createEntityRefund(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, refund, occTemplate);
+        createEntityRefund(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, refund, occTemplate, paymentGateway);
         return refund.getId();
     }
 
     private void createEntityRefund(CustomerAccount customerAccount, Long ctsAmount, PaymentResponseDto doPaymentResponseDto, PaymentMethodEnum paymentMethodType,
-            List<Long> aoIdsToPay, Refund refund, OCCTemplate occTemplate) {
+                                    List<Long> aoIdsToPay, Refund refund, OCCTemplate occTemplate, PaymentGateway paymentGateway) {
         refund.setPaymentMethod(paymentMethodType);
         refund.setAmount((new BigDecimal(ctsAmount).divide(new BigDecimal(100))));
         refund.setUnMatchingAmount(refund.getAmount());
@@ -121,20 +122,21 @@ public class RefundService extends PersistenceService<Refund> {
         refund.setTaxAmount(sumTax);
         refund.setAmountWithoutTax(sumWithoutTax);
         refund.setOrderNumber(orderNums);
+        refund.setPaymentGateway(paymentGateway);
         create(refund);
     }
 
     /**
-     * 
-     * @param customerAccount customer account
-     * @param ctsAmount amount in cent
+     * @param customerAccount      customer account
+     * @param ctsAmount            amount in cent
      * @param doPaymentResponseDto payment by card dto
-     * @param paymentMethodType payment Method Type
-     * @param aoIdsToPay list AO to refunded
+     * @param paymentMethodType    payment Method Type
+     * @param aoIdsToPay           list AO to refunded
+     * @param paymentGateway       PaymentGateway
      * @return the AO id created
      * @throws BusinessException business exception.
      */
-    public Long createRefundAO(CustomerAccount customerAccount, Long ctsAmount, PaymentResponseDto doPaymentResponseDto, PaymentMethodEnum paymentMethodType, List<Long> aoIdsToPay)
+    public Long createRefundAO(CustomerAccount customerAccount, Long ctsAmount, PaymentResponseDto doPaymentResponseDto, PaymentMethodEnum paymentMethodType, List<Long> aoIdsToPay, PaymentGateway paymentGateway)
             throws BusinessException {
         String occTemplateCode = paramBeanFactory.getInstance().getProperty("occ.refund.card", "REF_CRD");
         if (paymentMethodType == PaymentMethodEnum.DIRECTDEBIT) {
@@ -145,7 +147,7 @@ public class RefundService extends PersistenceService<Refund> {
             throw new BusinessException("Cannot find OCC Template with code=" + occTemplateCode);
         }
         Refund refund = new Refund();
-        createEntityRefund(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, refund, occTemplate);
+        createEntityRefund(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, refund, occTemplate, paymentGateway);
         return refund.getId();
 
     }

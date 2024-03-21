@@ -17,35 +17,8 @@
  */
 package org.meveo.model.payments;
 
-public enum RejectedType {
+public enum PaymentRejectionActionStatus {
 
-    A(1, "RejectedType.Automatic"), M(2, "RejectedType.Manual");
-
-    private String label;
-    private Integer id;
-
-    RejectedType(Integer id, String label) {
-        this.label = label;
-        this.id = id;
-    }
-
-    public String getLabel() {
-        return this.label;
-    }
-
-    public Integer getId() {
-        return this.id;
-    }
-
-    public static RejectedType getValue(Integer id) {
-        if (id != null) {
-            for (RejectedType status : values()) {
-                if (id.equals(status.getId())) {
-                    return status;
-                }
-            }
-        }
-        return null;
-    }
-
+	PENDING, RUNNING, COMPLETED, FAILED, CANCELED;
 }
+

@@ -7037,7 +7037,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public Invoice duplicateByType(Invoice invoice, List<Long> invoiceLinesIds, boolean isAdjustment) {
 
         if (invoice.getOrders() != null) {
-            invoice.getOrders().size();
+            invoice = refreshOrRetrieve(invoice);
         }
 
         var invoiceAgregates = new ArrayList<InvoiceAgregate>();

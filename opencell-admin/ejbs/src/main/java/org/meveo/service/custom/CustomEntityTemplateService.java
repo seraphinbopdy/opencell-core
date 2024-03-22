@@ -335,6 +335,19 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
             return cets;
         }
     }
+    
+    @Override
+    public long count(PaginationConfiguration config) {
+    	if(!currentUser.hasRoles("ReadAllCE")){
+   		 List<String> eligibleCodes = currentUser.getRoles()
+                    .stream()
+                    .filter(role -> role.startsWith("CE_") && role.endsWith("-read"))
+                    .map(code -> code.substring(3, code.indexOf("-read")))
+                    .collect(Collectors.toList());
+            config.getFilters().put("inList code ", eligibleCodes);
+   	}
+        return super.count(config);
+    }
 
     /**
      * Get a list of custom entity templates for cache

@@ -1185,15 +1185,17 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         if(wo.isOverrodePrice()) {
             priceWithoutTax=wo.getUnitAmountWithoutTax();
         }
-	    
-	    
-	    if (pricePlan.getScriptInstance() != null) {
-		    log.debug("start to execute script instance for ratePrice {}", pricePlan);
-		    executeRatingScript(wo, pricePlan.getScriptInstance(), false);
-		    priceWithoutTax=wo.getUnitAmountWithoutTax()!=null?wo.getUnitAmountWithoutTax():BigDecimal.ZERO;
-		    priceWithTax=wo.getUnitAmountWithTax()!=null?wo.getUnitAmountWithTax():BigDecimal.ZERO;
-		    return new Amounts(priceWithoutTax, priceWithTax);
-	    }
+
+
+        if (pricePlan.getScriptInstance() != null) {
+            log.debug("start to execute script instance for ratePrice {}", pricePlan);
+            executeRatingScript(wo, pricePlan.getScriptInstance(), false);
+            if (wo.getUnitAmountWithoutTax() != null || wo.getUnitAmountWithTax() != null) {
+                priceWithoutTax = wo.getUnitAmountWithoutTax() != null ? wo.getUnitAmountWithoutTax() : BigDecimal.ZERO;
+                priceWithTax = wo.getUnitAmountWithTax() != null ? wo.getUnitAmountWithTax() : BigDecimal.ZERO;
+                return new Amounts(priceWithoutTax, priceWithTax);
+            }
+        }
 
         ServiceInstance serviceInstance = wo.getServiceInstance();
         Date ppmvDate = wo.getOperationDate();

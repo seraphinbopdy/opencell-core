@@ -37,6 +37,7 @@ import org.meveo.admin.exception.InvoiceExistException;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.admin.job.utils.BillinRunApplicationElFilterUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.model.billing.BillingProcessTypesEnum;
 import org.meveo.model.billing.BillingRun;
@@ -132,7 +133,8 @@ public class InvoicingJobV2Bean extends BaseJobBean {
     private void executeBillingRun(BillingRun billingRun, JobInstance jobInstance, JobExecutionResultImpl result, ScriptInstance billingRunValidationScript, boolean v11Process) {
     	boolean prevalidatedAutomaticPrevBRStatus = false;
     	boolean firstPassAutomatic = billingRun.getStatus() == INVOICE_LINES_CREATED && billingRun.getProcessType() == AUTOMATIC;
-    	
+        result.addReport((!StringUtils.isBlank(result.getReport()) ? "," : "") + "Billing run #" + billingRun.getId());
+
         if(billingRun.getStatus() == INVOICE_LINES_CREATED
                 && (billingRun.getProcessType() == AUTOMATIC || billingRun.getProcessType() == FULL_AUTOMATIC)) {
             billingRun.setStatus(PREVALIDATED);

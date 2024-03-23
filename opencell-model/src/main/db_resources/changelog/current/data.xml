@@ -23300,7 +23300,48 @@ public class ImportJobNotification extends Script {
 		<sql>update adm_country set description_i18n = '{"ENG": "South Africa", "FRA": "Afrique du Sud"}', description =  'South Africa' where country_code = 'ZA'</sql>
 		<sql>update adm_country set description_i18n = '{"ENG": "Zambia", "FRA": "Zambie"}', description =  'Zambia' where country_code = 'ZM'</sql>
 		<sql>update adm_country set description_i18n = '{"ENG": "Zimbabwe", "FRA": "Zimbabwe"}', description =  'Zimbabwe' where country_code = 'ZW'</sql>
+   </changeSet>
+
+    <changeSet id="#INTRD-19464_20231225" author="ZBARIKI">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="org.meveo.service.script.DummyPaymentGatewayScript" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Dummy payment pateway script"/>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="script"><![CDATA[package org.meveo.service.script;
+package org.meveo.service.script;
+
+import org.meveo.admin.exception.BusinessException;
+
+import java.util.Map;
+
+
+public class DummyPaymentGatewayScript extends Script {
+
+    private static final String ERROR_MESSAGE
+            = "Dummy gateway for SEPA files generation (For now, its only purpose is to store rejection codes. Please continue to use DD requests for SEPA files)";
+    @Override
+    public void execute(Map<String, Object> context) throws BusinessException {
+        throw new BusinessException(ERROR_MESSAGE);
+    }
+}]]></column>
+        </insert>
+        <insert tableName="ar_payment_gateway">
+            <column name="id" valueSequenceNext="ar_payment_gateway_seq" />
+            <column name="version" valueNumeric="1" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="SEPA_FILE" />
+            <column name="description"
+                    value="Dummy gateway for SEPA files generation (For now, its only purpose is to store rejection codes. Please continue to use DD requests for SEPA files)" />
+            <column name="payment_method" value="DIRECTDEBIT" />
+            <column name="type" value="NATIF" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code = 'org.meveo.service.script.DummyPaymentGatewayScript')" />
+        </insert>
     </changeSet>
+
     <changeSet id="#INTRD-20962_add_missing_currencies" author="a.rouaguebe">
         <insert tableName="adm_currency">
             <column name="id" valueNumeric="-193" />
@@ -23720,21 +23761,21 @@ public class ImportJobNotification extends Script {
             <where>code='MarkWOToRerateJob'</where>
         </update>
     </changeSet>
-    <changeSet id="#INTRD-20796_20240216" author="AbdellatifBARI">
+    <changeSet id="#INTRD-20796_20240315" author="AbdellatifBARI">
         <update tableName="meveo_job_instance">
             <column name="cf_values"><![CDATA[{
                 "nbRuns":[{"long":-1}],
                 "waitingMillis":[{"long":0}],
-                "UpdateHugeEntityJob_targetJob":[{"string":"MarkWOToRerateJob"}],
-                "UpdateHugeEntityJob_entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
-                "UpdateHugeEntityJob_fieldsToUpdate":[{"string": "status='TO_RERATE'"}],
-                "UpdateHugeEntityJob_defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
-                "UpdateHugeEntityJob_selectFetchSize":[{"long":1000000}],
-                "UpdateHugeEntityJob_updateChunkSize":[{"long":32767}],
-                "UpdateHugeEntityJob_isPessimisticUpdateLock":[{"boolean":false}],
-                "UpdateHugeEntityJob_isUsingView":[{"boolean":true}],
-                "UpdateHugeEntityJob_isOpenCursor":[{"boolean":true}],
-                "UpdateHugeEntityJob_emailTemplate": [{"entity": {"code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
+                "targetJob":[{"string":"MarkWOToRerateJob"}],
+                "entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
+                "fieldsToUpdate":[{"string": "status='TO_RERATE'"}],
+                "defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
+                "selectFetchSize":[{"long":1000000}],
+                "updateChunkSize":[{"long":32767}],
+                "isPessimisticUpdateLock":[{"boolean":false}],
+                "isUsingView":[{"boolean":true}],
+                "isOpenCursor":[{"boolean":true}],
+                "emailTemplate": [{"entity": {"code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
                 }]]></column>
             <where>code='MarkWOToRerateJob'</where>
         </update>
@@ -23776,7 +23817,7 @@ public class ImportJobNotification extends Script {
 			<where>code='ARREARS_BALANCE'</where>
 		</update>
 	</changeSet>
-	
+
 	<changeSet id="#INTRD-21661_20240301" author="aeljaouhari">
     	<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -23816,4 +23857,177 @@ public class ImportJobNotification extends Script {
             <column name="version" value="1" />
         </insert>
     </changeSet>
+
+    <changeSet id="#INTRD-21883_20240318" author="aeljaouhari">
+    	<insert tableName="advanced_settings">
+		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
+		    <column name="version" value="0"/>
+		    <column name="disabled" valueNumeric="0"/>
+		    <column name="created" valueComputed="${db.current.time}"/>
+		    <column name="category" value="performance"/>
+		    <column name="property_group" value="standardExports"/>
+		    <column name="property_type" value="java.lang.String"/>
+		    <column name="property_value" value=","/>
+		    <column name="creator" value="applicationInitializer"/>
+		    <column name="code" value="standardExports.fieldsSeparator"/>
+		    <column name="description" value="standardExports.fieldsSeparator"/>
+		</insert>
+		<insert tableName="advanced_settings">
+		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
+		    <column name="version" value="0"/>
+		    <column name="disabled" valueNumeric="0"/>
+		    <column name="created" valueComputed="${db.current.time}"/>
+		    <column name="category" value="performance"/>
+		    <column name="property_group" value="standardExports"/>
+		    <column name="property_type" value="java.lang.String"/>
+		    <column name="property_value" value="."/>
+		    <column name="creator" value="applicationInitializer"/>
+		    <column name="code" value="standardExports.decimalSeparator"/>
+		    <column name="description" value="standardExports.decimalSeparator"/>
+		</insert>
+		<insert tableName="advanced_settings">
+		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
+		    <column name="version" value="0"/>
+		    <column name="disabled" valueNumeric="0"/>
+		    <column name="created" valueComputed="${db.current.time}"/>
+		    <column name="category" value="performance"/>
+		    <column name="property_group" value="standardExports"/>
+		    <column name="property_type" value="java.lang.String"/>
+		    <column name="property_value" value="csv"/>
+		    <column name="creator" value="applicationInitializer"/>
+		    <column name="code" value="standardExports.fileNameExtension"/>
+		    <column name="description" value="standardExports.fileNameExtension"/>
+		</insert>
+	</changeSet>
+
+    <changeSet id="INTRD-19826_20240103" author="ZBARIKI">
+        <insert tableName="meveo_script_instance_cat">
+            <column name="id" valueSequenceNext="meveo_script_instance_cat_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="PAYMENT_REJECTION_ACTIONS"/>
+            <column name="description" value="Payment rejection actions"/>
+            <column name="description_i18n" value='{"EN":"Payment rejection actions","FR":"Actions sur rejet de paiement"}' />
+        </insert>
+    </changeSet>
+    
+  	<changeSet id="INTRD-20888_20240125" author="aeljaouhari">
+        <insert tableName="meveo_script_instance">
+        	<column name="id" valueSequenceNext="meveo_script_instance_seq" />
+        	<column name="code" value="org.meveo.service.script.payment.TestRejectionAction" />
+        	<column name="script">
+        		<![CDATA[   package org.meveo.service.script.payment;
+            		public class TestRejectionAction extends TestRejectionActionScript {}]]>
+        	</column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="OPENCELL.ADMIN" />
+            <column name="version" valueNumeric="0" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Action will succeed or failed based on the passed parameter, and log the provided text. It’s also possible to add an execution delay."/>
+            <column name="description_i18n">
+				<![CDATA[{"EN":"<p>Action will succeed or failed based on the passed parameter, and log the provided text.</p><p>It’s also possible to add an execution delay.</p>","FR":"<p>L’action réussira ou échouera selon le paramètre passé, et enregistrera le message fourni.</p><p>Il est également possible d’ajouter un délai d’exécution.</p>"}]]>
+			</column>
+			<column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')" />
+        </insert>
+
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="executionResult" />
+			<column name="description_i18n" value='{"FR":"Résultat de l’action","EN":"Action result"}'/>
+			<column name="class_name" value="java.lang.String" />
+			<column name="mandatory" valueNumeric="1" />
+			<column name="default_value" value="success" />
+			<column name="allowed_values" value="success|failure" />
+			<column name="values_separator" value="\|" />
+			<column name="collection" valueNumeric="0" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
+		</insert>
+
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="report" />
+			<column name="description_i18n" value='{"FR":"Message du rapport","EN":"Report message"}'/>
+			<column name="class_name" value="java.lang.String" />
+			<column name="mandatory" valueNumeric="1" />
+			<column name="values_separator" value="\|" />
+			<column name="collection" valueNumeric="0" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
+		</insert>
+
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="delay" />
+			<column name="description_i18n" value='{"FR":"Délai (secondes)","EN":"Delay (seconds)"}'/>
+			<column name="class_name" value="java.lang.Integer" />
+			<column name="default_value" value="1" />
+			<column name="mandatory" valueNumeric="1" />
+			<column name="values_separator" value="\|" />
+			<column name="collection" valueNumeric="0" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
+		</insert>
+    </changeSet>
+
+    <changeSet id="INTRD-20997-20230129" author="ZBariki">
+        <insert tableName="generic_sequence">
+            <column name="id" valueSequenceNext="bill_seq_invoice_seq"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="payment_rejection_codes_group_seq"/>
+            <column name="description" value="Payment rejection codes group sequence"/>
+            <column name="sequence_type" value="SEQUENCE"/>
+            <column name="sequence_size" valueNumeric="6"/>
+            <column name="current_number" valueNumeric="0"/>
+        </insert>
+        <insert tableName="adm_custom_generic_entity_code">
+            <column name="id" valueSequenceNext="adm_custom_generic_entity_code_seq"/>
+            <column name="entity_class" value="org.meveo.model.payments.PaymentRejectionCodesGroup"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="format_el" value="PRCG-"/>
+            <column name="sequence_id"
+                    valueComputed="(SELECT id from generic_sequence where code = 'payment_rejection_codes_group_seq')"/>
+        </insert>
+
+        <insert tableName="generic_sequence">
+            <column name="id" valueSequenceNext="bill_seq_invoice_seq"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="payment_rejection_code_seq"/>
+            <column name="description" value="Payment rejection code sequence"/>
+            <column name="sequence_type" value="SEQUENCE"/>
+            <column name="sequence_size" valueNumeric="6"/>
+            <column name="current_number" valueNumeric="0"/>
+        </insert>
+        <insert tableName="adm_custom_generic_entity_code">
+            <column name="id" valueSequenceNext="adm_custom_generic_entity_code_seq"/>
+            <column name="entity_class" value="org.meveo.model.payments.PaymentRejectionCode"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="format_el" value="PRC-"/>
+            <column name="sequence_id"
+                    valueComputed="(SELECT id from generic_sequence where code = 'payment_rejection_code_seq')"/>
+        </insert>
+    </changeSet>
+    
+    <changeSet id="INTRD-20890_20240201" author="aeljaouhari">
+		<insert tableName="meveo_job_instance">
+			<column name="id" valueSequenceNext="meveo_job_instance_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="job_category" value="PAYMENT" />
+			<column name="job_template" value="RejectionPaymentActionJob" />
+			<column name="code" value="RejectionPaymentActionJob" />
+			<column name="creator" value="applicationInitializer" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="description" value="Rejection Payment Action Job" />
+			<column name="uuid" value="RejectionPaymentActionJob_Job" />
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>

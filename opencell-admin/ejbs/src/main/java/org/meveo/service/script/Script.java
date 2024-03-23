@@ -131,6 +131,16 @@ public abstract class Script implements Serializable, ScriptInterface {
      * The invoice validation reject reason.
      */
 	public static final String INVOICE_VALIDATION_REASON = "InvoiceValidation.REASON";
+	
+    /**
+     * The rejection action result.
+     */
+	public static final String REJECTION_ACTION_RESULT = "REJECTION_ACTION_RESULT";
+	
+	/**
+     * The rejection action report.
+     */
+	public static final String REJECTION_ACTION_REPORT = "InvoiceValidation.REASON";
 
     /**
      * A logger

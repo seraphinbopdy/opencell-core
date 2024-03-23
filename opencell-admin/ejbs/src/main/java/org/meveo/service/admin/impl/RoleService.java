@@ -127,10 +127,16 @@ public class RoleService extends PersistenceService<Role> {
     public Role findOrCreateRole(String name,Role parentRole) {
     	Role role=null;
         try {
-        	 role = getEntityManager().createNamedQuery("Role.getByName", Role.class).setParameter("name", name.toLowerCase()).getSingleResult();
-
+        	 role = getEntityManager().createNamedQuery("Role.getByName", Role.class).setParameter("name", name.toLowerCase()).setMaxResults(1).getSingleResult();
+             if(canSynchroWithKC() && keycloakAdminClientService.findRole(name, true)==null) {
+                 if(parentRole==null) {
+                     keycloakAdminClientService.createRole(name, name, true);
+                 } else {
+                     keycloakAdminClientService.createRole(name, name, true, parentRole.getName(), parentRole.getDescription(), parentRole.isClientRole());
+                 }
+             }
         } catch (NoResultException ex) {
-          super.create(new Role(name, name, true, parentRole));
+            create(new Role(name, name, true, parentRole));
         }
 
         return role;

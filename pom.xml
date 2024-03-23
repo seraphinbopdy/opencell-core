@@ -63,22 +63,22 @@
         <!-- </repository> -->
         <repository>
             <id>opencell-repo</id>
-            <url>http://libs.opencellsoft.com/</url>
+            <url>https://libs.opencellsoft.com/</url>
         </repository>
         <repository>
             <id>opencell-nexus</id>
-            <url>http://nexus.int.opencell.work/repository/maven-snapshots/</url>
+            <url>https://nexus.int.opencell.work/repository/maven-snapshots/</url>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
             <id>opencast-public</id>
-            <url>http://nexus.opencast.org/nexus/content/repositories/public/</url>
+            <url>https://nexus.opencast.org/nexus/content/repositories/public/</url>
         </pluginRepository>
         <pluginRepository>
             <id>central-maven</id>
-            <url>http://central.maven.org/maven2/</url>
+            <url>https://central.maven.org/maven2/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -820,7 +820,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.4.0.905</version>
+                    <version>3.10.0.2594</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

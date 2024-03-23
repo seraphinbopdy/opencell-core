@@ -166,7 +166,7 @@ public class PricePlanSelectionService implements Serializable {
 
         if (enablePPFilters) {
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableSeller")) {
-                queryBuilder.append(" AND (seller.id = :sellerId OR seller.id IS NULL)");
+                queryBuilder.append(" AND (ppm.seller.id = :sellerId OR ppm.seller.id IS NULL)");
                 queryParams.put("sellerId", bareWo.getSeller().getId());
             }
 
@@ -176,84 +176,84 @@ public class PricePlanSelectionService implements Serializable {
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableTradingCountry")) {
-                queryBuilder.append(" AND (tradingCountry.id = :tradingCountryId OR tradingCountry.id IS NULL)");
+                queryBuilder.append(" AND (ppm.tradingCountry.id = :tradingCountryId OR ppm.tradingCountry.id IS NULL)");
                 queryParams.put("tradingCountryId", buyerCountryId);
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableTradingCurrency")) {
-                queryBuilder.append(" AND (tradingCurrency.id = :tradingCurrencyId OR tradingCurrency.id IS NULL)");
+                queryBuilder.append(" AND (ppm.tradingCurrency.id = :tradingCurrencyId OR ppm.tradingCurrency.id IS NULL)");
                 queryParams.put("tradingCurrencyId", buyerCurrency != null ? buyerCurrency.getId() : null);
             }
 
             // Value of FALSE or 1 will filter by criteria1Value property in DB
             if ((advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value") instanceof Boolean && (Boolean) advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value"))
                     || (advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value") instanceof Integer && 1 == (Integer) advancedSettingsValues.get("pricePlanFilters.enableCriteria1Value"))) {
-                queryBuilder.append(" AND (criteria1Value = :param1 OR criteria1Value IS NULL)");
+                queryBuilder.append(" AND (ppm.criteria1Value = :param1 OR ppm.criteria1Value IS NULL)");
                 queryParams.put("param1", bareWo.getParameter1());
             }
 
             // Value of FALSE or 1 will filter by criteria2Value property in DB
             if ((advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value") instanceof Boolean && (Boolean) advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value"))
                     || (advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value") instanceof Integer && 1 == (Integer) advancedSettingsValues.get("pricePlanFilters.enableCriteria2Value"))) {
-                queryBuilder.append(" AND (criteria2Value = :param2 OR criteria2Value IS NULL)");
+                queryBuilder.append(" AND (ppm.criteria2Value = :param2 OR ppm.criteria2Value IS NULL)");
                 queryParams.put("param2", bareWo.getParameter2());
             }
 
             // Value of FALSE or 1 will filter by criteria3Value property in DB
             if ((advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value") instanceof Boolean && (Boolean) advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value"))
                     || (advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value") instanceof Integer && 1 == (Integer) advancedSettingsValues.get("pricePlanFilters.enableCriteria3Value"))) {
-                queryBuilder.append(" AND (criteria3Value = :param3 OR criteria3Value IS NULL)");
+                queryBuilder.append(" AND (ppm.criteria3Value = :param3 OR ppm.criteria3Value IS NULL)");
                 queryParams.put("param3", bareWo.getParameter3());
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableStartSubscriptionDate")) {
-                queryBuilder.append(" AND (startSubscriptionDate IS NULL OR startSubscriptionDate <= :subscriptionDate)");
+                queryBuilder.append(" AND (ppm.startSubscriptionDate IS NULL OR ppm.startSubscriptionDate <= :subscriptionDate)");
                 queryParams.put("subscriptionDate", subscriptionDate);
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableEndSubscriptionDate")) {
-                queryBuilder.append(" AND (endSubscriptionDate IS NULL OR endSubscriptionDate > :subscriptionDate)");
+                queryBuilder.append(" AND (ppm.endSubscriptionDate IS NULL OR ppm.endSubscriptionDate > :subscriptionDate)");
                 queryParams.put("subscriptionDate", subscriptionDate);
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableMinSubscriptionAgeInMonth")) {
-                queryBuilder.append(" AND (minSubscriptionAgeInMonth IS NULL OR minSubscriptionAgeInMonth <= :subscriptionAge)");
+                queryBuilder.append(" AND (ppm.minSubscriptionAgeInMonth IS NULL OR ppm.minSubscriptionAgeInMonth <= :subscriptionAge)");
                 queryParams.put("subscriptionAge", subscriptionAge);
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableMaxSubscriptionAgeInMonth")) {
-                queryBuilder.append(" AND (maxSubscriptionAgeInMonth IS NULL OR maxSubscriptionAgeInMonth > :subscriptionAge)");
+                queryBuilder.append(" AND (ppm.maxSubscriptionAgeInMonth IS NULL OR ppm.maxSubscriptionAgeInMonth > :subscriptionAge)");
                 queryParams.put("subscriptionAge", subscriptionAge);
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableStartRatingDate")) {
-                queryBuilder.append(" AND (startRatingDate IS NULL OR startRatingDate <= :operationDate)");
+                queryBuilder.append(" AND (ppm.startRatingDate IS NULL OR ppm.startRatingDate <= :operationDate)");
                 queryParams.put("operationDate", operationDate);
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableEndRatingDate")) {
-                queryBuilder.append(" AND (endRatingDate IS NULL OR endRatingDate > :operationDate)");
+                queryBuilder.append(" AND (ppm.endRatingDate IS NULL OR ppm.endRatingDate > :operationDate)");
                 queryParams.put("operationDate", operationDate);
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableValidityFrom")) {
-                queryBuilder.append(" AND (validityFrom IS NULL OR validityFrom < :startDate)");
+                queryBuilder.append(" AND (ppm.validityFrom IS NULL OR ppm.validityFrom < :startDate)");
                 queryParams.put("startDate", startDate);
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableValidityDate")) {
-                queryBuilder.append(" AND (validityDate IS NULL OR validityDate >= :startDate OR validityDate >= :endDate)");
+                queryBuilder.append(" AND (ppm.validityDate IS NULL OR ppm.validityDate >= :startDate OR ppm.validityDate >= :endDate)");
                 queryParams.put("startDate", startDate);
                 queryParams.put("endDate", endDate);
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableMaxQuantity")) {
-                queryBuilder.append(" AND (maxQuantity IS NULL OR maxQuantity > :quantity)");
+                queryBuilder.append(" AND (ppm.maxQuantity IS NULL OR ppm.maxQuantity > :quantity)");
                 queryParams.put("quantity", bareWo.getQuantity());
             }
 
             if ((Boolean) advancedSettingsValues.get("pricePlanFilters.enableMinQuantity")) {
-                queryBuilder.append(" AND (minQuantity IS NULL OR minQuantity <= :quantity)");
+                queryBuilder.append(" AND (ppm.minQuantity IS NULL OR ppm.minQuantity <= :quantity)");
                 queryParams.put("quantity", bareWo.getQuantity());
             }
         }

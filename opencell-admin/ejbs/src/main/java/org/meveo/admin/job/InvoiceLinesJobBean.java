@@ -7,6 +7,7 @@ import static java.util.Collections.emptyList;
 import static java.util.List.of;
 import static java.util.stream.Collectors.toList;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -200,6 +201,9 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
 
                 if (incrementalInvoiceLines) {
                     nrOfAccounts = (Long) emWrapper.getEntityManager().createNamedQuery("InvoiceLine.countDistinctBAByBR").setParameter("brId", currentBillingRun.getId()).getSingleResult();
+                    aggregatedStats.addToAmountWithoutTax(Optional.ofNullable(currentBillingRun.getPrAmountWithoutTax()).orElse(BigDecimal.ZERO));
+                    aggregatedStats.addToAmountWithTax(Optional.ofNullable(currentBillingRun.getPrAmountWithTax()).orElse(BigDecimal.ZERO));
+                    aggregatedStats.addToAmountTax(Optional.ofNullable(currentBillingRun.getPrAmountTax()).orElse(BigDecimal.ZERO));
                 }
 
                 billingRunExtensionService.updateBillingRunStatistics(currentBillingRun.getId(), aggregatedStats, nrOfAccounts.intValue(), BillingRunStatusEnum.OPEN);

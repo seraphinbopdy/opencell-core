@@ -19,7 +19,7 @@ package org.meveo.model.payments;
 
 public enum RejectedType {
 
-    A(1, "RejectedType.a"), M(2, "RejectedType.m");
+    A(1, "RejectedType.Automatic"), M(2, "RejectedType.Manual");
 
     private String label;
     private Integer id;

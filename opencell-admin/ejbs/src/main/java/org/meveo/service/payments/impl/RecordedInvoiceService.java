@@ -491,8 +491,6 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 
         if (isRecordedInvoice) {
             recordedInvoice = (T) new RecordedInvoice();
-            recordedInvoice.setNetToPay(netToPay);
-            recordedInvoice.setTransactionalNetToPay(netTransactionalToPay);
             
             List<String> orderNums = new ArrayList<>();
             if (invoice.getOrders() != null) {
@@ -522,16 +520,6 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
             if (occTemplate == null) {
                 throw new ImportInvoiceException("Cant find negative OccTemplate");
             }
-            netToPay = netToPay.abs();
-        }
-        if (amountWithoutTax != null) {
-            amountWithoutTax = amountWithoutTax.abs();
-        }
-        if (amountTax != null) {
-            amountTax = amountTax.abs();
-        }
-        if (amountWithTax != null) {
-            amountWithTax = amountWithTax.abs();
         }
         recordedInvoice.setAccountingCode(occTemplate.getAccountingCode());
         recordedInvoice.setCode(occTemplate.getCode());
@@ -539,13 +527,38 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         recordedInvoice.setTransactionCategory(occTemplate.getOccCategory());
         recordedInvoice.setAccountCodeClientSide(occTemplate.getAccountCodeClientSide());
 
+        if (netToPay != null && netToPay.compareTo(BigDecimal.ZERO) < 0) {
+        	netToPay = netToPay.abs();
+        }
+        if (amountWithoutTax != null && amountWithoutTax.compareTo(BigDecimal.ZERO) < 0) {
+            amountWithoutTax = amountWithoutTax.abs();
+        }
+        if (amountTax != null && amountTax.compareTo(BigDecimal.ZERO) < 0) {
+            amountTax = amountTax.abs();
+        }
+        if (amountWithTax != null && amountWithTax.compareTo(BigDecimal.ZERO) < 0) {
+            amountWithTax = amountWithTax.abs();
+        }
+        recordedInvoice.setNetToPay(netToPay);
         recordedInvoice.setAmount(amountWithTax);
-        recordedInvoice.setUnMatchingAmount(amountWithTax);
-        recordedInvoice.setMatchingAmount(BigDecimal.ZERO);
-
         recordedInvoice.setAmountWithoutTax(amountWithoutTax);
         recordedInvoice.setTaxAmount(amountTax);
+        recordedInvoice.setUnMatchingAmount(amountWithTax);
+        recordedInvoice.setMatchingAmount(BigDecimal.ZERO);
         
+        if (netTransactionalToPay != null && netTransactionalToPay.compareTo(BigDecimal.ZERO) < 0) {
+        	netTransactionalToPay = netTransactionalToPay.abs();
+        }
+        if (amountTransactionalWithoutTax != null && amountTransactionalWithoutTax.compareTo(BigDecimal.ZERO) < 0) {
+        	amountTransactionalWithoutTax = amountTransactionalWithoutTax.abs();
+        }
+        if (amountTransactionalTax != null && amountTransactionalTax.compareTo(BigDecimal.ZERO) < 0) {
+        	amountTransactionalTax = amountTransactionalTax.abs();
+        }
+        if (amountTransactionalWithTax != null && amountTransactionalWithTax.compareTo(BigDecimal.ZERO) < 0) {
+        	amountTransactionalWithTax = amountTransactionalWithTax.abs();
+        }
+        recordedInvoice.setTransactionalNetToPay(netTransactionalToPay);
         recordedInvoice.setTransactionalAmount(amountTransactionalWithTax);
         recordedInvoice.setTransactionalAmountWithoutTax(amountTransactionalWithoutTax);
         recordedInvoice.setTransactionalTaxAmount(amountTransactionalTax);        

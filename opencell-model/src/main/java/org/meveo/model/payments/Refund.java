@@ -38,6 +38,13 @@ public class Refund extends AccountOperation {
     @JoinColumn(name = "refunded_payment_id")
     private Payment refundedPayment;
 
+    /**
+     * Payment gateway
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_gateway_id")
+    private PaymentGateway paymentGateway;
+
     public Payment getRefundedPayment() {
         return refundedPayment;
     }
@@ -46,4 +53,11 @@ public class Refund extends AccountOperation {
         this.refundedPayment = refundedPayment;
     }
 
+    public PaymentGateway getPaymentGateway() {
+        return paymentGateway;
+    }
+
+    public void setPaymentGateway(PaymentGateway paymentGateway) {
+        this.paymentGateway = paymentGateway;
+    }
 }

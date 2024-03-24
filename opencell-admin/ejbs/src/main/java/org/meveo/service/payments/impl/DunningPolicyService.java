@@ -80,7 +80,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         }
         if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
             try {
-                String query = "SELECT inv FROM Invoice inv WHERE (inv.paymentStatus = 'UNPAID' OR inv.paymentStatus = 'PPAID') AND inv.dunningCollectionPlanTriggered = false AND "
+                String query = "SELECT inv FROM Invoice inv WHERE (inv.paymentStatus = 'UNPAID' OR inv.paymentStatus = 'PPAID' OR inv.paymentStatus = 'PENDING') AND inv.dunningCollectionPlanTriggered = false AND "
                         + buildPolicyRulesFilter(policy.getDunningPolicyRules());
                 return (List<Invoice>) invoiceService.executeSelectQuery(query, null);
             } catch (Exception exception) {
@@ -280,7 +280,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                         .filter(invoice -> invoiceEligibilityCheck(invoice, policy, dayOverDue))
                         .forEach(invoice -> {
                             dunningCollectionPlanNumber.incrementAndGet();
-                            collectionPlanService.createCollectionPlanFrom(invoice, policy, dayOverDue, collectionPlanStatus);
+                            collectionPlanService.createCollectionPlanFrom(invoice, policy, dayOverDue, collectionPlanStatus, jobExecutionResult);
                         });
             } else {
                 log.error("No level configured do meet the conditions for policy" + policy.getPolicyName());
@@ -306,7 +306,9 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         } catch (ParseException exception) {
             throw new BusinessException(exception);
         }
+
         long daysDiff = TimeUnit.DAYS.convert((today.getTime() - dueDate.getTime()), TimeUnit.MILLISECONDS);
+
         if (policy.getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE)) {
             BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
                     .map(RecordedInvoice::getUnMatchingAmount)
@@ -317,11 +319,10 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                                             .map(RecordedInvoice::getUnMatchingAmount)
                                             .orElse(BigDecimal.ZERO);
             dayOverDueAndThresholdCondition =
-                    (dayOverDue.longValue() == daysDiff || minBalance.doubleValue() >= policy.getMinBalanceTrigger()) && minBalance.compareTo(BigDecimal.ZERO) > 0;
+                    (dayOverDue.longValue() <= daysDiff && minBalance.doubleValue() >= policy.getMinBalanceTrigger()) && minBalance.compareTo(BigDecimal.ZERO) > 0;
         }
-        return (invoice.getPaymentStatus().equals(UNPAID) || invoice.getPaymentStatus().equals(PENDING))
-                && collectionPlanService.findByInvoiceId(invoice.getId()).isEmpty()
-                && dayOverDueAndThresholdCondition;
+
+        return dayOverDueAndThresholdCondition && collectionPlanService.findByInvoiceId(invoice.getId()).isEmpty();
     }
 
     public List<DunningPolicy> availablePoliciesForSwitch(Invoice invoice) {

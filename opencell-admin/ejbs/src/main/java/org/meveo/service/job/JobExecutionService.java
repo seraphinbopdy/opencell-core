@@ -57,6 +57,7 @@ import org.meveo.service.base.BaseService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.meveo.service.crm.impl.CustomFieldInstanceService;
 
 /**
  * The Class JobExecutionService.
@@ -105,6 +106,9 @@ public class JobExecutionService extends BaseService {
     @MeveoJpa
     private EntityManagerWrapper emWrapper;
 
+    @Inject
+    protected CustomFieldInstanceService customFieldInstanceService;
+
     /**
      * Execute a job and return job execution result ID to be able to query execution results later. Job execution result is persisted right away, while job is executed asynchronously.
      * 
@@ -151,6 +155,12 @@ public class JobExecutionService extends BaseService {
                 // set parent history id
                 if (params != null && params.containsKey(Job.JOB_PARAM_HISTORY_PARENT_ID)) {
                     jobExecutionResult.setParentJobExecutionResult((Long) params.get(Job.JOB_PARAM_HISTORY_PARENT_ID));
+                } else {
+                    if (jobInstance.getRunTimeCfValues() == null) {
+                        customFieldInstanceService.instantiateCFWithDefaultValueIfNull(jobInstance);
+                        jobInstance.setRunTimeCfValues(jobInstance.getCfValuesNullSafe() != null ? jobInstance.getCfValuesNullSafe().clone() : null);
+                    }
+                    jobExecutionResult.setCfValues(jobInstance.getRunTimeCfValues());
                 }
 
                 jobExecutionResultService.persistResult(jobExecutionResult);
@@ -229,6 +239,7 @@ public class JobExecutionService extends BaseService {
                 JobInstance nextJob = jobInstanceService.refreshOrRetrieve(jobInstance.getFollowingJob());
                 nextJob = PersistenceUtils.initializeAndUnproxy(nextJob);
                 log.info("Executing next job {} for {}", nextJob.getCode(), jobInstance.getCode());
+                nextJob.setRunTimeCfValues(nextJob.getCfValuesNullSafe() != null ? nextJob.getCfValuesNullSafe().clone() : null);
                 executeJob(nextJob, null, JobLauncherEnum.TRIGGER, true);
             }
         }

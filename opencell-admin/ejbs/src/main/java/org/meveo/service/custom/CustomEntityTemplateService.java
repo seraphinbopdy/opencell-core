@@ -288,6 +288,9 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
                             .filter(role -> role.startsWith("CE_") && role.endsWith("-read"))
                             .map(code -> code.substring(3, code.indexOf("-read")))
                             .collect(Collectors.toList());
+           		if(config.getFilters()==null) {
+        			config.setFilters(new HashMap<String, Object>());
+        		 }
                     config.getFilters().put("inList code ", eligibleCodes);
             	}
                 cets = super.list(config);
@@ -328,6 +331,9 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
                          .filter(role -> role.startsWith("CE_") && role.endsWith("-read"))
                          .map(code -> code.substring(3, code.indexOf("-read")))
                          .collect(Collectors.toList());
+        		 if(config.getFilters()==null) {
+         			config.setFilters(new HashMap<String, Object>());
+         		 }
                  config.getFilters().put("inList code ", eligibleCodes);
         	}
            

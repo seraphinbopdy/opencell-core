@@ -83,6 +83,9 @@ public class CustomGenericEntityCodeService extends PersistenceService<CustomGen
         }
         if (customGenericCode == null) {
             customGenericCode = randomUUID().toString();
+            if(getServiceInterface(entity.getClass()) == null) {
+                return (customGenericCode + now().getNano());
+            }
             BaseEntity baseEntity =
                     ((PersistenceService) getServiceInterface(entity.getClass())).findBusinessEntityByCode(customGenericCode);
             if (baseEntity != null) {

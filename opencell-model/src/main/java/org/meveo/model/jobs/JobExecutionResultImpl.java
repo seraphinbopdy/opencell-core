@@ -44,7 +44,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
-import org.meveo.model.BaseEntity;
+import org.meveo.model.CFEntity;
+import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.NotifiableEntity;
 
 /**
@@ -53,6 +54,7 @@ import org.meveo.model.NotifiableEntity;
  * @author Andrius Karpavicius
  */
 @Entity
+@CustomFieldEntity(cftCodePrefix = "JobExecutionResultImpl")
 @Table(name = "job_execution")
 @NotifiableEntity
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "job_execution_seq"), })
@@ -64,7 +66,7 @@ import org.meveo.model.NotifiableEntity;
         @NamedQuery(name = "JobExecutionResult.cancelUnfinishedJobsByNode", query = "update JobExecutionResultImpl je set je.status='SHUTDOWN', je.endDate=NOW(), je.report=CONCAT('Job cancelled due to the server was shutdown in the middle of job execution/n', je.report) where je.status = 'RUNNING' and je.nodeName=:nodeName"),
         @NamedQuery(name = "JobExecutionResult.listUnfinishedJobs", query = "select jr from JobExecutionResultImpl jr where jr.id in (select distinct (case when je.parentJobExecutionResult is null then je.id else je.parentJobExecutionResult end) from JobExecutionResultImpl je where je.status = 'RUNNING' or je.status = 'SHUTDOWN')") })
 
-public class JobExecutionResultImpl extends BaseEntity {
+public class JobExecutionResultImpl extends CFEntity {
 
     private static final long serialVersionUID = 430457580612075457L;
 

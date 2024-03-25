@@ -48,6 +48,7 @@ import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobClusterBehaviorEnum;
+import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.TimerEntity;
 import org.meveo.model.report.query.QueryScheduler;
@@ -68,6 +69,10 @@ public class JobInstanceService extends BusinessService<JobInstance> {
 
     @Inject
     private JobCacheContainerProvider jobCacheContainerProvider;
+
+    @Inject
+    private JobExecutionResultService jobExecutionResultService;
+
 
     private static Map<JobCategoryEnum, List<Class<? extends Job>>> jobClasses = new HashMap<>();
     private static Map<CacheKeyLong, Timer> jobTimers = new HashMap<>();
@@ -111,6 +116,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
             if (cfts != null && !cfts.isEmpty()) {
                 try {
                     customFieldTemplateService.createMissingTemplates(EntityCustomizationUtils.getAppliesTo(job.getClass(), null), cfts.values());
+                    jobExecutionResultService.createMissingCustomFieldTemplates(cfts.values());
                 } catch (Exception e) {
                     log.error("Failed to registed missing CF templates for job " + job.getClass());
                 }
@@ -369,7 +375,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
 
     /**
      * Synchronize definition of custom field templates specified in Job class to those found in DB. Register in DB if was missing.
-     * 
+     *
      * @param jobInstance Job instance to synchronize custom fields for
      */
     public void createMissingCustomFieldTemplates(JobInstance jobInstance) {
@@ -391,7 +397,8 @@ public class JobInstanceService extends BusinessService<JobInstance> {
         }
 
         try {
-            customFieldTemplateService.createMissingTemplates((ICustomFieldEntity) jobInstance, jobTemplatesFromJob);
+            customFieldTemplateService.createMissingTemplates(jobInstance, jobTemplatesFromJob);
+            jobExecutionResultService.createMissingCustomFieldTemplates(jobTemplatesFromJob);
         } catch (BusinessException e) {
             log.error("Failed to create missing custom field templates", e);
         }

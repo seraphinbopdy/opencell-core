@@ -151,6 +151,8 @@ public class JobExecutionService extends BaseService {
                 // set parent history id
                 if (params != null && params.containsKey(Job.JOB_PARAM_HISTORY_PARENT_ID)) {
                     jobExecutionResult.setParentJobExecutionResult((Long) params.get(Job.JOB_PARAM_HISTORY_PARENT_ID));
+                } else {
+                    jobExecutionResult.setCfValues(jobInstance.getRunTimeCfValues());
                 }
 
                 jobExecutionResultService.persistResult(jobExecutionResult);

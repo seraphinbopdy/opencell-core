@@ -1,0 +1,743 @@
+{
+	"info": {
+		"_postman_id": "bc2ca83d-d238-446a-a121-f29186fcc462",
+		"name": "INTRD-17567 : Payment rejection 5",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10400726"
+	},
+	"item": [
+		{
+			"name": "Create rejection code",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"PRC_ID\", jsonData.id);\r",
+							"postman.setEnvironmentVariable(\"PRC_CODE\", jsonData.code);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"code\": \"{{PRC_CODE}}_{{currentDate}}\",\r\n    \"description\": \"Rejection code description\",\r\n    \"descriptionI18n\": {\r\n        \"ENG\": \"Rejection code description\",\r\n        \"FRA\": \"Description du code de rejet\"\r\n    },\r\n    \"paymentGateway\": {\r\n        \"id\": \"{{PAYMENT_GATEWAY_ID}}\",\r\n        \"code\": \"{{PAYMENT_GATEWAY_CODE}}\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create payment rejection codes group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"PRCG_ID\", jsonData.id);\r",
+							"\r",
+							"tests[\"is.success\"] = jsonData.actionStatus.status === \"SUCCESS\";"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "opencell.admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "opencell.admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"description\": \"Payment rejection codes groupe description\",\r\n    \"paymentGateway\": {\r\n        \"id\": {{PAYMENT_GATEWAY_ID}},\r\n        \"code\": \"{{PAYMENT_GATEWAY_CODE}}\"\r\n    },\r\n    \"rejectionCodes\": [\r\n        {\r\n            \"id\": {{PRC_ID}}\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes/group",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes",
+						"group"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update payment rejection codes group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"PRC_ID\", jsonData.id);\r",
+							"\r",
+							"tests[\"is.success\"] = jsonData.actionStatus.status === \"SUCCESS\";"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"description\": \"Payment rejection codes groupe description new update\",\r\n    \"paymentGateway\": {\r\n        \"id\": {{PAYMENT_GATEWAY_ID}},\r\n        \"code\": \"{{PAYMENT_GATEWAY_CODE}}\"\r\n    },\r\n    \"rejectionCodes\": [],\r\n    \"rejectionActions\": []\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes/group/{{PRCG_ID}}",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes",
+						"group",
+						"{{PRCG_ID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create rejection action",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"PRA_ID\", jsonData.id);\r",
+							"tests[\"is.success\"] = jsonData.actionStatus.status === \"SUCCESS\";\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "opencell.admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "opencell.admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"code\": \"{{PRA_CODE}}\",\r\n    \"description\": \"Rejection action description\",\r\n    \"scriptInstance\": {\r\n        \"id\": {{SCRIPT_INSTANCE_ID}},\r\n        \"code\": \"{{SCRIPT_INSTANCE_CODE}}\"\r\n    },\r\n    \"scriptParameters\": {\r\n        \"key1\": \"value1\",\r\n        \"key2\": \"value2\"\r\n    },\r\n    \"rejectionCodeGroup\": {\r\n        \"id\" : \"{{PRCG_ID}}\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes/rejectionActions",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes",
+						"rejectionActions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get rejection action",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"sortBy\": \"id\",\r\n    \"filters\": {\r\n        \"SQL\": \"(id = {{PRA_ID}})\"\r\n    },\r\n    \"nestedEntities\": [\r\n        \"paymentRejectionCodesGroup\"\r\n    ],\r\n    \"sortOrder\": \"DESCENDING\",\r\n    \"offset\": 0,\r\n    \"limit\": 20\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/generic/all/PaymentRejectionAction",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"generic",
+						"all",
+						"PaymentRejectionAction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update rejection action",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"PRC_ID\", jsonData.id);\r",
+							"\r",
+							"tests[\"is.success\"] = jsonData.actionStatus.status === \"SUCCESS\";"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"description\": \"Rejection action description_updated 10\",\r\n    \"sequence\": 200,\r\n    \"scriptInstance\": {\r\n        \"id\" : 1,\r\n        \"code\": \"{{SCRIPT_INSTANCE_CODE}}\"\r\n    },\r\n    \"scriptParameters\": {\r\n        \"key1\": \"new val 01\",\r\n        \"key2\": \"new val 02\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes/rejectionActions/{{PRA_ID}}",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes",
+						"rejectionActions",
+						"{{PRA_ID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get rejection action",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"sortBy\": \"id\",\r\n    \"filters\": {\r\n        \"SQL\": \"(id = {{PRA_ID}})\"\r\n    },\r\n    \"nestedEntities\": [\"paymentRejectionCodesGroup\"],\r\n    \"sortOrder\": \"DESCENDING\",\r\n    \"offset\": 0,\r\n    \"limit\": 20\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/generic/all/PaymentRejectionAction",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"generic",
+						"all",
+						"PaymentRejectionAction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create rejection action 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"PRA_ID\", jsonData.id);\r",
+							"tests[\"is.success\"] = jsonData.actionStatus.status === \"SUCCESS\";\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "opencell.admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "opencell.admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"code\": \"{{PRA_CODE}}2\",\r\n    \"description\": \"Rejection action description\",\r\n    \"scriptInstance\": {\r\n        \"id\": {{SCRIPT_INSTANCE_ID}},\r\n        \"code\": \"{{SCRIPT_INSTANCE_CODE}}\"\r\n    },\r\n    \"scriptParameters\": {\r\n        \"key1\": \"value1\",\r\n        \"key2\": \"value2\"\r\n    },\r\n    \"rejectionCodeGroup\": {\r\n        \"id\" : \"{{PRCG_ID}}\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes/rejectionActions",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes",
+						"rejectionActions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update a PaymentRejectionAction sequence",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"PRC_ID\", jsonData.id);\r",
+							"\r",
+							"tests[\"is.success\"] = jsonData.actionStatus.status === \"SUCCESS\";"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "opencell.admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "opencell.admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"sequenceAction\": \"UP\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes/rejectionActions/{{PRA_ID}}/UpdateSequence",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes",
+						"rejectionActions",
+						"{{PRA_ID}}",
+						"UpdateSequence"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete rejection action",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes/rejectionActions/{{PRC_ID}}",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes",
+						"rejectionActions",
+						"{{PRC_ID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete payment rejection codes group",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes/group/{{PRCG_ID}}",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes",
+						"group",
+						"{{PRCG_ID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete payment rejection codes group",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "opencell.admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "opencell.admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"filters\": {\r\n        \"$filter1\": {\r\n            \"description\": \"Payment rejection codes groupe description\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejectionCodes/group",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejectionCodes",
+						"group"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Payment AO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"PAYMENT_ID\", jsonData.paymentId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "opencell.admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "opencell.admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"paymentMethod\": \"CARD\",\r\n    \"amount\": 13,\r\n    \"reference\": \"1008\",\r\n    \"dueDate\": 1709189122249,\r\n    \"occTemplateCode\": \"PAY_CRD\",\r\n    \"customerAccountCode\": \"OKT6244\",\r\n    \"transactionDate\": 1709189122244,\r\n    \"bankCollectionDate\": 1709189122244,\r\n    \"bankLot\": \"@today-opencell.superadmin\",\r\n    \"paymentInfo\": \"opencell.superadmin\",\r\n    \"transactionalCurrency\": \"EUR\",\r\n    \"isToMatching\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/payment",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"payment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RejectedPayment creation API",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"tests[\"is.success\"] = jsonData.actionStatus.status === \"SUCCESS\";"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "opencell.admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "opencell.admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": {{PAYMENT_ID}},\r\n    \"rejectionDate\": \"2024-02-16\",\r\n    \"rejectionCode\": \"{{PRC_CODE}}\",\r\n    \"comment\": \"comment 01\",\r\n    \"paymentGatewayCode\" : \"SEPA_FILE\",\r\n    \"skipRejectionActions\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/payment/rejection",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"payment",
+						"rejection"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "opencell.admin",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "opencell.admin",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const dateNow = new Date();",
+					"pm.environment.set('currentDate', dateNow.toISOString());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "PRA_CODE",
+			"value": "PRA_CODE_1",
+			"type": "string"
+		},
+		{
+			"key": "PRA_DESCRIPTION",
+			"value": "Rejection action description",
+			"type": "string"
+		},
+		{
+			"key": "SCRIPT_INSTANCE_ID",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "SCRIPT_INSTANCE_CODE",
+			"value": "org.meveo.service.script.DummyPaymentGatewayScript",
+			"type": "string"
+		},
+		{
+			"key": "PRA_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "PRCG_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "PRCG_CODE",
+			"value": "PRCG_CODE_01",
+			"type": "string"
+		},
+		{
+			"key": "PAYMENT_GATEWAY_ID",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "PAYMENT_GATEWAY_CODE",
+			"value": "SEPA_FILE",
+			"type": "string"
+		},
+		{
+			"key": "PRC_CODE",
+			"value": "PRC_010997549",
+			"type": "string"
+		},
+		{
+			"key": "PRCODE_ID",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "currentDate",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

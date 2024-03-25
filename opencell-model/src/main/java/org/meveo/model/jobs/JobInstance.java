@@ -48,6 +48,7 @@ import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ModuleItem;
+import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.report.query.QueryScheduler;
 
 /**
@@ -171,6 +172,12 @@ public class JobInstance extends EnableBusinessCFEntity {
     /** The run time values. */
     @Transient
     private Map<String, Object> runTimeValues;
+
+    /**
+     * Custom field values of current run
+     */
+    @Transient
+    protected CustomFieldValues runTimeCfValues;
 
     /**
      * Gets the job template.
@@ -539,5 +546,23 @@ public class JobInstance extends EnableBusinessCFEntity {
         } else {
             return limitToNrOfNodes;
         }
+    }
+
+    /**
+     * Gets runTimeCfValues.
+     *
+     * @return value of runTimeCfValues
+     */
+    public CustomFieldValues getRunTimeCfValues() {
+        return runTimeCfValues;
+    }
+
+    /**
+     * Sets runTimeCfValues.
+     *
+     * @param runTimeCfValues value of runTimeCfValues
+     */
+    public void setRunTimeCfValues(CustomFieldValues runTimeCfValues) {
+        this.runTimeCfValues = runTimeCfValues;
     }
 }

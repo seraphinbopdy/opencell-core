@@ -24030,4 +24030,11 @@ public class DummyPaymentGatewayScript extends Script {
 		</insert>
 	</changeSet>
 
+	<changeSet id="INTRD-21379_20240325" author="zelmeliani">
+        <update tableName="dunning_policy">
+            <column name="determine_level_by" value="DAYS_OVERDUE_AND_BALANCE_THRESHOLD" />
+			<where>determine_level_by = 'DAYS_OVERDUE_OR_BALANCE_THRESHOLD'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -508,15 +508,6 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
         return referenceTable;
     }
 
-    /**
-     * Count the number of custom entity instances based on the list method as the cache can be involved
-     * @param config Data filtering, sorting and pagination criteria
-     * @return
-     */
-    public long count(PaginationConfiguration config) {
-        return this.list(config).size();
-    }
-
     @Override
     public CustomEntityTemplate findByIdIgnoringCache(Long id, List<String> fetchFields) {
         CustomEntityTemplate cet = super.findByIdIgnoringCache(id, fetchFields);

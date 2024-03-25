@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
 
     <property name="type.blob" value="blob" dbms="postgresql" />
     <property name="type.blob" value="longblob" dbms="mysql" />
@@ -41,9 +41,14 @@
     <property name="uuid_function" value="uuid_generate_v4()" dbms="postgresql"/>
     <property name="uuid_function" value="uuid()" dbms="mysql"/>
     <property name="uuid_function" value="sys_guid()" dbms="oracle"/>
-
-    <property name="migration" value="true" />
     
-    <include file="current/structure.xml" relativeToChangelogFile="true" />
-    <include file="current/data.xml" relativeToChangelogFile="true" />
+    <property name="liquibase_file_prefix" value="src/main/resources/"/>
+
+    <include file="rebuild/structure.xml" relativeToChangelogFile="true" />
+    <include file="rebuild/data.xml" relativeToChangelogFile="true" />
+    <include file="rebuild/data-demo.xml" relativeToChangelogFile="true" />
+    <include file="rebuild/data-scripts.xml" relativeToChangelogFile="true" />
+    <include file="rebuild/data-reports.xml" relativeToChangelogFile="true" />
+    <include file="rebuild/finalize_rebuild.xml" relativeToChangelogFile="true" />
+
 </databaseChangeLog>

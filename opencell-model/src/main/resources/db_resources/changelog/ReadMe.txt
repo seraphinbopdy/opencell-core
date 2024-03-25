@@ -1,19 +1,18 @@
 What is Liquibase?
--------------------
+------------------
 Liquibase is an open source database change management tool built on Java. Rather than writing SQL directly against the database to create, update or drop database objects, 
 developers define their desired database changes in XML files. The XML file, called a changelog, contains a list of changesets that define a desired database change in an database agnostic abstraction. 
 The changelog is intended to contain an evolving list of database changes the team would like to apply to a target database. This list is additive over time.
 
 
 How does it work in Opencell?
-------------------------------
-Liquibase can be executed through either the command line or as part of a build using Ant, Maven or the like (build integration). 
+-----------------------------
+Liquibase can be executed manually through either the command line, as part of a build using Maven or automatically at application startup. 
 Liquibase will apply the changesets directly to the database and can handle rollbacks and tagging of database state.
 
 Directory Structure:
 1- /current - the directory that contains :
 structure.xml : the evolution changelog file which evolves by a release number.
-data.xml : the dataset file related to changelog file structure.xml.
 
 2- /rebuild : the directory that contains :
 structure.xml : the initial changelog file that creates the database.
@@ -31,8 +30,12 @@ data.xml : demo dunning related dataset
 7- db.dunning.xml : master changelog file to populate database with demo dunning data
 
 
-Procedure for the developer
-------------------------------
+Manual update - procedure for the developer 
+-------------------------------------------
+In persistence.xml:
+- set <property name="hibernate.hbm2ddl.auto" value="validate" />
+- or <property name="hibernate.hbm2ddl.auto" value="update" /> and use environment variable "DB_MIGRATION_MANUAL=true" to turn off automatic database update at application startup. Db schema validation will still occur.
+
 running rebuild: 
 mvn sql:execute@reset-pg -Pdevelopment,rebuild liquibase:dropAll liquibase:update
 for oracle replace sql:execute@reset-pg with sql:execute@reset-oracle
@@ -46,15 +49,27 @@ updating data model:
 3- add empty changeset to the end of rebuild file with the same id and author that was added as to current file
 
 
+Automatic update
+----------------
+In persistence.xml:
+- set <property name="hibernate.hbm2ddl.auto" value="update" />. Use environment variable "DB_MIGRATION_MANUAL=false" or remove it all together to turn on automatic database update and DB schema validation at application startup.
+
+A presense of db_migration_status table in database will indicate to use a "current" instead of a "rebuild" set of files for DB update.
+
+
 Best Practices
-------------------------------
+--------------
 - One Change per ChangeSet
 - Take attention to duplication of changeSet Ids and authors, the pattern of id is : #IdOfYourTicket_yyyymmdd
 - Make your changesets database agnostic by using variables defined in db.current.xml or db.rebuild.xml files
+- Changes, reported in current/structure.xml, are replicated to rebuild/structure.xml or rebuild/dataXXX.xml file in the following way:
+    - add an empty changeset to rebuild/structure.xml matching id, author and dbms of a changeset in current/structure.xml file
+    - split changes by subject into tables, FK, UK, procedures, data, etc... 
+    - incorporate changes to rebuild/structure.xml and/or rebuild/dataXXX.xml files in appropriate existing or as new changesets. In case of a new changeset, the id must contain a "-rebuild" suffix
 
 
 How to generate a sql delta between two different local versions?
-------------------------------------------------------------------
+-----------------------------------------------------------------
 we'll take an example of two versions 11.0.0 and 11.1.0
 
 1- Make a pull rebase of the 11.0.0 branch

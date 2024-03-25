@@ -275,19 +275,30 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
     public List<CustomEntityTemplate> list(PaginationConfiguration config) {
 
         if (useCETCache
-                && (config.getFilters() == null || config.getFilters().isEmpty() || (config.getFilters().size() == 1 && config.getFilters().get("disabled") != null && !(boolean) config.getFilters().get("disabled")))) {
-            List<CustomEntityTemplate> cets = new ArrayList<CustomEntityTemplate>();
+                && (config.getFilters() == null || config.getFilters().isEmpty() || (config.getFilters().size() == 1
+                && config.getFilters().get("disabled") != null && !(boolean) config.getFilters().get("disabled")))) {
+            List<CustomEntityTemplate> cets = new ArrayList<>();
             cets.addAll(customFieldsCache.getCustomEntityTemplates());
 
             // Populate cache if record is not found in cache
             if (cets.isEmpty()) {
+            	if(!currentUser.hasRoles("ReadAllCE")){
+           		 List<String> eligibleCodes = currentUser.getRoles()
+                            .stream()
+                            .filter(role -> role.startsWith("CE_") && role.endsWith("-read"))
+                            .map(code -> code.substring(3, code.indexOf("-read")))
+                            .collect(Collectors.toList());
+                    config.getFilters().put("inList code ", eligibleCodes);
+            	}
                 cets = super.list(config);
                 if (cets != null) {
                     cets.forEach((cet) -> customFieldsCache.addUpdateCustomEntityTemplate(cet, false));
                 }
+            }else {
+            	 cets = cets.stream().filter(cet -> currentUser.hasRoles(cet.getReadPermission(), "ReadAllCE")).collect(Collectors.toList());
             }
 
-            cets = cets.stream().filter(cet -> currentUser.hasRoles(cet.getReadPermission(), "ReadAllCE")).collect(Collectors.toList());
+           
 
             // Order the list
             try {
@@ -311,9 +322,31 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
             return cets;
 
         } else {
+        	if(!currentUser.hasRoles("ReadAllCE")){
+        		 List<String> eligibleCodes = currentUser.getRoles()
+                         .stream()
+                         .filter(role -> role.startsWith("CE_") && role.endsWith("-read"))
+                         .map(code -> code.substring(3, code.indexOf("-read")))
+                         .collect(Collectors.toList());
+                 config.getFilters().put("inList code ", eligibleCodes);
+        	}
+           
             List<CustomEntityTemplate> cets = super.list(config);
-            return cets.stream().filter(cet -> currentUser.hasRoles(cet.getReadPermission(), "ReadAllCE")).collect(Collectors.toList());
+            return cets;
         }
+    }
+    
+    @Override
+    public long count(PaginationConfiguration config) {
+    	if(!currentUser.hasRoles("ReadAllCE")){
+   		 List<String> eligibleCodes = currentUser.getRoles()
+                    .stream()
+                    .filter(role -> role.startsWith("CE_") && role.endsWith("-read"))
+                    .map(code -> code.substring(3, code.indexOf("-read")))
+                    .collect(Collectors.toList());
+            config.getFilters().put("inList code ", eligibleCodes);
+   	}
+        return super.count(config);
     }
 
     /**

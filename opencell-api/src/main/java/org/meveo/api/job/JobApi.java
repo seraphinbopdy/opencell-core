@@ -111,9 +111,9 @@ public class JobApi extends BaseApi {
 
         // populate customFields
         try {
-            CustomFieldValues cfValues = jobInstance.getCfValues() != null ? jobInstance.getCfValues().clone() : null;
+            CustomFieldValues cfValues = jobInstance.getCfValuesNullSafe() != null ? jobInstance.getCfValuesNullSafe().clone() : null;
             populateCustomFields(jobExecution.getCustomFields(), jobInstance, true);
-            jobInstance.setRunTimeCfValues(jobInstance.getCfValues());
+            jobInstance.setRunTimeCfValues(jobInstance.getCfValuesNullSafe() != null ? jobInstance.getCfValuesNullSafe().clone() : null);
             jobInstance.setCfValues(cfValues);
         } catch (MissingParameterException | InvalidParameterException e) {
             log.error("Failed to associate custom field instance to an entity: {}", e.getMessage());

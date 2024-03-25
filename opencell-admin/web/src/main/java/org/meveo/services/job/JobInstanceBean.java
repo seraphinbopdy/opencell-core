@@ -151,6 +151,7 @@ public class JobInstanceBean extends CustomFieldBean<JobInstance> {
     @ActionMethod
     public String execute() {
 
+        entity.setRunTimeCfValues(entity.getCfValuesNullSafe() != null ? entity.getCfValuesNullSafe().clone() : null);
         jobExecutionService.executeJob(entity, null, JobLauncherEnum.GUI);
         messages.info(new BundleKey("messages", "jobInstance.job.laucnhed"), entity.getJobTemplate());
 

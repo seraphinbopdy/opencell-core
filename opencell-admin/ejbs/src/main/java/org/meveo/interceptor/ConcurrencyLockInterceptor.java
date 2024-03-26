@@ -29,6 +29,9 @@ public class ConcurrencyLockInterceptor implements Serializable {
                 lockBy = (Long) parameterValue;
             } else if (parameterValue instanceof IEntity) {
                 lockBy = (Long) ((IEntity) parameterValue).getId();
+				if(lockBy == null ) {
+					lockBy = (long) parameterValue.hashCode();
+				}
             }
         }
 

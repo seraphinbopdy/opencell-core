@@ -30,9 +30,11 @@ import org.meveo.apiv2.generic.exception.MeveoExceptionMapper;
 import org.meveo.apiv2.generic.services.GenericApiAlteringService;
 import org.meveo.apiv2.generic.services.GenericApiLoadService;
 import org.meveo.apiv2.generic.services.PersistenceServiceHelper;
+import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.securityDeposit.FinanceSettings;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.util.Inflector;
 
@@ -47,6 +49,9 @@ public class GenericResourceImpl implements GenericResource {
 
     @Inject
     private FinanceSettingsService financeSettingsService;
+    
+	@Inject
+	private AdvancedSettingsApiService advancedSettingsApiService;
 
     @Override
     public Response count(Boolean extractList, String entityName, GenericPagingAndFiltering searchConfig) {
@@ -214,17 +219,20 @@ public class GenericResourceImpl implements GenericResource {
         if(!fileFormat.equalsIgnoreCase("CSV") && !fileFormat.equalsIgnoreCase("EXCEL") && !fileFormat.equalsIgnoreCase("PDF")){
             throw new BadRequestException("Accepted formats for export are (CSV, PDF or EXCEL).");
         }
+        if (StringUtils.isNotBlank(decimalSeparator) && !List.of(",",".").contains(decimalSeparator)) {
+			throw new BadRequestException("For decimal separator,  only '.' (point) and ',' (comma) are accepted");
+		}
         if (StringUtils.isBlank(locale)) {
             locale = "EN"; // default value EN
         }
         if (StringUtils.isBlank(fieldsSeparator)) {
-        	fieldsSeparator = "EN";
+        	fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).orElse(null);
         }
         if (StringUtils.isBlank(decimalSeparator)) {
-        	decimalSeparator = "EN"; 
+        	decimalSeparator = advancedSettingsApiService.findByCode("standardExports.decimalSeparator").map(AdvancedSettings::getValue).orElse(null); 
         }
         if (StringUtils.isBlank(fileNameExtension)) {
-        	fileNameExtension = "EN"; 
+        	fileNameExtension = advancedSettingsApiService.findByCode("standardExports.fileNameExtension").map(AdvancedSettings::getValue).orElse(null); 
         }
         Class entityClass = GenericHelper.getEntityClass(entityName);
         GenericRequestMapper genericRequestMapper = new GenericRequestMapper(entityClass, PersistenceServiceHelper.getPersistenceService());
@@ -233,4 +241,5 @@ public class GenericResourceImpl implements GenericResource {
                 .entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"\"}, \"data\":{ \"filePath\":\""+ filePath +"\"}}")
                 .build();
     }
+    
 }

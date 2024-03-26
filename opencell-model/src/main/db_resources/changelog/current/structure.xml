@@ -14996,6 +14996,13 @@ Opencell team.
     
     <changeSet id="INTRD_12001_20221205-data" author="TarikFA.">
     
+    	<delete tableName="meveo_script_parameter">
+            <where>script_instance_id = (SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.CompareOfferAmountScript')</where>
+        </delete>
+    	<delete tableName="meveo_script_instance">
+            <where>code = 'org.meveo.service.script.CompareOfferAmountScript'</where>
+        </delete>
+        
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="code" value="org.meveo.service.script.CompareOfferAmountScript" />
@@ -15074,6 +15081,14 @@ Opencell team.
     </changeSet>
     
     <changeSet id="INTRD-12266_20221214" author="aeljaouhari">
+    	
+    	<delete tableName="meveo_script_parameter">
+            <where>script_instance_id = (SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ValidateCreditCategoryScript')</where>
+        </delete>
+    	<delete tableName="meveo_script_instance">
+            <where>code = 'org.meveo.service.script.ValidateCreditCategoryScript'</where>
+        </delete>
+        
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="code" value="org.meveo.service.script.validation.ValidateCreditCategoryScript" />
@@ -15106,6 +15121,14 @@ Opencell team.
     </changeSet>
 
     <changeSet id="INTRD-12103_20221215_rebuild" author="HichamHANINE">
+    
+    	<delete tableName="meveo_script_parameter">
+            <where>script_instance_id = (SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.CompareOfferLinesAmountScript')</where>
+        </delete>
+    	<delete tableName="meveo_script_instance">
+            <where>code = 'org.meveo.service.script.CompareOfferLinesAmountScript'</where>
+        </delete>
+    
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="code" value="org.meveo.service.script.CompareOfferLinesAmountScript" />
@@ -15269,6 +15292,14 @@ Only offer actually present on invoice will be tested."}'/>
     </changeSet>
     
     <changeSet id="INTRD-12267_20221219" author="aeljaouhari">
+    
+    	<delete tableName="meveo_script_parameter">
+            <where>script_instance_id = (SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ValidateCustomerAge')</where>
+        </delete>
+        <delete tableName="meveo_script_instance">
+            <where>code = 'org.meveo.service.script.ValidateCustomerAge'</where>
+        </delete>
+        
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="code" value="org.meveo.service.script.validation.ValidateCustomerAge" />
@@ -15336,6 +15367,14 @@ Only offer actually present on invoice will be tested."}'/>
     </changeSet>
     
     <changeSet id="INTRD-12268_20221221" author="aeljaouhari">
+    
+    	<delete tableName="meveo_script_parameter">
+            <where>script_instance_id = (SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ValidateSubscriptionAge')</where>
+        </delete>
+        <delete tableName="meveo_script_instance">
+            <where>code = 'org.meveo.service.script.ValidateSubscriptionAge'</where>
+        </delete>
+        
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="code" value="org.meveo.service.script.validation.ValidateSubscriptionAge" />

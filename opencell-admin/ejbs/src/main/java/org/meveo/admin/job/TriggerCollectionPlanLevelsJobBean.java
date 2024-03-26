@@ -373,7 +373,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
             ids.add(invoice.getRecordedInvoice().getId());
             PaymentGateway paymentGateway =
                     paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
-            //jobBean.doPayment(preferredPaymentMethod, customerAccount, amountToPay, ids, paymentGateway);// TODO ZEI - Remove this comment
+            jobBean.doPayment(preferredPaymentMethod, customerAccount, amountToPay, ids, paymentGateway);
         }
     }
 

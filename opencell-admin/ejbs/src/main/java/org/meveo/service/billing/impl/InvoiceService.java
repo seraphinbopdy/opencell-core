@@ -99,6 +99,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -3700,7 +3701,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @throws BusinessException General business exception
      */
     public void postCreate(Invoice invoice) throws BusinessException {
-        if(invoice.getBillingRun() == null) {
+        if(invoice.getBillingRun() == null
+                && (invoice.getSubscriptions() == null || invoice.getSubscriptions().isEmpty())) {
         	linkInvoiceSubscriptions(invoice);
         }
 
@@ -6253,6 +6255,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
             invoiceAggregateProcessingInfo.invoice.assignTemporaryInvoiceNumber();
             update(invoiceAggregateProcessingInfo.invoice);
             applyAutomaticInvoiceCheck(invoiceAggregateProcessingInfo.invoice, automaticInvoiceCheck);
+            invoiceAggregateProcessingInfo.invoice =
+                    refreshOrRetrieve(invoiceAggregateProcessingInfo.invoice);
             postCreate(invoiceAggregateProcessingInfo.invoice);
         }
         applyExchangeRateToInvoiceLineAndAggregate(invoiceList);

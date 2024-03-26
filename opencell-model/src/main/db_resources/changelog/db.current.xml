@@ -45,5 +45,4 @@
     <property name="migration" value="true" />
     
     <include file="current/structure.xml" relativeToChangelogFile="true" />
-    <include file="current/data.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

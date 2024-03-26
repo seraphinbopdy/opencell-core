@@ -236,7 +236,6 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 				subscription.setPriceList(order.getPriceList());
 				if(offer.getTerminationDate() != null) {
 					subscription.setRenewed(false);
-					subscription.setTerminationDate(offer.getTerminationDate());
 					subscription.setSubscribedTillDate(offer.getTerminationDate());
 					if(offer.getTerminationReason() != null && subscription.getSubscriptionRenewal() != null) {
 						SubscriptionRenewal renewal =  subscription.getSubscriptionRenewal();

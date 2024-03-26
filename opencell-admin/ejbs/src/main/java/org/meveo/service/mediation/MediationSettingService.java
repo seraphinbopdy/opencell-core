@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.meveo.interceptor.ConcurrencyLock;
 import org.meveo.model.mediation.EdrVersioningRule;
 import org.meveo.model.mediation.MediationSetting;
 import org.meveo.model.rating.CDR;
@@ -55,6 +56,7 @@ public class MediationSettingService extends PersistenceService<MediationSetting
         }).get();
     }
 
+	@ConcurrencyLock(lockParameter = 1)
     public void applyEdrVersioningRule(List<EDR> edrs, CDR cdr, boolean isTriggeredEdr) {
 
         MediationSetting mediationSetting = getMediationSetting();

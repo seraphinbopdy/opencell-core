@@ -89,198 +89,7 @@
             <column name="code" value="org.meveo.service.script.demo.CustomGatewayPaymentScript"/>
             <column name="src_type" value="JAVA_CLASS"/>
             <column name="description" value="CustomGatewayPaymentScript demo implementation"/>
-            <column name="created" valueDate="${db.current.time}"/>
-            <column name="script">
-                <![CDATA[
-					package org.meveo.service.script.demo;
-					
-					import java.io.StringReader;
-					import java.util.Date;
-					import java.util.Map;
-					import javax.xml.xpath.*;
-					import org.meveo.admin.exception.BusinessException;
-					import org.meveo.model.payments.*;
-					import org.meveo.service.script.payment.PaymentScript;
-					import org.slf4j.Logger;
-					import org.slf4j.LoggerFactory;
-					import org.xml.sax.InputSource;
-					
-					/**
-					 * @author anasseh
-					 */
-					public class CustomGatewayPaymentScript extends PaymentScript {
-						private static final Logger log = LoggerFactory.getLogger(CustomGatewayPaymentScript.class);
-					
-						public void createCardToken(Map<String, Object> methodContext) throws BusinessException {
-							log.info("createCardToken  methodContext {} ", methodContext);
-							methodContext.put(PaymentScript.RESULT_TOKEN,
-									"7ced0000-3ab2-000d-6a50-08d4b8a6" + (int) (Math.random() * 1000 + 1));
-						}
-					
-						public void doPaymentToken(Map<String, Object> methodContext) throws BusinessException {
-							doIt(methodContext, "PAL");
-						}
-					
-						public void doPaymentCard(Map<String, Object> methodContext) throws BusinessException {
-							doIt(methodContext, "PAL_CARD");
-						}
-					
-						public void doRefundToken(Map<String, Object> methodContext) throws BusinessException {
-							doIt(methodContext, "RFD");
-						}
-					
-						public void doRefundCard(Map<String, Object> methodContext) throws BusinessException {
-							doIt(methodContext, "RFD_CARD");
-						}
-					
-						@Override
-						public void doPaymentSepa(Map<String, Object> methodContext) throws BusinessException {
-							log.info("doPaymentSepa  methodContext {} ", methodContext);
-							doIt(methodContext, "PAL_SEPA");
-						}
-					
-						@Override
-						public void cancelPayment(Map<String, Object> methodContext) throws BusinessException {
-							log.info("cancelPayment  methodContext {} ", methodContext);
-						}
-					
-						@Override
-						public void doRefundSepa(Map<String, Object> methodContext) throws BusinessException {
-							log.info("doRefundSepa  methodContext {} ", methodContext);
-							doIt(methodContext, "RFD_SEPA");
-						}
-					
-						@Override
-						public void checkPayment(Map<String, Object> methodContext) throws BusinessException {
-							try {
-								log.info("checkPayment  methodContext {} ", methodContext);
-								String paymentResponse = "<root>";
-								paymentResponse += "<STATUS>92</STATUS>";
-								paymentResponse += "<PAYID>" + ((int) (Math.random() * 100000 + 1)) + "</PAYID>";
-								paymentResponse += "<TRANSACTIONID>92</TRANSACTIONID>";
-								paymentResponse += "<CRMTOKEN>clientSide</CRMTOKEN>";
-								paymentResponse += "<BRAND>VISA</BRAND>";
-								paymentResponse += "<ACCEPTENCE>bankRef</ACCEPTENCE>";
-								paymentResponse += "</root>";
-								methodContext.put(PaymentScript.RESULT_PAYMENT_STATUS, PaymentStatusEnum.PENDING);
-								methodContext.put(PaymentScript.RESULT_PAYMENT_ID, getValue(paymentResponse, "/root/PAYID"));
-								methodContext.put(PaymentScript.RESULT_TRANSACTION_ID, getValue(paymentResponse, "/root/TRANSACTIONID"));
-								methodContext.put(PaymentScript.RESULT_CODE_CLIENT_SIDE, getValue(paymentResponse, "/root/CRMTOKEN"));
-								methodContext.put(PaymentScript.RESULT_PAYMENT_BRAND, getValue(paymentResponse, "/root/BRAND"));
-								methodContext.put(PaymentScript.RESULT_BANK_REFERENCE, getValue(paymentResponse, "/root/ACCEPTENCE"));
-							} catch (Exception e) {
-								throw new BusinessException(e.getMessage());
-							}
-						}
-					
-						@Override
-						public void checkMandat(Map<String, Object> methodContext) throws BusinessException {
-							log.info("checkMandat  methodContext {} ", methodContext);
-							methodContext.put(PaymentScript.RESULT_MANDAT_ID, methodContext.get(PaymentScript.CONTEXT_MANDAT_ID));
-							methodContext.put(PaymentScript.RESULT_MANDAT_REF, methodContext.get(PaymentScript.CONTEXT_MANDAT_REF));
-							methodContext.put(PaymentScript.RESULT_STATE, MandatStateEnum.active);
-							methodContext.put(PaymentScript.RESULT_STANDARD, PaymentScript.RESULT_STANDARD);
-							methodContext.put(PaymentScript.RESULT_INT_SCORE, "12");
-							methodContext.put(PaymentScript.RESULT_DATE_CREATED, new Date());
-							methodContext.put(PaymentScript.RESULT_DATE_SIGNED, new Date());
-							methodContext.put(PaymentScript.RESULT_SCHEME, PaymentScript.RESULT_SCHEME);
-							methodContext.put(PaymentScript.RESULT_BIC, PaymentScript.RESULT_BIC);
-							methodContext.put(PaymentScript.RESULT_IBAN, PaymentScript.RESULT_IBAN);
-							methodContext.put(PaymentScript.RESULT_BANK_NAME, PaymentScript.RESULT_BANK_NAME);
-						}
-					
-						@Override
-						public void getHostedCheckoutUrl(Map<String, Object> methodContext) throws BusinessException {
-							log.info("getHostedCheckoutUrl  methodContext {} ", methodContext);
-					
-							methodContext.put(PaymentScript.RESULT_HOSTED_CO_URL, "https://dump.url.com/checkoutPageUrl");
-							methodContext.put(PaymentScript.RESULT_HOSTED_CO_ID, "123456789");
-					
-						}
-					
-						@Override
-						public void createInvoice(Map<String, Object> methodContext) throws BusinessException {
-							log.info("createInvoice  methodContext {} ", methodContext);
-							methodContext.put(PaymentScript.RESULT_HOSTED_CO_URL, "https://dump.url.com/invoicePageUrl");
-						}
-					
-						@Override
-						public void createSepaDirectDebitToken(Map<String, Object> methodContext) throws BusinessException {
-							log.info("createSepaDirectDebitToken  methodContext {} ", methodContext);
-							methodContext.put(PaymentScript.RESULT_TOKEN,
-									"7ced0000-3ab2-000d-6a50-08d4b8a6" + (int) (Math.random() * 1000 + 1));
-					
-						}
-					
-						@Override
-						public void createMandate(Map<String, Object> methodContext) throws BusinessException {
-							log.info("createMandate  methodContext {} ", methodContext);
-					
-						}
-					
-						@Override
-						public void approveSepaDDMandate(Map<String, Object> methodContext) throws BusinessException {
-							log.info("approveSepaDDMandate  methodContext {} ", methodContext);
-					
-						}
-					
-						@Override
-						public void getHostedCheckoutStatus(Map<String, Object> methodContext) throws BusinessException {
-							log.info("getHostedCheckoutStatus  methodContext {} ", methodContext);
-							methodContext.put(PaymentScript.RESULT_HOSTED_CO_STATUS, PaymentScript.RESULT_HOSTED_CO_STATUS);
-							methodContext.put(PaymentScript.RESULT_PAYMENT_ID, "123456");
-							methodContext.put(PaymentScript.RESULT_PAYMENT_STATUS, PaymentStatusEnum.ACCEPTED);
-					
-						}
-					
-						private void doIt(Map<String, Object> methodContext, String operationType) throws BusinessException {
-							try {
-								log.debug("EXECUTE  methodContext {} ", methodContext);
-								Long amountCts = (Long) methodContext.get(PaymentScript.CONTEXT_AMOUNT_CTS);
-								if (amountCts == null) {
-									throw new BusinessException("amountCts is null");
-								}
-					
-								// DEMO : get tokenId or card infos from context
-								String body = "{";
-								body += " \"PSPID\" : \"PSPID\" ,";
-								body += " \"USERID\" : \"USERID\" ,";
-								body += " \"PSWD\" : \"PSWD\" ,";
-								body += " \"REFKIND\" :  \"PSPID\" ,";
-								body += " \"REFID\" : \"PSPID\" ,";
-								body += " \"OPERATION\" : \"" + operationType + "\" ,";
-								body += " \"AMOUNT\" : \"" + amountCts.longValue() + "\" ,";
-								body += " \"SHASIGN\" : \"SHASIGN\" ,";
-								body += " }";
-					
-								String paymentResponse = "<root>";
-								paymentResponse += "<STATUS>92</STATUS>";
-								paymentResponse += "<PAYID>" + ((int) (Math.random() * 100000 + 1)) + "</PAYID>";
-								paymentResponse += "<TRANSACTIONID>92</TRANSACTIONID>";
-								paymentResponse += "<CRMTOKEN>clientSide</CRMTOKEN>";
-								paymentResponse += "<BRAND>VISA</BRAND>";
-								paymentResponse += "<ACCEPTENCE>bankRef</ACCEPTENCE>";
-								paymentResponse += "</root>";
-								methodContext.put(PaymentScript.RESULT_PAYMENT_STATUS, PaymentStatusEnum.PENDING);
-								methodContext.put(PaymentScript.RESULT_PAYMENT_ID, getValue(paymentResponse, "/root/PAYID"));
-								methodContext.put(PaymentScript.RESULT_TRANSACTION_ID, getValue(paymentResponse, "/root/TRANSACTIONID"));
-								methodContext.put(PaymentScript.RESULT_CODE_CLIENT_SIDE, getValue(paymentResponse, "/root/CRMTOKEN"));
-								methodContext.put(PaymentScript.RESULT_PAYMENT_BRAND, getValue(paymentResponse, "/root/BRAND"));
-								methodContext.put(PaymentScript.RESULT_BANK_REFERENCE, getValue(paymentResponse, "/root/ACCEPTENCE"));
-							} catch (Exception e) {
-								throw new BusinessException(e.getMessage());
-							}
-						}
-					
-						private String getValue(String sourceXML, String expression) throws XPathExpressionException {
-							InputSource iSource = new InputSource(new StringReader(sourceXML));
-							XPathFactory xpathFactory = XPathFactory.newInstance();
-							XPath xpath = xpathFactory.newXPath();
-							return xpath.evaluate(expression, iSource);
-						}
-					}
-				]]>
-            </column>
+            <column name="created" valueDate="${db.current.time}"/>            
         </insert>
               
         <sql><![CDATA[INSERT INTO ${db.schema.adapted}meveo_script_instance (id, version, disabled, created, code, description, src_type, script) VALUES (-11  , 0, 0,  ${db.current.time}, 'org.meveo.service.script.demo.PaymentCallBackScript', 'PaymentCallBackScript', 'JAVA_CLASS', null);]]></sql>
@@ -296,16 +105,9 @@
           '#{event.pathInfo.startsWith("/DEMO/custom_payment-callback?")}', 'INBOUND_REQ', 'opencell.admin', NULL, NULL, NULL, -11, 0);]]></sql>
 
         <sql><![CDATA[INSERT INTO ${db.schema.adapted}adm_notification_params VALUES (-10, '#{event.getParameters()}', 'params');]]></sql>        
-
     </changeSet>
 
-    
-    
-    
-    <changeSet author="ZBARIKI" id="#6048_20210326" dbms="postgresql"/>        
-    <changeSet author="MohamedSTITANE" id="#6048_20210326" dbms="oracle"/>    
-
-    <changeSet id="#INTRD-13383_20230123" author="bourras">
+    <changeSet id="rebuild-scripting-jobs" author="AndriusKarpavicius">
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq"/>
             <column name="version" valueNumeric="0"/>
@@ -314,9 +116,6 @@
             <column name="description" value="Migrate OneShot Charge of Type OTHER to INVOICING_PLAN"/>
             <column name="created" valueDate="${db.current.time}"/>
         </insert>
-    </changeSet>
-    
-    <changeSet author="AmineBENAICHA" id="#6048_20210611">
         <insert tableName="meveo_script_instance">
             <column name="id" valueNumeric="-30"/>
             <column name="version" valueNumeric="0" />
@@ -347,12 +146,149 @@
                 ]]>
             </column>
         </insert>
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="code" value="org.meveo.service.script.MassWrittingOffInvoicesScript" />
+            <column name="script">
+                <![CDATA[   package org.meveo.service.script;
+                    public class MassWrittingOffInvoicesScript extends MassWrittingOffInvoices {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="OPENCELL.ADMIN" />
+            <column name="version" valueNumeric="1" />
+            <column name="src_type" value="JAVA" />
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq" />
+            <column name="version" valueNumeric="1" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="job_category" value="MEDIATION" />
+            <column name="job_template" value="FlatFileProcessingJob" />
+            <column name="code" value="massWrittingOffInvoicesJob" />
+            <column name="description" value="mass writting off invoices job"/>
+            <column name="creator" value="opencell.admin" />
+            <column name="job_speed" value="NORMAL" />
+            <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
+            <column name="verbose_report" valueNumeric="1" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="cf_values">
+                <![CDATA[
+                {"nbRuns": [{"long": 1}], "oneFilePerJob": [{"boolean": false}], "sortingOption": [{"string": "ALPHA"}], "waitingMillis": [{"long": 0}], "FlatFileProcessingJob_inputDir": [{"string": "/imports/writeOff/inputs"}], "FlatFileProcessingJob_outputDir": [{"string": "/imports/writeOff/outputs"}], "FlatFileProcessingJob_archiveDir": [{"string": "/imports/writeOff/archives"}], "FlatFileProcessingJob_errorAction": [{"string": "CONTINUE"}], "FlatFileProcessingJob_mappingConf": [{"string": "<beanio\r\n\txmlns=\"http://www.beanio.org/2012/03\"\r\n\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n  xsi:schemaLocation=\"http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd\">\r\n\t<stream name=\"record\" format=\"csv\">\r\n\t\t<parser>\r\n\t\t\t<property name=\"delimiter\" value=\";\" />\r\n\t\t\t<property name=\"comments\" value=\"END\" />\r\n\t\t\t<property name=\"multilineEnabled\" value=\"true\" />\r\n\t\t</parser>\r\n\t\t<record name=\"header\" minOccurs=\"1\" maxOccurs=\"1\" class=\"map\">\r\n\t\t\t<field name=\"INVOICE_NUMBER\" ignore=\"true\"/>\r\n\t\t\t<field name=\"INVOICE_AMOUNT\" ignore=\"true\"/>\r\n\t\t\t<field name=\"UNCOLLECTIBILITY_CERTIFICATE_NUMBER\" ignore=\"true\"/>\r\n\t\t</record>\r\n\t\t<record name=\"details\" minOccurs=\"1\" maxOccurs=\"unbounded\" class=\"map\">\r\n\t\t\t<field name=\"INVOICE_NUMBER\" required=\"true\"/>\r\n\t\t\t<field name=\"INVOICE_AMOUNT\" required=\"true\"/>\r\n\t\t\t<field name=\"UNCOLLECTIBILITY_CERTIFICATE_NUMBER\" required=\"true\"/>\r\n\t\t</record>\r\n\t</stream>\r\n</beanio>"}], "FlatFileProcessingJob_scriptsFlow": [{"string": "org.meveo.service.script.MassWrittingOffInvoicesScript"}], "FlatFileProcessingJob_formatTransfo": [{"string": "None"}], "FlatFileProcessingJob_originFilename": [{"string": "origin_filename"}], "FlatFileProcessingJob_nbLinesToProcess": [{"long": 1}], "FlatFileProcessingJob_fileNameExtension": [{"string": "csv"}], "FlatFileProcessingJob_recordVariableName": [{"string": "record"}]}
+                ]]>
+            </column>
+        </insert>        
+    </changeSet>
+    
+    
+    <changeSet id="#INTRD-19464_20231225-rebuild" author="ZBARIKI">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="org.meveo.service.script.DummyPaymentGatewayScript" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Dummy payment pateway script"/>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="script"><![CDATA[package org.meveo.service.script;
+package org.meveo.service.script;
+
+import org.meveo.admin.exception.BusinessException;
+
+import java.util.Map;
+
+
+public class DummyPaymentGatewayScript extends Script {
+
+    private static final String ERROR_MESSAGE
+            = "Dummy gateway for SEPA files generation (For now, its only purpose is to store rejection codes. Please continue to use DD requests for SEPA files)";
+    @Override
+    public void execute(Map<String, Object> context) throws BusinessException {
+        throw new BusinessException(ERROR_MESSAGE);
+    }
+}]]></column>
+        </insert>
+        <insert tableName="ar_payment_gateway">
+            <column name="id" valueSequenceNext="ar_payment_gateway_seq" />
+            <column name="version" valueNumeric="1" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="SEPA_FILE" />
+            <column name="description"
+                    value="Dummy gateway for SEPA files generation (For now, its only purpose is to store rejection codes. Please continue to use DD requests for SEPA files)" />
+            <column name="payment_method" value="DIRECTDEBIT" />
+            <column name="type" value="NATIF" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code = 'org.meveo.service.script.DummyPaymentGatewayScript')" />
+        </insert>
     </changeSet>
 
-            
-       <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->
-    <changeSet id="#liquibase_hack_data-scripts" author="AbdelmounaimAkadid">
-        <sql>update databasechangelog set filename='src/main/db_resources/changelog/current/data.xml' where filename='src/main/db_resources/changelog/rebuild/data-scripts.xml'</sql>
+    <changeSet id="INTRD-19826_20240103-rebuild" author="ZBARIKI">
+        <insert tableName="meveo_script_instance_cat">
+            <column name="id" valueSequenceNext="meveo_script_instance_cat_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="PAYMENT_REJECTION_ACTIONS"/>
+            <column name="description" value="Payment rejection actions"/>
+            <column name="description_i18n" value='{"EN":"Payment rejection actions","FR":"Actions sur rejet de paiement"}' />
+        </insert>
     </changeSet>
+    
+    <changeSet id="INTRD-20888_20240125-rebuild" author="aeljaouhari">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="code" value="org.meveo.service.script.payment.TestRejectionAction" />
+            <column name="script">
+                <![CDATA[   package org.meveo.service.script.payment;
+                    public class TestRejectionAction extends TestRejectionActionScript {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="OPENCELL.ADMIN" />
+            <column name="version" valueNumeric="0" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Action will succeed or failed based on the passed parameter, and log the provided text. It’s also possible to add an execution delay."/>
+            <column name="description_i18n">
+                <![CDATA[{"EN":"<p>Action will succeed or failed based on the passed parameter, and log the provided text.</p><p>It’s also possible to add an execution delay.</p>","FR":"<p>L’action réussira ou échouera selon le paramètre passé, et enregistrera le message fourni.</p><p>Il est également possible d’ajouter un délai d’exécution.</p>"}]]>
+            </column>
+            <column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')" />
+        </insert>
 
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="executionResult" />
+            <column name="description_i18n" value='{"FR":"Résultat de l’action","EN":"Action result"}'/>
+            <column name="class_name" value="java.lang.String" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="default_value" value="success" />
+            <column name="allowed_values" value="success|failure" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="report" />
+            <column name="description_i18n" value='{"FR":"Message du rapport","EN":"Report message"}'/>
+            <column name="class_name" value="java.lang.String" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="delay" />
+            <column name="description_i18n" value='{"FR":"Délai (secondes)","EN":"Delay (seconds)"}'/>
+            <column name="class_name" value="java.lang.Integer" />
+            <column name="default_value" value="1" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
+        </insert>
+    </changeSet>
+    
 </databaseChangeLog>

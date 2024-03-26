@@ -12,7 +12,7 @@
     <name>Opencell Model</name>
 
     <properties>
-        <liquibase.changeLogFile>src/main/resources/db_resources/changelog/db.current.xml</liquibase.changeLogFile>
+        <liquibase.changeLogFile>src/main/db_resources/changelog/db.current.xml</liquibase.changeLogFile>
     </properties>
 
     <build>
@@ -369,19 +369,19 @@
         <profile>
             <id>base</id>
             <properties>
-                <liquibase.changeLogFile>src/main/resources/db_resources/changelog/db.base.xml</liquibase.changeLogFile>
+                <liquibase.changeLogFile>src/main/db_resources/changelog/db.base.xml</liquibase.changeLogFile>
             </properties>
         </profile>
         <profile>
             <id>rebuild</id>
             <properties>
-                <liquibase.changeLogFile>src/main/resources/db_resources/changelog/db.rebuild.xml</liquibase.changeLogFile>
+                <liquibase.changeLogFile>src/main/db_resources/changelog/db.rebuild.xml</liquibase.changeLogFile>
             </properties>
         </profile>
         <profile>
             <id>dunning</id>
             <properties>
-                <liquibase.changeLogFile>src/main/resources/db_resources/changelog/db.dunning.xml</liquibase.changeLogFile>
+                <liquibase.changeLogFile>src/main/db_resources/changelog/db.dunning.xml</liquibase.changeLogFile>
             </properties>
         </profile>
 

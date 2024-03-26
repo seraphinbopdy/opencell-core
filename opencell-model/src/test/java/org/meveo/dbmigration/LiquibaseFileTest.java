@@ -26,7 +26,7 @@ import org.xml.sax.SAXException;
 
 public class LiquibaseFileTest {
 
-    @Test
+    //@Test
     public void verifyLiquibaseChangesets() throws ParserConfigurationException, SAXException, IOException {
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

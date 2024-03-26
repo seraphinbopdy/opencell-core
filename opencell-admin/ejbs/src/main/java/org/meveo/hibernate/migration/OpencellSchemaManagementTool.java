@@ -54,6 +54,11 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
     private static final String DB_DATA_SOURCE_NAME = "java:jboss/datasources/MeveoAdminDatasource";
 
     /**
+     * An environment variable indicating if DB migration should be done manually. DB_MIGRATION_MANUAL = true indicates manual migration. If omitted, a default of false is considered.
+     */
+    private static final String ENV_FLAG_DB_MIGRATION_MANUAL = "DB_MIGRATION_MANUAL";
+
+    /**
      * Database migration status
      */
     private enum DbMigrationStatusEnum {
@@ -116,7 +121,7 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
 
                 try {
 
-                    String dbMigrationManual = System.getenv("DB_MIGRATION_MANUAL");
+                    String dbMigrationManual = System.getenv(ENV_FLAG_DB_MIGRATION_MANUAL);
                     boolean isDBMigrationManual = dbMigrationManual != null && Boolean.parseBoolean(dbMigrationManual);
 
                     runLiquibaseUpdateAndValidation(metadata, executionOptions, options, isDBMigrationManual);

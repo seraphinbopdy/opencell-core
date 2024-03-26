@@ -302,6 +302,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		collectionPlanToPause.setPausedUntilDate(pauseUntil);
 		collectionPlanToPause.setPauseReason(dunningPauseReason);
 		collectionPlanToPause.addPauseDuration((int) daysBetween(new Date(),collectionPlanToPause.getPausedUntilDate()));
+        collectionPlanToPause.setNextActionDate(addDaysToDate(collectionPlanToPause.getNextActionDate(), collectionPlanToPause.getPauseDuration()));
 		update(collectionPlanToPause);
 		return collectionPlanToPause; 
 	}
@@ -364,7 +365,8 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		}
 		collectionPlanToResume.setStatus(collectionPlanStatus);
 		collectionPlanToResume.addPauseDuration((int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date()));
-		update(collectionPlanToResume);
+        collectionPlanToResume.setNextActionDate(addDaysToDate(collectionPlanToResume.getNextActionDate(), (int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date())));
+        update(collectionPlanToResume);
 		return collectionPlanToResume;
 	}
 

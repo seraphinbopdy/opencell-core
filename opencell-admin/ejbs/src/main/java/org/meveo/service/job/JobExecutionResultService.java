@@ -287,6 +287,8 @@ public class JobExecutionResultService extends PersistenceService<JobExecutionRe
         String appliesTo = EntityCustomizationUtils.getAppliesTo(JobExecutionResultImpl.class, null);
         customFieldTemplateService.createMissingTemplates(appliesTo, cfts.stream()
                 .map(cft -> {
+                    customFieldTemplateService.detach(cft);
+                    cft.setId(null);
                     cft.setAppliesTo(appliesTo);
                     return cft;
                 }).collect(Collectors.toList()));

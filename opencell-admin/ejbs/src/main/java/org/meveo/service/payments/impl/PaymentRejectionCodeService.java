@@ -6,6 +6,7 @@ import static java.lang.String.join;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -164,7 +165,13 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         }
         return languagesDetails.stream()
                 .map(language -> language[2])
-                .map(descriptionI18n::get)
+                .map(languageCode -> {
+                    if(descriptionI18n == null) {
+                        return EMPTY;
+                    } else {
+                        return ofNullable(descriptionI18n.get(languageCode)).orElse(EMPTY);
+                    }
+                })
                 .collect(joining(";"));
     }
 

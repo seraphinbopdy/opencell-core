@@ -28,6 +28,7 @@ import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 import static org.meveo.model.payments.MatchingStatusEnum.I;
 import static org.meveo.model.payments.OperationCategoryEnum.DEBIT;
+import static org.meveo.model.shared.DateUtils.daysBetween;
 import static org.meveo.model.shared.DateUtils.setDateToEndOfDay;
 
 import java.math.BigDecimal;
@@ -59,12 +60,10 @@ import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoicePaymentStatusEnum;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.SubCategoryInvoiceAgregate;
+import org.meveo.model.dunning.DunningCollectionPlan;
+import org.meveo.model.dunning.DunningCollectionPlanStatus;
 import org.meveo.model.order.Order;
-import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.MatchingStatusEnum;
-import org.meveo.model.payments.OCCTemplate;
-import org.meveo.model.payments.RecordedInvoice;
-import org.meveo.model.payments.RecordedInvoiceCatAgregate;
+import org.meveo.model.payments.*;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
@@ -94,7 +93,14 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 
     @Inject
     private InvoiceService invoiceService;
-    
+
+    @Inject
+    DunningCollectionPlanService dunningCollectionPlanService;
+
+    @Inject
+    DunningCollectionPlanStatusService dunningCollectionPlanStatusService;
+
+
     /**
      * @param recordedInvoiceId recored invoice id
      * @throws BusinessException business exception
@@ -786,6 +792,10 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         if(validationResult.isPresent()) {
             throw new BusinessException(validationResult.get());
         }
+
+        // Stop the dunning collection plan if it is active
+        processToUpdateCollectionPlanStatus(recordedInvoice, DunningCollectionPlanStatusEnum.ACTIVE, DunningCollectionPlanStatusEnum.STOPPED, false);
+
         recordedInvoice.setMatchingStatus(I);
         recordedInvoice.setLitigationReason(litigationReason);
         updatePaymentStatus(recordedInvoice, DISPUTED, new Date());
@@ -833,6 +843,10 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         final Date today = new Date();
         setMatchingStatus(recordedInvoice);
         recordedInvoice.setLitigationReason(litigationReason);
+
+        // Active the dunning collection plan if it is stopped
+        processToUpdateCollectionPlanStatus(recordedInvoice, DunningCollectionPlanStatusEnum.STOPPED, DunningCollectionPlanStatusEnum.ACTIVE, Boolean.TRUE);
+
         computePaymentStatus(recordedInvoice, today);
         update(recordedInvoice);
         return recordedInvoice;
@@ -874,6 +888,39 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
                 }
             } else if (today.after(recordedInvoice.getInvoice().getDueDate())) {
                 updatePaymentStatus(recordedInvoice, UNPAID, today);
+            }
+        }
+    }
+
+    /**
+     * Process to update the dunning collection plan status and pause duration if the status to set is active and the update pause duration is true.
+     * @param pRecordedInvoice recorded invoice.
+     * @param pStatusToRemove status to remove.
+     * @param pStatusToSet status to set.
+     */
+    private void processToUpdateCollectionPlanStatus(RecordedInvoice pRecordedInvoice, DunningCollectionPlanStatusEnum pStatusToRemove, DunningCollectionPlanStatusEnum pStatusToSet, Boolean pUpdatePauseDuration) {
+        // Get the dunning collection plan by invoice id
+        List<DunningCollectionPlan> collectionPlans = dunningCollectionPlanService.findByInvoiceId(pRecordedInvoice.getInvoice().getId());
+
+        // if the dunning collection plan is not empty
+        if (!collectionPlans.isEmpty() && collectionPlans.get(0) != null) {
+            DunningCollectionPlan dunningCollectionPlan = collectionPlans.get(0);
+
+            // Get the dunning collection plan status by status to remove
+            DunningCollectionPlanStatus collectionPlanStatusToRemove = dunningCollectionPlanStatusService.findByStatus(pStatusToRemove);
+
+            if (dunningCollectionPlan.getStatus().equals(collectionPlanStatusToRemove)) {
+                // Set the dunning collection plan status to the status to set
+                DunningCollectionPlanStatus collectionPlanStatusToSet = dunningCollectionPlanStatusService.findByStatus(pStatusToSet);
+                dunningCollectionPlan.setStatus(collectionPlanStatusToSet);
+
+                // If the status to set is ACTIVE and the update pause duration is true
+                if (pStatusToSet.equals(DunningCollectionPlanStatusEnum.ACTIVE) && Boolean.TRUE.equals(pUpdatePauseDuration)) {
+                    // Update the pause duration
+                    dunningCollectionPlan.setPauseDuration(dunningCollectionPlan.getPauseDuration() + (int) daysBetween(pRecordedInvoice.getInvoice().getPaymentStatusDate( ), new Date()));
+                }
+
+                dunningCollectionPlanService.update(dunningCollectionPlan);
             }
         }
     }

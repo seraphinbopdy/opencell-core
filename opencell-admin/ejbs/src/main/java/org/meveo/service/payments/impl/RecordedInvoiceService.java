@@ -897,6 +897,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
      * @param pRecordedInvoice recorded invoice.
      * @param pStatusToRemove status to remove.
      * @param pStatusToSet status to set.
+     * @param pUpdatePauseDuration update pause duration.
      */
     private void processToUpdateCollectionPlanStatus(RecordedInvoice pRecordedInvoice, DunningCollectionPlanStatusEnum pStatusToRemove, DunningCollectionPlanStatusEnum pStatusToSet, Boolean pUpdatePauseDuration) {
         // Get the dunning collection plan by invoice id

@@ -185,6 +185,9 @@ public interface GenericResource {
             @Parameter(description = "the entity name", required = true) @PathParam("entityName") String entityName,
             @Parameter(description = "file format", required = true) @PathParam("fileFormat") String fileFormat,
             @Parameter(description = "Locale") @QueryParam("locale") String locale,
+            @Parameter(description = "fields Separator") @QueryParam("fieldsSeparator") String fieldsSeparator,
+            @Parameter(description = "decimal Separator") @QueryParam("decimalSeparator") String decimalSeparator,
+            @Parameter(description = "file Name Extension") @QueryParam("fileNameExtension") String fileNameExtension,
             @Parameter(description = "requestDto carries the wanted fields ex: {genericFields = [code, description]}", required = true) GenericPagingAndFiltering searchConfig) throws ClassNotFoundException;
 
 

@@ -91,7 +91,7 @@ public class AdvancedSettingsApiService implements ApiService<AdvancedSettings> 
 
     @Override
     public Optional<AdvancedSettings> findByCode(String code) {
-        return null;
+        return Optional.ofNullable(advancedSettingsService.findByCode(code));
     }
 
 	public Optional<List<AdvancedSettings>> patch(List<AdvancedSettings> listEntities) {

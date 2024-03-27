@@ -267,7 +267,7 @@ public class DunningCollectionPlan extends AuditableEntity {
 	}
 
 	public Integer getDaysOpen() {
-		return abs((int) daysBetween(new Date(), startDate));
+		return daysOpen;
 	}
 
 	public void setDaysOpen(Integer daysOpen) {

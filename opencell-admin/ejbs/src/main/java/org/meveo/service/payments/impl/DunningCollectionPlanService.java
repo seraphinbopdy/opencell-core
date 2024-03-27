@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import static java.lang.Math.abs;
 import static java.util.Arrays.asList;
 import static org.meveo.model.dunning.DunningLevelInstanceStatusEnum.*;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
@@ -160,12 +161,10 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
      * Create a collection plan from invoice and dunning policy
      * @param invoice : invoice
      * @param policy : dunningPolicy
-     * @param dayOverDue integer indicating day overdue
      * @param collectionPlanStatus collection plan status object
      * @return created DunningCollectionPlan
      */
-    public DunningCollectionPlan createCollectionPlanFrom(Invoice invoice, DunningPolicy policy, Integer dayOverDue,
-                                                          DunningCollectionPlanStatus collectionPlanStatus, JobExecutionResultImpl jobExecutionResult) {
+    public DunningCollectionPlan createCollectionPlanFrom(Invoice invoice, DunningPolicy policy, DunningCollectionPlanStatus collectionPlanStatus) {
         invoice = invoiceService.refreshOrRetrieve(invoice);
         DunningCollectionPlan collectionPlan = new DunningCollectionPlan();
         collectionPlan.setRelatedPolicy(policy);
@@ -175,6 +174,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         collectionPlan.setTotalDunningLevels(policy.getTotalDunningLevels());
         collectionPlan.setStartDate(new Date());
         collectionPlan.setStatus(collectionPlanStatus);
+        collectionPlan.setDaysOpen(abs((int) daysBetween(new Date(), collectionPlan.getStartDate())));
         Optional.ofNullable(invoice.getRecordedInvoice())
                 .ifPresent(recordedInvoice -> collectionPlan.setBalance(recordedInvoice.getTransactionalUnMatchingAmount()));
 
@@ -313,10 +313,10 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		DunningCollectionPlanStatus dunningCollectionPlanStatus = dunningCollectionPlanStatusService.refreshOrRetrieve(collectionPlanToStop.getStatus());
 
 		if(dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.SUCCESS)) {
-			throw new BusinessApiException("Collection Plan with id "+collectionPlanToStop.getId()+" cannot be stoped, the collection plan status is success");
+			throw new BusinessApiException("Collection Plan with id "+collectionPlanToStop.getId()+" cannot be stopped, the collection plan status is success");
 		}
 		if(dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.FAILED)) {
-			throw new BusinessApiException("Collection Plan with id "+collectionPlanToStop.getId()+" cannot be stoped, the collection plan status is failed");
+			throw new BusinessApiException("Collection Plan with id "+collectionPlanToStop.getId()+" cannot be stopped, the collection plan status is failed");
 		}
 		
 		DunningCollectionPlanStatus collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.STOPPED);
@@ -357,6 +357,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		DunningCollectionPlanStatus collectionPlanStatus=null;
 		if(collectionPlanToResume.getPausedUntilDate() != null && collectionPlanToResume.getPausedUntilDate().after(DateUtils.addDaysToDate(collectionPlanToResume.getStartDate(), dunningLevelInstance.get().getDaysOverdue()))) {
 			collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED);
+            collectionPlanToResume.setDaysOpen((int) daysBetween(collectionPlanToResume.getCloseDate(), new Date()) + 1);
 		} else {
 			collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
 			collectionPlanToResume.setPauseReason(null);

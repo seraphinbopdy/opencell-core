@@ -280,7 +280,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                         .filter(invoice -> invoiceEligibilityCheck(invoice, policy, dayOverDue))
                         .forEach(invoice -> {
                             dunningCollectionPlanNumber.incrementAndGet();
-                            collectionPlanService.createCollectionPlanFrom(invoice, policy, dayOverDue, collectionPlanStatus, jobExecutionResult);
+                            collectionPlanService.createCollectionPlanFrom(invoice, policy, collectionPlanStatus);
                         });
             } else {
                 log.error("No level configured do meet the conditions for policy" + policy.getPolicyName());

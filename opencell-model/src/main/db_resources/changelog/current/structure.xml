@@ -24356,6 +24356,20 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="description" value="Rejection Payment Action Job" />
             <column name="uuid" value="RejectionPaymentActionJob_Job" />
         </insert>
-    </changeSet>        
+    </changeSet>
+    <changeSet id="#INTRD-22148_20240327" author="zbariki">
+        <update tableName="billing_invoice_type">
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')"/>
+            <where>code='ADJ'</where>
+        </update>
+        <update tableName="billing_invoice_type">
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')"/>
+            <where>code='ADJ_INV'</where>
+        </update>
+        <update tableName="billing_invoice_type">
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')" />
+            <where>code='ADJ_REF'</where>
+        </update>
+    </changeSet>
     
 </databaseChangeLog>

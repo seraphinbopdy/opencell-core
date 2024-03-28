@@ -920,17 +920,15 @@ public class BillingAccountApi extends AccountEntityApi {
 
         CustomerAccount customerAccount = billingAccount.getCustomerAccount();
 
-        if (postData.getPaymentMethodType() == PaymentMethodEnum.CARD) {
-            throw new InvalidParameterException("paymentMethod", "Card");
-        } else if (postData.getPaymentMethodType() == PaymentMethodEnum.DIRECTDEBIT) {
-            if (postData.getBankCoordinates() == null) {
-                throw new MissingParameterException("bankCoordinates");
-            }
+		if (postData.getPaymentMethodType() == PaymentMethodEnum.DIRECTDEBIT) {
+			if (postData.getBankCoordinates() == null) {
+				throw new MissingParameterException("bankCoordinates");
+			}
 
-            if (StringUtils.isBlank(postData.getBankCoordinates().getIban())) {
-                throw new MissingParameterException("iban");
-            }
-        }
+			if (StringUtils.isBlank(postData.getBankCoordinates().getIban())) {
+				throw new MissingParameterException("iban");
+			}
+		}
 
         boolean found = false;
         boolean updateCA = false;

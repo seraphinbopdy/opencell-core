@@ -1227,7 +1227,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         ServiceInstance serviceInstance = wo.getServiceInstance();
         Date ppmvDate = wo.getOperationDate();
         if(ChargeTemplate.ChargeMainTypeEnum.ONESHOT.equals(wo.getChargeInstance().getChargeTemplate().getChargeMainType())) {
-            ppmvDate = Optional.ofNullable(serviceInstance.getPriceVersionDate()).orElse(wo.getOperationDate());
+            ppmvDate = (serviceInstance != null && serviceInstance.getPriceVersionDate() != null) ? serviceInstance.getPriceVersionDate() : wo.getOperationDate();
         }
         PricePlanMatrixVersion ppmVersion = pricePlanSelectionService.getPublishedVersionValidForDate(pricePlan.getId(), serviceInstance, ppmvDate);
         if (ppmVersion != null) {

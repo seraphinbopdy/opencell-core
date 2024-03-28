@@ -24378,4 +24378,16 @@ public class DummyPaymentGatewayScript extends Script {
         </update>
     </changeSet>
     
+    <changeSet id="#22150_20240328" author="TarikFA.">
+        <update tableName="iso_icd" >
+            <column name="code" value="0002" />
+            <where>code = 'SIREN'</where>
+        </update>
+
+        <update tableName="iso_icd" >
+            <column name="code" value="0009" />
+            <where>code = 'SIRET'</where>
+        </update>
+    </changeSet>
+    
 </databaseChangeLog>

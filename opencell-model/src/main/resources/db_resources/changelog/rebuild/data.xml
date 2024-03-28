@@ -8246,14 +8246,14 @@
     <changeSet id="#12132_20221219-rebuild" author="HatimOUDAD">
 		<sql>
 		<![CDATA[
-			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (1, 0, now(), NULL, 'opencell.admin', NULL, 'SIREN', 'System Information et Repertoire des Entreprise et des Etablissements: SIRENE ');
+			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (1, 0, now(), NULL, 'opencell.admin', NULL, '0002', 'System Information et Repertoire des Entreprise et des Etablissements: SIRENE ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (2, 0, now(), NULL, 'opencell.admin', NULL, '0003', 'Codification Numerique des Etablissments Financiers En Belgique ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (3, 0, now(), NULL, 'opencell.admin', NULL, '0004', 'NBS/OSI NETWORK ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (4, 0, now(), NULL, 'opencell.admin', NULL, '0005', 'USA FED GOV OSI NETWORK ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (5, 0, now(), NULL, 'opencell.admin', NULL, '0006', 'USA DOD OSI NETWORK ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (6, 0, now(), NULL, 'opencell.admin', NULL, '0007', 'Organisationsnummer ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (7, 0, now(), NULL, 'opencell.admin', NULL, '0008', 'LE NUMERO NATIONAL ');
-			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (8, 0, now(), NULL, 'opencell.admin', NULL, 'SIRET', 'SIRET-CODE ');
+			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (8, 0, now(), NULL, 'opencell.admin', NULL, '0009', 'SIRET-CODE ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (9, 0, now(), NULL, 'opencell.admin', NULL, '0010', 'Organizational Identifiers for Structured Names under ISO 9541 Part 2 ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (10, 0, now(), NULL, 'opencell.admin', NULL, '0011', 'International Code Designator for the Identification of OSI-based, Amateur Radio Organizations, Network Objects and Application Services. ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (11, 0, now(), NULL, 'opencell.admin', NULL, '0012', 'European Computer Manufacturers Association: ECMA ');

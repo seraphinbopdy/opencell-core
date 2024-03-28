@@ -103,7 +103,7 @@ public class ClusterEventMonitor implements MessageListener {
 
                 Object responseValue = processClusterEvent(eventDto);
 
-                // If reply was requested, send a response message
+                // If reply was requested, send a response message with event processing result value
                 if (rcvMessage.getJMSReplyTo() != null) {
 
                     JMSProducer jmsProducer = context.createProducer();

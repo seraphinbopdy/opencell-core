@@ -95,7 +95,10 @@ public class ClusterEventPublisher implements Serializable {
     }
 
     /**
-     * Publish event about some action on a given entity
+     * Publish event about some action on a given entity.</br>
+     * </br>
+     * Transaction is not enabled, so that message is published right away to MQ instead of waiting for a TX to commit. <br/>
+     * That way a message is received and processed by another node whule this node waits if expectedResponse=true
      * 
      * @param entity Entity that triggered event
      * @param action Action performed

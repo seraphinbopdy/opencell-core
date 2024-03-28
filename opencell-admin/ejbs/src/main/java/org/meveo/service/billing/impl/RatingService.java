@@ -603,7 +603,9 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 
     public RatingResult rateBareWalletOperation(WalletOperation bareWalletOperation, BigDecimal unitPriceWithoutTaxOverridden, BigDecimal unitPriceWithTaxOverridden, Long buyerCountryId, TradingCurrency buyerCurrency,
             boolean isVirtual) throws InvalidELException, PriceELErrorException, NoTaxException, NoPricePlanException, RatingException {
-	    FinanceSettings financeSettings = financeSettingsService.getFinanceSetting();
+
+        Map<PricePlanMatrix, Amounts> ppmScriptExecution = new HashMap<>();
+        FinanceSettings financeSettings = financeSettingsService.getFinanceSetting();
         RatingResult ratingResult = new RatingResult();
         WalletOperation discountedWalletOperation=null;
     	ChargeInstance chargeInstance = bareWalletOperation.getChargeInstance();
@@ -701,10 +703,17 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                                 try {
 	                                unitPriceWithoutTax = pricePlanMatrixLine != null ? pricePlanMatrixLine.getValue() : pricePlanMatrixLine.getPricePlanMatrixVersion().getPrice();
                                     if (pricePlan.getScriptInstance() != null) {
-                                        log.debug("start to execute script instance for ratePrice {}", pricePlan);
-                                        executeRatingScript(bareWalletOperation, pricePlan.getScriptInstance(), false);
-                                        unitPriceWithoutTax=bareWalletOperation.getUnitAmountWithoutTax()!=null?bareWalletOperation.getUnitAmountWithoutTax():BigDecimal.ZERO;
-                                        unitPriceWithTax=bareWalletOperation.getUnitAmountWithTax()!=null?bareWalletOperation.getUnitAmountWithTax():BigDecimal.ZERO;
+                                        Amounts unitPrices = ppmScriptExecution.get(pricePlan);
+                                        if (unitPrices == null) {
+                                            log.debug("start to execute script instance for ratePrice {}", pricePlan);
+                                            executeRatingScript(bareWalletOperation, pricePlan.getScriptInstance(), false);
+                                            unitPriceWithoutTax = bareWalletOperation.getUnitAmountWithoutTax() != null ? bareWalletOperation.getUnitAmountWithoutTax() : BigDecimal.ZERO;
+                                            unitPriceWithTax = bareWalletOperation.getUnitAmountWithTax() != null ? bareWalletOperation.getUnitAmountWithTax() : BigDecimal.ZERO;
+                                            ppmScriptExecution.put(pricePlan, new Amounts(unitPriceWithoutTax, unitPriceWithTax));
+                                        } else {
+                                            unitPriceWithoutTax = unitPrices.getAmountWithoutTax();
+                                            unitPriceWithTax = unitPrices.getAmountWithTax();
+                                        }
                                     }
 
                                     bareWalletOperation.setContract(contract);
@@ -739,9 +748,15 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                         log.debug("Will apply priceplan {} for {}", pricePlan.getId(), bareWalletOperation.getCode());
 	                    Amounts unitPrices = new Amounts(unitPriceWithoutTax, unitPriceWithTax);
 	                    if(unitPriceWithoutTax == null) {
-		                    unitPrices = determineUnitPrice(pricePlan, bareWalletOperation);
-		                    unitPriceWithoutTax = unitPrices.getAmountWithoutTax();
-		                    unitPriceWithTax = unitPrices.getAmountWithTax();
+                            unitPrices = ppmScriptExecution.get(pricePlan);
+                            if (unitPrices == null) {
+                                unitPrices = determineUnitPrice(pricePlan, bareWalletOperation);
+                                if (pricePlan.getScriptInstance() != null) {
+                                    ppmScriptExecution.put(pricePlan, unitPrices);
+                                }
+                            }
+                            unitPriceWithoutTax = unitPrices.getAmountWithoutTax();
+                            unitPriceWithTax = unitPrices.getAmountWithTax();
 	                    }
                         bareWalletOperation.setUnitAmountWithoutTax(unitPriceWithoutTax);
                         bareWalletOperation.setUnitAmountWithTax(unitPriceWithTax);
@@ -822,7 +837,13 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                          //Check if the PriceListLine is not null, then get the PricePlan, calculate all prices and update WalletOperation
                          if (priceListLine != null && PriceListTypeEnum.FIXED.equals(priceListLine.getPriceListType())) {
                              if(priceListLine.getPricePlan() != null) {
-                                 Amounts unitPrices = determineUnitPrice(priceListLine.getPricePlan(), bareWalletOperation);
+                                 Amounts unitPrices = ppmScriptExecution.get(priceListLine.getPricePlan());
+                                 if (unitPrices == null) {
+                                     unitPrices = determineUnitPrice(priceListLine.getPricePlan(), bareWalletOperation);
+                                     if (priceListLine.getPricePlan().getScriptInstance() != null) {
+                                         ppmScriptExecution.put(priceListLine.getPricePlan(), unitPrices);
+                                     }
+                                 }
                                  unitPriceWithoutTax = unitPrices.getAmountWithoutTax();
                                  unitPriceWithTax = unitPrices.getAmountWithTax();
                                  bareWalletOperation.setUnitAmountWithoutTax(unitPriceWithoutTax);
@@ -850,7 +871,13 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                     for (PricePlanMatrix ppm : availablePricePlansForRating) {
                         log.debug("Check if price plan {} is applicable for {}", ppm.getId(), bareWalletOperation.getCode());
 
-                        unitPrices = determineUnitPrice(ppm, bareWalletOperation);
+                        unitPrices = ppmScriptExecution.get(ppm);
+                        if (unitPrices == null) {
+                            unitPrices = determineUnitPrice(ppm, bareWalletOperation);
+                            if (ppm.getScriptInstance() != null) {
+                                ppmScriptExecution.put(ppm, unitPrices);
+                            }
+                        }
                         if(unitPrices != null) {
                             pricePlan = ppm;
                             break;
@@ -929,7 +956,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             calculateAmounts(bareWalletOperation, unitPriceWithoutTax, unitPriceWithTax);
             computeTransactionalAmounts(bareWalletOperation);
 
-            if (pricePlan != null && pricePlan.getScriptInstance() != null) {
+            if (pricePlan != null && pricePlan.getScriptInstance() != null && !ppmScriptExecution.containsKey(pricePlan)) {
                 log.debug("start to execute script instance for ratePrice {}", pricePlan);
                 executeRatingScript(bareWalletOperation, pricePlan.getScriptInstance(), false);
             }

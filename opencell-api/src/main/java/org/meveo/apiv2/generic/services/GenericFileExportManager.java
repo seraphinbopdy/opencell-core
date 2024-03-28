@@ -81,14 +81,14 @@ public class GenericFileExportManager {
         BIG_DECIMAL_FORMAT, NUMERIC_FORMAT, STRING_FORMAT, DATE_FORMAT
     }
 
-    public String export(String entityName, List<Map<String, Object>> mapResult, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale){
+    public String export(String entityName, List<Map<String, Object>> mapResult, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension){
     	log.debug("Save directory "+paramBeanFactory.getChrootDir());
     	DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD).appendValue(MONTH_OF_YEAR, 2).appendValue(DAY_OF_MONTH, 2)
         		.appendLiteral('-').appendValue(HOUR_OF_DAY, 2).appendValue(MINUTE_OF_HOUR, 2).appendValue(SECOND_OF_MINUTE, 2).toFormatter();
         String time = LocalDateTime.now().format(formatter);
     	saveDirectory = paramBeanFactory.getChrootDir() + File.separator + PATH_STRING_FOLDER + entityName + File.separator +time.substring(0,8) + File.separator;
         if (mapResult != null && !mapResult.isEmpty()) {        	
-            Path filePath = saveAsRecord(entityName, mapResult, fileType, fieldDetails, ordredColumn, locale);
+            Path filePath = saveAsRecord(entityName, mapResult, fileType, fieldDetails, ordredColumn, locale, fieldsSeparator, decimalSeparator, fileNameExtension);
             return filePath == null? null : filePath.toString();
         }
         return null;
@@ -102,8 +102,8 @@ public class GenericFileExportManager {
      * @param time 
      * @return
      */
-    private Path saveAsRecord(String fileName, List<Map<String, Object>> records, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale) {
-        String extensionFile = ".csv";
+    private Path saveAsRecord(String fileName, List<Map<String, Object>> records, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension) {
+        String extensionFile = null;
         DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendValue(DAY_OF_MONTH, 2).appendValue(MONTH_OF_YEAR, 2).appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
                 .appendLiteral('-').appendValue(HOUR_OF_DAY, 2).appendValue(MINUTE_OF_HOUR, 2).appendValue(SECOND_OF_MINUTE, 2).appendValue(MILLI_OF_SECOND, 3).toFormatter();
         String time = LocalDateTime.now().format(formatter);
@@ -111,16 +111,17 @@ public class GenericFileExportManager {
         try {
         	
         	//CSV
-            if(fileType.equals("CSV")) {
+            if(fileType.equalsIgnoreCase("CSV")) {
                 if(!Files.exists(Path.of(saveDirectory))){
                     Files.createDirectories(Path.of(saveDirectory));
                 }
+				extensionFile = (StringUtils.isBlank(fileNameExtension)) ? ".csv" : ".".concat(fileNameExtension);
                 File csvFile = new File(saveDirectory + fileName + time + extensionFile);
-                writeCsvFile(records, csvFile, fieldDetails, ordredColumn, locale);
+                writeCsvFile(records, csvFile, fieldDetails, ordredColumn, locale, fieldsSeparator, decimalSeparator, fileNameExtension);
                 return Path.of(saveDirectory, fileName + time + extensionFile);
             }
             //EXCEL
-            if(fileType.equals("EXCEL")) {
+            if(fileType.equalsIgnoreCase("EXCEL")) {
             	if(!Files.exists(Path.of(saveDirectory))){
                     Files.createDirectories(Path.of(saveDirectory));
                 }
@@ -129,7 +130,7 @@ public class GenericFileExportManager {
                 writeExcelFile(outputExcelFile, records, fieldDetails, ordredColumn);
                 return Path.of(saveDirectory + fileName + time + extensionFile);
             }
-            if(fileType.equalsIgnoreCase("pdf")) {
+            if(fileType.equalsIgnoreCase("PDF")) {
                 if(!Files.exists(Path.of(saveDirectory))){
                     Files.createDirectories(Path.of(saveDirectory));
                 }
@@ -153,8 +154,8 @@ public class GenericFileExportManager {
      * @param ordredColumn
      * @throws IOException
      */
-	private void writeCsvFile(List<Map<String, Object>> records, File csvFile, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale) throws IOException {
-		CsvBuilder csv = new CsvBuilder();
+	private void writeCsvFile(List<Map<String, Object>> records, File csvFile, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension) throws IOException {
+		CsvBuilder csv = new CsvBuilder(fieldsSeparator, true);
         ordredColumn.forEach(field -> {
             GenericFieldDetails fieldDetail = fieldDetails.get(field);
             csv.appendValue(extractValue(field, fieldDetail));
@@ -162,7 +163,7 @@ public class GenericFileExportManager {
         csv.startNewLine();
         for (Map<String, Object> item : records) {
             ordredColumn.forEach(field ->
-                    csv.appendValue(applyTransformation(fieldDetails.get(field), item.get(field), locale))
+                    csv.appendValue(applyTransformation(fieldDetails.get(field), item.get(field), locale, decimalSeparator))
             );
             csv.startNewLine();
         }
@@ -292,11 +293,11 @@ public class GenericFileExportManager {
     private void addRows(Map<String, Object> rows, PdfPTable table, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale) {
         ordredColumn.forEach(col -> {
             GenericFieldDetails fieldDetail = fieldDetails.get(col);
-            table.addCell(applyTransformation(fieldDetail, rows.get(col), locale));
+            table.addCell(applyTransformation(fieldDetail, rows.get(col), locale, null));
         });
     }
 
-    private String applyTransformation(GenericFieldDetails fieldDetail, Object value, String locale) {
+    private String applyTransformation(GenericFieldDetails fieldDetail, Object value, String locale, String decimalSeparator) {
         if (fieldDetail == null) {
             return value == null ? StringUtils.EMPTY : value.toString();
         }
@@ -315,6 +316,13 @@ public class GenericFileExportManager {
 
             if (value instanceof LocalDate || value instanceof LocalDateTime) {
                 return DateTimeFormatter.ofPattern(fieldDetail.getTransformation()).format((TemporalAccessor) value);
+            }
+        } else if (StringUtils.isNotBlank(decimalSeparator)) {
+        	if (value instanceof Long || value instanceof BigDecimal || value instanceof Double || value instanceof Float || value instanceof Integer) {
+                DecimalFormatSymbols symbols = ",".equals(decimalSeparator) ? new DecimalFormatSymbols(Locale.FRENCH) : new DecimalFormatSymbols(Locale.ENGLISH);
+                DecimalFormat formatter = new DecimalFormat("#.##", symbols);
+                formatter.setGroupingUsed(false);
+                return formatter.format(value);
             }
         }
 
@@ -408,7 +416,7 @@ public class GenericFileExportManager {
 
         // If the map is not empty then save As Record to export - CSV, EXCEL or PDF
         if (!map.isEmpty()) {
-            Path filePath = saveAsRecord(filename, map, fileType, fieldDetails, orderedColumn, locale);
+            Path filePath = saveAsRecord(filename, map, fileType, fieldDetails, orderedColumn, locale, null, null, null);
             return filePath == null ? null : filePath.toString();
         }
 

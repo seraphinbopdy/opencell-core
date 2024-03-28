@@ -8,6 +8,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -180,7 +181,7 @@ public interface CommercialOrderRs {
 	})
 
 	Response createOrderOffer(	@Parameter( name = "orderOfferDto",
-	description = "order offer dto for a new insertion") OrderOfferDto orderOfferDto);
+	description = "order offer dto for a new insertion") OrderOfferDto orderOfferDto, @QueryParam("isQuickOrder") boolean isQuickOrder);
 
 
 	@PUT

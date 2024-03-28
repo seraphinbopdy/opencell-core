@@ -12352,7 +12352,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="vat_payment_option_id" value="1" />
             <column name="invoice_code_type_id" value="19" />
             <column name="invoice_subject_code" valueComputed="(SELECT id FROM untdid_4451_invoice_subject_code where code = 'IND')"></column>
-        </insert>
+			<column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')"/>
+		</insert>
         <insert tableName="billing_invoice_type">
             <column name="id" valueNumeric="-3" />
             <column name="version" valueNumeric="0" />

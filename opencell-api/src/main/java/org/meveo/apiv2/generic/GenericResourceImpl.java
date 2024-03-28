@@ -30,9 +30,11 @@ import org.meveo.apiv2.generic.exception.MeveoExceptionMapper;
 import org.meveo.apiv2.generic.services.GenericApiAlteringService;
 import org.meveo.apiv2.generic.services.GenericApiLoadService;
 import org.meveo.apiv2.generic.services.PersistenceServiceHelper;
+import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.securityDeposit.FinanceSettings;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.util.Inflector;
 
@@ -47,6 +49,9 @@ public class GenericResourceImpl implements GenericResource {
 
     @Inject
     private FinanceSettingsService financeSettingsService;
+    
+	@Inject
+	private AdvancedSettingsApiService advancedSettingsApiService;
 
     @Override
     public Response count(Boolean extractList, String entityName, GenericPagingAndFiltering searchConfig) {
@@ -193,7 +198,7 @@ public class GenericResourceImpl implements GenericResource {
     }
     
     @Override
-    public Response export(String entityName, String fileFormat, String locale, GenericPagingAndFiltering searchConfig) throws ClassNotFoundException {
+    public Response export(String entityName, String fileFormat, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension, GenericPagingAndFiltering searchConfig) throws ClassNotFoundException {
         Set<String> genericFields = null;
         List<GenericFieldDetails> genericFieldDetails = null;
 
@@ -211,17 +216,30 @@ public class GenericResourceImpl implements GenericResource {
             genericFieldDetails = searchConfig.getGenericFieldDetails();
             
         }
-        if(!fileFormat.equals("CSV") && !fileFormat.equals("EXCEL") && !fileFormat.equalsIgnoreCase("pdf")){
-            throw new BadRequestException("Accepted formats for export are (CSV, pdf or EXCEL).");
+        if(!fileFormat.equalsIgnoreCase("CSV") && !fileFormat.equalsIgnoreCase("EXCEL") && !fileFormat.equalsIgnoreCase("PDF")){
+            throw new BadRequestException("Accepted formats for export are (CSV, PDF or EXCEL).");
         }
+        if (StringUtils.isNotBlank(decimalSeparator) && !List.of(",",".").contains(decimalSeparator)) {
+			throw new BadRequestException("For decimal separator,  only '.' (point) and ',' (comma) are accepted");
+		}
         if (StringUtils.isBlank(locale)) {
             locale = "EN"; // default value EN
         }
+        if (StringUtils.isBlank(fieldsSeparator)) {
+        	fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).orElse(null);
+        }
+        if (StringUtils.isBlank(decimalSeparator)) {
+        	decimalSeparator = advancedSettingsApiService.findByCode("standardExports.decimalSeparator").map(AdvancedSettings::getValue).orElse(null); 
+        }
+        if (StringUtils.isBlank(fileNameExtension)) {
+        	fileNameExtension = advancedSettingsApiService.findByCode("standardExports.fileNameExtension").map(AdvancedSettings::getValue).orElse(null); 
+        }
         Class entityClass = GenericHelper.getEntityClass(entityName);
         GenericRequestMapper genericRequestMapper = new GenericRequestMapper(entityClass, PersistenceServiceHelper.getPersistenceService());
-        String filePath = loadService.export(entityClass, genericRequestMapper.mapTo(searchConfig), genericFields, genericFieldDetails, fileFormat, entityName, locale);
+        String filePath = loadService.export(entityClass, genericRequestMapper.mapTo(searchConfig), genericFields, genericFieldDetails, fileFormat, entityName, locale, fieldsSeparator, decimalSeparator, fileNameExtension);
         return Response.ok()
                 .entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"\"}, \"data\":{ \"filePath\":\""+ filePath +"\"}}")
                 .build();
     }
+    
 }

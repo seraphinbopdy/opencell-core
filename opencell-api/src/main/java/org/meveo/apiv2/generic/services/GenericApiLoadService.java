@@ -204,7 +204,8 @@ public class GenericApiLoadService {
     }
 
 	public String export(Class entityClass, PaginationConfiguration searchConfig, Set<String> genericFields,
-                         List<GenericFieldDetails> genericFieldDetails, String fileFormat, String entityName, String locale) throws ClassNotFoundException {
+			List<GenericFieldDetails> genericFieldDetails, String fileFormat, String entityName, String locale,
+			String fieldsSeparator, String decimalSeparator, String fileNameExtension) throws ClassNotFoundException {
 
 		// SearchResult searchResult = persistenceDelegate.list(entityClass, searchConfig);
 		Map<String, GenericFieldDetails> fieldDetails = new HashMap<>();
@@ -249,7 +250,7 @@ public class GenericApiLoadService {
 		};
 
 		return genericExportManager.export(entityName, list.stream().map(originalLine).collect(toList()), fileFormat, fieldDetails,
-                genericFieldDetails.stream().map(GenericFieldDetails::getName).collect(Collectors.toList()), locale);
+                genericFieldDetails.stream().map(GenericFieldDetails::getName).collect(Collectors.toList()), locale, fieldsSeparator, decimalSeparator, fileNameExtension);
 	}
 
 	private String nameOrHeader(GenericFieldDetails x) {

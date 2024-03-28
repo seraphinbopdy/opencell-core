@@ -24357,6 +24357,12 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="uuid" value="RejectionPaymentActionJob_Job" />
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-22243_20240327" author="AbdellatifBARI">
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl_val where customfieldtemplate_id in (select id from ${db.schema.adapted}crm_custom_field_tmpl where applies_to='JobInstance_UpdateHugeEntityJob' ) </sql>
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl where applies_to='JobInstance_UpdateHugeEntityJob'</sql>
+    </changeSet>
+    
     <changeSet id="#INTRD-22148_20240327" author="zbariki">
         <update tableName="billing_invoice_type">
             <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')"/>

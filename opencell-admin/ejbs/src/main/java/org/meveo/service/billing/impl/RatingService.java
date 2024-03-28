@@ -621,7 +621,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 			bareWalletOperation.setBusinessKey(businessKey);
 		} catch (Exception e) {
 			throw new InvalidELException(String.format("Error during businessKeyEl evaluation: subscription=%s, product instance=%s,%s, charge=%s, EDR=%s",
-					bareWalletOperation.getSubscription().getCode(), getProductId(bareWalletOperation), getProductCode(bareWalletOperation), 
+					bareWalletOperation.getSubscription().getCode(), getProductId(bareWalletOperation), getProductCode(bareWalletOperation),
 					getChargeTemplateCode(bareWalletOperation), (bareWalletOperation.getEdr() == null)? null : bareWalletOperation.getEdr().getId()));
 		}
 	   
@@ -1540,9 +1540,9 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         }
         if (walletOperation.getSubscription() != null) {
             discountPlanInstances.addAll(walletOperation.getSubscription().getAllDiscountPlanInstances());
-        }
-        if (walletOperation.getSubscription() != null) {
-            discountPlanInstances.addAll(walletOperation.getSubscription().getUserAccount().getBillingAccount().getAllDiscountPlanInstances());
+			if(CollectionUtils.isNotEmpty(walletOperation.getSubscription().getUserAccount().getBillingAccount().getAllDiscountPlanInstances())){
+				discountPlanInstances.addAll(walletOperation.getSubscription().getUserAccount().getBillingAccount().getAllDiscountPlanInstances());
+			}
         }
         var accountingArticle = walletOperation.getAccountingArticle()!=null?walletOperation.getAccountingArticle():accountingArticleService.getAccountingArticleByChargeInstance(chargeInstance, walletOperation);
         List<DiscountPlanItem>  applicableDiscountPlanItems = new ArrayList<>();
@@ -1569,21 +1569,16 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
     					discountPlanItemService.getApplicableDiscountPlanItems(walletOperation.getBillingAccount(), discountPlan, DiscountPlanItemTypeEnum.FIXED, walletOperation.getOperationDate(), 
     							walletOperation.getSubscription(), walletOperation, walletOperation.getAccountingArticle()));
 
-                if( CollectionUtils.isNotEmpty(applicableDiscountPlanItems) || CollectionUtils.isNotEmpty(fixedDiscountPlanItems)) {
+                if( (CollectionUtils.isNotEmpty(applicableDiscountPlanItems) || CollectionUtils.isNotEmpty(fixedDiscountPlanItems) ) && !isVirtual)  {
                     discountPlanInstance.setApplicationCount( discountPlanInstance.getApplicationCount() == null ? 1 : discountPlanInstance.getApplicationCount() + 1);
-                    isDiscountPlanInstanceUpdated = true;
-                }
-
-                if(isDiscountPlanInstanceUpdated && !isVirtual) {
-                    discountPlanInstanceService.update(discountPlanInstance);
                 }
 
             }
             if(!applicableDiscountPlanItems.isEmpty()) {
                 Seller seller = walletOperation.getSeller() != null ? walletOperation.getSeller() : walletOperation.getBillingAccount().getCustomerAccount().getCustomer().getSeller();
-                ratingResult.getWalletOperations().addAll(discountPlanService.calculateDiscountplanItems(applicableDiscountPlanItems, seller, walletOperation.getBillingAccount(), walletOperation.getOperationDate(), walletOperation.getQuantity(),
-                        walletOperation.getUnitAmountWithoutTax(), walletOperation.getCode(), walletOperation.getWallet(), walletOperation.getOfferTemplate(),
-                        walletOperation.getServiceInstance(), walletOperation.getSubscription(), walletOperation.getDescription(), isVirtual, chargeInstance, walletOperation, DiscountPlanTypeEnum.PRODUCT,DiscountPlanTypeEnum.OFFER,DiscountPlanTypeEnum.QUOTE));
+                ratingResult.getWalletOperations().addAll(discountPlanService.calculateDiscountplanItems(applicableDiscountPlanItems, seller, walletOperation.getBillingAccount(), walletOperation.getOperationDate(), walletOperation.getQuantity(), 
+                        walletOperation.getUnitAmountWithoutTax(), walletOperation.getCode(), walletOperation.getWallet(), walletOperation.getOfferTemplate(), 
+                        walletOperation.getServiceInstance(), walletOperation.getSubscription(), walletOperation.getDescription(), isVirtual, chargeInstance, walletOperation, DiscountPlanTypeEnum.PRODUCT,DiscountPlanTypeEnum.OFFER,DiscountPlanTypeEnum.QUOTE, DiscountPlanTypeEnum.PROMO_CODE));
             }
             if(!fixedDiscountPlanItems.isEmpty()) {
                 ratingResult.getEligibleFixedDiscountItems().addAll(fixedDiscountPlanItems);

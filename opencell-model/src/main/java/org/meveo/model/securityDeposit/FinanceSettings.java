@@ -102,6 +102,10 @@ public class FinanceSettings extends BusinessEntity {
     @Column(name = "handle_accounting_periods")
     private boolean handleAccountingPeriods = true;
 
+    @Type(type = "numeric_boolean")
+    @Column(name = "enable_empty_subscription_activation")
+    private boolean enableEmptySubscriptionActivation;
+
     public FinanceSettings() {
         super();
     }
@@ -280,5 +284,13 @@ public class FinanceSettings extends BusinessEntity {
 
     public void setHandleAccountingPeriods(boolean handleAccountingPeriods) {
         this.handleAccountingPeriods = handleAccountingPeriods;
+    }
+
+    public boolean isEnableEmptySubscriptionActivation() {
+        return enableEmptySubscriptionActivation;
+    }
+
+    public void setEnableEmptySubscriptionActivation(boolean enableEmptySubscriptionActivation) {
+        this.enableEmptySubscriptionActivation = enableEmptySubscriptionActivation;
     }
 }

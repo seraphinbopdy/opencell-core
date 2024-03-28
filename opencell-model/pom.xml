@@ -12,7 +12,7 @@
     <name>Opencell Model</name>
 
     <properties>
-        <liquibase.changeLogFile>src/main/db_resources/changelog/db.current.xml</liquibase.changeLogFile>
+        <liquibase.changeLogFile>src/main/resources/db_resources/changelog/db.current.xml</liquibase.changeLogFile>
     </properties>
 
     <build>

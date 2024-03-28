@@ -689,6 +689,9 @@ public class CustomerAccountApi extends AccountEntityApi {
             if (customerAccountDto.getCustomFields() != null && !customerAccountDto.getCustomFields().isEmpty()) {
                 existedCustomerAccountDto.setCustomFields(customerAccountDto.getCustomFields());
             }
+            if (customerAccountDto.getPaymentMethods() != null && !customerAccountDto.getPaymentMethods().isEmpty()) {
+            	existedCustomerAccountDto.setPaymentMethods(customerAccountDto.getPaymentMethods());
+            }
             update(existedCustomerAccountDto);
         }
     }

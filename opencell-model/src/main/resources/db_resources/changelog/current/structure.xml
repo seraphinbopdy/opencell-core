@@ -24389,5 +24389,11 @@ public class DummyPaymentGatewayScript extends Script {
             <where>code = 'SIRET'</where>
         </update>
     </changeSet>
+
+    <changeSet id="#INTRD-22284_20240328" author="zbariki">
+        <addColumn tableName="finance_settings">
+            <column name="enable_empty_subscription_activation" type="${type.boolean}" defaultValueNumeric="0" />
+        </addColumn>
+    </changeSet>
     
 </databaseChangeLog>

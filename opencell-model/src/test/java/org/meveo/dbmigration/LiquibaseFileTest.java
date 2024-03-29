@@ -2,11 +2,7 @@ package org.meveo.dbmigration;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +22,22 @@ import org.xml.sax.SAXException;
 
 public class LiquibaseFileTest {
 
-    //@Test
+    /**
+     * Validate:</br>
+     * </br>
+     * - There are no duplicate tags in liquibase files</br>
+     * - All current/structure.xml changesets are present in rebuild/structure.xml file</br>
+     * - Changesets from current/structure.xml do not contain content in rebuild/structure.xml</br>
+     * - Changesets from current/structure.xml are not present in rebuild/data.xml</br>
+     * - Changesets from current/structure.xml are not present in rebuild/data-scripts.xml</br>
+     * - Changesets from current/structure.xml are not present in rebuild/data-reports.xml</br>
+     * - Empty changesets from rebuild/structure.xml are not present in current/structure.xml</br>
+     * 
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    @Test
     public void verifyLiquibaseChangesets() throws ParserConfigurationException, SAXException, IOException {
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -100,42 +111,6 @@ public class LiquibaseFileTest {
             if (currentStructureChangeSets.get(changeSetId) == null) {
                 missingChangesetsInCurrent.add(changeSetId);
             }
-        }
-
-        File file = new File(Thread.currentThread().getContextClassLoader().getResource("db_resources/changelog/rebuild/structure.xml").getPath());
-
-        File outFile = new File("c:/andrius/structure-new.xml");
-
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
-            String line = reader.readLine();
-            while (line != null) {
-
-                boolean matched = false;
-                for (String changeSet : missingChangesetsInCurrent) {
-                    if (line.contains("id=\"" + changeSet.substring(0, changeSet.indexOf("..")) + "\"")) {
-                        matched = true;
-                    }
-                }
-                if (!matched) {
-                    writer.write(line);
-                    writer.newLine();
-                } else {
-                    if (!(line.contains("</changeSet>") || line.contains("/>"))) {
-                        line = reader.readLine();
-                    }
-                }
-
-                // Read the next line
-                line = reader.readLine();
-            }
-            reader.close();
-            writer.close();
-        } catch (
-
-        IOException e) {
-            e.printStackTrace();
         }
 
         assertTrue("The following empty changesets from rebuild/structure.xml are not present in current/structure.xml: " + missingChangesetsInCurrent.toString(), missingChangesetsInCurrent.isEmpty());

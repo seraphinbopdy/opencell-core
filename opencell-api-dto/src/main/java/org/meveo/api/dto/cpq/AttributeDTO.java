@@ -125,6 +125,10 @@ public class AttributeDTO extends EnableBusinessDto {
 	
 	@Schema(description = "replaced value")
 	private Object assignedValue;
+	
+	
+	@Schema(description = "indicate if the type of attribute is EL then this may contain the EL value")
+	private String elValue;
 
     
     public AttributeDTO() {
@@ -144,7 +148,8 @@ public class AttributeDTO extends EnableBusinessDto {
             allowedValues = new ArrayList<String>(attribute.getAllowedValues());
         }
         attributeType=attribute.getAttributeType();
-        unitNbDecimal = attribute.getUnitNbDecimal(); 
+        unitNbDecimal = attribute.getUnitNbDecimal();
+		elValue = attribute.getElValue();
         this.setDisabled(attribute.isDisabled());
         if (!attribute.getAssignedAttributes().isEmpty()) {
         	for (Attribute attr:attribute.getAssignedAttributes()) {
@@ -388,5 +393,13 @@ public class AttributeDTO extends EnableBusinessDto {
 
 	public void setAssignedValue(Object assignedValue) {
 		this.assignedValue = assignedValue;
+	}
+	
+	public String getElValue() {
+		return elValue;
+	}
+	
+	public void setElValue(String elValue) {
+		this.elValue = elValue;
 	}
 }

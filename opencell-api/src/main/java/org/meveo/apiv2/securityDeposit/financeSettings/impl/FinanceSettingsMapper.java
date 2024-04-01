@@ -40,7 +40,8 @@ public class FinanceSettingsMapper  extends ResourceMapper<org.meveo.apiv2.secur
                 .edrPartitionPeriod(entity.getEdrPartitionPeriod())
                 .handleAccountingPeriods(entity.isHandleAccountingPeriods())
                 .handleFrameworkAgreement(entity.isHandleFrameworkAgreement())
-                .handleInvoicingPlans(entity.isHandleInvoicingPlans());
+                .handleInvoicingPlans(entity.isHandleInvoicingPlans())
+                .enableEmptySubscriptionActivation(entity.isEnableEmptySubscriptionActivation());
         
         if (entity.getAuxiliaryAccounting() != null) {
             builder.useAuxiliaryAccounting(entity.getAuxiliaryAccounting().isUseAuxiliaryAccounting())
@@ -138,6 +139,7 @@ public class FinanceSettingsMapper  extends ResourceMapper<org.meveo.apiv2.secur
          financeSettings.setHandleFrameworkAgreement(resource.getHandleFrameworkAgreement());
          financeSettings.setHandleInvoicingPlans(resource.getHandleInvoicingPlans());
          
+         financeSettings.setEnableEmptySubscriptionActivation(resource.getEnableEmptySubscriptionActivation());
          return financeSettings;
     }
 

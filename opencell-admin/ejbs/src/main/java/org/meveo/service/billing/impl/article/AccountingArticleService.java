@@ -293,10 +293,13 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
 	}
 
     public AccountingArticle getAccountingArticleByChargeInstance(ChargeInstance chargeInstance, WalletOperation walletOperation) throws InvalidELException, ValidationException {
-        if (chargeInstance == null) {
-            return null;
-        }
-        ServiceInstance serviceInstance = chargeInstance.getServiceInstance();
+		if (chargeInstance == null) {
+			return null;
+		}
+		ServiceInstance serviceInstance = chargeInstance.getServiceInstance();
+		if (serviceInstance == null) {
+			return null;
+		}
         Map<String, Object> attributes = serviceInstance.extractAttributes();
         Optional<AccountingArticle> accountingArticle;
 		accountingArticle = getAccountingArticle(serviceInstance != null && serviceInstance.getProductVersion()!=null ? serviceInstance.getProductVersion().getProduct() : null,

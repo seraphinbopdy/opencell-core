@@ -128,4 +128,10 @@ public interface FinanceSettings extends Resource {
     default boolean getHandleAccountingPeriods() {
         return TRUE;
     }
+
+    @Value.Default
+    @Schema(description = "Enable empty subscription activation")
+    default Boolean getEnableEmptySubscriptionActivation() {
+        return false;
+    }
 }

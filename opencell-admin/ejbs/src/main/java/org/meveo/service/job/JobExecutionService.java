@@ -187,7 +187,7 @@ public class JobExecutionService extends BaseService {
                 jobParameters.putAll(params);
             }
             jobParameters.put(Job.JOB_PARAM_LAUNCHER, jobLauncher);
-            clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.execute, jobParameters);
+            jobExecutionResultId = (Long) clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.execute, jobParameters, true);
         }
         return jobExecutionResultId;
     }

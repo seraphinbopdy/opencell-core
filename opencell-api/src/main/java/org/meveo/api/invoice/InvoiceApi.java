@@ -595,13 +595,13 @@ public class InvoiceApi extends BaseApi {
         }
         if(invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode())) {
             Set<LinkedInvoice> linkedInvoices = invoice.getLinkedInvoices();
-            if(linkedInvoices != null) {
+            if (linkedInvoices != null && !linkedInvoices.isEmpty()) {
                 Invoice originalInvoice = linkedInvoices.stream().map(LinkedInvoice::getLinkedInvoiceValue).findFirst().get();
-                if(originalInvoice.getLinkedInvoices() != null && !originalInvoice.getLinkedInvoices().isEmpty()) {
+                if (originalInvoice.getLinkedInvoices() != null && !originalInvoice.getLinkedInvoices().isEmpty()) {
                     long validatedAdj = originalInvoice.getLinkedInvoices().stream()
                             .filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getStatus().equals(VALIDATED))
                             .count();
-                    if(validatedAdj == 1) {
+                    if (validatedAdj == 1) {
                         throw new BusinessApiException("Can not validate multiple adjustment on the same Invoice");
                     }
                 }

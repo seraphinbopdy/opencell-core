@@ -297,10 +297,7 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
 			return null;
 		}
 		ServiceInstance serviceInstance = chargeInstance.getServiceInstance();
-		if (serviceInstance == null) {
-			return null;
-		}
-        Map<String, Object> attributes = serviceInstance.extractAttributes();
+		Map<String, Object> attributes = serviceInstance != null ? serviceInstance.extractAttributes() : null;
         Optional<AccountingArticle> accountingArticle;
 		accountingArticle = getAccountingArticle(serviceInstance != null && serviceInstance.getProductVersion()!=null ? serviceInstance.getProductVersion().getProduct() : null,
 				chargeInstance.getChargeTemplate(),

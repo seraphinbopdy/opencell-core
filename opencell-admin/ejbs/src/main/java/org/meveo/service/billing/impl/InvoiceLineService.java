@@ -185,8 +185,6 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 
     private UserAccountService userAccountService;
 
-    private InvoiceTypeService invoiceTypeService;
-
     @Inject
     private PaymentMethodService paymentMethodService;
     
@@ -1294,9 +1292,9 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         List<InvoiceLinesGroup> customInvoiceLinesGroups = billingRun != null ? executeBillingCycleScript(invoiceLines, billingRun, invoiceLines.get(0).getBillingAccount()) : null;
 
         if (customInvoiceLinesGroups != null && !customInvoiceLinesGroups.isEmpty()) {
-            customInvoiceLinesGroups.forEach(group -> this.writeInvoiceLines(group.getInvoiceLines(), UNDERSCORE_SEPARATOR + group.getInvoiceKey()));
+            customInvoiceLinesGroups.forEach(group -> this.writeInvoiceLines(group.getInvoiceLines(), group.getInvoiceKey()));
         } else {
-            writeInvoiceLines(invoiceLines, EMPTY_STRING);
+            writeInvoiceLines(invoiceLines, null);
         }
 
         // Link Rated transactions with invoice lines
@@ -1432,9 +1430,10 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 
 
     private void writeInvoiceLines(List<InvoiceLine> invoiceLines, String invoiceKey) {
-        log.info("======== CREATING {} INVOICE LINES ========", invoiceLines.size());
         invoiceLines.forEach(invoiceLine -> {
-            invoiceLine.setInvoiceKey(invoiceLine.getInvoiceKey() + invoiceKey);
+            if(invoiceKey!=null) {
+            	invoiceLine.setInvoiceKey(invoiceKey);
+            }
             create(invoiceLine);
         });
     }

@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -138,7 +137,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		Query query = getEntityManager().createNamedQuery("InvoiceLine.getInvoicingItems").setParameter("ids", baIDs).setParameter("billingRunId", billingRun.getId());
 		final Map<Long, List<InvoicingItem>> itemsByBAID = ((List<Object[]>)query.getResultList()).stream().map(InvoicingItem::new).collect(Collectors.groupingBy(InvoicingItem::getBillingAccountId));
 		log.info("======= {} InvoicingItems found =======",itemsByBAID.size());
-		billingAccountDetailsMap.values().stream().forEach(x->x.setInvoicingItems(Collections.singletonList(itemsByBAID.get(x.getBillingAccountId()))));
+		
+		billingAccountDetailsMap.values().stream().forEach(x->x.setInvoicingItems(itemsByBAID.get(x.getBillingAccountId()).stream()
+		        .collect(Collectors.groupingBy(InvoicingItem::getInvoiceKey)).values().stream().collect(Collectors.toList())));
 		return new ArrayList<>(billingAccountDetailsMap.values());
 	}
     

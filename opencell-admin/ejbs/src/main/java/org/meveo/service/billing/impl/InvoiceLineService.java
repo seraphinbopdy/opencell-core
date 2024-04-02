@@ -1232,7 +1232,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 BigDecimal amountWithoutTax = ofNullable(((BigDecimal) groupedRT.get("amount_without_tax"))).orElse(ZERO).add((BigDecimal) groupedRT.get("sum_without_tax"));
                 BigDecimal amountWithTax = ofNullable(((BigDecimal) groupedRT.get("amount_with_tax"))).orElse(ZERO).add((BigDecimal) groupedRT.get("sum_with_tax"));
                 BigDecimal taxPercent = ofNullable((BigDecimal) groupedRT.get("tax_rate")).orElse((BigDecimal) groupedRT.get("tax_percent"));
-                BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(amountWithoutTax, amountWithTax, taxPercent, appProvider.isEntreprise(), appProvider.getRounding(),
+                BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(((BigDecimal) groupedRT.get("amount_without_tax")), ((BigDecimal) groupedRT.get("amount_with_tax")), taxPercent, appProvider.isEntreprise(), appProvider.getRounding(),
                         appProvider.getRoundingMode().getRoundingMode());
                 BigDecimal deltaAmountWithoutTax = (BigDecimal) groupedRT.get("sum_without_tax");
                 BigDecimal deltaAmountWithTax = (BigDecimal) groupedRT.get("sum_with_tax");
@@ -1257,9 +1257,9 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 }
 
                 linesFactory.update(invoiceLineId, deltaAmounts, deltaQuantity, beginDate, finishDate, unitPrice);
-                statistics.addToAmountWithoutTax(amounts[0]);
-                statistics.addToAmountWithTax(amounts[1]);
-                statistics.addToAmountTax(amounts[2]);
+                statistics.addToAmountWithoutTax(billingRun.getPrAmountWithoutTax().add(amounts[0]));
+                statistics.addToAmountWithTax(billingRun.getPrAmountWithTax().add(amounts[1]));
+                statistics.addToAmountTax(billingRun.getPrAmountTax().add(amounts[2]));
 
             } else {
                 invoiceLine = linesFactory.create(groupedRT, iLIdsRtIdsCorrespondence, configuration, result, appProvider, billingRun, openOrderNumber);

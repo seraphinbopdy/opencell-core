@@ -2,6 +2,7 @@ package org.meveo.service.billing.impl;
 
 import static java.util.Arrays.asList;
 import static org.meveo.model.billing.BillingEntityTypeEnum.BILLINGACCOUNT;
+import static org.meveo.model.billing.BillingEntityTypeEnum.ORDER;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -268,6 +269,9 @@ public class InvoiceLineAggregationService implements Serializable {
         PaginationConfiguration searchConfig = new PaginationConfiguration(null, null, evaluateFilters(bcFilter, RatedTransaction.class), null, fieldToFetch, groupBy, (Set<String>) null, "billingAccount.id", SortOrder.ASCENDING);
 
         String extraCondition = (billingRun.getLastTransactionDate() != null ? " a.usageDate < :lastTransactionDate and " : " ") + QUERY_FILTER;
+        if(billingRun.getBillingCycle() != null && ORDER.equals(billingRun.getBillingCycle().getType())) {
+            extraCondition += " and a.infoOrder.order is not null";
+        }
 
         QueryBuilder queryBuilder = nativePersistenceService.getAggregateQuery("RatedTransaction", searchConfig, null, extraCondition, null);
         return queryBuilder.getQueryAsString();

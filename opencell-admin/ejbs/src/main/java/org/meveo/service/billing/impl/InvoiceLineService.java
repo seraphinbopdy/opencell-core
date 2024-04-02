@@ -134,8 +134,6 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 
     private static final String UNDERSCORE_SEPARATOR = "_";
 
-    private static final String EMPTY_STRING = "";
-
     @Inject
     private TaxMappingService taxMappingService;
 
@@ -193,6 +191,9 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
     
     @Inject
     private UntdidTaxationCategoryService untdidTaxationCategoryService;
+    
+    @Inject
+    private InvoiceTypeService invoiceTypeService;
 
     @PostConstruct
     private void init() {

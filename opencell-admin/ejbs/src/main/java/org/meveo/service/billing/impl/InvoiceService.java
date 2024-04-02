@@ -6304,7 +6304,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
 
     @SuppressWarnings("unchecked")
-    private List<InvoiceLinesGroup> executeBCScriptWithInvoiceLines(BillingRun billingRun, InvoiceType invoiceType, List<InvoiceLine> invoiceLines, IBillableEntity entity, String scriptInstanceCode,
+    public List<InvoiceLinesGroup> executeBCScriptWithInvoiceLines(BillingRun billingRun, InvoiceType invoiceType, List<InvoiceLine> invoiceLines, IBillableEntity entity, String scriptInstanceCode,
             PaymentMethod paymentMethod) throws BusinessException {
         HashMap<String, Object> context = new HashMap<>();
         context.put(Script.CONTEXT_ENTITY, entity);

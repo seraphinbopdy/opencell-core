@@ -101,6 +101,9 @@ public class InvoiceLinesFactory {
         ofNullable(data.get("discount_plan_type"))
             .ifPresent(dpt -> invoiceLine.setDiscountPlanType(dpt instanceof DiscountPlanItemTypeEnum ? (DiscountPlanItemTypeEnum) dpt : DiscountPlanItemTypeEnum.valueOf((String) dpt)));
         ofNullable(data.get("discount_value")).ifPresent(id -> invoiceLine.setDiscountValue((BigDecimal) data.get("discount_value")));
+        ofNullable(data.get("seller_id")).ifPresent(id -> invoiceLine.setSellerId(((Number)id).longValue()));
+        ofNullable(data.get("invoice_type_id")).ifPresent(id -> invoiceLine.setInvoiceTypeId(((Number)id).longValue()));
+        ofNullable(data.get("method_payment_id")).ifPresent(id -> invoiceLine.setPaymentMethodId(((Number)id).longValue()));
         if(data.get("discounted_ratedtransaction_id")!=null) {
         	Long discountedILId = iLIdsRtIdsCorrespondence.get(((Number)data.get("discounted_ratedtransaction_id")).longValue());
          		if(discountedILId!=null) {

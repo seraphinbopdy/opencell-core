@@ -51,7 +51,6 @@ import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentErrorTypeEnum;
-import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentOrRefundEnum;
 import org.meveo.model.payments.PaymentStatusEnum;
@@ -60,7 +59,6 @@ import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.DDRequestItemService;
 import org.meveo.service.payments.impl.MatchingCodeService;
 import org.meveo.service.payments.impl.OCCTemplateService;
-import org.meveo.service.payments.impl.PaymentGatewayService;
 import org.meveo.service.payments.impl.PaymentHistoryService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.util.ApplicationProvider;
@@ -114,9 +112,6 @@ public class UnitSepaDirectDebitJobBean {
 
 	@Inject
 	private PaymentService paymentService;
-
-	@Inject
-	private PaymentGatewayService paymentGatewayService;
 
 
 	/**
@@ -224,16 +219,12 @@ public class UnitSepaDirectDebitJobBean {
 		ParamBean paramBean = paramBeanFactory.getInstance();
 		String occTemplateCode = null;
 		T automatedPayment = null;
-		PaymentGateway paymentGateway =
-				paymentGatewayService.getPaymentGateway(customerAccount, customerAccount.getPreferredPaymentMethod(), null);
 		if (ddRequestItem.getDdRequestLOT().getPaymentOrRefundEnum().getOperationCategoryToProcess() == OperationCategoryEnum.CREDIT) {
 			occTemplateCode = paramBean.getProperty("occ.refund.dd", "REF_DDT");
 			automatedPayment = (T) new AutomatedRefund();
-			((AutomatedRefund) automatedPayment).setPaymentGateway(paymentGateway);
 		} else {
 			occTemplateCode = paramBean.getProperty("occ.payment.dd", "PAY_DDT");
 			automatedPayment = (T) new AutomatedPayment();
-			((AutomatedPayment) automatedPayment).setPaymentGateway(paymentGateway);
 		}
 
 		OCCTemplate occTemplate = oCCTemplateService.findByCode(occTemplateCode);
@@ -241,7 +232,7 @@ public class UnitSepaDirectDebitJobBean {
 			throw new BusinessException("Cannot find OCC Template with code=" + occTemplateCode);
 		}
 
-		paymentService.calculateAmountsByTransactionCurrency((Payment) automatedPayment, customerAccount, amount, null, transactionDate);
+		paymentService.calculateAmountsByTransactionCurrency(automatedPayment, customerAccount, amount, null, transactionDate);
 
 		automatedPayment.setPaymentMethod(paymentMethodEnum);
 		automatedPayment.setAccountingCode(occTemplate.getAccountingCode());

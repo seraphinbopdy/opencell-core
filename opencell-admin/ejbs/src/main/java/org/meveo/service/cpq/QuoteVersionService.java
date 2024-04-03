@@ -103,17 +103,27 @@ public class QuoteVersionService extends PersistenceService<QuoteVersion>   {
 	
     @SuppressWarnings("unchecked")
     public List<QuoteVersion>findByQuoteCode(String quoteCode) throws BusinessException {
-        try {
-            Query q = getEntityManager().createQuery("from QuoteVersion where quote.code =:quoteCode and status<>:status");
-            q.setParameter("quoteCode", quoteCode);
-            q.setParameter("status", VersionStatusEnum.CLOSED);
-            List<QuoteVersion> versions = q.getResultList();
-            log.info("findByQuoteCode: founds {} QuoteVersion with quoteCode={} and status<>{} ", versions.size(),quoteCode, "CLOSED" );
-            return versions;
-        } catch (Exception e) {
-            return null;
-        }
+        return findByQuoteCode(quoteCode, VersionStatusEnum.CLOSED);
     }
+	
+	public List<QuoteVersion>findByQuoteCode(String quoteCode, VersionStatusEnum status) throws BusinessException {
+		try {
+			String query = "from QuoteVersion where quote.code =:quoteCode";
+			if(status != null) {
+				query += " and status<>:status";
+			}
+			Query q = getEntityManager().createQuery(query);
+			q.setParameter("quoteCode", quoteCode);
+			if(status != null) {
+				q.setParameter("status", status);
+			}
+			List<QuoteVersion> versions = q.getResultList();
+			log.info("findByQuoteCode: founds {} QuoteVersion with quoteCode={} and status<>{} ", versions.size(),quoteCode, "CLOSED" );
+			return versions;
+		} catch (Exception e) {
+			return null;
+		}
+	}
 	
 	
 	/**

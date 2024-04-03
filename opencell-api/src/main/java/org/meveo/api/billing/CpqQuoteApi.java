@@ -1063,7 +1063,7 @@ public class CpqQuoteApi extends BaseApi {
     private GetQuoteDtoResponse populateToDto(CpqQuote quote, boolean loadQuoteOffers, boolean loadQuoteProduct, boolean loadQuoteAttributes) {
         GetQuoteDtoResponse result = new GetQuoteDtoResponse();
         result.setQuoteDto(populateQuoteToDto(quote));
-        final List<QuoteVersion> quoteVersions = quoteVersionService.findByQuoteCode(quote.getCode());
+        final List<QuoteVersion> quoteVersions = quoteVersionService.findByQuoteCode(quote.getCode(), null);
         GetQuoteVersionDtoResponse quoteVersionDto = null;
         for (QuoteVersion version : quoteVersions) {
             quoteVersionDto = new GetQuoteVersionDtoResponse(version, true, true, true,true);

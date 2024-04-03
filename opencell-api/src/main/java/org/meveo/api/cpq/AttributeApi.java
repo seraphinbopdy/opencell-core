@@ -101,6 +101,7 @@ public class AttributeApi extends BaseCrudApi<Attribute, AttributeDTO> {
 		attribute.setChargeTemplates(chargeTemplateService.getChargeTemplatesByCodes(postData.getChargeTemplateCodes()));
 		attribute.setUnitNbDecimal(postData.getUnitNbDecimal());
 		attribute.setDisabled(postData.isDisabled() == null ? false : postData.isDisabled());
+		attribute.setElValue(postData.getElValue());
 		populateCustomFields(postData.getCustomFields(), attribute, true);
 		validateAttribute(attribute);
 		attributeService.create(attribute);
@@ -195,6 +196,7 @@ public class AttributeApi extends BaseCrudApi<Attribute, AttributeDTO> {
 		attribute.setPriority(postData.getPriority());
 		attribute.setAttributeType(postData.getAttributeType());
 		attribute.setAllowedValues(postData.getAllowedValues());
+		attribute.setElValue(postData.getElValue());
 		attribute.setChargeTemplates(chargeTemplateService.getChargeTemplatesByCodes(postData.getChargeTemplateCodes()));
         attribute.setDisabled(postData.isDisabled() == null ? false : postData.isDisabled());
 		if(postData.getUnitNbDecimal() != null) {

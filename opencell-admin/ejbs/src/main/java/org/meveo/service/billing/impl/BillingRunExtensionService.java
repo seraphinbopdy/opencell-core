@@ -27,6 +27,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.jpa.JpaAmpNewTx;
@@ -41,6 +42,9 @@ import org.meveo.service.base.PersistenceService;
  **/
 @Stateless
 public class BillingRunExtensionService extends PersistenceService<BillingRun> {
+
+    @Inject
+    private InvoiceLineService invoiceLineService;
 
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -110,12 +114,27 @@ public class BillingRunExtensionService extends PersistenceService<BillingRun> {
         ofNullable(pdfExecutionResultId).ifPresent(pdfExecutionId -> billingRun.setPdfJobExecutionResultId(pdfExecutionId));
         return updateNoCheck(billingRun);
     }
-    
+
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void updateBillingRunJobExecution(Long billingRunId, JobExecutionResultImpl result) {
         BillingRun billingRun = findById(billingRunId);
         billingRun.addJobExecutions(result);
+    }
+
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void updateIncrementalBillingRunStatistics(Long billingRunId, int count, BillingRunStatusEnum status) {
+        List<Object[]> amounts = invoiceLineService.getInvoiceLineStatistics(billingRunId);
+        BillingRun billingRun = findById(billingRunId);
+        if(amounts != null && !amounts.isEmpty()) {
+            billingRun.setPrAmountTax((BigDecimal) amounts.get(0)[2]);
+            billingRun.setPrAmountWithTax((BigDecimal) amounts.get(0)[1]);
+            billingRun.setPrAmountWithoutTax((BigDecimal) amounts.get(0)[0]);
+        }
+        billingRun.setBillableBillingAcountNumber(count);
+        billingRun.setProcessDate(new Date());
+        billingRun.setStatus(status);
         updateNoCheck(billingRun);
     }
 }

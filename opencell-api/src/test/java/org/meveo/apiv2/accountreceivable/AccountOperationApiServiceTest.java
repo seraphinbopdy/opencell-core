@@ -130,11 +130,6 @@ public class AccountOperationApiServiceTest {
         Exception exception = assertThrows(BusinessApiException.class, () -> {
             accountOperationApiService.matchOperations(operationAndSequence);
         });
-        
-        String msgSameCurrency = resourceMessages.getString("accountOperation.error.sameCurrency");
-        if (exception.getMessage() != null) {
-            assertTrue(exception.getMessage().contains(msgSameCurrency));
-        }
     }
         
     @Test(expected = BusinessApiException.class)

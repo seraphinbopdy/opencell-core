@@ -378,80 +378,76 @@ public class PricePlanMatrixLineService extends PersistenceService<PricePlanMatr
 		}
         return lines;
     }
-
-    private String buildQuery(Map<String, Object> searchInfo) {
-        StringBuilder queryString = new StringBuilder();
-        queryString.append("SELECT distinct ppml FROM PricePlanMatrixLine ppml");
-	    queryString.append(" LEFT JOIN FETCH ppml.pricePlanMatrixValues ppmv ");
-		if(searchInfo.containsKey("attributes") && !((List)searchInfo.get("attributes")).isEmpty()){
-			queryString.append(" JOIN PricePlanMatrixColumn ppmc ON ppmv.pricePlanMatrixColumn=ppmc ");
+	
+	private String buildQuery(Map<String, Object> searchInfo) {
+		StringBuilder queryString = new StringBuilder();
+		queryString.append("SELECT distinct ppml FROM PricePlanMatrixLine ppml");
+		queryString.append(" LEFT JOIN FETCH ppml.pricePlanMatrixValues ppmvs ");
+		if(searchInfo.containsKey("pricePlanMatrixVersion") && ((Map) searchInfo.get("pricePlanMatrixVersion")).containsKey("id")){
+			queryString.append(" WHERE ppml.pricePlanMatrixVersion.id = :pricePlanMatrixVersionId ");
 		}
-	    boolean containsWhere = false;
-        if(searchInfo.containsKey("pricePlanMatrixVersion") && ((Map) searchInfo.get("pricePlanMatrixVersion")).containsKey("id")){
-            queryString.append(" WHERE ppml.pricePlanMatrixVersion.id = :pricePlanMatrixVersionId ");
-			containsWhere = true;
-        }
-        if(searchInfo.containsKey("priceWithoutTax")){
-			if(containsWhere) {
-				queryString.append(" AND ");
-			} else {
-				queryString.append(" WHERE ");
-			}
-            queryString.append(" ppml.priceWithoutTax = :priceWithoutTax ");
-        }
-        if(searchInfo.containsKey("attributes") && !((List)searchInfo.get("attributes")).isEmpty()){
-	        if(containsWhere) {
-		        queryString.append(" AND ");
-	        } else {
-		        queryString.append(" WHERE ");
-	        }
-			List<Map<String, Object>> attributesSearch = (List<Map<String, Object>>) searchInfo.get("attributes");
-			List<String> attributCodes = attributesSearch.stream().map(codes -> ((String) codes.get("column")).toLowerCase()).collect(Collectors.toList());
-	        searchInfo.put("codes", attributCodes);
-			queryString.append("(LOWER(ppmc.code) in :codes ) AND ");
-	        String attributeValue = attributesSearch.stream().map(stringObjectMap ->
-				resolveType((String) stringObjectMap.get("type"), stringObjectMap.get("value"), (String) stringObjectMap.getOrDefault("operator", "="))
-			).collect(Collectors.joining(" OR "));
-	        queryString.append(attributeValue);
-        }
-        queryString.append(" ORDER BY ppml." + searchInfo.getOrDefault("sortBy","id"));
-        queryString.append(" ");
-        queryString.append(searchInfo.getOrDefault("order","ASC"));
-
-        return queryString.toString();
-    }
+		if(searchInfo.containsKey("priceWithoutTax")){
+			queryString.append(" AND ppml.priceWithoutTax = :priceWithoutTax ");
+		}
+		if(searchInfo.containsKey("attributes") && !((List)searchInfo.get("attributes")).isEmpty()){
+			queryString.append(" AND ppml.id in ")
+					.append("(SELECT ppmv.pricePlanMatrixLine FROM PricePlanMatrixValue ppmv")
+					.append(" INNER JOIN PricePlanMatrixColumn ppmc ON ppmv.pricePlanMatrixColumn.id=ppmc.id ")
+					.append(" WHERE ppmc.code in (SELECT ppmc2.code FROM PricePlanMatrixColumn ppmc2 WHERE ppmc2.pricePlanMatrixVersion.id =:pricePlanMatrixVersionId) ")
+					.append("AND ppmc.pricePlanMatrixVersion.id =:pricePlanMatrixVersionId AND ");
+			queryString.append(appendAttributesToQuery((List<Map<String, Object>>) searchInfo.getOrDefault("attributes", Collections.EMPTY_LIST))).append(")");
+		}
+		queryString.append(" ORDER BY ppml." + searchInfo.getOrDefault("sortBy","id"));
+		queryString.append(" ");
+		queryString.append(searchInfo.getOrDefault("order","ASC"));
+		
+		return queryString.toString();
+	}
+	
+	private String appendAttributesToQuery(List<Map<String, Object>> attributesSearch) {
+		return attributesSearch.stream()
+				.map(stringObjectMap ->
+						 resolveType((String) stringObjectMap.get("type"), stringObjectMap.get("value"), (String) stringObjectMap.getOrDefault("operator", "=")))
+				.collect(Collectors.joining(" OR "));
+	}
 
 
     private String resolveType(String type, Object value, String operator) {
 
         String rangeType = "";
-        switch(type.toLowerCase()){
-            case "string":
-                return "(LOWER(ppmv.stringValue) " + formattedOperation(operator, value.toString().toLowerCase()) + ")";
-            case "long":
-                return "(ppmv.longValue " + formattedOperation(operator, value) + ")";
-            case "double":
-                if("=".equals(operator)){
-	                return "(ppmc.isRange = true and ppmv.fromDoubleValue <=" + Double.valueOf(value.toString())+ "  and ppmv.toDoubleValue >="+ Double.valueOf(value.toString());
-                }else if("!=".equals(operator)){
-	                return "(ppmc.isRange = true and ppmv.toDoubleValue <" + Double.valueOf(value.toString())+ "  and ppmv.fromDoubleValue >"+ Double.valueOf(value.toString());
-                }
-                if(operator.contentEquals("BETWEEN")){
-                    return "(ppmv.doubleValue " + formattedOperation(operator, value.toString())+ ")";
-                }
-                return "(ppmv.doubleValue " + formattedOperation(operator, Double.valueOf(value.toString()))+ ")";
-            case "boolean":
-                return "(ppmv.booleanValue " + formattedOperation(operator, Boolean.valueOf(value.toString()))+ ")";
-            case "date":
-                if("=".equals(operator)){
-	                return "(ppmc.isRange = true and ppmv.fromDateValue <='" + new java.sql.Date(parseDate(value).getTime())+ "'  and ppmv.toDateValue >='"+ new java.sql.Date(parseDate(value).getTime())+"')";
-                }else if("!=".equals(operator)){
-	                return "(ppmc.isRange = true and ppmv.toDateValue <'" +  new java.sql.Date(parseDate(value).getTime())+ "'  or ppmv.fromDateValue >'"+ new java.sql.Date(parseDate(value).getTime()) + "')";
-                }
-                return rangeType + "(ppmc.isRange = false and (ppmv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ "))";
-            default:
-                return "stringValue = ''";
-        }
+	    switch(type.toLowerCase()){
+		    case "string":
+			    return "(LOWER(ppmv.stringValue) " + formattedOperation(operator, value.toString().toLowerCase()) + ")";
+		    case "long":
+			    return "(ppmv.longValue " + formattedOperation(operator, value) + ")";
+		    case "double":
+			    if("=".equals(operator)){
+				    rangeType = "(ppmc.isRange = true and ppmv.fromDoubleValue <=" + Double.valueOf(value.toString())+ "  and ppmv.toDoubleValue >="+ Double.valueOf(value.toString()) + ")";
+				    return rangeType;
+			    }else if("!=".equals(operator)){
+				    rangeType = "(ppmc.isRange = true and ppmv.toDoubleValue <" + Double.valueOf(value.toString())+ "  and ppmv.fromDoubleValue >"+ Double.valueOf(value.toString()) + ")";
+				    return rangeType;
+			    }
+			    if(operator.contentEquals("BETWEEN")){
+				    return "(ppmv.doubleValue " + formattedOperation(operator, value.toString())+ " )";
+			    }
+			    return "(ppmv.doubleValue " + formattedOperation(operator, Double.valueOf(value.toString()))+ " )";
+		    case "boolean":
+			    return "(ppmv.booleanValue " + formattedOperation(operator, Boolean.valueOf(value.toString()))+ " )";
+		    case "date":
+			    if("=".equals(operator)){
+				    rangeType = "(ppmc.isRange = true and ppmv.fromDateValue <='" + new java.sql.Date(parseDate(value).getTime())+ "'  and ppmv.toDateValue >='"+ new java.sql.Date(parseDate(value).getTime())+"'";
+				    rangeType +=  " OR (ppmc.isRange = false and (ppmv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ " OR ppmv.dateValue IS NULL)))";
+				    return rangeType;
+			    }else if("!=".equals(operator)){
+				    rangeType = "(ppmc.isRange = true and ppmv.toDateValue <'" +  new java.sql.Date(parseDate(value).getTime())+ "'  or ppmv.fromDateValue >'"+ new java.sql.Date(parseDate(value).getTime()) + "'";
+				    rangeType +=  " OR (ppmc.isRange = false and (ppmv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ " OR ppmv.dateValue IS NULL)))";
+				    return rangeType;
+			    }
+			    return rangeType + "(ppmc.isRange = false and (ppmv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ "))";
+		    default:
+			    return "stringValue = ''";
+	    }
     }
 
     private String formattedOperation(String operator, Object value) {

@@ -154,7 +154,8 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 					getBigDecimal(agedList[20]),
 					getBigDecimal(agedList[23]),
 					getBigDecimal(agedList[26])));
-
+			
+			agedReceivableDto.setTransactionCategory((OperationCategoryEnum)agedList[40]);
 			dtoList.add(agedReceivableDto);
 		} 
 		return dtoList;

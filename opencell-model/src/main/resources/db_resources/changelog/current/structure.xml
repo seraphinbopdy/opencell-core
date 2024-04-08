@@ -24409,5 +24409,9 @@ public class DummyPaymentGatewayScript extends Script {
 	<changeSet id="#INTRD-22401_20240408" author="aeljaouhari">
 		<sql>CREATE INDEX IF NOT EXISTS ar_account_operation_journal_id_idx ON ar_account_operation(journal_id)</sql>
 	</changeSet>
+	
+	<changeSet id="#INTRD-22262_20240408" author="aeljaouhari">
+		<sql>CREATE INDEX IF NOT EXISTS rated_transaction_ba_idx ON billing_rated_transaction(billing_account__id)</sql>
+	</changeSet>
 
 </databaseChangeLog>

@@ -1401,7 +1401,8 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
      * @return List<InvoiceLinesGroup> return the list of InvoiceLinesGroup defined by a customized script
      */
     private List<InvoiceLinesGroup> executeBillingCycleScript(List<InvoiceLine> invoiceLines, BillingRun billingRun, IBillableEntity billableEntity) {
-        if (billingRun.getBillingCycle().getScriptInstance() != null && invoiceLines != null && !invoiceLines.isEmpty()) {
+        if (billingRun.getBillingCycle() != null && billingRun.getBillingCycle().getScriptInstance() != null
+                && invoiceLines != null && !invoiceLines.isEmpty()) {
             InvoiceLine firstInvoiceLine = invoiceLines.get(0);
             InvoiceType invoiceType;
 

@@ -19473,6 +19473,7 @@
         <sql>create index idx__charge_instance__lower_description on ${db.schema.adapted}billing_charge_instance(lower(description))</sql>
         <sql>CREATE INDEX idx_job_execution_parent_job_result_id ON ${db.schema.adapted}job_execution(parent_job_result_id)</sql>
         <sql>CREATE INDEX IF NOT EXISTS ar_account_operation_recorded_invoice_id_idx ON ar_account_operation(recorded_invoice_id)</sql>
+        <sql>CREATE INDEX IF NOT EXISTS ar_account_operation_journal_id_idx ON ar_account_operation(journal_id)</sql>
     </changeSet>
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-index-997">
@@ -20852,5 +20853,6 @@
     <changeSet id="#INTRD-22148_20240327" author="zbariki" />
     <changeSet id="#INTRD-22243_20240327" author="AbdellatifBARI" />
     <changeSet id="#INTRD-22295_20240425" author="aeljaouhari" />
+    <changeSet id="#INTRD-22401_20240408" author="aeljaouhari" />
     
 </databaseChangeLog>

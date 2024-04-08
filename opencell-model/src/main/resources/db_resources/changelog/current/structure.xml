@@ -24401,5 +24401,9 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="invoice_key" type="varchar(255)" />
         </addColumn>
     </changeSet>
+    
+  	<changeSet id="#INTRD-22295_20240425" author="aeljaouhari">
+		<sql>CREATE INDEX IF NOT EXISTS ar_account_operation_recorded_invoice_id_idx ON ar_account_operation(recorded_invoice_id)</sql>
+	</changeSet>
 
 </databaseChangeLog>

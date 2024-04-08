@@ -1201,7 +1201,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 
         OpenOrderSetting openOrderSetting = openOrderSettingService.findLastOne();
         boolean useOpenOrder = ofNullable(openOrderSetting).map(OpenOrderSetting::getUseOpenOrders).orElse(false);
-        InvoiceLine invoiceLine;
+        InvoiceLine invoiceLine=null;
         List<Long> associatedRtIds;
 
         Long billingRunId = null;
@@ -1283,7 +1283,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
             }
 
             rtIlBrIds[i][0] = associatedRtIds;
-            rtIlBrIds[i][1] = invoiceLineId;
+            rtIlBrIds[i][1] = invoiceLine;
             rtIlBrIds[i][2] = billingRunId;
             numberOrRts = numberOrRts + associatedRtIds.size();
             i++;
@@ -1313,7 +1313,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 em.flush();
 
             for (Object[] rtIlBrId : rtIlBrIds) {
-                ratedTransactionService.linkRTsToIL((List<Long>) rtIlBrId[0], (Long) rtIlBrId[1], (Long) rtIlBrId[2]);
+                ratedTransactionService.linkRTsToIL((List<Long>) rtIlBrId[0], ((InvoiceLine) rtIlBrId[1]).getId(), (Long) rtIlBrId[2]);
             }
 
         } else {
@@ -1326,7 +1326,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 					for (Object[] rtIlBrId : rtIlBrIds) {
 						for (Long rtId : (List<Long>) rtIlBrId[0]) {
 							preparedStatement.setLong(1, rtId);
-							preparedStatement.setLong(2, (Long) rtIlBrId[1]);
+							preparedStatement.setLong(2, ((InvoiceLine) rtIlBrId[1]).getId());
 							if (rtIlBrId[2] != null) {
 								preparedStatement.setLong(3, (Long) rtIlBrId[2]);
 							} else {

@@ -77,7 +77,7 @@ public class AgedReceivableMapperTest {
 
                 DunningLevelEnum.R1, new Name(new Title(), "TEST", "TEST"),
                 "CA_DESCRIPTION", "SELLER_CODE", "SELLER_DESCRIPTION", new Date(), "EUR", 1L, "INV_1000",
-                new BigDecimal(100), "CA_CODE", new BigDecimal(100), 1L};
+                new BigDecimal(100), "CA_CODE", new BigDecimal(100), 1L, OperationCategoryEnum.DEBIT};
         input.add(agedReceivable);
 
         List<AgedReceivableDto> response = mapper.toEntityList(input);

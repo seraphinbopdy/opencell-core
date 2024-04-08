@@ -822,8 +822,14 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
     public <T> T parseObjectFromString(String value, String clazzName) {
         try {
             Class<T> clazz = (Class<T>) Class.forName(clazzName);
-            return (clazzName.startsWith("org.meveo.model"))? (T) getEntityManager().find(clazz, Long.parseLong(value)) 
-            		: clazz.getConstructor(new Class[] {String.class }).newInstance(value);
+			if(clazzName.startsWith("org.meveo.model")){
+				if(value.matches("\\d+")){
+					return (T) getEntityManager().find(clazz, Long.parseLong(value));
+				}
+				return (T) getEntityManager().createQuery("from " + clazzName + " where code = :code", clazz).setParameter("code", value).getSingleResult();
+			}
+	  
+			return (T) clazz.getConstructor(new Class[] {String.class }).newInstance(value);
         } catch (Exception e) {
             throw new BusinessException(String.format("Failed to parse %s as %s", value, clazzName));
         }

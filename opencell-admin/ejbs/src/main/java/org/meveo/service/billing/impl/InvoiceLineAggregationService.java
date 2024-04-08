@@ -270,7 +270,7 @@ public class InvoiceLineAggregationService implements Serializable {
 
         String extraCondition = (billingRun.getLastTransactionDate() != null ? " a.usageDate < :lastTransactionDate and " : " ") + QUERY_FILTER;
         if(billingRun.getBillingCycle() != null && ORDER.equals(billingRun.getBillingCycle().getType())) {
-            extraCondition += " and a.infoOrder.order is not null";
+            extraCondition += " and a.orderInfo.order is not null";
         }
 
         QueryBuilder queryBuilder = nativePersistenceService.getAggregateQuery("RatedTransaction", searchConfig, null, extraCondition, null);

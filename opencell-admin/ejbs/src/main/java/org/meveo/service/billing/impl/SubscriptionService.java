@@ -18,6 +18,9 @@
 package org.meveo.service.billing.impl;
 
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+import static org.meveo.model.billing.SubscriptionStatusEnum.ACTIVE;
+import static org.meveo.model.billing.SubscriptionStatusEnum.CANCELED;
+import static org.meveo.model.billing.SubscriptionStatusEnum.CLOSED;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -76,6 +79,7 @@ import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplateTypeEnum;
 import org.meveo.model.catalog.ServiceTemplate;
+import org.meveo.model.cpq.offer.OfferComponent;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.mediation.Access;
 import org.meveo.model.order.OrderItemActionEnum;
@@ -93,6 +97,7 @@ import org.meveo.service.order.OrderHistoryService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.PaymentMethodService;
 import org.meveo.service.script.offer.OfferModelScriptService;
+import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 
 
 /**
@@ -131,6 +136,9 @@ public class SubscriptionService extends BusinessService<Subscription> {
     
     @Inject
     private CustomerAccountService customerAccountService;
+
+    @Inject
+    private FinanceSettingsService financeSettingsService;
 
     @MeveoAudit
     @Override
@@ -233,7 +241,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
          * (InstanceStatusEnum.ACTIVE.equals(serviceInstance.getStatus())) { serviceInstanceService.serviceCancellation(serviceInstance, terminationDate); } }
          */
         subscription.setTerminationDate(cancelationDate);
-        subscription.setStatus(SubscriptionStatusEnum.CANCELED);
+        subscription.setStatus(CANCELED);
         subscription = update(subscription);
 
         return subscription;
@@ -279,13 +287,13 @@ public class SubscriptionService extends BusinessService<Subscription> {
             reactivationDate = new Date();
         }
 
-        if (subscription.getStatus() != SubscriptionStatusEnum.RESILIATED && subscription.getStatus() != SubscriptionStatusEnum.CANCELED && subscription.getStatus() != SubscriptionStatusEnum.SUSPENDED) {
+        if (subscription.getStatus() != SubscriptionStatusEnum.RESILIATED && subscription.getStatus() != CANCELED && subscription.getStatus() != SubscriptionStatusEnum.SUSPENDED) {
             throw new ElementNotResiliatedOrCanceledException("subscription", subscription.getCode());
         }
 
         subscription.setTerminationDate(null);
         subscription.setSubscriptionTerminationReason(null);
-        subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
+        subscription.setStatus(ACTIVE);
 
         List<ServiceInstance> serviceInstances = subscription.getServiceInstances();
         for (ServiceInstance serviceInstance : serviceInstances) {
@@ -345,7 +353,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
     public Subscription terminateSubscription(Subscription subscription, Date terminationDate, SubscriptionTerminationReason terminationReason, String orderNumber, Long orderItemId, OrderItemActionEnum orderItemAction)
             throws BusinessException {
 
-        if (subscription.getStatus()==SubscriptionStatusEnum.RESILIATED || subscription.getStatus()==SubscriptionStatusEnum.CANCELED ||subscription.getStatus()==SubscriptionStatusEnum.CLOSED ) {
+        if (subscription.getStatus()==SubscriptionStatusEnum.RESILIATED || subscription.getStatus()== CANCELED ||subscription.getStatus()== CLOSED ) {
             return subscription;
         }
         
@@ -512,9 +520,9 @@ public class SubscriptionService extends BusinessService<Subscription> {
     public List<Long> getSubscriptionsToRenewOrNotify(Date untillDate) {
 
         List<Long> ids = getEntityManager().createNamedQuery("Subscription.getExpired", Long.class).setParameter("date", untillDate)
-                .setParameter("statuses", Arrays.asList(SubscriptionStatusEnum.ACTIVE, SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.SUSPENDED)).getResultList();
+                .setParameter("statuses", Arrays.asList(ACTIVE, SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.SUSPENDED)).getResultList();
         ids.addAll(getEntityManager().createNamedQuery("Subscription.getToNotifyExpiration", Long.class).setParameter("date", untillDate)
-                .setParameter("statuses", Arrays.asList(SubscriptionStatusEnum.ACTIVE, SubscriptionStatusEnum.CREATED)).getResultList());
+                .setParameter("statuses", Arrays.asList(ACTIVE, SubscriptionStatusEnum.CREATED)).getResultList());
 
         return ids;
     }
@@ -543,6 +551,22 @@ public class SubscriptionService extends BusinessService<Subscription> {
             		fixedDiscountItems.addAll(ratingResult.getEligibleFixedDiscountItems());
             }
         }
+        if(CANCELED == sub.getStatus() || CLOSED == sub.getStatus()) {
+            throw new BusinessException("The subscription status is " + sub.getStatus());
+        }
+        if((sub.getServiceInstances() == null || sub.getServiceInstances().isEmpty())
+                && financeSettingsService.getFinanceSetting().isEnableEmptySubscriptionActivation()) {
+            boolean mandatoryProducts = sub.getOffer()
+                    .getOfferComponents()
+                    .stream()
+                    .anyMatch(OfferComponent::isMandatory);
+            if(mandatoryProducts) {
+                throw new BusinessException("The subscription cannot be activated as its offer includes mandatory products.");
+            } else {
+                sub.setStatus(ACTIVE);
+                update(sub);
+            }
+        }
         return ratingResult;
     }
 
@@ -559,7 +583,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
 
         qb.addCriterionDateRangeToTruncatedToDay("subscriptionDate", higherBound, true, false);
         qb.addCriterionEnum("status", SubscriptionStatusEnum.CREATED, "<>", false);
-        qb.addCriterionEnum("status", SubscriptionStatusEnum.ACTIVE, "<>", false);
+        qb.addCriterionEnum("status", ACTIVE, "<>", false);
 
         return (List<Subscription>) qb.getQuery(getEntityManager()).getResultList();
     }
@@ -744,7 +768,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
      */
     public boolean willBeTerminatedInFuture(Subscription subscription) {
         SubscriptionRenewal subscriptionRenewal = subscription != null ? subscription.getSubscriptionRenewal() : null;
-        return (subscription != null && (subscription.getStatus() == SubscriptionStatusEnum.CREATED || subscription.getStatus() == SubscriptionStatusEnum.ACTIVE) && subscription.getSubscribedTillDate() != null
+        return (subscription != null && (subscription.getStatus() == SubscriptionStatusEnum.CREATED || subscription.getStatus() == ACTIVE) && subscription.getSubscribedTillDate() != null
                 && subscription.getSubscribedTillDate().compareTo(new Date()) > 0 && subscriptionRenewal != null && !subscriptionRenewal.isAutoRenew() && subscriptionRenewal.getTerminationReason() != null
                 && subscriptionRenewal.getEndOfTermAction() == SubscriptionRenewal.EndOfTermActionEnum.TERMINATE);
     }
@@ -987,7 +1011,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
         }
 
         Optional<Subscription> activeSubscription = subscriptions.stream()
-                .filter(s -> SubscriptionStatusEnum.ACTIVE.equals(s.getStatus()))
+                .filter(s -> ACTIVE.equals(s.getStatus()))
                 .findFirst();
 
         return activeSubscription.orElseGet(() -> subscriptions.stream()

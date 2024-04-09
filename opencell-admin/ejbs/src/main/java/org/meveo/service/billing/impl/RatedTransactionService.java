@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -2317,6 +2318,7 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             } else {
                 billingRunFilters = billingRun.getFilters();
             }
+            billingRunFilters = Optional.ofNullable(billingRunFilters).orElseGet(HashMap::new);
             billingRunFilters.put("status", RatedTransactionStatusEnum.OPEN.toString());
             additionalFilter.append("a.usageDate < '").append(billingRun.getLastTransactionDate().toString()).append("'");
         }

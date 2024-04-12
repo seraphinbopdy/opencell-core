@@ -789,7 +789,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 log.warn("matchOperations The operationId " + accountOperation.getId() + " is not for the customerAccount");
                 throw new BusinessException("The operationId " + accountOperation.getId() + " is not for the customerAccount");
             }
-            if (accountOperation.getMatchingStatus() != MatchingStatusEnum.O && accountOperation.getMatchingStatus() != MatchingStatusEnum.P) {
+	        List<MatchingStatusEnum> matchingStatus = List.of(MatchingStatusEnum.O, MatchingStatusEnum.P, MatchingStatusEnum.I);
+            if (!matchingStatus.contains(accountOperation.getMatchingStatus())) {
                 log.warn("matchOperations The operationId " + accountOperation.getId() + " is already matching");
                 throw new NoAllOperationUnmatchedException("The operationId " + accountOperation.getId() + " is already matching");
             }
@@ -939,7 +940,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 log.warn("matchOperations The operationId " + accountOperation.getId() + " is not for the customerAccount");
                 throw new BusinessException("The operationId " + accountOperation.getId() + " is not for the customerAccount");
             }
-            if (accountOperation.getTransactionCategory() == OperationCategoryEnum.DEBIT && accountOperation.getMatchingStatus() != MatchingStatusEnum.O && accountOperation.getMatchingStatus() != MatchingStatusEnum.P) {
+	        List<MatchingStatusEnum> matchingStatus = List.of(MatchingStatusEnum.O, MatchingStatusEnum.P, MatchingStatusEnum.I);
+            if (accountOperation.getTransactionCategory() == OperationCategoryEnum.DEBIT && !matchingStatus.contains(accountOperation.getMatchingStatus())) {
                 log.warn("matchOperations The operationId " + accountOperation.getId() + " is already matching");
                 throw new NoAllOperationUnmatchedException("The operationId " + accountOperation.getId() + " is already matching");
             }

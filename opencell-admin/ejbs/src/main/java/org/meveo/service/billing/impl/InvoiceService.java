@@ -6960,6 +6960,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if (invoiceResource.getPurchaseOrder() != null) {
             toUpdate.setExternalPurchaseOrderNumber(invoiceResource.getPurchaseOrder());
         }
+	    
+	    if(invoiceResource.getSellerCode() != null ) {
+		    Seller seller = new Seller();
+		    seller.setCode(invoiceResource.getSellerCode());
+		    toUpdate.setSeller(tryToFindByCodeOrId(seller));
+	    }
 
         return update(toUpdate);
     }

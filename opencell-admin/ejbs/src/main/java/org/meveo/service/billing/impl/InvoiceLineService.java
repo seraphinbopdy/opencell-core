@@ -1217,8 +1217,10 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         List<InvoiceLine> invoiceLines = new ArrayList<>();
 
         int i = 0;
+	    BillingAccount billingAccount = null;
         for (Map<String, Object> groupedRT : groupedRTs) {
             Long invoiceLineId = null;
+			billingAccount = billingAccountService.findById(Long.valueOf(groupedRT.get("billing_account__id").toString()));
             if (groupedRT.get("rated_transaction_ids") instanceof Number) {
                 associatedRtIds = new ArrayList<>();
                 associatedRtIds.add(((Number) groupedRT.get("rated_transaction_ids")).longValue());
@@ -1254,8 +1256,15 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                     unitPrice = quantity.compareTo(ZERO) == 0 ? amountWithoutTax : amountWithoutTax.divide(quantity,
                             appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
                 }
-
-                linesFactory.update(invoiceLineId, deltaAmounts, deltaQuantity, beginDate, finishDate, unitPrice);
+	            invoiceLine = this.findById(invoiceLineId);
+	            invoiceLine.setAmountWithoutTax(invoiceLine.getAmountWithoutTax().add(deltaAmountWithoutTax));
+	            invoiceLine.setAmountWithTax(invoiceLine.getAmountWithTax().add(deltaAmountWithTax));
+	            invoiceLine.setAmountTax(invoiceLine.getAmountTax().add(deltaAmountTax));
+	            invoiceLine.setQuantity(invoiceLine.getQuantity().add(deltaQuantity));
+	            invoiceLine.setValidity(new DatePeriod(beginDate, finishDate));
+	            invoiceLine.setUnitPrice(unitPrice);
+				this.update(invoiceLine);
+                //linesFactory.update(invoiceLineId, deltaAmounts, deltaQuantity, beginDate, finishDate, unitPrice);
                 statistics.addToAmountWithoutTax(amounts[0]);
                 statistics.addToAmountWithTax(amounts[1]);
                 statistics.addToAmountTax(amounts[2]);
@@ -1278,10 +1287,11 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                         openOrder.setBalance(openOrder.getBalance().subtract(invoiceLine.getAmountWithoutTax()));
                     }
                 }
-                buildInvoiceKey(invoiceLine);
-                invoiceLines.add(invoiceLine);
             }
-
+	        
+	        buildInvoiceKey(invoiceLine);
+	        invoiceLines.add(invoiceLine);
+			
             rtIlBrIds[i][0] = associatedRtIds;
             rtIlBrIds[i][1] = invoiceLine;
             rtIlBrIds[i][2] = billingRunId;
@@ -1289,7 +1299,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
             i++;
         }
         
-        List<InvoiceLinesGroup> customInvoiceLinesGroups = billingRun != null ? executeBillingCycleScript(invoiceLines, billingRun, invoiceLines.get(0).getBillingAccount()) : null;
+        List<InvoiceLinesGroup> customInvoiceLinesGroups = billingRun != null ? executeBillingCycleScript(invoiceLines, billingRun, billingAccount) : null;
 
         if (customInvoiceLinesGroups != null && !customInvoiceLinesGroups.isEmpty()) {
             customInvoiceLinesGroups.forEach(group -> this.writeInvoiceLines(group.getInvoiceLines(), group.getInvoiceKey()));

@@ -262,6 +262,18 @@
 		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/header/billingAccount/@registrationNo"/>
 		<fieldDescription><![CDATA[/invoice/header/billingAccount/@registrationNo]]></fieldDescription>
 	</field>
+	<field name="baSiren" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression">
+			<![CDATA[/invoice/header/billingAccount/PartyIdentification/CompanyId[@schemeID="0002"]]]>
+		</property>
+		<fieldDescription><![CDATA[/invoice/header/billingAccount/PartyIdentification/CompanyId[@schemeID="0002"]]]></fieldDescription>
+	</field>
+	<field name="baSiret" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression">
+			<![CDATA[/invoice/header/billingAccount/PartyIdentification/CompanyId[@schemeID="0009"]]]>
+		</property>
+		<fieldDescription><![CDATA[/invoice/header/billingAccount/PartyIdentification/CompanyId[@schemeID="0009"]]]></fieldDescription>
+	</field>
 	<field name="mobile" class="java.lang.String">
 		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/header/customer/contact/@mobile"/>
 		<fieldDescription><![CDATA[/invoice/header/customer/contact/@mobile]]></fieldDescription>
@@ -325,6 +337,18 @@
 	<field name="customerLanguageCode" class="java.lang.String">
 		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/header/customerAccount/@languageCode"/>
 		<fieldDescription><![CDATA[/invoice/header/customerAccount/@languageCode]]></fieldDescription>
+	</field>
+	<field name="sellerSiren" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression">
+			<![CDATA[/invoice/header/seller/PartyIdentification/CompanyId[@schemeID="0002"]]]>
+		</property>
+		<fieldDescription><![CDATA[/invoice/header/seller/PartyIdentification/CompanyId[@schemeID="0002"]]]></fieldDescription>
+	</field>
+	<field name="sellerSiret" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression">
+			<![CDATA[/invoice/header/seller/PartyIdentification/CompanyId[@schemeID="0009"]]]>
+		</property>
+		<fieldDescription><![CDATA[/invoice/header/seller/PartyIdentification/CompanyId[@schemeID="0009"]]]></fieldDescription>
 	</field>
 	<group name="1">
 		<groupHeader>
@@ -536,7 +560,7 @@
 	</group>
 	<group name="5"/>
 	<pageHeader>
-		<band height="140">
+		<band height="143">
 			<textField evaluationTime="Report" isBlankWhenNull="false">
 				<reportElement x="568" y="10" width="17" height="20" uuid="70ddbde0-a609-410d-8301-143597ebd6fe"/>
 				<textElement markup="html">
@@ -581,8 +605,9 @@
 				<textFieldExpression><![CDATA["Due Date: " + ($F{country}=="US" ? java.time.LocalDate.parse($F{dueDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{dueDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="410" y="70" width="184" height="70" uuid="ec6e4a89-edc8-445f-a3cb-8827a5725e9b">
+				<reportElement x="410" y="60" width="184" height="80" uuid="ec6e4a89-edc8-445f-a3cb-8827a5725e9b">
 					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="SansSerif" size="10" isBold="false"/>
@@ -598,6 +623,9 @@
 + (($F{baCity}!=null && !String.valueOf($F{baCity}).isEmpty() && !String.valueOf($F{baCity}).equals("null")) ? $F{baCity} : "")
 + "\n"
 + (($F{baCountry}!=null && !String.valueOf($F{baCountry}).isEmpty() && !String.valueOf($F{baCountry}).equals("null")) ? $F{baCountry} : "")
++ "\n"
++ (($F{baSiren}!=null && !String.valueOf($F{baSiren}).isEmpty() && !String.valueOf($F{baSiren}).equals("null")) ? "Siren : " + $F{baSiren} + "\n" : "")
++ (($F{baSiret}!=null && !String.valueOf($F{baSiret}).isEmpty() && !String.valueOf($F{baSiret}).equals("null")) ? "Siret : " + $F{baSiret} + " " : "")
 + "\n"]]></textFieldExpression>
 			</textField>
 		</band>
@@ -622,11 +650,13 @@
 					<textElement textAlignment="Left" verticalAlignment="Middle" markup="styled">
 						<font fontName="SansSerif" size="9.6"/>
 					</textElement>
-					<textFieldExpression><![CDATA[(($F{sellerDescription}!=null && !String.valueOf($F{sellerDescription}).isEmpty() && !String.valueOf($F{sellerDescription}).equals("null")) ? "<style isBold='true'>" + $F{sellerDescription} + "</style> - " : "") +
-(($F{sellerLegalType}!=null && !String.valueOf($F{sellerLegalType}).isEmpty() && !String.valueOf($F{sellerLegalType}).equals("null")) ? $F{sellerLegalType} : "") + 
+					<textFieldExpression><![CDATA[(($F{sellerDescription}!=null && !String.valueOf($F{sellerDescription}).isEmpty() && !String.valueOf($F{sellerDescription}).equals("null")) ? "<style isBold='true'>" + $F{sellerDescription} + "</style> " : "") +
+(($F{sellerLegalType}!=null && !String.valueOf($F{sellerLegalType}).isEmpty() && !String.valueOf($F{sellerLegalType}).equals("null")) ? " - " + $F{sellerLegalType} : "") + 
 (($F{sellerRegNo}!=null && !String.valueOf($F{sellerRegNo}).isEmpty() && !String.valueOf($F{sellerRegNo}).equals("null")) ? "<style isBold='true'> - Reg.nr.: </style>" + $F{sellerRegNo} : "")
 +
 (($F{sellerVatNo}!=null && !String.valueOf($F{sellerVatNo}).isEmpty() && !String.valueOf($F{sellerVatNo}).equals("null")) ? "<style isBold='true'> - VAT Number </style>" + $F{sellerVatNo} : "")
++ (($F{sellerSiren}!=null && !String.valueOf($F{sellerSiren}).isEmpty() && !String.valueOf($F{sellerSiren}).equals("null")) ? "<style isBold='true'> - Siren </style>" + $F{sellerSiren} : "")
++ (($F{sellerSiret}!=null && !String.valueOf($F{sellerSiret}).isEmpty() && !String.valueOf($F{sellerSiret}).equals("null")) ? "<style isBold='true'> - Siret </style>" + $F{sellerSiret} : "")
 +  " - "
 + (($F{sellerAddress1}!=null && !String.valueOf($F{sellerAddress1}).isEmpty() && !String.valueOf($F{sellerAddress1}).equals("null")) ? " " + $F{sellerAddress1} : "")
 + (($F{sellerAddress2}!=null && !String.valueOf($F{sellerAddress2}).isEmpty() && !String.valueOf($F{sellerAddress2}).equals("null")) ? " " + $F{sellerAddress2} : "")

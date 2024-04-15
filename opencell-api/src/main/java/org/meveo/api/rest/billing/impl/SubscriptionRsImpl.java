@@ -45,6 +45,7 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.ChargeInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
+import org.meveo.service.crm.impl.SubscriptionActivationException;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -455,6 +456,8 @@ public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
             } else {
                 processException(exception, result);
             }
+        } catch (SubscriptionActivationException exception) {
+            throw new ForbiddenException(exception.getMessage());
         } catch (Exception e) {
             processException(e, result);
         }

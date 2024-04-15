@@ -19,6 +19,7 @@
 package org.meveo.api.rest;
 
 import javax.ejb.Singleton;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MediaType;
@@ -58,6 +59,8 @@ public class JaxRsExceptionMapper implements ExceptionMapper<Exception> {
         } else if (e instanceof JsonParseException || e instanceof JsonMappingException) {
             return Response.status(Response.Status.BAD_REQUEST).entity(new ActionStatus(ActionStatusEnum.FAIL, MeveoApiErrorCodeEnum.INVALID_PARAMETER, e.getMessage())).build();
 
+        } else if(e instanceof ForbiddenException) {
+            return Response.status(Status.FORBIDDEN).entity(new ActionStatus(ActionStatusEnum.FAIL, e.getMessage())).build();
         }
         return buildResponse(unwrapException(e), MediaType.TEXT_PLAIN, Status.INTERNAL_SERVER_ERROR);
 

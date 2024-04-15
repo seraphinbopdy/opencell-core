@@ -544,15 +544,15 @@ public class SubscriptionService extends BusinessService<Subscription> {
         // using a new ArrayList (cloning the original one) to avoid ConcurrentModificationException
     	RatingResult ratingResult = new RatingResult();
     	Set<DiscountPlanItem> fixedDiscountItems = new HashSet<>();
+        if(CANCELED == sub.getStatus() || CLOSED == sub.getStatus()) {
+            throw new IncorrectServiceInstanceException("The subscription status is " + sub.getStatus());
+        }
         for (ServiceInstance si : new ArrayList<>(emptyIfNull(sub.getServiceInstances()))) {
             if (si.getStatus().equals(InstanceStatusEnum.INACTIVE)) {
             	ratingResult = serviceInstanceService.serviceActivation(si);
             	if(ratingResult != null && !ratingResult.getEligibleFixedDiscountItems().isEmpty())
             		fixedDiscountItems.addAll(ratingResult.getEligibleFixedDiscountItems());
             }
-        }
-        if(CANCELED == sub.getStatus() || CLOSED == sub.getStatus()) {
-            throw new BusinessException("The subscription status is " + sub.getStatus());
         }
         if((sub.getServiceInstances() == null || sub.getServiceInstances().isEmpty())
                 && financeSettingsService.getFinanceSetting().isEnableEmptySubscriptionActivation()) {

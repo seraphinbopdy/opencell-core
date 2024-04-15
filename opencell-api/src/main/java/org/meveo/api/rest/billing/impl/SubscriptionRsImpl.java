@@ -18,6 +18,7 @@
 
 package org.meveo.api.rest.billing.impl;
 
+import org.meveo.admin.exception.IncorrectServiceInstanceException;
 import org.meveo.api.billing.SubscriptionApi;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
@@ -48,6 +49,7 @@ import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
 
 import java.util.Date;
@@ -446,6 +448,13 @@ public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
 
         try {
             subscriptionApi.activateSubscription(subscriptionCode, subscriptionValidityDate);
+        } catch (IncorrectServiceInstanceException exception) {
+            if(exception.getMessage().startsWith("Subscription is ")
+                    || exception.getMessage().startsWith("The subscription status is")) {
+                throw new ForbiddenException(exception.getMessage());
+            } else {
+                processException(exception, result);
+            }
         } catch (Exception e) {
             processException(e, result);
         }

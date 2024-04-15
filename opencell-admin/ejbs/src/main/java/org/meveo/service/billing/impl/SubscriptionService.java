@@ -21,6 +21,7 @@ import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.meveo.model.billing.SubscriptionStatusEnum.ACTIVE;
 import static org.meveo.model.billing.SubscriptionStatusEnum.CANCELED;
 import static org.meveo.model.billing.SubscriptionStatusEnum.CLOSED;
+import static org.meveo.model.billing.SubscriptionStatusEnum.RESILIATED;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -92,6 +93,8 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.catalog.impl.CalendarService;
 import org.meveo.service.catalog.impl.OfferTemplateService;
+import org.meveo.service.crm.impl.SubscriptionActivationException;
+import org.meveo.service.crm.impl.SubscriptionServiceException;
 import org.meveo.service.medina.impl.AccessService;
 import org.meveo.service.order.OrderHistoryService;
 import org.meveo.service.payments.impl.CustomerAccountService;
@@ -544,7 +547,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
         // using a new ArrayList (cloning the original one) to avoid ConcurrentModificationException
     	RatingResult ratingResult = new RatingResult();
     	Set<DiscountPlanItem> fixedDiscountItems = new HashSet<>();
-        if(CANCELED == sub.getStatus() || CLOSED == sub.getStatus()) {
+        if(CANCELED == sub.getStatus() || CLOSED == sub.getStatus() || RESILIATED == sub.getStatus()) {
             throw new IncorrectServiceInstanceException("The subscription status is " + sub.getStatus());
         }
         for (ServiceInstance si : new ArrayList<>(emptyIfNull(sub.getServiceInstances()))) {
@@ -554,8 +557,14 @@ public class SubscriptionService extends BusinessService<Subscription> {
             		fixedDiscountItems.addAll(ratingResult.getEligibleFixedDiscountItems());
             }
         }
+        boolean emptySubscriptionActivationEnabled =
+                financeSettingsService.getFinanceSetting().isEnableEmptySubscriptionActivation();
         if((sub.getServiceInstances() == null || sub.getServiceInstances().isEmpty())
-                && financeSettingsService.getFinanceSetting().isEnableEmptySubscriptionActivation()) {
+                && !emptySubscriptionActivationEnabled) {
+            throw new SubscriptionActivationException("Allow empty subscription activation option is set to false, subscription cannot be activated");
+        }
+        if((sub.getServiceInstances() == null || sub.getServiceInstances().isEmpty())
+                && emptySubscriptionActivationEnabled) {
             boolean mandatoryProducts = sub.getOffer()
                     .getOfferComponents()
                     .stream()

@@ -211,7 +211,6 @@ public class InvoicingJobV2Bean extends BaseJobBean {
                 billingRun.setStatus(REJECTED);
             }
         }
-		billingRun.setInvoiceNumber(result.getInvoiceCount());
 		billingRunService.updateBillingRunStatistics(billingRun);
 		billingRunService.update(billingRun);
 		billingRunService.updateBillingRunJobExecution(billingRun.getId(), result);

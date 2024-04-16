@@ -87,7 +87,6 @@ import org.meveo.model.billing.MinAmountForAccounts;
 import org.meveo.model.billing.PostInvoicingReportsDTO;
 import org.meveo.model.billing.PreInvoicingReportsDTO;
 import org.meveo.model.billing.RatedTransaction;
-import org.meveo.model.billing.RatedTransactionStatusEnum;
 import org.meveo.model.billing.RejectedBillingAccount;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.ThresholdOptionsEnum;
@@ -110,7 +109,6 @@ import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.crm.impl.CustomerService;
-import org.meveo.service.job.JobExecutionResultService;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.order.OrderService;
@@ -1545,6 +1543,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 quarantineBillingRun.setPrAmountTax(BigDecimal.ZERO);
                 quarantineBillingRun.setPrAmountWithoutTax(BigDecimal.ZERO);
                 quarantineBillingRun.setPrAmountWithTax(BigDecimal.ZERO);
+                quarantineBillingRun.setInvoiceNumber(0);
 
                 quarantineBillingRun.setStatus(BillingRunStatusEnum.REJECTED);
                 quarantineBillingRun.setIsQuarantine(Boolean.TRUE);
@@ -1675,19 +1674,8 @@ public class BillingRunService extends PersistenceService<BillingRun> {
     }
     
     public void updateBillingRunStatistics(BillingRun billingRun) {
-    	billingRun = billingRunService.refreshOrRetrieve(billingRun);
-
-        List<BillingAccount> billingAccounts = invoiceService.getInvoicesBillingAccountsByBR(billingRun);
-        
-        Amounts amounts = invoiceService.getTotalAmountsByBR(billingRun);
-
-        billingRun.setPrAmountTax(amounts.getAmountTax());
-        billingRun.setPrAmountWithoutTax(amounts.getAmountWithoutTax());
-        billingRun.setPrAmountWithTax(amounts.getAmountWithTax());
-        
-        billingRun.setBillableBillingAccounts(billingAccounts);
-    	billingRun.setBillableBillingAcountNumber(billingAccounts.size());
-        
+        recalculateBRStatisticsByInvoices(billingRun);
+        getEntityManager().createNamedQuery("BillingAccount.linkToBillingRunByInvoice").setParameter("billingRunId", billingRun.getId()).executeUpdate();
     }
 
     public void updateBillingRunJobExecution(Long billingRunId, JobExecutionResultImpl result) {
@@ -1799,5 +1787,21 @@ public class BillingRunService extends PersistenceService<BillingRun> {
             query = query.setMaxResults(nbToRetrieve);
         }
         return query.getResultList();
+    }
+    
+    public void recalculateBRStatisticsByInvoices(BillingRun billingRun) {
+        Query selectQuery = getEntityManager().createNamedQuery("BillingRun.calculateBRStatisticsByInvoices");
+        selectQuery.setParameter("billingRunId", billingRun.getId());
+        Object[] result = (Object[]) selectQuery.getSingleResult();
+        BigDecimal amountWithTax = (BigDecimal) result[0];
+        BigDecimal amountTax = (BigDecimal) result[1];
+        BigDecimal amountWithoutTax = (BigDecimal) result[2];
+        Integer countBA = ((Long) result[3]).intValue();
+        Integer countInvoices = ((Long) result[4]).intValue();
+    	billingRun.setPrAmountTax(amountTax);
+    	billingRun.setPrAmountWithTax(amountWithTax);
+    	billingRun.setPrAmountWithoutTax(amountWithoutTax);
+    	billingRun.setBillableBillingAcountNumber(countBA);
+    	billingRun.setInvoiceNumber(countInvoices);
     }
 }

@@ -612,7 +612,9 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         List<DDPaymentMethod> ddPaymentMethods = entity.getDDPaymentMethods();
         validatePaymentMethod(entity.getPreferredPaymentMethod(), ddPaymentMethods);
         for (PaymentMethod pm : entity.getPaymentMethods()) {
-            pm.updateAudit(currentUser);
+        	if (pm != null) {
+        		pm.updateAudit(currentUser);
+        	}
         }
         // Register card payment methods in payment gateway and obtain a token id
         for (CardPaymentMethod cardPaymentMethod : entity.getCardPaymentMethods(true)) {

@@ -273,7 +273,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         }
         
 		if (offer != null && offer.isDisabled() && serviceInstance.getSubscription().getOrder() == null) {
-			throw new BusinessException(String.format("OfferTemplate[code=%s] is disabled and cannot be subscription to. Please select another offer.", offer.getCode()));
+			throw new BusinessException(String.format("OfferTemplate[code=%s] is disabled and cannot be subscribed to. Please select another offer.", offer.getCode()));
 		}
 
         if (offer != null && serviceInstance != null) {

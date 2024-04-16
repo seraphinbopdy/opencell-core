@@ -20856,6 +20856,7 @@
     <changeSet id="#INTRD-22295_20240425" author="aeljaouhari" />
     <changeSet id="#INTRD-22401_20240408" author="aeljaouhari" />
     <changeSet id="#INTRD-22262_20240408" author="aeljaouhari" />
-    <changeSet id="#INTRD-22318_20240415" author="AbdelmounaimAkadid" /> 
+    <changeSet id="#INTRD-22318_20240415" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-20685_simple_customer_settings" author="a.rouaguebe" />
     
 </databaseChangeLog>

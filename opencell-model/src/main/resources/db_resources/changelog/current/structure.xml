@@ -24872,5 +24872,34 @@ public class DummyPaymentGatewayScript extends Script {
                     valueComputed="(SELECT id from generic_sequence where code = 'payment_rejection_code_seq')"/>
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-20685_simple_customer_settings" author="a.rouaguebe">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="AccountHierarchy"/>
+            <column name="property_group" value="crm"/>
+            <column name="property_type" value="java.lang.String"/>
+            <column name="property_value" valueComputed="(select code from billing_cycle limit 1)"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="crm.defaultBillingCycle"/>
+            <column name="description" value="crm.defaultBillingCycle"/>
+        </insert>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="AccountHierarchy"/>
+            <column name="property_group" value="crm"/>
+            <column name="property_type" value="java.lang.String"/>
+            <column name="property_value" valueComputed="(select code from crm_customer_category limit 1)"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="crm.defaultCustomerCategory"/>
+            <column name="description" value="crm.defaultCustomerCategory"/>
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

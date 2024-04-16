@@ -41,6 +41,7 @@ import org.meveo.api.rest.billing.SubscriptionRs;
 import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.apiv2.billing.ServiceInstanceToDelete;
+import org.meveo.apiv2.generic.exception.ConflictException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.ChargeInstance;
 import org.meveo.model.billing.Subscription;
@@ -66,6 +67,8 @@ import java.util.List;
 @Interceptors({ WsRestApiInterceptor.class })
 public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
 
+    private static final String MANDATORY_PRODUCTS_CHECK = "MANDATORY_PRODUCTS_CHECK";
+
     @Inject
     private SubscriptionApi subscriptionApi;
 
@@ -77,11 +80,11 @@ public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
             Subscription subscription = subscriptionApi.create(postData);
             result.setEntityCode(subscription.getCode());
             result.setEntityId(subscription.getId());
-            
+
             return Response.ok(result).build();
         } catch (MeveoApiException e) {
             return errorResponse(e, result);
-        } 
+        }
 
     }
 
@@ -457,7 +460,11 @@ public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
                 processException(exception, result);
             }
         } catch (SubscriptionActivationException exception) {
-            throw new ForbiddenException(exception.getMessage());
+            if(MANDATORY_PRODUCTS_CHECK.equalsIgnoreCase(exception.getCode())) {
+                throw new ConflictException(exception.getMessage());
+            } else {
+                throw new ForbiddenException(exception.getMessage());
+            }
         } catch (Exception e) {
             processException(e, result);
         }

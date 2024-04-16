@@ -33,12 +33,16 @@ import org.jboss.resteasy.api.validation.Validation;
 import org.meveo.api.MeveoApiErrorCodeEnum;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
+import org.meveo.apiv2.generic.exception.ConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+
+import static javax.ws.rs.core.Response.Status.CONFLICT;
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 
 @Provider
 @Singleton
@@ -60,7 +64,9 @@ public class JaxRsExceptionMapper implements ExceptionMapper<Exception> {
             return Response.status(Response.Status.BAD_REQUEST).entity(new ActionStatus(ActionStatusEnum.FAIL, MeveoApiErrorCodeEnum.INVALID_PARAMETER, e.getMessage())).build();
 
         } else if(e instanceof ForbiddenException) {
-            return Response.status(Status.FORBIDDEN).entity(new ActionStatus(ActionStatusEnum.FAIL, e.getMessage())).build();
+            return Response.status(FORBIDDEN).entity(new ActionStatus(ActionStatusEnum.FAIL, e.getMessage())).build();
+        } else if(e instanceof ConflictException) {
+            return Response.status(CONFLICT).entity(new ActionStatus(ActionStatusEnum.FAIL, e.getMessage())).build();
         }
         return buildResponse(unwrapException(e), MediaType.TEXT_PLAIN, Status.INTERNAL_SERVER_ERROR);
 

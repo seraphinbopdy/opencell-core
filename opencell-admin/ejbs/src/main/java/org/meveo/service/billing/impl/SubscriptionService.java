@@ -561,7 +561,8 @@ public class SubscriptionService extends BusinessService<Subscription> {
                 financeSettingsService.getFinanceSetting().isEnableEmptySubscriptionActivation();
         if((sub.getServiceInstances() == null || sub.getServiceInstances().isEmpty())
                 && !emptySubscriptionActivationEnabled) {
-            throw new SubscriptionActivationException("Allow empty subscription activation option is set to false, subscription cannot be activated");
+            throw new SubscriptionActivationException("EMPTY_SUB_NOT_ENABLED",
+                    "Allow empty subscription activation option is set to false, subscription cannot be activated");
         }
         if((sub.getServiceInstances() == null || sub.getServiceInstances().isEmpty())
                 && emptySubscriptionActivationEnabled) {
@@ -570,7 +571,8 @@ public class SubscriptionService extends BusinessService<Subscription> {
                     .stream()
                     .anyMatch(OfferComponent::isMandatory);
             if(mandatoryProducts) {
-                throw new BusinessException("The subscription cannot be activated as its offer includes mandatory products.");
+                throw new SubscriptionActivationException("MANDATORY_PRODUCTS_CHECK",
+                        "The subscription cannot be activated as its offer includes mandatory products.");
             } else {
                 sub.setStatus(ACTIVE);
                 update(sub);

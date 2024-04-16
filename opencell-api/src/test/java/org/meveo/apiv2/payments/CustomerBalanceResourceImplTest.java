@@ -81,7 +81,7 @@ public class CustomerBalanceResourceImplTest {
                 .code("CODE")
                 .label("LABEL")
                 .occTemplates(Collections.emptyList())
-                .balanceEl(null)
+                .balanceEL(null)
                 .build();
 
         customerBalanceResource.create(customerBalance);
@@ -95,7 +95,7 @@ public class CustomerBalanceResourceImplTest {
                 .code("CODE")
                 .label("LABEL")
                 .occTemplates(null)
-                .balanceEl(null)
+                .balanceEL(null)
                 .build();
 
         customerBalanceResource.create(customerBalance);

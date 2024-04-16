@@ -22,8 +22,8 @@ public class CustomerBalanceMapper extends ResourceMapper<CustomerBalance, org.m
             customerBalance.setDescription(resource.getLabel());
         }
         customerBalance.setDefaultBalance(resource.getDefaultBalance());
-        if(resource.getBalanceEl() != null) {
-            customerBalance.setBalanceEl(resource.getBalanceEl());
+        if(resource.getBalanceEL() != null) {
+            customerBalance.setBalanceEl(resource.getBalanceEL());
         }
         if(resource.getOccTemplates() != null) {
             List<OCCTemplate> templates = new ArrayList<>();

@@ -45,9 +45,11 @@ import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.meveo.api.dto.AgedReceivableDto;
 import org.meveo.apiv2.generic.GenericFieldDetails;
+import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.commons.utils.CsvBuilder;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.settings.AdvancedSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +65,10 @@ public class GenericFileExportManager {
 	
 	@Inject
     private ParamBeanFactory paramBeanFactory;
+
+    @Inject
+    private AdvancedSettingsApiService advancedSettingsApiService;
+
 	protected Logger log = LoggerFactory.getLogger(getClass());
 
     private static final String PATH_STRING_FOLDER = "exports" + File.separator + "generic"+ File.separator;
@@ -416,7 +422,8 @@ public class GenericFileExportManager {
 
         // If the map is not empty then save As Record to export - CSV, EXCEL or PDF
         if (!map.isEmpty()) {
-            Path filePath = saveAsRecord(filename, map, fileType, fieldDetails, orderedColumn, locale, null, null, null);
+            String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).orElse(";");
+            Path filePath = saveAsRecord(filename, map, fileType, fieldDetails, orderedColumn, locale, fieldsSeparator, null, null);
             return filePath == null ? null : filePath.toString();
         }
 

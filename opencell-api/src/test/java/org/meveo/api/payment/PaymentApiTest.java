@@ -1,5 +1,6 @@
 package org.meveo.api.payment;
 
+import static java.util.Collections.emptyList;
 import static java.util.List.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -330,7 +331,9 @@ public class PaymentApiTest {
 
     @Test
     public void should_remove_payment_rejection_action_found() {
-        when(paymentRejectionActionService.findById(1L)).thenReturn(new PaymentRejectionAction());
+        PaymentRejectionAction action = new PaymentRejectionAction();
+        action.setRejectionActionReports(emptyList());
+        when(paymentRejectionActionService.findById(1L)).thenReturn(action);
 
         paymentApi.removeRejectionAction(1L);
 

@@ -18,6 +18,7 @@ import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ModuleItem;
+import org.meveo.model.scripts.ScriptInstance;
 
 @Entity
 @ModuleItem
@@ -51,6 +52,13 @@ public class PaymentRejectionActionReport extends BusinessCFEntity {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_date")
     private Date endDate;
+
+	/**
+	 * Script instance associated to payment rejection report.
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "action_script_id")
+	private ScriptInstance actionScript;
 
 	public RejectedPayment getRejectedPayment() {
 		return rejectedPayment;
@@ -100,4 +108,11 @@ public class PaymentRejectionActionReport extends BusinessCFEntity {
 		this.endDate = endDate;
 	}
 
+	public ScriptInstance getActionScript() {
+		return actionScript;
+	}
+
+	public void setActionScript(ScriptInstance actionScript) {
+		this.actionScript = actionScript;
+	}
 }

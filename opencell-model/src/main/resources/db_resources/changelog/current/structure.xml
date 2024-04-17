@@ -24902,4 +24902,15 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
 
+    <changeSet id="INTRD-22259_20240409" author="zbariki">
+        <addColumn tableName="ar_payment_rejection_action_report">
+            <column name="action_script_id" type="bigint"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="action_script_id"
+                                 baseTableName="ar_payment_rejection_action_report"
+                                 constraintName="fk_payment_rejection_action_report_action_script"
+                                 referencedTableName="meveo_script_instance"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>

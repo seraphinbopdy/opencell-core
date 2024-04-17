@@ -491,6 +491,19 @@ public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
 
         try {
             subscriptionApi.activateSubscription(putData.getSubscriptionCode(), null);
+        } catch (IncorrectServiceInstanceException exception) {
+            if(exception.getMessage().startsWith("Subscription is ")
+                    || exception.getMessage().startsWith("The subscription status is")) {
+                throw new ForbiddenException(exception.getMessage());
+            } else {
+                processException(exception, result);
+            }
+        } catch (SubscriptionActivationException exception) {
+            if(MANDATORY_PRODUCTS_CHECK.equalsIgnoreCase(exception.getCode())) {
+                throw new ConflictException(exception.getMessage());
+            } else {
+                throw new ForbiddenException(exception.getMessage());
+            }
         } catch (Exception e) {
             processException(e, result);
         }

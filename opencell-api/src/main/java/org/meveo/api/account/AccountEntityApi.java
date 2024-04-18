@@ -279,6 +279,7 @@ public class AccountEntityApi extends BaseApi {
 		/*if(org.apache.commons.collections.CollectionUtils.isNotEmpty(registrationNumberList)) {
 			registrationNumberList.forEach(registrationNumber -> registrationNumber.setAccountEntity(null));
 		}*/
+        registrationNumberList.clear();
 		if(org.apache.commons.collections.CollectionUtils.isNotEmpty(registrationNumbers)) {
 			registrationNumbers.forEach(registrationNumberDto -> {
 				RegistrationNumber registrationNumber = registrationNumberService.findByRegistrationNo(registrationNumberDto.getRegistrationNo());

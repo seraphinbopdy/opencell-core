@@ -20867,5 +20867,6 @@
     <changeSet id="#INTRD-22318_20240415" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-20685_simple_customer_settings" author="a.rouaguebe" />
     <changeSet id="INTRD-22259_20240409" author="zbariki" />
-
+    <changeSet id="INTRD-22195_20240417" author="AbdelmounaimAkadid" />
+    
 </databaseChangeLog>

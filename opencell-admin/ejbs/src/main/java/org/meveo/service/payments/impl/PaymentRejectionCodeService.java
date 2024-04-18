@@ -17,6 +17,7 @@ import static org.meveo.commons.utils.StringUtils.EMPTY;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.meveo.api.exception.MeveoApiException;
 import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentRejectionCode;
 import org.meveo.service.base.BusinessService;
@@ -343,7 +344,14 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         if (rejectionCodes == null || rejectionCodes.isEmpty()) {
             return;
         }
-        rejectionCodes.forEach(this::remove);
+        rejectionCodes.forEach(rejectionCode ->  {
+            if(rejectionCode.getPaymentRejectionCodesGroup() == null) {
+                remove(rejectionCode);
+            } else {
+                throw new BusinessException("Rejection code " + rejectionCode.getCode()
+                        + " is used in a rejection codes group.");
+            }
+        } );
         getEntityManager().flush();
     }
 

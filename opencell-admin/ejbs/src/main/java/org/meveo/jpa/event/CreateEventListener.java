@@ -25,6 +25,9 @@ import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
+import org.meveo.service.admin.impl.SequenceService;
+import org.meveo.service.base.BusinessEntityService;
+import org.meveo.service.base.BusinessService;
 
 /**
  * JPA Persist event listener. Auto generate and customize business entity code.
@@ -34,6 +37,11 @@ import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
  */
 public class CreateEventListener extends DefaultPersistEventListener {
 
+	private static SequenceService sequenceService = null;
+	
+	static {
+		sequenceService = (SequenceService) EjbUtils.getServiceInterface("SequenceService");
+	}
     @Override
     public void onPersist(PersistEvent event) throws HibernateException {
         super.onPersist(event);
@@ -43,12 +51,31 @@ public class CreateEventListener extends DefaultPersistEventListener {
                 BusinessEntity businessEntity = (BusinessEntity) entity;
                 if (StringUtils.isBlank(businessEntity.getCode())) {
                     CustomGenericEntityCodeService customGenericEntityCodeService = (CustomGenericEntityCodeService) EjbUtils.getServiceInterface("CustomGenericEntityCodeService");
-                    businessEntity.setCode(customGenericEntityCodeService.getGenericEntityCode(businessEntity));
+	                businessEntity.setCode(checkExistingCodeonDB(businessEntity, customGenericEntityCodeService, 0));
                 }
             } catch (Exception e) {
                 throw new HibernateException(e);
             }
         }
     }
+	
+	/**
+	 * create method that take code as parameter and the  business entity
+	 * and check if it exists in the database if so increment it
+ 	 */
+	private String checkExistingCodeonDB(BusinessEntity entity, CustomGenericEntityCodeService customGenericEntityCodeService, int incrementCodeValue) {
+		BusinessService businessEntityService = (BusinessService) EjbUtils.getServiceInterface(entity.getClass());
+		String code = customGenericEntityCodeService.getGenericEntityCode(entity);
+		if(incrementCodeValue > 0) {
+			code = code + "_" + incrementCodeValue;
+		}
+		if (businessEntityService.findByCode(code) != null) {
+			return checkExistingCodeonDB(entity, customGenericEntityCodeService, ++incrementCodeValue);
+		}
+		return code;
+		
+		
+	}
+	
 
 }

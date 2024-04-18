@@ -978,6 +978,8 @@ public class PaymentApi extends BaseApi {
 	public void removeRejectionAction(Long id) {
 		PaymentRejectionAction rejectionAction = ofNullable(paymentRejectionActionService.findById(id))
 				.orElseThrow(() -> new NotFoundException("Payment rejection action not found"));
+		rejectionAction.getRejectionActionReports().forEach(paymentRejectionActionReport
+				-> paymentRejectionActionReport.setAction(null));
 		paymentRejectionActionService.remove(rejectionAction);
 	}
 

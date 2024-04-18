@@ -14086,6 +14086,7 @@
             <column name="report" type="${type.text}" />
             <column name="start_date" type="datetime" />
             <column name="end_date" type="datetime" />
+            <column name="action_script_id" type="bigint"/>
         </createTable>
     </changeSet>    
     
@@ -19330,7 +19331,14 @@
                                  referencedTableName="ar_payment_rejection_action"
                                  referencedColumnNames="id" />
                                      
-    </changeSet>    
+    </changeSet>
+    <changeSet id="INTRD-22259_2024049-rebuild-fk" author="zbariki">
+        <addForeignKeyConstraint baseColumnNames="action_script_id"
+                                 baseTableName="ar_payment_rejection_action_report"
+                                 constraintName="fk_payment_rejection_action_report_action_script"
+                                 referencedTableName="meveo_script_instance"
+                                 referencedColumnNames="id"/>
+    </changeSet>
     
     <!-- end fk -->
 
@@ -20858,5 +20866,6 @@
     <changeSet id="#INTRD-22262_20240408" author="aeljaouhari" />
     <changeSet id="#INTRD-22318_20240415" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-20685_simple_customer_settings" author="a.rouaguebe" />
-    
+    <changeSet id="INTRD-22259_20240409" author="zbariki" />
+
 </databaseChangeLog>

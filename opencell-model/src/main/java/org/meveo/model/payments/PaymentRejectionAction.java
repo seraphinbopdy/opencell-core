@@ -8,6 +8,7 @@ import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ModuleItem;
 import org.meveo.model.scripts.ScriptInstance;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,7 +16,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -48,6 +51,9 @@ public class PaymentRejectionAction extends BusinessCFEntity {
     @Column(name = "script_parameters", columnDefinition = "jsonb")
     private Map<String,String> scriptParameters;
 
+    @OneToMany(mappedBy = "action", fetch = FetchType.LAZY)
+    private List<PaymentRejectionActionReport> rejectionActionReports;
+
     public int getSequence() {
         return sequence;
     }
@@ -78,5 +84,13 @@ public class PaymentRejectionAction extends BusinessCFEntity {
 
     public void setScriptParameters(Map<String, String> scriptParameters) {
         this.scriptParameters = scriptParameters;
+    }
+
+    public List<PaymentRejectionActionReport> getRejectionActionReports() {
+        return rejectionActionReports;
+    }
+
+    public void setRejectionActionReports(List<PaymentRejectionActionReport> rejectionActionReports) {
+        this.rejectionActionReports = rejectionActionReports;
     }
 }

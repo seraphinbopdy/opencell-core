@@ -1089,7 +1089,7 @@ public class PaymentService extends PersistenceService<Payment> {
         	actionReport.setAction(action);
         	actionReport.setRejectedPayment(rejectedPayment);
         	actionReport.setStatus(PaymentRejectionActionStatus.PENDING);
-        	
+        	actionReport.setActionScript(action.getScript());
         	paymentRejectionActionReportService.create(actionReport);
         });
 	}

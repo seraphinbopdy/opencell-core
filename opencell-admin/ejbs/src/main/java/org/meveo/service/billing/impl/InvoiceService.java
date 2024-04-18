@@ -2859,6 +2859,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void validateInvoice(Invoice invoice) {
 		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+		invoice.setRejectedByRule(null);
+		invoice.setRejectReason(null);
 		serviceSingleton.assignInvoiceNumber(invoice, true);
 	}
     

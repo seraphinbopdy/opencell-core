@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static org.meveo.model.billing.BillingEntityTypeEnum.BILLINGACCOUNT;
 import static org.meveo.model.billing.BillingEntityTypeEnum.ORDER;
 
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -222,7 +223,7 @@ public class InvoiceLineAggregationService implements Serializable {
 	            fieldToFetch.add("discountPlanType as discount_plan_type");
 	            fieldToFetch.add("discountValue as discount_value");
             }
-            if (!aggregationConfiguration.isIgnoreOrders()) {
+            if (ORDER == aggregationConfiguration.getType() || !aggregationConfiguration.isIgnoreOrders()) {
                 fieldToFetch.add("orderInfo.order.id as commercial_order_id");
                 fieldToFetch.add("orderNumber as order_number");
                 fieldToFetch.add("orderInfo.order.id as order_id");
@@ -373,7 +374,7 @@ public class InvoiceLineAggregationService implements Serializable {
             groupBy.add("serviceInstance");
         }
 
-        if (!aggregationConfiguration.isIgnoreOrders()) {
+        if (ORDER == aggregationConfiguration.getType() || !aggregationConfiguration.isIgnoreOrders()) {
             groupBy.add("orderInfo.order.id");
             groupBy.add("orderNumber");
         }
@@ -430,7 +431,7 @@ public class InvoiceLineAggregationService implements Serializable {
 		    mapToInvoiceLineTable.put("subscription_id", "((agr.subscription_id is null and  ivl.subscription_id is null) or agr.subscription_id = ivl.subscription_id)");
 		    mapToInvoiceLineTable.put("service_instance_id", "((agr.service_instance_id is null and ivl.service_instance_id is null) or agr.service_instance_id = ivl.service_instance_id)");
 		}
-		if(aggregationConfiguration.isDisableAggregation() || !aggregationConfiguration.isIgnoreOrders()) {
+		if(aggregationConfiguration.isDisableAggregation() || ORDER == aggregationConfiguration.getType() || !aggregationConfiguration.isIgnoreOrders()) {
 	        mapToInvoiceLineTable.put("order_id", "((agr.order_id is null and ivl.commercial_order_id is null) or agr.order_id =  ivl.commercial_order_id)");
 	        mapToInvoiceLineTable.put("order_number", "((agr.order_number is null and ivl.order_number is null) or agr.order_number = ivl.order_number)");
 		}

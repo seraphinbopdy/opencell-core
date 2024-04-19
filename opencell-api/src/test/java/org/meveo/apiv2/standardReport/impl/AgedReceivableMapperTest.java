@@ -46,7 +46,7 @@ public class AgedReceivableMapperTest {
                 "CA_DESCRIPTION", "SELLER_DESCRIPTION", "SELLER_CODE",
                 new Date(), "EUR", 1L, "INV_1000", new BigDecimal(100), "CA_CODE", new BigDecimal(100), 1L, OperationCategoryEnum.DEBIT};
         input.add(agedReceivable);
-        List<AgedReceivableDto> response = mapper.buildDynamicResponse(input, 2);
+        List<AgedReceivableDto> response = mapper.buildDynamicResponse(input, 2, false);
 
         assertNotNull(response);
         assertEquals(responseDtoSize, response.size());

@@ -79,7 +79,7 @@ public class OfferTemplateDto extends ProductOfferingDto {
     @XmlElementWrapper(name = "offerProducts")
     @XmlElement(name = "offerProducts")
     @Schema(description = "list of The offer component")
-    protected List<OfferProductsDto> offerProducts=new ArrayList<>();
+    protected List<OfferProductsDto> offerProducts= null;
 
     /** The offer product templates. */
     @XmlElementWrapper(name = "allowedDiscountPlans")

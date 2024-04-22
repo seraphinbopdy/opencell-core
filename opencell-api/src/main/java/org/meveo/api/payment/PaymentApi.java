@@ -774,8 +774,14 @@ public class PaymentApi extends BaseApi {
 					&& rejectionCodesGroup.getPaymentRejectionCodes() != null
 					&& rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
 				removeRejectionCodeGroup(rejectionCodesGroup.getId());
+			} else {
+				if(rejectionCodesGroup != null
+						&& rejectionCodesGroup.getPaymentRejectionCodes() != null
+						&& !rejectionCodesGroup.getPaymentRejectionCodes().isEmpty()) {
+					rejectionCodesGroup.getPaymentRejectionCodes().remove(rejectionCode);
+				}
+				rejectionCodeService.remove(rejectionCode);
 			}
-			rejectionCodeService.remove(rejectionCode);
 		} else if(rejectionCode.getPaymentRejectionCodesGroup() != null && !forceDelete) {
 			throw new MeveoApiException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group." +
 					" Use ‘force:true’ to override. If the group becomes empty, it will be deleted too");
@@ -1155,9 +1161,14 @@ public class PaymentApi extends BaseApi {
 
 	private void removeDependencies(PaymentRejectionCodesGroup toRemove) {
 		toRemove.getPaymentRejectionActions()
-				.forEach(paymentRejectionAction -> paymentRejectionAction.setPaymentRejectionCodesGroup(null));
+				.forEach(paymentRejectionAction -> {
+					if(paymentRejectionAction.getRejectionActionReports() != null
+							&& !paymentRejectionAction.getRejectionActionReports().isEmpty()) {
+						paymentRejectionAction.getRejectionActionReports().forEach(report -> report.setAction(null));
+					}
+					paymentRejectionActionService.remove(paymentRejectionAction);});
 		toRemove.getPaymentRejectionCodes()
-				.forEach(paymentRejectionCode -> paymentRejectionCode.setPaymentRejectionCodesGroup(null));
+				.forEach(paymentRejectionCode -> rejectionCodeService.remove(paymentRejectionCode));
 	}
 
 	/**

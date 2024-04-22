@@ -252,12 +252,16 @@ public class PaymentResourceImpl implements PaymentResource {
         if (filters == null || filters.getFilters() == null || filters.getFilters().isEmpty()) {
             throw new MissingParameterException("No filter provided");
         }
-        final int deletedCodeCount = paymentApi.removeRejectionCode(filters);
-        return ok()
-                .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
-                        ",\"message\":\"Payment rejection codes successfully deleted\"}," +
-                        " \"numberOfDeletedCodes\":" + deletedCodeCount + "}")
-                .build();
+        try {
+            final int deletedCodeCount = paymentApi.removeRejectionCode(filters);
+            return ok()
+                    .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                            ",\"message\":\"Payment rejection codes successfully deleted\"}," +
+                            " \"numberOfDeletedCodes\":" + deletedCodeCount + "}")
+                    .build();
+        } catch (MeveoApiException exception) {
+            return buildErrorResponse(exception.getMessage());
+        }
     }
 
     /**

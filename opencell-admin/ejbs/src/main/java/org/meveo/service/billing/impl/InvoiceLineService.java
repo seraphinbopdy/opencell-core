@@ -66,6 +66,7 @@ import org.meveo.model.billing.AdjustmentStatusEnum;
 import org.meveo.model.billing.Amounts;
 import org.meveo.model.billing.ApplyMinimumModeEnum;
 import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.BillingEntityTypeEnum;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.ExtraMinAmount;
 import org.meveo.model.billing.Invoice;
@@ -1289,7 +1290,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 }
             }
 	        
-	        buildInvoiceKey(invoiceLine);
+	        buildInvoiceKey(invoiceLine, billingRun);
 	        invoiceLines.add(invoiceLine);
 			
             rtIlBrIds[i][0] = associatedRtIds;
@@ -1380,27 +1381,36 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
      * Build invoiceKey from an entity invoiceLine from different information such as billingAccount, seller, invoiceType, etc.
      *
      * @param invoiceLine InvoiceLine
+     * @param billingRun 
      * @return void
      */
-    private void buildInvoiceKey(InvoiceLine invoiceLine) {
+    private void buildInvoiceKey(InvoiceLine invoiceLine, BillingRun billingRun) {
+    	
         StringJoiner invoiceKey =  new StringJoiner(UNDERSCORE_SEPARATOR);
-        if (invoiceLine.getBillingAccount() != null) {
-            invoiceKey.add(String.valueOf(invoiceLine.getBillingAccount().getId()));
+        
+        invoiceKey.add(formatEntityId(invoiceLine.getBillingAccount()));
+        invoiceKey.add(formatId(invoiceLine.getSellerId()));
+        invoiceKey.add(formatId(invoiceLine.getInvoiceTypeId()));
+        invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));
+        if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.SUBSCRIPTION) {
+        	invoiceKey.add(formatEntityId(invoiceLine.getSubscription()));
         }
-        if (invoiceLine.getSellerId() != null) {
-            invoiceKey.add(String.valueOf(invoiceLine.getSellerId()));
-        }
-        if (invoiceLine.getPaymentMethodId() != null) {
-            invoiceKey.add(String.valueOf(invoiceLine.getPaymentMethodId()));
-        }
-        if (invoiceLine.getInvoiceTypeId() != null) {
-            invoiceKey.add(String.valueOf(invoiceLine.getInvoiceTypeId()));
+        if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.ORDER) {
+        	invoiceKey.add(formatEntityId(invoiceLine.getCommercialOrder()));
         }
         if (invoiceLine.getOpenOrderNumber() != null) {
             invoiceKey.add(invoiceLine.getOpenOrderNumber());
         }
         invoiceLine.setInvoiceKey(invoiceKey.toString());
     }
+    
+    private String formatEntityId(BaseEntity entity) {
+    	return formatId(entity==null? null:entity.getId());
+    }
+
+	private String formatId(Long id) {
+		return id==null?"":String.valueOf(id);
+	}
 
     /**
      * method to execute billing cycle script.

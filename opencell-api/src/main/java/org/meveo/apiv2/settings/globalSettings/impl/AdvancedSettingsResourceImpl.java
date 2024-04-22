@@ -21,7 +21,7 @@ public class AdvancedSettingsResourceImpl implements AdvancedSettingsResource {
 
 	@Override
 	public Response create(org.meveo.apiv2.settings.AdvancedSettings input) {
-		if (advancedSettingsApiService.findByCode(input.getCode()) != null) {
+		if (advancedSettingsApiService.findByCode(input.getCode()).isPresent()) {
 			throw new EntityAlreadyExistsException(AdvancedSettings.class, input.getCode());
 		}
 		AdvancedSettings advancedSetting = mapToEntity(input);

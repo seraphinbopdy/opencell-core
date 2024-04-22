@@ -433,7 +433,9 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 	                }
                 }
             });
-
+            accountingCodeJournal.values().forEach(journalEntry -> { 
+            	checkInvoiceLineRevenuDirection(journalEntry, occT); 
+            });                                 
             saved.addAll(accountingCodeJournal.values());
 
         } else {
@@ -516,9 +518,12 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
                     revenuEntry.setAnalyticCode3(accountingArticle.getAnalyticCode3());
                 }
                 revenuEntry.setTransactionalAmount(recordedInvoice.getInvoice().getDiscountAmount().negate());
+                checkInvoiceLineRevenuDirection(revenuEntry, occT);
                 saved.add(revenuEntry);
             }
-
+            accountingCodeJournal.values().forEach(journalEntry -> { 
+            	checkInvoiceLineRevenuDirection(journalEntry,occT); 
+            });                                 
             saved.addAll(accountingCodeJournal.values());
 
         } else {
@@ -542,11 +547,27 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 
     @Override
     public void create(JournalEntry journalEntry) {
+    	journalEntry.setAmount(journalEntry.getAmount().abs());
+    	journalEntry.setTransactionalAmount(journalEntry.getTransactionalAmount().abs());
         super.create(journalEntry);
         if(checkAuxiliaryCodeUniqniess(journalEntry.getAuxiliaryAccountCode(), journalEntry.getCustomerAccount()) != 0) {
             journalEntry.setAuxiliaryAccountCode(journalEntry.getAuxiliaryAccountCode()
                     + journalEntry.getCustomerAccount().getId());
         }
+    }
+    
+    
+    private void checkInvoiceLineRevenuDirection(JournalEntry journalEntry, OCCTemplate occTemplate) {
+		if (journalEntry.getAccountOperation() instanceof RecordedInvoice) {
+			OCCTemplate occTemplateNegative = ((RecordedInvoice) (journalEntry.getAccountOperation())).getInvoice().getInvoiceType().getOccTemplateNegative();
+			if (occTemplateNegative != null && occTemplate.getCode().equals(occTemplateNegative.getCode())) {
+				if (journalEntry.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+					journalEntry.setDirection(journalEntry.getDirection().equals(JournalEntryDirectionEnum.DEBIT) ? JournalEntryDirectionEnum.CREDIT : JournalEntryDirectionEnum.DEBIT);
+				}
+			} else if (journalEntry.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+				journalEntry.setDirection(journalEntry.getDirection().equals(JournalEntryDirectionEnum.DEBIT) ? JournalEntryDirectionEnum.CREDIT : JournalEntryDirectionEnum.DEBIT);
+			}
+		}
     }
 
     /**

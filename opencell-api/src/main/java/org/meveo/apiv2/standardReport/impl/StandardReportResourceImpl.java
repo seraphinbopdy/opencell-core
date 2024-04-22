@@ -62,7 +62,7 @@ public class StandardReportResourceImpl implements StandardReportResource {
                         startDueDate, endDueDate, customerAccountDescription, sellerDescription, sellerCode, invoiceNumber, stepInDays, numberOfPeriods, tradingCurrency, functionalCurrency);
         agedReceivableMapper.setAppProvider(appProvider);
     	List<AgedReceivableDto> agedReceivablesList = (stepInDays == null && numberOfPeriods == null)
-                ? agedReceivableMapper.toEntityList(agedBalanceList) : agedReceivableMapper.buildDynamicResponse(agedBalanceList, numberOfPeriods);
+                ? agedReceivableMapper.toEntityList(agedBalanceList) : agedReceivableMapper.buildDynamicResponse(agedBalanceList, numberOfPeriods, false);
         ImmutableAgedReceivable[] agedReceivablesData = agedReceivablesList
                 .stream()
                 .map(agedReceivableDto ->
@@ -119,7 +119,7 @@ public class StandardReportResourceImpl implements StandardReportResource {
 		            (String) input.getFilters().get("functionalCurrency"));
 		    // Convert List of Object to a list of Aged Receivable Dto
         	agedReceivablesList = (input.getFilters().get("stepInDays") == null && input.getFilters().get("numberOfPeriods") == null)
-                    ? agedReceivableMapper.fromListObjectToListEntity(agedBalanceList) : agedReceivableMapper.buildDynamicResponse(agedBalanceList, input.getFilters().get("numberOfPeriods") != null ? (Integer) input.getFilters().get("numberOfPeriods") : 0);
+                    ? agedReceivableMapper.fromListObjectToListEntity(agedBalanceList) : agedReceivableMapper.buildDynamicResponse(agedBalanceList, input.getFilters().get("numberOfPeriods") != null ? (Integer) input.getFilters().get("numberOfPeriods") : 0, true);
 
 		} else {
 			Date startDate = new Date();

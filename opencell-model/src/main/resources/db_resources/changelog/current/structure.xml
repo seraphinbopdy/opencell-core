@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
+    <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid">
+        <sql>update databasechangelog set filename='${liquibase_file_prefix}db_resources/changelog/current/structure.xml', md5sum=null where filename ='src/main/db_resources/changelog/current/data.xml'</sql>
+    </changeSet>
+    
     <changeSet id="#INTRD-2628-20211025" author="AbdelkaderBouazza">
         <addForeignKeyConstraint baseTableName="dunning_level_dunning_action" baseColumnNames="dunning_level_id"
                                  constraintName="dunning_level_dunning_action_pkey_const" referencedTableName="dunning_level"

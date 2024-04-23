@@ -293,6 +293,10 @@
 		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/header/seller/paymentGateway/bankName"/>
 		<fieldDescription><![CDATA[/invoice/header/seller/paymentGateway/bankName]]></fieldDescription>
 	</field>
+	<field name="totalAdvancesAmountWithTax" class="java.lang.Double">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/amount/advances/@totalAmountWithTax"/>
+		<fieldDescription><![CDATA[/invoice/amount/advances/@totalAmountWithTax]]></fieldDescription>
+	</field>
 	<group name="subCategory"/>
 	<group name="1"/>
 	<group name="2">
@@ -577,8 +581,21 @@
 					<textFieldExpression><![CDATA[($F{baExemptionReason} != null ? ("<style isBold='true'>Exemption reason : </style> Not subject to VAT - " + $F{baExemptionReason}) : "") + 
 (($F{baExemptionReason} == null || $F{baExemptionReason}.isEmpty()) && $F{vatexReasons} != null ? ("<style isBold='true'>VAT exoneration reason : </style>" + $F{vatexReasons} + "\n") : "")]]></textFieldExpression>
 				</textField>
+				<textField>
+					<reportElement x="226" y="3" width="350" height="19" forecolor="#000000" uuid="5d7f0c02-8094-464f-a79f-bea5b34c4789">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="5px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<printWhenExpression><![CDATA[$F{totalAdvancesAmountWithTax}!=null && $F{totalAdvancesAmountWithTax} > 0]]></printWhenExpression>
+					</reportElement>
+					<box bottomPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Bottom">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? "Prepaid amount : " + (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{totalAdvancesAmountWithTax}))) : "Prepaid amount : " + (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{totalAdvancesAmountWithTax})))]]></textFieldExpression>
+				</textField>
 				<componentElement>
-					<reportElement key="" positionType="Float" stretchType="ElementGroupHeight" isPrintRepeatedValues="false" x="243" y="4" width="343" height="30" isPrintWhenDetailOverflows="true" forecolor="#000000" uuid="efb6e3e2-cf48-479d-a73b-0fabcbe6decb"/>
+					<reportElement key="" positionType="Float" stretchType="ElementGroupHeight" isPrintRepeatedValues="false" x="241" y="30" width="343" height="30" isPrintWhenDetailOverflows="true" forecolor="#000000" uuid="efb6e3e2-cf48-479d-a73b-0fabcbe6decb"/>
 					<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="Blank">
 						<datasetRun subDataset="dataset1" uuid="de44a2e2-c550-491d-a95f-b1e1dfa85e3f">
 							<dataSourceExpression><![CDATA[$P{REPORT_DATA_SOURCE}.dataSource("/invoice/amount/taxes/tax")]]></dataSourceExpression>

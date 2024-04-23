@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Invoice" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryNewPage="true" uuid="801855a9-548e-443b-81d5-d27d42b5df88">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="MyInvoiceIssue"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="dev.xml"/>
 	<style name="table">
 		<box>
 			<pen lineWidth="1.0" lineColor="#000000"/>
@@ -350,6 +350,38 @@
 		</property>
 		<fieldDescription><![CDATA[/invoice/header/seller/PartyIdentification/CompanyId[@schemeID="0009"]]]></fieldDescription>
 	</field>
+	<field name="uaQuality" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/name/quality"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/name/quality]]></fieldDescription>
+	</field>
+	<field name="uaFirstName" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/name/firstName"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/name/firstName]]></fieldDescription>
+	</field>
+	<field name="uaName" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/name/name"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/name/name]]></fieldDescription>
+	</field>
+	<field name="uaAddrLine1" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/address1"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/address1]]></fieldDescription>
+	</field>
+	<field name="uaAddrLine2" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/address2"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/address2]]></fieldDescription>
+	</field>
+	<field name="uaAddrZip" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/postalCode"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/postalCode]]></fieldDescription>
+	</field>
+	<field name="uaCity" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/city"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/city]]></fieldDescription>
+	</field>
+	<field name="uaCountry" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/countryName"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/countryName]]></fieldDescription>
+	</field>
 	<group name="1">
 		<groupHeader>
 			<band height="292" splitType="Immediate">
@@ -469,16 +501,16 @@
 							<textElement textAlignment="Left" verticalAlignment="Top">
 								<font fontName="SansSerif" size="10" isBold="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[(($F{baQuality}!=null && !String.valueOf($F{baQuality}).isEmpty() && !String.valueOf($F{baQuality}).equals("null")) ? $F{baQuality} + " " : "")
-+ (($F{baFirstName}!=null && !String.valueOf($F{baFirstName}).isEmpty() && !String.valueOf($F{baFirstName}).equals("null")) ? $F{baFirstName} + " " : "") 
-+ (($F{baName}!=null && !String.valueOf($F{baName}).isEmpty() && !String.valueOf($F{baName}).equals("null")) ? $F{baName} : "") 
+							<textFieldExpression><![CDATA[(($F{uaQuality}!=null && !String.valueOf($F{uaQuality}).isEmpty() && !String.valueOf($F{uaQuality}).equals("null")) ? $F{uaQuality} + " " : "")
++ (($F{uaFirstName}!=null && !String.valueOf($F{uaFirstName}).isEmpty() && !String.valueOf($F{uaFirstName}).equals("null")) ? $F{uaFirstName} + " " : "") 
++ (($F{uaName}!=null && !String.valueOf($F{uaName}).isEmpty() && !String.valueOf($F{uaName}).equals("null")) ? $F{uaName} : "") 
 + "\n"
-+ (($F{baAddrLine1}!=null && !String.valueOf($F{baAddrLine1}).isEmpty() && !String.valueOf($F{baAddrLine1}).equals("null")) ? $F{baAddrLine1} + "\n" : "")
-+ (($F{baAddrLine2}!=null && !String.valueOf($F{baAddrLine2}).isEmpty() && !String.valueOf($F{baAddrLine2}).equals("null")) ? $F{baAddrLine2} + "\n" : "")
-+ (($F{baAddrZip}!=null && !String.valueOf($F{baAddrZip}).isEmpty() && !String.valueOf($F{baAddrZip}).equals("null")) ? $F{baAddrZip} + " " : "")
-+ (($F{baCity}!=null && !String.valueOf($F{baCity}).isEmpty() && !String.valueOf($F{baCity}).equals("null")) ? $F{baCity} : "")
++ (($F{uaAddrLine1}!=null && !String.valueOf($F{uaAddrLine1}).isEmpty() && !String.valueOf($F{uaAddrLine1}).equals("null")) ? $F{uaAddrLine1} + "\n" : "")
++ (($F{uaAddrLine2}!=null && !String.valueOf($F{uaAddrLine2}).isEmpty() && !String.valueOf($F{uaAddrLine2}).equals("null")) ? $F{uaAddrLine2} + "\n" : "")
++ (($F{uaAddrZip}!=null && !String.valueOf($F{uaAddrZip}).isEmpty() && !String.valueOf($F{uaAddrZip}).equals("null")) ? $F{uaAddrZip} + " " : "")
++ (($F{uaCity}!=null && !String.valueOf($F{uaCity}).isEmpty() && !String.valueOf($F{uaCity}).equals("null")) ? $F{uaCity} : "")
 + "\n"
-+ (($F{baCountry}!=null && !String.valueOf($F{baCountry}).isEmpty() && !String.valueOf($F{baCountry}).equals("null")) ? $F{baCountry} : "")
++ (($F{uaCountry}!=null && !String.valueOf($F{uaCountry}).isEmpty() && !String.valueOf($F{uaCountry}).equals("null")) ? $F{uaCountry} : "")
 + "\n"]]></textFieldExpression>
 						</textField>
 						<staticText>

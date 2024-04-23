@@ -278,11 +278,11 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     private void updateHugeEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
         executeMassUpdaterJob(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
         if (isRunningAsJobManager(jobExecutionResult)) {
+            update(jobExecutionResult, jobInstance, batchEntity);
             if (jobExecutionResult.getNbItemsCorrectlyProcessed() > 0) {
                 //Execute the email sending in an isolated transaction ==> if there is an exception, we don't position the batch in FAILURE status.
                 methodCallingUtils.callMethodInNewTx(() -> sendEmail(batchEntity, jobExecutionResult));
             }
-            update(jobExecutionResult, jobInstance, batchEntity);
         }
     }
 

@@ -1382,7 +1382,6 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
      *
      * @param invoiceLine InvoiceLine
      * @param billingRun 
-     * @return void
      */
     private void buildInvoiceKey(InvoiceLine invoiceLine, BillingRun billingRun) {
     	
@@ -1392,11 +1391,13 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         invoiceKey.add(formatId(invoiceLine.getSellerId()));
         invoiceKey.add(formatId(invoiceLine.getInvoiceTypeId()));
         invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));
-        if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.SUBSCRIPTION) {
-        	invoiceKey.add(formatEntityId(invoiceLine.getSubscription()));
-        }
-        if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.ORDER) {
-        	invoiceKey.add(formatEntityId(invoiceLine.getCommercialOrder()));
+        if(billingRun != null) {
+            if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.SUBSCRIPTION) {
+                invoiceKey.add(formatEntityId(invoiceLine.getSubscription()));
+            }
+            if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.ORDER) {
+                invoiceKey.add(formatEntityId(invoiceLine.getCommercialOrder()));
+            }
         }
         if (invoiceLine.getOpenOrderNumber() != null) {
             invoiceKey.add(invoiceLine.getOpenOrderNumber());

@@ -1391,7 +1391,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         invoiceKey.add(formatId(invoiceLine.getSellerId()));
         invoiceKey.add(formatId(invoiceLine.getInvoiceTypeId()));
         invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));
-        if(billingRun != null) {
+        if(billingRun != null && billingRun.getBillingCycle() != null) {
             if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.SUBSCRIPTION) {
                 invoiceKey.add(formatEntityId(invoiceLine.getSubscription()));
             }

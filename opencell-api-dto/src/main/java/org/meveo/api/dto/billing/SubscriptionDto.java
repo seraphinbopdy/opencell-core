@@ -98,12 +98,14 @@ public class SubscriptionDto extends BusinessEntityDto {
 
     /** The services. */
     @XmlElement(required = false)
+    @Deprecated(forRemoval = true, since = "11.X")
     private ServiceInstancesDto services = new ServiceInstancesDto();
 
     /**
      * Use in creation and update.
      */
     @XmlElement(required = false)
+    @Deprecated(forRemoval = true, since = "11.X")
     private ProductsDto products = new ProductsDto();
 
     /**

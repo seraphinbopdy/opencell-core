@@ -18,18 +18,25 @@
 
 package org.meveo.api.account;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.*;
 import org.meveo.api.billing.SubscriptionApi;
 import org.meveo.api.dto.*;
 import org.meveo.api.dto.account.*;
+import org.meveo.api.dto.billing.ActivateServicesRequestDto;
+import org.meveo.api.dto.billing.ServiceToActivateDto;
 import org.meveo.api.dto.billing.SubscriptionDto;
+import org.meveo.api.dto.billing.SubscriptionsDto;
+import org.meveo.api.dto.cpq.ProductToInstantiateDto;
 import org.meveo.api.dto.payment.PaymentMethodDto;
 import org.meveo.api.dto.response.account.GetAccountHierarchyResponseDto;
 import org.meveo.api.dto.response.account.GetBillingAccountResponseDto;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
+import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.payment.PaymentMethodApi;
 import org.meveo.api.security.Interceptor.SecuredBusinessEntityMethodInterceptor;
 import org.meveo.api.security.config.annotation.FilterProperty;
@@ -52,16 +59,19 @@ import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.CustomerAccountStatusEnum;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 import org.meveo.service.admin.impl.CountryService;
 import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.billing.impl.BillingAccountService;
+import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.billing.impl.UserAccountService;
 import org.meveo.service.catalog.impl.TitleService;
 import org.meveo.service.crm.impl.*;
 import org.meveo.service.payments.impl.CustomerAccountService;
+import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.util.ApplicationProvider;
 import org.meveo.util.MeveoParamBean;
 
@@ -180,6 +190,11 @@ public class AccountHierarchyApi extends BaseApi {
     public static final int CA = 2;
     public static final int BA = 4;
     public static final int UA = 8;
+	
+	@Inject
+	private SubscriptionService subscriptionService;
+	@Inject
+	private SubscriptionTerminationReasonService subscriptionTerminationReasonService;
 
     /**
      * Creates the customer heirarchy including : - Trading Country - Trading Currency - Trading Language - Customer Brand - Customer Category - Seller - Customer - Customer
@@ -960,7 +975,7 @@ public class AccountHierarchyApi extends BaseApi {
                                                     } else {
                                                         subscriptionDto.setUserAccount(userAccountDto.getCode());
                                                     }
-                                                    methodCallingUtils.callMethodInNewTx(() -> subscriptionApi.createOrUpdatePartialWithAccessAndServices(subscriptionDto, null, null, null));
+	                                                processSubscriptionOnTransitionStatus(subscriptionDto);
                                                 }
                                             }
                                         }
@@ -2171,4 +2186,80 @@ public class AccountHierarchyApi extends BaseApi {
         }
         return listPaymentMethod;
     }
+	
+	private void processSubscriptionOnTransitionStatus(SubscriptionDto subscriptionDto) {
+		Subscription subscription = subscriptionService.findByCodeAndValidityDate(subscriptionDto.getCode(), subscriptionDto.getValidityDate());
+		List<SubscriptionStatusEnum> allowedStatus =  List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.ACTIVE);
+		if(subscription == null && (subscriptionDto.getStatus() == null || allowedStatus.contains(subscriptionDto.getStatus()))) {
+			subscription = subscriptionApi.create(subscriptionDto);
+			if(subscriptionDto.getStatus() == null) {
+				return;
+			}
+		}
+		String errorMsg = "Transition from status : " + (subscription != null ? subscription.getStatus() : null) + " to status : " + subscriptionDto.getStatus() + " is not allowed";
+		if(subscription != null) {
+			log.info("Subscription : {}, from status : {}, to status : {}", subscription.getCode(), subscription.getStatus(), subscriptionDto.getStatus());
+			switch (subscriptionDto.getStatus()) {
+				case ACTIVE:
+					allowedStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.SUSPENDED);
+					if(!allowedStatus.contains(subscription.getStatus())){
+						throw new BusinessApiException(errorMsg);
+					}
+					if(subscription.getStatus() == SubscriptionStatusEnum.SUSPENDED) {
+						subscriptionService.subscriptionReactivation(subscription, null);
+						break;
+					}
+					if (CollectionUtils.isNotEmpty(subscriptionDto.getProductsToInstantiate())) {
+						ActivateServicesRequestDto activateServices = new ActivateServicesRequestDto();
+						List<ServiceToActivateDto> serviceToActivateDto = new ArrayList<>();
+						for(ProductToInstantiateDto productToInstantiateDto: subscriptionDto.getProductsToInstantiate()){
+							ServiceToActivateDto serviceToActivate = new ServiceToActivateDto();
+							serviceToActivate.setCode(productToInstantiateDto.getProductCode());
+							serviceToActivate.setQuantity(productToInstantiateDto.getQuantity());
+							serviceToActivate.setSubscriptionDate(subscription.getSubscriptionDate());
+							serviceToActivateDto.add(serviceToActivate);
+						}
+						activateServices.getServicesToActivateDto().setService(serviceToActivateDto);
+						activateServices.setSubscription(subscription.getCode());
+						subscriptionApi.activateServices(activateServices);
+					}else{
+						subscriptionService.activateInstantiatedService(subscription);
+					}
+					
+					break;
+				case RESILIATED:
+					allowedStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.ACTIVE, SubscriptionStatusEnum.SUSPENDED);
+					if(!allowedStatus.contains(subscription.getStatus())){
+						throw new BusinessApiException(errorMsg);
+					}
+					//TODO: add comment on US for this RESILIATED status that it requies terminationReason to terminate this subscription
+					List<SubscriptionStatusEnum> fromStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.ACTIVE, SubscriptionStatusEnum.SUSPENDED);
+					if (fromStatus.contains(subscription.getStatus()) && subscriptionDto.getTerminationDate() != null){
+						SubscriptionTerminationReason terminationReason = null;
+						if(StringUtils.isNotBlank(subscriptionDto.getTerminationReason())){
+							terminationReason = subscriptionTerminationReasonService.findByCodeReason(subscriptionDto.getTerminationReason());
+							if(terminationReason == null) {
+								throw new EntityDoesNotExistsException(SubscriptionTerminationReason.class, subscriptionDto.getTerminationReason());
+							}
+						}
+						
+						subscriptionService.terminateSubscription(subscription, subscriptionDto.getTerminationDate(), terminationReason, ChargeInstance.NO_ORDER_NUMBER);
+					}
+					break;
+					case SUSPENDED:
+						allowedStatus = List.of(SubscriptionStatusEnum.ACTIVE);
+						if(!allowedStatus.contains(subscription.getStatus())){
+							throw new BusinessApiException(errorMsg);
+						}
+						if (subscription.getStatus() == SubscriptionStatusEnum.ACTIVE) {
+							subscriptionService.subscriptionSuspension(subscription, null);
+						}
+						break;
+				default:
+					throw new BusinessApiException(errorMsg);
+			}
+		}else {
+			throw new BusinessApiException(errorMsg);
+		}
+	}
 }

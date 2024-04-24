@@ -3315,7 +3315,7 @@ public class SubscriptionApi extends BaseApi {
     @Inject
     private ProductService productService;
 
-    private void processProduct(Subscription subscription,  ProductToInstantiateDto productDto) {
+    public void processProduct(Subscription subscription,  ProductToInstantiateDto productDto) {
         if (StringUtils.isBlank(productDto.getProductCode())) {
             missingParameters.add("productCode");
         }

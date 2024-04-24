@@ -19,6 +19,7 @@
 package org.meveo.api.payment;
 
 import static java.lang.String.format;
+import static java.math.BigDecimal.ZERO;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
@@ -28,6 +29,7 @@ import static org.meveo.apiv2.payments.ImmutableRejectionGroup.builder;
 import static org.meveo.apiv2.payments.SequenceActionType.DOWN;
 import static org.meveo.apiv2.payments.SequenceActionType.UP;
 import static org.meveo.commons.utils.StringUtils.isBlank;
+import static org.meveo.model.payments.MatchingStatusEnum.O;
 import static org.meveo.model.payments.RejectedType.MANUAL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.ENCODED_FILE_RESULT_LABEL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.EXPORT_SIZE_RESULT_LABEL;
@@ -100,7 +102,6 @@ import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.AutomatedPayment;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.MatchingAmount;
-import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.MatchingTypeEnum;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OtherCreditAndCharge;
@@ -239,7 +240,7 @@ public class PaymentApi extends BaseApi {
         payment.setReference(paymentDto.getReference());
         payment.setDueDate(paymentDto.getDueDate() == null ? new Date() : paymentDto.getDueDate());
         payment.setTransactionDate(paymentDto.getTransactionDate() == null ? new Date() : paymentDto.getTransactionDate());
-        payment.setMatchingStatus(MatchingStatusEnum.O);
+        payment.setMatchingStatus(O);
         payment.setPaymentOrder(paymentDto.getPaymentOrder());
         payment.setFees(paymentDto.getFees());
         payment.setComment(paymentDto.getComment());
@@ -343,7 +344,7 @@ public class PaymentApi extends BaseApi {
 			throw new BusinessApiException("Transaction currency is different from account operation currency");
 		}
 		for(AccountOperation ao :aosToPaid ) {
-			if(BigDecimal.ZERO.compareTo(payment.getUnMatchingAmount()) == 0) {
+			if(ZERO.compareTo(payment.getUnMatchingAmount()) == 0) {
 				break;
 			}
 			List<Long> aosIdsToMatch = new ArrayList<>();
@@ -1259,28 +1260,69 @@ public class PaymentApi extends BaseApi {
 		if(payment.getPaymentGateway() == null) {
 			payment.setPaymentGateway(paymentRejectionCode.getPaymentGateway());
 		}
-		OCCTemplate occTemplate = paymentService.getOCCTemplateRejectPayment(payment);
+		try {
 
-		RejectedPayment rejectedPayment = from(payment, occTemplate);
-		accountOperationService.create(rejectedPayment);
-		payment.setRejectedPayment(rejectedPayment);
-		if(!rejectionPayment.getSkipRejectionActions()) {
-			paymentService.createRejectionActions(rejectedPayment);
+			OCCTemplate occTemplate = paymentService.getOCCTemplateRejectPayment(payment);
+			matchingCodeService.unmatchingByAOid(payment.getId());
+
+			RejectedPayment rejectedPayment = from(payment, occTemplate);
+			accountOperationService.handleAccountingPeriods(rejectedPayment);
+			accountOperationService.create(rejectedPayment);
+			payment.setRejectedPayment(rejectedPayment);
+			if (!rejectionPayment.getSkipRejectionActions()) {
+				paymentService.createRejectionActions(rejectedPayment);
+			}
+			if (rejectedPayment.getListAaccountOperationSupposedPaid() != null) {
+				for (AccountOperation ao : rejectedPayment.getListAaccountOperationSupposedPaid()) {
+					ao.setRejectedPayment(rejectedPayment);
+				}
+			}
+			List<Long> aos = new ArrayList<>();
+			aos.add(payment.getId());
+			aos.add(rejectedPayment.getId());
+			matchingCodeService.matchOperations(payment.getCustomerAccount().getId(),
+					null, aos, null);
+			PaymentHistory paymentHistory = paymentHistoryService.findHistoryByPaymentId(payment.getReference());
+			if (paymentHistory != null) {
+				paymentHistory.setAsyncStatus(PaymentStatusEnum.REJECTED);
+				paymentHistory.setLastUpdateDate(new Date());
+				paymentHistory.setErrorCode("RJCT");
+				paymentHistory.setErrorMessage("Manual payment rejection");
+				paymentHistoryService.update(paymentHistory);
+			}
+			accountOperationService.update(payment);
+			return RejectionPayment.from(rejectedPayment);
+		} catch (Exception e) {
+			throw new BusinessApiException(e);
 		}
-		accountOperationService.update(payment);
-		return RejectionPayment.from(rejectedPayment);
 	}
 
 	private RejectedPayment from(Payment payment, OCCTemplate occTemplate) {
 		RejectedPayment rejectedPayment = new RejectedPayment();
+		CustomerAccount customerAccount = payment.getCustomerAccount();
+		paymentService.calculateAmountsByTransactionCurrency(rejectedPayment,
+				customerAccount, payment.getUnMatchingAmount(), null, new Date());
 		rejectedPayment.setRejectedType(MANUAL);
-		rejectedPayment.setBankReference(payment.getBankReference());
+		rejectedPayment.setBankReference("r_" + payment.getBankReference());
 		rejectedPayment.setRejectedDate(new Date());
+		rejectedPayment.setTransactionDate(new Date());
+		rejectedPayment.setDueDate(payment.getDueDate());
 		rejectedPayment.setAccountingCode(occTemplate.getAccountingCode());
 		rejectedPayment.setCode(occTemplate.getCode());
 		rejectedPayment.setDescription(occTemplate.getDescription());
 		rejectedPayment.setTransactionCategory(occTemplate.getOccCategory());
 		rejectedPayment.setPaymentMethod(payment.getPaymentMethod());
+		rejectedPayment.setMatchingAmount(ZERO);
+		rejectedPayment.setUnMatchingAmount(payment.getUnMatchingAmount());
+		rejectedPayment.setCustomerAccount(payment.getCustomerAccount());
+		rejectedPayment.setAccountCodeClientSide(payment.getAccountCodeClientSide());
+		rejectedPayment.setTaxAmount(payment.getTaxAmount());
+		rejectedPayment.setAmountWithoutTax(payment.getAmountWithoutTax());
+		rejectedPayment.setOrderNumber(payment.getOrderNumber());
+		rejectedPayment.setMatchingStatus(O);
+		rejectedPayment.setRejectedDescription("Manual rejection");
+		rejectedPayment.setRejectedCode("MANUAL_REJECT");
+		rejectedPayment.setListAaccountOperationSupposedPaid(paymentService.getAccountOperationThatWasPaid(payment));
 		return rejectedPayment;
 	}
 

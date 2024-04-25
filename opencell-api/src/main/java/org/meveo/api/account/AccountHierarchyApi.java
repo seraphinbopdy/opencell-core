@@ -2228,13 +2228,16 @@ public class AccountHierarchyApi extends BaseApi {
 					
 					break;
 				case RESILIATED:
+					if(subscriptionDto.getTerminationDate() == null) {
+						missingParameters.add("terminationDate");
+						handleMissingParameters();
+					}
 					allowedStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.ACTIVE, SubscriptionStatusEnum.SUSPENDED);
 					if(!allowedStatus.contains(subscription.getStatus())){
 						throw new BusinessApiException(errorMsg);
 					}
-					//TODO: add comment on US for this RESILIATED status that it requies terminationReason to terminate this subscription
-					List<SubscriptionStatusEnum> fromStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.ACTIVE, SubscriptionStatusEnum.SUSPENDED);
-					if (fromStatus.contains(subscription.getStatus()) && subscriptionDto.getTerminationDate() != null){
+					//TODO: add comment on US for this RESILIATED status that it requires terminationReason to terminate this subscription
+					if (allowedStatus.contains(subscription.getStatus()) && subscriptionDto.getTerminationDate() != null){
 						SubscriptionTerminationReason terminationReason = null;
 						if(StringUtils.isNotBlank(subscriptionDto.getTerminationReason())){
 							terminationReason = subscriptionTerminationReasonService.findByCodeReason(subscriptionDto.getTerminationReason());

@@ -1257,8 +1257,15 @@ public class PaymentApi extends BaseApi {
 				.orElseThrow(() -> new NotFoundException("Rejection code "
 						+ rejectionPayment.getRejectionCode()
 						+ " not found for gateway[code=" + rejectionPayment.getPaymentGatewayCode()));
-		if(payment.getPaymentGateway() == null) {
-			payment.setPaymentGateway(paymentRejectionCode.getPaymentGateway());
+		PaymentGateway paymentGateway = null;
+		if(rejectionPayment.getPaymentGatewayCode() != null) {
+			paymentGateway = paymentGatewayService.findByCode(rejectionPayment.getPaymentGatewayCode());
+		}
+		if(paymentGateway == null && payment.getPaymentGateway() != null) {
+			paymentGateway = payment.getPaymentGateway();
+		}
+		if(paymentGateway == null && rejectionPayment.getPaymentGatewayCode() != null) {
+			throw new BadRequestException("Payment has no gateway. Please provide a valid paymentGateway");
 		}
 		try {
 
@@ -1266,6 +1273,7 @@ public class PaymentApi extends BaseApi {
 			matchingCodeService.unmatchingByAOid(payment.getId());
 
 			RejectedPayment rejectedPayment = from(rejectionPayment, payment, occTemplate);
+			rejectedPayment.setPaymentGateway(paymentGateway);
 			accountOperationService.handleAccountingPeriods(rejectedPayment);
 			accountOperationService.create(rejectedPayment);
 			payment.setRejectedPayment(rejectedPayment);

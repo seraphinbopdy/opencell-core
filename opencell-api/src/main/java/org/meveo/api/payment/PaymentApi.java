@@ -1265,7 +1265,7 @@ public class PaymentApi extends BaseApi {
 			OCCTemplate occTemplate = paymentService.getOCCTemplateRejectPayment(payment);
 			matchingCodeService.unmatchingByAOid(payment.getId());
 
-			RejectedPayment rejectedPayment = from(payment, occTemplate);
+			RejectedPayment rejectedPayment = from(rejectionPayment, payment, occTemplate);
 			accountOperationService.handleAccountingPeriods(rejectedPayment);
 			accountOperationService.create(rejectedPayment);
 			payment.setRejectedPayment(rejectedPayment);
@@ -1286,8 +1286,8 @@ public class PaymentApi extends BaseApi {
 			if (paymentHistory != null) {
 				paymentHistory.setAsyncStatus(PaymentStatusEnum.REJECTED);
 				paymentHistory.setLastUpdateDate(new Date());
-				paymentHistory.setErrorCode("RJCT");
-				paymentHistory.setErrorMessage("Manual payment rejection");
+				paymentHistory.setErrorCode(rejectionPayment.getRejectionCode());
+				paymentHistory.setErrorMessage(rejectionPayment.getComment());
 				paymentHistoryService.update(paymentHistory);
 			}
 			accountOperationService.update(payment);
@@ -1297,13 +1297,13 @@ public class PaymentApi extends BaseApi {
 		}
 	}
 
-	private RejectedPayment from(Payment payment, OCCTemplate occTemplate) {
+	private RejectedPayment from(RejectionPayment rejectionPayment, Payment payment, OCCTemplate occTemplate) {
 		RejectedPayment rejectedPayment = new RejectedPayment();
 		CustomerAccount customerAccount = payment.getCustomerAccount();
 		paymentService.calculateAmountsByTransactionCurrency(rejectedPayment,
 				customerAccount, payment.getUnMatchingAmount(), null, new Date());
 		rejectedPayment.setRejectedType(MANUAL);
-		rejectedPayment.setBankReference("r_" + payment.getBankReference());
+		rejectedPayment.setBankReference(payment.getBankReference());
 		rejectedPayment.setRejectedDate(new Date());
 		rejectedPayment.setTransactionDate(new Date());
 		rejectedPayment.setDueDate(payment.getDueDate());
@@ -1320,8 +1320,8 @@ public class PaymentApi extends BaseApi {
 		rejectedPayment.setAmountWithoutTax(payment.getAmountWithoutTax());
 		rejectedPayment.setOrderNumber(payment.getOrderNumber());
 		rejectedPayment.setMatchingStatus(O);
-		rejectedPayment.setRejectedDescription("Manual rejection");
-		rejectedPayment.setRejectedCode("MANUAL_REJECT");
+		rejectedPayment.setRejectedDescription(rejectionPayment.getComment());
+		rejectedPayment.setRejectedCode(rejectionPayment.getRejectionCode());
 		rejectedPayment.setListAaccountOperationSupposedPaid(paymentService.getAccountOperationThatWasPaid(payment));
 		return rejectedPayment;
 	}

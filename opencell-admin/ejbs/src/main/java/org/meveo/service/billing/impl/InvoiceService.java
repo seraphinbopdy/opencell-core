@@ -2807,16 +2807,17 @@ public class InvoiceService extends PersistenceService<Invoice> {
             super.remove(invoice);
         } else {
             invoiceLinesService.cancelIlByInvoices(invoicesIds);
-            cancelInvoiceById(invoice.getId());
+            cancelInvoiceById(invoice.getId(), currentUser.getUserName());
         }
         updateBillingRunStatistics(invoice);
         log.debug("Invoice canceled {}", invoice.getTemporaryInvoiceNumber());
     }
 
-	public void cancelInvoiceById(Long invoiceId) {
+    public void cancelInvoiceById(Long invoiceId, String pUserName) {
         getEntityManager().createNamedQuery("Invoice.cancelInvoiceById")
-        .setParameter("now", new Date())
+                .setParameter("now", new Date())
                 .setParameter("invoiceId", invoiceId)
+                .setParameter("username", pUserName)
                 .executeUpdate();
     }
     

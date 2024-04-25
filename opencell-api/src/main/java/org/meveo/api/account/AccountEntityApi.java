@@ -20,6 +20,7 @@ package org.meveo.api.account;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.meveo.admin.util.ResourceBundle;
 import org.meveo.api.BaseApi;
 import org.meveo.api.dto.account.AccountDto;
 import org.meveo.api.dto.account.RegistrationNumberDto;
@@ -70,6 +71,8 @@ public class AccountEntityApi extends BaseApi {
 	
 	@Inject
 	protected IsoIcdService isoIcdService;
+	@Inject
+	private ResourceBundle resourceBundle;
 
     public void populate(AccountDto postData, AccountEntity accountEntity) throws MeveoApiException {
         Address address = new Address();
@@ -281,6 +284,9 @@ public class AccountEntityApi extends BaseApi {
 		}*/
         registrationNumberList.clear();
 		if(org.apache.commons.collections.CollectionUtils.isNotEmpty(registrationNumbers)) {
+			if(registrationNumbers.size() > 1) {
+				throw new BusinessApiException(resourceBundle.getString("registrationNumber.multiple.numberNotAllowed"));
+			}
 			registrationNumbers.forEach(registrationNumberDto -> {
 				RegistrationNumber registrationNumber = registrationNumberService.findByRegistrationNo(registrationNumberDto.getRegistrationNo());
 				IsoIcd isoIcd = null;

@@ -24984,5 +24984,16 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512000000')" />
         </insert>
     </changeSet>
+    
+    <changeSet id="INTRD-22557_20240425" author="TarikFA.">
+        <update tableName="iso_icd">
+            <column name="scheme_name" value="SIREN" />
+            <where>code = '0002'</where>
+        </update>
+        <update tableName="iso_icd">
+            <column name="scheme_name" value="SIRET" />
+            <where>code = '0009'</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>

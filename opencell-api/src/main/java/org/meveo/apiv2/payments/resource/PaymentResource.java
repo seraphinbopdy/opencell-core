@@ -191,7 +191,7 @@ public interface PaymentResource {
                     @ApiResponse(responseCode = "404", description = "No entity found to remove"),
                     @ApiResponse(responseCode = "400", description = "RejectionCode deletion failed")
             })
-    Response removeRejectionCode(@Parameter(required = true) PagingAndFiltering filters);
+    Response removeRejectionCode(@Parameter(required = true) RejectionCodeDeleteInput rejectionCodeDeleteInput);
 
     @POST
     @Path("/rejectionCodes/group")

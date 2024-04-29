@@ -351,8 +351,7 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                 throw new BusinessException("Rejection code " + rejectionCode.getCode()
                         + " is used in a rejection codes group.");
             }
-        } );
-        getEntityManager().flush();
+        });
     }
 
     /**

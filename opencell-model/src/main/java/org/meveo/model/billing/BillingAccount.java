@@ -45,6 +45,7 @@ import javax.persistence.MapKey;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.QueryHint;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -121,6 +122,8 @@ import org.meveo.model.tax.TaxCategory;
 		@NamedQuery(name = "BillingAccount.getCountByCreditCategory", query = "select count(*) from BillingAccount ba where ba.id=:id and ba.customerAccount.creditCategory.id in (:creditCategoryIds)"),
         @NamedQuery(name = "BillingAccount.getBaFetchCaAndCustomer",
                 query = "select ba from BillingAccount ba left join fetch ba.customerAccount as ca left join fetch ca.customer as c left join fetch c.parentCustomer where ba.id = :id "),
+		@NamedQuery(name = "BillingAccount.fetchIdByCode", query = "SELECT b.id FROM BillingAccount b where b.code=:code", hints = {@QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
+		@NamedQuery(name = "BillingAccount.listIdByCode", query = "SELECT b.code, b.id FROM BillingAccount b "),
         @NamedQuery(name = "BillingAccount.unlinkPriceList", query = "update BillingAccount set priceList = null where priceList.id = :priceListId")})
 public class BillingAccount extends AccountEntity implements IInvoicingMinimumApplicable, IBillableEntity, IWFEntity, IDiscountable, ICounterEntity {
 

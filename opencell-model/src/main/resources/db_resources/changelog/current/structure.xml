@@ -24996,4 +24996,21 @@ public class DummyPaymentGatewayScript extends Script {
         </update>
     </changeSet>
 
+    <changeSet id="INTRD-22385_20240429" author="TarikFA.">
+        <insert tableName="cpq_tag_type">
+            <column name="id" valueSequenceNext="cpq_tag_type_seq"></column>
+            <column name="created" value="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="New products" />
+            <column name="description" value="New products" />
+        </insert>
+        <insert tableName="cpq_tag_type">
+            <column name="id" valueSequenceNext="cpq_tag_type_seq"></column>
+            <column name="created" value="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="Stock products" />
+            <column name="description" value="New products" />
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

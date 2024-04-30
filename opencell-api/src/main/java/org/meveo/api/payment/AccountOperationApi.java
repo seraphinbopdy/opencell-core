@@ -124,6 +124,8 @@ import org.meveo.model.payments.Refund;
 import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.WriteOff;
 import org.meveo.model.settings.AdvancedSettings;
+import org.meveo.model.shared.Address;
+import org.meveo.model.shared.Name;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.billing.impl.AccountingCodeService;
 import org.meveo.service.payments.impl.AccountOperationService;
@@ -969,7 +971,7 @@ public class AccountOperationApi extends BaseApi {
 
     }
 
-    public String exportCustomerBalance(String fileFormat, CustomerBalanceExportDto exportConfig) throws ClassNotFoundException {
+    public String exportCustomerBalance(String fileFormat, CustomerBalanceExportDto exportConfig) {
 
         String locale = "EN"; // default value EN
         String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).orElse(null);
@@ -1081,7 +1083,7 @@ public class AccountOperationApi extends BaseApi {
             headerCell = headerRow.createCell(0);
             String customerAccountDetails = "";
             if(customerAccount != null){
-                customerAccountDetails = String.format("%s %s%n%s", customerAccount.getName().getFirstName(), customerAccount.getName().getLastName(), customerAccount.getAddress().getAddress1());
+                customerAccountDetails = String.format("%s %s%n%s", ofNullable(customerAccount.getName()).map(Name::getFirstName).orElse(""), ofNullable(customerAccount.getName()).map(Name::getLastName).orElse(""), ofNullable(customerAccount.getAddress()).map(Address::getAddress1).orElse(""));
             }
             headerCell.setCellValue(customerAccountDetails);
             headerCell.setCellStyle(headerStyle);

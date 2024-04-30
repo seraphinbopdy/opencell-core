@@ -77,6 +77,7 @@ import org.meveo.api.security.config.annotation.FilterResults;
 import org.meveo.api.security.config.annotation.SecureMethodParameter;
 import org.meveo.api.security.config.annotation.SecuredBusinessEntityMethod;
 import org.meveo.api.security.filter.ListFilter;
+import org.meveo.apiv2.generic.exception.ConflictException;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.apiv2.payments.ClearingResponse;
 import org.meveo.apiv2.payments.ImmutableClearingResponse;
@@ -130,6 +131,7 @@ import org.meveo.service.payments.impl.PaymentRejectionCodeService;
 import org.meveo.service.payments.impl.PaymentRejectionCodesGroupService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
+import org.meveo.service.payments.impl.RejectionCodeDeleteException;
 import org.meveo.service.script.ScriptInstanceService;
 
 /**
@@ -784,7 +786,7 @@ public class PaymentApi extends BaseApi {
 				rejectionCodeService.remove(rejectionCode);
 			}
 		} else if(rejectionCode.getPaymentRejectionCodesGroup() != null && !forceDelete) {
-			throw new MeveoApiException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group." +
+			throw new ConflictException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group." +
 					" Use ‘force:true’ to override. If the group becomes empty, it will be deleted too");
 		}
 	}
@@ -993,20 +995,18 @@ public class PaymentApi extends BaseApi {
 	/**
 	 * Delete payment rejection code
 	 *
-	 * @param filters PagingAndFiltering
+	 * @param filters     PagingAndFiltering
+	 * @param forceDelete force delete
 	 */
-	public int removeRejectionCode(PagingAndFiltering filters) {
+	public int removeRejectionCode(PagingAndFiltering filters, boolean forceDelete) {
 		PaginationConfiguration configuration = new PaginationConfiguration(castFilters(filters.getFilters()));
-		List<PaymentRejectionCode> paymentRejectionCodes = rejectionCodeService.list(configuration);
-		if (paymentRejectionCodes == null || paymentRejectionCodes.isEmpty()) {
+		List<PaymentRejectionCode> rejectionCodesToRemove = rejectionCodeService.list(configuration);
+		if (rejectionCodesToRemove == null || rejectionCodesToRemove.isEmpty()) {
 			throw new NotFoundException("No payment rejection code found");
 		}
-		try {
-			rejectionCodeService.remove(paymentRejectionCodes);
-			return paymentRejectionCodes.size();
-		} catch (Exception exception) {
-			throw new BusinessApiException(exception.getMessage());
-		}
+		rejectionCodesToRemove.forEach(paymentRejectionCode
+				-> removeRejectionCode(paymentRejectionCode.getId(), forceDelete));
+		return rejectionCodesToRemove.size();
 	}
 
 	private Map<String, Object> castFilters(Map<String, Object> filters) {

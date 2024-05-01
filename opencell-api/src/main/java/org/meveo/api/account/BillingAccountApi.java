@@ -240,19 +240,6 @@ public class BillingAccountApi extends AccountEntityApi {
                 missingParameters.add("emailTemplate");
             }
         }
-		if(postData.getLegalEntityType() == null) {
-			missingParameters.add("legalEntityType");
-		}else if(StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
-			missingParameters.add("legalEntityType.code");
-		}
-		if(StringUtils.isBlank(postData.getDescription())) {
-			missingParameters.add("description");
-		}
-		if(CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
-			missingParameters.add("registrationNo");
-		}
-		
-		
 
         handleMissingParameters(postData);
 

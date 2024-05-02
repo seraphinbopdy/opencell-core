@@ -9,6 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -18,6 +20,7 @@ import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ModuleItem;
+import org.meveo.model.scripts.ScriptInstance;
 
 @Entity
 @ModuleItem
@@ -25,6 +28,9 @@ import org.meveo.model.ModuleItem;
 @Table(name = "ar_payment_rejection_action_report")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
         parameters = {@Parameter(name = "sequence_name", value = "ar_payment_rejection_action_report_seq"),})
+@NamedQueries({
+		@NamedQuery(name = "PaymentRejectionActionReport.removeActionReference", query = "UPDATE PaymentRejectionActionReport SET action = null WHERE code=:rejectionCode"),
+})
 public class PaymentRejectionActionReport extends BusinessCFEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -51,6 +57,13 @@ public class PaymentRejectionActionReport extends BusinessCFEntity {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_date")
     private Date endDate;
+
+	/**
+	 * Script instance associated to payment rejection report.
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "action_script_id")
+	private ScriptInstance actionScript;
 
 	public RejectedPayment getRejectedPayment() {
 		return rejectedPayment;
@@ -100,4 +113,11 @@ public class PaymentRejectionActionReport extends BusinessCFEntity {
 		this.endDate = endDate;
 	}
 
+	public ScriptInstance getActionScript() {
+		return actionScript;
+	}
+
+	public void setActionScript(ScriptInstance actionScript) {
+		this.actionScript = actionScript;
+	}
 }

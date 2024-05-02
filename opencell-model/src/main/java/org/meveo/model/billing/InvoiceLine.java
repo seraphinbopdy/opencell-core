@@ -4,15 +4,13 @@ import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.ZERO;
 import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.LAZY;
-import static org.meveo.model.billing.InvoiceLineStatusEnum.OPEN;
 import static org.meveo.model.billing.AdjustmentStatusEnum.NOT_ADJUSTED;
+import static org.meveo.model.billing.InvoiceLineStatusEnum.OPEN;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -30,20 +28,23 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.persistence.PreUpdate;
-import javax.persistence.PrePersist;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.meveo.commons.utils.NumberUtils;
-import org.meveo.model.*;
+import org.meveo.model.AuditableCFEntity;
+import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.DatePeriod;
+import org.meveo.model.ObservableEntity;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
@@ -53,11 +54,11 @@ import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.RoundingModeEnum;
 import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.cpq.CpqQuote;
-import org.meveo.model.cpq.commercial.OrderLot;
-import org.meveo.model.cpq.commercial.OrderOffer;
-import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.ProductVersion;
+import org.meveo.model.cpq.commercial.CommercialOrder;
+import org.meveo.model.cpq.commercial.OrderLot;
+import org.meveo.model.cpq.commercial.OrderOffer;
 import org.meveo.model.cpq.offer.QuoteOffer;
 
 /** 
@@ -130,10 +131,10 @@ import org.meveo.model.cpq.offer.QuoteOffer;
         @NamedQuery(name = "InvoiceLine.sumAmountByOpenOrderNumberAndBA", query = "SELECT SUM(il.amountWithTax) FROM InvoiceLine il WHERE il.status = 'BILLED' AND il.openOrderNumber = :openOrderNumber AND il.billingAccount.id = :billingAccountId"),
 		@NamedQuery(name = "InvoiceLine.linkToInvoice", query = "UPDATE InvoiceLine il set il.status=org.meveo.model.billing.InvoiceLineStatusEnum.BILLED, il.invoice=:invoice, il.invoiceAggregateF=:invoiceAgregateF where il.id in :ids"),
         @NamedQuery(name = "InvoiceLine.getInvoicingItems", query = 
-    	"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')) "
+    	"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')), il.invoiceKey "
     		+ " FROM InvoiceLine il "
     		+ " WHERE il.billingRun.id=:billingRunId AND il.billingAccount.id IN (:ids) AND il.status='OPEN' "
-    		+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id "
+    		+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.invoiceKey "
     		+ " order by il.billingAccount.id"),
         @NamedQuery(name = "InvoiceLine.findByIdsAndAdjustmentStatus", query = "SELECT il from InvoiceLine il left join fetch il.invoice i left join fetch i.invoiceType WHERE adjustment_status = :status and il.id in (:invoiceLinesIds)"),
         @NamedQuery(name = "InvoiceLine.findByIdsAndOtherAdjustmentStatus", query = "SELECT il from InvoiceLine il  left join fetch il.invoice i left join fetch i.invoiceType WHERE adjustment_status <> :status and il.id in (:invoiceLinesIds)"),
@@ -163,8 +164,8 @@ import org.meveo.model.cpq.offer.QuoteOffer;
 				"il.status =: statusToUpdate WHERE il.id =: id"),
 		@NamedQuery(name = "InvoiceLine.cancelInvoiceLineByWoIds", query = "UPDATE InvoiceLine il SET il.auditable.updated = :now, il.status = org.meveo.model.billing.InvoiceLineStatusEnum.CANCELED WHERE il.status = org.meveo.model.billing.InvoiceLineStatusEnum.OPEN AND il.id in (SELECT wo.ratedTransaction.invoiceLine.id FROM WalletOperation wo WHERE wo.id IN :woIds)"),
 		@NamedQuery(name = "InvoiceLine.sumAmountsPerBR", query = "SELECT SUM(il.amountWithoutTax), SUM(il.amountTax), SUM(il.amountWithTax) FROM InvoiceLine il WHERE il.billingRun.id =:billingRunId"),
-        @NamedQuery(name = "InvoiceLine.countDistinctBAByBR", query = "select count(distinct il.billingAccount) from InvoiceLine il where billingRun.id=:brId")
-
+        @NamedQuery(name = "InvoiceLine.countDistinctBAByBR", query = "select count(distinct il.billingAccount) from InvoiceLine il where billingRun.id=:brId"),
+		@NamedQuery(name = "InvoiceLine.getInvoiceLinesStatistics", query = "select SUM(il.amountWithoutTax), SUM(il.amountWithTax), SUM(il.amountTax) FROM InvoiceLine il WHERE il.billingRun.id = (:billingRunId)")
 	})
 
 @NamedNativeQueries({
@@ -443,6 +444,22 @@ public class InvoiceLine extends AuditableCFEntity {
 
 	private static int INVOICING_ROUNDING;
 
+	/**
+	 * Invoice Key
+	 */
+	@Column(name = "invoice_key")
+	@Size(max = 255)
+	private String invoiceKey;
+
+	@Transient
+	private Long sellerId;
+
+	@Transient
+	private Long invoiceTypeId;
+
+	@Transient
+	private Long paymentMethodId;
+    
 	public InvoiceLine() {
 	}
 
@@ -968,6 +985,38 @@ public class InvoiceLine extends AuditableCFEntity {
 		this.linkedInvoiceLine = linkedInvoiceLine;
 	}
 
+	public String getInvoiceKey() {
+		return invoiceKey;
+	}
+
+	public void setInvoiceKey(String invoiceKey) {
+		this.invoiceKey = invoiceKey;
+	}
+
+	public Long getSellerId() {
+		return sellerId;
+	}
+
+	public void setSellerId(Long sellerId) {
+		this.sellerId = sellerId;
+	}
+
+	public Long getInvoiceTypeId() {
+		return invoiceTypeId;
+	}
+
+	public void setInvoiceTypeId(Long invoiceTypeId) {
+		this.invoiceTypeId = invoiceTypeId;
+	}
+
+	public Long getPaymentMethodId() {
+		return paymentMethodId;
+	}
+
+	public void setPaymentMethodId(Long paymentMethodId) {
+		this.paymentMethodId = paymentMethodId;
+	}
+    
 	@PrePersist
 	@PreUpdate
 	public void prePersistOrUpdate() {

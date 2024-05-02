@@ -778,7 +778,12 @@ public abstract class BaseApi {
         if (cfDto.getMapValue() != null && !cfDto.getMapValue().isEmpty()) {
             return CustomFieldValueDto.fromDTO(cfDto.getMapValue());
         } else if (cfDto.getListValue() != null && !cfDto.getListValue().isEmpty()) {
-            return CustomFieldValueDto.fromDTO(cfDto.getListValue());
+			try{
+				return CustomFieldValueDto.fromDTO(cfDto.getListValue());
+			}catch(Exception e){
+				throw new MissingParameterException(e.getMessage());
+			}
+        
         } else if (!StringUtils.isBlank(cfDto.getFileValue())) {
             return fromDTO(cft, cfDto);
         } else if (cfDto.getStringValue() != null) {
@@ -792,6 +797,10 @@ public abstract class BaseApi {
         } else if (cfDto.getLongValue() != null) {
             return cfDto.getLongValue();
         } else if (cfDto.getEntityReferenceValue() != null) {
+			if(Strings.isBlank(cfDto.getEntityReferenceValue().getClassname())) {
+				missingParameters.add("classname");
+				handleMissingParameters();
+			}
             return cfDto.getEntityReferenceValue().fromDTO();
             // } else {
             // Other type values that are of some other DTO type (e.g.

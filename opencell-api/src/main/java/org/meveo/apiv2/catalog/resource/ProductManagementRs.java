@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.response.cpq.GetProductDtoResponse;
 import org.meveo.apiv2.catalog.SimpleOneshotProductDto;
 import org.meveo.apiv2.catalog.SimpleRecurrentProductDto;
@@ -14,7 +15,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 @Path("/catalog/productManagement")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -31,7 +31,7 @@ public interface ProductManagementRs {
                             content = @Content(schema = @Schema(implementation = GetProductDtoResponse.class))),
                     @ApiResponse(responseCode = "400", description = "the product already existe with the given code")
             })
-    Response createProductSimpleOneshot(SimpleOneshotProductDto postData);
+    ActionStatus createProductSimpleOneshot(SimpleOneshotProductDto postData);
 
 
 
@@ -46,7 +46,7 @@ public interface ProductManagementRs {
                             content = @Content(schema = @Schema(implementation = GetProductDtoResponse.class))),
                     @ApiResponse(responseCode = "400", description = "the product already existe with the given code")
             })
-    Response createProductSimpleRecurrent(SimpleRecurrentProductDto postData);
+    ActionStatus createProductSimpleRecurrent(SimpleRecurrentProductDto postData);
 
 
 
@@ -61,5 +61,5 @@ public interface ProductManagementRs {
                             content = @Content(schema = @Schema(implementation = GetProductDtoResponse.class))),
                     @ApiResponse(responseCode = "400", description = "the product already existe with the given code")
             })
-    Response createProductSimpleUsage(SimpleUsageProductDto postData);
+    ActionStatus createProductSimpleUsage(SimpleUsageProductDto postData);
 }

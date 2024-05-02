@@ -1,5 +1,6 @@
 package org.meveo.api.payment;
 
+import static java.util.Collections.emptyList;
 import static java.util.List.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -47,6 +48,7 @@ import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.payments.impl.PaymentGatewayService;
 import org.meveo.service.payments.impl.PaymentHistoryService;
+import org.meveo.service.payments.impl.PaymentRejectionActionReportService;
 import org.meveo.service.payments.impl.PaymentRejectionActionService;
 import org.meveo.service.payments.impl.PaymentRejectionCodeService;
 import org.meveo.service.payments.impl.PaymentRejectionCodesGroupService;
@@ -189,20 +191,6 @@ public class PaymentApiTest {
     }
 
     @Test
-    public void should_remove_rejection_code() {
-        PaymentRejectionCode entity = new PaymentRejectionCode();
-        entity.setCode("CODE_RC");
-        entity.setId(1L);
-        entity.setPaymentRejectionCodesGroup(new PaymentRejectionCodesGroup());
-
-        when(paymentRejectionCodeService.findById(any())).thenReturn(entity);
-
-        paymentApi.removeRejectionCode(1L, true);
-
-        verify(paymentRejectionCodeService, times(1)).remove(entity);
-    }
-
-    @Test
     public void should_export_rejection_code() {
         PaymentRejectionCode entity = new PaymentRejectionCode();
         entity.setCode("CODE_RC");
@@ -330,7 +318,9 @@ public class PaymentApiTest {
 
     @Test
     public void should_remove_payment_rejection_action_found() {
-        when(paymentRejectionActionService.findById(1L)).thenReturn(new PaymentRejectionAction());
+        PaymentRejectionAction action = new PaymentRejectionAction();
+        action.setRejectionActionReports(emptyList());
+        when(paymentRejectionActionService.findById(1L)).thenReturn(action);
 
         paymentApi.removeRejectionAction(1L);
 

@@ -50,9 +50,15 @@ public class AccountOperationServiceMatchingTest {
         ao.setTransactionCategory(OperationCategoryEnum.CREDIT);
         Mockito.when(customerAccountService.findById(any())).thenReturn(ao.getCustomerAccount());
         Mockito.when(accountOperationService.findById(1L)).thenReturn(ao);
+        AccountOperation ao2 = buildAo("ABC", 1L);
+        tradingCurrency.setId(2L);
+        ao2.setTransactionalCurrency(tradingCurrency);
+        ao2.setTransactionCategory(OperationCategoryEnum.DEBIT);
+        Mockito.when(customerAccountService.findById(any())).thenReturn(ao2.getCustomerAccount());
+        Mockito.when(accountOperationService.findById(2L)).thenReturn(ao2);
         Mockito.doNothing().when(paymentPlanService).toComplete(any());
 
-        List<AccountOperationAndSequence> request = buildRequest(List.of(1L), List.of(0));
+        List<AccountOperationAndSequence> request = buildRequest(List.of(1L, 2L), List.of(0, 1));
         accountOperationApiService.matchOperations(request); // no need to validate content, MatchingResult is mocked
 
     }

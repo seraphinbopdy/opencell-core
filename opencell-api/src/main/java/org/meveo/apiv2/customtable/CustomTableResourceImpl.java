@@ -17,9 +17,12 @@ import org.meveo.apiv2.generic.GenericFieldDetails;
 import org.meveo.apiv2.generic.ImmutableGenericFieldDetails;
 
 import org.meveo.apiv2.generic.services.GenericFileExportManager;
+import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.customEntities.CustomEntityTemplate;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.custom.CustomTableService;
 
 @Interceptors({ WsRestApiInterceptor.class })
@@ -30,6 +33,9 @@ public class CustomTableResourceImpl implements CustomTableResource {
 
 	@Inject
 	private GenericFileExportManager genericExportManager;
+	
+	@Inject
+	private AdvancedSettingsApiService advancedSettingsApiService;
 
 	@Override
 	public Response export(String customTableCode, String fileFormat) {
@@ -45,8 +51,12 @@ public class CustomTableResourceImpl implements CustomTableResource {
 		
 		List<Map<String, Object>> data = ofNullable(customTableService.exportCustomTable(cet)).orElseThrow(
 				() -> new NotFoundException("The custom table code " + customTableCode + " is empty"));
+		
+        String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).orElse(",");
+        String decimalSeparator = advancedSettingsApiService.findByCode("standardExports.decimalSeparator").map(AdvancedSettings::getValue).orElse("."); 
+        String fileNameExtension = advancedSettingsApiService.findByCode("standardExports.fileNameExtension").map(AdvancedSettings::getValue).orElse("csv"); 
 
-		String filePath = genericExportManager.export(customTableCode, data, fileFormat, getGenericFieldDetails(cfts), getOrdredColumn(cfts), "FR");
+		String filePath = genericExportManager.export(customTableCode, data, fileFormat, getGenericFieldDetails(cfts), getOrdredColumn(cfts), "FR", fieldsSeparator, decimalSeparator, fileNameExtension);
 
 		return Response.ok()
 				.entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"\"}, \"data\":{ \"filePath\":\"" + filePath + "\"}}")
@@ -64,9 +74,6 @@ public class CustomTableResourceImpl implements CustomTableResource {
 	
 	private String getTransformationCFT(CustomFieldTemplate cft) {
 		String pattern = null;
-		if (cft.getFieldType() == CustomFieldTypeEnum.LONG || cft.getFieldType() == CustomFieldTypeEnum.DOUBLE) {
-			pattern = "#,##0.00";
-		}
 		if (cft.getFieldType() == CustomFieldTypeEnum.DATE) {
 			pattern = "dd/MM/yyyy";
 		}

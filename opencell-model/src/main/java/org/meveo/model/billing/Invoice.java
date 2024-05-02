@@ -138,8 +138,8 @@ import org.meveo.model.shared.DateUtils;
                 + "FROM Invoice inv where inv.billingRun.id=:billingRunId group by inv.subscription.id, inv.commercialOrder.id , inv.id, inv.billingAccount.id, inv.billingAccount.customerAccount.id, inv.billingAccount.customerAccount.customer.id"),
 
         @NamedQuery(name = "Invoice.sumAmountsByBR", query = "select sum(inv.amountTax),sum(inv.amountWithoutTax), sum(inv.amountWithTax) FROM Invoice inv where inv.billingRun.id=:billingRunId and inv.status <> 'CANCELED'"),
-        @NamedQuery(name = "Invoice.billingAccountsByBr", query = "select distinct inv.billingAccount from Invoice inv where inv.billingRun.id=:billingRunId and inv.status <> 'CANCELED'"),
-		@NamedQuery(name = "Invoice.cancelInvoiceById", query = "update Invoice inv set inv.status='CANCELED', inv.rejectedByRule = null, inv.rejectReason = null, inv.auditable.updated=:now WHERE inv.id=:invoiceId AND inv.status <> 'VALIDATED'"),
+        @NamedQuery(name = "Invoice.billingAccountsByBr", query = "select distinct inv.billingAccount from Invoice inv where inv.billingRun.id=:billingRunId"),
+        @NamedQuery(name = "Invoice.cancelInvoiceById", query = "update Invoice inv set inv.status='CANCELED', inv.rejectedByRule = null, inv.rejectReason = null, inv.auditable.updated=:now, inv.auditable.updater=:username WHERE inv.id=:invoiceId AND inv.status <> 'VALIDATED'"),
 
         @NamedQuery(name = "Invoice.deleteByIds", query = "delete from Invoice inv where inv.id IN (:invoicesIds)"),
         @NamedQuery(name = "Invoice.excludePrpaidInvoices", query = "select inv.id from Invoice inv where inv.id IN (:invoicesIds) and inv.prepaid=false"),

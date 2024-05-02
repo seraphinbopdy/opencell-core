@@ -11039,6 +11039,7 @@
             <column name="conversion_from_billing_currency" type="${type.boolean}" defaultValueNumeric="0" />
 			<column name="linked_invoice_line_id" type="bigint"/>
             <column name="additional_agg_fields" type="${type.json}" />
+            <column name="invoice_key" type="varchar(255)" />
         </createTable>
     </changeSet>
     <changeSet id="rebuild-str-tbl-488" author="NabilOUACHI">
@@ -12135,6 +12136,7 @@
             <column name="edr_partition_range_months" type="int4">
                 <constraints nullable="true" />
             </column>
+            <column name="enable_empty_subscription_activation" type="${type.boolean}" defaultValueNumeric="0" />
       </createTable>
     </changeSet>
     <changeSet id="#INTRD-3461_20212128-rebuild-str-tbl" author="hichamElHaloui">
@@ -14084,6 +14086,7 @@
             <column name="report" type="${type.text}" />
             <column name="start_date" type="datetime" />
             <column name="end_date" type="datetime" />
+            <column name="action_script_id" type="bigint"/>
         </createTable>
     </changeSet>    
     
@@ -19328,7 +19331,14 @@
                                  referencedTableName="ar_payment_rejection_action"
                                  referencedColumnNames="id" />
                                      
-    </changeSet>    
+    </changeSet>
+    <changeSet id="INTRD-22259_2024049-rebuild-fk" author="zbariki">
+        <addForeignKeyConstraint baseColumnNames="action_script_id"
+                                 baseTableName="ar_payment_rejection_action_report"
+                                 constraintName="fk_payment_rejection_action_report_action_script"
+                                 referencedTableName="meveo_script_instance"
+                                 referencedColumnNames="id"/>
+    </changeSet>
     
     <!-- end fk -->
 
@@ -19470,6 +19480,9 @@
         <sql>create index idx__billing_wo__billing_account_id on ${db.schema.adapted}billing_wallet_operation(billing_account_id)</sql>
         <sql>create index idx__charge_instance__lower_description on ${db.schema.adapted}billing_charge_instance(lower(description))</sql>
         <sql>CREATE INDEX idx_job_execution_parent_job_result_id ON ${db.schema.adapted}job_execution(parent_job_result_id)</sql>
+        <sql>CREATE INDEX IF NOT EXISTS ar_account_operation_recorded_invoice_id_idx ON ar_account_operation(recorded_invoice_id)</sql>
+        <sql>CREATE INDEX IF NOT EXISTS ar_account_operation_journal_id_idx ON ar_account_operation(journal_id)</sql>
+        <sql>CREATE INDEX IF NOT EXISTS rated_transaction_ba_idx ON billing_rated_transaction(billing_account__id)</sql>
     </changeSet>
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-index-997">
@@ -20635,10 +20648,7 @@
     <changeSet id="#INTRD-11745_20221130" author="TarikFA." />
     <changeSet id="#INTRD-12024_20221202" author="aeljaouhari" />
     <changeSet id="INTRD_12001_20221205" author="TarikFA." />
-    <changeSet id="INTRD-12266_20221214" author="aeljaouhari" />
-    <changeSet id="INTRD-12267_20221219" author="aeljaouhari" />
     <changeSet id="#INTRD-12335_20221216" author="Bourras"/>
-    <changeSet id="INTRD-12268_20221221" author="aeljaouhari" />
     <changeSet id="#INTRD-12677_20221230" author="aeljaouhari" />
     <changeSet id="#INTRD-12546_20221230" author="aeljaouhari" />
     <changeSet id="#OUTRD-3_20221012-job" author="MohamedChaouki">
@@ -20711,6 +20721,7 @@
     <changeSet id="#INTRD-11208_20230131" author="zelmeliani"/>
     <changeSet id="INTRD-15467-15458_2023_04_18" author="ZBariki"/>
     <changeSet id="#INTRD-20847_20230214" author="zelmeliani"/>
+    <changeSet id="INTRD-14424_20230710" author="ThangNguyen"/>
 
     <changeSet id="#5425_20200930 - Failed to execute some report extract" author="Mohamed-Ali-HAMMAL"/>
     <changeSet id="#12569_20221222" author="HichamELHALOUI"/>
@@ -20738,7 +20749,6 @@
     <changeSet id="INTRD-2547-2480-2482-2478_20211021" author="khalidHORRI" />
     <changeSet id="INTRD-6608_20220420_pg" author="AkadidAbdelmounaim" dbms="postgresql" />
     <changeSet id="#INTRD-5830_20220324" author="aelmalki" />
-    <changeSet id="INTRD_11783_20221201_compate_invoice_amount" author="a.rouaguebe" />
     <changeSet id="INTRD-2698-20211028" author="AbdelkaderBouazza" />
     <changeSet id="INTRD-15222_20230424" author="aelmalki" />
     <changeSet id="J215_20210708" author="Mohammed_ELAZZOUZI" dbms="postgresql" />
@@ -20757,7 +20767,6 @@
     <changeSet id="#INTRD-5380_2022_02_28" author="ZBariki" />
     <changeSet id="INTRD-21616_20240228_oracle" author="AdilElJaouhari" dbms="oracle" />
     <changeSet id="#INTRD-4590-20220308" author="HatimOUDAD" />
-    <changeSet id="INTRD-12598_20221227_rebuild" author="HichamHANINE" />
     <changeSet id="INTRD-4680-01032022" author="TarikRabeh" />
     <changeSet id="INTRD-3765_07012022" author="hichamElHaloui" />
     <changeSet id="#INTRD-6341_20220406" author="aelmalki" />
@@ -20775,11 +20784,9 @@
     <changeSet id="#INTRD-5888_2022-03_23" author="hichamELHALOUI" />
     <changeSet id="#5308_20200618 - Add script" author="AndriusKarpavicius" />
     <changeSet id="#INTRD-7360_20220525" author="hichamhanine" />
-    <changeSet id="INTRD_12001_20221205-data" author="TarikFA." />
     <changeSet id="#INTRD-15126_20230322" author="houdad" />
     <changeSet id="INTRD-2511-1_20211029" author="Mohammed_ElAzzouzi" />
     <changeSet id="#INTRD-13957_20230213" author="houdad" />
-    <changeSet id="INTRD-12103_20221215_rebuild" author="HichamHANINE" />
     <changeSet id="#INTRD-12906_20230215" author="hichamELHALOUI" />
     <changeSet id="INTRD-18097_20230830" author="houdad" />
     <changeSet id="#INTRD-2421_20211012-pg" author="AndriusKarpavicius" dbms="postgresql" />
@@ -20791,7 +20798,6 @@
     <changeSet id="#INTRD-19862_20231214" author="zelmeliani" />
     <changeSet id="#INTRD-6668_20220421-data" author="TarikRabeh" />
     <changeSet id="#INTRD-10772_20221025_ajd_occ_template" author="e.bourras" />
-    <changeSet id="#INTRD-9066_20231009-data" author="AbdellatifBARI" />
     <changeSet id="#INTRD-15186_20230328" author="zelmeliani" />
     <changeSet id="INTRD_1985_20210923_data" author="TarikFA." />
     <changeSet id="#INTRD-20796_20240315" author="AbdellatifBARI" />
@@ -20851,5 +20857,21 @@
     <changeSet id="#INTRD-19464_20231225" author="ZBARIKI" />
     <changeSet id="#INTRD-19736_20240315" author="AbdellatifBARI" />
     <changeSet id="INTRD-20997-20230129" author="ZBariki" />
-    
+    <changeSet id="#INTRD-22284_20240328" author="zbariki" />
+    <changeSet id="#22150_20240328" author="TarikFA." />
+    <changeSet id="#INTRD-22148_20240327" author="zbariki" />
+    <changeSet id="#INTRD-22243_20240327" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-22295_20240425" author="aeljaouhari" />
+    <changeSet id="#INTRD-22401_20240408" author="aeljaouhari" />
+    <changeSet id="#INTRD-22262_20240408" author="aeljaouhari" />
+    <changeSet id="#INTRD-22318_20240415" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-20685_simple_customer_settings" author="a.rouaguebe" />
+    <changeSet id="INTRD-22259_20240409" author="zbariki" />
+    <changeSet id="INTRD-22195_20240417" author="AbdelmounaimAkadid" />
+    <changeSet id="INTRD-22557_20240425" author="TarikFA." />
+    <changeSet id="INTRD-22385_20240429" author="TarikFA." />
+
+
+    <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
+
 </databaseChangeLog>

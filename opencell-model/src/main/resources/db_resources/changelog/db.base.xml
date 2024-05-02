@@ -42,7 +42,7 @@
     <property name="uuid_function" value="uuid()" dbms="mysql"/>
     <property name="uuid_function" value="sys_guid()" dbms="oracle"/>
 
-    <property name="liquibase_file_prefix" value="src/main/"/>
+    <property name="liquibase_file_prefix" value="src/main/resources/"/>
     
     <include file="rebuild/structure.xml" relativeToChangelogFile="true" />
     <include file="rebuild/data.xml" relativeToChangelogFile="true" />

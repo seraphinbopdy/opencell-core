@@ -16,10 +16,14 @@
  */
 package org.meveo.event.monitoring;
 
+import java.io.Serializable;
+
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
@@ -37,7 +41,6 @@ import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CfValueAccumulator;
 import org.meveo.service.custom.CustomEntityTemplateService;
-import org.meveo.service.job.Job;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
@@ -57,6 +60,9 @@ public class ClusterEventMonitor implements MessageListener {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private JMSContext context;
 
     @Inject
     private JobInstanceService jobInstanceService;
@@ -95,7 +101,19 @@ public class ClusterEventMonitor implements MessageListener {
                 }
                 log.info("{} Received cluster synchronization event message {}", EjbUtils.getCurrentClusterNode(), eventDto);
 
-                processClusterEvent(eventDto);
+                Object responseValue = processClusterEvent(eventDto);
+
+                // If reply was requested, send a response message with event processing result value
+                if (rcvMessage.getJMSReplyTo() != null) {
+
+                    JMSProducer jmsProducer = context.createProducer();
+                    Message responseMessage = context.createObjectMessage((Serializable) responseValue);
+                    responseMessage.setJMSCorrelationID(rcvMessage.getJMSCorrelationID());
+
+                    log.debug("Responding to a cluster synchronization event message with response {}", responseValue);
+
+                    jmsProducer.send(rcvMessage.getJMSReplyTo(), responseMessage);
+                }
 
             } else {
                 log.warn("Unhandled cluster synchronization event message type: " + rcvMessage.getClass().getName());
@@ -109,8 +127,9 @@ public class ClusterEventMonitor implements MessageListener {
      * Process incoming data synchronization between cluster nodes event
      * 
      * @param eventDto Data synchronization between cluster nodes event.
+     * @return A response value of processing an event
      */
-    private void processClusterEvent(ClusterEventDto eventDto) {
+    private Object processClusterEvent(ClusterEventDto eventDto) {
 
         currentUserProvider.forceAuthentication(eventDto.getUserName(), eventDto.getProviderCode());
 
@@ -124,12 +143,12 @@ public class ClusterEventMonitor implements MessageListener {
                         ? (JobLauncherEnum) eventDto.getAdditionalInfo().get(Job.JOB_PARAM_LAUNCHER)
                         : null;
 
-                jobExecutionService.executeJob(jobInstanceService.findById(eventDto.getId()), null, jobLauncher, false);
+                return jobExecutionService.executeJob(jobInstanceService.findById(eventDto.getId()), null, jobLauncher, false);
 
             } else if (eventDto.getAction() == CrudActionEnum.executeWorker) {
                 JobLauncherEnum jobLauncher = JobLauncherEnum.WORKER;
 
-                jobExecutionService.executeJob(jobInstanceService.findById(eventDto.getId()), eventDto.getAdditionalInfo(), jobLauncher, false);
+                return jobExecutionService.executeJob(jobInstanceService.findById(eventDto.getId()), eventDto.getAdditionalInfo(), jobLauncher, false);
 
             } else if (eventDto.getAction() == CrudActionEnum.stop) {
                 jobExecutionService.stopJob(jobInstanceService.findById(eventDto.getId()), false);
@@ -162,5 +181,6 @@ public class ClusterEventMonitor implements MessageListener {
                 CustomEntityTemplate cet = customEntityTemplateService.findByCode(eventDto.getCode()); // Find by code instead of ID, so it would be added to a cache
             }
         }
+        return null;
     }
 }

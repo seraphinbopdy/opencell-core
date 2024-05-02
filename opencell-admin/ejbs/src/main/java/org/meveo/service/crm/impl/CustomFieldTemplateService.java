@@ -893,4 +893,10 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         }
         return false;
     }
+
+    @Override
+    public CustomFieldTemplate update(CustomFieldTemplate cft) {
+        customFieldsCache.addUpdateCustomFieldTemplate(cft);
+        return super.update(cft);
+    }
 }

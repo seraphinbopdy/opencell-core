@@ -18,7 +18,13 @@
 
 package org.meveo.admin.job;
 
+import static java.util.Comparator.comparingInt;
 import static java.util.Optional.of;
+import static org.meveo.model.payments.PaymentRejectionActionStatus.CANCELED;
+import static org.meveo.model.payments.PaymentRejectionActionStatus.FAILED;
+import static org.meveo.model.payments.PaymentRejectionActionStatus.PENDING;
+import static org.meveo.model.payments.PaymentRejectionActionStatus.RUNNING;
+import static org.meveo.model.payments.RejectionActionStatus.COMPLETED;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -43,6 +49,7 @@ import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.payments.impl.AccountOperationService;
+import org.meveo.service.payments.impl.PaymentRejectionActionReportService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
@@ -61,6 +68,9 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
     
     @Inject
     private ScriptInstanceService scriptInstanceService;
+
+	@Inject
+	private PaymentRejectionActionReportService paymentRejectionActionReportService;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -82,26 +92,33 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
     /**
      * process a rejected payment having rejectionActionsStatus PENDING
      * 
-     * @param rejectedPayment
+     * @param rejectedPayment rejection payment
      * @param jobExecutionResult Job execution result
      */
     private void processRejectedPayment(RejectedPayment rejectedPayment, JobExecutionResultImpl jobExecutionResult) {
     	boolean processNextAction = true;
     	rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.RUNNING);
     	List<PaymentRejectionActionReport> rejectionActionsReport = rejectedPayment.getPaymentRejectionActionReports();
-    	rejectionActionsReport.sort((a,b) -> a.getAction().getSequence() - b.getAction().getSequence());
-    	for (PaymentRejectionActionReport actionReport :  rejectionActionsReport) {
+    	rejectionActionsReport.sort(comparingInt(a -> a.getAction().getSequence()));
+    	for (PaymentRejectionActionReport actionReport : rejectionActionsReport) {
+			if(actionReport.getAction() == null
+					&& (PENDING == actionReport.getStatus() || RUNNING == actionReport.getStatus())) {
+				actionReport.setStatus(CANCELED);
+				actionReport.setReport("Action has been deleted from payment rejection settings");
+				paymentRejectionActionReportService.update(actionReport);
+				continue;
+			}
     		if (processNextAction) {
     			processPaymentRejectionActionReport(actionReport);
-				processNextAction = !(PaymentRejectionActionStatus.FAILED.equals(actionReport.getStatus()));
+				processNextAction = !(FAILED.equals(actionReport.getStatus()));
     		} else {
-    			actionReport.setStatus(PaymentRejectionActionStatus.CANCELED);
+    			actionReport.setStatus(CANCELED);
     			actionReport.setEndDate(new Date());
     		}
     	}
 
     	if (processNextAction) {
-    		rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.COMPLETED);
+    		rejectedPayment.setRejectionActionsStatus(COMPLETED);
     	} else {
     		rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.FAILED);
     	}
@@ -114,14 +131,14 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
 		methodContext.put(Script.CONTEXT_APP_PROVIDER, appProvider);
 		
 		actionReport.setStartDate(new Date());
-		actionReport.setStatus(PaymentRejectionActionStatus.RUNNING);
+		actionReport.setStatus(RUNNING);
 		try {
 			ScriptInterface rejectionPaymentActionScript = injectScriptParams(methodContext, actionReport.getAction());
 			rejectionPaymentActionScript.execute(methodContext);
-			actionReport.setStatus((Boolean) methodContext.get(Script.REJECTION_ACTION_RESULT) ? PaymentRejectionActionStatus.COMPLETED	: PaymentRejectionActionStatus.FAILED);
+			actionReport.setStatus((Boolean) methodContext.get(Script.REJECTION_ACTION_RESULT) ? PaymentRejectionActionStatus.COMPLETED	: FAILED);
 			actionReport.setReport((String) methodContext.get(Script.REJECTION_ACTION_REPORT));
 		} catch (Exception e) {
-			actionReport.setStatus(PaymentRejectionActionStatus.FAILED);
+			actionReport.setStatus(FAILED);
 			actionReport.setReport(e.getMessage());
 		}
 		actionReport.setEndDate(new Date());

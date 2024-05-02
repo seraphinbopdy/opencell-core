@@ -387,10 +387,7 @@ public class DDRequestLOTService extends PersistenceService<DDRequestLOT> {
 		if (bankCoordinates.getIcs() == null) {
 			return prefix + "bankCoordinates.ics";
 		}
-		// UPDATE INTRD-9135 : accountOperation.reference should not be made mandatory for triggering direct debit.
-		if (ca.getDescription() == null) {
-			return prefix + "ca.description";
-		}
+		
 		return null;
 	}
 

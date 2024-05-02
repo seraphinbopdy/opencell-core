@@ -177,7 +177,7 @@ public class SepaFile extends AbstractDDRequestBuilder {
 
 	@Override
 	public void generateDDRequestLotFile(DDRequestLOT ddRequestLot, Provider appProvider, JobExecutionResultImpl result) throws BusinessException {
-		ddRequestLot = ddRequestLOTService.findById(ddRequestLot.getId(), Arrays.asList("ddrequestItems"));
+		ddRequestLot = ddRequestLOTService.findById(ddRequestLot.getId(), Arrays.asList("ddrequestItems","ddRequestBuilder","seller"));
 		if (ddRequestLot.getPaymentOrRefundEnum().getOperationCategoryToProcess() == OperationCategoryEnum.DEBIT) {
 			generateDDRequestLotFileForSSD(ddRequestLot, appProvider);
 		} else {
@@ -587,7 +587,7 @@ public class SepaFile extends AbstractDDRequestBuilder {
 		paymentInformation.setPmtInfId(ArConfig.getDDRequestHeaderReference() + DASH_STRING + ddrequestItem.getId());
 		paymentInformation.setPmtMtd(PaymentMethod3Code.TRF);
 		paymentInformation.setBtchBookg(true);
-		paymentInformation.setNbOfTxs(String.valueOf(ddrequestItem.getAccountOperations().size()));
+		paymentInformation.setNbOfTxs(NUMBER_OF_TRANSACTIONS_1);
 		paymentInformation.setCtrlSum(ddrequestItem.getAmount().setScale(2, RoundingMode.HALF_UP));
 		PaymentTypeInformation19 paymentTypeInformation = new PaymentTypeInformation19();
 		paymentInformation.setPmtTpInf(paymentTypeInformation);
@@ -667,7 +667,12 @@ public class SepaFile extends AbstractDDRequestBuilder {
 			throw new BusinessException(e);
 		}
 		org.meveo.admin.sepa.jaxb.pain001.PartyIdentification32 initgPty = new org.meveo.admin.sepa.jaxb.pain001.PartyIdentification32();
-		initgPty.setNm(appProvider.getDescription());
+		if (ddRequestLot.getSeller() != null) {			
+			initgPty.setNm(ddRequestLot.getSeller().getDescription());
+		} else {
+			initgPty.setNm(appProvider.getDescription());
+		}
+		
 		groupHeader.setInitgPty(initgPty);
 
 	}

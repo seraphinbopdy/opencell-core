@@ -180,7 +180,7 @@ public class PricePlanMatrixVersionApi extends BaseCrudApi<PricePlanMatrixVersio
             }
         }
         if(VersionStatusEnum.PUBLISHED.equals(pricePlanMatrixVersion.getStatus())){
-        	if(validity != null && validity.getTo() != null) {
+        	if(validity != null) {
         		pricePlanMatrixVersionService.updatePublishedPricePlanMatrixVersion(pricePlanMatrixVersion, validity.getTo());
         	}
         } else {

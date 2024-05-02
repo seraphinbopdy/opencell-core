@@ -202,7 +202,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
                     nrOfAccounts = (Long) emWrapper.getEntityManager().createNamedQuery("InvoiceLine.countDistinctBAByBR").setParameter("brId", currentBillingRun.getId()).getSingleResult();
                 }
 
-                billingRunExtensionService.updateBillingRunStatistics(currentBillingRun.getId(), aggregatedStats, nrOfAccounts.intValue(), BillingRunStatusEnum.OPEN);
+                billingRunExtensionService.updateIncrementalBillingRunStatistics(currentBillingRun.getId(), nrOfAccounts.intValue(), BillingRunStatusEnum.OPEN);
             }
             // Otherwise, update directly status of billing run as INVOICE_LINES_CREATED
             else {

@@ -52,7 +52,8 @@ class IEntityBeanSerializer extends StdSerializer<IEntity> implements GenericSer
         if(value instanceof HibernateProxy) {
             target = (Class<? extends IEntity>) target.getSuperclass();
         }
-        return source.equals(target) &&
+        boolean areTheSame = source.isAssignableFrom(target) || target.isAssignableFrom(source);
+        return source.equals(target) || areTheSame &&
                 (e.getId() != null ? e.getId().equals(value.getId()) : e.equals(value));
     }
 

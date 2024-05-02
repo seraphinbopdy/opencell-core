@@ -386,7 +386,7 @@ public class PricePlanSelectionService implements Serializable {
             operationDateParam = operationDate;
         } else if (PriceVersionDateSettingEnum.DELIVERY.equals(serviceInstance.getPriceVersionDateSetting()) || PriceVersionDateSettingEnum.RENEWAL.equals(serviceInstance.getPriceVersionDateSetting())
                 || PriceVersionDateSettingEnum.QUOTE.equals(serviceInstance.getPriceVersionDateSetting())) {
-            operationDateParam = serviceInstance.getPriceVersionDate();
+            operationDateParam = serviceInstance.getPriceVersionDate() != null ? serviceInstance.getPriceVersionDate() : operationDate;
         }
 
         if (operationDateParam != null) {

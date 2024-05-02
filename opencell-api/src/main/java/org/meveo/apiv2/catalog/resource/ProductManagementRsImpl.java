@@ -5,6 +5,7 @@ import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.cpq.ProductDto;
 import org.meveo.api.dto.response.catalog.SimpleChargeProductResponseDto;
 import org.meveo.api.logging.WsRestApiInterceptor;
+import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.apiv2.catalog.SimpleOneshotProductDto;
 import org.meveo.apiv2.catalog.SimpleRecurrentProductDto;
 import org.meveo.apiv2.catalog.SimpleUsageProductDto;
@@ -13,44 +14,61 @@ import org.meveo.apiv2.catalog.service.ProductManagementApiService;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
 
 @Stateless
 @Interceptors({ WsRestApiInterceptor.class })
-public class ProductManagementRsImpl implements ProductManagementRs {
+public class ProductManagementRsImpl extends BaseRs implements ProductManagementRs  {
     
     @Inject
     private ProductManagementApiService productManagementApiService;
     
     @Override
-    public Response createProductSimpleOneshot(SimpleOneshotProductDto postData) {
+    public ActionStatus createProductSimpleOneshot(SimpleOneshotProductDto postData) {
 
-        ActionStatus actionStatus = new ActionStatus();
-        ProductDto productSimpleOneShot = productManagementApiService.createProductSimpleOneShot(postData);
+        try {
+            ProductDto productSimpleOneShot = productManagementApiService.createProductSimpleOneShot(postData);
 
-        SimpleChargeProductResponseDto simpleChargeProductResponseDto = new SimpleChargeProductResponseDto().setProduct(productSimpleOneShot);
-        simpleChargeProductResponseDto.setStatus(ActionStatusEnum.SUCCESS);
-        return Response.ok(simpleChargeProductResponseDto).build();
+            SimpleChargeProductResponseDto simpleChargeProductResponseDto = new SimpleChargeProductResponseDto().setProduct(productSimpleOneShot);
+            simpleChargeProductResponseDto.setStatus(ActionStatusEnum.SUCCESS);
+            return simpleChargeProductResponseDto;
+        } catch (Exception e) {
+            ActionStatus status = new ActionStatus();
+            processException(e, status);
+            return status;
+        }
     }
 
     @Override
-    public Response createProductSimpleRecurrent(SimpleRecurrentProductDto postData) {
+    public ActionStatus createProductSimpleRecurrent(SimpleRecurrentProductDto postData) {
 
-        ProductDto productSimpleRecurrent = productManagementApiService.createProductSimpleRecurrent(postData);
+        try {
+            ProductDto productSimpleRecurrent = productManagementApiService.createProductSimpleRecurrent(postData);
 
-        SimpleChargeProductResponseDto simpleChargeProductResponseDto = new SimpleChargeProductResponseDto().setProduct(productSimpleRecurrent);
-        simpleChargeProductResponseDto.setStatus(ActionStatusEnum.SUCCESS);
-        return Response.ok(simpleChargeProductResponseDto).build();
+            SimpleChargeProductResponseDto simpleChargeProductResponseDto = new SimpleChargeProductResponseDto().setProduct(productSimpleRecurrent);
+            simpleChargeProductResponseDto.setStatus(ActionStatusEnum.SUCCESS);
+            return simpleChargeProductResponseDto;
+        } catch (Exception e) {
+            ActionStatus status = new ActionStatus();
+            processException(e, status);
+            return status;
+        }
     }
 
     @Override
-    public Response createProductSimpleUsage(SimpleUsageProductDto postData) {
+    public ActionStatus createProductSimpleUsage(SimpleUsageProductDto postData) {
 
 
-        ProductDto productSimpleRecurrent = productManagementApiService.createProductSimpleUsage(postData);
+        try {
+            ProductDto productSimpleRecurrent = productManagementApiService.createProductSimpleUsage(postData);
+            SimpleChargeProductResponseDto simpleChargeProductResponseDto = new SimpleChargeProductResponseDto().setProduct(productSimpleRecurrent);
+            simpleChargeProductResponseDto.setStatus(ActionStatusEnum.SUCCESS);
+            return simpleChargeProductResponseDto;
+        } catch (Exception e) {
+            ActionStatus status = new ActionStatus();
+            processException(e, status);
+            return status;
+        }
 
-        SimpleChargeProductResponseDto simpleChargeProductResponseDto = new SimpleChargeProductResponseDto().setProduct(productSimpleRecurrent);
-        simpleChargeProductResponseDto.setStatus(ActionStatusEnum.SUCCESS);
-        return Response.ok(simpleChargeProductResponseDto).build();
+        
     }
 }

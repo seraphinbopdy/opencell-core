@@ -216,7 +216,7 @@ public class ProductManagementApiService extends BaseApi {
         PricePlanMatrixVersionDto pricePlanMatrixVersionDto = new PricePlanMatrixVersionDto();
         pricePlanMatrixVersionDto.setPricePlanMatrixCode(pricePlanMatrixDto.getCode());
         pricePlanMatrixVersionDto.setLabel(postData.getLabel());
-        pricePlanMatrixVersionDto.setAmountWithoutTax(postData.getPrice());
+        pricePlanMatrixVersionDto.setPrice(postData.getPrice());
         pricePlanMatrixVersionDto.setValidity(postData.getValidity());
         pricePlanMatrixVersionDto.setVersion(1);
         pricePlanMatrixVersionDto.setPriceVersionType(PriceVersionTypeEnum.FIXED);

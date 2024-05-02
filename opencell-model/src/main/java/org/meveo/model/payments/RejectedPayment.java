@@ -26,6 +26,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -80,6 +83,13 @@ public class RejectedPayment extends AccountOperation {
     
     @OneToMany(mappedBy = "rejectedPayment")
     List<PaymentRejectionActionReport> paymentRejectionActionReports = new ArrayList<PaymentRejectionActionReport>();
+
+    /**
+     * Payment gateway
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_gateway_id")
+    private PaymentGateway paymentGateway;
 
     public Date getRejectedDate() {
         return rejectedDate;
@@ -175,4 +185,11 @@ public class RejectedPayment extends AccountOperation {
 		this.paymentRejectionActionReports = paymentRejectionActionReports;
 	}
 
+    public PaymentGateway getPaymentGateway() {
+        return paymentGateway;
+    }
+
+    public void setPaymentGateway(PaymentGateway paymentGateway) {
+        this.paymentGateway = paymentGateway;
+    }
 }

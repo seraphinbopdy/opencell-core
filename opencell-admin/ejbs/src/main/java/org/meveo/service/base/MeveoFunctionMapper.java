@@ -2073,7 +2073,7 @@ public class MeveoFunctionMapper extends FunctionMapper {
 		Object resultValue = null;
 		for(ProductVersionAttribute productVersionAttribute : attribute.getProductVersionAttributes()) {
 			if(productVersionAttribute.getAttribute().getCode().equals(attributeCode)) {
-				if(productVersionAttribute.getDefaultValue()!=null) {
+				if(StringUtils.isNotBlank(productVersionAttribute.getDefaultValue())) {
 					resultValue =  productVersionAttribute.getDefaultValue();
 				}
 			}

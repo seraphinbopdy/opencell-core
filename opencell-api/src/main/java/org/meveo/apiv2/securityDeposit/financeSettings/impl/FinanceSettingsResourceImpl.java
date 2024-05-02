@@ -1,5 +1,6 @@
 package org.meveo.apiv2.securityDeposit.financeSettings.impl;
 
+import static java.util.List.of;
 import static java.util.Optional.ofNullable;
 
 import org.meveo.api.exception.BusinessApiException;
@@ -47,7 +48,7 @@ public class FinanceSettingsResourceImpl implements FinanceSettingsResource {
 
     @Override
     public Response update(Long id, FinanceSettings financeSettings) {
-        org.meveo.model.securityDeposit.FinanceSettings financeSettingsToUpdate = financeSettingsService.findById(id);
+        org.meveo.model.securityDeposit.FinanceSettings financeSettingsToUpdate = financeSettingsService.findById(id, of("openOrderSetting"));
         if (financeSettingsToUpdate == null) {
             throw new EntityDoesNotExistsException("Finance settings with id " + id + " does not exist.");
         }

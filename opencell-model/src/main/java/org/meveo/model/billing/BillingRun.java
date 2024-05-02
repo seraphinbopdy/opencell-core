@@ -84,6 +84,9 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
         @NamedQuery(name = "BillingRun.findByIdAndBCCode", query = "from BillingRun br join fetch br.billingCycle bc where lower(concat(br.id,'/',bc.code)) like :code "),
         @NamedQuery(name = "BillingRun.nullifyBillingRunXMLExecutionResultIds", query = "update BillingRun br set br.xmlJobExecutionResultId = null where br = :billingRun"),
         @NamedQuery(name = "BillingRun.nullifyBillingRunPDFExecutionResultIds", query = "update BillingRun br set br.pdfJobExecutionResultId = null where br = :billingRun") ,
+        @NamedQuery(name = "BillingRun.calculateBRStatisticsByInvoices", 
+		query = "SELECT SUM(i.amountWithTax) AS amountWithTax, SUM(i.amountTax) AS amountTax, SUM(i.amountWithoutTax) AS amountWithoutTax, COUNT(DISTINCT i.billingAccount.id) AS countBA, COUNT(i) AS countInvoices "
+				+ "FROM Invoice i WHERE i.billingRun.id = :billingRunId AND i.status <> 'CANCELED'"),
         @NamedQuery(name = "BillingRun.findByBillingCycle", query = "FROM BillingRun br WHERE br.billingCycle = :bc")})
 public class BillingRun extends EnableEntity implements ICustomFieldEntity, IReferenceEntity {
 
@@ -1235,6 +1238,10 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
 
     public void setAdditionalAggregationFields(List<String> additionalAggregationFields) {
         this.additionalAggregationFields = additionalAggregationFields;
+    }
+    
+    public void addInvoiceNumber(int count) {
+    	this.invoiceNumber=(this.invoiceNumber!=null?this.invoiceNumber:0)+count;
     }
 
 }

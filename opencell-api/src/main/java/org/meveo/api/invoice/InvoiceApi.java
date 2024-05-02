@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -63,6 +64,7 @@ import org.meveo.api.dto.payment.PaymentScheduleInstancesDto;
 import org.meveo.api.dto.payment.RecordedInvoiceDto;
 import org.meveo.api.dto.response.InvoicesDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.api.exception.MeveoApiException;
@@ -590,6 +592,20 @@ public class InvoiceApi extends BaseApi {
                 .orElseThrow(() -> new EntityDoesNotExistsException("Invoice does not exists"));
         if(VALIDATED.equals(invoice.getStatus())) {
             throw new BadRequestException("Invoice already validated");
+        }
+        if(invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode())) {
+            Set<LinkedInvoice> linkedInvoices = invoice.getLinkedInvoices();
+            if (linkedInvoices != null && !linkedInvoices.isEmpty()) {
+                Invoice originalInvoice = linkedInvoices.stream().map(LinkedInvoice::getLinkedInvoiceValue).findFirst().get();
+                if (originalInvoice.getLinkedInvoices() != null && !originalInvoice.getLinkedInvoices().isEmpty()) {
+                    long validatedAdj = originalInvoice.getLinkedInvoices().stream()
+                            .filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getStatus().equals(VALIDATED))
+                            .count();
+                    if (validatedAdj == 1) {
+                        throw new BusinessApiException("Can not validate multiple adjustment on the same Invoice");
+                    }
+                }
+            }
         }
         serviceSingleton.validateAndAssignInvoiceNumber(invoiceId, refreshExchangeRate);
         Boolean brGenerateAO = ofNullable(invoice.getBillingRun()).map(BillingRun::getGenerateAO).orElse(false);

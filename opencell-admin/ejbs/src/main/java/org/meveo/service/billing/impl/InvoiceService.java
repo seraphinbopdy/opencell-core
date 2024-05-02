@@ -2807,16 +2807,17 @@ public class InvoiceService extends PersistenceService<Invoice> {
             super.remove(invoice);
         } else {
             invoiceLinesService.cancelIlByInvoices(invoicesIds);
-            cancelInvoiceById(invoice.getId());
+            cancelInvoiceById(invoice.getId(), currentUser.getUserName());
         }
         updateBillingRunStatistics(invoice);
         log.debug("Invoice canceled {}", invoice.getTemporaryInvoiceNumber());
     }
 
-	public void cancelInvoiceById(Long invoiceId) {
+    public void cancelInvoiceById(Long invoiceId, String pUserName) {
         getEntityManager().createNamedQuery("Invoice.cancelInvoiceById")
-        .setParameter("now", new Date())
+                .setParameter("now", new Date())
                 .setParameter("invoiceId", invoiceId)
+                .setParameter("username", pUserName)
                 .executeUpdate();
     }
     
@@ -2859,6 +2860,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void validateInvoice(Invoice invoice) {
 		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+		invoice.setRejectedByRule(null);
+		invoice.setRejectReason(null);
 		serviceSingleton.assignInvoiceNumber(invoice, true);
 	}
     
@@ -3019,7 +3022,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if (CollectionUtils.isEmpty(invoiceIds) && !CollectionUtils.isEmpty(invoices)) {
             invoiceIds = invoices.stream().map(invoice -> invoice.getId()).collect(toList());
         }
-        getEntityManager().createNamedQuery("Invoice.moveToBRByIds").setParameter("billingRun", nextBR).setParameter("invoiceIds", invoiceIds).executeUpdate();
+        if(!CollectionUtils.isEmpty(invoiceIds)) {
+        	nextBR.addInvoiceNumber(invoiceIds.size());
+        	getEntityManager().createNamedQuery("Invoice.moveToBRByIds").setParameter("billingRun", nextBR).setParameter("invoiceIds", invoiceIds).executeUpdate();
+        }
         return nextBR.getId();
     }
 
@@ -5439,6 +5445,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         
         if(!invoices.isEmpty()) {
             BillingRun nextBR = billingRunService.findOrCreateNextQuarantineBR(billingRun.getId(), null);
+            nextBR.addInvoiceNumber(invoices.size());
             getEntityManager().createNamedQuery("Invoice.moveToBR").setParameter("nextBR", nextBR).setParameter("billingRunId", billingRun.getId()).setParameter("statusList", toMove).executeUpdate();
         }
     }
@@ -6304,7 +6311,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
 
     @SuppressWarnings("unchecked")
-    private List<InvoiceLinesGroup> executeBCScriptWithInvoiceLines(BillingRun billingRun, InvoiceType invoiceType, List<InvoiceLine> invoiceLines, IBillableEntity entity, String scriptInstanceCode,
+    public List<InvoiceLinesGroup> executeBCScriptWithInvoiceLines(BillingRun billingRun, InvoiceType invoiceType, List<InvoiceLine> invoiceLines, IBillableEntity entity, String scriptInstanceCode,
             PaymentMethod paymentMethod) throws BusinessException {
         HashMap<String, Object> context = new HashMap<>();
         context.put(Script.CONTEXT_ENTITY, entity);
@@ -6960,6 +6967,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if (invoiceResource.getPurchaseOrder() != null) {
             toUpdate.setExternalPurchaseOrderNumber(invoiceResource.getPurchaseOrder());
         }
+	    
+	    if(invoiceResource.getSellerCode() != null ) {
+		    Seller seller = new Seller();
+		    seller.setCode(invoiceResource.getSellerCode());
+		    toUpdate.setSeller(tryToFindByCodeOrId(seller));
+	    }
 
         return update(toUpdate);
     }
@@ -7300,6 +7313,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
        
         if (billingRun != null) {
             BillingRun nextBR = billingRunService.findOrCreateNextQuarantineBR(billingRun.getId(), quarantineBillingRunDto.getDescriptionsTranslated());
+            nextBR.addInvoiceNumber(invoices.size());
             getEntityManager().createNamedQuery("Invoice.moveToBRByIds").setParameter("billingRun", nextBR).setFlushMode(FlushModeType.AUTO).setParameter("invoiceIds", invoiceIds).executeUpdate();
             getEntityManager().createNamedQuery("InvoiceLine.moveToQuarantineBRByInvoiceIds").setParameter("billingRun", nextBR).setParameter("invoiceIds", invoiceIds).executeUpdate();
             getEntityManager().createNamedQuery("RatedTransaction.moveToQuarantineBRByInvoiceIds").setParameter("billingRun", nextBR).setParameter("invoiceIds", invoiceIds).executeUpdate();

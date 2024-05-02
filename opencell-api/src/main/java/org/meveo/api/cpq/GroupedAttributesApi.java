@@ -80,7 +80,7 @@ public class GroupedAttributesApi extends BaseApi{
 		if(groupedAttribute == null) {
 			throw new EntityDoesNotExistsException(GroupedAttributes.class, groupedAttributeDto.getCode());
 		}
-		if(!StringUtils.isEmpty(groupedAttributeDto.getDescription())) {
+		if(groupedAttributeDto.getDescription() != null) {
 			groupedAttribute.setDescription(groupedAttributeDto.getDescription());
 		}
 		addToGroup(groupedAttribute, groupedAttributeDto.getAttributeCodes(), false);

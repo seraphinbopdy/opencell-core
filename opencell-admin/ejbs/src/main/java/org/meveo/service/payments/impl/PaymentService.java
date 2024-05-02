@@ -17,6 +17,11 @@
  */
 package org.meveo.service.payments.impl;
 
+import static org.meveo.model.payments.PaymentMethodEnum.CASH;
+import static org.meveo.model.payments.PaymentMethodEnum.PAYPALPAYMENTLINK;
+import static org.meveo.model.payments.PaymentMethodEnum.SIPS;
+import static org.meveo.model.payments.PaymentMethodEnum.STRIPEDIRECTLINK;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -72,7 +77,6 @@ import org.meveo.model.payments.RejectedType;
 import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
-
 
 /**
  * Payment service implementation.
@@ -728,10 +732,10 @@ public class PaymentService extends PersistenceService<Payment> {
         if (paymentMethodType == PaymentMethodEnum.DIRECTDEBIT) {
             occTemplateCode = paramBean.getProperty("occ.payment.dd", "PAY_DDT");
         }
-        if (paymentMethodType == PaymentMethodEnum.STRIPEDIRECTLINK) {
+        if (paymentMethodType == STRIPEDIRECTLINK) {
             occTemplateCode = paramBean.getProperty("occ.payment.stp", "PAY_STP");
         }
-        if (paymentMethodType == PaymentMethodEnum.PAYPALPAYMENTLINK) {
+        if (paymentMethodType == PAYPALPAYMENTLINK) {
             occTemplateCode = paramBean.getProperty("occ.payment.pal", "PAY_PAL");
         }
 
@@ -909,7 +913,7 @@ public class PaymentService extends PersistenceService<Payment> {
                 rejectedPayment.setTaxAmount(accountOperation.getTaxAmount());
                 rejectedPayment.setAmountWithoutTax(accountOperation.getAmountWithoutTax());
                 rejectedPayment.setOrderNumber(accountOperation.getOrderNumber());
-                rejectedPayment.setRejectedType(RejectedType.A);
+                rejectedPayment.setRejectedType(RejectedType.AUTOMATIC);
                 rejectedPayment.setRejectedDate(new Date());
                 rejectedPayment.setTransactionDate(new Date());
                 rejectedPayment.setDueDate(accountOperation.getDueDate());
@@ -975,7 +979,7 @@ public class PaymentService extends PersistenceService<Payment> {
 
     }
 
-    private OCCTemplate getOCCTemplateRejectPayment(AccountOperation accountOperation) {
+    public OCCTemplate getOCCTemplateRejectPayment(AccountOperation accountOperation) {
     	ParamBean paramBean = paramBeanFactory.getInstance();
     	String occTemplateCode = null;
         if (accountOperation instanceof AutomatedRefund || accountOperation instanceof Refund) {
@@ -996,6 +1000,18 @@ public class PaymentService extends PersistenceService<Payment> {
            }
            if(PaymentMethodEnum.WIRETRANSFER == accountOperation.getPaymentMethod()) {
                occTemplateCode = paramBean.getProperty("occ.rejectedPayment.chk", "REJ_WTF");
+           }
+           if (PAYPALPAYMENTLINK == accountOperation.getPaymentMethod()) {
+               occTemplateCode = paramBean.getProperty("occ.rejectedPayment.ppal", "REJ_PAL");
+           }
+           if (STRIPEDIRECTLINK == accountOperation.getPaymentMethod()) {
+               occTemplateCode = paramBean.getProperty("occ.rejectedPayment.stp", "REJ_STP");
+           }
+           if (CASH == accountOperation.getPaymentMethod()) {
+                occTemplateCode = paramBean.getProperty("occ.rejectedPayment.cash", "REJ_CASH");
+           }
+           if (SIPS == accountOperation.getPaymentMethod()) {
+               occTemplateCode = paramBean.getProperty("occ.rejectedPayment.tip", "REJ_TIP");
            }
         }
 
@@ -1089,7 +1105,7 @@ public class PaymentService extends PersistenceService<Payment> {
         	actionReport.setAction(action);
         	actionReport.setRejectedPayment(rejectedPayment);
         	actionReport.setStatus(PaymentRejectionActionStatus.PENDING);
-        	
+        	actionReport.setActionScript(action.getScript());
         	paymentRejectionActionReportService.create(actionReport);
         });
 	}

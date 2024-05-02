@@ -1269,8 +1269,7 @@ public class PaymentApi extends BaseApi {
 		}
 		PaymentRejectionCode paymentRejectionCode = rejectionCodeService.findByCode(rejectionPayment.getRejectionCode());
 		ofNullable(paymentRejectionCode)
-				.orElseThrow(() -> new NotFoundException(String.format("Rejection code %s not found for gateway[code=%s",
-						rejectionPayment.getRejectionCode(), rejectionPayment.getPaymentGatewayCode())));
+				.orElseThrow(() -> new NotFoundException("Provided rejection code not found"));
 		PaymentGateway paymentGateway = null;
 		if(rejectionPayment.getPaymentGatewayCode() != null) {
 			paymentGateway = paymentGatewayService.findByCode(rejectionPayment.getPaymentGatewayCode());
@@ -1280,6 +1279,11 @@ public class PaymentApi extends BaseApi {
 		}
 		if(paymentGateway == null && rejectionPayment.getPaymentGatewayCode() != null) {
 			throw new BadRequestException("Payment has no gateway. Please provide a valid paymentGateway");
+		}
+		if(paymentRejectionCode.getPaymentGateway() != null
+				&& !paymentGateway.getId().equals(paymentRejectionCode.getPaymentGateway().getId())) {
+			throw new BadRequestException("Rejection code " + rejectionPayment.getRejectionCode()
+					+ " not found for gateway[code=" + rejectionPayment.getPaymentGatewayCode() + "]");
 		}
 		try {
 
@@ -1320,6 +1324,7 @@ public class PaymentApi extends BaseApi {
 				customerAccount, payment.getUnMatchingAmount(), null, new Date());
 		rejectedPayment.setRejectedType(MANUAL);
 		rejectedPayment.setBankReference(payment.getBankReference());
+		rejectedPayment.setReference(payment.getReference());
 		rejectedPayment.setRejectedDate(new Date());
 		rejectedPayment.setTransactionDate(new Date());
 		rejectedPayment.setDueDate(payment.getDueDate());

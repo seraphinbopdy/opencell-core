@@ -2858,12 +2858,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
     
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void validateInvoice(Invoice invoice) {
-		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
-		invoice.setRejectedByRule(null);
-		invoice.setRejectReason(null);
-		serviceSingleton.assignInvoiceNumber(invoice, true);
-	}
+	public void validateInvoice(Long id) {
+        Invoice invoice = ofNullable(findById(id)).orElseThrow(() -> new EntityDoesNotExistsException(Invoice.class, id));
+        invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+        invoice.setRejectedByRule(null);
+        invoice.setRejectReason(null);
+        serviceSingleton.assignInvoiceNumber(invoice, true);
+    }
     
     /**
      * @param billingRunId

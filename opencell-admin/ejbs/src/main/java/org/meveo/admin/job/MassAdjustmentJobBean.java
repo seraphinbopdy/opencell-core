@@ -62,7 +62,7 @@ public class MassAdjustmentJobBean extends BaseJobBean {
         
         for (Invoice invoice : impactedInvoices) {
         	Invoice adjustment = invoiceService.createAdjustment(invoice, invoiceLinesToAdjustIds, null);
-        	invoiceService.validateInvoice(adjustment);
+        	invoiceService.validateInvoice(adjustment.getId());
         	adjustment.setInvoiceLines(invoiceLineService.listInvoiceLinesByInvoice(adjustment.getId()));
         	totalLinesProcessed += adjustment.getInvoiceLines().size();
         	totalAWoTProcessed = totalAWoTProcessed.add(adjustment.getInvoiceLines().stream().map(InvoiceLine::getAmountWithoutTax).reduce(BigDecimal.ZERO, BigDecimal::add));

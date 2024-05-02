@@ -630,7 +630,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 	private Invoice validateInvoice(boolean ignoreValidationRules, Invoice invoice, boolean generateAO) throws Exception {
 		if (ignoreValidationRules) {
-			invoiceService.validateInvoice(invoice);
+			invoiceService.validateInvoice(invoice.getId());
 			if (generateAO) {
 				invoiceService.generateRecordedInvoiceAO(invoice.getId());
 			}

@@ -21,7 +21,6 @@ package org.meveo.api.payment;
 import static java.lang.String.format;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
@@ -31,7 +30,6 @@ import static org.meveo.apiv2.payments.SequenceActionType.DOWN;
 import static org.meveo.apiv2.payments.SequenceActionType.UP;
 import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.model.payments.MatchingStatusEnum.O;
-import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
 import static org.meveo.model.payments.RejectedType.MANUAL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.ENCODED_FILE_RESULT_LABEL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.EXPORT_SIZE_RESULT_LABEL;
@@ -49,7 +47,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -115,7 +112,6 @@ import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentRejectionAction;
-import org.meveo.model.payments.PaymentRejectionActionReport;
 import org.meveo.model.payments.PaymentRejectionCode;
 import org.meveo.model.payments.PaymentRejectionCodesGroup;
 import org.meveo.model.payments.PaymentStatusEnum;
@@ -130,12 +126,12 @@ import org.meveo.service.payments.impl.MatchingCodeService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.payments.impl.PaymentGatewayService;
 import org.meveo.service.payments.impl.PaymentHistoryService;
-import org.meveo.service.payments.impl.PaymentRejectionActionReportService;
 import org.meveo.service.payments.impl.PaymentRejectionActionService;
 import org.meveo.service.payments.impl.PaymentRejectionCodeService;
 import org.meveo.service.payments.impl.PaymentRejectionCodesGroupService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
+import org.meveo.service.payments.impl.RejectionCodeDeleteException;
 import org.meveo.service.script.ScriptInstanceService;
 
 /**
@@ -189,9 +185,6 @@ public class PaymentApi extends BaseApi {
 
 	@Inject
 	private PaymentRejectionCodesGroupService paymentRejectionCodesGroupService;
-
-	@Inject
-	private PaymentRejectionActionReportService paymentRejectionActionReportService;
 
 	private static final String PAYMENT_GATEWAY_NOT_FOUND_ERROR_MESSAGE = "Payment gateway not found";
 	private static final String PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE = "Payment rejection code not found";
@@ -792,10 +785,6 @@ public class PaymentApi extends BaseApi {
 				}
 				rejectionCodeService.remove(rejectionCode);
 			}
-			paymentRejectionActionReportService.getEntityManager()
-						.createNamedQuery("PaymentRejectionActionReport.removeActionReference")
-					.setParameter("rejectionCode", rejectionCode.getCode())
-					.executeUpdate();
 		} else if(rejectionCode.getPaymentRejectionCodesGroup() != null && !forceDelete) {
 			throw new ConflictException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group." +
 					" Use ‘force:true’ to override. If the group becomes empty, it will be deleted too");
@@ -1260,17 +1249,14 @@ public class PaymentApi extends BaseApi {
 		}
 		Payment payment = rejectionPayment.getId() != null
 				? loadRejectionPaymentById(rejectionPayment) : loadRejectionPaymentByExternalId(rejectionPayment);
-		if(payment.getRejectedPayment() != null) {
-			throw new ForbiddenException(format("Payment[id=%d, reference=%s] has already been rejected by RejectedPayment[id=%d]",
-					payment.getId(), payment.getReference(), payment.getRejectedPayment().getId()));
-		}
 		if (payment.getPaymentGateway() == null && isBlank(rejectionPayment.getPaymentGatewayCode())) {
 			throw new BadRequestException("Payment has no gateway. Please provide a paymentGatewayCode");
 		}
 		PaymentRejectionCode paymentRejectionCode = rejectionCodeService.findByCode(rejectionPayment.getRejectionCode());
 		ofNullable(paymentRejectionCode)
-				.orElseThrow(() -> new NotFoundException(String.format("Rejection code %s not found for gateway[code=%s",
-						rejectionPayment.getRejectionCode(), rejectionPayment.getPaymentGatewayCode())));
+				.orElseThrow(() -> new NotFoundException("Rejection code "
+						+ rejectionPayment.getRejectionCode()
+						+ " not found for gateway[code=" + rejectionPayment.getPaymentGatewayCode()));
 		PaymentGateway paymentGateway = null;
 		if(rejectionPayment.getPaymentGatewayCode() != null) {
 			paymentGateway = paymentGatewayService.findByCode(rejectionPayment.getPaymentGatewayCode());
@@ -1304,12 +1290,18 @@ public class PaymentApi extends BaseApi {
 			aos.add(rejectedPayment.getId());
 			matchingCodeService.matchOperations(payment.getCustomerAccount().getId(),
 					null, aos, null);
-			paymentHistoryService.rejectPaymentHistory(payment.getReference(),
-					rejectionPayment.getRejectionCode(), rejectionPayment.getComment());
+			PaymentHistory paymentHistory = paymentHistoryService.findHistoryByPaymentId(payment.getReference());
+			if (paymentHistory != null) {
+				paymentHistory.setAsyncStatus(PaymentStatusEnum.REJECTED);
+				paymentHistory.setLastUpdateDate(new Date());
+				paymentHistory.setErrorCode(rejectionPayment.getRejectionCode());
+				paymentHistory.setErrorMessage(rejectionPayment.getComment());
+				paymentHistoryService.update(paymentHistory);
+			}
 			accountOperationService.update(payment);
 			return RejectionPayment.from(rejectedPayment);
-		} catch (Exception exception) {
-			throw new BusinessApiException(exception);
+		} catch (Exception e) {
+			throw new BusinessApiException(e);
 		}
 	}
 

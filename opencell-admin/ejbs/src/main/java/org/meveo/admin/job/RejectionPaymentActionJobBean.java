@@ -49,7 +49,6 @@ import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.payments.impl.AccountOperationService;
-import org.meveo.service.payments.impl.PaymentRejectionActionReportService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
@@ -68,9 +67,6 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
     
     @Inject
     private ScriptInstanceService scriptInstanceService;
-
-	@Inject
-	private PaymentRejectionActionReportService paymentRejectionActionReportService;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -104,9 +100,8 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
 			if(actionReport.getAction() == null
 					&& (PENDING == actionReport.getStatus() || RUNNING == actionReport.getStatus())) {
 				actionReport.setStatus(CANCELED);
-				actionReport.setReport("Action has been deleted from payment rejection settings");
-				paymentRejectionActionReportService.update(actionReport);
-				continue;
+				jobExecutionResult.addReport("Action has been deleted from payment rejection settings");
+				return;
 			}
     		if (processNextAction) {
     			processPaymentRejectionActionReport(actionReport);

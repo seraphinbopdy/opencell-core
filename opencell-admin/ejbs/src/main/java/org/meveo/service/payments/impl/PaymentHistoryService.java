@@ -29,6 +29,8 @@ import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.Refund;
 import org.meveo.service.base.PersistenceService;
 
+import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
+
 /**
  * @author anasseh
  * @lastModifiedVersion 5.0.2
@@ -143,4 +145,16 @@ public class PaymentHistoryService extends PersistenceService<PaymentHistory> {
             return null;
         }
     }
+
+	public PaymentHistory rejectPaymentHistory(String paymentReference, String rejectionCode, String rejectionComment) {
+		PaymentHistory paymentHistory = findHistoryByPaymentId(paymentReference);
+		if (paymentHistory != null) {
+			paymentHistory.setAsyncStatus(REJECTED);
+			paymentHistory.setLastUpdateDate(new Date());
+			paymentHistory.setErrorCode(rejectionCode);
+			paymentHistory.setErrorMessage(rejectionComment);
+			update(paymentHistory);
+		}
+		return paymentHistory;
+	}
 }

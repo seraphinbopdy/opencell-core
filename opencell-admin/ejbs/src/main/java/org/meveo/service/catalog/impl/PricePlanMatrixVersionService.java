@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -781,20 +782,15 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             StringBuilder fileName = new StringBuilder();
             fileName.append(ppmv.getId());
             if (ppmv.getPricePlanMatrix() != null) {
-                if(!ListUtils.isEmtyCollection(ppmv.getPricePlanMatrix().getChargeTemplates()) && ppmv.getPricePlanMatrix().getChargeTemplates().size() == 1) {
-                    ChargeTemplate chargeTemplate = ppmv.getPricePlanMatrix().getChargeTemplates().iterator().next();
-                    fileName.append(fileNameSeparator + chargeTemplate.getId());
-                    fileName.append(fileNameSeparator + chargeTemplate.getDescription()).append(fileNameSeparator + chargeTemplate.getCode());
-                } else {
-                    fileName.append(fileNameSeparator + ppmv.getPricePlanMatrix().getCode());
-                }
+				ChargeTemplate chargeTemplate = ppmv.getPricePlanMatrix().getChargeTemplates().stream().sorted(Comparator.comparing(ChargeTemplate::getId)).findFirst().orElse(null);
+                 fileName.append(fileNameSeparator).append(chargeTemplate.getId());
+                 fileName.append(fileNameSeparator).append(chargeTemplate.getDescription());
+	             fileName.append(fileNameSeparator).append(chargeTemplate.getCode());
             }
-
-            fileName.append(fileNameSeparator + ppmv.getLabel());
+	        
+	        fileName.append(fileNameSeparator + ppmv.getLabel());
+	        fileName.append(fileNameSeparator).append(ppmv.getStatus());
             fileName.append(fileNameSeparator);
-            if (ppmv.getValidity() != null) {
-                fileName.append(ppmv.getStatus());
-            }
             if (ppmv.getValidity() != null) {
                 fileName.append(fileNameSeparator);
                 if (ppmv.getValidity().getFrom() != null) {

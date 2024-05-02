@@ -9,8 +9,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,9 +26,6 @@ import org.meveo.model.scripts.ScriptInstance;
 @Table(name = "ar_payment_rejection_action_report")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
         parameters = {@Parameter(name = "sequence_name", value = "ar_payment_rejection_action_report_seq"),})
-@NamedQueries({
-		@NamedQuery(name = "PaymentRejectionActionReport.removeActionReference", query = "UPDATE PaymentRejectionActionReport SET action = null WHERE code=:rejectionCode"),
-})
 public class PaymentRejectionActionReport extends BusinessCFEntity {
 
 	private static final long serialVersionUID = 1L;

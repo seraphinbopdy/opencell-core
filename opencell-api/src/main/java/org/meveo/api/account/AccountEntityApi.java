@@ -284,9 +284,6 @@ public class AccountEntityApi extends BaseApi {
 		}*/
         registrationNumberList.clear();
 		if(org.apache.commons.collections.CollectionUtils.isNotEmpty(registrationNumbers)) {
-			if(registrationNumbers.size() > 1) {
-				throw new BusinessApiException(resourceBundle.getString("registrationNumber.multiple.numberNotAllowed"));
-			}
 			registrationNumbers.forEach(registrationNumberDto -> {
 				RegistrationNumber registrationNumber = registrationNumberService.findByRegistrationNo(registrationNumberDto.getRegistrationNo());
 				IsoIcd isoIcd = null;

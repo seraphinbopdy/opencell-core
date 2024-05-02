@@ -22,7 +22,6 @@ import static java.util.Comparator.comparingInt;
 import static java.util.Optional.of;
 import static org.meveo.model.payments.PaymentRejectionActionStatus.CANCELED;
 import static org.meveo.model.payments.PaymentRejectionActionStatus.FAILED;
-import static org.meveo.model.payments.PaymentRejectionActionStatus.PENDING;
 import static org.meveo.model.payments.PaymentRejectionActionStatus.RUNNING;
 import static org.meveo.model.payments.RejectionActionStatus.COMPLETED;
 
@@ -101,13 +100,6 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
     	List<PaymentRejectionActionReport> rejectionActionsReport = rejectedPayment.getPaymentRejectionActionReports();
     	rejectionActionsReport.sort(comparingInt(a -> a.getAction().getSequence()));
     	for (PaymentRejectionActionReport actionReport : rejectionActionsReport) {
-			if(actionReport.getAction() == null
-					&& (PENDING == actionReport.getStatus() || RUNNING == actionReport.getStatus())) {
-				actionReport.setStatus(CANCELED);
-				actionReport.setReport("Action has been deleted from payment rejection settings");
-				paymentRejectionActionReportService.update(actionReport);
-				continue;
-			}
     		if (processNextAction) {
     			processPaymentRejectionActionReport(actionReport);
 				processNextAction = !(FAILED.equals(actionReport.getStatus()));

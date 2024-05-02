@@ -793,8 +793,9 @@ public class PaymentApi extends BaseApi {
 				rejectionCodeService.remove(rejectionCode);
 			}
 			paymentRejectionActionReportService.getEntityManager()
-						.createNamedQuery("PaymentRejectionActionReport.removeActionReference")
+					.createNamedQuery("PaymentRejectionActionReport.removeActionReference")
 					.setParameter("rejectionCode", rejectionCode.getCode())
+					.setParameter("report", "Action has been deleted from payment rejection settings")
 					.executeUpdate();
 		} else if(rejectionCode.getPaymentRejectionCodesGroup() != null && !forceDelete) {
 			throw new ConflictException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group." +
@@ -1283,7 +1284,7 @@ public class PaymentApi extends BaseApi {
 		if(paymentRejectionCode.getPaymentGateway() != null
 				&& !paymentGateway.getId().equals(paymentRejectionCode.getPaymentGateway().getId())) {
 			throw new BadRequestException("Rejection code " + rejectionPayment.getRejectionCode()
-					+ " not found for gateway[code=" + rejectionPayment.getPaymentGatewayCode() + "]");
+					+ " not found for gateway[code=" + payment.getPaymentGateway().getCode() + "]");
 		}
 		try {
 

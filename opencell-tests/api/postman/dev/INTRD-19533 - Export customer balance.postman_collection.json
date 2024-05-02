@@ -1,0 +1,1290 @@
+{
+	"info": {
+		"_postman_id": "485cadeb-1543-4193-bcc8-6a05aab126ec",
+		"name": "INTRD-19533 - Export customer balance",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26920418"
+	},
+	"item": [
+		{
+			"name": "01-setuup",
+			"item": [
+				{
+					"name": "set timestamp Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ts\", new Date().getTime());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{opencell.url}}/v2/version",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"{{currencyCode}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/currency/addFunctionalCurrency",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"currency",
+								"addFunctionalCurrency"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02-customer hierarchy",
+			"item": [
+				{
+					"name": "01 - create customer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"{{customerCode}}\",\r\n    \"description\": \"{{customerCode}}\",\r\n    \"address\": {},\r\n    \"name\": {},\r\n    \"customerCategory\": \"CLIENT\",\r\n    \"isCompany\": true,\r\n    \"customFields\": {\r\n        \"customField\": []\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/customer",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "02 - create customer account",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"{{customerAccountCode}}\",\r\n    \"description\": \"{{customerAccountCode}}\",\r\n    \"contactInformation\": {},\r\n    \"address\": {},\r\n    \"name\": {},\r\n    \"dueDateDelayEL\": \"\",\r\n    \"customer\": \"{{customerCode}}\",\r\n    \"currency\": \"{{currencyCode}}\",\r\n    \"language\": \"FRA\",\r\n    \"isCompany\": true,\r\n    \"methodOfPayment\": [\r\n        {\r\n            \"paymentMethodType\": \"CHECK\",\r\n            \"alias\": \"{{customerAccountCode}}_CHECK\",\r\n            \"disabled\": false,\r\n            \"preferred\": true\r\n        }\r\n    ],\r\n    \"generalClientAccountCode\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/customerAccount",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"customerAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03 - Billing account",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"{{billingAccountCode}}\",\r\n    \"description\": \"{{billingAccountCode}}\",\r\n    \"contactInformation\": {\r\n        \"address\": {},\r\n        \"email\": \"{{billingAccountCode}}@yopmail.com\"\r\n    },\r\n    // \"registrationNo\": \"\",\r\n    \"vatNo\": \"\",\r\n    \"externalRef1\": \"\",\r\n    \"country\": \"FR\",\r\n    \"language\": \"FRA\",\r\n    \"tradingCurrency\": \"{{currencyCode}}\",\r\n    \"customerAccount\": \"{{customerAccountCode}}\",\r\n    \"invoicingThreshold\": \"\",\r\n    \"discountPlanInstance\": [],\r\n    \"discountPlanForInstantiation\": [],\r\n    \"discountPlanForTermination\": [],\r\n    \"electronicBilling\": \"\",\r\n    \"paymentMethod\": null,\r\n    \"email\": \"{{billingAccountCode}}@yopmail.com\",\r\n    \"ccedEmails\": \"\",\r\n    \"mailingType\": \"\",\r\n    \"emailTemplate\": \"\",\r\n    \"address\": {},\r\n    \"billingCycle\": \"{{billingCycleARECode}}\",\r\n    \"name\": {},\r\n    \"isCompany\": true,\r\n    \"legalEntityType\": {\r\n        \"code\": \"CIE\"\r\n    },\r\n    \"minimumAmountEl\": \"\",\r\n    \"minimumLabelEl\": \"\",\r\n    \"customFields\": {\r\n        \r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/billingAccount",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"billingAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03 - User account",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"description\": \"AR_CONSUMER\",\r\n    \"name\": {\r\n        \"title\": \"CIE\"\r\n    },\r\n    \"billingAccount\": \"{{billingAccountCode}}\",\r\n    \"isCompany\": true,\r\n    \"isConsumer\": true,\r\n    \"parentUserAccountCode\": null,\r\n    \"code\": \"{{userAccountCode}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/account/userAccount",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"account",
+								"userAccount"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "03-Offer Copy",
+			"item": [
+				{
+					"name": "OneShot Charge",
+					"item": [
+						{
+							"name": "X01 - Create OneshotCharge",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"code\": \"{{oneShotChargeCode}}\",\r\n    \"description\": \"Desc {{oneShotChargeCode}}\",\r\n    \"oneShotChargeTemplateType\": \"SUBSCRIPTION\",\r\n    \"linkedAttributes\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/oneShotChargeTemplate/createOrUpdate",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"oneShotChargeTemplate",
+										"createOrUpdate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "X02 - Create Oneshot Price Plan Copy",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"code\": \"{{oneshotPricePlanCode}}\",\r\n    \"eventCode\": \"{{oneShotChargeCode}}\",\r\n    \"description\": \"This is {{oneShotChargeCode}} price plan description\",\r\n    \"amountWithoutTax\": 100\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/pricePlan",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"pricePlan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "X03 - Create Oneshot Price Plan Version",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"pricePlanMatrixCode\": \"{{oneshotPricePlanCode}}\",\r\n    \"label\": \"Label {{oneshotPricePlanCode}}\",\r\n    \"validity\": {\r\n        \"from\": null,\r\n        \"to\": null\r\n    },\r\n    \"amountWithoutTax\": 100,\r\n    \"isMatrix\": false\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/pricePlan/pricePlanMatrixVersion",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"pricePlan",
+										"pricePlanMatrixVersion"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "X04 - Publish OS PP Version",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"code\": \"{{oneshotPricePlanCode}}\",\r\n    \"version\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/pricePlan/{{oneshotPricePlanCode}}/pricePlanMatrixVersions/1/status/PUBLISHED",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"pricePlan",
+										"{{oneshotPricePlanCode}}",
+										"pricePlanMatrixVersions",
+										"1",
+										"status",
+										"PUBLISHED"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "X05 - Activate OS Charge",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"chargeCode\": \"{{oneShotChargeCode}}\",\r\n    \"newStatus\": \"ACTIVE\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/chargeTemplates/{{oneShotChargeCode}}/status/ACTIVE",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"chargeTemplates",
+										"{{oneShotChargeCode}}",
+										"status",
+										"ACTIVE"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Y01 - Create Product",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"code\": \"{{productCode}}\",\r\n    \"label\": \"label {{productCode}}\",\r\n    \"productChargeTemplateMappingDto\": [\r\n        {\r\n            \"chargeCode\": \"{{oneShotChargeCode}}\",\r\n            \"productCode\": \"{{productCode}}\"\r\n        }\r\n    ],\r\n    \"discountListCodes\": [],\r\n    \"mediaCodes\": [],\r\n    \"modelChildren\": [],\r\n    \"currentProductVersion\": null,\r\n    \"commercialRuleCodes\": [],\r\n    \"agreementDateSetting\": \"COPY\",\r\n    \"customFields\": {\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/products",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Y01 - Add Attribute to Product",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"code\": \"{{productCode}}\",\r\n    \"label\": \"label {{productCode}}\",\r\n    \"status\": \"ACTIVE\",\r\n    \"statusDate\": 1659530614079,\r\n    \"productChargeTemplateMappingDto\": [\r\n        {\r\n            \"chargeCode\": \"{{oneShotChargeCode}}\",\r\n            \"productCode\": \"{{productCode}}\"\r\n        }\r\n    ],\r\n    \"discountListCodes\": [],\r\n    \"mediaCodes\": [],\r\n    \"modelChildren\": [],\r\n    \"currentProductVersion\": {\r\n        \"shortDescription\": \"label {{productCode}}\",\r\n        \"productCode\": \"AR_PR_test_1\",\r\n        \"currentVersion\": 1,\r\n        \"statusDate\": 1660064660821,\r\n        \"groupedAttributeCodes\": [],\r\n        \"validity\": {\r\n            \"from\": \"2022-08-09T19:04:20+02:00\"\r\n        },\r\n        \"productAttributes\": [\r\n            {\r\n                \"attributeCode\": \"AR_ATTRIBUTE_LIST\",\r\n                \"display\": true\r\n            }\r\n        ],\r\n        \"tagCodes\": []\r\n    },\r\n    \"commercialRuleCodes\": [],\r\n    \"isModel\": false\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/products/{{productCode}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"products",
+										"{{productCode}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Y02 - Publish Product",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"versionStatus\": \"PUBLISHED\",\r\n    \"codeProduct\": \"{{productCode}}\",\r\n    \"codeVersion\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/products/{{productCode}}/productVersions/1/status/PUBLISHED",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"products",
+										"{{productCode}}",
+										"productVersions",
+										"1",
+										"status",
+										"PUBLISHED"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Y03 - Get Created Product",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"nestedEntities\": [\r\n        \"productLine\",\r\n        \"discountList\",\r\n        \"brand\",\r\n        \"medias\",\r\n        \"commercialRules\",\r\n        \"productLine\",\r\n        \"productCharges\",\r\n        \"productCharges.chargeTemplate\",\r\n        \"productCharges.counterTemplate\",\r\n        \"productVersions.tags\",\r\n        \"productVersions.product\",\r\n        \"productVersions.attributes.attribute\",\r\n        \"productVersions.groupedAttributes\",\r\n        \"currentVersion.tags\",\r\n        \"currentVersion.attributes.attribute\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/v2/generic/product/1",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"v2",
+										"generic",
+										"product",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Y03 - Get Created Product Version",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"nestedEntities\": [\r\n        \"attributes\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/v2/generic/productVersion/1",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"v2",
+										"generic",
+										"productVersion",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Y04 - Activate product",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"codeProduct\": \"{{productCode}}\",\r\n    \"toStatus\": \"ACTIVE\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/products/{{productCode}}/status/ACTIVE",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"products",
+										"{{productCode}}",
+										"status",
+										"ACTIVE"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Y05 - Attach OS Charge to Product",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"code\": \"{{productCode}}\",\r\n    \"label\": \"Label {{productCode}}\",\r\n    \"status\": \"ACTIVE\",\r\n    \"statusDate\": 1658792541325,\r\n    \"productChargeTemplateMappingDto\": [\r\n        {\r\n            \"chargeCode\": \"{{oneShotChargeCode}}\",\r\n            \"productCode\": \"{{productCode}}\"\r\n        }\r\n    ],\r\n    \"discountListCodes\": [],\r\n    \"mediaCodes\": [],\r\n    \"modelChildren\": [],\r\n    \"currentProductVersion\": null,\r\n    \"commercialRuleCodes\": [],\r\n    \"isModel\": false\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/catalog/products/{{productCode}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"catalog",
+										"products",
+										"{{productCode}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Z01 - Create Offer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Offer {{offerCode}}\",\r\n    \"attributes\": [],\r\n    \"offerAttributes\": [],\r\n    \"commercialRuleCodes\": [],\r\n    \"mediaCodes\": [],\r\n    \"offerProducts\": [],\r\n    \"tagCodes\": [],\r\n    \"validFrom\": \"2022-07-24\",\r\n    \"newValidFrom\": null,\r\n    \"newValidTo\": null,\r\n    \"seller\": [\r\n        \"MAIN_SELLER\"\r\n    ],\r\n    \"channel\": [],\r\n    \"allowedDiscountPlans\": [],\r\n    \"allowedOfferChange\": [],\r\n    \"isOfferChangeRestricted\": false,\r\n    \"autoEndOfEngagement\": false,\r\n    \"renewalRule\": {\r\n        \"initialTermType\": \"RECURRING\",\r\n        \"initialyActiveForUnit\": \"MONTH\",\r\n        \"autoRenew\": true,\r\n        \"extendAgreementPeriodToSubscribedTillDate\": true,\r\n        \"endOfTermAction\": \"SUSPEND\",\r\n        \"renewalTermType\": \"RECURRING\"\r\n    },\r\n    \"offerTemplateCategory\": [],\r\n    \"code\": \"{{offerCode}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/catalog/offerTemplate",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"catalog",
+								"offerTemplate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Z02 - Attach product to offer",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Offer {{offerCode}}\",\r\n    \"code\": \"{{offerCode}}\",\r\n    \"updatedCode\": \"{{offerCode}}\",\r\n    \"attributes\": [],\r\n    \"offerAttributes\": [],\r\n    \"commercialRuleCodes\": [],\r\n    \"mediaCodes\": [],\r\n    \"statusDate\": 1658878924921,\r\n    \"disabled\": false,\r\n    \"offerProducts\": [\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{productCode}}\"\r\n            },\r\n            \"mandatory\": true\r\n        }\r\n    ],\r\n    \"tagCodes\": [],\r\n    \"validFrom\": \"2022-07-24T00:00:00+02:00\",\r\n    \"newValidFrom\": \"2022-07-24T00:00:00+02:00\",\r\n    \"customFields\": {\r\n    },\r\n    \"seller\": [\r\n        \"MAIN_SELLER\"\r\n    ],\r\n    \"isModel\": false,\r\n    \"channel\": [],\r\n    \"allowedDiscountPlans\": [],\r\n    \"allowedOfferChange\": [],\r\n    \"isOfferChangeRestricted\": false,\r\n    \"autoEndOfEngagement\": false,\r\n    \"renewalRule\": {\r\n        \"autoRenew\": true,\r\n        \"endOfTermAction\": \"SUSPEND\",\r\n        \"initialyActiveForUnit\": \"MONTH\",\r\n        \"extendAgreementPeriodToSubscribedTillDate\": true,\r\n        \"initialTermType\": \"RECURRING\",\r\n        \"renewalTermType\": \"RECURRING\"\r\n    },\r\n    \"offerTemplateCategory\": [],\r\n    \"id\": \"1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/catalog/offerTemplate",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"catalog",
+								"offerTemplate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Z03 - Activate Offer Template",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"offerCode\": \"{{offerCode}}\",\r\n    \"toStatus\": \"ACTIVE\",\r\n    \"from\": \"2022-07-24T00:00:00+02:00\",\r\n    \"to\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/catalog/offerTemplate/{{offerCode}}/update/status?status=ACTIVE&validFrom=2022-07-24T00:00:00+02:00&validTo=",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"catalog",
+								"offerTemplate",
+								"{{offerCode}}",
+								"update",
+								"status"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "ACTIVE"
+								},
+								{
+									"key": "validFrom",
+									"value": "2022-07-24T00:00:00+02:00"
+								},
+								{
+									"key": "validTo",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "04-Subscribe and Charge Copy",
+			"item": [
+				{
+					"name": "Create sub and instanciate Services",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userAccount\": \"{{userAccountCode}}\",\r\n    \"offerTemplate\": \"{{offerCode}}\",\r\n    \"renewalRule\": {\r\n        \"autoRenew\": true,\r\n        \"endOfTermAction\": \"SUSPEND\",\r\n        \"initialyActiveForUnit\": \"MONTH\",\r\n        \"extendAgreementPeriodToSubscribedTillDate\": true,\r\n        \"initialTermType\": \"RECURRING\",\r\n        \"renewalTermType\": \"RECURRING\",\r\n        \"renewForUnit\": \"MONTH\"\r\n    },\r\n    \"subscriptionDate\": {{now-ts}},\r\n    \"seller\": \"MAIN_SELLER\",\r\n    \"salesPersonName\": \"opencell.admin\",\r\n    \"discountPlanForInstantiation\": [],\r\n    \"discountPlanForTermination\": [],\r\n    \"productToInstantiateDto\": [\r\n        {\r\n            \"productCode\": \"{{productCode}}\",\r\n            \"quantity\": 1,\r\n            \"deliveryDate\": {{now-ts}},\r\n            \"attributeInstances\": []\r\n        }\r\n    ],\r\n    \"code\": \"{{subscriptionCode}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/billing/subscription/subscribeAndInstantiateProducts",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"billing",
+								"subscription",
+								"subscribeAndInstantiateProducts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Service Instance ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// get data[0].id and store it as serviceInstanceId",
+									"var serviceInstanceId = pm.response.json().data[0].id;",
+									"pm.globals.set(\"serviceInstanceId\", serviceInstanceId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"subscription.code\": \"{{subscriptionCode}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/serviceInstance",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"serviceInstance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Activate Service",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subscription\": \"{{subscriptionCode}}\",\n    \"servicesToActivate\": {\n        \"service\": [\n            {\n                \"code\": \"{{productCode}}\",\n                \"quantity\": 1,\n                \"id\": {{serviceInstanceId}},\n                \"subscriptionDate\": {{now-ts}}\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/billing/subscription/activateServices",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"billing",
+								"subscription",
+								"activateServices"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "05-Generate AOs",
+			"item": [
+				{
+					"name": "Run|RT_Job Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if( pm.response.code === 200) {",
+									"    var jsonData = JSON.parse(responseBody);",
+									"    pm.globals.set(\"jobRun.id\", jsonData.actionStatus.message);",
+									"}",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\":\"RT_Job\"\n}"
+						},
+						"url": {
+							"raw": "{{opencell.url}}/job/execute",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"job",
+								"execute"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create BR Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"billingRunId\", pm.response.json().message);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"billingRunTypeEnum\": \"FULL_AUTOMATIC\",\n    \"lastTransactionDate\": \"{{lastTransactionDate}}\",\n    \"invoiceDate\": \"{{invoiceDate}}\",\n    \"referenceDate\": \"TODAY\",\n    \"generateAO\": true,\n    \"billingCycleCode\": \"{{billingCycleCode}}\",\n    \"incrementalInvoiceLines\": false,\n    \"preReportAutoOnCreate\": false,\n    \"preReportAutoOnInvoiceLinesJob\": false,\n    \"rejectAutoAction\": \"CANCEL\",\n    \"suspectAutoAction\": \"CANCEL\",\n    \"disableAggregation\": false,\n    \"dateAggregation\": \"NO_DATE_AGGREGATION\",\n    \"useAccountingArticleLabel\": false,\n    \"aggregateUnitAmounts\": false,\n    \"ignoreSubscriptions\": true,\n    \"ignoreOrders\": true,\n    \"ignoreUserAccounts\": true,\n    \"discountAggregation\": \"FULL_AGGREGATION\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/billing/invoicing/createBillingRun",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"billing",
+								"invoicing",
+								"createBillingRun"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Execute Job - IL V2 Copy",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"{{billingRunId}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/billing/invoicing/{{billingRunId}}/advanceStatus?executeInvoicingJob=true",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"billing",
+								"invoicing",
+								"{{billingRunId}}",
+								"advanceStatus"
+							],
+							"query": [
+								{
+									"key": "executeInvoicingJob",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Payment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Stores the paymentId in an environment or global variable",
+									"var paymentId = pm.response.json().paymentId;",
+									"pm.collectionVariables.set(\"createdPaymentId\", paymentId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"paymentMethod\": \"CHECK\",\r\n    \"amount\": 1,\r\n    \"reference\": \"PAY_CHECK_001\",\r\n    \"dueDate\": 1714573556650,\r\n    \"occTemplateCode\": \"PAY_CHK\",\r\n    \"customerAccountCode\": \"{{customerAccountCode}}\",\r\n    \"transactionDate\": 1714573556646,\r\n    \"bankCollectionDate\": 1714573556646,\r\n    \"bankLot\": \"@today-opencell.admin\",\r\n    \"paymentInfo\": \"CHECK\",\r\n    \"paymentInfo2\": \"\",\r\n    \"paymentInfo3\": \"\",\r\n    \"paymentInfo4\": \"\",\r\n    \"paymentInfo5\": \"\",\r\n    \"transactionalCurrency\": \"{{currencyCode}}\",\r\n    \"isToMatching\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/payment",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"payment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get AccountOperationID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// get data[0].id and store it as serviceInstanceId",
+									"var aoId = pm.response.json().data[0].id;",
+									"pm.collectionVariables.set(\"accountOperationId\", aoId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filters\": {\n        \"type\": \"I\",\n        \"customerAccount.code\": \"{{customerAccountCode}}\"\n    },\n    \"nestedEntities\": [\n        \"invoices\",\n        \"invoices.subscription\"\n    ]\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/generic/all/accountOperation",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"generic",
+								"all",
+								"accountOperation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Match AOs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Stores the paymentId in an environment or global variable",
+									"var paymentId = pm.response.json().paymentId;",
+									"pm.collectionVariables.set(\"createdPaymentId\", paymentId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"accountOperations\": [\r\n        {\r\n            \"id\": {{accountOperationId}},\r\n            \"sequence\": 0\r\n        },\r\n        {\r\n            \"id\": {{createdPaymentId}},\r\n            \"sequence\": 1\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{opencell.url}}/v2/accountReceivable/accountOperation/matchOperations",
+							"host": [
+								"{{opencell.url}}"
+							],
+							"path": [
+								"v2",
+								"accountReceivable",
+								"accountOperation",
+								"matchOperations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Export AO Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerAccount\": {\n        \"code\": \"{{customerAccountCode}}\"\n    },\n    \"customerBalance\": {\n        \"id\": -1\n    },\n    \"genericFieldDetails\": [\n        {\n            \"name\": \"reference\",\n            \"header\": \"Reference\",\n            \"transformation\": \"\"\n        },\n        {\n            \"name\": \"collectionDate\",\n            \"header\": \"Collection Date\",\n            \"transformation\": \"dd/MM/yyyy\"\n        },\n        {\n            \"name\": \"type\",\n            \"header\": \"Transaction Type\",\n            \"transformation\": \"\"\n        },\n        {\n            \"name\": \"accountingDate\",\n            \"header\": \"Accounting Date\",\n            \"transformation\": \"dd/MM/yyyy\"\n        },\n        {\n            \"name\": \"description\",\n            \"header\": \"Description\",\n            \"transformation\": \"\"\n        },\n        {\n            \"name\": \"amountDebit\",\n            \"header\": \"Debit\",\n            \"formulaInputs\": \"transactionCategory, transactionalAmount\",\n            \"formula\": \"#{transactionCategory=='DEBIT' ? transactionalAmount : '-' }\",\n            \"transformation\": \"¤ #,##0.00\"\n        },\n        {\n            \"name\": \"amountCredit\",\n            \"formulaInputs\": \"transactionCategory, transactionalAmount\",\n            \"formula\": \"#{transactionCategory=='CREDIT' ? transactionalAmount : '-' }\",\n            \"header\": \"Credit\",\n            \"transformation\": \"¤ #,##0.00\"\n        },\n        {\n            \"name\": \"matchingStatus\",\n            \"header\": \"Matching Status\",\n            \"transformation\": \"\"\n        },\n        {\n            \"name\": \"transactionalUnMatchingAmount\",\n            \"header\": \"Balance\",\n            \"transformation\": \"¤ #,##0.00\"\n        },\n        {\n            \"name\": \"transactionalMatchingAmount\",\n            \"header\": \"Operation amount\",\n            \"transformation\": \"¤ #,##0.00\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/accountOperation/exportCustomerBalance/EXCEL",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"accountOperation",
+						"exportCustomerBalance",
+						"EXCEL"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{opencell.password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{opencell.username}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"let ts = pm.collectionVariables.get(\"ts\");",
+					"let testSuffix = \"_01_\"+ts",
+					"",
+					"var moment = require('moment');",
+					"pm.environment.set('now', moment().format((\"YYYY-MM-DDTHH:mm:ssZ\")));",
+					"pm.environment.set('now-ts', moment().valueOf());",
+					"",
+					"pm.collectionVariables.set('invoiceDate', moment().format((\"YYYY-MM-DD\")));",
+					"pm.collectionVariables.set('lastTransactionDate', moment().add(1, 'days').format((\"YYYY-MM-DD\")));",
+					"pm.collectionVariables.set('currencyCode', 'USD');",
+					"",
+					"// Create BC - No Aggregation",
+					"let billingCycleARECode = \"CYC_INV_MT_1\";",
+					"pm.collectionVariables.set(\"billingCycleARECode\", billingCycleARECode);",
+					"",
+					"// Customer hierarchy",
+					"let customerCode = \"AR_CUST\" + testSuffix;",
+					"let customerAccountCode = \"AR_CA\" + testSuffix;",
+					"let billingAccountCode = \"AR_BA\" + testSuffix;",
+					"let userAccountCode = \"AR_UA\" + testSuffix;",
+					"",
+					"pm.collectionVariables.set(\"customerCode\", customerCode);",
+					"pm.collectionVariables.set(\"customerAccountCode\", customerAccountCode);",
+					"pm.collectionVariables.set(\"billingAccountCode\", billingAccountCode);",
+					"pm.collectionVariables.set(\"userAccountCode\", userAccountCode);",
+					"",
+					"// Payment Method",
+					"let paymentMethodeDDAlias = \"AR_PM_DD\" + testSuffix;",
+					"let paymentMethodeDDmandateIdent = \"AR_MI_DD\" + testSuffix;",
+					"pm.collectionVariables.set(\"paymentMethodeDDAlias\", paymentMethodeDDAlias);",
+					"pm.collectionVariables.set(\"paymentMethodeDDmandateIdent\",  paymentMethodeDDmandateIdent);",
+					"",
+					"",
+					"//--------------- Charges",
+					"let oneShotChargeCode = \"AR_CH_OS\" + testSuffix;",
+					"let recurrentChargeCode = \"AR_CH_RE\" + testSuffix;",
+					"let usageChargeCode = \"AR_CH_USG\" + testSuffix;",
+					"let oneshotPricePlanCode = \"PP_\" + oneShotChargeCode;",
+					"let recurrentPricePlanCode = \"PP_\" + recurrentChargeCode;",
+					"let usagePricePlanCode = \"PP_\" + usageChargeCode;",
+					"",
+					"pm.collectionVariables.set(\"oneShotChargeCode\", oneShotChargeCode);",
+					"pm.collectionVariables.set(\"recurrentChargeCode\", recurrentChargeCode);",
+					"pm.collectionVariables.set(\"usageChargeCode\", usageChargeCode);",
+					"pm.collectionVariables.set(\"oneshotPricePlanCode\", oneshotPricePlanCode);",
+					"pm.collectionVariables.set(\"recurrentPricePlanCode\", recurrentPricePlanCode);",
+					"pm.collectionVariables.set(\"usagePricePlanCode\", usagePricePlanCode);",
+					"",
+					"//--------------- Products",
+					"let productCode = \"AR_PR\" + testSuffix;",
+					"",
+					"pm.collectionVariables.set(\"productCode\", productCode);",
+					"",
+					"//--------------- Offers",
+					"let offerCode = \"AR_OF\" + testSuffix;",
+					"let subscriptionCode = \"AR_SUB\" + testSuffix;",
+					"",
+					"pm.collectionVariables.set(\"offerCode\", offerCode);",
+					"pm.collectionVariables.set(\"subscriptionCode\", subscriptionCode);",
+					"",
+					"",
+					"let billingCycleCode = \"CYC_INV_MT_1\";",
+					"pm.collectionVariables.set(\"billingCycleCode\", billingCycleCode);",
+					"",
+					"// Quote",
+					"let quoteCode = \"AR_QUOTE\" + testSuffix;",
+					"pm.collectionVariables.set(\"quoteCode\", quoteCode);",
+					"",
+					"// Quote",
+					"let afCode = \"AR_AF_006\";",
+					"pm.collectionVariables.set(\"afCode\", afCode);",
+					"pm.collectionVariables.set(\"clCode\", afCode+'_CL_001');"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "billingCycleARECode",
+			"value": ""
+		},
+		{
+			"key": "customerCode",
+			"value": ""
+		},
+		{
+			"key": "customerAccountCode",
+			"value": ""
+		},
+		{
+			"key": "billingAccountCode",
+			"value": ""
+		},
+		{
+			"key": "userAccountCode",
+			"value": ""
+		},
+		{
+			"key": "paymentMethodeDDAlias",
+			"value": ""
+		},
+		{
+			"key": "paymentMethodeDDmandateIdent",
+			"value": ""
+		},
+		{
+			"key": "oneShotChargeCode",
+			"value": ""
+		},
+		{
+			"key": "recurrentChargeCode",
+			"value": ""
+		},
+		{
+			"key": "usageChargeCode",
+			"value": ""
+		},
+		{
+			"key": "oneshotPricePlanCode",
+			"value": ""
+		},
+		{
+			"key": "recurrentPricePlanCode",
+			"value": ""
+		},
+		{
+			"key": "usagePricePlanCode",
+			"value": ""
+		},
+		{
+			"key": "productCode",
+			"value": ""
+		},
+		{
+			"key": "offerCode",
+			"value": ""
+		},
+		{
+			"key": "subscriptionCode",
+			"value": ""
+		},
+		{
+			"key": "billingCycleCode",
+			"value": ""
+		},
+		{
+			"key": "quoteCode",
+			"value": ""
+		},
+		{
+			"key": "afCode",
+			"value": ""
+		},
+		{
+			"key": "clCode",
+			"value": ""
+		},
+		{
+			"key": "billingRunId",
+			"value": ""
+		},
+		{
+			"key": "invoiceDate",
+			"value": ""
+		},
+		{
+			"key": "lastTransactionDate",
+			"value": ""
+		},
+		{
+			"key": "currencyCode",
+			"value": ""
+		},
+		{
+			"key": "createdPaymentId",
+			"value": ""
+		},
+		{
+			"key": "ts",
+			"value": ""
+		},
+		{
+			"key": "accountOperationId",
+			"value": ""
+		}
+	]
+}

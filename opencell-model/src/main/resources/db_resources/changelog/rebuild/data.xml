@@ -12757,5 +12757,16 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="description" value="New products" />
         </insert>
     </changeSet>
+    
+  	<changeSet id="#INTRD-22516_20240503" author="aeljaouhari">
+        <update tableName="billing_invoice_type">
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')"/>
+            <where>code='ADJ_INV'</where>
+        </update>
+        <update tableName="billing_invoice_type">
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')" />
+            <where>code='ADJ_REF'</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>

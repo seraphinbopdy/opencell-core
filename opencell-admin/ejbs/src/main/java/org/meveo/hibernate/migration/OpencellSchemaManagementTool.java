@@ -344,17 +344,7 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
             DataSource dataSource = (DataSource) initialContext.lookup(DB_DATA_SOURCE_NAME);
 
             Connection connection = dataSource.getConnection();
-            DbMigrationStatusEnum dbMigrationStatus = getDBMigrationStatus(connection, Version.buildNumber);
 
-            if (dbMigrationStatus == DbMigrationStatusEnum.MIGRATION_COMPLETED) {
-                log.info("Database is already up to date for build " + Version.buildNumber + ". Will skip DB migration and schema validation");
-                return;
-            }
-
-            // Run Liquibase update from a corresponding file
-            if (!validateOnly) {
-                //runLiquibase(connection, dbMigrationStatus == DbMigrationStatusEnum.NEW_DB ? DB_CHANGELLOG_REBUILD : DB_CHANGELLOG_CURRENT);
-            }
 
             // Run a default schema validation
             log.info("Will proceede with custom schema validator");

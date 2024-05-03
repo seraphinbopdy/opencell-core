@@ -486,13 +486,13 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	    invoice = invoiceService.findById(invoice.getId(), asList("invoiceLines", "invoiceType", "invoiceType.occTemplate", "linkedInvoices"));
 
 	    if (invoice.getStatus() != InvoiceStatusEnum.VALIDATED) {
-            throw new ForbiddenException("Invoice should be Validated");
+            throw new BadRequestException("Invoice should be Validated");
         }
 
 		if(invoice.getLinkedInvoices() != null && !invoice.getLinkedInvoices().isEmpty()) {
 			invoice.getLinkedInvoices().forEach(relatedInvoice -> {
 				if(VALIDATED == relatedInvoice.getLinkedInvoiceValue().getStatus()) {
-					throw new ForbiddenException("You cannot create ADJ on invoice with an already validated ADJ");
+					throw new BadRequestException("You cannot create ADJ on invoice with an already validated ADJ");
 				}
 			});
 		}
@@ -500,11 +500,11 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 		String invoiceType = invoice.getInvoiceType() != null ? invoice.getInvoiceType().getCode() : "";
 		boolean invoiceTypeForbidden = invoiceTypeService.getListAdjustementCode().contains(invoiceType);
 		if(invoiceTypeForbidden) {
-			throw new ForbiddenException("You cannot create ADJ from another ADJ invoice");
+			throw new BadRequestException("You cannot create ADJ from another ADJ invoice");
 		}
 	    
-	    if (invoice.getInvoiceType().getOccTemplate().getOccCategory() != OperationCategoryEnum.DEBIT) {
-	        throw new ForbiddenException("You cannot make a credit note over another");
+	    if (!OperationCategoryEnum.DEBIT.equals(invoice.getInvoiceType().getOccTemplate().getOccCategory())) {
+	        throw new BadRequestException("You cannot make a credit note over another");
         }
 	    
 	    if (invoiceLinesToReplicate.getGlobalAdjustment() == null) {

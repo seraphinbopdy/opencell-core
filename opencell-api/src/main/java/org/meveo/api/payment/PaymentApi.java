@@ -137,6 +137,7 @@ import org.meveo.service.payments.impl.PaymentRejectionCodeService;
 import org.meveo.service.payments.impl.PaymentRejectionCodesGroupService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
+import org.meveo.service.payments.impl.RejectedPaymentService;
 import org.meveo.service.script.ScriptInstanceService;
 
 /**
@@ -193,6 +194,9 @@ public class PaymentApi extends BaseApi {
 
 	@Inject
 	private PaymentRejectionActionReportService paymentRejectionActionReportService;
+	
+	@Inject
+	private RejectedPaymentService rejectedPaymentService;
 
 	private static final String PAYMENT_GATEWAY_NOT_FOUND_ERROR_MESSAGE = "Payment gateway not found";
 	private static final String PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE = "Payment rejection code not found";
@@ -776,19 +780,13 @@ public class PaymentApi extends BaseApi {
 	 * @param forceDelete force rejection code delete
 	 */
 	public void removeRejectionCode(Long id, boolean forceDelete) {
-		PaymentRejectionCode rejectionCode = ofNullable(rejectionCodeService.findById(id))
-				.orElseThrow(() -> new NotFoundException(PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE));
-		if(rejectionCode.getPaymentRejectionCodesGroup() == null ||
-				(rejectionCode.getPaymentRejectionCodesGroup() != null && forceDelete)) {
+		PaymentRejectionCode rejectionCode = ofNullable(rejectionCodeService.findById(id)).orElseThrow(() -> new NotFoundException(PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE));
+		if (rejectionCode.getPaymentRejectionCodesGroup() == null || (rejectionCode.getPaymentRejectionCodesGroup() != null && forceDelete)) {
 			PaymentRejectionCodesGroup rejectionCodesGroup = rejectionCode.getPaymentRejectionCodesGroup();
-			if(rejectionCodesGroup != null
-					&& rejectionCodesGroup.getPaymentRejectionCodes() != null
-					&& rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
+			if (rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
 				removeRejectionCodeGroup(rejectionCodesGroup.getId());
 			} else {
-				if(rejectionCodesGroup != null
-						&& rejectionCodesGroup.getPaymentRejectionCodes() != null
-						&& !rejectionCodesGroup.getPaymentRejectionCodes().isEmpty()) {
+				if(rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && !rejectionCodesGroup.getPaymentRejectionCodes().isEmpty()) {
 					rejectionCodesGroup.getPaymentRejectionCodes().remove(rejectionCode);
 				}
 				rejectionCodeService.remove(rejectionCode);
@@ -798,9 +796,16 @@ public class PaymentApi extends BaseApi {
 					.setParameter("rejectionCode", rejectionCode.getCode())
 					.setParameter("report", "Action has been deleted from payment rejection settings")
 					.executeUpdate();
-		} else if(rejectionCode.getPaymentRejectionCodesGroup() != null && !forceDelete) {
-			throw new ConflictException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group." +
-					" Use ‘force:true’ to override. If the group becomes empty, it will be deleted too");
+			
+			paymentRejectionActionReportService.getEntityManager().flush();
+			
+			rejectedPaymentService.getEntityManager()
+					.createNamedQuery("RejectedPayment.updateRejectionActionsStatus")
+					.setParameter("rejectedCode", rejectionCode.getCode())
+					.executeUpdate();
+			
+		} else if (rejectionCode.getPaymentRejectionCodesGroup() != null && !forceDelete) {
+			throw new ConflictException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group. Use ‘force:true’ to override. If the group becomes empty, it will be deleted too");
 		}
 	}
 

@@ -29,6 +29,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -38,6 +40,9 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @DiscriminatorValue(value = "R")
+@NamedQueries({
+    @NamedQuery(name = "RejectedPayment.updateRejectionActionsStatus", query = "UPDATE RejectedPayment rp SET rp.rejectionActionsStatus = 'NO_ACTION' WHERE rp.rejectedCode = :rejectedCode AND NOT EXISTS (SELECT 1 FROM PaymentRejectionActionReport r WHERE r.action <> null and r.rejectedPayment = rp.id)"),
+})
 public class RejectedPayment extends AccountOperation {
 
     private static final long serialVersionUID = 1L;

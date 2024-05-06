@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -98,7 +99,10 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
     	boolean processNextAction = true;
     	rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.RUNNING);
     	List<PaymentRejectionActionReport> rejectionActionsReport = rejectedPayment.getPaymentRejectionActionReports();
-    	rejectionActionsReport.sort(comparingInt(a -> a.getAction().getSequence()));
+    	rejectionActionsReport = rejectionActionsReport.stream()
+    			.filter(rp -> rp.getAction() != null)
+    			.sorted(comparingInt(rp -> rp.getAction().getSequence()))
+    			.collect(Collectors.toList());
     	for (PaymentRejectionActionReport actionReport : rejectionActionsReport) {
     		if (processNextAction) {
     			processPaymentRejectionActionReport(actionReport);

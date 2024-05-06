@@ -446,6 +446,9 @@ public class OfferTemplateDto extends ProductOfferingDto {
 	 * @return the offerProducts
 	 */
 	public List<OfferProductsDto> getOfferProducts() {
+		if(offerProducts == null) {
+			offerProducts = new ArrayList<OfferProductsDto>();
+		}
 		return offerProducts;
 	}
 

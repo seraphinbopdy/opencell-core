@@ -306,7 +306,9 @@ public class AccountEntityApi extends BaseApi {
 				registrationNumberList.add(registrationNumber);
 				if(registrationNumber.getId() == null){
 					registrationNumberService.create(registrationNumber);
-				}
+				} else {
+                    registrationNumberService.update(registrationNumber);
+                }
 			});
 		}
 	}

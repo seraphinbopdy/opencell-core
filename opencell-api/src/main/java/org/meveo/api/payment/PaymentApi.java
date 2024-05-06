@@ -26,6 +26,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.meveo.apiv2.payments.ImmutableRejectionGroup.builder;
 import static org.meveo.apiv2.payments.SequenceActionType.DOWN;
 import static org.meveo.apiv2.payments.SequenceActionType.UP;
@@ -1293,6 +1294,9 @@ public class PaymentApi extends BaseApi {
 
 			RejectedPayment rejectedPayment = from(rejectionPayment, payment, occTemplate);
 			rejectedPayment.setPaymentGateway(paymentGateway);
+			if(StringUtils.isBlank(rejectedPayment.getRejectedDescription())) {
+				rejectedPayment.setRejectedDescription(paymentRejectionCode.getDescription());
+			}
 			accountOperationService.handleAccountingPeriods(rejectedPayment);
 			accountOperationService.create(rejectedPayment);
 			payment.setRejectedPayment(rejectedPayment);

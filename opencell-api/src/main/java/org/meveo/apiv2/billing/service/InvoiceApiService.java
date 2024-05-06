@@ -19,7 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
@@ -28,16 +31,14 @@ import javax.ws.rs.NotFoundException;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.exception.ImportInvoiceException;
-import org.meveo.admin.exception.InvoiceExistException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.BaseApi;
-import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.FilterDto;
 import org.meveo.api.dto.billing.QuarantineBillingRunDto;
 import org.meveo.api.dto.invoice.GenerateInvoiceRequestDto;
 import org.meveo.api.exception.BusinessApiException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.invoice.InvoiceApi;
@@ -561,11 +562,24 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	 * @param invoiceResource {@link InvoicePatchInput}
 	 * @return {@link Invoice}
 	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public Invoice updateValidatedInvoice(Invoice invoice, org.meveo.apiv2.billing.InvoicePatchInput invoiceResource) {      
-    	ICustomFieldEntity customFieldEntity = new Invoice();
-		customFieldEntity = invoiceBaseApi.populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), invoice, true);
+    	ICustomFieldEntity customFieldEntity = invoiceBaseApi.populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), invoice, true);
         return invoiceService.updateValidatedInvoice(invoice, invoiceResource.getComment(), customFieldEntity.getCfValues(), invoiceResource.getPurchaseOrder());
     }
+
+	@Transactional
+	public Invoice updateValidatedInvoice(Long invoiceId, InvoicePatchInput invoiceResource) {
+		Invoice invoice = invoiceService.findById(invoiceId, asList("invoiceType"));
+		if(invoice == null) {
+			throw new EntityDoesNotExistsException(Invoice.class, invoiceId);
+		}
+		if(invoice.getStatus() != InvoiceStatusEnum.VALIDATED) {
+			throw new ForbiddenException("Invoice should be Validated");
+		}
+		
+		return updateValidatedInvoice(invoice, invoiceResource);
+	}
 	
 	/**
 	 * @param invoice

@@ -524,8 +524,7 @@ public class InvoiceResourceImpl implements InvoiceResource {
 
 	@Override
     public Response updateValidateInvoice(Long id, InvoicePatchInput input) {
-		Invoice invoice = findValidatedInvoiceToUpdate(id);
-        invoiceApiService.updateValidatedInvoice(invoice, input);
+        invoiceApiService.updateValidatedInvoice(id, input);
         return Response.ok().entity(LinkGenerator.getUriBuilderFromResource(InvoiceResource.class, id).build()).build();
     }
 

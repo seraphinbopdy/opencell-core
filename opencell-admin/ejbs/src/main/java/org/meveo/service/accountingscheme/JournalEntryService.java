@@ -656,8 +656,10 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 	}
 	
 	private JournalEntry createBadDebtWritOff(WriteOff writeOff, AccountingCode accountingCode,  BigDecimal reduce) {
-		return  buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.DEBIT,
-				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount().subtract(reduce), null, writeOff.getOperationNumber());
+        JournalEntry journalEntry = buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.DEBIT,
+                writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount().subtract(reduce), null, writeOff.getOperationNumber());
+        journalEntry.setTransactionalAmount(writeOff.getTransactionalAmount() == null ? BigDecimal.ZERO : writeOff.getTransactionalAmount().subtract(reduce));
+        return journalEntry;
 	}
 	
 	private List<JournalEntry> createDoubtfulReceivable(WriteOff writeOff) {

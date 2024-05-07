@@ -20870,6 +20870,7 @@
     <changeSet id="INTRD-22195_20240417" author="AbdelmounaimAkadid" />
     <changeSet id="INTRD-22557_20240425" author="TarikFA." />
     <changeSet id="INTRD-22385_20240429" author="TarikFA." />
+    <changeSet id="#INTRD_22492_20240506" author="zelmeliani" />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

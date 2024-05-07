@@ -25013,4 +25013,12 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD_22492_20240506" author="zelmeliani">
+        <update tableName="ar_occ_template">
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '654100000')" />
+            <where>code='EXP_WRT'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

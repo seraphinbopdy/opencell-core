@@ -48,7 +48,6 @@ import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.payments.impl.PaymentGatewayService;
 import org.meveo.service.payments.impl.PaymentHistoryService;
-import org.meveo.service.payments.impl.PaymentRejectionActionReportService;
 import org.meveo.service.payments.impl.PaymentRejectionActionService;
 import org.meveo.service.payments.impl.PaymentRejectionCodeService;
 import org.meveo.service.payments.impl.PaymentRejectionCodesGroupService;

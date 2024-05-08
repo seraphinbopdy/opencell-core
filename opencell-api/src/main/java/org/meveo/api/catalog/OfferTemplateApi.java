@@ -319,6 +319,8 @@ public class OfferTemplateApi extends ProductOfferingApi<OfferTemplate, OfferTem
                 allowedOffers.add(allowedOffer);
             }
             offerTemplate.setAllowedOffersChange(allowedOffers);
+        } else if(postData.getAllowedOfferChange() != null && postData.getAllowedOfferChange().isEmpty()) {
+            offerTemplate.getAllowedOffersChange().clear();
         }
 
         Boolean autoEndOfEngagement = postData.getAutoEndOfEngagement();

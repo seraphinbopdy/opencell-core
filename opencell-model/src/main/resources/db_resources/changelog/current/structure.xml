@@ -25021,4 +25021,15 @@ public class DummyPaymentGatewayScript extends Script {
         </update>
     </changeSet>
 
+    <changeSet id="#INTRD-22825_20240509_allowed_offers_data_recovery" author="a.rouaguebe">
+        <sql>
+            INSERT INTO cat_offer_allowed_offer_change (offer_tmpl_id, allowed_offer_change_id)
+            SELECT o.offer_template_id, o.id FROM cat_offer_template o
+            WHERE o.offer_template_id is not null
+        </sql>
+        <modifySql dbms="postgresql">
+            <append value=" on conflict do nothing"/>
+        </modifySql>
+    </changeSet>
+
 </databaseChangeLog>

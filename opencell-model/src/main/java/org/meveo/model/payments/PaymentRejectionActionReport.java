@@ -29,7 +29,8 @@ import org.meveo.model.scripts.ScriptInstance;
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
         parameters = {@Parameter(name = "sequence_name", value = "ar_payment_rejection_action_report_seq"),})
 @NamedQueries({
-		@NamedQuery(name = "PaymentRejectionActionReport.removeActionReference", query = "UPDATE PaymentRejectionActionReport SET action = null, status = 'CANCELED', report=:report WHERE code=:rejectionCode"),
+		@NamedQuery(name = "PaymentRejectionActionReport.removeActionReferenceToPendingAndInProgressReports", query = "UPDATE PaymentRejectionActionReport SET action = null, status = 'CANCELED', report=:report WHERE code=:rejectionCode AND status IN ('PENDING', 'RUNNING')"),
+		@NamedQuery(name = "PaymentRejectionActionReport.removeActionReference", query = "UPDATE PaymentRejectionActionReport rar SET rar.action = null WHERE rar.code=:rejectionCode")
 })
 public class PaymentRejectionActionReport extends BusinessCFEntity {
 

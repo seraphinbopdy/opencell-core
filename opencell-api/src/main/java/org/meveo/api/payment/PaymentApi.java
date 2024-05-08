@@ -21,18 +21,15 @@ package org.meveo.api.payment;
 import static java.lang.String.format;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.meveo.apiv2.payments.ImmutableRejectionGroup.builder;
 import static org.meveo.apiv2.payments.SequenceActionType.DOWN;
 import static org.meveo.apiv2.payments.SequenceActionType.UP;
 import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.model.payments.MatchingStatusEnum.O;
-import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
 import static org.meveo.model.payments.RejectedType.MANUAL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.ENCODED_FILE_RESULT_LABEL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.EXPORT_SIZE_RESULT_LABEL;
@@ -116,7 +113,6 @@ import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentRejectionAction;
-import org.meveo.model.payments.PaymentRejectionActionReport;
 import org.meveo.model.payments.PaymentRejectionCode;
 import org.meveo.model.payments.PaymentRejectionCodesGroup;
 import org.meveo.model.payments.PaymentStatusEnum;
@@ -792,9 +788,13 @@ public class PaymentApi extends BaseApi {
 				rejectionCodeService.remove(rejectionCode);
 			}
 			paymentRejectionActionReportService.getEntityManager()
-					.createNamedQuery("PaymentRejectionActionReport.removeActionReference")
+					.createNamedQuery("PaymentRejectionActionReport.removeActionReferenceToPendingAndInProgressReports")
 					.setParameter("rejectionCode", rejectionCode.getCode())
 					.setParameter("report", "Action has been deleted from payment rejection settings")
+					.executeUpdate();
+			paymentRejectionActionReportService.getEntityManager()
+					.createNamedQuery("PaymentRejectionActionReport.removeActionReference")
+					.setParameter("rejectionCode", rejectionCode.getCode())
 					.executeUpdate();
 			
 			paymentRejectionActionReportService.getEntityManager().flush();

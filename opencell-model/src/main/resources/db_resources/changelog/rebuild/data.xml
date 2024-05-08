@@ -12117,7 +12117,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="created" valueDate="${db.current.time}" />
 			<column name="creator" value="applicationInitializer" />
 			<column name="code" valueComputed="${uuid_function}" />
-			<column name="use_security_deposit" value="1" />
+			<column name="use_security_deposit" value="0" />
 		</insert>
 		<insert tableName="security_deposit_templat">
 			<column name="id"

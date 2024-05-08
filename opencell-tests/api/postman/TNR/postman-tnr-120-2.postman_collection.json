@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "9953dec6-de6d-435c-a8e4-faa78899e321",
-		"name": "DoubleRun-120-V12-INV2",
+		"_postman_id": "f28e2bca-6b68-43ea-8b44-98824de5fd2a",
+		"name": "postman-tnr-120-V16-2",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "4396982"
 	},
@@ -158,6 +158,71 @@
 			"response": []
 		},
 		{
+			"name": "advanced",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(function(){}, 20000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "opencell.admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "opencell.admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    {\r\n        \"id\": 1,\r\n        \"code\": \"pricePlanFilters.enablePricePlanFilters\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 2,\r\n        \"code\": \"pricePlanFilters.enableOfferTemplate\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 3,\r\n        \"code\": \"pricePlanFilters.enableStartSubscriptionDate\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 4,\r\n        \"code\": \"pricePlanFilters.enableEndSubscriptionDate\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 5,\r\n        \"code\": \"pricePlanFilters.enableStartRatingDate\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 6,\r\n        \"code\": \"pricePlanFilters.enableEndRatingDate\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 7,\r\n        \"code\": \"pricePlanFilters.enableMinQuantity\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 8,\r\n        \"code\": \"pricePlanFilters.enableMaxQuantity\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 9,\r\n        \"code\": \"pricePlanFilters.enableMinSubscriptionAgeInMonth\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 10,\r\n        \"code\": \"pricePlanFilters.enableMaxSubscriptionAgeInMonth\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 11,\r\n        \"code\": \"pricePlanFilters.enableCriteria1Value\",\r\n        \"value\": 1\r\n    },\r\n    {\r\n        \"id\": 12,\r\n        \"code\": \"pricePlanFilters.enableCriteria2Value\",\r\n        \"value\": 1\r\n    },\r\n    {\r\n        \"id\": 13,\r\n        \"code\": \"pricePlanFilters.enableCriteria3Value\",\r\n        \"value\": 1\r\n    },\r\n    {\r\n        \"id\": 14,\r\n        \"code\": \"pricePlanFilters.enableCriteriaEL\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 15,\r\n        \"code\": \"pricePlanFilters.enableTradingCurrency\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 16,\r\n        \"code\": \"pricePlanFilters.enableTradingCountry\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 17,\r\n        \"code\": \"pricePlanFilters.enableSeller\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 18,\r\n        \"code\": \"pricePlanFilters.enableValidityCalendar\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 19,\r\n        \"code\": \"pricePlanFilters.enableValidityFrom\",\r\n        \"value\": true\r\n    },\r\n    {\r\n        \"id\": 20,\r\n        \"code\": \"pricePlanFilters.enableValidityDate\",\r\n        \"value\": true\r\n    }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/setting/advanced",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"setting",
+						"advanced"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Update PDF Job",
 			"event": [
 				{
@@ -256,7 +321,7 @@
 			"response": []
 		},
 		{
-			"name": "Update Invoicing_Job_V2",
+			"name": "Update Invoicing_Job_V3",
 			"event": [
 				{
 					"listen": "test",
@@ -284,7 +349,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"Invoicing_Job_V2\",\r\n    \"description\": \"Invoicing Job V2\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"InvoicingJobV2\",\r\n    \"active\": true,\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"waitingMillis\",\r\n                \"description\": \"Waiting before next launch (ms)\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 0,\r\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n            },\r\n            {\r\n                \"code\": \"nbRuns\",\r\n                \"description\": \"Number of parallel execution\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": -1,\r\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n            }\r\n        ]\r\n    },\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"7_XML\",\r\n    \"jobSpeed\": \"NORMAL\"\r\n}",
+					"raw": "{\r\n    \"code\": \"Invoicing_Job_V3\",\r\n    \"description\": \"Invoicing Job V3\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"InvoicingJobV3\",\r\n    \"active\": true,\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"waitingMillis\",\r\n                \"description\": \"Waiting before next launch (ms)\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 0,\r\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n            },\r\n            {\r\n                \"code\": \"nbRuns\",\r\n                \"description\": \"Number of parallel execution\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": -1,\r\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n            }\r\n        ]\r\n    },\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"7_XML\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -315,7 +380,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -324,7 +390,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -333,7 +400,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n \"code\": \"Invoice_Lines_Job_V2\",\r\n       \r\n        \"jobCategory\": \"INVOICING\",\r\n        \"jobTemplate\": \"InvoiceLinesJob\",\r\n        \"active\": true,\r\n        \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"JobInstance_InvoiceLinesJob_AggregationPerUnitAmount\",\r\n                    \"description\": \"aggregation per unit amount\",\r\n                    \"fieldType\": \"BOOLEAN\",\r\n                    \"booleanValue\": false\r\n                }\r\n            ]\r\n        },\r\n        \"limitToSingleNode\": true,\r\n        \"verboseReport\": true,\r\n        \"followingJob\":\"Invoicing_Job_V2\",\r\n        \"jobSpeed\": \"NORMAL\"\r\n}\r\n",
+					"raw": "{\r\n    \"code\": \"Invoice_Lines_Job_V2\",\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"InvoiceLinesJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"Invoicing_Job_V3\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -382,7 +449,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"ArticleMappingJob\",\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"ArticleMappingJob\",\r\n    \"active\": true,\r\n    \r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"Invoice_Lines_Job_V2\",\r\n    \"jobSpeed\": \"NORMAL\"\r\n}",
+					"raw": "{\r\n    \"code\": \"ArticleMappingJob\",\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"ArticleMappingJob\",\r\n    \"active\": true,\r\n    \r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"Invoice_Lines_Job_V2\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -529,7 +596,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"4_UsageRating\",\r\n    \"jobCategory\": \"RATING\",\r\n    \"jobTemplate\": \"UsageRatingJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"jobSpeed\": \"NORMAL\",\r\n    \"followingJob\": \"5_RatedTransactions\",\r\n    \"verboseReport\": true,\r\n    \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        }\r\n    \r\n}",
+					"raw": "{\r\n    \"code\": \"4_UsageRating\",\r\n    \"jobCategory\": \"RATING\",\r\n    \"jobTemplate\": \"UsageRatingJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n\r\n    \"followingJob\": \"5_RatedTransactions\",\r\n    \"verboseReport\": true,\r\n    \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        }\r\n    \r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -578,7 +645,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"3_UsageRating\",\r\n    \"jobCategory\": \"RATING\",\r\n    \"jobTemplate\": \"UsageRatingJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"jobSpeed\": \"NORMAL\",\r\n    \"followingJob\": \"4_UsageRating\",\r\n    \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        }\r\n}",
+					"raw": "{\r\n    \"code\": \"3_UsageRating\",\r\n    \"jobCategory\": \"RATING\",\r\n    \"jobTemplate\": \"UsageRatingJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"4_UsageRating\",\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"waitingMillis\",\r\n                \"description\": \"Waiting before next launch (ms)\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 0,\r\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n            },\r\n            {\r\n                \"code\": \"nbRuns\",\r\n                \"description\": \"Number of parallel execution\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 2,\r\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n            }\r\n        ]\r\n    }\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

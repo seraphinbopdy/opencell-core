@@ -779,14 +779,6 @@ public class PaymentApi extends BaseApi {
 		PaymentRejectionCode rejectionCode = ofNullable(rejectionCodeService.findById(id)).orElseThrow(() -> new NotFoundException(PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE));
 		if (rejectionCode.getPaymentRejectionCodesGroup() == null || (rejectionCode.getPaymentRejectionCodesGroup() != null && forceDelete)) {
 			PaymentRejectionCodesGroup rejectionCodesGroup = rejectionCode.getPaymentRejectionCodesGroup();
-			if (rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
-				removeRejectionCodeGroup(rejectionCodesGroup.getId());
-			} else {
-				if(rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && !rejectionCodesGroup.getPaymentRejectionCodes().isEmpty()) {
-					rejectionCodesGroup.getPaymentRejectionCodes().remove(rejectionCode);
-				}
-				rejectionCodeService.remove(rejectionCode);
-			}
 			paymentRejectionActionReportService.getEntityManager()
 					.createNamedQuery("PaymentRejectionActionReport.removeActionReferenceToPendingAndInProgressReports")
 					.setParameter("rejectionCode", rejectionCode.getCode())
@@ -796,13 +788,21 @@ public class PaymentApi extends BaseApi {
 					.createNamedQuery("PaymentRejectionActionReport.removeActionReference")
 					.setParameter("rejectionCode", rejectionCode.getCode())
 					.executeUpdate();
-			
+
 			paymentRejectionActionReportService.getEntityManager().flush();
-			
+
 			rejectedPaymentService.getEntityManager()
 					.createNamedQuery("RejectedPayment.updateRejectionActionsStatus")
 					.setParameter("rejectedCode", rejectionCode.getCode())
 					.executeUpdate();
+			if (rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
+				removeRejectionCodeGroup(rejectionCodesGroup.getId());
+			} else {
+				if(rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && !rejectionCodesGroup.getPaymentRejectionCodes().isEmpty()) {
+					rejectionCodesGroup.getPaymentRejectionCodes().remove(rejectionCode);
+				}
+				rejectionCodeService.remove(rejectionCode);
+			}
 			
 		} else if (rejectionCode.getPaymentRejectionCodesGroup() != null && !forceDelete) {
 			throw new ConflictException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group. Use ‘force:true’ to override. If the group becomes empty, it will be deleted too");

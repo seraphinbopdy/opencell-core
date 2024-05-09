@@ -195,7 +195,7 @@ public class ProductVersionAttributeDTO {
 			this.description=attribute.getDescription();
 			this.disabled=attribute.isDisabled();
 			this.attributeType=attribute.getAttributeType();
-			this.allowedValues = attribute.getAllowedValues();
+			this.allowedValues = new ArrayList<>(attribute.getAllowedValues());
 			if (!attribute.getChargeTemplates().isEmpty()) {
 				for (ChargeTemplate charge:attribute.getChargeTemplates()) {
 					this.chargeTemplateCodes.add(charge.getCode());

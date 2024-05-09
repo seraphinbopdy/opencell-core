@@ -28,6 +28,7 @@ import javax.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.crm.CustomFieldTemplate;
+import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
@@ -94,6 +95,40 @@ public class SendInvoiceJob extends Job {
         overrideEmailEl.setMaxValue(Long.MAX_VALUE);
         overrideEmailEl.setGuiPosition("tab:Configuration:0;field:1");
         result.put("overrideEmailEl", overrideEmailEl);
+
+        CustomFieldTemplate customFieldBR = new CustomFieldTemplate();
+        customFieldBR.setCode("SendInvoiceJob_billingRun");
+        customFieldBR.setAppliesTo("JobInstance_SendInvoiceJob");
+        customFieldBR.setActive(true);
+        customFieldBR.setDescription(resourceMessages.getString("jobExecution.billingRuns"));
+        customFieldBR.setFieldType(CustomFieldTypeEnum.ENTITY);
+        customFieldBR.setStorageType(CustomFieldStorageTypeEnum.LIST);
+        customFieldBR.setEntityClazz("org.meveo.model.billing.BillingRun");
+        customFieldBR.setValueRequired(false);
+        customFieldBR.setGuiPosition("tab:Configuration:0;field:2");
+        result.put("SendInvoiceJob_billingRun", customFieldBR);
+
+        CustomFieldTemplate invoiceDateRangeFrom = new CustomFieldTemplate();
+        invoiceDateRangeFrom.setCode("invoiceDateRangeFrom");
+        invoiceDateRangeFrom.setAppliesTo("JobInstance_SendInvoiceJob");
+        invoiceDateRangeFrom.setActive(true);
+        invoiceDateRangeFrom.setDescription("From invoice date EL");
+        invoiceDateRangeFrom.setFieldType(CustomFieldTypeEnum.STRING);
+        invoiceDateRangeFrom.setValueRequired(false);
+        invoiceDateRangeFrom.setMaxValue(2000L);
+        invoiceDateRangeFrom.setGuiPosition("tab:Configuration:0;field:3");
+        result.put("invoiceDateRangeFrom", invoiceDateRangeFrom);
+
+        CustomFieldTemplate invoiceDateRangeTo = new CustomFieldTemplate();
+        invoiceDateRangeTo.setCode("invoiceDateRangeTo");
+        invoiceDateRangeTo.setAppliesTo("JobInstance_SendInvoiceJob");
+        invoiceDateRangeTo.setActive(true);
+        invoiceDateRangeTo.setDescription("To invoice date EL");
+        invoiceDateRangeTo.setFieldType(CustomFieldTypeEnum.STRING);
+        invoiceDateRangeTo.setValueRequired(false);
+        invoiceDateRangeTo.setMaxValue(2000L);
+        invoiceDateRangeTo.setGuiPosition("tab:Configuration:0;field:4");
+        result.put("invoiceDateRangeTo", invoiceDateRangeTo);
 
         return result;
     }

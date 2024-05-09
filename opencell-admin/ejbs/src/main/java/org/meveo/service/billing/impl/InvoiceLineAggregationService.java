@@ -2,6 +2,8 @@ package org.meveo.service.billing.impl;
 
 import static java.util.Arrays.asList;
 import static org.meveo.model.billing.BillingEntityTypeEnum.BILLINGACCOUNT;
+import static org.meveo.model.billing.BillingEntityTypeEnum.ORDER;
+
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -209,19 +211,19 @@ public class InvoiceLineAggregationService implements Serializable {
                     "amountWithoutTax as sum_without_tax", "amountWithTax as sum_with_tax", "offerTemplate.id as offer_id", "serviceInstance.id as service_instance_id", "usageDate as usage_date",
                     "startDate as start_date", "endDate as end_date", "orderNumber as order_number", "orderInfo.order.id as commercial_order_id", "orderInfo.order.id as order_id", "taxPercent as tax_percent",
                     "tax.id as tax_id", "orderInfo.productVersion.id as product_version_id", "orderInfo.orderLot.id as order_lot_id", "chargeInstance.id as charge_instance_id", "accountingArticle.id as article_id",
-                    "discountedRatedTransaction as discounted_ratedtransaction_id", "discountPlanType as discount_plan_type", "discountValue as discount_value", "subscription.id as subscription_id", "userAccount.id as user_account_id"));
+                    "discountedRatedTransaction as discounted_ratedtransaction_id", "discountPlanType as discount_plan_type", "discountValue as discount_value", "subscription.id as subscription_id", "userAccount.id as user_account_id", "seller.id as seller_id"));
 
         } else {
             fieldToFetch = new ArrayList<>(
                 asList("string_agg_long(a.id) as rated_transaction_ids", "billingAccount.id as billing_account__id", "SUM(a.quantity) as quantity", unitAmountAggregationFunction + " as unit_amount_without_tax",
                     "SUM(a.amountWithoutTax) as sum_without_tax", "SUM(a.amountWithTax) as sum_with_tax", "offerTemplate.id as offer_id", usageDateAggregationFunction + " as usage_date", "min(a.startDate) as start_date",
-                    "max(a.endDate) as end_date", "taxPercent as tax_percent", "tax.id as tax_id", "orderInfo.productVersion.id as product_version_id", "accountingArticle.id as article_id", "count(a.id) as rt_count"));
-
-            fieldToFetch.add("discountedRatedTransaction as discounted_ratedtransaction_id");
-            fieldToFetch.add("discountPlanType as discount_plan_type");
-            fieldToFetch.add("discountValue as discount_value");
-
-            if (!aggregationConfiguration.isIgnoreOrders()) {
+                    "max(a.endDate) as end_date", "taxPercent as tax_percent", "tax.id as tax_id", "orderInfo.productVersion.id as product_version_id", "accountingArticle.id as article_id", "count(a.id) as rt_count", "seller.id as seller_id"));
+            if (aggregationConfiguration.getDiscountAggregation() == DiscountAggregationModeEnum.NO_AGGREGATION) {
+	            fieldToFetch.add("discountedRatedTransaction as discounted_ratedtransaction_id");
+	            fieldToFetch.add("discountPlanType as discount_plan_type");
+	            fieldToFetch.add("discountValue as discount_value");
+            }
+            if (ORDER == aggregationConfiguration.getType() || !aggregationConfiguration.isIgnoreOrders()) {
                 fieldToFetch.add("orderInfo.order.id as commercial_order_id");
                 fieldToFetch.add("orderNumber as order_number");
                 fieldToFetch.add("orderInfo.order.id as order_id");
@@ -268,6 +270,9 @@ public class InvoiceLineAggregationService implements Serializable {
         PaginationConfiguration searchConfig = new PaginationConfiguration(null, null, evaluateFilters(bcFilter, RatedTransaction.class), null, fieldToFetch, groupBy, (Set<String>) null, "billingAccount.id", SortOrder.ASCENDING);
 
         String extraCondition = (billingRun.getLastTransactionDate() != null ? " a.usageDate < :lastTransactionDate and " : " ") + QUERY_FILTER;
+        if(billingRun.getBillingCycle() != null && ORDER.equals(billingRun.getBillingCycle().getType())) {
+            extraCondition += " and a.orderInfo.order is not null";
+        }
 
         QueryBuilder queryBuilder = nativePersistenceService.getAggregateQuery("RatedTransaction", searchConfig, null, extraCondition, null);
         return queryBuilder.getQueryAsString();
@@ -349,9 +354,12 @@ public class InvoiceLineAggregationService implements Serializable {
         groupBy.add("tax.id");
         groupBy.add("taxPercent");
         groupBy.add("orderInfo.productVersion.id");
-        groupBy.add("discountedRatedTransaction");
-        groupBy.add("discountValue");
-        groupBy.add("discountPlanType");
+        groupBy.add("seller.id");
+        if (aggregationConfiguration.getDiscountAggregation() == DiscountAggregationModeEnum.NO_AGGREGATION) {
+	        groupBy.add("discountedRatedTransaction");
+	        groupBy.add("discountValue");
+	        groupBy.add("discountPlanType");
+        }
         if (aggregationConfiguration.getType() == BillingEntityTypeEnum.ORDER) {
             groupBy.add("orderNumber");
         } else if (aggregationConfiguration.getType() == BillingEntityTypeEnum.SUBSCRIPTION) {
@@ -366,7 +374,7 @@ public class InvoiceLineAggregationService implements Serializable {
             groupBy.add("serviceInstance");
         }
 
-        if (!aggregationConfiguration.isIgnoreOrders()) {
+        if (ORDER == aggregationConfiguration.getType() || !aggregationConfiguration.isIgnoreOrders()) {
             groupBy.add("orderInfo.order.id");
             groupBy.add("orderNumber");
         }
@@ -423,7 +431,7 @@ public class InvoiceLineAggregationService implements Serializable {
 		    mapToInvoiceLineTable.put("subscription_id", "((agr.subscription_id is null and  ivl.subscription_id is null) or agr.subscription_id = ivl.subscription_id)");
 		    mapToInvoiceLineTable.put("service_instance_id", "((agr.service_instance_id is null and ivl.service_instance_id is null) or agr.service_instance_id = ivl.service_instance_id)");
 		}
-		if(aggregationConfiguration.isDisableAggregation() || !aggregationConfiguration.isIgnoreOrders()) {
+		if(aggregationConfiguration.isDisableAggregation() || ORDER == aggregationConfiguration.getType() || !aggregationConfiguration.isIgnoreOrders()) {
 	        mapToInvoiceLineTable.put("order_id", "((agr.order_id is null and ivl.commercial_order_id is null) or agr.order_id =  ivl.commercial_order_id)");
 	        mapToInvoiceLineTable.put("order_number", "((agr.order_number is null and ivl.order_number is null) or agr.order_number = ivl.order_number)");
 		}

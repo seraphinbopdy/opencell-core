@@ -17,11 +17,6 @@
  */
 package org.meveo.service.accountingscheme;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Optional.ofNullable;
-import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXILIARY_ACCOUNT_CODE;
-import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXILIARY_ACCOUNT_LABEL;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -55,6 +50,7 @@ import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.AccountingCodeService;
 import org.meveo.service.billing.impl.InvoiceService;
+import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
@@ -66,7 +62,6 @@ import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,6 +71,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyMap;
+import static java.util.Optional.ofNullable;
+import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXILIARY_ACCOUNT_CODE;
+import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXILIARY_ACCOUNT_LABEL;
 
 @Stateless
 public class JournalEntryService extends PersistenceService<JournalEntry> {
@@ -93,6 +93,9 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
     public static final String PARAM_ID_ACCOUNTING_CODE = "ID_ACCOUNTING_CODE";
     public static final String PARAM_DIRECTION = "DIRECTION";
     public static final String GET_BY_ACCOUNT_OPERATION_AND_DIRECTION_QUERY = "JournalEntry.getByAccountOperationAndDirection";
+    public static final String TAX_JOURNAL_CODE = "TAX";
+    public static final String BAN_JOURNAL_CODE = "BAN";
+    public static final String BANKS_ACCOUNTING_CODE = "Banks";
 
     @Inject
     private ProviderService providerService;
@@ -212,7 +215,7 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
         // 1- produce a first accounting entry
         JournalEntry firstAccountingEntry = buildJournalEntry(ao, firstAccountingCode, firstCategory,
                 ao.getAmount() == null ? BigDecimal.ZERO : ao.getAmount(), null, ao.getOperationNumber());
-
+        firstAccountingEntry.setJournalCode(BAN_JOURNAL_CODE);
         saved.add(firstAccountingEntry);
 
         log.info("First accounting entry successfully created for AO={} [category={}, accountingCode={}]",
@@ -221,7 +224,7 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
         // 2- produce the second accounting entry : difference with first on (accountingCode and occtCategory)
         JournalEntry secondAccountingEntry = buildJournalEntry(ao, secondAccountingCode, secondCategory,
                 ao.getAmount() == null ? BigDecimal.ZERO : ao.getAmount(), null, ao.getOperationNumber());
-
+        firstAccountingEntry.setJournalCode(BAN_JOURNAL_CODE);
         saved.add(secondAccountingEntry);
 
         log.info("Second accounting entry successfully created for AO={} [category={}, accountingCode={}]",
@@ -353,6 +356,10 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
         	firstEntry.setCustomerCode(customerAccount.getCode());
         	firstEntry.setCustomerName(customerAccount.getDescription());
         }
+
+        if(!firstEntry.getLabel().isEmpty() && firstEntry.getLabel().equals(BANKS_ACCOUNTING_CODE)) {
+            firstEntry.setJournalCode(BAN_JOURNAL_CODE);
+        }
         
         firstEntry.setSellerName(ofNullable(seller).map(Seller::getDescription).orElse(null));
 
@@ -415,6 +422,9 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 	                            amoutTax,
 	                            taxAgr.getTax(), recordedInvoice.getOperationNumber());
 	                    taxEntry.setTransactionalAmount(transactionAmoutTax);
+
+                        // Set journal TAX code
+                        taxEntry.setJournalCode(TAX_JOURNAL_CODE);
 	                    accountingCodeJournal.put(groupKey, taxEntry);
 	                } else {
 	                    JournalEntry entry = accountingCodeJournal.get(groupKey);
@@ -423,7 +433,9 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 	                }
                 }
             });
-
+            accountingCodeJournal.values().forEach(journalEntry -> { 
+            	checkInvoiceLineRevenuDirection(journalEntry, occT); 
+            });                                 
             saved.addAll(accountingCodeJournal.values());
 
         } else {
@@ -506,9 +518,12 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
                     revenuEntry.setAnalyticCode3(accountingArticle.getAnalyticCode3());
                 }
                 revenuEntry.setTransactionalAmount(recordedInvoice.getInvoice().getDiscountAmount().negate());
+                checkInvoiceLineRevenuDirection(revenuEntry, occT);
                 saved.add(revenuEntry);
             }
-
+            accountingCodeJournal.values().forEach(journalEntry -> { 
+            	checkInvoiceLineRevenuDirection(journalEntry,occT); 
+            });                                 
             saved.addAll(accountingCodeJournal.values());
 
         } else {
@@ -532,11 +547,27 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 
     @Override
     public void create(JournalEntry journalEntry) {
+    	journalEntry.setAmount(journalEntry.getAmount().abs());
+    	journalEntry.setTransactionalAmount(journalEntry.getTransactionalAmount().abs());
         super.create(journalEntry);
         if(checkAuxiliaryCodeUniqniess(journalEntry.getAuxiliaryAccountCode(), journalEntry.getCustomerAccount()) != 0) {
             journalEntry.setAuxiliaryAccountCode(journalEntry.getAuxiliaryAccountCode()
                     + journalEntry.getCustomerAccount().getId());
         }
+    }
+    
+    
+    private void checkInvoiceLineRevenuDirection(JournalEntry journalEntry, OCCTemplate occTemplate) {
+		if (journalEntry.getAccountOperation() instanceof RecordedInvoice) {
+			OCCTemplate occTemplateNegative = ((RecordedInvoice) (journalEntry.getAccountOperation())).getInvoice().getInvoiceType().getOccTemplateNegative();
+			if (occTemplateNegative != null && occTemplate.getCode().equals(occTemplateNegative.getCode())) {
+				if (journalEntry.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+					journalEntry.setDirection(journalEntry.getDirection().equals(JournalEntryDirectionEnum.DEBIT) ? JournalEntryDirectionEnum.CREDIT : JournalEntryDirectionEnum.DEBIT);
+				}
+			} else if (journalEntry.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+				journalEntry.setDirection(journalEntry.getDirection().equals(JournalEntryDirectionEnum.DEBIT) ? JournalEntryDirectionEnum.CREDIT : JournalEntryDirectionEnum.DEBIT);
+			}
+		}
     }
 
     /**
@@ -625,8 +656,10 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 	}
 	
 	private JournalEntry createBadDebtWritOff(WriteOff writeOff, AccountingCode accountingCode,  BigDecimal reduce) {
-		return  buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.DEBIT,
-				writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount().subtract(reduce), null, writeOff.getOperationNumber());
+        JournalEntry journalEntry = buildJournalEntry(writeOff, accountingCode, OperationCategoryEnum.DEBIT,
+                writeOff.getAmount() == null ? BigDecimal.ZERO : writeOff.getAmount().subtract(reduce), null, writeOff.getOperationNumber());
+        journalEntry.setTransactionalAmount(writeOff.getTransactionalAmount() == null ? BigDecimal.ZERO : writeOff.getTransactionalAmount().subtract(reduce));
+        return journalEntry;
 	}
 	
 	private List<JournalEntry> createDoubtfulReceivable(WriteOff writeOff) {
@@ -684,6 +717,9 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
 								amoutTax,
 								taxAgr.getTax(), writeOff.getOperationNumber());
 						taxEntry.setTransactionalAmount(transactionAmoutTax);
+
+                        // Set journal TAX code
+                        taxEntry.setJournalCode(TAX_JOURNAL_CODE);
 						accountingCodeJournal.put(groupKey, taxEntry);
 					} else {
 						JournalEntry entry = accountingCodeJournal.get(groupKey);

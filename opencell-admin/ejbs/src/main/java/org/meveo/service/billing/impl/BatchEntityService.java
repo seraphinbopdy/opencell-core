@@ -20,7 +20,7 @@ package org.meveo.service.billing.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.job.MassUpdaterJobBean;
+import org.meveo.admin.job.MassUpdaterJob;
 import org.meveo.admin.job.UpdateHugeEntityJob;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -101,7 +101,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     private ServiceSingleton serviceSingleton;
 
     @Inject
-    private MassUpdaterJobBean massUpdaterJobBean;
+    private MassUpdaterJob massUpdaterJob;
 
     @Inject
     private MethodCallingUtils methodCallingUtils;
@@ -278,9 +278,11 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     private void updateHugeEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
         executeMassUpdaterJob(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
         if (isRunningAsJobManager(jobExecutionResult)) {
-            //Execute the email sending in an isolated transaction ==> if there is an exception, we don't position the batch in FAILURE status.
-            methodCallingUtils.callMethodInNewTx(() -> sendEmail(batchEntity, jobExecutionResult));
             update(jobExecutionResult, jobInstance, batchEntity);
+            if (jobExecutionResult.getNbItemsCorrectlyProcessed() > 0) {
+                //Execute the email sending in an isolated transaction ==> if there is an exception, we don't position the batch in FAILURE status.
+                methodCallingUtils.callMethodInNewTx(() -> sendEmail(batchEntity, jobExecutionResult));
+            }
         }
     }
 
@@ -327,10 +329,15 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         Long updateChunkSize = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_UPDATE_CHUNK_SIZE);
         String defaultFilter = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER);
         Boolean isPessimisticUpdateLock = (Boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_PESSIMISTIC_UPDATE_LOCK);
+        Boolean isUsingView = (Boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_USING_VIEW);
+        Boolean isOpenCursor = isOpenCursor(jobExecutionResult);
+        Boolean isCaseSensitive = isCaseSensitive(jobExecutionResult);
 
-        String selectQuery = getSelectQuery(hugeEntityClass, batchEntity.getFilters(), defaultFilter);
+        String selectQuery = getSelectQuery(hugeEntityClass, batchEntity.getFilters(), defaultFilter, isCaseSensitive);
         String updateQuery = getUpdateQuery(jobExecutionResult, batchEntity, hugeEntityClass.getSimpleName());
-        massUpdaterJobBean.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunkSize, selectQuery, selectFetchSize, selectMaxResults, false, isPessimisticUpdateLock);
+
+        massUpdaterJob.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunkSize, selectQuery, selectFetchSize, selectMaxResults,
+                false, isPessimisticUpdateLock, isUsingView, isOpenCursor);
     }
 
     /**
@@ -358,13 +365,15 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @param hugeEntityClass the hug entity class
      * @param filters         the filters
      * @param defaultFilter   the default filter
+     * @param isCaseSensitive Indicates if the select query should use strict checking to compare two strings or not.
      * @return the select query
      */
-    public String getSelectQuery(Class hugeEntityClass, Map<String, Object> filters, String defaultFilter) {
+    public String getSelectQuery(Class hugeEntityClass, Map<String, Object> filters, String defaultFilter, boolean isCaseSensitive) {
         Map<String, Object> mergedFilters = addFilters(defaultFilter, filters);
-        GenericRequestMapper mapper = new GenericRequestMapper(hugeEntityClass, PersistenceServiceHelper.getPersistenceService());
-        mergedFilters = mapper.evaluateFilters(Objects.requireNonNull(mergedFilters), hugeEntityClass);
-
+        if (isCaseSensitive) {
+            GenericRequestMapper mapper = new GenericRequestMapper(hugeEntityClass, PersistenceServiceHelper.getPersistenceService());
+            mergedFilters = mapper.evaluateFilters(Objects.requireNonNull(mergedFilters), hugeEntityClass);
+        }
         PaginationConfiguration searchConfig = new PaginationConfiguration(mergedFilters);
         searchConfig.setFetchFields(Arrays.asList("id"));
         return nativePersistenceService.getQuery(hugeEntityClass.getSimpleName(), searchConfig, null).getQueryAsString();
@@ -454,5 +463,27 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      */
     public int update(StringBuilder updateQuery, List<Long> ids) {
         return nativePersistenceService.update(updateQuery, ids);
+    }
+
+    /**
+     * Indicates if the job will use the open cursor or not.
+     *
+     * @param jobExecutionResult the job execution result
+     * @return true if the job will use the open cursor.
+     */
+    protected boolean isOpenCursor(JobExecutionResultImpl jobExecutionResult) {
+        return jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_OPEN_CURSOR) != null ?
+                (boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_OPEN_CURSOR) : false;
+    }
+
+    /**
+     * Indicates if the select query should use strict checking to compare two strings or not.
+     *
+     * @param jobExecutionResult the job execution result
+     * @return true  if the select query should use strict checking to compare two strings or not.
+     */
+    protected boolean isCaseSensitive(JobExecutionResultImpl jobExecutionResult) {
+        return jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE) != null ?
+                (boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE) : false;
     }
 }

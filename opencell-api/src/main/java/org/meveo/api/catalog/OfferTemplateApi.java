@@ -319,6 +319,8 @@ public class OfferTemplateApi extends ProductOfferingApi<OfferTemplate, OfferTem
                 allowedOffers.add(allowedOffer);
             }
             offerTemplate.setAllowedOffersChange(allowedOffers);
+        } else if(postData.getAllowedOfferChange() != null && postData.getAllowedOfferChange().isEmpty()) {
+            offerTemplate.getAllowedOffersChange().clear();
         }
 
         Boolean autoEndOfEngagement = postData.getAutoEndOfEngagement();
@@ -1234,9 +1236,9 @@ public class OfferTemplateApi extends ProductOfferingApi<OfferTemplate, OfferTem
         List<OfferProductsDto> offerProductDtos = postData.getOfferProducts();
         List<OfferComponent> newOfferProductDtos = new ArrayList<>();
         var productCodes = new HashSet<String>();
-        if (clearOfferComponent)
+	    boolean hasOfferComponentDtos = offerProductDtos != null && offerProductDtos !=null ;
+        if (clearOfferComponent && hasOfferComponentDtos)
             offerTemplate.getOfferComponents().clear();
-        boolean hasOfferComponentDtos = offerProductDtos != null && !offerProductDtos.isEmpty();
         if (hasOfferComponentDtos) {
             updateSequence(offerProductDtos);
             for (var currentOfferProduct : offerProductDtos) {

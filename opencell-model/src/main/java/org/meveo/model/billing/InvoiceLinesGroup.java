@@ -34,6 +34,11 @@ public class InvoiceLinesGroup implements Serializable {
         this.paymentMethod = paymentMethod;
         this.openOrderNumber = openOrderNumber;
     }
+    
+	public InvoiceLinesGroup(String invoiceKey, List<InvoiceLine> invoiceLines) {
+		this.invoiceLines = invoiceLines;
+		this.invoiceKey = invoiceKey;
+	}
 
     public BillingAccount getBillingAccount() {
         return billingAccount;

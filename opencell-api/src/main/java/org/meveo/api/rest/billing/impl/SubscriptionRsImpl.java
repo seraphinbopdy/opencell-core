@@ -18,6 +18,7 @@
 
 package org.meveo.api.rest.billing.impl;
 
+import org.meveo.admin.exception.IncorrectServiceInstanceException;
 import org.meveo.api.billing.SubscriptionApi;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
@@ -40,14 +41,17 @@ import org.meveo.api.rest.billing.SubscriptionRs;
 import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.apiv2.billing.ServiceInstanceToDelete;
+import org.meveo.apiv2.generic.exception.ConflictException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.ChargeInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
+import org.meveo.service.crm.impl.SubscriptionActivationException;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
 
 import java.util.Date;
@@ -63,6 +67,8 @@ import java.util.List;
 @Interceptors({ WsRestApiInterceptor.class })
 public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
 
+    private static final String MANDATORY_PRODUCTS_CHECK = "MANDATORY_PRODUCTS_CHECK";
+
     @Inject
     private SubscriptionApi subscriptionApi;
 
@@ -74,11 +80,11 @@ public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
             Subscription subscription = subscriptionApi.create(postData);
             result.setEntityCode(subscription.getCode());
             result.setEntityId(subscription.getId());
-            
+
             return Response.ok(result).build();
         } catch (MeveoApiException e) {
             return errorResponse(e, result);
-        } 
+        }
 
     }
 
@@ -446,6 +452,19 @@ public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
 
         try {
             subscriptionApi.activateSubscription(subscriptionCode, subscriptionValidityDate);
+        } catch (IncorrectServiceInstanceException exception) {
+            if(exception.getMessage().startsWith("Subscription is ")
+                    || exception.getMessage().startsWith("The subscription status is")) {
+                throw new ForbiddenException(exception.getMessage());
+            } else {
+                processException(exception, result);
+            }
+        } catch (SubscriptionActivationException exception) {
+            if(MANDATORY_PRODUCTS_CHECK.equalsIgnoreCase(exception.getCode())) {
+                throw new ConflictException(exception.getMessage());
+            } else {
+                throw new ForbiddenException(exception.getMessage());
+            }
         } catch (Exception e) {
             processException(e, result);
         }
@@ -472,6 +491,19 @@ public class SubscriptionRsImpl extends BaseRs implements SubscriptionRs {
 
         try {
             subscriptionApi.activateSubscription(putData.getSubscriptionCode(), null);
+        } catch (IncorrectServiceInstanceException exception) {
+            if(exception.getMessage().startsWith("Subscription is ")
+                    || exception.getMessage().startsWith("The subscription status is")) {
+                throw new ForbiddenException(exception.getMessage());
+            } else {
+                processException(exception, result);
+            }
+        } catch (SubscriptionActivationException exception) {
+            if(MANDATORY_PRODUCTS_CHECK.equalsIgnoreCase(exception.getCode())) {
+                throw new ConflictException(exception.getMessage());
+            } else {
+                throw new ForbiddenException(exception.getMessage());
+            }
         } catch (Exception e) {
             processException(e, result);
         }

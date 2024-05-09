@@ -151,6 +151,7 @@ public class JobInstanceBean extends CustomFieldBean<JobInstance> {
     @ActionMethod
     public String execute() {
 
+        entity.setRunTimeCfValues(entity.getCfValuesNullSafe() != null ? entity.getCfValuesNullSafe().clone() : null);
         jobExecutionService.executeJob(entity, null, JobLauncherEnum.GUI);
         messages.info(new BundleKey("messages", "jobInstance.job.laucnhed"), entity.getJobTemplate());
 
@@ -220,6 +221,7 @@ public class JobInstanceBean extends CustomFieldBean<JobInstance> {
 
         try {
             customFieldTemplateService.createMissingTemplates((ICustomFieldEntity) entity, jobTemplatesFromJob);
+            jobExecutionResultService.createMissingCustomFieldTemplates(jobTemplatesFromJob);
         } catch (BusinessException e) {
             log.error("Failed to create missing custom field templates", e);
         }

@@ -22,11 +22,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.jpa.JpaAmpNewTx;
+import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobExecutionResultStatusEnum;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.util.EntityCustomizationUtils;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -34,9 +36,11 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * The Class JobExecution result service.
@@ -272,5 +276,21 @@ public class JobExecutionResultService extends PersistenceService<JobExecutionRe
         Date currentDate = new Date();
 
         return TimeUnit.SECONDS.convert(dateLimit.getTime() - currentDate.getTime(), TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Synchronize definition of custom field templates specified in jobExecutionResult to those found in DB. Register in DB if was missing.
+     *
+     * @param cfts custom field templates
+     */
+    public void createMissingCustomFieldTemplates(Collection<CustomFieldTemplate> cfts) {
+        String appliesTo = EntityCustomizationUtils.getAppliesTo(JobExecutionResultImpl.class, null);
+        customFieldTemplateService.createMissingTemplates(appliesTo, cfts.stream()
+                .map(cft -> {
+                    customFieldTemplateService.detach(cft);
+                    cft.setId(null);
+                    cft.setAppliesTo(appliesTo);
+                    return cft;
+                }).collect(Collectors.toList()));
     }
 }

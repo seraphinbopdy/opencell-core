@@ -30,6 +30,7 @@ import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -232,7 +233,8 @@ public class AttributeService extends BusinessService<Attribute>{
             if (AttributeTypeEnum.LIST_TEXT == pvAttribute.getAttribute().getAttributeType() && !pvAttribute.getAttribute().getAllowedValues().contains(attributeValue.getRealValue())) {
                 throw new BusinessApiException("The value '" + attributeValue.getRealValue() + "' is not part of allowed values " + pvAttribute.getAttribute().getAllowedValues());
             }else if(AttributeTypeEnum.LIST_NUMERIC == pvAttribute.getAttribute().getAttributeType()){
-	           boolean valueExist = pvAttribute.getAttribute().getAllowedValues().stream().anyMatch(value -> new BigDecimal(value).compareTo(new BigDecimal(attributeValue.getRealValue().toString())) == 0);
+	           boolean valueExist = Optional.ofNullable(pvAttribute.getAttribute()
+                                                                   .getAllowedValues()).orElse(Collections.emptyList()).stream().anyMatch(value -> new BigDecimal(value).compareTo(new BigDecimal(attributeValue.getRealValue().toString())) == 0);
 			   if(!valueExist){
 				   throw new BusinessApiException("The value '" + attributeValue.getRealValue() + "' is not part of allowed values " + pvAttribute.getAttribute().getAllowedValues());
 			   }

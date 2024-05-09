@@ -24,6 +24,7 @@ import static java.util.Optional.ofNullable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import org.meveo.apiv2.standardReport.ImmutableAgedReceivable;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.DunningLevelEnum;
+import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.shared.Name;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -76,13 +78,13 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 				.transactional_TotalAmountByPeriod(agedReceivableDto.getTransactionalTotalAmountByPeriod())
 				.transactional_NetAmountByPeriod(agedReceivableDto.getTransactionalNetAmountByPeriod())
 				.transactional_TaxAmountByPeriod(agedReceivableDto.getTransactionalTaxAmountByPeriod())
+				.transactionCategory(agedReceivableDto.getTransactionCategory())
 				.build();
     }
 
 
 	@Override
 	protected AgedReceivableDto toEntity(AgedReceivable resource) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -153,7 +155,8 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 					getBigDecimal(agedList[20]),
 					getBigDecimal(agedList[23]),
 					getBigDecimal(agedList[26])));
-
+			
+			agedReceivableDto.setTransactionCategory((OperationCategoryEnum)agedList[40]);
 			dtoList.add(agedReceivableDto);
 		} 
 		return dtoList;
@@ -198,24 +201,26 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 	}
 
 	protected List<AgedReceivableDto> fromListObjectToListEntity(List<Object[]> resource) {
-		List<AgedReceivableDto> dtoList = new  ArrayList<>();
+		List<AgedReceivableDto> dtoList = new ArrayList<>();
 		for (var i = 0; i < resource.size(); i++) {
 			Object[] agedList = resource.get(i);
 			var agedReceivableDto = new AgedReceivableDto();
-			agedReceivableDto.setNotYetDue((BigDecimal)agedList[1]);
-			agedReceivableDto.setSum1To30((BigDecimal)agedList[3]);
-			agedReceivableDto.setSum31To60((BigDecimal) agedList[6]);
-			agedReceivableDto.setSum61To90((BigDecimal)agedList[9]);
-			agedReceivableDto.setSum90Up((BigDecimal)agedList[12]);
-			if(agedList[27] instanceof DunningLevelEnum) {
+			OperationCategoryEnum transactionCategory = agedList[40] == null ? null : (OperationCategoryEnum) agedList[40];
+
+			agedReceivableDto.setNotYetDue(evaluateAmountByOperationCategory((BigDecimal) agedList[1], transactionCategory));
+			agedReceivableDto.setSum1To30(evaluateAmountByOperationCategory((BigDecimal) agedList[3], transactionCategory));
+			agedReceivableDto.setSum31To60(evaluateAmountByOperationCategory((BigDecimal) agedList[6], transactionCategory));
+			agedReceivableDto.setSum61To90(evaluateAmountByOperationCategory((BigDecimal) agedList[9], transactionCategory));
+			agedReceivableDto.setSum90Up(evaluateAmountByOperationCategory((BigDecimal) agedList[12], transactionCategory));
+			if (agedList[27] instanceof DunningLevelEnum) {
 				agedReceivableDto.setDunningLevel((DunningLevelEnum) agedList[27]);
 			}
 
-			if(agedList[28] != null && agedList[28] instanceof Name) {
+			if (agedList[28] != null && agedList[28] instanceof Name) {
 				agedReceivableDto.setCustomerAccountName(getName((Name) agedList[28]));
 			}
 
-			if(agedReceivableDto.getCustomerAccountName() != null) {
+			if (agedReceivableDto.getCustomerAccountName() != null) {
 				agedReceivableDto.setCustomerAccountDescription(agedReceivableDto.getCustomerAccountName());
 			} else {
 				agedReceivableDto.setCustomerAccountDescription((String) agedList[29]);
@@ -229,17 +234,35 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 			agedReceivableDto.setInvoiceNumber((String) agedList[35]);
 			agedReceivableDto.setCustomerAccountCode((String) agedList[37]);
 
-			agedReceivableDto.setGeneralTotal(((BigDecimal)agedList[3]).add((BigDecimal)agedList[6]).add((BigDecimal)agedList[9]).add((BigDecimal)agedList[12]));
-			agedReceivableDto.setNetAmountByPeriod(asList((BigDecimal) agedList[2], (BigDecimal) agedList[5], (BigDecimal) agedList[8], (BigDecimal) agedList[11]));
-			agedReceivableDto.setTotalAmountByPeriod(asList((BigDecimal) agedList[3], (BigDecimal) agedList[6], (BigDecimal) agedList[9], (BigDecimal) agedList[12]));
-			agedReceivableDto.setTaxAmountByPeriod(asList((BigDecimal) agedList[4], (BigDecimal) agedList[7], (BigDecimal) agedList[10], (BigDecimal) agedList[13]));
+			BigDecimal generalTotal = ((BigDecimal) agedList[3]).add((BigDecimal) agedList[6]).add((BigDecimal) agedList[9]).add((BigDecimal) agedList[12]);
+			agedReceivableDto.setGeneralTotal(evaluateAmountByOperationCategory(generalTotal, transactionCategory));
 
-			if(agedList[38] == null)
-				agedReceivableDto.setBilledAmount((BigDecimal) agedList[36]);
-			else
-				agedReceivableDto.setBilledAmount((BigDecimal) agedList[38]);
+			List<BigDecimal> netAmountByPeriod = asList(evaluateAmountByOperationCategory((BigDecimal) agedList[2], transactionCategory),
+					evaluateAmountByOperationCategory((BigDecimal) agedList[5], transactionCategory),
+					evaluateAmountByOperationCategory((BigDecimal) agedList[8], transactionCategory),
+					evaluateAmountByOperationCategory((BigDecimal) agedList[11], transactionCategory));
+			agedReceivableDto.setNetAmountByPeriod(netAmountByPeriod);
+
+			List<BigDecimal> totalAmountByPeriod = asList(evaluateAmountByOperationCategory((BigDecimal) agedList[3], transactionCategory),
+					evaluateAmountByOperationCategory((BigDecimal) agedList[6], transactionCategory),
+					evaluateAmountByOperationCategory((BigDecimal) agedList[9], transactionCategory),
+					evaluateAmountByOperationCategory((BigDecimal) agedList[12], transactionCategory));
+			agedReceivableDto.setTotalAmountByPeriod(totalAmountByPeriod);
+
+			List<BigDecimal> taxAmountByPeriod = asList(evaluateAmountByOperationCategory((BigDecimal) agedList[4], transactionCategory),
+					evaluateAmountByOperationCategory((BigDecimal) agedList[7], transactionCategory),
+					evaluateAmountByOperationCategory((BigDecimal) agedList[10], transactionCategory),
+					evaluateAmountByOperationCategory((BigDecimal) agedList[13], transactionCategory));
+			agedReceivableDto.setTaxAmountByPeriod(taxAmountByPeriod);
+
+			BigDecimal billedAmount = (BigDecimal) agedList[36];
+			if (agedList[38] != null) {
+				billedAmount = (BigDecimal) agedList[38];
+			}
+			agedReceivableDto.setBilledAmount(evaluateAmountByOperationCategory(billedAmount, transactionCategory));
 
 			agedReceivableDto.setCustomerId((Long) agedList[39]);
+			agedReceivableDto.setTransactionCategory(transactionCategory);
 			agedReceivableDto.setFuncCurrency(ofNullable(appProvider.getCurrency()).map(Currency::getCurrencyCode).orElse(null));
 			dtoList.add(agedReceivableDto);
 		}
@@ -260,16 +283,22 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 	 * Build dynamic response from list of objects
 	 * @param agedReceivables List of objects
 	 * @param numberOfPeriods Number of periods
+	 * @param applyEvaluation indicates if the category evaluation well be applied or not.
 	 * @return List of {@link AgedReceivableDto}
 	 */
-	public List<AgedReceivableDto> buildDynamicResponse(List<Object[]> agedReceivables, int numberOfPeriods) {
-		List<AgedReceivableDto> responseDto = new  ArrayList<>();
+	public List<AgedReceivableDto> buildDynamicResponse(List<Object[]> agedReceivables, int numberOfPeriods, boolean applyEvaluation) {
+		List<AgedReceivableDto> responseDto = new ArrayList<>();
 
 		for (int index = 0; index < agedReceivables.size(); index++) {
 			Object[] agedReceivable = agedReceivables.get(index);
 			AgedReceivableDto agedReceivableDto = new AgedReceivableDto();
-			agedReceivableDto.setNotYetDue((BigDecimal) agedReceivable[1]);
-			agedReceivableDto.setTransactionalNotYetDue((BigDecimal) agedReceivable[2]);
+			OperationCategoryEnum transactionCategory = (OperationCategoryEnum) Arrays.stream(agedReceivable)
+					.filter(item -> item instanceof OperationCategoryEnum)
+					.findFirst().orElse(null);
+
+			agedReceivableDto.setNotYetDue(evaluateAmountByOperationCategory((BigDecimal) agedReceivable[1], transactionCategory, applyEvaluation));
+			agedReceivableDto.setTransactionalNotYetDue(evaluateAmountByOperationCategory((BigDecimal) agedReceivable[2], transactionCategory, applyEvaluation));
+
 			int sumIndex;
 			int startingSumIndex = 3;
 			agedReceivableDto.setNetAmountByPeriod(new ArrayList<>());
@@ -277,45 +306,46 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 			agedReceivableDto.setTaxAmountByPeriod(new ArrayList<>());
 
 			for (sumIndex = 0; sumIndex < numberOfPeriods; sumIndex++) {
-				agedReceivableDto.getNetAmountByPeriod().add(getBigDecimal(agedReceivable[startingSumIndex]));
-				agedReceivableDto.getTotalAmountByPeriod().add(getBigDecimal(agedReceivable[startingSumIndex + 1]));
-				agedReceivableDto.getTaxAmountByPeriod().add(getBigDecimal(agedReceivable[startingSumIndex + 2]));
+				agedReceivableDto.getNetAmountByPeriod().add(evaluateAmountByOperationCategory(getBigDecimal(agedReceivable[startingSumIndex]), transactionCategory, applyEvaluation));
+				agedReceivableDto.getTotalAmountByPeriod().add(evaluateAmountByOperationCategory(getBigDecimal(agedReceivable[startingSumIndex + 1]), transactionCategory, applyEvaluation));
+				agedReceivableDto.getTaxAmountByPeriod().add(evaluateAmountByOperationCategory(getBigDecimal(agedReceivable[startingSumIndex + 2]), transactionCategory, applyEvaluation));
 
-				agedReceivableDto.getTransactionalNetAmountByPeriod().add(getBigDecimal(agedReceivable[startingSumIndex + 3]));
-				agedReceivableDto.getTransactionalTotalAmountByPeriod().add(getBigDecimal(agedReceivable[startingSumIndex + 4]));
-				agedReceivableDto.getTransactionalTaxAmountByPeriod().add(getBigDecimal(agedReceivable[startingSumIndex + 5]));
+				agedReceivableDto.getTransactionalNetAmountByPeriod().add(evaluateAmountByOperationCategory(getBigDecimal(agedReceivable[startingSumIndex + 3]), transactionCategory, applyEvaluation));
+				agedReceivableDto.getTransactionalTotalAmountByPeriod().add(evaluateAmountByOperationCategory(getBigDecimal(agedReceivable[startingSumIndex + 4]), transactionCategory, applyEvaluation));
+				agedReceivableDto.getTransactionalTaxAmountByPeriod().add(evaluateAmountByOperationCategory(getBigDecimal(agedReceivable[startingSumIndex + 5]), transactionCategory, applyEvaluation));
 				startingSumIndex += 6;
 			}
 
 			agedReceivableDto.setDunningLevel((DunningLevelEnum) agedReceivable[startingSumIndex]);
 			agedReceivableDto.setCustomerAccountName(agedReceivable[++startingSumIndex] == null ? null : getName((Name) agedReceivable[startingSumIndex]));
 			agedReceivableDto.setCustomerAccountDescription(agedReceivableDto.getCustomerAccountName() != null ? agedReceivableDto.getCustomerAccountName() : (String) agedReceivable[++startingSumIndex]);
-			if(agedReceivableDto.getCustomerAccountName() != null) {
+			if (agedReceivableDto.getCustomerAccountName() != null) {
 				++startingSumIndex;
 			}
 			agedReceivableDto.setSellerDescription((String) agedReceivable[++startingSumIndex]);
 			agedReceivableDto.setSellerCode((String) agedReceivable[++startingSumIndex]);
 			agedReceivableDto.setDueDate(agedReceivable[++startingSumIndex] == null ? null : ((Date) agedReceivable[startingSumIndex]));
 			agedReceivableDto.setTradingCurrency((String) agedReceivable[++startingSumIndex]);
-			BigDecimal generalTotal = agedReceivableDto.getTotalAmountByPeriod()
+			BigDecimal generalTotal = agedReceivableDto.getTransactionalTotalAmountByPeriod()
 					.stream()
 					.reduce(ZERO, BigDecimal::add);
-			agedReceivableDto.setGeneralTotal(generalTotal);
+			agedReceivableDto.setGeneralTotal(evaluateAmountByOperationCategory(generalTotal, transactionCategory, applyEvaluation));
 			agedReceivableDto.setInvoiceId((Long) agedReceivable[++startingSumIndex]);
 			agedReceivableDto.setInvoiceNumber((String) agedReceivable[++startingSumIndex]);
-			agedReceivableDto.setBilledAmount((BigDecimal) agedReceivable[++startingSumIndex]);
+			agedReceivableDto.setBilledAmount(evaluateAmountByOperationCategory((BigDecimal) agedReceivable[++startingSumIndex], transactionCategory, applyEvaluation));
 			agedReceivableDto.setFuncCurrency(ofNullable(appProvider.getCurrency()).map(Currency::getCurrencyCode).orElse(null));
 			agedReceivableDto.setCustomerAccountCode((String) agedReceivable[++startingSumIndex]);
 
-			if(agedReceivable[++startingSumIndex] != null) {
-				agedReceivableDto.setBilledAmount(getBigDecimal(agedReceivable[startingSumIndex]));
+			if (agedReceivable[++startingSumIndex] != null) {
+				agedReceivableDto.setBilledAmount(evaluateAmountByOperationCategory(getBigDecimal(agedReceivable[startingSumIndex]), transactionCategory, applyEvaluation));
 			}
 
 			agedReceivableDto.setCustomerId((Long) agedReceivable[++startingSumIndex]);
+			agedReceivableDto.setTransactionCategory((OperationCategoryEnum) agedReceivable[++startingSumIndex]);
 			BigDecimal transactionalGeneralTotal = agedReceivableDto.getTransactionalTotalAmountByPeriod()
 					.stream()
 					.reduce(ZERO, BigDecimal::add);
-			agedReceivableDto.setTransactionalGeneralTotal(transactionalGeneralTotal);
+			agedReceivableDto.setTransactionalGeneralTotal(evaluateAmountByOperationCategory(transactionalGeneralTotal, transactionCategory, applyEvaluation));
 			responseDto.add(agedReceivableDto);
 		}
 		return responseDto;
@@ -327,6 +357,32 @@ public class AgedReceivableMapper extends ResourceMapper<AgedReceivable, AgedRec
 
 	private BigDecimal getBigDecimal(Object value) {
 		return value == null ? ZERO : (BigDecimal) value;
+	}
+
+	/**
+	 * Evaluate amount by operation category
+	 *
+	 * @param amount            the amount to be evaluated.
+	 * @param operationCategory the operation category.
+	 * @return the evaluated amount
+	 */
+	public BigDecimal evaluateAmountByOperationCategory(BigDecimal amount, OperationCategoryEnum operationCategory) {
+		return evaluateAmountByOperationCategory(amount, operationCategory, true);
+	}
+
+	/**
+	 * Evaluate amount by operation category
+	 *
+	 * @param amount            the amount to be evaluated.
+	 * @param operationCategory the operation category.
+	 * @param applyEvaluation   indicates if the category evaluation well be applied or not.
+	 * @return the evaluated amount
+	 */
+	public BigDecimal evaluateAmountByOperationCategory(BigDecimal amount, OperationCategoryEnum operationCategory, boolean applyEvaluation) {
+		if (applyEvaluation && amount != null && amount.compareTo(BigDecimal.ZERO) > 0 && operationCategory == OperationCategoryEnum.CREDIT) {
+			amount = amount.negate();
+		}
+		return amount;
 	}
    
 }

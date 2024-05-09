@@ -25,7 +25,10 @@ import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
 import org.meveo.model.catalog.OfferTemplate;
+import org.meveo.model.cpq.ProductVersion;
+import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.contract.Contract;
+import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.tax.TaxClass;
 
@@ -194,6 +197,20 @@ public class AggregatedWalletOperation {
 	private BigDecimal discountValue;
 
 	private Contract rulesContract;
+	private ProductVersion productVersion;
+	private OrderProduct orderProduct;
+	private boolean useSpecificPriceConversion;
+	private BigDecimal transactionalAmountWithoutTax;
+	private BigDecimal transactionalAmountWithTax;
+	private BigDecimal transactionalAmountTax;
+	private BigDecimal transactionalUnitAmountWithoutTax;
+	private BigDecimal transactionalUnitAmountWithTax;
+	private BigDecimal transactionalUnitAmountTax;
+	private TradingCurrency tradingCurrency;
+	private String businessKey;
+	private Contract contract;
+	private ContractItem contractLine;
+	
 
 	public AggregatedWalletOperation(String walletOpsIds, Long sellerId, Integer year, Integer month, Integer day, Tax tax, InvoiceSubCategory invoiceSubCategory, Object id,
 									 BigDecimal amountWithTax, BigDecimal amountWithoutTax, BigDecimal amountTax, TaxClass taxClass, BigDecimal quantity, BigDecimal unitAmountWithoutTax,
@@ -662,4 +679,109 @@ public class AggregatedWalletOperation {
 	public void setRulesContract(Contract rulesContract) {
 		this.rulesContract = rulesContract;
 	}
+
+	public ProductVersion getProductVersion() {
+		return productVersion;
+	}
+
+	public void setProductVersion(ProductVersion productVersion) {
+		this.productVersion = productVersion;
+	}
+
+	public OrderProduct getOrderProduct() {
+		return orderProduct;
+	}
+
+	public void setOrderProduct(OrderProduct orderProduct) {
+		this.orderProduct = orderProduct;
+	}
+
+	public boolean isUseSpecificPriceConversion() {
+		return useSpecificPriceConversion;
+	}
+
+	public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
+		this.useSpecificPriceConversion = useSpecificPriceConversion;
+	}
+
+	public BigDecimal getTransactionalAmountWithoutTax() {
+		return transactionalAmountWithoutTax;
+	}
+
+	public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
+		this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
+	}
+
+	public BigDecimal getTransactionalAmountWithTax() {
+		return transactionalAmountWithTax;
+	}
+
+	public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
+		this.transactionalAmountWithTax = transactionalAmountWithTax;
+	}
+
+	public BigDecimal getTransactionalAmountTax() {
+		return transactionalAmountTax;
+	}
+
+	public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
+		this.transactionalAmountTax = transactionalAmountTax;
+	}
+
+	public BigDecimal getTransactionalUnitAmountWithoutTax() {
+		return transactionalUnitAmountWithoutTax;
+	}
+
+	public void setTransactionalUnitAmountWithoutTax(BigDecimal transactionalUnitAmountWithoutTax) {
+		this.transactionalUnitAmountWithoutTax = transactionalUnitAmountWithoutTax;
+	}
+
+	public BigDecimal getTransactionalUnitAmountWithTax() {
+		return transactionalUnitAmountWithTax;
+	}
+
+	public void setTransactionalUnitAmountWithTax(BigDecimal transactionalUnitAmountWithTax) {
+		this.transactionalUnitAmountWithTax = transactionalUnitAmountWithTax;
+	}
+
+	public BigDecimal getTransactionalUnitAmountTax() {
+		return transactionalUnitAmountTax;
+	}
+
+	public void setTransactionalUnitAmountTax(BigDecimal transactionalUnitAmountTax) {
+		this.transactionalUnitAmountTax = transactionalUnitAmountTax;
+	}
+
+	public TradingCurrency getTradingCurrency() {
+		return tradingCurrency;
+	}
+
+	public void setTradingCurrency(TradingCurrency tradingCurrency) {
+		this.tradingCurrency = tradingCurrency;
+	}
+
+	public String getBusinessKey() {
+		return businessKey;
+	}
+
+	public void setBusinessKey(String businessKey) {
+		this.businessKey = businessKey;
+	}
+
+	public Contract getContract() {
+		return contract;
+	}
+
+	public void setContract(Contract contract) {
+		this.contract = contract;
+	}
+
+	public ContractItem getContractLine() {
+		return contractLine;
+	}
+
+	public void setContractLine(ContractItem contractLine) {
+		this.contractLine = contractLine;
+	}
+	
 }

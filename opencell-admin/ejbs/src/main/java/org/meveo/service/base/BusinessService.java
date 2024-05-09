@@ -201,5 +201,15 @@ public abstract class BusinessService<P extends BusinessEntity> extends Persiste
             return null;
         }
     }
-    
+
+    public <B extends BusinessEntity> B findByIdOrCode(B entity) {
+        BusinessEntity businessEntity = null;
+        if(entity.getId() != null) {
+            businessEntity = findById(entity.getId());
+        }
+        if(businessEntity == null && entity.getCode() != null) {
+            businessEntity = findByCode(entity.getCode());
+        }
+        return (B) businessEntity;
+    }
 }

@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="AndriusKarpavicius" id="rebuild-data-decisionRule">
+        <insert tableName="wf_decision_rule">
+            <column name="id" valueNumeric="1" />
+            <column name="version" valueNumeric="0" />
+            <column name="condition_el" value="#{mv:getCFValue(entity,'Territory')==_VALUE_}" />
+            <column name="name" value="Territory" />
+            <column name="type" value="STRING" />
+            <column name="value" value="Other" />
+            <column name="model" valueNumeric="1" />
+        </insert>
+        <insert tableName="wf_decision_rule">
+            <column name="id" valueNumeric="2" />
+            <column name="version" valueNumeric="0" />
+            <column name="condition_el" value="#{mv:getCFValue(entity,'Territory')==_VALUE_}" />
+            <column name="name" value="Territory" />
+            <column name="type" value="STRING" />
+            <column name="value" value="south" />
+            <column name="model" valueNumeric="0" />
+        </insert>
+        <insert tableName="wf_decision_rule">
+            <column name="id" valueNumeric="3" />
+            <column name="version" valueNumeric="0" />
+            <column name="condition_el" value="#{mv:getCFValue(entity,'Territory')==_VALUE_}" />
+            <column name="name" value="Territory" />
+            <column name="type" value="STRING" />
+            <column name="value" value="west" />
+            <column name="model" valueNumeric="1" />
+        </insert>
+        <insert tableName="wf_decision_rule">
+            <column name="id" valueNumeric="4" />
+            <column name="version" valueNumeric="0" />
+            <column name="condition_el" value="#{mv:getCFValue(entity,'Territory')==_VALUE_}" />
+            <column name="name" value="Territory" />
+            <column name="type" value="STRING" />
+            <column name="value" value="north" />
+            <column name="model" valueNumeric="0" />
+        </insert>
+        <insert tableName="wf_decision_rule">
+            <column name="id" valueNumeric="5" />
+            <column name="version" valueNumeric="0" />
+            <column name="condition_el" value="#{mv:getCFValue(entity,'SalesAmount')==_VALUE_}" />
+            <column name="name" value="Sales amount" />
+            <column name="type" value="STRING" />
+            <column name="value" value="Other" />
+            <column name="model" valueNumeric="1" />
+        </insert>
+        <insert tableName="wf_decision_rule">
+            <column name="id" valueNumeric="6" />
+            <column name="version" valueNumeric="0" />
+            <column name="condition_el" value="#{mv:getCFValue(entity,'AccountType')==_VALUE_}" />
+            <column name="name" value="Account Type" />
+            <column name="type" value="STRING" />
+            <column name="value" value="Other" />
+            <column name="model" valueNumeric="1" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="AndriusKarpavicius" id="rebuild-data-paymentGateway"> 
+        <insert tableName="crm_provider_pay_methods">
+            <column name="provider_id" valueNumeric="1" />
+            <column name="payment_method" value="CARD" />
+        </insert>
+        <insert tableName="crm_provider_pay_methods">
+            <column name="provider_id" valueNumeric="1" />
+            <column name="payment_method" value="DIRECTDEBIT" />
+        </insert>
+        <insert tableName="crm_provider_pay_methods">
+            <column name="provider_id" valueNumeric="1" />
+            <column name="payment_method" value="PAYPALPAYMENTLINK" />
+        </insert>
+        <insert tableName="crm_provider_pay_methods">
+            <column name="provider_id" valueNumeric="1" />
+            <column name="payment_method" value="STRIPEDIRECTLINK" />
+        </insert>
+        <insert tableName="crm_provider_pay_methods">
+            <column name="provider_id" valueNumeric="1" />
+            <column name="payment_method" value="CHECK" />
+        </insert>
+    </changeSet>
+    
+    <changeSet author="AndriusKarpavicius" id="rebuild-data-payment-gateway">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueNumeric="-10"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="org.meveo.service.script.demo.CustomGatewayPaymentScript"/>
+            <column name="src_type" value="JAVA_CLASS"/>
+            <column name="description" value="CustomGatewayPaymentScript demo implementation"/>
+            <column name="created" valueDate="${db.current.time}"/>            
+        </insert>
+              
+        <sql><![CDATA[INSERT INTO ${db.schema.adapted}meveo_script_instance (id, version, disabled, created, code, description, src_type, script) VALUES (-11  , 0, 0,  ${db.current.time}, 'org.meveo.service.script.demo.PaymentCallBackScript', 'PaymentCallBackScript', 'JAVA_CLASS', null);]]></sql>
+
+        <sql><![CDATA[INSERT INTO ${db.schema.adapted}ar_payment_gateway (id, version, disabled, created, updated, code, description, type, payment_method, card_type,
+        implementation_class_name, script_instance_id, trading_currency_id, application_el, uuid, creator) VALUES (-1, 0, 0,  ${db.current.time}, NULL, 'GatewayDemo_CARD', 'GatewayDemo CARD for Demo', 'CUSTOM', 'CARD', NULL, NULL, -10, NULL, NULL,
+          '3bb099a3-e72d-49ea-9d96-908e74569e02', 'opencell.admin');]]></sql>
+        <sql><![CDATA[INSERT INTO ${db.schema.adapted}ar_payment_gateway (id, version, disabled, created, updated, code, description, type, payment_method, card_type,
+        implementation_class_name, script_instance_id, trading_currency_id, application_el, uuid, creator) VALUES (-2, 0, 0,  ${db.current.time}, NULL, 'GatewayDemo_DD', 'GatewayDemo DirectDebit for Demo', 'CUSTOM', 'DIRECTDEBIT', NULL, NULL, -10, NULL, NULL,
+          '45b099a3-e72d-49ee-9d56-908e74569e56', 'opencell.admin');]]></sql>          
+
+        <sql><![CDATA[INSERT INTO ${db.schema.adapted}adm_notification (id, version, disabled, created, updated, code, description, class_name_filter, event_expression_filter, event_type_filter, creator, updater, counter_instance_id, counter_template_id, script_instance_id, priority) VALUES (-10, 0, 0,  ${db.current.time}, NULL, 'PaymentCallBack', NULL, 'org.meveo.model.notification.InboundRequest',
+          '#{event.pathInfo.startsWith("/DEMO/custom_payment-callback?")}', 'INBOUND_REQ', 'opencell.admin', NULL, NULL, NULL, -11, 0);]]></sql>
+
+        <sql><![CDATA[INSERT INTO ${db.schema.adapted}adm_notification_params VALUES (-10, '#{event.getParameters()}', 'params');]]></sql>        
+    </changeSet>
+
+    <changeSet id="rebuild-scripting-jobs" author="AndriusKarpavicius">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="org.meveo.service.script.product.OneShotOtherTypeMigrationScript"/>
+            <column name="src_type" value="JAVA_CLASS"/>
+            <column name="description" value="Migrate OneShot Charge of Type OTHER to INVOICING_PLAN"/>
+            <column name="created" valueDate="${db.current.time}"/>
+        </insert>
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueNumeric="-30"/>
+            <column name="version" valueNumeric="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="org.meveo.service.script.ServiceTemplateToProductScript" />
+            <column name="description" value="Migration ServiceTemplate To Product" />
+            <column name="src_type" value="JAVA_CLASS" />
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueNumeric="-40" />
+            <column name="version" valueNumeric="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="updated" valueDate="null" />
+            <column name="uuid" value="ServiceTemplateToProductJob" />
+            <column name="code" value="ServiceTemplateToProductJob" />
+            <column name="description" value="ServiceTemplateToProductJob" />
+            <column name="job_category" value="MEDIATION" />
+            <column name="job_template" value="ScriptingJob" />
+            <column name="parametres" valueNumeric="null" />
+            <column name="creator" value="opencell.admin" />
+            <column name="updater" value="null" />
+            <column name="timerentity_id" value="null" />
+            <column name="cf_values">
+                <![CDATA[
+                    {"ScriptingJob_script":[{"entity":{"classname":"org.meveo.model.scripts.ScriptInstance","code":"org.meveo.service.script.ServiceTemplateToProductScript","id":-30}}],"ScriptingJob_TransactionType":[{"string":"REQUIRES_NEW"}]}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="code" value="org.meveo.service.script.MassWrittingOffInvoicesScript" />
+            <column name="script">
+                <![CDATA[   package org.meveo.service.script;
+                    public class MassWrittingOffInvoicesScript extends MassWrittingOffInvoices {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="OPENCELL.ADMIN" />
+            <column name="version" valueNumeric="1" />
+            <column name="src_type" value="JAVA" />
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq" />
+            <column name="version" valueNumeric="1" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="job_category" value="MEDIATION" />
+            <column name="job_template" value="FlatFileProcessingJob" />
+            <column name="code" value="massWrittingOffInvoicesJob" />
+            <column name="description" value="mass writting off invoices job"/>
+            <column name="creator" value="opencell.admin" />
+            <column name="job_speed" value="NORMAL" />
+            <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
+            <column name="verbose_report" valueNumeric="1" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="cf_values">
+                <![CDATA[
+                {"nbRuns": [{"long": 1}], "oneFilePerJob": [{"boolean": false}], "sortingOption": [{"string": "ALPHA"}], "waitingMillis": [{"long": 0}], "FlatFileProcessingJob_inputDir": [{"string": "/imports/writeOff/inputs"}], "FlatFileProcessingJob_outputDir": [{"string": "/imports/writeOff/outputs"}], "FlatFileProcessingJob_archiveDir": [{"string": "/imports/writeOff/archives"}], "FlatFileProcessingJob_errorAction": [{"string": "CONTINUE"}], "FlatFileProcessingJob_mappingConf": [{"string": "<beanio\r\n\txmlns=\"http://www.beanio.org/2012/03\"\r\n\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n  xsi:schemaLocation=\"http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd\">\r\n\t<stream name=\"record\" format=\"csv\">\r\n\t\t<parser>\r\n\t\t\t<property name=\"delimiter\" value=\";\" />\r\n\t\t\t<property name=\"comments\" value=\"END\" />\r\n\t\t\t<property name=\"multilineEnabled\" value=\"true\" />\r\n\t\t</parser>\r\n\t\t<record name=\"header\" minOccurs=\"1\" maxOccurs=\"1\" class=\"map\">\r\n\t\t\t<field name=\"INVOICE_NUMBER\" ignore=\"true\"/>\r\n\t\t\t<field name=\"INVOICE_AMOUNT\" ignore=\"true\"/>\r\n\t\t\t<field name=\"UNCOLLECTIBILITY_CERTIFICATE_NUMBER\" ignore=\"true\"/>\r\n\t\t</record>\r\n\t\t<record name=\"details\" minOccurs=\"1\" maxOccurs=\"unbounded\" class=\"map\">\r\n\t\t\t<field name=\"INVOICE_NUMBER\" required=\"true\"/>\r\n\t\t\t<field name=\"INVOICE_AMOUNT\" required=\"true\"/>\r\n\t\t\t<field name=\"UNCOLLECTIBILITY_CERTIFICATE_NUMBER\" required=\"true\"/>\r\n\t\t</record>\r\n\t</stream>\r\n</beanio>"}], "FlatFileProcessingJob_scriptsFlow": [{"string": "org.meveo.service.script.MassWrittingOffInvoicesScript"}], "FlatFileProcessingJob_formatTransfo": [{"string": "None"}], "FlatFileProcessingJob_originFilename": [{"string": "origin_filename"}], "FlatFileProcessingJob_nbLinesToProcess": [{"long": 1}], "FlatFileProcessingJob_fileNameExtension": [{"string": "csv"}], "FlatFileProcessingJob_recordVariableName": [{"string": "record"}]}
+                ]]>
+            </column>
+        </insert>        
+    </changeSet>
+    
+    
+    <changeSet id="#INTRD-19464_20231225-rebuild" author="ZBARIKI">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="org.meveo.service.script.DummyPaymentGatewayScript" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Dummy payment pateway script"/>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="script"><![CDATA[package org.meveo.service.script;
+package org.meveo.service.script;
+
+import org.meveo.admin.exception.BusinessException;
+
+import java.util.Map;
+
+
+public class DummyPaymentGatewayScript extends Script {
+
+    private static final String ERROR_MESSAGE
+            = "Dummy gateway for SEPA files generation (For now, its only purpose is to store rejection codes. Please continue to use DD requests for SEPA files)";
+    @Override
+    public void execute(Map<String, Object> context) throws BusinessException {
+        throw new BusinessException(ERROR_MESSAGE);
+    }
+}]]></column>
+        </insert>
+        <insert tableName="ar_payment_gateway">
+            <column name="id" valueSequenceNext="ar_payment_gateway_seq" />
+            <column name="version" valueNumeric="1" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="SEPA_FILE" />
+            <column name="description"
+                    value="Dummy gateway for SEPA files generation (For now, its only purpose is to store rejection codes. Please continue to use DD requests for SEPA files)" />
+            <column name="payment_method" value="DIRECTDEBIT" />
+            <column name="type" value="NATIF" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code = 'org.meveo.service.script.DummyPaymentGatewayScript')" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="INTRD-19826_20240103-rebuild" author="ZBARIKI">
+        <insert tableName="meveo_script_instance_cat">
+            <column name="id" valueSequenceNext="meveo_script_instance_cat_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="PAYMENT_REJECTION_ACTIONS"/>
+            <column name="description" value="Payment rejection actions"/>
+            <column name="description_i18n" value='{"EN":"Payment rejection actions","FR":"Actions sur rejet de paiement"}' />
+        </insert>
+    </changeSet>
+    
+    <changeSet id="INTRD-20888_20240125-rebuild" author="aeljaouhari">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="code" value="org.meveo.service.script.payment.TestRejectionAction" />
+            <column name="script">
+                <![CDATA[   package org.meveo.service.script.payment;
+                    public class TestRejectionAction extends TestRejectionActionScript {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="OPENCELL.ADMIN" />
+            <column name="version" valueNumeric="0" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Action will succeed or failed based on the passed parameter, and log the provided text. It’s also possible to add an execution delay."/>
+            <column name="description_i18n">
+                <![CDATA[{"EN":"<p>Action will succeed or failed based on the passed parameter, and log the provided text.</p><p>It’s also possible to add an execution delay.</p>","FR":"<p>L’action réussira ou échouera selon le paramètre passé, et enregistrera le message fourni.</p><p>Il est également possible d’ajouter un délai d’exécution.</p>"}]]>
+            </column>
+            <column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')" />
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="executionResult" />
+            <column name="description_i18n" value='{"FR":"Résultat de l’action","EN":"Action result"}'/>
+            <column name="class_name" value="java.lang.String" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="default_value" value="success" />
+            <column name="allowed_values" value="success|failure" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="report" />
+            <column name="description_i18n" value='{"FR":"Message du rapport","EN":"Report message"}'/>
+            <column name="class_name" value="java.lang.String" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="delay" />
+            <column name="description_i18n" value='{"FR":"Délai (secondes)","EN":"Delay (seconds)"}'/>
+            <column name="class_name" value="java.lang.Integer" />
+            <column name="default_value" value="1" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.TestRejectionAction')" />
+        </insert>
+    </changeSet>
+    
+</databaseChangeLog>

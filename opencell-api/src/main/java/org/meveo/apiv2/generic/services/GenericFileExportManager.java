@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +27,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -42,15 +42,19 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.meveo.api.dto.AgedReceivableDto;
 import org.meveo.apiv2.generic.GenericFieldDetails;
+import org.meveo.apiv2.generic.common.ExcelExportConfiguration;
+import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.commons.utils.CsvBuilder;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.settings.AdvancedSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +70,10 @@ public class GenericFileExportManager {
 	
 	@Inject
     private ParamBeanFactory paramBeanFactory;
+
+    @Inject
+    private AdvancedSettingsApiService advancedSettingsApiService;
+
 	protected Logger log = LoggerFactory.getLogger(getClass());
 
     private static final String PATH_STRING_FOLDER = "exports" + File.separator + "generic"+ File.separator;
@@ -83,20 +91,27 @@ public class GenericFileExportManager {
     protected enum ExcelStylesEnum {
         BIG_DECIMAL_FORMAT, NUMERIC_FORMAT, STRING_FORMAT, DATE_FORMAT
     }
+    public String export(String entityName, List<Map<String, Object>> mapResult, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension){
+        return export(entityName, mapResult, fileType, fieldDetails, ordredColumn, locale, fieldsSeparator, decimalSeparator, fileNameExtension, null);
+    }
 
-    public String export(String entityName, List<Map<String, Object>> mapResult, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale){
+    public String export(String entityName, List<Map<String, Object>> mapResult, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension, ExcelExportConfiguration configuration){
     	log.debug("Save directory "+paramBeanFactory.getChrootDir());
     	DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD).appendValue(MONTH_OF_YEAR, 2).appendValue(DAY_OF_MONTH, 2)
         		.appendLiteral('-').appendValue(HOUR_OF_DAY, 2).appendValue(MINUTE_OF_HOUR, 2).appendValue(SECOND_OF_MINUTE, 2).toFormatter();
         String time = LocalDateTime.now().format(formatter);
     	saveDirectory = paramBeanFactory.getChrootDir() + File.separator + PATH_STRING_FOLDER + entityName + File.separator +time.substring(0,8) + File.separator;
         if (mapResult != null && !mapResult.isEmpty()) {        	
-            Path filePath = saveAsRecord(entityName, mapResult, fileType, fieldDetails, ordredColumn, locale);
+            Path filePath = saveAsRecord(entityName, mapResult, fileType, fieldDetails, ordredColumn, locale, fieldsSeparator, decimalSeparator, fileNameExtension, configuration);
             return filePath == null? null : filePath.toString();
         }
         return null;
     }
 
+    private Path saveAsRecord(String fileName, List<Map<String, Object>> records, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension) {
+        return saveAsRecord(fileName, records, fileType, fieldDetails, ordredColumn, locale, fieldsSeparator, decimalSeparator, fileNameExtension, null);
+    }
+    
     /**
      * 
      * @param fileName
@@ -105,8 +120,8 @@ public class GenericFileExportManager {
      * @param time 
      * @return
      */
-    private Path saveAsRecord(String fileName, List<Map<String, Object>> records, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale) {
-        String extensionFile = ".csv";
+    private Path saveAsRecord(String fileName, List<Map<String, Object>> records, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension, ExcelExportConfiguration configuration) {
+        String extensionFile = null;
         DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendValue(DAY_OF_MONTH, 2).appendValue(MONTH_OF_YEAR, 2).appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
                 .appendLiteral('-').appendValue(HOUR_OF_DAY, 2).appendValue(MINUTE_OF_HOUR, 2).appendValue(SECOND_OF_MINUTE, 2).appendValue(MILLI_OF_SECOND, 3).toFormatter();
         String time = LocalDateTime.now().format(formatter);
@@ -114,25 +129,26 @@ public class GenericFileExportManager {
         try {
         	
         	//CSV
-            if(fileType.equals("CSV")) {
+            if(fileType.equalsIgnoreCase("CSV")) {
                 if(!Files.exists(Path.of(saveDirectory))){
                     Files.createDirectories(Path.of(saveDirectory));
                 }
+				extensionFile = (StringUtils.isBlank(fileNameExtension)) ? ".csv" : ".".concat(fileNameExtension);
                 File csvFile = new File(saveDirectory + fileName + time + extensionFile);
-                writeCsvFile(records, csvFile, fieldDetails, ordredColumn, locale);
+                writeCsvFile(records, csvFile, fieldDetails, ordredColumn, locale, fieldsSeparator, decimalSeparator, fileNameExtension);
                 return Path.of(saveDirectory, fileName + time + extensionFile);
             }
             //EXCEL
-            if(fileType.equals("EXCEL")) {
+            if(fileType.equalsIgnoreCase("EXCEL")) {
             	if(!Files.exists(Path.of(saveDirectory))){
                     Files.createDirectories(Path.of(saveDirectory));
                 }
                 extensionFile = ".xlsx";
                 File outputExcelFile = new File(saveDirectory + fileName + time + extensionFile);
-                writeExcelFile(outputExcelFile, records, fieldDetails, ordredColumn);
+                writeExcelFile(outputExcelFile, records, fieldDetails, ordredColumn, configuration);
                 return Path.of(saveDirectory + fileName + time + extensionFile);
             }
-            if(fileType.equalsIgnoreCase("pdf")) {
+            if(fileType.equalsIgnoreCase("PDF")) {
                 if(!Files.exists(Path.of(saveDirectory))){
                     Files.createDirectories(Path.of(saveDirectory));
                 }
@@ -156,8 +172,8 @@ public class GenericFileExportManager {
      * @param ordredColumn
      * @throws IOException
      */
-	private void writeCsvFile(List<Map<String, Object>> records, File csvFile, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale) throws IOException {
-		CsvBuilder csv = new CsvBuilder();
+	private void writeCsvFile(List<Map<String, Object>> records, File csvFile, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension) throws IOException {
+		CsvBuilder csv = new CsvBuilder(fieldsSeparator, true);
         ordredColumn.forEach(field -> {
             GenericFieldDetails fieldDetail = fieldDetails.get(field);
             csv.appendValue(extractValue(field, fieldDetail));
@@ -165,7 +181,7 @@ public class GenericFileExportManager {
         csv.startNewLine();
         for (Map<String, Object> item : records) {
             ordredColumn.forEach(field ->
-                    csv.appendValue(applyTransformation(fieldDetails.get(field), item.get(field), locale))
+                    csv.appendValue(applyTransformation(fieldDetails.get(field), item.get(field), locale, decimalSeparator))
             );
             csv.startNewLine();
         }
@@ -178,6 +194,19 @@ public class GenericFileExportManager {
 		}
 	}
 
+    /**
+     * Write Excel file for records
+     * 
+     * @param file - Target file
+     * @param records - Data to export
+     * @param fieldDetails - Field details
+     * @param orderedColumn - List of columns sorted
+     * @throws IOException - Exception if file writing fails
+     */
+    private void writeExcelFile(File file, List<Map<String, Object>> records, Map<String, GenericFieldDetails> fieldDetails, List<String> orderedColumn) throws IOException {
+        this.writeExcelFile(file, records, fieldDetails, orderedColumn, null);
+    }
+
 	/**
      * 
      * @param file
@@ -185,25 +214,46 @@ public class GenericFileExportManager {
      * @param ordredColumn
      * @throws IOException
      */
-    private void writeExcelFile(File file, List<Map<String, Object>> records, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn) throws IOException {
+    private void writeExcelFile(File file, List<Map<String, Object>> records, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, ExcelExportConfiguration configuration) throws IOException {
         FileOutputStream fileOut = null;
         var wb = new SXSSFWorkbook();
         wb.setCompressTempFiles(true);
         SXSSFSheet sheet = wb.createSheet();
         Map<String, CellStyle> excelCellStyles = createExcelCellStyles(wb);
-        int i = 0;
+        AtomicInteger i = new AtomicInteger(0);
+
+        CellStyle defaultStyle = wb.createCellStyle();
+        if(configuration != null && configuration.getBorderStyle() != null) {
+            excelCellStyles.values().forEach(style -> {
+                style.setBorderTop(configuration.getBorderStyle());
+                style.setBorderBottom(configuration.getBorderStyle());
+                style.setBorderLeft(configuration.getBorderStyle());
+                style.setBorderRight(configuration.getBorderStyle());
+            });
+            defaultStyle.setBorderTop(configuration.getBorderStyle());
+            defaultStyle.setBorderBottom(configuration.getBorderStyle());
+            defaultStyle.setBorderLeft(configuration.getBorderStyle());
+            defaultStyle.setBorderRight(configuration.getBorderStyle());
+        }
+
+        // create a cell where 3 columns are merged
+        if (configuration != null && configuration.getHeader() != null) {
+            i.set(configuration.getHeader().apply(sheet));
+        }   
+
         if (records != null && !records.isEmpty()) {
-        	var rowHeader = sheet.createRow(i++);
+        	var rowHeader = sheet.createRow(i.getAndIncrement());
             IntStream.range(0, ordredColumn.size())
                     .forEach(index -> {
                         Cell cell = rowHeader.createCell(index);
                         GenericFieldDetails fieldDetail = fieldDetails.get(ordredColumn.get(index));
+                        cell.setCellStyle(defaultStyle);
                         cell.setCellValue(extractValue(ordredColumn.get(index), fieldDetail));
                     });
 		    //Cell
             IntStream.range(0, records.size())
                 .forEach(indexRow -> {
-                    var rowCell = sheet.createRow(indexRow+1);
+                    var rowCell = sheet.createRow(i.get()+indexRow);
                     IntStream.range(0, ordredColumn.size())
                         .forEach(indexCol -> {
                             Cell cell = rowCell.createCell(indexCol);
@@ -215,16 +265,7 @@ public class GenericFileExportManager {
                             if (fieldDetail == null) {
                                 cell.setCellValue(value == null ? StringUtils.EMPTY : value.toString());
                             } else if (StringUtils.isNotBlank(fieldDetail.getTransformation())) {
-                                if (value instanceof Long || value instanceof BigDecimal || value instanceof Double || value instanceof Float || value instanceof Integer) {
-                                    cell.setCellValue(value instanceof BigDecimal ? ((BigDecimal) value).doubleValue() : (Long) value);
-                                } else if (value instanceof Date) {
-                                    cell.setCellValue((Date) value);
-                                } else if (value instanceof String && (value.toString().startsWith("0.00"))) { // specific case for formula field, wich have a String type with 0.00 value
-                                    cell.setCellValue(0.00);
-                                } else {
-                                    cell.setCellValue(extractStringValue(value));
-                                }
-
+                                cell.setCellValue(applyTransformation(fieldDetail, value, null, null));
                             } else if (MapUtils.isNotEmpty(fieldDetail.getMappings())) {
                                 for (Map.Entry<String, String> map : fieldDetail.getMappings().entrySet()) {
                                     if (map.getKey().equals(value.toString())) {
@@ -242,7 +283,6 @@ public class GenericFileExportManager {
                                 }
                             }
 
-                            //cell.setCellValue(applyTransformation(fieldDetails.get(key), value));
                             if (value instanceof Integer || value instanceof BigInteger) {
                                 cell.setCellStyle(excelCellStyles.get(wb.hashCode() + ExcelStylesEnum.NUMERIC_FORMAT.name()));
                             } else if (value instanceof Long || value instanceof BigDecimal || value instanceof Double || value instanceof Float) {
@@ -256,6 +296,12 @@ public class GenericFileExportManager {
                             }
                         });
                 });
+            
+            if(configuration != null && configuration.getFooter() != null) {
+                // apply function where inputs are sheet and last row index
+                configuration.getFooter().apply(sheet, i.get() + records.size());
+            }
+            
             try {
                 fileOut = new FileOutputStream(file);
                 wb.write(fileOut);
@@ -296,11 +342,11 @@ public class GenericFileExportManager {
     private void addRows(Map<String, Object> rows, PdfPTable table, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale) {
         ordredColumn.forEach(col -> {
             GenericFieldDetails fieldDetail = fieldDetails.get(col);
-            table.addCell(applyTransformation(fieldDetail, rows.get(col), locale));
+            table.addCell(applyTransformation(fieldDetail, rows.get(col), locale, null));
         });
     }
 
-    private String applyTransformation(GenericFieldDetails fieldDetail, Object value, String locale) {
+    private String applyTransformation(GenericFieldDetails fieldDetail, Object value, String locale, String decimalSeparator) {
         if (fieldDetail == null) {
             return value == null ? StringUtils.EMPTY : value.toString();
         }
@@ -319,6 +365,13 @@ public class GenericFileExportManager {
 
             if (value instanceof LocalDate || value instanceof LocalDateTime) {
                 return DateTimeFormatter.ofPattern(fieldDetail.getTransformation()).format((TemporalAccessor) value);
+            }
+        } else if (StringUtils.isNotBlank(decimalSeparator)) {
+        	if (value instanceof Long || value instanceof BigDecimal || value instanceof Double || value instanceof Float || value instanceof Integer) {
+                DecimalFormatSymbols symbols = ",".equals(decimalSeparator) ? new DecimalFormatSymbols(Locale.FRENCH) : new DecimalFormatSymbols(Locale.ENGLISH);
+                DecimalFormat formatter = new DecimalFormat("#.##", symbols);
+                formatter.setGroupingUsed(false);
+                return formatter.format(value);
             }
         }
 
@@ -384,7 +437,7 @@ public class GenericFileExportManager {
                                          List<AgedReceivableDto> agedReceivablesList, List<String> orderedColumn, String locale, Integer numberOfPeriods){
         log.info("Export Aged Balance - Entity Name: {}, File Type: {}, Locale: {}", entityName, fileType, locale);
 
-        String filename = FR_AGED_BALANCE_FILENAME;;
+        String filename = FR_AGED_BALANCE_FILENAME;
         DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendValue(DAY_OF_MONTH, 2).appendValue(MONTH_OF_YEAR, 2).appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
                 .appendLiteral('-').appendValue(HOUR_OF_DAY, 2).appendValue(MINUTE_OF_HOUR, 2).appendValue(SECOND_OF_MINUTE, 2).toFormatter();
         SimpleDateFormat format = new SimpleDateFormat(FR_DATE_FORMAT);
@@ -408,11 +461,12 @@ public class GenericFileExportManager {
         Map<String, GenericFieldDetails> fieldDetails = getFieldDetailsMap(genericFieldDetails);
         
         // Format Fields
-        formatFields(map, format, locale);
+        formatFields(map, format);
 
         // If the map is not empty then save As Record to export - CSV, EXCEL or PDF
         if (!map.isEmpty()) {
-            Path filePath = saveAsRecord(filename, map, fileType, fieldDetails, orderedColumn, locale);
+            String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).orElse(";");
+            Path filePath = saveAsRecord(filename, map, fileType, fieldDetails, orderedColumn, locale, fieldsSeparator, null, null);
             return filePath == null ? null : filePath.toString();
         }
 
@@ -445,7 +499,7 @@ public class GenericFileExportManager {
                 }
 
                 IntStream.range(0, numberOfPeriods)
-                        .forEach(i -> map.put("period" + (i + 1), o.getTotalAmountByPeriod().get(i)));
+                        .forEach(i -> map.put("period" + (i + 1), o.getTransactionalTotalAmountByPeriod().get(i)));
 
                 listOfMap.add(map);
             }
@@ -459,7 +513,7 @@ public class GenericFileExportManager {
      * @param mapResult List of Map
      * @param format Date Format
      */
-    private static void formatFields(List<Map<String, Object>> mapResult, SimpleDateFormat format, String locale) {
+    private static void formatFields(List<Map<String, Object>> mapResult, SimpleDateFormat format) {
         for (Map<String, Object> item : mapResult) {
             for (Map.Entry<String, Object> entry : item.entrySet()) {
                 if(entry.getKey().equals("dueDate")) {

@@ -177,6 +177,7 @@ public abstract class Job {
 
             if (executionResult == null) {
                 executionResult = new JobExecutionResultImpl(jobInstance, jobLauncher != null ? jobLauncher : JobLauncherEnum.TRIGGER, EjbUtils.getCurrentClusterNode());
+                executionResult.setCfValues(jobInstance.getRunTimeCfValues());
                 jobExecutionResultService.persistResult(executionResult);
             }
 

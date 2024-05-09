@@ -97,14 +97,21 @@ public class ApplyOneShotChargeInstanceRequestDto extends BaseEntityDto {
     private String description;
 
     /**
-     * The amount without tax.
+     * The amount without tax. use unitPrice instead
      */
+    @Deprecated
     private BigDecimal amountWithoutTax;
 
     /**
-     * The amount with tax.
+     * The amount with tax. use unitPrice instead
      */
+    @Deprecated
     private BigDecimal amountWithTax;
+    
+    /**
+     * The unit price.
+     */
+    private BigDecimal unitPrice;
 
     /**
      * The criteria 1.
@@ -282,6 +289,20 @@ public class ApplyOneShotChargeInstanceRequestDto extends BaseEntityDto {
     }
 
     /**
+	 * @return the unitPrice
+	 */
+	public BigDecimal getUnitPrice() {
+		return unitPrice;
+	}
+
+	/**
+	 * @param unitPrice the unitPrice to set
+	 */
+	public void setUnitPrice(BigDecimal unitPrice) {
+		this.unitPrice = unitPrice;
+	}
+
+	/**
      * Gets the criteria 1.
      *
      * @return the criteria 1

@@ -470,7 +470,7 @@ public class SubscriptionApi extends BaseApi {
                 throw new EntityDoesNotExistsException(OfferTemplate.class, postData.getOfferTemplate() + " / " + DateUtils.formatDateWithPattern(postData.getSubscriptionDate(), paramBean.getDateTimeFormat()));
             } else if (subscription.getServiceInstances() != null && !subscription.getServiceInstances().isEmpty() && !subscription.getOffer().equals(offerTemplate)) {
                 throw new InvalidParameterException("Cannot change the offer of subscription once the services are instantiated");
-            } else if (offerTemplate.isDisabled()) {
+            } else if (subscription.getOffer()!=null && subscription.getOffer().equals(offerTemplate) && offerTemplate.isDisabled() && subscription.getOrder() == null) {
                 throw new InvalidParameterException("Cannot subscribe to disabled offer");
             }
             subscription.setOffer(offerTemplate);
@@ -1184,6 +1184,8 @@ public class SubscriptionApi extends BaseApi {
             missingParameters.add("subscription");
         }
 
+        checkOneShotChargeInstancePrice(postData);
+        
         handleMissingParametersAndValidate(postData);
 
         Date operationDate = postData.getOperationDate();
@@ -1269,7 +1271,33 @@ public class SubscriptionApi extends BaseApi {
 
     }
 
-    /**
+    private void checkOneShotChargeInstancePrice(ApplyOneShotChargeInstanceRequestDto postData) {
+    	if(appProvider.isEntreprise()) {
+    		if (postData.getUnitPrice() != null && postData.getAmountWithoutTax() != null && postData.getUnitPrice().compareTo(postData.getAmountWithoutTax()) != 0) {
+    			throw new MeveoApiException("unitPrice and amountWithoutTax must be equal. Futhermore, ‘amountWithoutTax' is deprecated, you should only send 'unitPrice’.");
+    		}
+    		if (postData.getUnitPrice() == null && postData.getAmountWithoutTax() == null && postData.getAmountWithTax() != null) {
+    			throw new MeveoApiException("Provider is in B2B mode (entreprise=true). This means that unit prices are without tax. Furthermore, ‘amountWithTax’ is deprecated, you should send ‘unitPrice’.");
+    		}
+    		if (postData.getUnitPrice() != null) {
+    			postData.setAmountWithoutTax(postData.getUnitPrice());
+    		}
+    		postData.setAmountWithTax(null);
+    	} else {
+    		if (postData.getUnitPrice() != null && postData.getAmountWithTax() != null && postData.getUnitPrice().compareTo(postData.getAmountWithTax()) != 0) {
+    			throw new MeveoApiException("unitPrice and amountWithTax must be equal. Furthermore, ‘amountWithTax' is deprecated, you should only send 'unitPrice’.");
+    		}
+    		if (postData.getUnitPrice() == null && postData.getAmountWithTax() == null && postData.getAmountWithoutTax() != null) {
+    			throw new MeveoApiException("Provider is in B2C mode (entreprise=false). This means that unit prices are with tax. Furthermore, ‘amountWithoutTax’ is deprecated, you should send ‘unitPrice’.");
+    		}
+    		if (postData.getUnitPrice() != null) {
+    			postData.setAmountWithTax(postData.getUnitPrice());
+    		}
+    		postData.setAmountWithoutTax(null);
+    	}
+	}
+
+	/**
      * Apply a product charge on a subscription
      *
      * @param postData Apply product request dto
@@ -2879,7 +2907,7 @@ public class SubscriptionApi extends BaseApi {
         }
 
         if (offerTemplate.isDisabled()) {
-            throw new BusinessApiException(String.format("OfferTemplate[code=%s] is disabled and cannot be subscription to. Please select another offer.", offerTemplate.getCode()));
+            throw new BusinessApiException(String.format("OfferTemplate[code=%s] is disabled and cannot be subscribed to. Please select another offer.", offerTemplate.getCode()));
         }
 
         Seller seller = null;
@@ -3287,7 +3315,7 @@ public class SubscriptionApi extends BaseApi {
     @Inject
     private ProductService productService;
 
-    private void processProduct(Subscription subscription,  ProductToInstantiateDto productDto) {
+    public void processProduct(Subscription subscription,  ProductToInstantiateDto productDto) {
         if (StringUtils.isBlank(productDto.getProductCode())) {
             missingParameters.add("productCode");
         }

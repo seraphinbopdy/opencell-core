@@ -26,6 +26,11 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,6 +40,9 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @DiscriminatorValue(value = "R")
+@NamedQueries({
+    @NamedQuery(name = "RejectedPayment.updateRejectionActionsStatus", query = "UPDATE RejectedPayment rp SET rp.rejectionActionsStatus = 'NO_ACTION' WHERE rp.rejectedCode = :rejectedCode AND NOT EXISTS (SELECT 1 FROM PaymentRejectionActionReport r WHERE r.action <> null and r.rejectedPayment = rp.id)"),
+})
 public class RejectedPayment extends AccountOperation {
 
     private static final long serialVersionUID = 1L;
@@ -73,6 +81,20 @@ public class RejectedPayment extends AccountOperation {
     List<AccountOperation> listAaccountOperationSupposedPaid = new ArrayList<AccountOperation>();
 
     private PaymentMethodEnum paymentMethod;
+    
+    @Column(name = "rejection_actions_status")
+    @Enumerated(EnumType.STRING)
+    private RejectionActionStatus rejectionActionsStatus = RejectionActionStatus.NO_ACTION;
+    
+    @OneToMany(mappedBy = "rejectedPayment")
+    List<PaymentRejectionActionReport> paymentRejectionActionReports = new ArrayList<PaymentRejectionActionReport>();
+
+    /**
+     * Payment gateway
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_gateway_id")
+    private PaymentGateway paymentGateway;
 
     public Date getRejectedDate() {
         return rejectedDate;
@@ -152,4 +174,27 @@ public class RejectedPayment extends AccountOperation {
         this.paymentMethod = paymentMethod;
     }
 
+	public RejectionActionStatus getRejectionActionsStatus() {
+		return rejectionActionsStatus;
+	}
+
+	public void setRejectionActionsStatus(RejectionActionStatus rejectionActionsStatus) {
+		this.rejectionActionsStatus = rejectionActionsStatus;
+	}
+
+	public List<PaymentRejectionActionReport> getPaymentRejectionActionReports() {
+		return paymentRejectionActionReports;
+	}
+
+	public void setPaymentRejectionActionReports(List<PaymentRejectionActionReport> paymentRejectionActionReports) {
+		this.paymentRejectionActionReports = paymentRejectionActionReports;
+	}
+
+    public PaymentGateway getPaymentGateway() {
+        return paymentGateway;
+    }
+
+    public void setPaymentGateway(PaymentGateway paymentGateway) {
+        this.paymentGateway = paymentGateway;
+    }
 }

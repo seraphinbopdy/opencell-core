@@ -61,47 +61,62 @@ public class UpdateHugeEntityJob extends Job {
     /**
      * Custom field that contains the target job value
      */
-    public static final String CF_TARGET_JOB = "UpdateHugeEntityJob_targetJob";
+    public static final String CF_TARGET_JOB = "targetJob";
 
     /**
      * Custom field that contains the huge entity on which the job will update
      */
-    public static final String CF_ENTITY_ClASS_NAME = "UpdateHugeEntityJob_entityClassName";
+    public static final String CF_ENTITY_ClASS_NAME = "entityClassName";
 
     /**
      * Custom field that contains the fields to update (list of fields separated by commas and their values, example: status='OPEN', amount =10)
      */
-    public static final String CF_FIELDS_TO_UPDATE = "UpdateHugeEntityJob_fieldsToUpdate";
+    public static final String CF_FIELDS_TO_UPDATE = "fieldsToUpdate";
 
     /**
      * Custom field that contains the default filter for the update query which will be executed by the job to update huge entites.
      */
-    public static final String CF_DEFAULT_FILTER = "UpdateHugeEntityJob_defaultFilter";
-
-    /**
-     * Custom field that contains the select fetch size value
-     */
-    public static final String CF_SELECT_FETCH_SIZE = "UpdateHugeEntityJob_selectFetchSize";
-
-    /**
-     * Custom field that contains the select max results value
-     */
-    public static final String CF_SELECT_MAX_RESULTS = "UpdateHugeEntityJob_selectMaxResults";
-
-    /**
-     * Custom field that contains update query chunk size value
-     */
-    public static final String CF_UPDATE_CHUNK_SIZE = "UpdateHugeEntityJob_updateChunkSize";
-
-    /**
-     * Custom field containing the flag whether all update queries will be run on distinct IDs or whether it doesn't matter.
-     */
-    public static final String CF_IS_PESSIMISTIC_UPDATE_LOCK = "UpdateHugeEntityJob_isPessimisticUpdateLock";
+    public static final String CF_DEFAULT_FILTER = "defaultFilter";
 
     /**
      * Custom field that contains notification message which will send when job is done
      */
-    public static final String CF_EMAIL_TEMPLATE = "UpdateHugeEntityJob_emailTemplate";
+    public static final String CF_EMAIL_TEMPLATE = "emailTemplate";
+
+    /**
+     * Custom field that contains the select fetch size value
+     */
+    public static final String CF_SELECT_FETCH_SIZE = "selectFetchSize";
+
+    /**
+     * Custom field that contains the select max results value
+     */
+    public static final String CF_SELECT_MAX_RESULTS = "selectMaxResults";
+
+    /**
+     * Custom field that contains update query chunk size value
+     */
+    public static final String CF_UPDATE_CHUNK_SIZE = "updateChunkSize";
+
+    /**
+     * Custom field containing the flag whether all update queries will be run on distinct IDs or whether it doesn't matter.
+     */
+    public static final String CF_IS_PESSIMISTIC_UPDATE_LOCK = "isPessimisticUpdateLock";
+
+    /**
+     * Custom field containing the flag that indicates if the job will be use the view or not.
+     */
+    public static final String CF_IS_USING_VIEW = "isUsingView";
+
+    /**
+     * Custom field containing the flag that indicates if the job will use open cursor or not.
+     */
+    public static final String CF_IS_OPEN_CURSOR = "isOpenCursor";
+
+    /**
+     * Custom field containing the flag that indicates if the select query should use strict checking to compare two strings or not.
+     */
+    public static final String CF_IS_CASE_SENSITIVE = "isCaseSensitive";
 
 
     /**
@@ -156,58 +171,73 @@ public class UpdateHugeEntityJob extends Job {
     public Map<String, CustomFieldTemplate> getCustomFields() {
         Map<String, CustomFieldTemplate> result = new HashMap<>();
 
-        result.put(CF_NB_RUNS,
-                CustomFieldTemplateUtils.buildCF(CF_NB_RUNS, resourceMessages.getString("jobExecution.nbRuns"),
-                        CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Configuration:0;field:0", "-1", APPLIES_TO));
-
-        result.put(Job.CF_WAITING_MILLIS,
-                CustomFieldTemplateUtils.buildCF(Job.CF_WAITING_MILLIS,
-                        resourceMessages.getString("jobExecution.waitingMillis"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:1", "0", APPLIES_TO));
-
         result.put(CF_TARGET_JOB, CustomFieldTemplateUtils.buildCF(CF_TARGET_JOB, resourceMessages.getString("jobExecution.updateHugeEntity.targetJob"),
-                CustomFieldTypeEnum.STRING, "tab:Configuration:0;fieldGroup:Configuration:0;field:2", null, true, APPLIES_TO));
+                CustomFieldTypeEnum.STRING, "tab:Configuration:0;fieldGroup:Job configuration:0;field:0", null, true, APPLIES_TO));
 
         CustomFieldTemplate entityClassNameCF = CustomFieldTemplateUtils.buildCF(CF_ENTITY_ClASS_NAME, resourceMessages.getString("jobExecution.updateHugeEntity.entityClassName"),
-                CustomFieldTypeEnum.LIST, "tab:Configuration:0;fieldGroup:Configuration:0;field:3", null, true, CustomFieldStorageTypeEnum.SINGLE, null, APPLIES_TO, null);
+                CustomFieldTypeEnum.LIST, "tab:Configuration:0;fieldGroup:Job configuration:0;field:1", null, true, CustomFieldStorageTypeEnum.SINGLE, null, APPLIES_TO, null);
         entityClassNameCF.setListValues(getClassNames());
         entityClassNameCF.setAllowEdit(false);
         result.put(CF_ENTITY_ClASS_NAME, entityClassNameCF);
 
         CustomFieldTemplate fieldsToUpdate = CustomFieldTemplateUtils.buildCF(CF_FIELDS_TO_UPDATE, resourceMessages.getString("jobExecution.updateHugeEntity.fieldsToUpdate"),
-                CustomFieldTypeEnum.TEXT_AREA, "tab:Configuration:0;fieldGroup:Configuration:0;field:4", APPLIES_TO);
+                CustomFieldTypeEnum.TEXT_AREA, "tab:Configuration:0;fieldGroup:Job configuration:0;field:2", APPLIES_TO);
         fieldsToUpdate.setAllowEdit(false);
         result.put(CF_FIELDS_TO_UPDATE, fieldsToUpdate);
 
         CustomFieldTemplate defaultFilter = CustomFieldTemplateUtils.buildCF(CF_DEFAULT_FILTER, resourceMessages.getString("jobExecution.updateHugeEntity.defaultFilter"),
-                CustomFieldTypeEnum.TEXT_AREA, "tab:Configuration:0;fieldGroup:Configuration:0;field:5", APPLIES_TO);
+                CustomFieldTypeEnum.TEXT_AREA, "tab:Configuration:0;fieldGroup:Job configuration:0;field:3", APPLIES_TO);
         defaultFilter.setAllowEdit(false);
         result.put(CF_DEFAULT_FILTER, defaultFilter);
+
+        CustomFieldTemplate emailTemplateCF = CustomFieldTemplateUtils.buildCF(CF_EMAIL_TEMPLATE, resourceMessages.getString("jobExecution.updateHugeEntity.emailTemplate"), CustomFieldTypeEnum.ENTITY,
+                "tab:Configuration:0;fieldGroup:Job configuration:0;field:4", null, false, null, EmailTemplate.class.getName(), APPLIES_TO, null);
+        emailTemplateCF.setDataFilterEL("{\"media\":\"EMAIL\"}");
+        result.put(CF_EMAIL_TEMPLATE, emailTemplateCF);
+
+        result.put(CF_NB_RUNS,
+                CustomFieldTemplateUtils.buildCF(CF_NB_RUNS, resourceMessages.getString("jobExecution.nbRuns"),
+                        CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Execution configuration:1;field:0", "-1", APPLIES_TO));
+
+        result.put(Job.CF_WAITING_MILLIS,
+                CustomFieldTemplateUtils.buildCF(Job.CF_WAITING_MILLIS,
+                        resourceMessages.getString("jobExecution.waitingMillis"), CustomFieldTypeEnum.LONG,
+                        "tab:Configuration:0;fieldGroup:Execution configuration:1;field:1", "0", APPLIES_TO));
 
         result.put(CF_SELECT_FETCH_SIZE,
                 CustomFieldTemplateUtils.buildCF(CF_SELECT_FETCH_SIZE,
                         resourceMessages.getString("jobExecution.updateHugeEntity.selectFetchSize"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:6", String.valueOf(DEFAULT_SELECT_FETCH_SIZE), APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:2", String.valueOf(DEFAULT_SELECT_FETCH_SIZE), APPLIES_TO));
 
         result.put(CF_SELECT_MAX_RESULTS,
                 CustomFieldTemplateUtils.buildCF(CF_SELECT_MAX_RESULTS,
                         resourceMessages.getString("jobExecution.updateHugeEntity.selectMaxResults"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:7", APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:3", APPLIES_TO));
 
         result.put(CF_UPDATE_CHUNK_SIZE,
                 CustomFieldTemplateUtils.buildCF(CF_UPDATE_CHUNK_SIZE,
                         resourceMessages.getString("jobExecution.updateHugeEntity.updateChunkSize"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:8", String.valueOf(NativePersistenceService.SHORT_MAX_VALUE), APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:4", String.valueOf(NativePersistenceService.SHORT_MAX_VALUE), APPLIES_TO));
 
         result.put(CF_IS_PESSIMISTIC_UPDATE_LOCK,
                 CustomFieldTemplateUtils.buildCF(CF_IS_PESSIMISTIC_UPDATE_LOCK,
                         resourceMessages.getString("jobExecution.updateHugeEntity.isPessimisticUpdateLock"), CustomFieldTypeEnum.BOOLEAN,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;field:9", "false", APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:5", "false", APPLIES_TO));
 
-        CustomFieldTemplate emailTemplateCF = CustomFieldTemplateUtils.buildCF(CF_EMAIL_TEMPLATE, resourceMessages.getString("jobExecution.updateHugeEntity.emailTemplate"), CustomFieldTypeEnum.ENTITY,
-                "tab:Configuration:0;fieldGroup:Configuration:0;field:10", null, false, null, EmailTemplate.class.getName(), APPLIES_TO, null);
-        emailTemplateCF.setDataFilterEL("{\"media\":\"EMAIL\"}");
-        result.put(CF_EMAIL_TEMPLATE, emailTemplateCF);
+        result.put(CF_IS_USING_VIEW,
+                CustomFieldTemplateUtils.buildCF(CF_IS_USING_VIEW,
+                        resourceMessages.getString("jobExecution.updateHugeEntity.isUsingView"), CustomFieldTypeEnum.BOOLEAN,
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:6", "true", APPLIES_TO));
+
+        result.put(CF_IS_OPEN_CURSOR,
+                CustomFieldTemplateUtils.buildCF(CF_IS_OPEN_CURSOR,
+                        resourceMessages.getString("jobExecution.updateHugeEntity.isOpenCursor"), CustomFieldTypeEnum.BOOLEAN,
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:7", "true", APPLIES_TO));
+
+        result.put(CF_IS_CASE_SENSITIVE,
+                CustomFieldTemplateUtils.buildCF(CF_IS_CASE_SENSITIVE,
+                        resourceMessages.getString("jobExecution.updateHugeEntity.isCaseSensitive"), CustomFieldTypeEnum.BOOLEAN,
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:8", "false", APPLIES_TO));
         return result;
     }
 }

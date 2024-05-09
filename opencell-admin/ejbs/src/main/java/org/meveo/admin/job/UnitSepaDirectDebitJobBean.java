@@ -232,7 +232,7 @@ public class UnitSepaDirectDebitJobBean {
 			throw new BusinessException("Cannot find OCC Template with code=" + occTemplateCode);
 		}
 
-		paymentService.calculateAmountsByTransactionCurrency((Payment) automatedPayment, customerAccount, amount, null, transactionDate);
+		paymentService.calculateAmountsByTransactionCurrency(automatedPayment, customerAccount, amount, null, transactionDate);
 
 		automatedPayment.setPaymentMethod(paymentMethodEnum);
 		automatedPayment.setAccountingCode(occTemplate.getAccountingCode());

@@ -29,6 +29,7 @@ import org.meveo.apiv2.models.Resource;
 import org.meveo.model.payments.DunningLevelEnum;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.meveo.model.payments.OperationCategoryEnum;
 
 @XmlType(name = "agedReceivable", propOrder = {"customerAccountCode", "NotYetDue", "sum_1_30", "sum_31_60", "sum_61_90", "sum_90_up", "general_total"})
 @Value.Immutable
@@ -127,4 +128,7 @@ public interface AgedReceivable extends Resource {
 
     @Nullable
     List<BigDecimal> getTransactional_TotalAmountByPeriod();
+
+    @Nullable
+    OperationCategoryEnum getTransactionCategory();
 }

@@ -84,6 +84,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2097,6 +2098,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
     private Element populateAdvancesSection(Document doc, List<Object[]> advanceLinkedInvoices) {
 
         Element advances = doc.createElement("advances");
+	    BigDecimal totalAdvanceAmount = BigDecimal.ZERO;
 
         for (Object[] advancedLinkedInvoice : advanceLinkedInvoices) {
 
@@ -2106,10 +2108,11 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
             advance.setAttribute("invoiceDate", advancedLinkedInvoice[1] != null ? DateUtils.formatDateWithPattern((Date) advancedLinkedInvoice[1],
                     paramBeanFactory.getInstance().getProperty(INVOICE_DATE_FORMAT, DEFAULT_DATE_PATTERN)) : "");
             advance.setAttribute("amountWithTax", advancedLinkedInvoice[2] != null ? advancedLinkedInvoice[2].toString() : "");
-
+	        totalAdvanceAmount = totalAdvanceAmount.add((BigDecimal) advancedLinkedInvoice[2]);
             advances.appendChild(advance);
         }
-        return advances;
+	    advances.setAttribute("totalAmountWithTax", totalAdvanceAmount.toString());
+	    return advances;
     }
 
     /**

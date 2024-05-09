@@ -136,7 +136,7 @@ public class PricePlanMatrixResourceImpl implements PricePlanMatrixResource {
         fields.add("priceWithoutTax");
         fields.add("pricePlanMatrixVersion");
         fields.add("pricePlanMatrixValues");
-        fields.add("priceEL");
+        fields.add("valueEL");
         fields.add("priority");
         fields.add("cfValues");
 

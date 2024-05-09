@@ -285,7 +285,8 @@ public class CustomerAccount extends AccountEntity implements IInvoicingMinimumA
 	@OneToMany(mappedBy = "customerAccount", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
 	private Set<PaymentPlan> paymentPlans = new HashSet<>();
 	
-	@OneToMany(mappedBy = "customerAccount")
+	@OneToMany
+	@JoinColumn(name = "customer_account_id")
 	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
 	
 	public List<RegistrationNumber> getRegistrationNumbers() {

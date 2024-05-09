@@ -562,7 +562,8 @@ public class QueryBuilder {
             Object[] additionalParameters = Arrays.copyOfRange(((Object[]) value), 1, ((Object[]) value).length);
             addSqlCriterionMultiple(additionalSql, additionalParameters);
         } else {
-            addSql((String) value);
+            String sqlFilter = (String) value;
+            addSql(String.format("(%s)", sqlFilter));
         }
     }
 

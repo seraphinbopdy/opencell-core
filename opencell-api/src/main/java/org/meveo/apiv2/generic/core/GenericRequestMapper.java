@@ -1,5 +1,6 @@
 package org.meveo.apiv2.generic.core;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,8 +20,11 @@ import org.meveo.api.generics.filter.FactoryFilterMapper;
 import org.meveo.api.generics.filter.FilterMapper;
 import org.meveo.apiv2.generic.GenericPagingAndFiltering;
 import org.meveo.apiv2.generic.ImmutableGenericPagingAndFiltering;
+import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.IEntity;
 import org.meveo.service.base.PersistenceService;
+
+import javax.persistence.Embedded;
 
 public class GenericRequestMapper {
     private final Class entityClass;
@@ -61,7 +65,7 @@ public class GenericRequestMapper {
         return new PaginationConfiguration(genericPagingAndFiltering.getOffset().intValue(), genericPagingAndFiltering.getLimitOrDefault(GenericHelper.getDefaultLimit()).intValue(),
                 evaluateFilters(genericPagingAndFiltering.getFilters(), entityClass), genericPagingAndFiltering.getFullTextFilter(),
                 computeFetchFields(genericPagingAndFiltering), genericPagingAndFiltering.getGroupBy(), genericPagingAndFiltering.getHaving(), genericPagingAndFiltering.getJoinType(),
-                genericPagingAndFiltering.getIsFilter() || useDistinctProjection(genericPagingAndFiltering), genericPagingAndFiltering.getForceCount(), Optional.ofNullable(genericPagingAndFiltering.getSortBy()).orElse(defaultSort ? "id" : null), Optional.ofNullable(genericPagingAndFiltering.getSortOrder()).map(PagingAndFiltering.SortOrder::valueOf).orElse(defaultSort ? PagingAndFiltering.SortOrder.ASCENDING : null));
+                genericPagingAndFiltering.getIsFilter() || useDistinctProjection(genericPagingAndFiltering, entityClass), genericPagingAndFiltering.getForceCount(), Optional.ofNullable(genericPagingAndFiltering.getSortBy()).orElse(defaultSort ? "id" : null), Optional.ofNullable(genericPagingAndFiltering.getSortOrder()).map(PagingAndFiltering.SortOrder::valueOf).orElse(defaultSort ? PagingAndFiltering.SortOrder.ASCENDING : null));
     }
     private List<String> computeFetchFields(GenericPagingAndFiltering genericPagingAndFiltering) {
         if(genericPagingAndFiltering.getSortBy() == null) {
@@ -76,15 +80,20 @@ public class GenericRequestMapper {
 		return sortByFetchList;
     }
 
-    private boolean useDistinctProjection(GenericPagingAndFiltering genericPagingAndFiltering) {
+    private boolean useDistinctProjection(GenericPagingAndFiltering genericPagingAndFiltering, Class entityClass) {
 
         if(genericPagingAndFiltering.getSortBy() == null) {
             return MapUtils.isNotEmpty(genericPagingAndFiltering.getFilters());
         }
 
         if(MapUtils.isNotEmpty(genericPagingAndFiltering.getFilters())) {
-            return Stream.of(genericPagingAndFiltering.getSortBy().split(","))
-                         .noneMatch(s -> !s.isBlank() && s.contains("."));
+            return Stream.of(genericPagingAndFiltering.getSortBy()
+                                                      .split(","))
+                         .filter(s -> !s.isBlank() && s.contains("."))
+                         .allMatch(s -> {
+                             Field field = ReflectionUtils.getField(entityClass, s.split("\\.")[0]);
+                             return field.isAnnotationPresent(Embedded.class);
+                         });
         }
 
         return false;

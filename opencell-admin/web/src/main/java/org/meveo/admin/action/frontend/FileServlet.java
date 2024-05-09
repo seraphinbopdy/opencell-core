@@ -41,6 +41,8 @@ import org.meveo.model.crm.Provider;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.util.ApplicationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Edward P. Legaspi
@@ -49,6 +51,9 @@ import org.meveo.util.ApplicationProvider;
 public class FileServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7865816094143438213L;
+    
+    @Inject
+    private Logger log;
 
     @Inject
     @ApplicationProvider
@@ -120,70 +125,78 @@ public class FileServlet extends HttpServlet {
         // Validate the requested file
         // ------------------------------------------------------------
 
-        // Get requested file by path info.
-        String requestedFile = request.getPathInfo();
-
-        // Check if file is actually supplied to the request URL.
-        if (requestedFile == null) {
-            // Do your thing if the file is not supplied to the request URL.
-            // Throw an exception, or send 404, or show default/warning page, or just ignore
-            // it.
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        
-        // URL-decode the file name (might contain spaces and on) and prepare file
-        // object.
-        File fileOrFolder = new File(basePath, URLDecoder.decode(requestedFile, "UTF-8"));
-
-        // Check if file actually exists in filesystem.
-        if (!fileOrFolder.exists()) {
-            // Do your thing if the file appears to be non-existing.
-            // Throw an exception, or send 404, or show default/warning page, or just ignore
-            // it.
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-
-        if(!currentUser.isAuthenticated()) {//Not Authenticated
-            //Only files in "media" Folder is Valid
-            boolean isFolderOrFileValide = (requestedFile.length() > 7) && ("/media/".equalsIgnoreCase(requestedFile.substring(0, 7)));
-            if (!isFolderOrFileValide || fileOrFolder.isDirectory()) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-        }
-        
-        // Prepare some variables. The ETag is an unique identifier of the file.
-        String fileName = fileOrFolder.getName();
-
-        if (fileOrFolder.isDirectory()) {
-            // zipped it
-            ByteArrayOutputStream zipout = new ByteArrayOutputStream();
-            ZipOutputStream zos = new ZipOutputStream(zipout);
-            FileUtils.addDirToArchive(basePath, fileOrFolder.getPath(), zos);
-            zos.close();
-
-            ServletOutputStream outStream = response.getOutputStream();
-            response.setContentType("application/zip");
-            response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".zip");
-            outStream.write(zipout.toByteArray());
-            outStream.flush();
-            outStream.close();
-            zipout.close();
-        } else {
-            // file
-            try(FileInputStream fis = new FileInputStream(fileOrFolder);) {
-                response.setContentType("application/force-download");
-                response.setContentLength((int) fileOrFolder.length());
-                response.addHeader("Content-disposition", "attachment;filename=\"" + fileName + "\"");
-                IOUtils.copy(fis, response.getOutputStream());
-                response.flushBuffer();
-            } catch (FileNotFoundException ex) {
-                throw  ex;
-            }
-        }
-
+    	try {
+	        // Get requested file by path info.
+	        String requestedFile = request.getPathInfo();
+	
+	        // Check if file is actually supplied to the request URL.
+	        if (requestedFile == null) {
+	            // Do your thing if the file is not supplied to the request URL.
+	            // Throw an exception, or send 404, or show default/warning page, or just ignore
+	            // it.
+	            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+	            return;
+	        }
+	        
+	        // URL-decode the file name (might contain spaces and on) and prepare file
+	        // object.
+	        File fileOrFolder = new File(basePath, URLDecoder.decode(requestedFile, "UTF-8"));
+	
+	        // Check if file actually exists in filesystem.
+	        if (!fileOrFolder.exists()) {
+	            // Do your thing if the file appears to be non-existing.
+	            // Throw an exception, or send 404, or show default/warning page, or just ignore
+	            // it.
+	            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+	            return;
+	        }
+	
+	        if(!currentUser.isAuthenticated()) {//Not Authenticated
+	            //Only files in "media" Folder is Valid
+	            boolean isFolderOrFileValide = (requestedFile.length() > 7) && ("/media/".equalsIgnoreCase(requestedFile.substring(0, 7)));
+	            if (!isFolderOrFileValide || fileOrFolder.isDirectory()) {
+	                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+	                return;
+	            }
+	        }
+	        
+	        // Prepare some variables. The ETag is an unique identifier of the file.
+	        String fileName = fileOrFolder.getName();
+	
+	        if (fileOrFolder.isDirectory()) {
+	            // zipped it
+	            ByteArrayOutputStream zipout = new ByteArrayOutputStream();
+	            ZipOutputStream zos = new ZipOutputStream(zipout);
+	            FileUtils.addDirToArchive(basePath, fileOrFolder.getPath(), zos);
+	            zos.close();
+	
+	            ServletOutputStream outStream = response.getOutputStream();
+	            response.setContentType("application/zip");
+	            response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".zip");
+	            outStream.write(zipout.toByteArray());
+	            outStream.flush();
+	            outStream.close();
+	            zipout.close();
+	        } else {
+	            // file
+	            try(FileInputStream fis = new FileInputStream(fileOrFolder);) {
+	                response.setContentType("application/force-download");
+	                response.setContentLength((int) fileOrFolder.length());
+	                response.addHeader("Content-disposition", "attachment;filename=\"" + fileName + "\"");
+	                IOUtils.copy(fis, response.getOutputStream());
+	                response.flushBuffer();
+	            } catch (FileNotFoundException ex) {
+	                throw  ex;
+	            }
+	        }
+    	} catch (IOException e) {
+            // Log the exception for debugging purposes
+            log.error(e.getMessage());
+            
+            // Return an error response to the client
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().println("Internal server error occurred while processing the request.");
+        }      
     }
 
 }

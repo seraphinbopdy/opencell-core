@@ -1,4 +1,4 @@
-package org.meveo.admin.job.partitioning;
+package org.meveo.admin.job;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.jobs.JobCategoryEnum;

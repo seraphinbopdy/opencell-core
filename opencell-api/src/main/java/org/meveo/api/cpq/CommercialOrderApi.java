@@ -198,7 +198,7 @@ public class CommercialOrderApi extends BaseApi {
 			order.setCode(customGenericEntityCodeService.getGenericEntityCode(order));
 		}
 		if(!Strings.isEmpty(orderDto.getDescription())){
-			order.setCode(orderDto.getDescription());
+			order.setDescription(orderDto.getDescription());
 		}
 		if(!Strings.isEmpty(orderDto.getQuoteCode())) {
 			order.setQuote(loadEntityByCode(cpqQuoteService, orderDto.getQuoteCode(), CpqQuote.class));
@@ -843,7 +843,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 	} 
 	
 	
-	public OrderOfferDto createOrderOffer(OrderOfferDto orderOfferDto) throws MeveoApiException, BusinessException {
+	public OrderOfferDto createOrderOffer(OrderOfferDto orderOfferDto, boolean isQuickOrder) throws MeveoApiException, BusinessException {
 		OrderOffer orderOffer = new OrderOffer();
 		if (orderOfferDto.getCommercialOrderId()==null) {
 			missingParameters.add("commercialOrderId");
@@ -976,7 +976,9 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
         	Subscription subscription = subscriptionService.findByCode(orderOfferDto.getSubscriptionCode());
         	if(subscription == null) {
         		throw new EntityDoesNotExistsException("Subscription with code "+orderOfferDto.getSubscriptionCode()+" does not exist");
-        	}
+        	} else if (!SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus())) {
+				throw new BusinessApiException("Only ACTIVE subscription allowed for this operation");
+			}
         	orderOffer.setSubscription(subscription);
         }else {
         	orderOffer.setOrderLineType(OfferLineTypeEnum.CREATE);
@@ -992,6 +994,9 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 						orderOffer.getProducts().get(0).getProductVersion().getAttributes(),
 						orderProduct.getOrderAttributes()));
 		createOrderAttribute(orderOfferDto.getOrderAttributes(),null,orderOffer);
+		if(isQuickOrder && orderOfferDto.getOrderLineType() == OfferLineTypeEnum.APPLY_ONE_SHOT){
+			commercialOrderService.validateOrder(commercialOrder, false);
+		}
 		return orderOfferDto;
 	}
 	

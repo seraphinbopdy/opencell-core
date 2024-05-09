@@ -68,6 +68,17 @@ public class SynchronizedIterator<T> implements Iterator<T> {
 
     /**
      * Constructor
+     *
+     * @param dataList Data to iterate over
+     * @param size     the size of total data
+     */
+    public SynchronizedIterator(Collection<T> dataList, int size) {
+        iterator = dataList.iterator();
+        this.size = size;
+    }
+
+    /**
+     * Constructor
      * 
      * @param scrollableResults Scrollable results
      * @param size A total number of records

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -65,11 +66,13 @@ import org.meveo.model.billing.AdjustmentStatusEnum;
 import org.meveo.model.billing.Amounts;
 import org.meveo.model.billing.ApplyMinimumModeEnum;
 import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.BillingEntityTypeEnum;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.ExtraMinAmount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.InvoiceLineTaxModeEnum;
+import org.meveo.model.billing.InvoiceLinesGroup;
 import org.meveo.model.billing.InvoiceSubCategory;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.MinAmountData;
@@ -101,6 +104,7 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.order.Order;
 import org.meveo.model.ordering.OpenOrder;
 import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.securityDeposit.SecurityDeposit;
 import org.meveo.model.settings.OpenOrderSetting;
 import org.meveo.service.admin.impl.TradingCurrencyService;
@@ -112,10 +116,10 @@ import org.meveo.service.catalog.impl.TaxService;
 import org.meveo.service.cpq.CpqQuoteService;
 import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.order.OpenOrderService;
+import org.meveo.service.payments.impl.PaymentMethodService;
 import org.meveo.service.settings.impl.OpenOrderSettingService;
 import org.meveo.service.tax.TaxMappingService;
 import org.meveo.service.tax.TaxMappingService.TaxInfo;
-
 
 @Stateless
 public class InvoiceLineService extends PersistenceService<InvoiceLine> {
@@ -127,6 +131,8 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
      * A number of Rated transaction, from which a pending table will be used to update Rated transaction status
      */
     private static int minNrOfRtsToUsePendingTable = -1;
+
+    private static final String UNDERSCORE_SEPARATOR = "_";
 
     @Inject
     private TaxMappingService taxMappingService;
@@ -174,13 +180,20 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
     private OpenOrderService openOrderService;
 
     @Inject
+
     private UserAccountService userAccountService;
+
+    @Inject
+    private PaymentMethodService paymentMethodService;
     
     @Inject
     private ParamBeanFactory paramBeanFactory;
     
     @Inject
     private UntdidTaxationCategoryService untdidTaxationCategoryService;
+    
+    @Inject
+    private InvoiceTypeService invoiceTypeService;
 
     @PostConstruct
     private void init() {
@@ -760,7 +773,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 		if(invoiceLine.getQuantity() == null) {
             invoiceLine.setQuantity(new BigDecimal(1));
         }
-		
+
 		invoiceLine.setConversionFromBillingCurrency(false);
         if (StringUtils.isNotBlank(resource.getUnitPriceCurrency())) {
             String tradingCurrency = invoiceLine.getInvoice().getTradingCurrency()!= null ? invoiceLine.getInvoice().getTradingCurrency().getCurrencyCode() : null;
@@ -777,19 +790,26 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 			}
         }
 
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if(invoiceLine.getDiscountRate() != null && invoiceLine.getUnitPrice().compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal discountRate = invoiceLine.getDiscountRate().divide(new BigDecimal(100), appProvider.getRounding(),
+                    appProvider.getRoundingMode().getRoundingMode());
+            discountAmount = invoiceLine.getUnitPrice().multiply(discountRate);
+            invoiceLine.setDiscountAmount(discountAmount);
+        }
         if(invoiceLine.getUnitPrice() == null) {
             if (accountingArticle != null && accountingArticle.getUnitPrice() != null) {
                 invoiceLine.setUnitPrice(accountingArticle.getUnitPrice());
                 if(resource.getQuantity() != null) {
-                    invoiceLine.setAmountWithoutTax(accountingArticle.getUnitPrice().multiply(resource.getQuantity()));
-                    invoiceLine.setAmountWithTax(accountingArticle.getUnitPrice().multiply(resource.getQuantity()));
+                    invoiceLine.setAmountWithoutTax((accountingArticle.getUnitPrice().multiply(resource.getQuantity())).subtract(discountAmount));
+                    invoiceLine.setAmountWithTax((accountingArticle.getUnitPrice().multiply(resource.getQuantity())).subtract(discountAmount));
                 }
             } else {
                 throw new BusinessException("You cannot create an invoice line without a price " +
                         "if unit price is not set on article with code : " + resource.getAccountingArticleCode());
             }
         } else {
-            invoiceLine.setAmountWithoutTax(invoiceLine.getUnitPrice().multiply(resource.getQuantity()));
+            invoiceLine.setAmountWithoutTax((invoiceLine.getUnitPrice().multiply(resource.getQuantity())).subtract(discountAmount));
             invoiceLine.setAmountWithTax(NumberUtils.computeTax(invoiceLine.getAmountWithoutTax(),
                     invoiceLine.getTaxRate(), appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode().getRoundingMode()).add(invoiceLine.getAmountWithoutTax()));
         }
@@ -1182,7 +1202,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 
         OpenOrderSetting openOrderSetting = openOrderSettingService.findLastOne();
         boolean useOpenOrder = ofNullable(openOrderSetting).map(OpenOrderSetting::getUseOpenOrders).orElse(false);
-        InvoiceLine invoiceLine;
+        InvoiceLine invoiceLine=null;
         List<Long> associatedRtIds;
 
         Long billingRunId = null;
@@ -1198,8 +1218,10 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         List<InvoiceLine> invoiceLines = new ArrayList<>();
 
         int i = 0;
+	    BillingAccount billingAccount = null;
         for (Map<String, Object> groupedRT : groupedRTs) {
             Long invoiceLineId = null;
+			billingAccount = billingAccountService.findById(Long.valueOf(groupedRT.get("billing_account__id").toString()));
             if (groupedRT.get("rated_transaction_ids") instanceof Number) {
                 associatedRtIds = new ArrayList<>();
                 associatedRtIds.add(((Number) groupedRT.get("rated_transaction_ids")).longValue());
@@ -1235,8 +1257,15 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                     unitPrice = quantity.compareTo(ZERO) == 0 ? amountWithoutTax : amountWithoutTax.divide(quantity,
                             appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
                 }
-
-                linesFactory.update(invoiceLineId, deltaAmounts, deltaQuantity, beginDate, finishDate, unitPrice);
+	            invoiceLine = this.findById(invoiceLineId);
+	            invoiceLine.setAmountWithoutTax(invoiceLine.getAmountWithoutTax().add(deltaAmountWithoutTax));
+	            invoiceLine.setAmountWithTax(invoiceLine.getAmountWithTax().add(deltaAmountWithTax));
+	            invoiceLine.setAmountTax(invoiceLine.getAmountTax().add(deltaAmountTax));
+	            invoiceLine.setQuantity(invoiceLine.getQuantity().add(deltaQuantity));
+	            invoiceLine.setValidity(new DatePeriod(beginDate, finishDate));
+	            invoiceLine.setUnitPrice(unitPrice);
+				this.update(invoiceLine);
+                //linesFactory.update(invoiceLineId, deltaAmounts, deltaQuantity, beginDate, finishDate, unitPrice);
                 statistics.addToAmountWithoutTax(amounts[0]);
                 statistics.addToAmountWithTax(amounts[1]);
                 statistics.addToAmountTax(amounts[2]);
@@ -1246,7 +1275,6 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 statistics.addToAmountWithTax(invoiceLine.getAmountWithTax());
                 statistics.addToAmountWithoutTax(invoiceLine.getAmountWithoutTax());
                 statistics.addToAmountTax(invoiceLine.getAmountTax());
-                create(invoiceLine);
                 invoiceLineId = invoiceLine.getId();
 
                 for (Long id : associatedRtIds) {
@@ -1260,14 +1288,24 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                         openOrder.setBalance(openOrder.getBalance().subtract(invoiceLine.getAmountWithoutTax()));
                     }
                 }
-                invoiceLines.add(invoiceLine);
             }
-
+	        
+	        buildInvoiceKey(invoiceLine, billingRun);
+	        invoiceLines.add(invoiceLine);
+			
             rtIlBrIds[i][0] = associatedRtIds;
-            rtIlBrIds[i][1] = invoiceLineId;
+            rtIlBrIds[i][1] = invoiceLine;
             rtIlBrIds[i][2] = billingRunId;
             numberOrRts = numberOrRts + associatedRtIds.size();
             i++;
+        }
+        
+        List<InvoiceLinesGroup> customInvoiceLinesGroups = billingRun != null ? executeBillingCycleScript(invoiceLines, billingRun, billingAccount) : null;
+
+        if (customInvoiceLinesGroups != null && !customInvoiceLinesGroups.isEmpty()) {
+            customInvoiceLinesGroups.forEach(group -> this.writeInvoiceLines(group.getInvoiceLines(), group.getInvoiceKey()));
+        } else {
+            writeInvoiceLines(invoiceLines, null);
         }
 
         // Link Rated transactions with invoice lines
@@ -1286,7 +1324,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 em.flush();
 
             for (Object[] rtIlBrId : rtIlBrIds) {
-                ratedTransactionService.linkRTsToIL((List<Long>) rtIlBrId[0], (Long) rtIlBrId[1], (Long) rtIlBrId[2]);
+                ratedTransactionService.linkRTsToIL((List<Long>) rtIlBrId[0], ((InvoiceLine) rtIlBrId[1]).getId(), (Long) rtIlBrId[2]);
             }
 
         } else {
@@ -1299,7 +1337,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 					for (Object[] rtIlBrId : rtIlBrIds) {
 						for (Long rtId : (List<Long>) rtIlBrId[0]) {
 							preparedStatement.setLong(1, rtId);
-							preparedStatement.setLong(2, (Long) rtIlBrId[1]);
+							preparedStatement.setLong(2, ((InvoiceLine) rtIlBrId[1]).getId());
 							if (rtIlBrId[2] != null) {
 								preparedStatement.setLong(3, (Long) rtIlBrId[2]);
 							} else {
@@ -1321,7 +1359,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 } catch (SQLException e) {
                     log.error("Failed to insert into billing_rated_transaction_pending", e);
                     throw e;
-	}
+            	}
             });
     
             // Need to flush, so RTs can be updated in mass
@@ -1337,6 +1375,89 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         statistics.setInvoiceLines(invoiceLines);
 
         return statistics;
+    }
+
+    /**
+     * Build invoiceKey from an entity invoiceLine from different information such as billingAccount, seller, invoiceType, etc.
+     *
+     * @param invoiceLine InvoiceLine
+     * @param billingRun 
+     */
+    private void buildInvoiceKey(InvoiceLine invoiceLine, BillingRun billingRun) {
+    	
+        StringJoiner invoiceKey =  new StringJoiner(UNDERSCORE_SEPARATOR);
+        
+        invoiceKey.add(formatEntityId(invoiceLine.getBillingAccount()));
+        invoiceKey.add(formatId(invoiceLine.getSellerId()));
+        invoiceKey.add(formatId(invoiceLine.getInvoiceTypeId()));
+        invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));
+        if(billingRun != null && billingRun.getBillingCycle() != null) {
+            if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.SUBSCRIPTION) {
+                invoiceKey.add(formatEntityId(invoiceLine.getSubscription()));
+            }
+            if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.ORDER) {
+                invoiceKey.add(formatEntityId(invoiceLine.getCommercialOrder()));
+            }
+        }
+        if (invoiceLine.getOpenOrderNumber() != null) {
+            invoiceKey.add(invoiceLine.getOpenOrderNumber());
+        }
+        invoiceLine.setInvoiceKey(invoiceKey.toString());
+    }
+    
+    private String formatEntityId(BaseEntity entity) {
+    	return formatId(entity==null? null:entity.getId());
+    }
+
+	private String formatId(Long id) {
+		return id==null?"":String.valueOf(id);
+	}
+
+    /**
+     * method to execute billing cycle script.
+     *
+     * @param invoiceLines List<InvoiceLine> list of invoiceLines to be processed
+     * @param billingRun List<InvoiceLine> billing run in used
+     * @param billableEntity IBillableEntity entity to be billed
+     * @return List<InvoiceLinesGroup> return the list of InvoiceLinesGroup defined by a customized script
+     */
+    private List<InvoiceLinesGroup> executeBillingCycleScript(List<InvoiceLine> invoiceLines, BillingRun billingRun, IBillableEntity billableEntity) {
+        if (billingRun.getBillingCycle() != null && billingRun.getBillingCycle().getScriptInstance() != null
+                && invoiceLines != null && !invoiceLines.isEmpty()) {
+            InvoiceLine firstInvoiceLine = invoiceLines.get(0);
+            InvoiceType invoiceType;
+
+            if (firstInvoiceLine.getInvoiceTypeId() != null) {
+                invoiceType = invoiceTypeService.findById(firstInvoiceLine.getInvoiceTypeId());
+            } else {
+                invoiceType = invoiceService.determineInvoiceType(false, false, false,
+                        billingRun.getBillingCycle(), billingRun, firstInvoiceLine.getBillingAccount());
+            }
+
+            PaymentMethod paymentMethod;
+            if (firstInvoiceLine.getPaymentMethodId() != null) {
+                paymentMethod = paymentMethodService.findById(firstInvoiceLine.getPaymentMethodId());
+            } else {
+                paymentMethod = firstInvoiceLine.getBillingAccount().getPaymentMethod();
+            }
+            if (paymentMethod == null) {
+                paymentMethod = firstInvoiceLine.getBillingAccount().getCustomerAccount().getPreferredPaymentMethod();
+            }
+
+            return invoiceService.executeBCScriptWithInvoiceLines(billingRun, invoiceType, invoiceLines, billableEntity,
+                    billingRun.getBillingCycle().getScriptInstance().getCode(), paymentMethod);
+        }
+        return Collections.emptyList();
+    }
+
+
+    private void writeInvoiceLines(List<InvoiceLine> invoiceLines, String invoiceKey) {
+        invoiceLines.forEach(invoiceLine -> {
+            if(invoiceKey!=null) {
+            	invoiceLine.setInvoiceKey(invoiceKey);
+            }
+            create(invoiceLine);
+        });
     }
 
     public void deleteByBillingRun(long billingRunId) {
@@ -1709,5 +1830,11 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 
         getEntityManager().createNamedQuery("InvoiceLine.massUpdateWithDiscountedIL" + (EntityManagerProvider.isDBOracle() ? "Oracle" : "")).setParameter("brId", billingRunId).setParameter("minId", minId)
             .setParameter("maxId", maxId).executeUpdate();
+    }
+
+    public List<Object[]> getInvoiceLineStatistics(Long billingRunId) {
+        return getEntityManager().createNamedQuery("InvoiceLine.getInvoiceLinesStatistics")
+                .setParameter("billingRunId", billingRunId)
+                .getResultList();
     }
 }

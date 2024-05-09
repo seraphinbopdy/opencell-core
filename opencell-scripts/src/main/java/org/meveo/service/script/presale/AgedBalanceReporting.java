@@ -13,6 +13,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,11 +22,13 @@ import java.util.Map;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.AgedReceivableDto;
+import org.meveo.apiv2.standardReport.impl.AgedReceivableMapper;
 import org.meveo.commons.utils.CsvBuilder;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.MatchingStatusEnum;
+import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.model.shared.Name;
@@ -39,6 +42,7 @@ public class AgedBalanceReporting extends ReportExtractScript {
     private static final Logger log = LoggerFactory.getLogger(AgedBalanceReporting.class);
     private static Provider appProvider;
     private CustomerAccountService customerAccountService = (CustomerAccountService) getServiceInterface(CustomerAccountService.class.getSimpleName());
+    private AgedReceivableMapper agedReceivableMapper = new AgedReceivableMapper();
 
     @Override
     public void execute(Map<String, Object> executeContext) throws BusinessException {
@@ -168,7 +172,7 @@ public class AgedBalanceReporting extends ReportExtractScript {
                 .append("sum (case when ao.dueDate <='" + DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern) + "'  then ao.taxAmount else 0 end ) as sum_90_up_tax,");
         }
         query.append(
-            " ao.customerAccount.dunningLevel, ao.customerAccount.name, ao.customerAccount.description, ao.seller.description, ao.seller.code, ao.dueDate, ao.invoice.tradingCurrency.currency.currencyCode, ao.invoice.id, ao.invoice.invoiceNumber, ao.invoice.amountWithTax, ao.customerAccount.code, ao.invoice.transactionalAmountWithTax, ao.invoice.billingAccount.id ")
+            " ao.customerAccount.dunningLevel, ao.customerAccount.name, ao.customerAccount.description, ao.seller.description, ao.seller.code, ao.dueDate, ao.invoice.tradingCurrency.currency.currencyCode, ao.invoice.id, ao.invoice.invoiceNumber, ao.invoice.amountWithTax, ao.customerAccount.code, ao.invoice.transactionalAmountWithTax, ao.invoice.billingAccount.id, ao.transactionCategory ")
             .append("from ").append(RecordedInvoice.class.getSimpleName()).append(" as ao");
         QueryBuilder qb = new QueryBuilder(query.toString());
         qb.addSql("(ao.matchingStatus='" + MatchingStatusEnum.O + "' or ao.matchingStatus='" + MatchingStatusEnum.P + "') ");
@@ -187,7 +191,7 @@ public class AgedBalanceReporting extends ReportExtractScript {
             qb.addSql("(ao.invoice.paymentStatus = '" + PENDING + "' or ao.invoice.paymentStatus = '" + PPAID + "' or ao.invoice.paymentStatus ='" + UNPAID + "')");
         }
         qb.addGroupCriterion(
-            "ao.customerAccount.id, ao.customerAccount.dunningLevel, ao.customerAccount.name, ao.customerAccount.description, ao.seller.description, ao.seller.code, ao.dueDate, ao.amount, ao.invoice.tradingCurrency.currency.currencyCode, ao.invoice.id, ao.invoice.invoiceNumber, ao.invoice.amountWithTax, ao.customerAccount.code, ao.invoice.transactionalAmountWithTax, ao.invoice.billingAccount.id ");
+            "ao.customerAccount.id, ao.customerAccount.dunningLevel, ao.customerAccount.name, ao.customerAccount.description, ao.seller.description, ao.seller.code, ao.dueDate, ao.amount, ao.invoice.tradingCurrency.currency.currencyCode, ao.invoice.id, ao.invoice.invoiceNumber, ao.invoice.amountWithTax, ao.customerAccount.code, ao.invoice.transactionalAmountWithTax, ao.invoice.billingAccount.id, ao.transactionCategory");
         qb.addPaginationConfiguration(paginationConfiguration);
         return qb.getSqlString();
     }
@@ -197,16 +201,21 @@ public class AgedBalanceReporting extends ReportExtractScript {
         for (int index = 0; index < agedReceivables.size(); index++) {
             Object[] agedReceivable = agedReceivables.get(index);
             AgedReceivableDto agedReceivableDto = new AgedReceivableDto();
-            agedReceivableDto.setNotYetDue((BigDecimal) agedReceivable[1]);
+            OperationCategoryEnum transactionCategory = (OperationCategoryEnum) Arrays.stream(agedReceivable)
+                    .filter(item -> item instanceof OperationCategoryEnum)
+                    .findFirst().orElse(null);
+
+            agedReceivableDto.setNotYetDue(agedReceivableMapper.evaluateAmountByOperationCategory((BigDecimal) agedReceivable[1], transactionCategory));
+
             int sumIndex;
             int startingSumIndex = 2;
             agedReceivableDto.setNetAmountByPeriod(new ArrayList<>());
             agedReceivableDto.setTotalAmountByPeriod(new ArrayList<>());
             agedReceivableDto.setTaxAmountByPeriod(new ArrayList<>());
             for (sumIndex = 0; sumIndex < numberOfPeriods; sumIndex++) {
-                agedReceivableDto.getNetAmountByPeriod().add((BigDecimal) agedReceivable[startingSumIndex]);
-                agedReceivableDto.getTotalAmountByPeriod().add((BigDecimal) agedReceivable[startingSumIndex + 1]);
-                agedReceivableDto.getTaxAmountByPeriod().add((BigDecimal) agedReceivable[startingSumIndex + 2]);
+                agedReceivableDto.getNetAmountByPeriod().add(agedReceivableMapper.evaluateAmountByOperationCategory((BigDecimal) agedReceivable[startingSumIndex], transactionCategory));
+                agedReceivableDto.getTotalAmountByPeriod().add(agedReceivableMapper.evaluateAmountByOperationCategory((BigDecimal) agedReceivable[startingSumIndex + 1], transactionCategory));
+                agedReceivableDto.getTaxAmountByPeriod().add(agedReceivableMapper.evaluateAmountByOperationCategory((BigDecimal) agedReceivable[startingSumIndex + 2], transactionCategory));
                 startingSumIndex += 3;
             }
             agedReceivableDto.setCustomerAccountName(agedReceivable[++startingSumIndex] == null ? null : getName((Name) agedReceivable[startingSumIndex]));
@@ -216,13 +225,14 @@ public class AgedBalanceReporting extends ReportExtractScript {
             agedReceivableDto.setDueDate(agedReceivable[++startingSumIndex] == null ? null : ((Date) agedReceivable[startingSumIndex]));
             agedReceivableDto.setTradingCurrency((String) agedReceivable[++startingSumIndex]);
             BigDecimal generalTotal = agedReceivableDto.getTotalAmountByPeriod().stream().reduce(ZERO, BigDecimal::add);
-            agedReceivableDto.setGeneralTotal(generalTotal);
+            agedReceivableDto.setGeneralTotal(agedReceivableMapper.evaluateAmountByOperationCategory(generalTotal, transactionCategory));
             agedReceivableDto.setInvoiceId((Long) agedReceivable[++startingSumIndex]);
             agedReceivableDto.setInvoiceNumber((String) agedReceivable[++startingSumIndex]);
-            agedReceivableDto.setBilledAmount((BigDecimal) agedReceivable[++startingSumIndex]);
+            agedReceivableDto.setBilledAmount(agedReceivableMapper.evaluateAmountByOperationCategory((BigDecimal) agedReceivable[++startingSumIndex], transactionCategory));
             agedReceivableDto.setCustomerAccountCode((String) agedReceivable[++startingSumIndex]);
-            if (agedReceivable[++startingSumIndex] != null)
-                agedReceivableDto.setBilledAmount((BigDecimal) agedReceivable[startingSumIndex]);
+            if (agedReceivable[++startingSumIndex] != null) {
+                agedReceivableDto.setBilledAmount(agedReceivableMapper.evaluateAmountByOperationCategory((BigDecimal) agedReceivable[startingSumIndex], transactionCategory));
+            }
             agedReceivableDto.setCustomerId((Long) agedReceivable[++startingSumIndex]);
             responseDto.add(agedReceivableDto);
         }

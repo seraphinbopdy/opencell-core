@@ -263,29 +263,39 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 			// First AO is Credit, and shall be add with DEBIT to do unitary matching
 			Long creditAoId = aos.stream().filter(ao -> OperationCategoryEnum.CREDIT == ao.getTransactionCategory()).findFirst()
 					.orElseThrow(() -> new BusinessApiException("No credit AO passed for matching")).getId();
+			
+			// Split AO debit & credit
+			List<AccountOperation> creditAOs = aos.stream().filter(ao -> OperationCategoryEnum.CREDIT == ao.getTransactionCategory()).collect(Collectors.toList());
+			if (creditAOs == null || creditAOs.isEmpty()) {
+				throw new BusinessApiException("No credit AO passed for matching");
+			}
+			List<AccountOperation> debitAOs = aos.stream().filter(ao -> OperationCategoryEnum.DEBIT == ao.getTransactionCategory()).collect(Collectors.toList());
+			if (debitAOs == null || debitAOs.isEmpty()) {
+				throw new BusinessApiException("No debit AO passed for matching");
+			}
 
 			MatchingReturnObject matchingResult = new MatchingReturnObject();
 			List<PartialMatchingOccToSelect> partialMatchingOcc = new ArrayList<>();
 			matchingResult.setPartialMatchingOcc(partialMatchingOcc);
 			if (CollectionUtils.isNotEmpty(aos)) {
 			    TradingCurrency theFirstTradingCurrency = aos.get(0).getTransactionalCurrency();
-			    for (AccountOperation accountOperation : aos) {
-			        if (!theFirstTradingCurrency.getId().equals(accountOperation.getTransactionalCurrency().getId())) {
-	                    throw new BusinessApiException(resourceMessages.getString("accountOperation.error.sameCurrency"));
-	                }
-	                if (accountOperation.getId().equals(creditAoId)) {
-	                    // process only DEBIT AO
-	                    continue;
-	                }
-	                MatchingReturnObject unitaryResult = matchingCodeService.matchOperations(customer.getId(), customer.getCode(),
-	                        List.of(creditAoId, accountOperation.getId()), accountOperation.getId(), accountOperation.getAmountForUnmatching());
+				for (AccountOperation debitAO : debitAOs) {
+					for (AccountOperation creditAO : creditAOs) {
+						if (!theFirstTradingCurrency.getId().equals(creditAO.getTransactionalCurrency().getId())) {
+							throw new BusinessApiException(resourceMessages.getString("accountOperation.error.sameCurrency"));
+						}
+						if (creditAO.getMatchingStatus() != MatchingStatusEnum.O && creditAO.getMatchingStatus() != MatchingStatusEnum.P) {
+							continue;
+						}
+						MatchingReturnObject unitaryResult = matchingCodeService.matchOperations(customer.getId(),	customer.getCode(), List.of(creditAO.getId(), debitAO.getId()), creditAO.getId(), creditAO.getAmountForUnmatching());
 
-	                if (matchingResult.getPartialMatchingOcc() != null) {
-	                    partialMatchingOcc.addAll(matchingResult.getPartialMatchingOcc());
-	                }
+						if (matchingResult.getPartialMatchingOcc() != null) {
+							partialMatchingOcc.addAll(matchingResult.getPartialMatchingOcc());
+						}
 
-	                matchingResult.setOk(unitaryResult.isOk());
-	            }
+						matchingResult.setOk(unitaryResult.isOk());
+					}
+				}
 			}
 
 			if (partialMatchingOcc.isEmpty()) {

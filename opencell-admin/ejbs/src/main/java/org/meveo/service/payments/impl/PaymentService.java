@@ -17,6 +17,11 @@
  */
 package org.meveo.service.payments.impl;
 
+import static org.meveo.model.payments.PaymentMethodEnum.CASH;
+import static org.meveo.model.payments.PaymentMethodEnum.PAYPALPAYMENTLINK;
+import static org.meveo.model.payments.PaymentMethodEnum.SIPS;
+import static org.meveo.model.payments.PaymentMethodEnum.STRIPEDIRECTLINK;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,7 +47,6 @@ import org.meveo.api.exception.MeveoApiException;
 import org.meveo.audit.logging.annotations.MeveoAudit;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.billing.ExchangeRate;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.payments.AccountOperation;
@@ -63,13 +67,16 @@ import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.PaymentRejectionAction;
+import org.meveo.model.payments.PaymentRejectionActionReport;
+import org.meveo.model.payments.PaymentRejectionActionStatus;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.Refund;
 import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.RejectedType;
+import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
-
 
 /**
  * Payment service implementation.
@@ -122,6 +129,11 @@ public class PaymentService extends PersistenceService<Payment> {
     @Inject
     private TradingCurrencyService tradingCurrencyService;
 
+	@Inject
+	private PaymentRejectionActionService paymentRejectionActionService;
+	
+	@Inject
+	private PaymentRejectionActionReportService paymentRejectionActionReportService;
 
     @MeveoAudit
     @Override
@@ -466,9 +478,9 @@ public class PaymentService extends PersistenceService<Payment> {
     	 if (createAO) {
 
              if (isPayment) {
-                 aoPaymentId = createPaymentAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay);
+                 aoPaymentId = createPaymentAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, paymentGateway);
              } else {
-                 aoPaymentId = refundService.createRefundAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay);
+                 aoPaymentId = refundService.createRefundAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, paymentGateway);
              }
              doPaymentResponseDto.setAoCreated(true);
              if (matchingAO ) {
@@ -566,7 +578,6 @@ public class PaymentService extends PersistenceService<Payment> {
      * @param cvv cvv number
      * @param expiryDate expiry date
      * @param cardType card type
-     * @param isPayment if true is a payment else is a refund.
      * @param paymentMethodType payment method to use, CARD or DIRECTDEIBT.
      * @return id Refund
      */
@@ -620,7 +631,7 @@ public class PaymentService extends PersistenceService<Payment> {
         }
         Refund refund = new Refund();
         try {
-            aoPaymentId = refundService.createSDRefundAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, refund);
+            aoPaymentId = refundService.createSDRefundAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, refund, paymentGateway);
             doPaymentResponseDto.setAoCreated(true);
         } catch (Exception e) {
             log.warn("Cant create Account operation payment :", e);
@@ -705,25 +716,26 @@ public class PaymentService extends PersistenceService<Payment> {
     /**
      * Create the payment account operation for the payment that was processed.
      *
-     * @param customerAccount customer account
-     * @param ctsAmount amount in cent.
-     * @param doPaymentResponseDto payment responsse dto
-     * @param paymentMethodType payment method used
-     * @param aoIdsToPay list AO to paid
+     * @param customerAccount      customer account
+     * @param ctsAmount            amount in cent.
+     * @param doPaymentResponseDto payment response dto
+     * @param paymentMethodType    payment method used
+     * @param aoIdsToPay           list AO to paid
+     * @param paymentGateway       paymentGateway
      * @return the AO id created
      * @throws BusinessException business exception.
      */
     public Long createPaymentAO(CustomerAccount customerAccount, Long ctsAmount, PaymentResponseDto doPaymentResponseDto, PaymentMethodEnum paymentMethodType,
-            List<Long> aoIdsToPay) throws BusinessException {
+                                List<Long> aoIdsToPay, PaymentGateway paymentGateway) throws BusinessException {
         ParamBean paramBean = paramBeanFactory.getInstance();
         String occTemplateCode = paramBean.getProperty("occ.payment.card", "PAY_CRD");
         if (paymentMethodType == PaymentMethodEnum.DIRECTDEBIT) {
             occTemplateCode = paramBean.getProperty("occ.payment.dd", "PAY_DDT");
         }
-        if (paymentMethodType == PaymentMethodEnum.STRIPEDIRECTLINK) {
+        if (paymentMethodType == STRIPEDIRECTLINK) {
             occTemplateCode = paramBean.getProperty("occ.payment.stp", "PAY_STP");
         }
-        if (paymentMethodType == PaymentMethodEnum.PAYPALPAYMENTLINK) {
+        if (paymentMethodType == PAYPALPAYMENTLINK) {
             occTemplateCode = paramBean.getProperty("occ.payment.pal", "PAY_PAL");
         }
 
@@ -752,6 +764,7 @@ public class PaymentService extends PersistenceService<Payment> {
         payment.setCollectionDate(new Date());
         payment.setAccountingDate(new Date());
         setSumAndOrdersNumber(payment, aoIdsToPay);
+        payment.setPaymentGateway(paymentGateway);
         accountOperationService.handleAccountingPeriods(payment);
         create(payment);
         return payment.getId();
@@ -900,7 +913,7 @@ public class PaymentService extends PersistenceService<Payment> {
                 rejectedPayment.setTaxAmount(accountOperation.getTaxAmount());
                 rejectedPayment.setAmountWithoutTax(accountOperation.getAmountWithoutTax());
                 rejectedPayment.setOrderNumber(accountOperation.getOrderNumber());
-                rejectedPayment.setRejectedType(RejectedType.A);
+                rejectedPayment.setRejectedType(RejectedType.AUTOMATIC);
                 rejectedPayment.setRejectedDate(new Date());
                 rejectedPayment.setTransactionDate(new Date());
                 rejectedPayment.setDueDate(accountOperation.getDueDate());
@@ -909,7 +922,9 @@ public class PaymentService extends PersistenceService<Payment> {
                 rejectedPayment.setListAaccountOperationSupposedPaid(listAoThatSupposedPaid);
 
                 accountOperationService.handleAccountingPeriods(rejectedPayment);
+                
                 accountOperationService.create(rejectedPayment);
+                createRejectionActions(rejectedPayment);
                 if (listAoThatSupposedPaid != null) {
                     for (AccountOperation ao : listAoThatSupposedPaid) {
                         ao.setRejectedPayment(rejectedPayment);
@@ -964,7 +979,7 @@ public class PaymentService extends PersistenceService<Payment> {
 
     }
 
-    private OCCTemplate getOCCTemplateRejectPayment(AccountOperation accountOperation) {
+    public OCCTemplate getOCCTemplateRejectPayment(AccountOperation accountOperation) {
     	ParamBean paramBean = paramBeanFactory.getInstance();
     	String occTemplateCode = null;
         if (accountOperation instanceof AutomatedRefund || accountOperation instanceof Refund) {
@@ -985,6 +1000,18 @@ public class PaymentService extends PersistenceService<Payment> {
            }
            if(PaymentMethodEnum.WIRETRANSFER == accountOperation.getPaymentMethod()) {
                occTemplateCode = paramBean.getProperty("occ.rejectedPayment.chk", "REJ_WTF");
+           }
+           if (PAYPALPAYMENTLINK == accountOperation.getPaymentMethod()) {
+               occTemplateCode = paramBean.getProperty("occ.rejectedPayment.ppal", "REJ_PAL");
+           }
+           if (STRIPEDIRECTLINK == accountOperation.getPaymentMethod()) {
+               occTemplateCode = paramBean.getProperty("occ.rejectedPayment.stp", "REJ_STP");
+           }
+           if (CASH == accountOperation.getPaymentMethod()) {
+                occTemplateCode = paramBean.getProperty("occ.rejectedPayment.cash", "REJ_CASH");
+           }
+           if (SIPS == accountOperation.getPaymentMethod()) {
+               occTemplateCode = paramBean.getProperty("occ.rejectedPayment.tip", "REJ_TIP");
            }
         }
 
@@ -1060,5 +1087,40 @@ public class PaymentService extends PersistenceService<Payment> {
     }
     private BigDecimal toTransactional(BigDecimal amount, BigDecimal rate) {
         return amount != null ? amount.multiply(rate) : BigDecimal.ZERO;
+    }
+    
+	public void createRejectionActions(RejectedPayment rejectedPayment) {
+        List<PaymentRejectionAction> rejectionActions = paymentRejectionActionService.findActionsByCodeAndPaymentGateway(rejectedPayment.getRejectedCode(), null);
+        
+        if (rejectionActions == null || rejectionActions.isEmpty()) {
+        	rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.NO_ACTION);
+        } else {
+        	rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.PENDING);
+        }
+        accountOperationService.update(rejectedPayment);
+
+        rejectionActions.forEach(action -> {
+        	PaymentRejectionActionReport actionReport = new PaymentRejectionActionReport();
+        	actionReport.setCode(rejectedPayment.getRejectedCode());
+        	actionReport.setAction(action);
+        	actionReport.setRejectedPayment(rejectedPayment);
+        	actionReport.setStatus(PaymentRejectionActionStatus.PENDING);
+        	actionReport.setActionScript(action.getScript());
+        	paymentRejectionActionReportService.create(actionReport);
+        });
+	}
+
+    /**
+     * Find Account operation by externalId and paymentGateway
+     *
+     * @param externalId AO externalId
+     * @param paymentGatewayCode paymentGateway code
+     * @return A list of {@link AccountOperation} objects matching the specified externalId.
+     */
+    public List<Payment> findByExternalIdAndPaymentGateWay(String externalId, String paymentGatewayCode) {
+        return getEntityManager().createNamedQuery("RejectedPayment.findByExternalIdAndPaymentGateWay", Payment.class)
+                .setParameter("externalId", externalId)
+                .setParameter("paymentGatewayCode", paymentGatewayCode)
+                .getResultList();
     }
 }

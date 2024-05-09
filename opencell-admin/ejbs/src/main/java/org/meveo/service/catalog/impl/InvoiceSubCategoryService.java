@@ -117,7 +117,7 @@ public class InvoiceSubCategoryService extends BusinessService<InvoiceSubCategor
 	 * @return
 	 */
 	public InvoiceSubCategory findFromMap(long invoiceSubCategoryId) {
-		if(invoiceSubCategoryMap.isEmpty()) {
+		if(invoiceSubCategoryMap.isEmpty() || invoiceSubCategoryMap.get(invoiceSubCategoryId)==null) {
 	        List<InvoiceSubCategory> invoiceSubCategories = getEntityManager().createNamedQuery("InvoiceSubCategory.listWithCategory").getResultList();
 			invoiceSubCategoryMap = invoiceSubCategories.stream().collect(Collectors.toMap(InvoiceSubCategory::getId, Function.identity()));
 		}

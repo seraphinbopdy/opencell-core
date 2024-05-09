@@ -153,7 +153,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
 
         MatchingCode matchingCode = new MatchingCode();
         BigDecimal amountToMatch = ZERO;
-        BigDecimal functionalAmountToMatch = ZERO;
+        BigDecimal functionalAmountToMatch = listOcc.stream().filter(ao -> OperationCategoryEnum.DEBIT == ao.getTransactionCategory()).map(AccountOperation::getUnMatchingAmount).findFirst().orElse(ZERO);
         BigDecimal amountCredit = amount;
         BigDecimal amountDebit = amount;
         BigDecimal functionalCreditAmount = amount;
@@ -203,15 +203,14 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             MatchingAmount matchingAmount = new MatchingAmount();
             if (accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT) {
                 // Functional Amounts
-                if (functionalCreditAmount.compareTo(accountOperation.getTransactionalUnMatchingAmount()) >= 0) {
+            	
+                if (functionalAmountToMatch.compareTo(functionalCreditAmount) >= 0) {
                     fullMatch = true;
-                    functionalAmountToMatch = accountOperation.getUnMatchingAmount();
                     functionalCreditAmount = functionalCreditAmount.subtract(functionalAmountToMatch);
 
                 } else {
                     fullMatch = false;
-                    functionalAmountToMatch = functionalCreditAmount;
-                    functionalCreditAmount = ZERO;
+                    functionalCreditAmount = functionalCreditAmount.subtract(functionalAmountToMatch);
                 }
                 
                 // Transactional Amounts
@@ -297,12 +296,13 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             invoiceTransactionalUnMatchingAmount = accountOperation.getTransactionalUnMatchingAmount();
             BigDecimal matchedAmount;
             BigDecimal transactionMatchedAmount;
-            if (0 != amountToMatch.longValue()) {
+            if (BigDecimal.ZERO.compareTo(amountToMatch) != 0) {
                 // add baseMatchingAmount to avoid having TransactionalMatchingAmount = MatchingAmount * 2
                 matchedAmount = accountOperation.getMatchingAmount();
                 transactionMatchedAmount = accountOperation.getTransactionalMatchingAmount();
-                accountOperation.setTransactionalUnMatchingAmount(
-                        accountOperation.getTransactionalUnMatchingAmount().subtract(amountToMatch));
+                accountOperation.setTransactionalUnMatchingAmount(fullMatch ?
+                        accountOperation.getTransactionalUnMatchingAmount().subtract(amountToMatch) 
+                        : accountOperation.getTransactionalUnMatchingAmount().subtract(functionalAmountToMatch) );
                 accountOperation.setTransactionalMatchingAmount(accountOperation.getTransactionalAmount()
                         .subtract(accountOperation.getTransactionalUnMatchingAmount()));
                 BigDecimal computedMatchingAmount =
@@ -438,15 +438,15 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             invoiceTransactionalUnMatchingAmount = accountOperation.getTransactionalUnMatchingAmount();
             BigDecimal matchedAmount;
             BigDecimal transactionMatchedAmount;
-            if(0 != amountToMatch.longValue()) {
+            if(BigDecimal.ZERO.compareTo(amountToMatch) != 0) {
                 matchedAmount = accountOperation.getMatchingAmount();
                 transactionMatchedAmount = accountOperation.getTransactionalMatchingAmount();
-                if(invoiceTransactionalUnMatchingAmount.compareTo(amountToMatch) <= 0) {
+                if(invoiceTransactionalUnMatchingAmount.compareTo(functionalAmountToMatch) <= 0) {
                     accountOperation.setTransactionalUnMatchingAmount(
-                            (invoiceTransactionalUnMatchingAmount.subtract(amountToMatch)).abs());
+                            (invoiceTransactionalUnMatchingAmount.subtract(functionalAmountToMatch)).abs());
                 } else {
                     accountOperation.setTransactionalUnMatchingAmount(accountOperation.
-                            getTransactionalUnMatchingAmount().subtract(amountToMatch));
+                            getTransactionalUnMatchingAmount().subtract(functionalAmountToMatch));
                 }
                 accountOperation.setTransactionalMatchingAmount(
                         accountOperation.getTransactionalAmount().subtract(accountOperation.getTransactionalUnMatchingAmount()));
@@ -791,7 +791,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 log.warn("matchOperations The operationId " + accountOperation.getId() + " is not for the customerAccount");
                 throw new BusinessException("The operationId " + accountOperation.getId() + " is not for the customerAccount");
             }
-            if (accountOperation.getMatchingStatus() != MatchingStatusEnum.O && accountOperation.getMatchingStatus() != MatchingStatusEnum.P) {
+	        List<MatchingStatusEnum> matchingStatus = List.of(MatchingStatusEnum.O, MatchingStatusEnum.P, MatchingStatusEnum.I);
+            if (!matchingStatus.contains(accountOperation.getMatchingStatus())) {
                 log.warn("matchOperations The operationId " + accountOperation.getId() + " is already matching");
                 throw new NoAllOperationUnmatchedException("The operationId " + accountOperation.getId() + " is already matching");
             }
@@ -941,7 +942,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 log.warn("matchOperations The operationId " + accountOperation.getId() + " is not for the customerAccount");
                 throw new BusinessException("The operationId " + accountOperation.getId() + " is not for the customerAccount");
             }
-            if (accountOperation.getMatchingStatus() != MatchingStatusEnum.O && accountOperation.getMatchingStatus() != MatchingStatusEnum.P) {
+	        List<MatchingStatusEnum> matchingStatus = List.of(MatchingStatusEnum.O, MatchingStatusEnum.P, MatchingStatusEnum.I);
+            if (accountOperation.getTransactionCategory() == OperationCategoryEnum.DEBIT && !matchingStatus.contains(accountOperation.getMatchingStatus())) {
                 log.warn("matchOperations The operationId " + accountOperation.getId() + " is already matching");
                 throw new NoAllOperationUnmatchedException("The operationId " + accountOperation.getId() + " is already matching");
             }
@@ -974,23 +976,17 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 PaymentHistory paymentHistory = paymentHistoryService.findHistoryByPaymentId(payment.getReference());
                 if (paymentHistory != null) {
                     List<Long> aoIdsToPay = operationIds.stream().filter(aoId -> !aoId.equals(payment.getId())).collect(toList());
-                    if (paymentHistory.getListAoPaid() == null || paymentHistory.getListAoPaid().isEmpty()) {
-                        List<AccountOperation> aoToPay = new ArrayList<>();
-                        for (Long aoId : aoIdsToPay) {
-                            aoToPay.add(accountOperationService.findById(aoId));
-                        }
-                        for (AccountOperation ao : aoToPay) {
-                            if (ao != null) {
-                                if (ao.getPaymentHistories() == null) {
-                                    ao.setPaymentHistories(new ArrayList<>());
-                                }
-                                ao.getPaymentHistories().add(paymentHistory);
-
-                                if (paymentHistory.getListAoPaid() == null) {
-                                    paymentHistory.setListAoPaid(new ArrayList<>());
-                                }
-                                paymentHistory.getListAoPaid().add(ao);
+                    List<AccountOperation> aoToPay = new ArrayList<>();
+                    for (Long aoId : aoIdsToPay) {
+                        aoToPay.add(accountOperationService.findById(aoId));
+                    }
+                    for (AccountOperation ao : aoToPay) {
+                        if (ao != null) {
+                            if (ao.getPaymentHistories() == null) {
+                                ao.setPaymentHistories(new ArrayList<>());
                             }
+                            ao.getPaymentHistories().add(paymentHistory);
+                            paymentHistory.getListAoPaid().add(ao);
                         }
                     }
                 }

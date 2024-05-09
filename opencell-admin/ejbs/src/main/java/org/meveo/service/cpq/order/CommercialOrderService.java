@@ -58,6 +58,7 @@ import org.meveo.model.cpq.enums.PriceVersionDateSettingEnum;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentMethod;
+import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.DiscountPlanInstanceService;
 import org.meveo.service.billing.impl.OneShotChargeInstanceService;
@@ -78,7 +79,7 @@ import org.meveo.service.payments.impl.PaymentMethodService;
  *
  */
 @Stateless
-public class CommercialOrderService extends PersistenceService<CommercialOrder>{
+public class CommercialOrderService extends BusinessService<CommercialOrder> {
 
     @Inject
     private ServiceSingleton serviceSingleton;
@@ -236,7 +237,6 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 				subscription.setPriceList(order.getPriceList());
 				if(offer.getTerminationDate() != null) {
 					subscription.setRenewed(false);
-					subscription.setTerminationDate(offer.getTerminationDate());
 					subscription.setSubscribedTillDate(offer.getTerminationDate());
 					if(offer.getTerminationReason() != null && subscription.getSubscriptionRenewal() != null) {
 						SubscriptionRenewal renewal =  subscription.getSubscriptionRenewal();

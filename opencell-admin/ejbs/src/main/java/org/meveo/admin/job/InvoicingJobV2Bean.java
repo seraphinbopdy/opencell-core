@@ -3,7 +3,6 @@ package org.meveo.admin.job;
 import static java.lang.String.format;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Collections.emptyList;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.meveo.model.billing.BillingProcessTypesEnum.AUTOMATIC;
 import static org.meveo.model.billing.BillingProcessTypesEnum.FULL_AUTOMATIC;
@@ -21,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import javax.ejb.Stateless;
@@ -39,6 +37,7 @@ import org.meveo.admin.exception.InvoiceExistException;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.admin.job.utils.BillinRunApplicationElFilterUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.model.billing.BillingProcessTypesEnum;
 import org.meveo.model.billing.BillingRun;
@@ -134,7 +133,8 @@ public class InvoicingJobV2Bean extends BaseJobBean {
     private void executeBillingRun(BillingRun billingRun, JobInstance jobInstance, JobExecutionResultImpl result, ScriptInstance billingRunValidationScript, boolean v11Process) {
     	boolean prevalidatedAutomaticPrevBRStatus = false;
     	boolean firstPassAutomatic = billingRun.getStatus() == INVOICE_LINES_CREATED && billingRun.getProcessType() == AUTOMATIC;
-    	
+        result.addReport((!StringUtils.isBlank(result.getReport()) ? "," : "") + "Billing run #" + billingRun.getId());
+
         if(billingRun.getStatus() == INVOICE_LINES_CREATED
                 && (billingRun.getProcessType() == AUTOMATIC || billingRun.getProcessType() == FULL_AUTOMATIC)) {
             billingRun.setStatus(PREVALIDATED);
@@ -200,7 +200,7 @@ public class InvoicingJobV2Bean extends BaseJobBean {
                 }
             }
         }
-        if(result.getInvoiceCount() == 0) {
+        if(result.getInvoiceCount() == 0 && billingRun.getInvoiceNumber() != null) {
             result.setInvoiceCount(billingRun.getInvoiceNumber());
         }
         if(!firstPassAutomatic || billingRun.getStatus() == POSTVALIDATED) {
@@ -211,10 +211,9 @@ public class InvoicingJobV2Bean extends BaseJobBean {
                 billingRun.setStatus(REJECTED);
             }
         }
-		billingRun.setInvoiceNumber(result.getInvoiceCount());
-        updateBillingRunAmounts(billingRun);
-        billingRunService.update(billingRun);
-        billingRunService.updateBillingRunJobExecution(billingRun.getId(), result);
+		billingRunService.updateBillingRunStatistics(billingRun);
+		billingRunService.update(billingRun);
+		billingRunService.updateBillingRunJobExecution(billingRun.getId(), result);
 
     }
 
@@ -301,9 +300,4 @@ public class InvoicingJobV2Bean extends BaseJobBean {
         amountWithoutTax = ZERO;
     }
 
-    private void updateBillingRunAmounts(BillingRun billingRun) {
-        billingRun.setPrAmountWithTax(amountWithTax);
-        billingRun.setPrAmountWithoutTax(amountWithoutTax);
-        billingRun.setPrAmountTax(amountTax);
-    }
 }

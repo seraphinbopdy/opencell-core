@@ -144,6 +144,9 @@ public class WalletOperationAggregatorQueryBuilder {
 		if (aggregationLine.getAction().equals(WalletOperationAggregationActionEnum.KEY)) {
 			return getFieldGroupBy(field);
 		}
+		if (aggregationLine.getAction().equals(WalletOperationAggregationActionEnum.EMBEDDED_KEY)) {
+			return field + ", ";
+		}
 		return "";
 	}
 
@@ -202,7 +205,7 @@ public class WalletOperationAggregatorQueryBuilder {
 
 			selectStr = "'" + aggregationLine.getValue() + "' as " + getAlias(aggregationLine);
 
-		} else if (aggregationLine.getAction().equals(WalletOperationAggregationActionEnum.CUSTOM)) {
+		} else if (aggregationLine.getAction().equals(WalletOperationAggregationActionEnum.CUSTOM) || aggregationLine.getAction().equals(WalletOperationAggregationActionEnum.EMBEDDED_KEY)) {
 
 			selectStr = aggregationLine.getField() + " as " + getAlias(aggregationLine);
 		} else {

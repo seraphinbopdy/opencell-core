@@ -79,6 +79,8 @@ import org.meveo.service.payments.impl.DunningStopReasonsService;
 
 public class DunningCollectionPlanApiService implements ApiService<DunningCollectionPlan> {
 
+    private static final String SWITCH = "SWITCH";
+
     @Inject
     private GlobalSettingsVerifier globalSettingsVerifier;
 
@@ -191,7 +193,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         }
         Optional<DunningCollectionPlan> optional = of(dunningCollectionPlanService.switchCollectionPlan(oldCollectionPlan, policy, policyLevel));
 
-        auditLogService.trackOperation("SWITCH", new Date(), oldCollectionPlan, oldCollectionPlan.getCollectionPlanNumber());
+        auditLogService.trackOperation(SWITCH, new Date(), oldCollectionPlan, oldCollectionPlan.getCollectionPlanNumber());
+
+        optional.ifPresent(dunningCollectionPlan -> auditLogService.trackOperation(SWITCH, new Date(), dunningCollectionPlan, dunningCollectionPlan.getCollectionPlanNumber()));
         return optional;
     }
 
@@ -543,6 +547,18 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             Integer minSequence = dunningLevelInstanceService.getMinSequenceByDaysOverdue(collectionPlan, daysOverdue);
             newDunningLevelInstance.setSequence(minSequence.intValue());
 
+            if (collectionPlan != null) {
+                // Check the related invoice and set it to the level instance
+                if (collectionPlan.getRelatedInvoice() != null) {
+                    newDunningLevelInstance.setInvoice(collectionPlan.getRelatedInvoice());
+                }
+
+                // Check the related customer account and set it to the level instance
+                if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
+                    newDunningLevelInstance.setCustomerAccount(collectionPlan.getBillingAccount().getCustomerAccount());
+                }
+            }
+
             dunningLevelInstanceService.create(newDunningLevelInstance);
 
             // 3- update dunningLevelInstances
@@ -606,6 +622,18 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     fields.add("levelStatus");
                 }
                 levelInstanceToUpdate.setLevelStatus(updateLevelInstanceInput.getLevelStatus());
+            }
+
+            if (collectionPlan != null) {
+                // Check the related invoice and set it to the level instance
+                if (collectionPlan.getRelatedInvoice() != null) {
+                    levelInstanceToUpdate.setInvoice(collectionPlan.getRelatedInvoice());
+                }
+
+                // Check the related customer account and set it to the level instance
+                if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
+                    levelInstanceToUpdate.setCustomerAccount(collectionPlan.getBillingAccount().getCustomerAccount());
+                }
             }
 
             dunningLevelInstanceService.update(levelInstanceToUpdate);

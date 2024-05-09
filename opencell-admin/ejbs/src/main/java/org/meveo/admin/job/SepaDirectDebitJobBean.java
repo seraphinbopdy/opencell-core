@@ -168,7 +168,9 @@ public class SepaDirectDebitJobBean extends BaseJobBean {
 				sellerCode = ((EntityReferenceWrapper) this.getParamOrCFValue(jobInstance, "SepaJob_seller")).getCode();
 				seller = sellerService.findByCode(sellerCode);
 			}
-
+			if(ddRequestOpEnum == null) {
+				ddRequestOpEnum = DDRequestOpEnum.CREATE;
+			}
 			DDRequestBuilderInterface ddRequestBuilderInterface = ddRequestBuilderFactory.getInstance(ddRequestBuilder);
 			List<DDRequestLotOp> ddrequestOps = dDRequestLotOpService.getDDRequestOps(ddRequestBuilder, seller, paymentOrRefundEnum,ddRequestOpEnum);
 

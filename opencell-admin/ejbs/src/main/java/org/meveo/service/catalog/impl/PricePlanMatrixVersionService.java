@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -780,21 +781,16 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             final String fileNameSeparator = "_-_";
             StringBuilder fileName = new StringBuilder();
             fileName.append(ppmv.getId());
-            if (ppmv.getPricePlanMatrix() != null && !ListUtils.isEmtyCollection(ppmv.getPricePlanMatrix().getChargeTemplates())) {
-                if(ppmv.getPricePlanMatrix().getChargeTemplates().size() == 1) {
-                    ChargeTemplate chargeTemplate = ppmv.getPricePlanMatrix().getChargeTemplates().iterator().next();
-                    fileName.append(fileNameSeparator + chargeTemplate.getId());
-                    fileName.append(fileNameSeparator + chargeTemplate.getDescription()).append(fileNameSeparator + chargeTemplate.getCode());
-                } else {
-                    fileName.append(fileNameSeparator + ppmv.getPricePlanMatrix().getCode());
-                }
+            if (ppmv.getPricePlanMatrix() != null) {
+				ChargeTemplate chargeTemplate = ppmv.getPricePlanMatrix().getChargeTemplates().stream().sorted(Comparator.comparing(ChargeTemplate::getId)).findFirst().orElse(null);
+                 fileName.append(fileNameSeparator).append(chargeTemplate.getId());
+                 fileName.append(fileNameSeparator).append(chargeTemplate.getDescription());
+	             fileName.append(fileNameSeparator).append(chargeTemplate.getCode());
             }
-
-            fileName.append(fileNameSeparator + ppmv.getLabel());
+	        
+	        fileName.append(fileNameSeparator + ppmv.getLabel());
+	        fileName.append(fileNameSeparator).append(ppmv.getStatus());
             fileName.append(fileNameSeparator);
-            if (ppmv.getValidity() != null) {
-                fileName.append(ppmv.getStatus());
-            }
             if (ppmv.getValidity() != null) {
                 fileName.append(fileNameSeparator);
                 if (ppmv.getValidity().getFrom() != null) {
@@ -804,6 +800,10 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                 if (ppmv.getValidity().getTo() != null) {
                     fileName.append(ppmv.getValidity().getTo().getTime());
                 }
+            }
+            // remove separator if it's at the end of the file name
+            if (fileName.lastIndexOf(fileNameSeparator) == fileName.length() - fileNameSeparator.length()) {
+                fileName.delete(fileName.length() - fileNameSeparator.length(), fileName.length());
             }
             return File.separator + fileName.toString().replaceAll("null", "").replaceAll("[/: ]", "-");
         }
@@ -937,7 +937,10 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
         private LinkedHashMap<String, Object> toCSVLineRecords(PricePlanMatrixVersion ppv, List<Map<String, Object>> ppmvMaps) {
             LinkedHashMap<String, Object> CSVLineRecords = new LinkedHashMap<>();
             CSVLineRecords.put("label", ppv.getLabel());
-            CSVLineRecords.put("amount", ppv.getPrice());            
+            CSVLineRecords.put("amount", ppv.getPrice());
+            CSVLineRecords.put("status", ppv.getStatus());
+            CSVLineRecords.put("version", ppv.getVersion());
+
             for (Map<String, Object> ppmvMap : ppmvMaps)
             {
                 Long ppvId = (Long) ppmvMap.get("ppvId");

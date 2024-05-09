@@ -123,7 +123,8 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "Invoice.nullifyInvoicePDFFileNames", query = "update Invoice inv set inv.pdfFilename = null where inv.billingRun = :billingRun"),
         @NamedQuery(name = "Invoice.portInvoiceReport", query = "select inv.amountWithTax, inv.amountWithoutTax, inv.amountTax, inv.paymentMethodType, pm.yearExpiration, pm.monthExpiration, ba.electronicBilling from Invoice inv inner join inv.billingAccount ba left join inv.paymentMethod pm where inv.billingRun.id=:billingRunId"),
         @NamedQuery(name = "Invoice.deleteByBR", query = "delete from Invoice inv where inv.billingRun.id=:billingRunId AND inv.status <> 'VALIDATED'"),
-        @NamedQuery(name = "Invoice.moveToBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.DRAFT where inv.id in (:invoiceIds)"),
+        @NamedQuery(name = "Invoice.moveToBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.SUSPECT where inv.id in (:invoiceIds)"),
+        @NamedQuery(name = "Invoice.moveToRejectedBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.REJECTED where inv.id in (:invoiceIds)"),
         @NamedQuery(name = "Invoice.moveToBR", query = "update Invoice inv set inv.billingRun=:nextBR where inv.billingRun.id=:billingRunId and inv.status in(:statusList)"),
         @NamedQuery(name = "Invoice.deleteByStatusAndBR", query = "delete from Invoice inv where inv.status in(:statusList) and inv.billingRun.id=:billingRunId"),
         @NamedQuery(name = "Invoice.findByStatusAndBR", query = "from Invoice inv where inv.status in (:statusList) and inv.billingRun.id=:billingRunId"),
@@ -137,8 +138,8 @@ import org.meveo.model.shared.DateUtils;
                 + "FROM Invoice inv where inv.billingRun.id=:billingRunId group by inv.subscription.id, inv.commercialOrder.id , inv.id, inv.billingAccount.id, inv.billingAccount.customerAccount.id, inv.billingAccount.customerAccount.customer.id"),
 
         @NamedQuery(name = "Invoice.sumAmountsByBR", query = "select sum(inv.amountTax),sum(inv.amountWithoutTax), sum(inv.amountWithTax) FROM Invoice inv where inv.billingRun.id=:billingRunId and inv.status <> 'CANCELED'"),
-        @NamedQuery(name = "Invoice.billingAccountsByBr", query = "select distinct inv.billingAccount from Invoice inv where inv.billingRun.id=:billingRunId and inv.status <> 'CANCELED'"),
-		@NamedQuery(name = "Invoice.cancelInvoiceById", query = "update Invoice inv set inv.status='CANCELED', inv.rejectedByRule = null, inv.rejectReason = null, inv.auditable.updated=:now WHERE inv.id=:invoiceId AND inv.status <> 'VALIDATED'"),
+        @NamedQuery(name = "Invoice.billingAccountsByBr", query = "select distinct inv.billingAccount from Invoice inv where inv.billingRun.id=:billingRunId"),
+        @NamedQuery(name = "Invoice.cancelInvoiceById", query = "update Invoice inv set inv.status='CANCELED', inv.rejectedByRule = null, inv.rejectReason = null, inv.auditable.updated=:now, inv.auditable.updater=:username WHERE inv.id=:invoiceId AND inv.status <> 'VALIDATED'"),
 
         @NamedQuery(name = "Invoice.deleteByIds", query = "delete from Invoice inv where inv.id IN (:invoicesIds)"),
         @NamedQuery(name = "Invoice.excludePrpaidInvoices", query = "select inv.id from Invoice inv where inv.id IN (:invoicesIds) and inv.prepaid=false"),
@@ -165,11 +166,11 @@ import org.meveo.model.shared.DateUtils;
 	@NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
 			+ "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt "
 			+ "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
-			+ "	WHERE rt.status = 'BILLED' and il.invoice_id=:invoiceId"),
+			+ "	WHERE il.status = 'BILLED' and il.invoice_id=:invoiceId"),
 	@NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
 			+ "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt "
 			+ "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
-			+ "	WHERE rt.status = 'BILLED' and il.billing_run_id=:billingRunId")
+			+ "	WHERE il.status = 'BILLED' and il.billing_run_id=:billingRunId")
 
 })
 public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISearchable {

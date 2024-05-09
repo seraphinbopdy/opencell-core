@@ -62,7 +62,7 @@ public class StandardReportResourceImpl implements StandardReportResource {
                         startDueDate, endDueDate, customerAccountDescription, sellerDescription, sellerCode, invoiceNumber, stepInDays, numberOfPeriods, tradingCurrency, functionalCurrency);
         agedReceivableMapper.setAppProvider(appProvider);
     	List<AgedReceivableDto> agedReceivablesList = (stepInDays == null && numberOfPeriods == null)
-                ? agedReceivableMapper.toEntityList(agedBalanceList) : agedReceivableMapper.buildDynamicResponse(agedBalanceList, numberOfPeriods);
+                ? agedReceivableMapper.toEntityList(agedBalanceList) : agedReceivableMapper.buildDynamicResponse(agedBalanceList, numberOfPeriods, false);
         ImmutableAgedReceivable[] agedReceivablesData = agedReceivablesList
                 .stream()
                 .map(agedReceivableDto ->
@@ -119,7 +119,7 @@ public class StandardReportResourceImpl implements StandardReportResource {
 		            (String) input.getFilters().get("functionalCurrency"));
 		    // Convert List of Object to a list of Aged Receivable Dto
         	agedReceivablesList = (input.getFilters().get("stepInDays") == null && input.getFilters().get("numberOfPeriods") == null)
-                    ? agedReceivableMapper.fromListObjectToListEntity(agedBalanceList) : agedReceivableMapper.buildDynamicResponse(agedBalanceList, input.getFilters().get("numberOfPeriods") != null ? (Integer) input.getFilters().get("numberOfPeriods") : 0);
+                    ? agedReceivableMapper.fromListObjectToListEntity(agedBalanceList) : agedReceivableMapper.buildDynamicResponse(agedBalanceList, input.getFilters().get("numberOfPeriods") != null ? (Integer) input.getFilters().get("numberOfPeriods") : 0, true);
 
 		} else {
 			Date startDate = new Date();
@@ -156,24 +156,23 @@ public class StandardReportResourceImpl implements StandardReportResource {
 		agedReceivablesList.forEach(ag -> {
         	if(input.getFilters().get("numberOfPeriods") != null) {
         		Integer num = (Integer) input.getFilters().get("numberOfPeriods");
-        		if(ag.getTotalAmountByPeriod().size() > 0) {
+        		if(!ag.getTransactionalTotalAmountByPeriod().isEmpty()) {
         			if(num > 0) {
-            			ag.setSum1To30(ag.getTotalAmountByPeriod().get(0));
+            			ag.setSum1To30(ag.getTransactionalTotalAmountByPeriod().get(0));
             		}
             		
             		if(num > 1) {
-            			ag.setSum31To60(ag.getTotalAmountByPeriod().get(1));
+            			ag.setSum31To60(ag.getTransactionalTotalAmountByPeriod().get(1));
             		}
             		
             		if(num > 2) {
-            			ag.setSum61To90(ag.getTotalAmountByPeriod().get(2));
+            			ag.setSum61To90(ag.getTransactionalTotalAmountByPeriod().get(2));
             		}
             		
             		if(num > 3) {
-            			ag.setSum90Up(ag.getTotalAmountByPeriod().get(3));
+            			ag.setSum90Up(ag.getTransactionalTotalAmountByPeriod().get(3));
             		}
         		}
-        		
         	}
         });
 	}

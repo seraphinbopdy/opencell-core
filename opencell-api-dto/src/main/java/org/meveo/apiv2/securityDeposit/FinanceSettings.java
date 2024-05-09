@@ -22,7 +22,7 @@ public interface FinanceSettings extends Resource {
     @Value.Default
     @Schema(description = "use security deposit")
     default Boolean getUseSecurityDeposit() {
-        return TRUE;
+        return FALSE;
     }
 
     @Nullable
@@ -114,18 +114,24 @@ public interface FinanceSettings extends Resource {
     @Value.Default
     @Schema(description = "Handle Framework Agreement")
     default boolean getHandleFrameworkAgreement() {
-        return TRUE;
+        return FALSE;
     }
 
     @Value.Default
     @Schema(description = "Handle Invoice Plans")
     default boolean getHandleInvoicingPlans() {
-        return TRUE;
+        return FALSE;
     }
 
     @Value.Default
     @Schema(description = "Handle Accounting Periods")
     default boolean getHandleAccountingPeriods() {
-        return TRUE;
+        return FALSE;
+    }
+
+    @Value.Default
+    @Schema(description = "Enable empty subscription activation")
+    default Boolean getEnableEmptySubscriptionActivation() {
+        return false;
     }
 }

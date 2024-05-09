@@ -75,9 +75,6 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
     @Inject
     private DunningSettingsService dunningSettingsService;
 
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-    private final SimpleDateFormat emailDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-
     @Inject
     private DunningActionInstanceService actionInstanceService;
 
@@ -117,7 +114,6 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
         }
     }
 
-    private boolean processInvoices(List<Invoice> invoices, DunningLevel reminderLevel, DunningPolicyLevel policyLevel, DunningCollectionPlan dunningCollectionPlan, DunningSettings pDunningSettings, DunningPolicy pDunningPolicy) {
     /**
      * Process invoices
      *
@@ -127,7 +123,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
      * @param pDunningPolicy   Dunning policy
      * @return True if processed
      */
-    private boolean processInvoices(List<Invoice> invoices, DunningPolicyLevel policyLevel, DunningSettings pDunningSettings, DunningPolicy pDunningPolicy) {
+    private boolean processInvoices(List<Invoice> invoices, DunningLevel reminderLevel, DunningPolicyLevel policyLevel, DunningCollectionPlan dunningCollectionPlan, DunningSettings pDunningSettings, DunningPolicy pDunningPolicy) {
         Date today = new Date();
         boolean processed = false;
         reminderLevel = levelService.findById(reminderLevel.getId(), asList("dunningActions"));
@@ -138,9 +134,9 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                     for (Invoice invoice : invoices) {
                         Date dateToCompare = addDaysToDate(invoice.getDueDate(), reminderLevel.getDaysOverdue());
                         if (simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today)) && !invoice.isReminderLevelTriggered()) {
-                            launchActions(invoice, dunningCollectionPlan, reminderLevel);
+                            DunningLevelInstance dunningLevelInstance = launchActions(invoice, policyLevel);
                             markInvoiceAsReminderAlreadySent(invoice);
-                            createLevelInstance(policyLevel);
+                            updateDunningLevelInstance(dunningLevelInstance);
                             processed = true;
 
                         }
@@ -150,9 +146,9 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                         Date dateToCompare = addDaysToDate(invoice.getDueDate(), reminderLevel.getDaysOverdue());
                         if ((simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today)) && !invoice.isReminderLevelTriggered()) ||
                                 invoice.getNetToPay().compareTo(reminderLevel.getMinBalance()) > 0) {
-                            launchActions(invoice, dunningCollectionPlan, reminderLevel);
+                            DunningLevelInstance dunningLevelInstance = launchActions(invoice, policyLevel);
                             markInvoiceAsReminderAlreadySent(invoice);
-                            createLevelInstance(policyLevel);
+                            updateDunningLevelInstance(dunningLevelInstance);
                             processed = true;
                         }
                     }
@@ -171,9 +167,9 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
 
                         Date dateToCompare = addDaysToDate(invoice.getDueDate(), reminderLevel.getDaysOverdue());
                         if(simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today)) && !invoice.isReminderLevelTriggered() && launchAction) {
-                            launchActions(invoice, dunningCollectionPlan, reminderLevel);
+                            DunningLevelInstance dunningLevelInstance = launchActions(invoice, policyLevel);
                             markInvoiceAsReminderAlreadySent(invoice);
-                            createLevelInstance(policyLevel);
+                            updateDunningLevelInstance(dunningLevelInstance);
                             processed = true;
                         }
                     }
@@ -191,9 +187,8 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                         Date dateToCompare = addDaysToDate(invoice.getDueDate(), reminderLevel.getDaysOverdue());
                         if((simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today)) && !invoice.isReminderLevelTriggered()) ||
                                 invoiceUnpaid.compareTo(reminderLevel.getMinBalance()) > 0) {
-                            launchActions(invoice, dunningCollectionPlan, reminderLevel);
+                            DunningLevelInstance dunningLevelInstance = launchActions(invoice, policyLevel);
                             markInvoiceAsReminderAlreadySent(invoice);
-                            createLevelInstance(policyLevel);
                             processed = true;
                         }
                     }
@@ -274,26 +269,20 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
             Seller seller = invoice.getSeller();
             Map<Object, Object> params = new HashMap<>();
             params.put("billingAccountDescription", billingAccount.getDescription());
-            params.put("billingAccountAddressAddress1",
-                    billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
-            params.put("billingAccountAddressZipCode",
-                    billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
-            params.put("billingAccountAddressCity",
-                    billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
+            params.put("billingAccountAddressAddress1", billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
+            params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
+            params.put("billingAccountAddressCity", billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
 
             ContactInformation contactInformation = billingAccount.getContactInformation();
+
             if(contactInformation != null) {
-                params.put("contactInformationEmail",  contactInformation.getEmail() != null ?
-                        contactInformation.getEmail() : "");
-                params.put("contactInformationPhone",  contactInformation.getPhone() != null ?
-                        contactInformation.getPhone() : "");
-                params.put("contactInformationMobile",  contactInformation.getMobile()  != null ?
-                        contactInformation.getMobile() : "");
+                params.put("contactInformationEmail",  contactInformation.getEmail() != null ? contactInformation.getEmail() : "");
+                params.put("contactInformationPhone",  contactInformation.getPhone() != null ? contactInformation.getPhone() : "");
+                params.put("contactInformationMobile",  contactInformation.getMobile()  != null ? contactInformation.getMobile() : "");
             }
-            params.put("customerAccountFirstName",  customerAccount.getName() != null ?
-                    customerAccount.getName().getFirstName() : "");
-            params.put("customerAccountLastName",  customerAccount.getName() != null ?
-                    customerAccount.getName().getLastName() : "");
+
+            params.put("customerAccountFirstName",  customerAccount.getName() != null ? customerAccount.getName().getFirstName() : "");
+            params.put("customerAccountLastName",  customerAccount.getName() != null ? customerAccount.getName().getLastName() : "");
             params.put("invoiceInvoiceNumber", invoice.getInvoiceNumber());
             params.put("invoiceDueDate", emailDateFormatter.format(invoice.getDueDate()));
             params.put("invoiceInvoiceDate", emailDateFormatter.format(new Date()));
@@ -303,21 +292,18 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
             params.put("invoicePaymentMethodType", invoice.getPaymentMethodType());
             params.put("invoicePaymentStatus", invoice.getPaymentStatus());
             params.put("invoiceOrderOrderNumber", invoice.getOrder() != null ? invoice.getOrder().getOrderNumber() : "");
+
             if(Boolean.TRUE.equals(billingAccount.getIsCompany())) {
-                params.put("billingAccountLegalEntityTypeCode",
-                        ofNullable(billingAccount.getLegalEntityType()).map(Title::getCode).orElse(""));
+                params.put("billingAccountLegalEntityTypeCode", ofNullable(billingAccount.getLegalEntityType()).map(Title::getCode).orElse(""));
             } else {
                 Name name = ofNullable(billingAccount.getName()).orElse(null);
                 Title title = ofNullable(name).map(Name::getTitle).orElse(null);
-                params.put("billingAccountLegalEntityTypeCode",
-                        ofNullable(title).map(Title::getDescription).orElse(""));
+                params.put("billingAccountLegalEntityTypeCode", ofNullable(title).map(Title::getDescription).orElse(""));
             }
-            params.put("customerAccountAddressAddress1",
-                    customerAccount.getAddress() != null ? customerAccount.getAddress().getAddress1() : "");
-            params.put("customerAccountAddressZipCode",
-                    customerAccount.getAddress() != null ? customerAccount.getAddress().getZipCode() : "");
-            params.put("customerAccountAddressCity",
-                    customerAccount.getAddress() != null ? customerAccount.getAddress().getCity() : "");
+
+            params.put("customerAccountAddressAddress1", customerAccount.getAddress() != null ? customerAccount.getAddress().getAddress1() : "");
+            params.put("customerAccountAddressZipCode", customerAccount.getAddress() != null ? customerAccount.getAddress().getZipCode() : "");
+            params.put("customerAccountAddressCity", customerAccount.getAddress() != null ? customerAccount.getAddress().getCity() : "");
             params.put("customerAccountDescription", customerAccount.getDescription());
 
             params.put("dayDate", emailDateFormatter.format(new Date()));
@@ -325,11 +311,13 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
             List<File> attachments = new ArrayList<>();
             String invoiceFileName = invoiceService.getFullPdfFilePath(invoice, false);
             File attachment = new File(invoiceFileName);
+
             if (!attachment.exists()) {
                 log.warn("No Pdf file exists for the invoice : {}", ofNullable(invoice.getInvoiceNumber()).orElse(invoice.getTemporaryInvoiceNumber()));
             } else {
                 attachments.add(attachment);
             }
+
             if(billingAccount.getContactInformation() != null && billingAccount.getContactInformation().getEmail() != null) {
                 collectionPlanService.sendNotification(seller.getContactInformation().getEmail(),
                         billingAccount, emailTemplate, params, attachments);

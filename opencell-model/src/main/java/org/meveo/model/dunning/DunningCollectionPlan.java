@@ -25,6 +25,9 @@ import org.meveo.model.AuditableEntity;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
 
+import static java.lang.Math.abs;
+import static org.meveo.model.shared.DateUtils.daysBetween;
+
 /**
  *The dunning collection plan
  *

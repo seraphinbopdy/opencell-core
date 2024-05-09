@@ -85,7 +85,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         }
         if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
             try {
-                String query = "SELECT inv FROM Invoice inv WHERE (inv.paymentStatus = 'UNPAID' OR inv.paymentStatus = 'PPAID') AND inv.dunningCollectionPlanTriggered = false AND "
+                String query = "SELECT inv FROM Invoice inv WHERE (inv.paymentStatus = 'UNPAID' OR inv.paymentStatus = 'PPAID' OR inv.paymentStatus = 'PENDING') AND inv.dunningCollectionPlanTriggered = false AND "
                         + buildPolicyRulesFilter(policy.getDunningPolicyRules());
                 return (List<Invoice>) invoiceService.executeSelectQuery(query, null);
             } catch (Exception exception) {
@@ -285,7 +285,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                         .filter(invoice -> invoiceEligibilityCheck(invoice, policy, dayOverDue))
                         .forEach(invoice -> {
                             dunningCollectionPlanNumber.incrementAndGet();
-                            collectionPlanService.createCollectionPlanFrom(invoice, policy, dayOverDue, collectionPlanStatus);
+                            collectionPlanService.createCollectionPlanFrom(invoice, policy, collectionPlanStatus);
                         });
             } else {
                 log.error("No level configured do meet the conditions for policy" + policy.getPolicyName());
@@ -311,62 +311,23 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         } catch (ParseException exception) {
             throw new BusinessException(exception);
         }
+
         long daysDiff = TimeUnit.DAYS.convert((today.getTime() - dueDate.getTime()), TimeUnit.MILLISECONDS);
 
-        DunningSettings dunningSettings = dunningSettingsService.findLastOne();
-
-        if(dunningSettings != null) {
-            if(dunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {
-                if (policy.getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE)) {
-                    dayOverDueAndThresholdCondition = (dayOverDue.longValue() <= daysDiff);
-                } else {
-                    BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
-                            .map(RecordedInvoice::getUnMatchingAmount)
-                            .orElse(BigDecimal.ZERO);
-                    dayOverDueAndThresholdCondition =
-                            (dayOverDue.longValue() == daysDiff || minBalance.doubleValue() >= policy.getMinBalanceTrigger());
-                }
-            } else if(dunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL)) {
-                if (policy.getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE)) {
-                    if(invoice != null && invoice.getBillingAccount() != null && invoice.getBillingAccount().getCustomerAccount() != null && invoice.getBillingAccount().getCustomerAccount().getAccountOperations() != null) {
-                        for(BillingAccount billingAccount : invoice.getBillingAccount().getCustomerAccount().getBillingAccounts()) {
-                            if(!dayOverDueAndThresholdCondition) {
-                                for(Invoice inv : billingAccount.getInvoices()) {
-                                    try {
-                                        daysDiff = TimeUnit.DAYS.convert((today.getTime() - simpleDateFormat.parse(simpleDateFormat.format(inv.getDueDate())).getTime()), TimeUnit.MILLISECONDS);
-                                    } catch (ParseException e) {
-                                        throw new RuntimeException(e);
-                                    }
-
-                                    if(dayOverDue.longValue() <= daysDiff) {
-                                        dayOverDueAndThresholdCondition = (dayOverDue.longValue() <= daysDiff);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    BigDecimal minBalance = BigDecimal.valueOf(0);
-
-                    if(invoice != null && invoice.getBillingAccount() != null && invoice.getBillingAccount().getCustomerAccount() != null && invoice.getBillingAccount().getCustomerAccount().getAccountOperations() != null) {
-                        for(BillingAccount billingAccount : invoice.getBillingAccount().getCustomerAccount().getBillingAccounts()) {
-                            for(Invoice inv : billingAccount.getInvoices()) {
-                                minBalance = minBalance.add(ofNullable(inv.getRecordedInvoice())
-                                        .map(RecordedInvoice::getUnMatchingAmount)
-                                        .orElse(BigDecimal.ZERO));
-                            }
-                        }
-                    }
-
-                    dayOverDueAndThresholdCondition = (dayOverDue.longValue() == daysDiff || minBalance.doubleValue() >= policy.getMinBalanceTrigger());
-                }
-            }
+        if (policy.getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE)) {
+            BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
+                    .map(RecordedInvoice::getUnMatchingAmount)
+                    .orElse(BigDecimal.ZERO);
+            dayOverDueAndThresholdCondition = (dayOverDue.longValue() <= daysDiff) && minBalance.compareTo(BigDecimal.ZERO) > 0;
+        } else {
+            BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
+                                            .map(RecordedInvoice::getUnMatchingAmount)
+                                            .orElse(BigDecimal.ZERO);
+            dayOverDueAndThresholdCondition =
+                    (dayOverDue.longValue() <= daysDiff && minBalance.doubleValue() >= policy.getMinBalanceTrigger()) && minBalance.compareTo(BigDecimal.ZERO) > 0;
         }
 
-        return (invoice.getPaymentStatus().equals(UNPAID) || invoice.getPaymentStatus().equals(PENDING))
-                && collectionPlanService.findByInvoiceId(invoice.getId()).isEmpty()
-                && dayOverDueAndThresholdCondition;
+        return dayOverDueAndThresholdCondition && collectionPlanService.findByInvoiceId(invoice.getId()).isEmpty();
     }
 
     public List<DunningPolicy> availablePoliciesForSwitch(Invoice invoice) {
@@ -435,7 +396,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         getEntityManager().createNamedQuery("DunningPolicy.activateByDunningMode").setParameter("dunningMode", pDunningMode).executeUpdate();
         getEntityManager().createNamedQuery("DunningPolicy.deactivateByDunningMode").setParameter("dunningMode", pDunningMode).executeUpdate();
     }
-    
+
     /**
      * Check if priority already taken by an other policy
      * @param priority

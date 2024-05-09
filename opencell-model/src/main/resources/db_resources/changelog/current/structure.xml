@@ -12060,5 +12060,17 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="uuid" value="Invoicing_Threshold" />
         </insert>
     </changeSet>
+    
+  	<changeSet id="#INTRD-22583_20240509" author="aeljaouhari">
+        <update tableName="iso_icd" >
+            <column name="scheme_name" value="SIRENE" />
+            <where>code = '0002'</where>
+        </update>
+
+        <update tableName="iso_icd" >
+            <column name="scheme_name" value="SIRET" />
+            <where>code = '0009'</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>

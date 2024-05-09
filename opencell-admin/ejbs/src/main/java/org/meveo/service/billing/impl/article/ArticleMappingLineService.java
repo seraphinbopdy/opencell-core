@@ -38,24 +38,28 @@ public class ArticleMappingLineService extends BusinessService<ArticleMappingLin
 	private static final String DEFAULT_ARTICLE_MAPPING_CODE = "DEFAULT_ARTICLE_MAPPING";
 
 	@SuppressWarnings("unchecked")
-	public List<ArticleMappingLine> findByProductAndCharge(Product product, ChargeTemplate chargeTemplate,
-														   OfferTemplate offer, String parameter1,
-														   String parameter2, String parameter3) {
+	public List<ArticleMappingLine> findByProductAndCharge(Product product, ChargeTemplate chargeTemplate, OfferTemplate offer, String parameter1, String parameter2, String parameter3) {
+		return findByProductAndChargeByIds(product==null?null:product.getId(), chargeTemplate==null?null:chargeTemplate.getId(), offer==null?null:offer.getId(), parameter1, parameter2, parameter3);
+	}
+		
+	public List<ArticleMappingLine> findByProductAndChargeByIds(Long productId, Long chargeTemplateId,
+				   Long  offerId, String parameter1,
+				   String parameter2, String parameter3) {
 		QueryBuilder queryBuilder = new QueryBuilder(ArticleMappingLine.class, "am", Arrays.asList("attributesMapping"));
-		if(product != null)
-			queryBuilder.addCriterionEntity("am.product.id", product.getId());
-		if(chargeTemplate != null)
-			queryBuilder.addCriterionEntity("am.chargeTemplate.id", chargeTemplate.getId());
-		if(product == null) {
+		if(productId != null)
+			queryBuilder.addCriterionEntity("am.product.id", productId);
+		if(chargeTemplateId != null)
+			queryBuilder.addCriterionEntity("am.chargeTemplate.id", chargeTemplateId);
+		if(productId == null) {
 			queryBuilder.addSql("am.product is null ");
 		}
-		if(chargeTemplate == null) {
+		if(chargeTemplateId == null) {
 			queryBuilder.addSql("am.chargeTemplate is null ");
 		}
-		if(offer != null) {
-			queryBuilder.addCriterionEntity("am.offerTemplate.id", offer.getId());
+		if(offerId != null) {
+			queryBuilder.addCriterionEntity("am.offerTemplate.id", offerId);
 		}
-		if(offer == null) {
+		if(offerId == null) {
 			queryBuilder.addSql("am.offerTemplate is null ");
 		}
 		if(parameter1 != null) {

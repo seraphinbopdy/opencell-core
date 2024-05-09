@@ -128,7 +128,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
     private boolean processInvoices(List<Invoice> invoices, DunningLevel reminderLevel, DunningPolicyLevel policyLevel, DunningCollectionPlan dunningCollectionPlan, DunningSettings pDunningSettings, DunningPolicy pDunningPolicy) {
         Date today = new Date();
         boolean processed = false;
-        DunningLevel reminderLevel = levelService.findById(policyLevel.getDunningLevel().getId(), List.of("dunningActions"));
+        reminderLevel = levelService.findById(policyLevel.getDunningLevel().getId(), List.of("dunningActions"));
 
         if(pDunningSettings != null) {
             if (pDunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {

@@ -1,5 +1,6 @@
 package org.meveo.service.payments.impl;
 
+import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.jpa.JpaAmpNewTx;
@@ -28,6 +29,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import java.io.File;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -35,6 +37,8 @@ import java.util.*;
 import static java.lang.Math.abs;
 import static java.util.Arrays.asList;
 import static org.meveo.model.dunning.DunningLevelInstanceStatusEnum.*;
+import static org.meveo.model.payments.PaymentMethodEnum.CARD;
+import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
 import static org.meveo.model.shared.DateUtils.daysBetween;
 import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;

@@ -12769,7 +12769,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
         </update>
     </changeSet>
 
-	<changeSet id="#INTRD-14889_20240509" author="AbdellatifBARI">
+	<changeSet id="#INTRD-14889_20240509-data" author="AbdellatifBARI">
 		<insert tableName="meveo_job_instance">
 			<column name="id" valueNumeric="-66" />
 			<column name="version" valueNumeric="0" />
@@ -12783,5 +12783,6 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="uuid" value="Invoicing_Threshold" />
 		</insert>
 	</changeSet>
+	
 
 </databaseChangeLog>

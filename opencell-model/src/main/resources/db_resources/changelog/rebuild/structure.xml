@@ -20874,6 +20874,7 @@
     <changeSet id="#INTRD-22825_20240509_allowed_offers_data_recovery" author="a.rouaguebe" />
     <changeSet id="#INTRD-14889_20240509" author="AbdellatifBARI" />
     <changeSet id="#INTRD-22583_20240509" author="aeljaouhari" />
+    <changeSet id="#INTRD-14889_20240509-2" author="AbdelmounaimAkadid" />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

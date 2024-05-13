@@ -5,13 +5,19 @@ import com.fasterxml.jackson.core.JsonStreamContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.hibernate.Hibernate;
+import org.hibernate.HibernateException;
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.model.IEntity;
+import org.slf4j.Logger;
 
+import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.Set;
 
-class LazyProxySerializer extends StdSerializer<HibernateProxy> implements GenericSerializer{
+class LazyProxySerializer extends StdSerializer<HibernateProxy> implements GenericSerializer {
+    
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LazyProxySerializer.class);
+    
     private final Set<String> nestedEntities;
     private final Set<IEntity> sharedEntityToSerialize;
 
@@ -26,10 +32,18 @@ class LazyProxySerializer extends StdSerializer<HibernateProxy> implements Gener
         JsonStreamContext outputContext = gen.getOutputContext();
         boolean isSharedEntityToSerialize = sharedEntityToSerialize.stream().anyMatch(ses -> ses.getClass().equals(value.getClass()) && ses.getId().equals(value.getHibernateLazyInitializer().getIdentifier()));
 		if (isSharedEntityToSerialize || isNestedEntityCandidate(getPathToRoot(gen), outputContext.getCurrentName())) {
-            Hibernate.initialize(value);
-            Object implementation = value.getHibernateLazyInitializer().getImplementation();
-            sharedEntityToSerialize.add((IEntity) implementation);
-            gen.writeObject(implementation);
+            try {
+                Hibernate.initialize(value);
+                Object implementation = value.getHibernateLazyInitializer().getImplementation();
+                sharedEntityToSerialize.add((IEntity) implementation);
+                gen.writeObject(implementation);
+            } catch (EntityNotFoundException e) {
+                LOG.warn("Unable to initialize lazy entity {} with id {}", value.getClass().getSimpleName(), value.getHibernateLazyInitializer().getIdentifier());
+                gen.writeStartObject();
+                gen.writeFieldName("orphanedEntity");
+                gen.writeObject(value.getHibernateLazyInitializer().getIdentifier());
+                gen.writeEndObject();
+            }
         } else {
             gen.writeStartObject();
             gen.writeFieldName("id");

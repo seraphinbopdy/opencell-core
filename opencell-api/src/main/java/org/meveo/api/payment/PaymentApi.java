@@ -118,6 +118,7 @@ import org.meveo.model.payments.PaymentRejectionCodesGroup;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.RejectedPayment;
+import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.payments.impl.AccountOperationService;
@@ -791,10 +792,9 @@ public class PaymentApi extends BaseApi {
 
 			paymentRejectionActionReportService.getEntityManager().flush();
 
-			rejectedPaymentService.getEntityManager()
-					.createNamedQuery("RejectedPayment.updateRejectionActionsStatus")
-					.setParameter("rejectedCode", rejectionCode.getCode())
-					.executeUpdate();
+			// update AO status : (PENDING, NO_ACTION) ==> NO_ACTION | (RUNNING, FAILED, CANCELED) => CANCELED | (COMPLETED) => COMPLETED
+			rejectedPaymentService.updateRejectionActionsStatus(rejectionCode.getCode(), List.of(RejectionActionStatus.PENDING), RejectionActionStatus.NO_ACTION);
+			rejectedPaymentService.updateRejectionActionsStatus(rejectionCode.getCode(), List.of(RejectionActionStatus.FAILED, RejectionActionStatus.RUNNING), RejectionActionStatus.CANCELED);
 			if (rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
 				removeRejectionCodeGroup(rejectionCodesGroup.getId());
 			} else {

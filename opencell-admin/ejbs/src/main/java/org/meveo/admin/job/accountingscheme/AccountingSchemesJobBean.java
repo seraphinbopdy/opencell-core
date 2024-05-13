@@ -1,5 +1,6 @@
 package org.meveo.admin.job.accountingscheme;
 
+import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.IteratorBasedJobBean;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @since 13
@@ -98,6 +101,9 @@ public class AccountingSchemesJobBean extends IteratorBasedJobBean<Long> {
                 log.info("Process {} JournalEntry for AO={}, OCC={}, ASCH={}", createdEntries == null ? 0 : createdEntries.size(), accountOperation.getId(), occT.getId(), occT.getAccountingScheme().getCode());
 
                         accountOperation.setStatus(AccountOperationStatus.EXPORTED);
+                        if(!isBlank(accountOperation.getErrorDetail())) {
+                            accountOperation.setErrorDetail(null);
+                        }
                         accountOperationService.update(accountOperation);
                         journalEntryService.assignMatchingCodeToJournalEntries(accountOperation, createdEntries);
 

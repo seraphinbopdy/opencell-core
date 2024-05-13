@@ -41,7 +41,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @DiscriminatorValue(value = "R")
 @NamedQueries({
-    @NamedQuery(name = "RejectedPayment.updateRejectionActionsStatus", query = "UPDATE RejectedPayment rp SET rp.rejectionActionsStatus = 'NO_ACTION' WHERE rp.rejectedCode = :rejectedCode AND NOT EXISTS (SELECT 1 FROM PaymentRejectionActionReport r WHERE r.action <> null and r.rejectedPayment = rp.id)"),
+    @NamedQuery(name = "RejectedPayment.updateRejectionActionsStatus", query = "UPDATE RejectedPayment rp SET rp.rejectionActionsStatus = :statusDestination WHERE rp.rejectedCode = :rejectedCode AND rp.rejectionActionsStatus in (:statusSourceList) AND NOT EXISTS (SELECT 1 FROM PaymentRejectionActionReport r WHERE r.action <> null and r.rejectedPayment = rp.id)"),
 })
 public class RejectedPayment extends AccountOperation {
 

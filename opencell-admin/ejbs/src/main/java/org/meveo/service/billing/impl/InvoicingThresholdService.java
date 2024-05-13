@@ -32,6 +32,7 @@ import org.meveo.util.ApplicationProvider;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -137,8 +138,14 @@ public class InvoicingThresholdService extends PersistenceService<BatchEntity> {
 
             /* 2- applyThreshold by invoice */
             ids.forEach(item -> {
-                billingAccountsIds.add((Long) item[0]);
-                invoiceLinesIds.add((Long) item[1]);
+                BigInteger billingAccountId = (BigInteger) item[0];
+                String ilIds = (String) item[1];
+                if (billingAccountId != null) {
+                    billingAccountsIds.add(billingAccountId.longValue());
+                }
+                if (!StringUtils.isBlank(ilIds)) {
+                    invoiceLinesIds.addAll(stream((ilIds).split(",")).map(Long::parseLong).collect(toSet()));
+                }
             });
             if (!invoiceLinesIds.isEmpty()) {
                 // reopen invoice lines RTs
@@ -153,7 +160,7 @@ public class InvoicingThresholdService extends PersistenceService<BatchEntity> {
                 BillingAccount ba = getEntityManager().getReference(BillingAccount.class, baIdToReject);
                 rejectedBillingAccountService.create(ba, getEntityManager().getReference(BillingRun.class, billingRun.getId()), billingAccountReason);
             });
-
+            jobExecutionResult.registerSucces(billingAccountsIds.size());
         } catch (Exception e) {
             log.error("Failed to apply threshold for the billingRun id : {}", billingRun.getId(), e);
             jobExecutionResult.registerError(e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());

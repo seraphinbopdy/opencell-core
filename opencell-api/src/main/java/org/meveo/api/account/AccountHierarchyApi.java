@@ -86,6 +86,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.meveo.model.billing.SubscriptionStatusEnum.ACTIVE;
+import static org.meveo.model.billing.SubscriptionStatusEnum.RESILIATED;
+import static org.meveo.model.billing.SubscriptionStatusEnum.SUSPENDED;
+
 /**
  * Creates the customer hierarchy including : - Trading Country - Trading Currency - Trading Language - Customer Brand - Customer Category - Seller - Customer - Customer Account -
  * Billing Account - User Account
@@ -2189,7 +2193,7 @@ public class AccountHierarchyApi extends BaseApi {
 	
 	private void processSubscriptionOnTransitionStatus(SubscriptionDto subscriptionDto) {
 		Subscription subscription = subscriptionService.findByCodeAndValidityDate(subscriptionDto.getCode(), subscriptionDto.getValidityDate());
-		List<SubscriptionStatusEnum> allowedStatus =  List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.ACTIVE);
+		List<SubscriptionStatusEnum> allowedStatus =  List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, ACTIVE);
 		if(subscription == null && (subscriptionDto.getStatus() == null || allowedStatus.contains(subscriptionDto.getStatus()))) {
 			subscription = subscriptionApi.create(subscriptionDto);
 			if(subscriptionDto.getStatus() == null) {
@@ -2201,11 +2205,14 @@ public class AccountHierarchyApi extends BaseApi {
 			log.info("Subscription : {}, from status : {}, to status : {}", subscription.getCode(), subscription.getStatus(), subscriptionDto.getStatus());
 			switch (subscriptionDto.getStatus()) {
 				case ACTIVE:
-					allowedStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.SUSPENDED);
+                    if(ACTIVE.equals(subscription.getStatus())) {
+                        break;
+                    }
+					allowedStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SUSPENDED);
 					if(!allowedStatus.contains(subscription.getStatus())){
 						throw new BusinessApiException(errorMsg);
 					}
-					if(subscription.getStatus() == SubscriptionStatusEnum.SUSPENDED) {
+					if(subscription.getStatus() == SUSPENDED) {
 						subscriptionService.subscriptionReactivation(subscription, null);
 						break;
 					}
@@ -2228,11 +2235,14 @@ public class AccountHierarchyApi extends BaseApi {
 					
 					break;
 				case RESILIATED:
+                    if(RESILIATED.equals(subscription.getStatus())) {
+                        break;
+                    }
 					if(subscriptionDto.getTerminationDate() == null) {
 						missingParameters.add("terminationDate");
 						handleMissingParameters();
 					}
-					allowedStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.ACTIVE, SubscriptionStatusEnum.SUSPENDED);
+					allowedStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, ACTIVE, SUSPENDED);
 					if(!allowedStatus.contains(subscription.getStatus())){
 						throw new BusinessApiException(errorMsg);
 					}
@@ -2250,11 +2260,14 @@ public class AccountHierarchyApi extends BaseApi {
 					}
 					break;
 					case SUSPENDED:
-						allowedStatus = List.of(SubscriptionStatusEnum.ACTIVE);
+                        if(SUSPENDED.equals(subscription.getStatus())) {
+                            break;
+                        }
+						allowedStatus = List.of(ACTIVE);
 						if(!allowedStatus.contains(subscription.getStatus())){
 							throw new BusinessApiException(errorMsg);
 						}
-						if (subscription.getStatus() == SubscriptionStatusEnum.ACTIVE) {
+						if (subscription.getStatus() == ACTIVE) {
 							subscriptionService.subscriptionSuspension(subscription, null);
 						}
 						break;

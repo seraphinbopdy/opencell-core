@@ -761,7 +761,7 @@ public class ReratingService extends RatingService implements Serializable {
 		Map<String, List<Long>> errorsMap = new HashMap<>();
 		walletOperations.stream().forEach(operationToRerate -> {
 		    try {
-		    	reratingService.rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan, false);
+		    	reratingService.rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan, false, true);
 		    } catch (Exception e) {
 		        errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(operationToRerate.getId());
 		    }
@@ -769,8 +769,9 @@ public class ReratingService extends RatingService implements Serializable {
 		errorsMap.forEach((key, value) ->jobExecutionResult.registerError(""+value.size()+" errors of: "+key+" IDs: "+ value.stream().map(String::valueOf).collect(Collectors.joining(", "))));
 		ids.removeAll(errorsMap.values().stream().flatMap(List::stream).collect(Collectors.toList()));
 		if(!ids.isEmpty()) {
-			String updateILQuery = "UPDATE billing_wallet_operation wo SET status='RERATED', updated = CURRENT_TIMESTAMP where id in (:ids) ";
-			getEntityManager().createNativeQuery(updateILQuery).setParameter("ids", ids).executeUpdate();
+			Date now = new Date();
+			String updateILQuery = "UPDATE WalletOperation SET status='RERATED', updated = :now where id in (:ids) ";
+			getEntityManager().createQuery(updateILQuery).setParameter("ids", ids).setParameter("now", now).executeUpdate();
 		}
 	}
 }

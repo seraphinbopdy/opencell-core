@@ -12080,21 +12080,4 @@ public class DummyPaymentGatewayScript extends Script {
         </update>
     </changeSet>
 
-    <changeSet id="#INTRD-22810_20240514" author="TarikFA.">
-        <insert tableName="ar_occ_template">
-            <column name="id" valueSequenceNext="ar_occ_template_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="creator" value="applicationInitializer" />
-            <column name="code" value="PPL_CREATION" />
-            <column name="description" value="PPL_CREATION" />
-            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
-            <column name="occ_category" value="CREDIT" />
-            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
-            <column name="account_code_client_side" value="null" />
-            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '416000000')" />
-            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
-        </insert>
-    </changeSet>
-
 </databaseChangeLog>

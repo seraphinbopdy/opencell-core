@@ -609,11 +609,11 @@
 			</textField>
 			<image scaleImage="RealSize" hAlign="Left" vAlign="Middle">
 				<reportElement x="0" y="-1" width="189" height="85" uuid="919a6ccd-01f3-46e8-a5b8-9cfbfb50364b"/>
-				<imageExpression><![CDATA[$P{logoPath}+"Pictos/opensoft.png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{logoPath}+"Pictos/opensoft.jpg"]]></imageExpression>
 			</image>
 			<image>
 				<reportElement x="276" y="1" width="151" height="64" uuid="3e1e8dbf-d2a8-4f61-abea-40e48ad41727"/>
-				<imageExpression><![CDATA[$F{invoiceStatus}!="VALIDATED" ? $P{logoPath}+"Pictos/draft.png" : $P{logoPath}+"Pictos/blank.png"]]></imageExpression>
+				<imageExpression><![CDATA[$F{invoiceStatus}!="VALIDATED" ? $P{logoPath}+"Pictos/draft.jpg" : $P{logoPath}+"Pictos/blank.png"]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement isPrintRepeatedValues="false" x="18" y="70" width="214" height="20" uuid="7d23a789-5d14-426e-b234-5c9cbc3b914c"/>

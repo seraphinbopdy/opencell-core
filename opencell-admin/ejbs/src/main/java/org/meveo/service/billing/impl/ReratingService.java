@@ -766,7 +766,7 @@ public class ReratingService extends RatingService implements Serializable {
 		        errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(operationToRerate.getId());
 		    }
 		});
-		errorsMap.forEach((key, value) ->jobExecutionResult.registerError(""+value.size()+" errors of: "+key+" IDs: "+ value.stream().map(String::valueOf).collect(Collectors.joining(", "))));
+		errorsMap.forEach((key, value) ->jobExecutionResult.registerError(""+value.size()+" errors of: "+key+" IDs: "+ value.stream().map(String::valueOf).collect(Collectors.joining(", ")), value.size()));
 		ids.removeAll(errorsMap.values().stream().flatMap(List::stream).collect(Collectors.toList()));
 		if(!ids.isEmpty()) {
 			Date now = new Date();

@@ -288,12 +288,10 @@ public class AccountEntityApi extends BaseApi {
 				RegistrationNumber registrationNumber = registrationNumberService.findByRegistrationNo(registrationNumberDto.getRegistrationNo());
 				IsoIcd isoIcd = null;
 				
-				if(registrationNumber == null) {
-					registrationNumber = new RegistrationNumber(registrationNumberDto.getRegistrationNo(), isoIcd, accountEntity);
-				}else if(registrationNumber.getAccountEntity(accountEntity) == null ||  accountEntity.getId() == registrationNumber.getAccountEntity(accountEntity).getId()){
+				if(registrationNumber != null && (registrationNumber.getAccountEntity(accountEntity) == null ||  accountEntity.getId() == registrationNumber.getAccountEntity(accountEntity).getId())){
 					registrationNumber.setAccountEntity(accountEntity);
 				}else{
-					throw new BusinessApiException("The register number is already attach to another " + accountEntity.getClass().getSimpleName());
+					registrationNumber = new RegistrationNumber(registrationNumberDto.getRegistrationNo(), isoIcd, accountEntity);
 				}
 				
 				if(org.meveo.commons.utils.StringUtils.isNotBlank(registrationNumberDto.getIsoIcdCode())){

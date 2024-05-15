@@ -638,7 +638,6 @@ public class ReratingService extends RatingService implements Serializable {
      * @param useSamePricePlan Shall a same price plan will be used, or a new one should be looked up again
      * @param update Should we apply update on database
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void rerateWalletOperationAndInstantiateTriggeredEDRs(WalletOperation operationToRerate, boolean useSamePricePlan, boolean update) {
     	rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan, update, false);
     }
@@ -653,6 +652,7 @@ public class ReratingService extends RatingService implements Serializable {
      * @param rateTriggeredEDR Should we rate triggered EDRs
      * 
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void rerateWalletOperationAndInstantiateTriggeredEDRs(WalletOperation operationToRerate, boolean useSamePricePlan, boolean update, boolean rateTriggeredEDR) {
 
         RatingResult ratingResult = null;

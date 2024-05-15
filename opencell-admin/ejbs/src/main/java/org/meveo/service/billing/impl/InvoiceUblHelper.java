@@ -623,6 +623,11 @@ public class InvoiceUblHelper {
 		// todo : Check this contact namespace is correct
 		if(billingAccount.getContactInformation() != null){
 			ContactType contactType = getContactInformation(billingAccount.getContactInformation());
+			if(billingAccount.getName() != null && billingAccount.getName().getFullName() != null) {
+				oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
+				name.setValue(billingAccount.getName().getFullName());
+				contactType.setName(name);
+			}
 			partyType.setContact(contactType);
 		}
 		// AccountingCustomerParty/Party/PartyLegalEntity/Person

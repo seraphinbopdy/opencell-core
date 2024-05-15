@@ -7249,11 +7249,11 @@ Your name and surname
         INSERT INTO ${db.schema.adapted}CAT_UNIT_OF_MEASURE (id,version,creator,updater,code,created,updated,symbol,description,description_i18n,multiplicator,parent_id) VALUES (-2159, 0, 'opencell.admin', NULL, 'XZW', now(), NULL, 'Intermediate bulk container, natural wood', 'Intermediate bulk container, natural wood', NULL, 1, NULL);
         INSERT INTO ${db.schema.adapted}CAT_UNIT_OF_MEASURE (id,version,creator,updater,code,created,updated,symbol,description,description_i18n,multiplicator,parent_id) VALUES (-2160, 0, 'opencell.admin', NULL, 'XZX', now(), NULL, 'Intermediate bulk container, plywood', 'Intermediate bulk container, plywood', NULL, 1, NULL);
         INSERT INTO ${db.schema.adapted}CAT_UNIT_OF_MEASURE (id,version,creator,updater,code,created,updated,symbol,description,description_i18n,multiplicator,parent_id) VALUES (-2161, 0, 'opencell.admin', NULL, 'XZY', now(), NULL, 'Intermediate bulk container, reconstituted wood', 'Intermediate bulk container, reconstituted wood', NULL, 1, NULL);
-        INSERT INTO ${db.schema.adapted}CAT_UNIT_OF_MEASURE (id,version,creator,updater,code,created,updated,symbol,description,description_i18n,multiplicator,parent_id) VALUES (-2162, 0, 'opencell.admin', NULL, 'XZZ', now(), NULL, 'Mutually defined ', 'Mutually defined ', NULL, 1, NULL);   
-                
+        INSERT INTO ${db.schema.adapted}CAT_UNIT_OF_MEASURE (id,version,creator,updater,code,created,updated,symbol,description,description_i18n,multiplicator,parent_id) VALUES (-2162, 0, 'opencell.admin', NULL, 'XZZ', now(), NULL, 'Mutually defined ', 'Mutually defined ', NULL, 1, NULL);
+
         </sql>
         </changeSet>
-        
+
         <changeSet id="#INTRD-13967_20230215" author="houdad">
         <update tableName="adm_currency">
             <column name="currency_code" value="AFN" />
@@ -12072,12 +12072,27 @@ public class DummyPaymentGatewayScript extends Script {
             <where>code = '0009'</where>
         </update>
     </changeSet>
-    
+
     <changeSet id="#INTRD-14889_20240509-2" author="AbdelmounaimAkadid">
 		<update tableName="meveo_job_instance" >
             <column name="job_category" value="INVOICING" />
             <where>id = '-66'</where>
         </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-23038_20240515" author="TarikFA." >
+        <insert tableName="ar_occ_template" >
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="PPL_INSTALLMENT" />
+            <column name="description" value="Payment plan Installment" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <column name="manual_creation_enabled" valueNumeric="0" />
+        </insert>
     </changeSet>
 
 </databaseChangeLog>

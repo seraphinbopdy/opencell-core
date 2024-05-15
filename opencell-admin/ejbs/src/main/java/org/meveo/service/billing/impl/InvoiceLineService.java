@@ -46,6 +46,7 @@ import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.Session;
+import org.hibernate.exception.DataException;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.AggregationConfiguration;
 import org.meveo.admin.job.InvoiceLinesFactory;
@@ -702,9 +703,19 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
      * @return Created Invoice Line {@link InvoiceLine}
      */
     public InvoiceLine createInvoiceLine(InvoiceLine invoiceLine) {
-        create(invoiceLine);
-        getEntityManager().flush();
-        return invoiceLine;
+        try {
+            create(invoiceLine);
+            getEntityManager().flush();
+            return invoiceLine;
+        } catch (RuntimeException exception) {
+            if(exception.getCause() instanceof DataException) {
+                Throwable throwable = exception.getCause() != null
+                        ? exception.getCause().getCause() : exception;
+                throw new BusinessException(throwable.getCause().getMessage());
+            } else {
+                throw new BusinessException(exception.getMessage());
+            }
+        }
     }
 
 	public InvoiceLine initInvoiceLineFromResource(org.meveo.apiv2.billing.InvoiceLine resource, InvoiceLine invoiceLine) {

@@ -1460,10 +1460,8 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
     	RatingResult ratingResult = new RatingResult();
         WalletOperation operation = walletOperationToRerate.getUnratedClone();
         operation.setOperationDate(operation.getEdr() != null ? operation.getEdr().getEventDate() : operation.getOperationDate());
-        operation.setOperationDate(operation.getEdr() != null ? operation.getEdr().getEventDate() : operation.getOperationDate());
         PricePlanMatrix priceplan = operation.getPriceplan();
         WalletInstance wallet = operation.getWallet();
-        UserAccount userAccount = wallet.getUserAccount();
 
         if (useSamePricePlan && priceplan != null) {
             BigDecimal unitAmountWithTax = operation.getUnitAmountWithTax();
@@ -1472,6 +1470,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             if (appProvider.isEntreprise()) {
                 unitAmountWithoutTax = priceplan.getAmountWithoutTax();
                 if (priceplan.getAmountWithoutTaxEL() != null) {
+                	UserAccount userAccount = wallet.getUserAccount();
                     unitAmountWithoutTax = elUtils.evaluateAmountExpression(priceplan.getAmountWithoutTaxEL(), operation, userAccount, priceplan, unitAmountWithoutTax);
                     if (unitAmountWithoutTax == null) {
                         throw new BusinessException("Can't find unitPriceWithoutTax from PP :" + priceplan.getAmountWithoutTaxEL());
@@ -1481,6 +1480,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             } else {
                 unitAmountWithTax = priceplan.getAmountWithTax();
                 if (priceplan.getAmountWithTaxEL() != null) {
+                	UserAccount userAccount = wallet.getUserAccount();
                     unitAmountWithTax = elUtils.evaluateAmountExpression(priceplan.getAmountWithTaxEL(), operation, userAccount, priceplan, unitAmountWithoutTax);
                     if (unitAmountWithTax == null) {
                         throw new BusinessException("Can't find unitPriceWithoutTax from PP :" + priceplan.getAmountWithTaxEL());

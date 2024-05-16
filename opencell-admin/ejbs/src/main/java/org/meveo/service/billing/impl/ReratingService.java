@@ -670,6 +670,7 @@ public class ReratingService extends RatingService implements Serializable {
 
             // Trigger EDRs
             for (WalletOperation walletOperation : ratingResult.getWalletOperations()) {
+            	 walletOperationService.create(walletOperation);
                 List<EDR> triggeredEdrs = instantiateTriggeredEDRs(walletOperation, operationToRerate.getEdr(), false, true);
                 ratingResult.addTriggeredEDRs(triggeredEdrs);
             }

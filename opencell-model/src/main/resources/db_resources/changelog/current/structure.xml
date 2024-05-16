@@ -12094,4 +12094,10 @@ public class DummyPaymentGatewayScript extends Script {
         </delete>
     </changeSet>
 
+    <changeSet id="#INTRD-22947_20240516" author="TarikFA.">
+        <addColumn tableName="electronic_invoice_settings">
+            <column name="vat_date_code" type="int4" defaultValueNumeric="432"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -341,10 +341,11 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	}
 	
 	public Invoice update(Invoice invoice, Invoice input, org.meveo.apiv2.billing.Invoice invoiceResource) {
-		if(invoiceResource.getCustomFields() != null) {
-			populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), input, true);
-		}
         Invoice updateInvoice = invoiceService.update(invoice, input, invoiceResource);
+        if (invoiceResource.getCustomFields() != null) {
+			populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), updateInvoice, true);
+			invoiceService.update(updateInvoice);
+		}
         invoiceService.calculateInvoice(updateInvoice);
 
         return updateInvoice;

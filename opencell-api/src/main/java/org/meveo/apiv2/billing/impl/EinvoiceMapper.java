@@ -19,6 +19,7 @@ public class EinvoiceMapper extends ResourceMapper<EinvoiceSetting, ElectronicIn
 				.xmlGenerationJob(entity.getXmlGenerationJob())
 				.pdfGenerationJob(entity.getPdfGenerationJob())
 				.ublGenerationJob(entity.getUblGenerationJob())
+				.vatDateCode(entity.getVatDateCode())
 				.build();
 	}
 	
@@ -32,6 +33,7 @@ public class EinvoiceMapper extends ResourceMapper<EinvoiceSetting, ElectronicIn
 		einvoice.setXmlGenerationJob(resource.getXmlGenerationJob());
 		einvoice.setPdfGenerationJob(resource.getPdfGenerationJob());
 		einvoice.setUblGenerationJob(resource.getUblGenerationJob());
+		einvoice.setVatDateCode(resource.getVatDateCode());
 		return einvoice;
 	}
 }

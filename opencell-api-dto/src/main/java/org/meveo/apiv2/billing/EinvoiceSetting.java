@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
+import org.meveo.model.billing.VatDateCodeEnum;
 
 import javax.annotation.Nullable;
 
@@ -39,6 +40,10 @@ public interface EinvoiceSetting extends Resource {
 	@Nullable
 	@Schema(description = "the code of xml generation job")
 	String getXmlGenerationJob();
+	
+	@Nullable
+	@Schema(description = "the vat date code")
+	VatDateCodeEnum getVatDateCode();
 	
 	
 }

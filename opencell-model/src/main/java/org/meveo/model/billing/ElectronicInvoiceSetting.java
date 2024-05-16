@@ -7,6 +7,8 @@ import org.meveo.model.AuditableEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import java.util.Objects;
 
@@ -39,6 +41,11 @@ public class ElectronicInvoiceSetting  extends AuditableEntity {
 	
 	@Column(name = "xml_generation_job")
 	private String xmlGenerationJob;
+	
+	@Column(name = "vat_date_code")
+	@Enumerated(value = EnumType.ORDINAL)
+	private VatDateCodeEnum vatDateCode = VatDateCodeEnum.PAID_TO_DATE;
+	
 	
 	public boolean isForceXmlGeneration() {
 		return forceXmlGeneration;
@@ -94,6 +101,14 @@ public class ElectronicInvoiceSetting  extends AuditableEntity {
 	
 	public void setXmlGenerationJob(String xmlGenerationJob) {
 		this.xmlGenerationJob = xmlGenerationJob;
+	}
+	
+	public VatDateCodeEnum getVatDateCode() {
+		return vatDateCode;
+	}
+	
+	public void setVatDateCode(VatDateCodeEnum vatDateCode) {
+		this.vatDateCode = vatDateCode;
 	}
 	
 	@Override

@@ -69,6 +69,9 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     @Inject
     private DunningActionInstanceService actionInstanceService;
 
+    @Inject
+    private DunningSettingsService dunningSettingsService;
+
     @EJB
     private TriggerCollectionPlanLevelsJobBean jobBean;
 
@@ -254,17 +257,28 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     }
 
     private void triggerAction(DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
+        DunningSettings dunningSettings = dunningSettingsService.findLastOne();
+
+        // Execute script
         if (actionInstance.getActionType().equals(SCRIPT) && actionInstance.getDunningAction() != null) {
             HashMap<String, Object> context = new HashMap<>();
             context.put(Script.CONTEXT_ENTITY, collectionPlan.getRelatedInvoice());
+            context.put("customerAccount", collectionPlan.getCustomerAccount());
+            if (dunningSettings != null) {
+                context.put("dunningMode", dunningSettings.getDunningMode());
+            }
             scriptInstanceService.execute(actionInstance.getDunningAction().getScriptInstance().getCode(), context);
         }
+
+        // Send notification
         if (actionInstance.getActionType().equals(SEND_NOTIFICATION)
                 && (actionInstance.getDunningAction().getActionChannel().equals(EMAIL)
                 || actionInstance.getDunningAction().getActionChannel().equals(LETTER))) {
                 sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(),
                         collectionPlan.getRelatedInvoice(), collectionPlan.getLastActionDate());
         }
+
+        // Retry payment
         if (actionInstance.getActionType().equals(RETRY_PAYMENT)) {
         	collectionPlanService.launchPaymentAction(collectionPlan);
         }

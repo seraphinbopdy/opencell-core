@@ -24,6 +24,7 @@ import org.hibernate.annotations.Type;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
+import org.meveo.model.payments.CustomerAccount;
 
 import static java.lang.Math.abs;
 import static org.meveo.model.shared.DateUtils.daysBetween;
@@ -195,6 +196,13 @@ public class DunningCollectionPlan extends AuditableEntity {
      */
     @Column(name = "pause_duration")
     private Integer pauseDuration;
+
+	/**
+	 * Associated Customer account
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "customer_account_id")
+	private CustomerAccount customerAccount;
 
     public DunningCollectionPlan() {};
 
@@ -383,5 +391,12 @@ public class DunningCollectionPlan extends AuditableEntity {
 	 */
 	public void addPauseDuration(int days) {
 		this.pauseDuration = this.pauseDuration == null ? days : this.pauseDuration + days;
+	}
+
+	public CustomerAccount getCustomerAccount() {
+		return customerAccount;
+	}
+	public void setCustomerAccount(CustomerAccount customerAccount) {
+		this.customerAccount = customerAccount;
 	}
 }

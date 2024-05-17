@@ -82,7 +82,7 @@ public class BillingRunApiService implements ApiService<BillingRun> {
     private static final String INVOICING_JOB_CODE = "Invoicing_Job_V2";
     private static final String INVOICE_LINES_JOB_CODE = "Invoice_Lines_Job_V2";
 
-    private static final String INVOICING_JOB_PARAMETERS = "InvoicingJobV2_billingRun";
+    private static final String INVOICING_JOB_PARAMETERS = "billingRuns";
     private static final String INVOICE_LIENS_JOB_PARAMETERS = "InvoiceLinesJob_billingRun";
 
     @Override

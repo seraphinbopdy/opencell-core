@@ -12284,6 +12284,928 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		</sql>
     </changeSet>
 
+    <changeSet id="INTRD-18045_20230829" author="zelmeliani">
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello, </p>
+                    <p>We are reaching out to you in regards of your current balance that you have with our company. It seems you have a debit of #{customerAccountBalance} #{currencySymbol}.</p>
+                    <p>
+                        Please take the necessary steps to ensure payment of your last(s) invoice(s). <br>
+                    </p>
+                    <p>If you have any additional questions, do not hesitate to contact our services or your regular point of contact.</p>
+                    <p>Best regards,</p>
+                ]]>
+            </column>
+            <where>code='B2B+5'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello, </p>
+                    <p>We are following up on our previous email regarding your negative balance (that is currently of#{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>
+                        Please take contact with us to clear the situation.<br>
+                        If you have already done a payment, you can discard this email.
+                    </p>
+                    <p>If you have any additional question, do not hesitate to contact our services or your regular point of contact.</p>
+                    <p>Best regards,</p>
+                ]]>
+            </column>
+            <where>code='B2B +10'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello, </p>
+                    <p>It has now been 10 days since our first email regarding your current negative balance. Your current balance is #{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>
+                        Please take contact with us to clear the situation.<br>
+                        If you have already done a payment, you can discard this email.
+                    </p>
+                    <p>If you have any additional question, do not hesitate to contact our services or your regular point of contact.</p>
+                    <p>Best regards,</p>
+                ]]>
+            </column>
+            <where>code='B2B +20'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello, </p>
+                    <p>It seems our previous emails did not allow the expected outcome. Today, your current balance is of#{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>As it seems we were not able to clear the situation, the services you have with us have been suspended.</p>
+                    <p>If you have already done a payment, please contact us so that we can re-activate your services.</p>
+                    <p>If you have any additional question, please contact our services.</p>
+                    <p>Best regards,</p>
+                ]]>
+            </column>
+            <where>code='B2B +30'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
+                    <p>We are reaching out to you in regards of your current balance that you have with our company. It seems you have debit of #{customerAccountBalance} #{currencySymbol}.</p>
+                    <p>
+                        Please take necessary steps to insure payments of your last(s) invoice(s). <br>
+                        You
+                    </p>
+                    <p>If you have any additional question, do not hesitate to contact our services or your regular point of contact.</p>
+                    <p>Best regards,</p>
+                ]]>
+            </column>
+            <where>code='B2C +1'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
+                    <p>We are following up on our previous email regarding your negative balance (that is currently of#{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>
+                        Please take contact with us to clear the situation.<br>
+                        If you have already done a payment, you can discard this email.
+                    </p>
+                    <p>If you have any additional question, do not hesitate to contact our services or your regular point of contact.</p>
+                    <p>Best regards,</p>
+                ]]>
+            </column>
+            <where>code='B2C +5'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
+                    <p>It has now been 10 days since our first email regarding your current negative balance. Your current balance is #{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>
+                        Please take contact with us to clear the situation.<br>
+                        If you have already done a payment, you can discard this email.
+                    </p>
+                    <p>If you have any additional question, do not hesitate to contact our services or your regular point of contact.</p>
+                    <p>Best regards,</p>
+                ]]>
+            </column>
+            <where>code='B2C +10'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
+                    <p>It seems our previous emails did not allow the expected outcome. Today, your current balance is of#{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>As it seems we were not able to clear the situation, the services you have with us have been suspended.</p>
+                    <p>If you have already done a payment, please contact us so that we can re-activate your services.</p>
+                    <p>If you have any additional question, please contact our services.</p>
+                    <p>Best regards,</p>
+                ]]>
+            </column>
+            <where>code='B2C +15'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Bonjour,</p>
+                    <p>Nous vous contactons au sujet de votre solde actuel auprèss de notre société. Il semble que vous ayez une position débitrice d’un montant de #{customerAccountBalance} #{currencySymbol}.</p>
+                    <p>Nous vous invitons a faire le nécessaires pour assurer le paiement de votre (vos) dernière(s) facture(s).</p>
+                    <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
+                    <p>Meilleures salutations,</p>
+                ]]>
+            </column>
+            <where>code='B2B +5fr'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Bonjour,</p>
+                    <p>Nous donnons suite à notre précédent e-mail concernant votre solde négatif (actuellement de #{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>Merci de prendre contact avec nous pour échanger sur la situation.</p>
+                    <p>Si vous avez déjà effectué un paiement, veuillez ne pas prendre cet e-mail en considération.</p>
+                    <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
+                    <p>Meilleures salutations,</p>
+                ]]>
+            </column>
+            <where>code='B2B +10fr'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Bonjour,</p>
+                    <p>Cela fait maintenant 10 jours depuis notre premier e-mail concernant votre solde négatif. Votre solde actuel est de #{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>Merci de prendre contact avec nous pour éclaircir la situation.</p>
+                    <p>Si vous avez déjà effectué un paiement, vous pouvez ne pas prendre compte de cet e-mail.</p>
+                    <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
+                    <p>Meilleures salutations,</p>
+                ]]>
+            </column>
+            <where>code='B2B +20fr'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Bonjour,</p>
+                    <p>Il semble que nos e-mails précédents n'aient pas permis d’arriver au résultat escompté. Aujourd'hui, votre solde est de #{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>La situation ne s’étant pas régler à l’amiable, l’ensemble des services que vous avez avec nous ont été suspendus.</p>
+                    <p>Si vous avez déjà effectué un paiement, veuillez nous contacter afin que nous puissions réactiver vos services.</p>
+                    <p>Si vous avez des questions supplémentaires, veuillez contacter nos services.</p>
+                    <p>Meilleures salutations,</p>
+                ]]>
+            </column>
+            <where>code='B2B +30fr'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Bonjour#{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
+                    <p>Nous vous contactons au sujet de votre solde actuel auprèss de notre société. Il semble que vous ayez une position débitrice d’un montant de #{customerAccountBalance} #{currencySymbol}.</p>
+                    <p>Nous vous invitons a faire le nécessaires pour assurer le paiement de votre (vos) dernière(s) facture(s).</p>
+                    <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
+                    <p>Meilleures salutations,</p>
+                ]]>
+            </column>
+            <where>code='B2C +1fr'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Bonjour#{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
+                    <p>Nous donnons suite à notre précédent e-mail concernant votre solde négatif (actuellement de #{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>Merci de prendre contact avec nous pour échanger sur la situation.</p>
+                    <p>Si vous avez déjà effectué un paiement, veuillez ne pas prendre cet e-mail en considération.</p>
+                    <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
+                    <p>Meilleures salutations,</p>
+                ]]>
+            </column>
+            <where>code='B2C +5fr'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Bonjour#{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
+                    <p>Cela fait maintenant 10 jours depuis notre premier e-mail concernant votre solde négatif. Votre solde actuel est de #{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>Merci de prendre contact avec nous pour éclaircir la situation.</p>
+                    <p>Si vous avez déjà effectué un paiement, vous pouvez ne pas prendre compte de cet e-mail.</p>
+                    <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
+                    <p>Meilleures salutations,</p>
+                ]]>
+            </column>
+            <where>code='B2C +10fr'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Bonjour #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
+                    <p>Il semble que nos e-mails précédents n'aient pas permis d’arriver au résultat escompté. Aujourd'hui, votre solde est de #{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>La situation ne s’étant pas régler à l’amiable, l’ensemble des services que vous avez avec nous ont été suspendus.</p>
+                    <p>Si vous avez déjà effectué un paiement, veuillez nous contacter afin que nous puissions réactiver vos services.</p>
+                    <p>Si vous avez des questions supplémentaires, veuillez contacter nos services.</p>
+                    <p>Meilleures salutations,</p>
+                ]]>
+            </column>
+            <where>code='B2C +15fr'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Bonjour #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
+                    <p>Il semble que nos e-mails précédents n'aient pas permis d’arriver au résultat escompté. Aujourd'hui, votre solde est de #{customerAccountBalance} #{currencySymbol}).</p>
+                    <p>La situation ne s’étant pas régler à l’amiable, l’ensemble des services que vous avez avec nous ont été suspendus.</p>
+                    <p>Si vous avez déjà effectué un paiement, veuillez nous contacter afin que nous puissions réactiver vos services.</p>
+                    <p>Si vous avez des questions supplémentaires, veuillez contacter nos services.</p>
+                    <p>Meilleures salutations,</p>
+                ]]>
+            </column>
+            <where>code='B2C +15fr'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="INTRD-12827_20230904" author="zelmeliani">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="org.meveo.service.script.DunningSuspendSubscriptionScript" />
+            <column name="src_type" value="JAVA_CLASS" />
+            <column name="description" value="Suspend all subscriptions linked to customer and link it to B2CSuspend and B2BSuspend"/>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+						public class DunningSuspendSubscription extends DunningSuspendSubscriptionScript {}
+				]]>
+            </column>
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-81" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+5" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-11" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-82" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+10" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-12" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-83" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+20" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-13" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-84" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+30" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-14" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-85" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+1" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-15" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-86" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+5" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-16" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-87" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+10" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-17" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-88" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+15" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-18" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-89" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+5 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-19" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-90" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+10 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-20" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-91" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+20 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-21" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-92" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+30 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-22" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-93" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+1 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-23" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-94" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+5 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-24" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-95" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+10 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-25" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-96" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+15 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-26" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-97" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2CSuspend" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SCRIPT" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="SCRIPT" />
+            <column name="script_instance_id" valueComputed="(SELECT id from meveo_script_instance where code = 'org.meveo.service.script.DunningSuspendSubscriptionScript')" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-98" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2BSuspend" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SCRIPT" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="SCRIPT" />
+            <column name="script_instance_id" valueComputed="(SELECT id from meveo_script_instance where code = 'org.meveo.service.script.DunningSuspendSubscriptionScript')" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="#INTRD-12924_20230817" author="zelmeliani">
+        <!-- Dunning Level B2B 1 -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-81" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 1" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="5" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+5')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 1')" />
+        </insert>
+        <!-- Dunning Level B2B 2 -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-82" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 2" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="10" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+10')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 2')" />
+        </insert>
+        <!-- Dunning Level B2B 3 -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-83" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 3" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="20" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+20')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 3')" />
+        </insert>
+        <!-- Dunning Level B2B 4 -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-84" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 4" />
+            <column name="end_dunning_level" valueNumeric="1" />
+            <column name="days_overdue" valueNumeric="30" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+30')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 4')" />
+        </insert>
+        <!-- Dunning Level B2C 1 -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-85" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 1" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="1" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+1')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 1')" />
+        </insert>
+        <!-- Dunning Level B2C 2 -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-86" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 2" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="5" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+5')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 2')" />
+        </insert>
+        <!-- Dunning Level B2C 3 -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-87" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 3" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="10" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+10')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 3')" />
+        </insert>
+        <!-- Dunning Level B2C 4 -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-88" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 4" />
+            <column name="end_dunning_level" valueNumeric="1" />
+            <column name="days_overdue" valueNumeric="15" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+15')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 4')" />
+        </insert>
+        <!-- Dunning Level B2B 1 FR -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-89" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 1 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="5" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+5 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 1 FR')" />
+        </insert>
+        <!-- Dunning Level B2B 2 FR -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-90" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 2 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="10" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+10 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 2 FR')" />
+        </insert>
+        <!-- Dunning Level B2B 3 FR -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-91" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 3 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="20" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+20 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 3 FR')" />
+        </insert>
+        <!-- Dunning Level B2B 4 FR -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-92" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 4 FR" />
+            <column name="end_dunning_level" valueNumeric="1" />
+            <column name="days_overdue" valueNumeric="30" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+30 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 4 FR')" />
+        </insert>
+        <!-- Dunning Level B2C 1 FR -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-93" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 1 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="1" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+1 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 1 FR')" />
+        </insert>
+        <!-- Dunning Level B2C 2 FR -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-94" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 2 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="5" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+5 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 2 FR')" />
+        </insert>
+        <!-- Dunning Level B2C 3 FR -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-95" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 3 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="10" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+10 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 3 FR')" />
+        </insert>
+        <!-- Dunning Level B2C 4 FR -->
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-96" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 4 FR" />
+            <column name="end_dunning_level" valueNumeric="1" />
+            <column name="days_overdue" valueNumeric="15" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+15 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 4 FR')" />
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-10574_20230213" author="AndriusKarpavicius">
+        <insert tableName="audit_data_config">
+            <column name="id" valueSequenceNext="audit_data_config_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="opencell.admin"/>
+            <column name="entity_class" value="org.meveo.model.billing.Subscription"/>
+            <column name="entity_fields" value="status,userAccount,subscriptionRenewal,renewed"/>
+        </insert>
+        <insert tableName="audit_data_config">
+            <column name="id" valueSequenceNext="audit_data_config_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="opencell.admin"/>
+            <column name="entity_class" value="org.meveo.model.billing.ServiceInstance"/>
+            <column name="entity_fields" value="status,serviceRenewal,renewed"/>
+        </insert>
+        <insert tableName="audit_data_config">
+            <column name="id" valueSequenceNext="audit_data_config_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="opencell.admin"/>
+            <column name="entity_class" value="org.meveo.model.billing.Invoice"/>
+            <column name="entity_fields" value="status,xmlDate,pdfDate,emailSentDate,paymentStatus"/>
+        </insert>
+        <insert tableName="audit_data_config">
+            <column name="id" valueSequenceNext="audit_data_config_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="opencell.admin"/>
+            <column name="entity_class" value="org.meveo.model.order.Order"/>
+            <column name="entity_fields" value="status"/>
+        </insert>
+        <insert tableName="audit_data_config">
+            <column name="id" valueSequenceNext="audit_data_config_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="opencell.admin"/>
+            <column name="entity_class" value="org.meveo.model.payments.AccountOperation"/>
+            <column name="entity_fields" value="collectionDate"/>
+        </insert>
+        <insert tableName="audit_data_config">
+            <column name="id" valueSequenceNext="audit_data_config_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="opencell.admin"/>
+            <column name="entity_class" value="org.meveo.model.payments.CustomerAccount"/>
+            <column name="entity_fields" value="customer"/>
+        </insert>
+    
+        <insert tableName="audit_data_config">
+            <column name="id" valueSequenceNext="audit_data_config_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="opencell.admin"/>
+            <column name="entity_class" value="org.meveo.model.payments.PaymentScheduleInstance"/>
+            <column name="entity_fields" value="amount"/>
+        </insert>
+        <insert tableName="audit_data_config">
+            <column name="id" valueSequenceNext="audit_data_config_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueComputed="now()"/>
+            <column name="creator" value="opencell.admin"/>
+            <column name="entity_class" value="org.meveo.model.payments.PaymentScheduleInstanceItem"/>
+            <column name="entity_fields" value="requestPaymentDate,amount"/>
+        </insert>
+        <sql>call proc_recreate_audit_data_trigger('ar_payment_schedule_inst_item','request_pay_date,amount', null, null, false)</sql>
+        <sql>call proc_recreate_audit_data_trigger('ar_payment_schedule_inst','amount', null, null, true)</sql>
+        <sql>call proc_recreate_audit_data_trigger('ar_customer_account','customer_id', null, null, false)</sql>
+        <sql>call proc_recreate_audit_data_trigger('ar_account_operation','collection_date', null, null, false)</sql>
+        <sql>call proc_recreate_audit_data_trigger('ord_order','status', null, null, true)</sql>
+        <sql>call proc_recreate_audit_data_trigger('billing_invoice','status,xml_date,pdf_date,email_sent_date,payment_status', null, null, false)</sql>
+        <sql>call proc_recreate_audit_data_trigger('billing_subscription','status,user_account_id,renewed,auto_renew,auto_renew_date,days_notify_renew,end_of_term_action,auto_termin_reason_id,init_active_unit,init_active,calendar_init_active_id,match_end_aggr_date,renew_for_unit,renew_for,calendar_renew_for_id,initial_term_type,renewal_term_type', null, null, false)</sql>
+        <sql>call proc_recreate_audit_data_trigger('billing_service_instance','status,renewed,auto_renew,auto_renew_date,days_notify_renew,end_of_term_action,auto_termin_reason_id,init_active_unit,init_active,calendar_init_active_id,match_end_aggr_date,renew_for_unit,renew_for,calendar_renew_for_id,initial_term_type,renewal_term_type', null, null, false)</sql>
+    </changeSet>
+
+    <changeSet id="#INTRD-10574_20230214" author="AndriusKarpavicius">
+        <delete tableName="meveo_job_instance">
+            <where>code = 'APIv2PermissionsSyncJob'</where>
+        </delete>
+    </changeSet>
+
     <changeSet author="AndriusKarpavicius" id="rebuild-data-invoiceTypes">
         <insert tableName="billing_seq_invoice">
             <column name="id" valueSequenceNext="bill_seq_invoice_seq" />

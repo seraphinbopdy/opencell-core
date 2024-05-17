@@ -53,6 +53,10 @@ public class EntityReferenceDto implements Serializable {
     @XmlAttribute(required = true)
     private String code;
 
+    /** Entity id. */
+    @XmlAttribute
+    private Long id;
+
     /**
      * Instantiates a new entity reference dto.
      */
@@ -69,6 +73,7 @@ public class EntityReferenceDto implements Serializable {
         classname = entityReferenceWrapper.getClassname();
         classnameCode = entityReferenceWrapper.getClassnameCode();
         code = entityReferenceWrapper.getCode();
+        id = entityReferenceWrapper.getId();
     }
 
     /**
@@ -80,7 +85,7 @@ public class EntityReferenceDto implements Serializable {
         if (isEmpty()) {
             return null;
         }
-        return new EntityReferenceWrapper(classname, classnameCode, code);
+        return new EntityReferenceWrapper(classname, classnameCode, code, id);
     }
 
     /**
@@ -119,6 +124,24 @@ public class EntityReferenceDto implements Serializable {
         this.code = code;
     }
 
+    /**
+     * Gets the id.
+     *
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * Sets the id.
+     *
+     * @param id the new id
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -126,7 +149,7 @@ public class EntityReferenceDto implements Serializable {
      */
     @Override
     public String toString() {
-        return String.format("EntityReferenceDto [classname=%s, classnameCode=%s, code=%s]", classname, classnameCode, code);
+        return String.format("EntityReferenceDto [classname=%s, classnameCode=%s, code=%s, id=%s]", classname, classnameCode, code, id);
     }
 
     /**

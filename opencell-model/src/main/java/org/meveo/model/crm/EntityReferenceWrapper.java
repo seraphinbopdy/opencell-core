@@ -107,6 +107,21 @@ public class EntityReferenceWrapper implements Serializable, IReferenceEntity {
 
     /**
      * Constructor
+     *
+     * @param classname     Classname of an entity
+     * @param classnameCode Custom entity template code - applicable and required when reference is to Custom Entity Template type
+     * @param id            Entity id
+     * @param code          Entity code
+     */
+    public EntityReferenceWrapper(String classname, String classnameCode, String code, Long id) {
+        this.classname = classname;
+        this.classnameCode = classnameCode;
+        this.code = code;
+        this.id = id;
+    }
+
+    /**
+     * Constructor
      * 
      * @param classname Classname of an entity
      * @param classnameCode Custom entity template code - applicable and required when reference is to Custom Entity Template type

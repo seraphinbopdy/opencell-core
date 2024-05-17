@@ -20883,6 +20883,10 @@
     <changeSet id="#INTRD_22492_20240506" author="zelmeliani" />
     <changeSet id="#INTRD-22825_20240509_allowed_offers_data_recovery" author="a.rouaguebe" />
     <changeSet id="#INTRD-21493_20240502" author="zelmeliani" />
+    <changeSet id="INTRD-18045_20230829" author="zelmeliani" />
+    <changeSet id="#INTRD-21481_20240517" author="zelmeliani" />
+    <changeSet id="INTRD-12827_20230904" author="zelmeliani" />
+    <changeSet id="#INTRD-12924_20230817" author="zelmeliani" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

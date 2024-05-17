@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type;
 import org.meveo.model.AuditableEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -43,7 +44,7 @@ public class ElectronicInvoiceSetting  extends AuditableEntity {
 	private String xmlGenerationJob;
 	
 	@Column(name = "vat_date_code")
-	@Enumerated(value = EnumType.ORDINAL)
+	@Convert(converter = VatDateCodeEnumConverter.class)
 	private VatDateCodeEnum vatDateCode = VatDateCodeEnum.PAID_TO_DATE;
 	
 	

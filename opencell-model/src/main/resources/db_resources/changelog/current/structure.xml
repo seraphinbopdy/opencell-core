@@ -25954,4 +25954,16 @@ public class DummyPaymentGatewayScript extends Script {
         </modifySql>
     </changeSet>
 
+    <changeSet id="#INTRD-21493_20240502" author="zelmeliani">
+        <addColumn tableName="dunning_collection_plan">
+            <column name="customer_account_id" type="bigint" />
+        </addColumn>
+        <addForeignKeyConstraint
+                baseTableName="dunning_collection_plan"
+                baseColumnNames="customer_account_id"
+                constraintName="fk_dunning_collection_plan_ar_customer_account"
+                referencedTableName="ar_customer_account" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" />
+    </changeSet> 
+
 </databaseChangeLog>

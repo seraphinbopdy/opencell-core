@@ -18,6 +18,7 @@ import javax.ws.rs.core.Application;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.meveo.api.rest.invoice.impl.PaymentTermResourceImpl;
 import org.meveo.apiv2.accounting.resource.impl.AccountingPeriodResourceImpl;
 import org.meveo.apiv2.accounting.resource.impl.AccountingResourceImpl;
 import org.meveo.apiv2.accountreceivable.accountOperation.AccountReceivableResourceImpl;
@@ -169,7 +170,7 @@ public class GenericOpencellRestful extends Application {
                 CustomTableResourceImpl.class, AdvancedSettingsResourceImpl.class, CustomerBalanceResourceImpl.class, FileTypeResourceImpl.class, DocumentCategoryResourceImpl.class, 
                 ElectronicInvoicingResourceImpl.class,PaymentResourceImpl.class, PriceListResourceImpl.class, SellerResourceImpl.class, PriceListLineResourceImpl.class, CatalogPriceListResourceImpl.class,
 				SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
-                ProductManagementRsImpl.class, HugeEntityResourceImpl.class)
+                ProductManagementRsImpl.class, HugeEntityResourceImpl.class, PaymentTermResourceImpl.class)
                 .collect(Collectors.toSet());
         if (GENERIC_API_REQUEST_LOGGING_CONFIG.equalsIgnoreCase("true")) {
             resources.add(GenericApiLoggingFilter.class);

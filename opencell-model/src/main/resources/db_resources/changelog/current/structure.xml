@@ -12080,6 +12080,12 @@ public class DummyPaymentGatewayScript extends Script {
         </update>
     </changeSet>
     
+  	<changeSet id="#INTRD-20586_20240520" author="aeljaouhari">
+    	<delete tableName="job_execution_error">
+            <where>job_instance_id  = (select id from meveo_job_instance where code = 'XML_Job')</where>
+        </delete>
+    </changeSet>
+    
   	<changeSet id="#INTRD-20586_20240515" author="aeljaouhari">
     	<update tableName="meveo_job_instance">
             <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'EInvoice_job')"/>
@@ -12089,9 +12095,6 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="following_job_id" value="null"/>
             <where>code = 'Invoicing_Job_V2'</where>
         </update>
-        <delete tableName="job_execution_error">
-            <where>job_instance_id  = (select id from meveo_job_instance where code = 'XML_Job')</where>
-        </delete>
         <delete tableName="meveo_job_instance">
             <where>code = 'XML_Job'</where>
         </delete>

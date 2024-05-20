@@ -995,6 +995,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 						orderProduct.getOrderAttributes()));
 		createOrderAttribute(orderOfferDto.getOrderAttributes(),null,orderOffer);
 		if(isQuickOrder && orderOfferDto.getOrderLineType() == OfferLineTypeEnum.APPLY_ONE_SHOT){
+			commercialOrder.getOffers().add(orderOffer);
 			commercialOrderService.validateOrder(commercialOrder, false);
 		}
 		return orderOfferDto;
@@ -1360,7 +1361,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 			orderProductService.create(orderProduct);
 			//create order attributes linked to orderProduct
 			createOrderAttribute(orderProductDto.getOrderAttributes(), orderProduct,null);
-			orderOffer.getProducts().add(orderProduct); 
+			orderOffer.getProductswithoutDuplication().add(orderProduct);
 		}
 	}
 	

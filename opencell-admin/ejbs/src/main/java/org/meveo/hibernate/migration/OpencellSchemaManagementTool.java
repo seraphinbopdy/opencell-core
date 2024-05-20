@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.naming.InitialContext;
@@ -34,27 +32,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-
-import org.hibernate.boot.model.naming.Identifier;
-import org.hibernate.boot.model.relational.Namespace;
-import org.hibernate.boot.model.relational.Sequence;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.mapping.Column;
-import org.hibernate.mapping.Selectable;
-import org.hibernate.mapping.Table;
-import org.hibernate.resource.transaction.spi.DdlTransactionIsolator;
-
-import org.hibernate.tool.schema.internal.DefaultSchemaFilter;
-import org.hibernate.tool.schema.internal.Helper;
-import org.hibernate.tool.schema.extract.spi.NameSpaceTablesInformation;
-import org.hibernate.tool.schema.extract.spi.ColumnInformation;
-import org.hibernate.tool.schema.extract.spi.DatabaseInformation;
-import org.hibernate.tool.schema.extract.spi.SequenceInformation;
-import org.hibernate.tool.schema.extract.spi.TableInformation;
-import org.hibernate.tool.schema.internal.exec.JdbcContext;
-import org.hibernate.tool.schema.spi.SchemaFilter;
-import org.hibernate.tool.schema.spi.SchemaManagementException;
-import org.hibernate.type.descriptor.JdbcTypeNameMapper;
 
 /**
  * Database schema management tool for Opencell</br>
@@ -163,169 +140,19 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
 
         return new SchemaValidator() {
 
-        	@Override
-        	public void doValidation(Metadata metadata, ExecutionOptions options) {
-        		final JdbcContext jdbcContext = resolveJdbcContext( options.getConfigurationValues() );
+            @Override
+            public void doValidation(Metadata metadata, ExecutionOptions executionOptions) {
 
-        		final DdlTransactionIsolator isolator = getDdlTransactionIsolator( jdbcContext );
+                log.info("Will proceed to validate DB schema");
 
-        		final DatabaseInformation databaseInformation = Helper.buildDatabaseInformation(
-        				getServiceRegistry(),
-        				isolator,
-        				metadata.getDatabase().getDefaultNamespace().getName()
-        		);
+                try {
+                    runLiquibaseUpdateAndValidation(metadata, executionOptions, options, true);
 
-        		try {
-        			performValidation( metadata, databaseInformation, options, jdbcContext.getDialect() );
-        		}
-        		finally {
-        			try {
-        				databaseInformation.cleanup();
-        			}
-        			catch (Exception e) {
-        				log.debug( "Problem releasing DatabaseInformation : " + e.getMessage() );
-        			}
-
-        			isolator.release();
-        		}
-        	}
-
-        	public void performValidation(
-        			Metadata metadata,
-        			DatabaseInformation databaseInformation,
-        			ExecutionOptions options,
-        			Dialect dialect) {
-        		for ( Namespace namespace : metadata.getDatabase().getNamespaces() ) {
-        			if ( DefaultSchemaFilter.INSTANCE.includeNamespace( namespace ) ) {
-        				validateTables( metadata, databaseInformation, options, dialect, namespace );
-        			}
-        		}
-
-        		for ( Namespace namespace : metadata.getDatabase().getNamespaces() ) {
-        			if ( DefaultSchemaFilter.INSTANCE.includeNamespace( namespace ) ) {
-        				for ( Sequence sequence : namespace.getSequences() ) {
-        					if ( DefaultSchemaFilter.INSTANCE.includeSequence( sequence ) ) {
-        						final SequenceInformation sequenceInformation = databaseInformation.getSequenceInformation(
-        								sequence.getName()
-        						);
-        						validateSequence( sequence, sequenceInformation );
-        					}
-        				}
-        			}
-        		}
-        	}
-
-
-        	protected void validateTables(
-        			Metadata metadata,
-        			DatabaseInformation databaseInformation,
-        			ExecutionOptions options,
-        			Dialect dialect, Namespace namespace) {
-
-        		final NameSpaceTablesInformation tables = databaseInformation.getTablesInformation( namespace );
-        		for ( Table table : namespace.getTables() ) {
-        			if ( DefaultSchemaFilter.INSTANCE.includeTable( table ) && table.isPhysicalTable() ) {
-        				validateTable(
-        						table,
-        						tables.getTableInformation( table ),
-        						metadata,
-        						options,
-        						dialect
-        				);
-        			}
-        		}
-        	}
-
-			protected void validateTable(
-        			Table table,
-        			TableInformation tableInformation,
-        			Metadata metadata,
-        			ExecutionOptions options,
-        			Dialect dialect) {
-        		if ( tableInformation == null ) {
-        			log.info(
-        					String.format(
-        							"============> Schema-validation: missing table [%s]",
-        							table.getQualifiedTableName().toString()
-        					)
-        			);
-        			return;
-        		}
-
-        		final Iterator selectableItr = table.getColumnIterator();
-        		while ( selectableItr.hasNext() ) {
-        			final Selectable selectable = (Selectable) selectableItr.next();
-        			if ( Column.class.isInstance( selectable ) ) {
-        				final Column column = (Column) selectable;
-        				final ColumnInformation existingColumn = tableInformation.getColumn( Identifier.toIdentifier( column.getQuotedName() ) );
-        				if ( existingColumn == null ) {
-        					log.info(
-        							String.format(
-        									"============> Schema-validation: missing column [%s] in table [%s]",
-        									column.getName(),
-        									table.getQualifiedTableName()
-        							)
-        					);
-        					continue;
-        				}
-        				validateColumnType( table, column, existingColumn, metadata, options, dialect );
-        			}
-        		}
-        	}
-
-        	protected void validateColumnType(
-        			Table table,
-        			Column column,
-        			ColumnInformation columnInformation,
-        			Metadata metadata,
-        			ExecutionOptions options,
-        			Dialect dialect) {
-        		boolean typesMatch = column.getSqlTypeCode( metadata ) == columnInformation.getTypeCode()
-        				|| column.getSqlType( dialect, metadata ).toLowerCase(Locale.ROOT).startsWith( columnInformation.getTypeName().toLowerCase(Locale.ROOT) );
-        		if ( !typesMatch ) {
-        			log.info(
-        					String.format(
-        							"============> Schema-validation: wrong column type encountered in column [%s] in " +
-        									"table [%s]; found [%s (Types#%s)], but expecting [%s (Types#%s)]",
-        							column.getName(),
-        							table.getQualifiedTableName(),
-        							columnInformation.getTypeName().toLowerCase(Locale.ROOT),
-        							JdbcTypeNameMapper.getTypeName( columnInformation.getTypeCode() ),
-        							column.getSqlType().toLowerCase(Locale.ROOT),
-        							JdbcTypeNameMapper.getTypeName( column.getSqlTypeCode( metadata ) )
-        					)
-        			);
-        		}
-
-        		// this is the old Hibernate check...
-        		//
-        		// but I think a better check involves checks against type code and then the type code family, not
-        		// just the type name.
-        		//
-        		// See org.hibernate.type.descriptor.sql.JdbcTypeFamilyInformation
-        		// todo : this ^^
-        	}
-
-        	protected void validateSequence(Sequence sequence, SequenceInformation sequenceInformation) {
-        		if ( sequenceInformation == null ) {
-        			log.info(
-        					String.format( "============> Schema-validation: missing sequence [%s]", sequence.getName() )
-        			);
-        			return;
-        		}
-
-        		if ( sequenceInformation.getIncrementSize() > 0
-        				&& sequence.getIncrementSize() != sequenceInformation.getIncrementSize() ) {
-        			log.info(
-        					String.format(
-        							"============> Schema-validation: sequence [%s] defined inconsistent increment-size; found [%s] but expecting [%s]",
-        							sequence.getName(),
-        							sequenceInformation.getIncrementSize(),
-        							sequence.getIncrementSize()
-        					)
-        			);
-        		}
-        	}
+                } catch (Exception e) {
+                    log.error("Failed to validate DB schema", e);
+                    throw new RuntimeException(e);
+                }
+            }
         };
     }
 
@@ -344,11 +171,21 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
             DataSource dataSource = (DataSource) initialContext.lookup(DB_DATA_SOURCE_NAME);
 
             Connection connection = dataSource.getConnection();
+            DbMigrationStatusEnum dbMigrationStatus = getDBMigrationStatus(connection, Version.buildNumber);
 
+            if (dbMigrationStatus == DbMigrationStatusEnum.MIGRATION_COMPLETED) {
+                log.info("Database is already up to date for build " + Version.buildNumber + ". Will skip DB migration and schema validation");
+                return;
+            }
+
+            // Run Liquibase update from a corresponding file
+            if (!validateOnly) {
+                runLiquibase(connection, dbMigrationStatus == DbMigrationStatusEnum.NEW_DB ? DB_CHANGELLOG_REBUILD : DB_CHANGELLOG_CURRENT);
+            }
 
             // Run a default schema validation
-            log.info("Will proceede with custom schema validator");
-            getSchemaValidator(options).doValidation(metadata, executionOptions);
+            log.info("Will proceede with a default Hibernate schema validator");
+            super.getSchemaValidator(options).doValidation(metadata, executionOptions);
 
             updateMigrationStatus(dataSource.getConnection(), Version.buildNumber, Version.appVersion);
 

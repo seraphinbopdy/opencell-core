@@ -159,7 +159,8 @@ public class Seller extends AccountEntity implements IWFEntity {
     @JoinTable(name = "billing_seller_media", joinColumns = @JoinColumn(name = "seller_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
     private List<Media> medias = new ArrayList<>();
 	
-	@OneToMany(mappedBy = "seller")
+	@OneToMany
+	@JoinColumn(name = "seller_id")
 	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
 	
 	public List<RegistrationNumber> getRegistrationNumbers() {

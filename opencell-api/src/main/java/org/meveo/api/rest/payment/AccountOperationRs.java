@@ -26,11 +26,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.account.TransferAccountOperationDto;
 import org.meveo.api.dto.account.TransferOperationsDto;
 import org.meveo.api.dto.payment.AccountOperationDto;
+import org.meveo.api.dto.payment.CustomerBalanceExportDto;
 import org.meveo.api.dto.payment.LitigationRequestDto;
 import org.meveo.api.dto.payment.MatchOperationRequestDto;
 import org.meveo.api.dto.payment.UnMatchingOperationRequestDto;
@@ -40,6 +42,7 @@ import org.meveo.api.dto.response.payment.AccountOperationResponseDto;
 import org.meveo.api.dto.response.payment.AccountOperationsResponseDto;
 import org.meveo.api.dto.response.payment.MatchedOperationsResponseDto;
 import org.meveo.api.rest.IBaseRs;
+import org.meveo.apiv2.generic.GenericPagingAndFiltering;
 
 /**
  * @author Edward P. Legaspi
@@ -380,4 +383,16 @@ public interface AccountOperationRs extends IBaseRs {
 					)}
 	)
 	ActionStatus transferOperations(TransferOperationsDto transferOperationsDto);
+
+	@POST
+	@Path("/exportCustomerBalance/{fileFormat}")
+	@Operation(
+			summary=" Export customer balance",
+			description="Export customer balance",
+			operationId="POST_AccountOperation_exportCustomerBalance",
+			responses= {
+					@ApiResponse(responseCode="200", description = "paginated results successfully exported")
+			}
+	)
+	Response exportCustomerBalance(@PathParam("fileFormat") String fileFormat, CustomerBalanceExportDto exportConfig);
 }

@@ -48,6 +48,9 @@ public class EinvoiceResourceImpl implements EinvoiceResource {
 		checkAndAssignJobInstanceCodeExisting(einvoiceSettingInput.getPdfGenerationJob(), jobInstanceEInvoiceEnum.PDF, einvoiceSetting);
 		checkAndAssignJobInstanceCodeExisting(einvoiceSettingInput.getUblGenerationJob(), jobInstanceEInvoiceEnum.UBL, einvoiceSetting);
 		
+		if(einvoiceSettingInput.getVatDateCode() != null)
+			einvoiceSetting.setVatDateCode(einvoiceSettingInput.getVatDateCode());
+		
 		einvoiceSettingService.update(einvoiceSetting);
 		
 		einvoiceSettingService.chainToNextJob(einvoiceSetting);

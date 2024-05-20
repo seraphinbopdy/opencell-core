@@ -4,7 +4,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="MyInvoiceIssue"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="dev.xml"/>
 	<style name="table">
 		<box>
 			<pen lineWidth="1.0" lineColor="#000000"/>
@@ -350,6 +350,38 @@
 		</property>
 		<fieldDescription><![CDATA[/invoice/header/seller/PartyIdentification/CompanyId[@schemeID="0009"]]]></fieldDescription>
 	</field>
+	<field name="uaQuality" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/name/quality"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/name/quality]]></fieldDescription>
+	</field>
+	<field name="uaFirstName" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/name/firstName"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/name/firstName]]></fieldDescription>
+	</field>
+	<field name="uaName" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/name/name"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/name/name]]></fieldDescription>
+	</field>
+	<field name="uaAddrLine1" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/address1"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/address1]]></fieldDescription>
+	</field>
+	<field name="uaAddrLine2" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/address2"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/address2]]></fieldDescription>
+	</field>
+	<field name="uaAddrZip" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/postalCode"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/postalCode]]></fieldDescription>
+	</field>
+	<field name="uaCity" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/city"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/city]]></fieldDescription>
+	</field>
+	<field name="uaCountry" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/detail/userAccounts/userAccount/address/countryName"/>
+		<fieldDescription><![CDATA[/invoice/detail/userAccounts/userAccount/address/countryName]]></fieldDescription>
+	</field>
 	<group name="1">
 		<groupHeader>
 			<band height="292" splitType="Immediate">
@@ -469,16 +501,16 @@
 							<textElement textAlignment="Left" verticalAlignment="Top">
 								<font fontName="SansSerif" size="10" isBold="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[(($F{baQuality}!=null && !String.valueOf($F{baQuality}).isEmpty() && !String.valueOf($F{baQuality}).equals("null")) ? $F{baQuality} + " " : "")
-+ (($F{baFirstName}!=null && !String.valueOf($F{baFirstName}).isEmpty() && !String.valueOf($F{baFirstName}).equals("null")) ? $F{baFirstName} + " " : "") 
-+ (($F{baName}!=null && !String.valueOf($F{baName}).isEmpty() && !String.valueOf($F{baName}).equals("null")) ? $F{baName} : "") 
+							<textFieldExpression><![CDATA[(($F{uaQuality}!=null && !String.valueOf($F{uaQuality}).isEmpty() && !String.valueOf($F{uaQuality}).equals("null")) ? $F{uaQuality} + " " : "")
++ (($F{uaFirstName}!=null && !String.valueOf($F{uaFirstName}).isEmpty() && !String.valueOf($F{uaFirstName}).equals("null")) ? $F{uaFirstName} + " " : "") 
++ (($F{uaName}!=null && !String.valueOf($F{uaName}).isEmpty() && !String.valueOf($F{uaName}).equals("null")) ? $F{uaName} : "") 
 + "\n"
-+ (($F{baAddrLine1}!=null && !String.valueOf($F{baAddrLine1}).isEmpty() && !String.valueOf($F{baAddrLine1}).equals("null")) ? $F{baAddrLine1} + "\n" : "")
-+ (($F{baAddrLine2}!=null && !String.valueOf($F{baAddrLine2}).isEmpty() && !String.valueOf($F{baAddrLine2}).equals("null")) ? $F{baAddrLine2} + "\n" : "")
-+ (($F{baAddrZip}!=null && !String.valueOf($F{baAddrZip}).isEmpty() && !String.valueOf($F{baAddrZip}).equals("null")) ? $F{baAddrZip} + " " : "")
-+ (($F{baCity}!=null && !String.valueOf($F{baCity}).isEmpty() && !String.valueOf($F{baCity}).equals("null")) ? $F{baCity} : "")
++ (($F{uaAddrLine1}!=null && !String.valueOf($F{uaAddrLine1}).isEmpty() && !String.valueOf($F{uaAddrLine1}).equals("null")) ? $F{uaAddrLine1} + "\n" : "")
++ (($F{uaAddrLine2}!=null && !String.valueOf($F{uaAddrLine2}).isEmpty() && !String.valueOf($F{uaAddrLine2}).equals("null")) ? $F{uaAddrLine2} + "\n" : "")
++ (($F{uaAddrZip}!=null && !String.valueOf($F{uaAddrZip}).isEmpty() && !String.valueOf($F{uaAddrZip}).equals("null")) ? $F{uaAddrZip} + " " : "")
++ (($F{uaCity}!=null && !String.valueOf($F{uaCity}).isEmpty() && !String.valueOf($F{uaCity}).equals("null")) ? $F{uaCity} : "")
 + "\n"
-+ (($F{baCountry}!=null && !String.valueOf($F{baCountry}).isEmpty() && !String.valueOf($F{baCountry}).equals("null")) ? $F{baCountry} : "")
++ (($F{uaCountry}!=null && !String.valueOf($F{uaCountry}).isEmpty() && !String.valueOf($F{uaCountry}).equals("null")) ? $F{uaCountry} : "")
 + "\n"]]></textFieldExpression>
 						</textField>
 						<staticText>
@@ -577,35 +609,35 @@
 			</textField>
 			<image scaleImage="RealSize" hAlign="Left" vAlign="Middle">
 				<reportElement x="0" y="-1" width="189" height="85" uuid="919a6ccd-01f3-46e8-a5b8-9cfbfb50364b"/>
-				<imageExpression><![CDATA[$P{logoPath}+"Pictos/opensoft.png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{logoPath}+"Pictos/opensoft.jpg"]]></imageExpression>
 			</image>
 			<image>
 				<reportElement x="276" y="1" width="151" height="64" uuid="3e1e8dbf-d2a8-4f61-abea-40e48ad41727"/>
-				<imageExpression><![CDATA[$F{invoiceStatus}!="VALIDATED" ? $P{logoPath}+"Pictos/draft.png" : $P{logoPath}+"Pictos/blank.png"]]></imageExpression>
+				<imageExpression><![CDATA[$F{invoiceStatus}!="VALIDATED" ? $P{logoPath}+"Pictos/draft.jpg" : $P{logoPath}+"Pictos/blank.png"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="18" y="70" width="214" height="20" uuid="7d23a789-5d14-426e-b234-5c9cbc3b914c"/>
+				<reportElement isPrintRepeatedValues="false" x="18" y="70" width="214" height="20" uuid="7d23a789-5d14-426e-b234-5c9cbc3b914c"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{invoiceStatus}=="VALIDATED" ? ($F{invoiceCodeTypeLabel} != null && !$F{invoiceCodeTypeLabel}.isEmpty() ? $F{invoiceCodeTypeLabel} : "Invoice") + ": "+ $F{invoiceNumber} : "Draft " + ($F{invoiceCodeTypeLabel} != null ? $F{invoiceCodeTypeLabel} : "Invoice")]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="18" y="86" width="190" height="20" uuid="f9f73956-b4a2-41c9-9fea-f0e4e3956d22"/>
+				<reportElement isPrintRepeatedValues="false" x="18" y="86" width="190" height="20" uuid="f9f73956-b4a2-41c9-9fea-f0e4e3956d22"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Date: " + ($F{country}=="US" ? java.time.LocalDate.parse($F{invoiceDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{invoiceDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="18" y="101" width="190" height="20" uuid="f03bb93f-44f7-4b09-a3f9-e78c4d7ecb22"/>
+				<reportElement isPrintRepeatedValues="false" x="18" y="101" width="190" height="20" uuid="f03bb93f-44f7-4b09-a3f9-e78c4d7ecb22"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Due Date: " + ($F{country}=="US" ? java.time.LocalDate.parse($F{dueDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{dueDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="410" y="60" width="184" height="80" uuid="ec6e4a89-edc8-445f-a3cb-8827a5725e9b">
+				<reportElement isPrintRepeatedValues="false" x="410" y="60" width="184" height="80" uuid="ec6e4a89-edc8-445f-a3cb-8827a5725e9b">
 					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>

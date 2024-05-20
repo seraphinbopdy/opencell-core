@@ -986,13 +986,13 @@
             <column name="id" valueNumeric="-42" />
             <column name="version" valueNumeric="0" />
             <column name="created" valueDate="${db.current.time}" />
-            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '654100000')" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
             <column name="account_code_client_side" value="411000000" />
             <column name="code" value="EXP_WRT" />
             <column name="description" value="Expense - bad debt write-off" />
             <column name="occ_category" value="CREDIT" />
             <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
-            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '654100000')" />
             <column name="contra_accounting_code2_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '445710000')" />
             <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Invoice and Writeoff')" />
         </insert>
@@ -2350,6 +2350,22 @@
             <column name="value_required" value="0"/>
             <column name="creator" value="applicationInitializer"/>
             <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:7"/>
+        </insert>
+    </changeSet>
+    
+  	<changeSet id="#INTRD-18352_20230915_data_build" author="TarikFA.">
+        <insert tableName="electronic_invoice_settings">
+            <column name="id" valueSequenceNext="electronic_invoice_settings_seq"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="OPENCELL.ADMIN" />
+            <column name="force_xml_generation" valueNumeric="1" />
+            <column name="force_pdf_generation" valueNumeric="1" />
+            <column name="force_ubl_generation" valueNumeric="1" />
+            <column name="invoicing_job" value="Invoicing_Job_V2"/>
+            <column name="xml_generation_job" value="XMLInvoiceGenerationJobV2"/>
+            <column name="pdf_generation_job" value="PDF_Job"/>
+            <column name="ubl_generation_job" value="EInvoice_job"/>
         </insert>
     </changeSet>
 
@@ -4707,6 +4723,7 @@
             <column name="vat_payment_option_id" value="1" />
             <column name="invoice_code_type_id" value="19" />
             <column name="invoice_subject_code" valueComputed="(SELECT id FROM untdid_4451_invoice_subject_code where code = 'IND')"></column>
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')" />
 		</insert>
 		
 		<insert tableName="billing_invoice_type">
@@ -4725,6 +4742,7 @@
             <column name="vat_payment_option_id" value="1" />
             <column name="invoice_code_type_id" value="19" />
             <column name="invoice_subject_code" valueComputed="(SELECT id FROM untdid_4451_invoice_subject_code where code = 'IND')"></column>
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')" />
 		</insert>
 		
 		<insert tableName="billing_invoice_type_applies_to">
@@ -6824,7 +6842,7 @@
         </insert>
     </changeSet>
 
-
+	<changeSet id="#INTRD-22516_20240503" author="aeljaouhari" />
 
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->
     <changeSet id="#liquibase_hack_data" author="AbdelmounaimAkadid">

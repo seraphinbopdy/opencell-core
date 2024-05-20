@@ -123,7 +123,7 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "Invoice.nullifyInvoicePDFFileNames", query = "update Invoice inv set inv.pdfFilename = null where inv.billingRun = :billingRun"),
         @NamedQuery(name = "Invoice.portInvoiceReport", query = "select inv.amountWithTax, inv.amountWithoutTax, inv.amountTax, inv.paymentMethodType, pm.yearExpiration, pm.monthExpiration, ba.electronicBilling from Invoice inv inner join inv.billingAccount ba left join inv.paymentMethod pm where inv.billingRun.id=:billingRunId"),
         @NamedQuery(name = "Invoice.deleteByBR", query = "delete from Invoice inv where inv.billingRun.id=:billingRunId AND inv.status <> 'VALIDATED'"),
-        @NamedQuery(name = "Invoice.moveToBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.DRAFT where inv.id in (:invoiceIds)"),
+        @NamedQuery(name = "Invoice.moveToBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.SUSPECT where inv.id in (:invoiceIds)"),
         @NamedQuery(name = "Invoice.moveToRejectedBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.REJECTED where inv.id in (:invoiceIds)"),
         @NamedQuery(name = "Invoice.moveToBR", query = "update Invoice inv set inv.billingRun=:nextBR where inv.billingRun.id=:billingRunId and inv.status in(:statusList)"),
         @NamedQuery(name = "Invoice.deleteByStatusAndBR", query = "delete from Invoice inv where inv.status in(:statusList) and inv.billingRun.id=:billingRunId"),
@@ -139,7 +139,7 @@ import org.meveo.model.shared.DateUtils;
 
         @NamedQuery(name = "Invoice.sumAmountsByBR", query = "select sum(inv.amountTax),sum(inv.amountWithoutTax), sum(inv.amountWithTax) FROM Invoice inv where inv.billingRun.id=:billingRunId and inv.status <> 'CANCELED'"),
         @NamedQuery(name = "Invoice.billingAccountsByBr", query = "select distinct inv.billingAccount from Invoice inv where inv.billingRun.id=:billingRunId"),
-		@NamedQuery(name = "Invoice.cancelInvoiceById", query = "update Invoice inv set inv.status='CANCELED', inv.rejectedByRule = null, inv.rejectReason = null, inv.auditable.updated=:now WHERE inv.id=:invoiceId AND inv.status <> 'VALIDATED'"),
+        @NamedQuery(name = "Invoice.cancelInvoiceById", query = "update Invoice inv set inv.status='CANCELED', inv.rejectedByRule = null, inv.rejectReason = null, inv.auditable.updated=:now, inv.auditable.updater=:username WHERE inv.id=:invoiceId AND inv.status <> 'VALIDATED'"),
 
         @NamedQuery(name = "Invoice.deleteByIds", query = "delete from Invoice inv where inv.id IN (:invoicesIds)"),
         @NamedQuery(name = "Invoice.excludePrpaidInvoices", query = "select inv.id from Invoice inv where inv.id IN (:invoicesIds) and inv.prepaid=false"),

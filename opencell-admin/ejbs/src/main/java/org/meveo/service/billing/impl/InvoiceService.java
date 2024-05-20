@@ -40,7 +40,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -99,7 +98,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -274,12 +272,16 @@ import org.w3c.dom.Node;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRXmlDataSource;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
+import net.sf.jasperreports.export.type.PdfaConformanceEnum;
 
 /**
  * The Class InvoiceService.
@@ -1793,12 +1795,19 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
             DefaultJasperReportsContext context = DefaultJasperReportsContext.getInstance();
             JRPropertiesUtil.getInstance(context).setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.engine.util.xml.JaxenXPathExecuterFactory");
-
+            context.setProperty("net.sf.jasperreports.default.pdf.font.name", "net/sf/jasperreports/fonts/dejavu/DejaVuSans.ttf");    
+            context.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
+            
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-
-            OutputStream outStream = StorageFactory.getOutputStream(pdfFullFilename);
-            JasperExportManager.exportReportToPdfStream(jasperPrint, outStream);
-            outStream.close();
+            JRPdfExporter exporter = new JRPdfExporter();
+            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfFullFilename));
+            
+            SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+            configuration.setPdfaConformance(PdfaConformanceEnum.PDFA_1A);
+            configuration.setIccProfilePath(resDir + File.separator + billingTemplateName + File.separator + "pdf"+File.separator + "srgb.icc");
+            exporter.setConfiguration(configuration);
+            exporter.exportReport();
 
             if ("true".equals(paramBeanFactory.getInstance().getProperty("invoice.pdf.addWaterMark", "true"))) {
                 if (invoice.getInvoiceType().getCode().equals(paramBeanFactory.getInstance().getProperty("invoiceType.draft.code", "DRAFT")) || (invoice.isDraft() != null && invoice.isDraft())) {
@@ -1806,6 +1815,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 }
             }
             invoice.setPdfFilename(pdfFilename);
+            
+          
 
             log.info("PDF file '{}' produced for invoice {}", pdfFullFilename, invoice.getInvoiceNumberOrTemporaryNumber());
 
@@ -2807,16 +2818,17 @@ public class InvoiceService extends PersistenceService<Invoice> {
             super.remove(invoice);
         } else {
             invoiceLinesService.cancelIlByInvoices(invoicesIds);
-            cancelInvoiceById(invoice.getId());
+            cancelInvoiceById(invoice.getId(), currentUser.getUserName());
         }
         updateBillingRunStatistics(invoice);
         log.debug("Invoice canceled {}", invoice.getTemporaryInvoiceNumber());
     }
 
-	public void cancelInvoiceById(Long invoiceId) {
+    public void cancelInvoiceById(Long invoiceId, String pUserName) {
         getEntityManager().createNamedQuery("Invoice.cancelInvoiceById")
-        .setParameter("now", new Date())
+                .setParameter("now", new Date())
                 .setParameter("invoiceId", invoiceId)
+                .setParameter("username", pUserName)
                 .executeUpdate();
     }
     
@@ -2857,12 +2869,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
     
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void validateInvoice(Invoice invoice) {
-		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
-		invoice.setRejectedByRule(null);
-		invoice.setRejectReason(null);
-		serviceSingleton.assignInvoiceNumber(invoice, true);
-	}
+	public void validateInvoice(Long id) {
+        Invoice invoice = ofNullable(findById(id)).orElseThrow(() -> new EntityDoesNotExistsException(Invoice.class, id));
+        invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+        invoice.setRejectedByRule(null);
+        invoice.setRejectReason(null);
+        serviceSingleton.assignInvoiceNumber(invoice, true);
+    }
     
     /**
      * @param billingRunId

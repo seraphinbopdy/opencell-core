@@ -8246,14 +8246,14 @@
     <changeSet id="#12132_20221219-rebuild" author="HatimOUDAD">
 		<sql>
 		<![CDATA[
-			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (1, 0, now(), NULL, 'opencell.admin', NULL, '0002', 'System Information et Repertoire des Entreprise et des Etablissements: SIRENE ');
+			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (1, 0, now(), NULL, 'opencell.admin', NULL, '0002', 'SIRENE');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (2, 0, now(), NULL, 'opencell.admin', NULL, '0003', 'Codification Numerique des Etablissments Financiers En Belgique ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (3, 0, now(), NULL, 'opencell.admin', NULL, '0004', 'NBS/OSI NETWORK ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (4, 0, now(), NULL, 'opencell.admin', NULL, '0005', 'USA FED GOV OSI NETWORK ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (5, 0, now(), NULL, 'opencell.admin', NULL, '0006', 'USA DOD OSI NETWORK ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (6, 0, now(), NULL, 'opencell.admin', NULL, '0007', 'Organisationsnummer ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (7, 0, now(), NULL, 'opencell.admin', NULL, '0008', 'LE NUMERO NATIONAL ');
-			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (8, 0, now(), NULL, 'opencell.admin', NULL, '0009', 'SIRET-CODE ');
+			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (8, 0, now(), NULL, 'opencell.admin', NULL, '0009', 'SIRET');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (9, 0, now(), NULL, 'opencell.admin', NULL, '0010', 'Organizational Identifiers for Structured Names under ISO 9541 Part 2 ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (10, 0, now(), NULL, 'opencell.admin', NULL, '0011', 'International Code Designator for the Identification of OSI-based, Amateur Radio Organizations, Network Objects and Application Services. ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (11, 0, now(), NULL, 'opencell.admin', NULL, '0012', 'European Computer Manufacturers Association: ECMA ');
@@ -9218,7 +9218,7 @@
             <column name="creator" value="OPENCELL.ADMIN" />
             <column name="timerentity_id" valueNumeric="-1" />
             <column name="uuid" value="XMLEInvoiceGeneration_Job" />
-            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'EInvoice_job')"/>
+            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'PDF_Job')"/>
         </insert>
         <insert tableName="meveo_job_instance">
             <column name="id" valueNumeric="-8" />
@@ -9234,20 +9234,6 @@
             <column name="uuid" value="PDF_Job" />
         </insert>
         <insert tableName="meveo_job_instance">
-            <column name="id" valueNumeric="-7" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="1" />
-            <column name="created" valueDate="2015-03-19 00:04:19.913" />
-            <column name="job_category" value="INVOICING" />
-            <column name="job_template" value="XMLInvoiceGenerationJob" />
-            <column name="code" value="XML_Job" />
-
-            <column name="creator" value="OPENCELL.ADMIN" />
-            <column name="timerentity_id" valueNumeric="-1" />
-            <column name="uuid" value="XML_Job" />
-            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'PDF_Job')"/>
-        </insert>
-        <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq" />
             <column name="version" valueNumeric="0" />
             <column name="disabled" valueNumeric="1" />
@@ -9259,7 +9245,7 @@
             <column name="creator" value="OPENCELL.ADMIN" />
             <column name="timerentity_id" valueNumeric="-1" />
             <column name="uuid" value="Invoicing_Job_V2" />
-            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'XML_Job')"/>
+            <column name="following_job_id" value="null"/>
         </insert>
         <insert tableName="meveo_job_instance">
             <column name="id" valueNumeric="-14" />
@@ -9702,6 +9688,23 @@
             <column name="cf_values">
                 <![CDATA[
                     {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}], "CF_MASS_UPDATE_CHUNK": [{"long": 100000}]}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="INVOICING"/>
+            <column name="job_template" value="InvoicingJobV3"/>
+            <column name="code" value="InvoicingJobV3"/>
+            <column name="uuid" value="InvoicingJobV3"/>
+            <column name="description" value="Generate invoices"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}]}
                 ]]>
             </column>
         </insert>
@@ -12168,7 +12171,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="created" valueDate="${db.current.time}" />
 			<column name="creator" value="applicationInitializer" />
 			<column name="code" valueComputed="${uuid_function}" />
-			<column name="use_security_deposit" value="1" />
+			<column name="use_security_deposit" value="0" />
 		</insert>
 		<insert tableName="security_deposit_templat">
 			<column name="id"
@@ -12286,23 +12289,6 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
         <sql>call proc_recreate_audit_data_trigger('cat_offer_template',null, null, null, false)</sql>
     </changeSet>
 
-    <changeSet id="#INTRD-18352_20230915_data_build" author="TarikFA.">
-        <insert tableName="electronic_invoice_settings">
-            <column name="id" valueSequenceNext="electronic_invoice_settings_seq"/>
-            <column name="version" valueNumeric="1"/>
-            <column name="created" valueDate="${db.current.time}"/>
-            <column name="creator" value="OPENCELL.ADMIN" />
-
-            <column name="force_xml_generation" valueNumeric="1" />
-            <column name="force_pdf_generation" valueNumeric="1" />
-            <column name="force_ubl_generation" valueNumeric="1" />
-            <column name="invoicing_job" value="Invoicing_Job_V2"/>
-            <column name="xml_generation_job" value="XML_Job"/>
-            <column name="pdf_generation_job" value="PDF_Job"/>
-            <column name="ubl_generation_job" value="EInvoice_job"/>
-        </insert>
-    </changeSet>
-	
 	<changeSet id="#INTRD-18587_rebuild" author="aelmalki">
 		<sql>
 		<![CDATA[
@@ -12791,4 +12777,32 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		</insert>
 	</changeSet>
 
+
+    <changeSet id="INTRD-22385_20240429_build" author="TarikFA.">
+        <insert tableName="cpq_tag_type">
+            <column name="id" valueSequenceNext="cpq_tag_type_seq"></column>
+            <column name="created" value="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="New products" />
+            <column name="description" value="New products" />
+        </insert>
+        <insert tableName="cpq_tag_type">
+            <column name="id" valueSequenceNext="cpq_tag_type_seq"></column>
+            <column name="created" value="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="Stock products" />
+            <column name="description" value="New products" />
+        </insert>
+    </changeSet>
+    
+  	<changeSet id="#INTRD-22516_20240503" author="aeljaouhari">
+        <update tableName="billing_invoice_type">
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')"/>
+            <where>code='ADJ_INV'</where>
+        </update>
+        <update tableName="billing_invoice_type">
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')" />
+            <where>code='ADJ_REF'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

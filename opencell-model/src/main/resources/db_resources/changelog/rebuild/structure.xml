@@ -12103,7 +12103,7 @@
                 <constraints nullable="true" />
             </column>
             <column name="description" type="varchar(255)" />
-            <column name="use_security_deposit" type="${type.boolean}" defaultValueNumeric="1" />
+            <column name="use_security_deposit" type="${type.boolean}" defaultValueNumeric="0" />
             <column name="max_amount_security_deposit" type="numeric(23, 12)"  />
             <column name="max_amount_consumer" type="numeric(23, 12)"  />
             <column name="auto_refund" type="${type.boolean}" defaultValueNumeric="0" />
@@ -12124,9 +12124,9 @@
             <column name="billing_run_process_warning" type="${type.boolean}" defaultValueNumeric="0" />
             <column name="nb_partitions_keep" type="int4" />
             <column name="synchronous_mass_action_limit" type="int4" defaultValueNumeric="10000" />
-            <column name="handle_framework_agreement" type="${type.boolean}" defaultValueNumeric="1" />
-            <column name="handle_invoice_plan" type="${type.boolean}" defaultValueNumeric="1" />
-            <column name="handle_accounting_periods" type="${type.boolean}" defaultValueNumeric="1" />
+            <column name="handle_framework_agreement" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="handle_invoice_plan" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="handle_accounting_periods" type="${type.boolean}" defaultValueNumeric="0" />
             <column name="wo_partition_range_months" type="int4">
                 <constraints nullable="true" />
             </column>
@@ -13929,6 +13929,7 @@
             <column name= "xml_generation_job" type="varchar(50)" />
             <column name= "pdf_generation_job" type="varchar(50)" />
             <column name= "ubl_generation_job" type="varchar(50)" />
+            <column name="vat_date_code" type="int4" defaultValueNumeric="432"/>
         </createTable>
 
         <createTable tableName="pdp_status_and_history">
@@ -20877,6 +20878,17 @@
     <changeSet id="INTRD-22259_20240409" author="zbariki" />
     <changeSet id="INTRD-22195_20240417" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-22617_20240520" author="Mohammed_ElAzzouzi"/>
+    <changeSet id="INTRD-22557_20240425" author="TarikFA." />
+    <changeSet id="INTRD-22385_20240429" author="TarikFA." />
+    <changeSet id="#INTRD_22492_20240506" author="zelmeliani" />
+    <changeSet id="#INTRD-22825_20240509_allowed_offers_data_recovery" author="a.rouaguebe" />
+    <changeSet id="#INTRD-14889_20240509" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-22583_20240509" author="aeljaouhari" />
+    <changeSet id="#INTRD-14889_20240509-2" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-20586_20240515" author="aeljaouhari" />
+    <changeSet id="#INTRD-22947_20240516" author="TarikFA." />
+
+
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 
 </databaseChangeLog>

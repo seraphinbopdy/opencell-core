@@ -22,7 +22,6 @@ import static java.util.Comparator.comparingInt;
 import static java.util.Optional.of;
 import static org.meveo.model.payments.PaymentRejectionActionStatus.CANCELED;
 import static org.meveo.model.payments.PaymentRejectionActionStatus.FAILED;
-import static org.meveo.model.payments.PaymentRejectionActionStatus.PENDING;
 import static org.meveo.model.payments.PaymentRejectionActionStatus.RUNNING;
 import static org.meveo.model.payments.RejectionActionStatus.COMPLETED;
 
@@ -32,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -49,6 +49,7 @@ import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.payments.impl.AccountOperationService;
+import org.meveo.service.payments.impl.PaymentRejectionActionReportService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
@@ -67,6 +68,9 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
     
     @Inject
     private ScriptInstanceService scriptInstanceService;
+
+	@Inject
+	private PaymentRejectionActionReportService paymentRejectionActionReportService;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -95,14 +99,11 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
     	boolean processNextAction = true;
     	rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.RUNNING);
     	List<PaymentRejectionActionReport> rejectionActionsReport = rejectedPayment.getPaymentRejectionActionReports();
-    	rejectionActionsReport.sort(comparingInt(a -> a.getAction().getSequence()));
+    	rejectionActionsReport = rejectionActionsReport.stream()
+    			.filter(rp -> rp.getAction() != null)
+    			.sorted(comparingInt(rp -> rp.getAction().getSequence()))
+    			.collect(Collectors.toList());
     	for (PaymentRejectionActionReport actionReport : rejectionActionsReport) {
-			if(actionReport.getAction() == null
-					&& (PENDING == actionReport.getStatus() || RUNNING == actionReport.getStatus())) {
-				actionReport.setStatus(CANCELED);
-				jobExecutionResult.addReport("Action has been deleted from payment rejection settings");
-				return;
-			}
     		if (processNextAction) {
     			processPaymentRejectionActionReport(actionReport);
 				processNextAction = !(FAILED.equals(actionReport.getStatus()));

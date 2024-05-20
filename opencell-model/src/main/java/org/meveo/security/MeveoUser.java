@@ -301,4 +301,11 @@ public abstract class MeveoUser implements Serializable {
     public void setAuthenticationTokenId(String authenticationTokenId) {
         this.authenticationTokenId = authenticationTokenId;
     }
+
+    /**
+     * @return Was authentication forced (applies to jobs only)
+     */
+    public boolean isForcedAuthentication() {
+        return forcedAuthentication;
+    }
 }

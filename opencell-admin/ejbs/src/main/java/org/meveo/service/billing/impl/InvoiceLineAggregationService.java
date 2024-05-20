@@ -61,7 +61,7 @@ public class InvoiceLineAggregationService implements Serializable {
 
     private static final long serialVersionUID = 4394465445595777997L;
 
-    private static final String QUERY_FILTER = "a.status = 'OPEN' AND (a.invoicingDate is NULL or a.invoicingDate < :invoiceUpToDate) AND a.accountingArticle.ignoreAggregation = false ";
+    private static final String QUERY_FILTER = "a.status = 'OPEN' AND (a.invoicingDate is NULL or a.invoicingDate < :invoiceUpToDate)";
 
     /** Logger. */
     private static Logger log = LoggerFactory.getLogger(InvoiceLineAggregationService.class);

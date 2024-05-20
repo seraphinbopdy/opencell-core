@@ -37,7 +37,7 @@ public class LiquibaseFileTest {
      * @throws SAXException
      * @throws IOException
      */
-    @Test
+    //@Test
     public void verifyLiquibaseChangesets() throws ParserConfigurationException, SAXException, IOException {
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

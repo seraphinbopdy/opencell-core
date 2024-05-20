@@ -18,11 +18,13 @@
 
 package org.meveo.api.rest.payment.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.account.TransferAccountOperationDto;
 import org.meveo.api.dto.account.TransferOperationsDto;
 import org.meveo.api.dto.payment.AccountOperationDto;
+import org.meveo.api.dto.payment.CustomerBalanceExportDto;
 import org.meveo.api.dto.payment.LitigationRequestDto;
 import org.meveo.api.dto.payment.MatchOperationRequestDto;
 import org.meveo.api.dto.payment.UnMatchingOperationRequestDto;
@@ -31,17 +33,28 @@ import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
 import org.meveo.api.dto.response.payment.AccountOperationResponseDto;
 import org.meveo.api.dto.response.payment.AccountOperationsResponseDto;
 import org.meveo.api.dto.response.payment.MatchedOperationsResponseDto;
+import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.payment.AccountOperationApi;
 import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.api.rest.payment.AccountOperationRs;
+import org.meveo.apiv2.generic.GenericFieldDetails;
+import org.meveo.apiv2.generic.GenericPagingAndFiltering;
+import org.meveo.apiv2.generic.core.GenericHelper;
+import org.meveo.apiv2.generic.core.GenericRequestMapper;
+import org.meveo.apiv2.generic.services.PersistenceServiceHelper;
+import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.settings.AdvancedSettings;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Edward P. Legaspi
@@ -240,5 +253,19 @@ public class AccountOperationRsImpl extends BaseRs implements AccountOperationRs
             processException(exception, result);
         }
         return result;
+    }
+
+    @Override
+    public Response exportCustomerBalance(String fileFormat, CustomerBalanceExportDto exportConfig) {
+        try {
+            String filePath = accountOperationApi.exportCustomerBalance(fileFormat, exportConfig);
+            return Response.ok()
+                           .entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"\"}, \"data\":{ \"filePath\":\""+ filePath +"\"}}")
+                           .build();
+        } catch (Exception e) {
+            ActionStatus result = new ActionStatus(ActionStatusEnum.FAIL, "");
+            processException(e, result);
+            return Response.ok().entity(result).build(); // TODO - ARE : wrong result format
+        }
     }
 }

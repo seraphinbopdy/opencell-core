@@ -1,5 +1,7 @@
 package org.meveo.api.rest.cpq.impl;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.core.Response;
@@ -39,6 +41,7 @@ public class TagRsImpl extends BaseRs implements TagRs {
 	}
 
 	@Override
+    @TransactionAttribute(TransactionAttributeType.NEVER)
 	public Response updateTag(TagDto tagDto) {
 	     GetTagDtoResponse result = new GetTagDtoResponse();
 	        try {

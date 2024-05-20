@@ -12183,4 +12183,10 @@ public class DummyPaymentGatewayScript extends Script {
         </addColumn>
     </changeSet>
 
+    <changeSet id="#INTRD-22952_20240520" author="ZBariki">
+        <addColumn tableName="meveo_script_parameter">
+            <column name="filters" type="${type.json}"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

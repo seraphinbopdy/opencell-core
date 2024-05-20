@@ -43,6 +43,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseQuan
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ChargeIndicator;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CityName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyLegalForm;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentity;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditNoteTypeCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditedQuantity;
@@ -832,6 +833,16 @@ public class InvoiceUblHelper {
 					partyLegalEntity.setCompanyID(companyID);
 				}
 			}
+		}
+		if(seller.getLegalEntityType() != null) {
+			// AccountingSupplierParty/Party/PartyLegalEntity/CompanyLegalForm
+			CompanyLegalForm companyLegalForm = objectFactorycommonBasic.createCompanyLegalForm();
+			String value = seller.getLegalEntityType().getDescription();
+			if(seller.getLegalEntityType().getDescriptionI18n().get(invoiceLanguageCode) != null){
+				value = seller.getLegalEntityType().getDescriptionI18n().get(invoiceLanguageCode);
+			}
+			companyLegalForm.setValue(value);
+			partyLegalEntity.setCompanyLegalForm(companyLegalForm);
 		}
 		partyType.getPartyLegalEntities().add(partyLegalEntity);
 		supplierPartyType.setParty(partyType);

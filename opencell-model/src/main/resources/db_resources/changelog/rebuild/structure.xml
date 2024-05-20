@@ -512,6 +512,7 @@
         <createSequence sequenceName="ar_payment_rejection_action_seq" startValue="1" />
         <createSequence sequenceName="ar_payment_rejection_codes_group_seq" startValue="1" />
         <createSequence sequenceName="ar_payment_rejection_action_report_seq" startValue="1" />
+        <createSequence sequenceName="payment_term_seq" startValue="1"/>
             
     </changeSet>
 
@@ -14092,7 +14093,6 @@
     </changeSet>
 
     <changeSet id="#INTRD-23049_20240520_build" author="TarikFA.">
-        <createSequence sequenceName="payment_term_seq" startValue="1"/>
         <createTable tableName="payment_term">
             <column name="id" type="bigint" autoIncrement="${id.auto}">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="payment_term_pkey" />

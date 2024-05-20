@@ -790,15 +790,12 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
 	        
 	        fileName.append(fileNameSeparator + ppmv.getLabel());
 	        fileName.append(fileNameSeparator).append(ppmv.getStatus());
-            fileName.append(fileNameSeparator);
             if (ppmv.getValidity() != null) {
-                fileName.append(fileNameSeparator);
                 if (ppmv.getValidity().getFrom() != null) {
-                    fileName.append(ppmv.getValidity().getFrom().getTime());
+	                fileName.append(fileNameSeparator).append(ppmv.getValidity().getFrom().getTime());
                 }
-                fileName.append(fileNameSeparator);
                 if (ppmv.getValidity().getTo() != null) {
-                    fileName.append(ppmv.getValidity().getTo().getTime());
+	                fileName.append(fileNameSeparator).append(ppmv.getValidity().getTo().getTime());
                 }
             }
             // remove separator if it's at the end of the file name

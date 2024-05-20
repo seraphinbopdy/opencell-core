@@ -1,7 +1,6 @@
 package org.meveo.service.billing.impl.article;
 
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ChargeInstance;
 import org.meveo.model.billing.Invoice;
-import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.InvoiceSubCategory;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.TradingCountry;
@@ -92,37 +90,45 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
 
 	public Optional<AccountingArticle> getAccountingArticle(Product product, ChargeTemplate chargeTemplate, OfferTemplate offer,
 															Map<String, Object> attributes, WalletOperation walletOperation) throws InvalidELException, ValidationException {
+		return getAccountingArticleByIds(product, chargeTemplate==null?null:chargeTemplate.getId(), offer==null?null:offer.getId(), attributes, walletOperation);
+		
+	}
+	
+	public Optional<AccountingArticle> getAccountingArticleByIds(Product product, Long chargeTemplateId, Long offerId,
+				Map<String, Object> attributes, WalletOperation walletOperation) throws InvalidELException, ValidationException {
 		
 		List<ArticleMappingLine> articleMappingLines = null;
 		String param1 = ofNullable(walletOperation).map(WalletOperation::getParameter1).orElse(null);
 		String param2 = ofNullable(walletOperation).map(WalletOperation::getParameter2).orElse(null);
 		String param3 = ofNullable(walletOperation).map(WalletOperation::getParameter3).orElse(null);
 		
-		articleMappingLines = articleMappingLineService.findByProductAndCharge(product, chargeTemplate, offer, null, null, null);
+		Long productId= product==null? null : product.getId();
 		
-		if(articleMappingLines.isEmpty() && chargeTemplate != null && product != null) {
-			articleMappingLines = articleMappingLineService.findByProductAndCharge(product, chargeTemplate, null, null, null, null);
+		articleMappingLines = articleMappingLineService.findByProductAndChargeByIds(productId, chargeTemplateId, offerId, null, null, null);
+		
+		if(articleMappingLines.isEmpty() && chargeTemplateId != null && productId != null) {
+			articleMappingLines = articleMappingLineService.findByProductAndChargeByIds(productId, chargeTemplateId, null, null, null, null);
 		}
-		if(articleMappingLines.isEmpty() && chargeTemplate != null) {
-			articleMappingLines = articleMappingLineService.findByProductAndCharge(null, chargeTemplate, null, null, null, null);
+		if(articleMappingLines.isEmpty() && chargeTemplateId != null) {
+			articleMappingLines = articleMappingLineService.findByProductAndChargeByIds(null, chargeTemplateId, null, null, null, null);
 		}
-		if(articleMappingLines.isEmpty() && offer != null && product != null) {
-			articleMappingLines = articleMappingLineService.findByProductAndCharge(product, null, offer, null, null, null);
+		if(articleMappingLines.isEmpty() && offerId != null && productId != null) {
+			articleMappingLines = articleMappingLineService.findByProductAndChargeByIds(productId, null, offerId, null, null, null);
 		}
-		if(articleMappingLines.isEmpty() && product != null) {
-			articleMappingLines = articleMappingLineService.findByProductAndCharge(product, null, null, null, null, null);
+		if(articleMappingLines.isEmpty() && productId != null) {
+			articleMappingLines = articleMappingLineService.findByProductAndChargeByIds(productId, null, null, null, null, null);
 		}
-		if(articleMappingLines.isEmpty() && offer != null) {
-			articleMappingLines = articleMappingLineService.findByProductAndCharge(null, null, offer, null, null, null);
+		if(articleMappingLines.isEmpty() && offerId != null) {
+			articleMappingLines = articleMappingLineService.findByProductAndChargeByIds(null, null, offerId, null, null, null);
 		}
 		if(articleMappingLines.isEmpty() && walletOperation != null && walletOperation.getParameter1() != null) {
-			articleMappingLines = articleMappingLineService.findByProductAndCharge(null, null, null, param1, null, null);
+			articleMappingLines = articleMappingLineService.findByProductAndChargeByIds(null, null, null, param1, null, null);
 		}
 		if(articleMappingLines.isEmpty() && walletOperation != null && walletOperation.getParameter2() != null) {
-			articleMappingLines = articleMappingLineService.findByProductAndCharge(null, null, null, null, param2, null);
+			articleMappingLines = articleMappingLineService.findByProductAndChargeByIds(null, null, null, null, param2, null);
 		}
 		if(articleMappingLines.isEmpty() && walletOperation != null && walletOperation.getParameter3() != null) {
-			articleMappingLines = articleMappingLineService.findByProductAndCharge(null, null, null, null, null, param3);
+			articleMappingLines = articleMappingLineService.findByProductAndChargeByIds(null, null, null, null, null, param3);
 		}
 		
         List<ArticleMappingLine> filteredArticleMappingLines = new ArrayList<ArticleMappingLine>();
@@ -188,7 +194,7 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
             accountingArticle = attributeMappingLineMatch.getFullMatchsArticle().iterator().next();
 
         } else if (attributeMappingLineMatch.getFullMatchesCount() > 1) {
-			throw new RatingException("More than one accounting article found for product " + product.getId() + " and charge template " + chargeTemplate.getId());
+			throw new RatingException("More than one accounting article found for product " + productId + " and charge template " + chargeTemplateId);
 
 		} else {
             ArticleMappingLine bestMatch = attributeMappingLineMatch.getBestMatch();
@@ -299,9 +305,11 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
 		ServiceInstance serviceInstance = chargeInstance.getServiceInstance();
 		Map<String, Object> attributes = serviceInstance != null ? serviceInstance.extractAttributes() : new HashMap<>();
         Optional<AccountingArticle> accountingArticle;
-		accountingArticle = getAccountingArticle(serviceInstance != null && serviceInstance.getProductVersion()!=null ? serviceInstance.getProductVersion().getProduct() : null,
-				chargeInstance.getChargeTemplate(),
-				chargeInstance.getSubscription().getOffer(),
+		Long offerTemplateId = walletOperation != null && walletOperation.getOfferTemplate() != null ? walletOperation.getOfferTemplate().getId()
+				: (chargeInstance.getSubscription().getOffer() != null ? chargeInstance.getSubscription().getOffer().getId() : null);
+		accountingArticle = getAccountingArticleByIds(serviceInstance != null && serviceInstance.getProductVersion()!=null ? serviceInstance.getProductVersion().getProduct() : null,
+				chargeInstance.getChargeTemplate().getId(),
+				offerTemplateId,
 				attributes,
 				walletOperation);
 

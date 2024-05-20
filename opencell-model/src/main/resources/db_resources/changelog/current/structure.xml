@@ -24990,5 +24990,76 @@ public class DummyPaymentGatewayScript extends Script {
         <sql>create index cpq_attribute_instance__service_instance_index on ${db.schema.adapted}.cpq_attribute_instance using btree (service_instance_id)</sql>
         <sql>create index idx_subscription_id_charge_type on ${db.schema.adapted}.billing_charge_instance using btree (subscription_id, charge_type)</sql>
     </changeSet>
+    
+    <changeSet id="#INTRD-22617_20240520" author="Mohammed_ElAzzouzi">
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="RATING"/>
+            <column name="job_template" value="RatingCancellationJob"/>
+            <column name="code" value="RatingCancellationJob"/>
+            <column name="uuid" value="RatingCancellationJob"/>
+            <column name="description" value="Cancellation of operations to be rerated"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}], "JobInstance_RatingCancellationJob_UseExistingViews": [{"boolean": false}], "JobInstance_RatingCancellationJob_MaxRTsPerTransaction": [{"long": 100000}]}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="RATING"/>
+            <column name="job_template" value="ReRatingV2Job"/>
+            <column name="code" value="ReRatingV2Job"/>
+            <column name="uuid" value="ReRatingV2Job"/>
+            <column name="description" value="rerate operations"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}], "JobInstance_ReRatingV2Job_MaxRTsPerTransaction": [{"long": 1000}]}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="INVOICING"/>
+            <column name="job_template" value="RatedTransactionDiscountJob"/>
+            <column name="code" value="RT_discount_Job"/>
+            <column name="uuid" value="RT_discount_Job"/>
+            <column name="description" value="link rated transactions with associated discounted rated transaction"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}], "CF_MASS_UPDATE_CHUNK": [{"long": 100000}]}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="INVOICING"/>
+            <column name="job_template" value="InvoicingJobV3"/>
+            <column name="code" value="InvoicingJobV3"/>
+            <column name="uuid" value="InvoicingJobV3"/>
+            <column name="description" value="Generate invoices"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}]}
+                ]]>
+            </column>
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

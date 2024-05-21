@@ -41,7 +41,9 @@ public class FinanceSettingsMapper  extends ResourceMapper<org.meveo.apiv2.secur
                 .handleAccountingPeriods(entity.isHandleAccountingPeriods())
                 .handleFrameworkAgreement(entity.isHandleFrameworkAgreement())
                 .handleInvoicingPlans(entity.isHandleInvoicingPlans())
-                .enableEmptySubscriptionActivation(entity.isEnableEmptySubscriptionActivation());
+                .enableEmptySubscriptionActivation(entity.isEnableEmptySubscriptionActivation())
+                .enableQuotesFeature(entity.isEnableQuotesFeature())
+                .displayCounters(entity.isDisplayCounters());
         
         if (entity.getAuxiliaryAccounting() != null) {
             builder.useAuxiliaryAccounting(entity.getAuxiliaryAccounting().isUseAuxiliaryAccounting())
@@ -138,6 +140,8 @@ public class FinanceSettingsMapper  extends ResourceMapper<org.meveo.apiv2.secur
          financeSettings.setHandleAccountingPeriods(resource.getHandleAccountingPeriods());
          financeSettings.setHandleFrameworkAgreement(resource.getHandleFrameworkAgreement());
          financeSettings.setHandleInvoicingPlans(resource.getHandleInvoicingPlans());
+         financeSettings.setEnableQuotesFeature(resource.getEnableQuotesFeature());
+         financeSettings.setDisplayCounters(resource.getDisplayCounters());
          
          financeSettings.setEnableEmptySubscriptionActivation(resource.getEnableEmptySubscriptionActivation());
          return financeSettings;

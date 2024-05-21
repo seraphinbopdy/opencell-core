@@ -12137,6 +12137,8 @@
                 <constraints nullable="true" />
             </column>
             <column name="enable_empty_subscription_activation" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="enable_quotes_feature" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="display_counters" type="${type.boolean}" defaultValueNumeric="0" />
       </createTable>
     </changeSet>
     <changeSet id="#INTRD-3461_20212128-rebuild-str-tbl" author="hichamElHaloui">
@@ -20912,6 +20914,7 @@
     <changeSet id="#INTRD-23049_20240520" author="TarikFA." />
     <changeSet id="#INTRD-22952_20240520" author="ZBariki" />
     <changeSet id="#INTRD-22993_20240514" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-22976_20240520" author="aeljaouhari" />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

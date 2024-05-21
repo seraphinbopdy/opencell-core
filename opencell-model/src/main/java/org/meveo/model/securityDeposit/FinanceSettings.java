@@ -105,6 +105,14 @@ public class FinanceSettings extends BusinessEntity {
     @Type(type = "numeric_boolean")
     @Column(name = "enable_empty_subscription_activation")
     private boolean enableEmptySubscriptionActivation;
+    
+    @Type(type = "numeric_boolean")
+    @Column(name = "enable_quotes_feature")
+    private boolean enableQuotesFeature = false;
+    
+    @Type(type = "numeric_boolean")
+    @Column(name = "display_counters")
+    private boolean displayCounters = false;
 
     public FinanceSettings() {
         super();
@@ -293,4 +301,21 @@ public class FinanceSettings extends BusinessEntity {
     public void setEnableEmptySubscriptionActivation(boolean enableEmptySubscriptionActivation) {
         this.enableEmptySubscriptionActivation = enableEmptySubscriptionActivation;
     }
+
+	public boolean isEnableQuotesFeature() {
+		return enableQuotesFeature;
+	}
+
+	public void setEnableQuotesFeature(boolean enableQuotesFeature) {
+		this.enableQuotesFeature = enableQuotesFeature;
+	}
+
+	public boolean isDisplayCounters() {
+		return displayCounters;
+	}
+
+	public void setDisplayCounters(boolean displayCounters) {
+		this.displayCounters = displayCounters;
+	}
+    
 }

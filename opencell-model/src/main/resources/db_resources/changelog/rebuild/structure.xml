@@ -12648,6 +12648,7 @@
             <column name="collection" type="${type.boolean}" defaultValueNumeric="0">
                 <constraints nullable="false" />
             </column>
+            <column name="filters" type="${type.json}"/>
         </createTable>
     </changeSet>
 
@@ -20095,6 +20096,14 @@
         <sql>create table ${db.schema.adapted}billing_rated_transaction_open partition of ${db.schema.adapted}billing_rated_transaction for values in('OPEN')</sql>
         <sql>create table ${db.schema.adapted}billing_rated_transaction_other partition of ${db.schema.adapted}billing_rated_transaction default</sql>
     </changeSet>
+    
+    <changeSet id="USAGE_RERATE_RT_JOB_BUILD" author="Mohammed_ElAzzouzi">
+        <sql>create index billing_redirection_rule__idx_contract_id_priority on ${db.schema.adapted}billing_redirection_rule using btree (contract_id, priority)</sql>
+        <sql>create index cpq_attribute_instance__service_instance_index on ${db.schema.adapted}cpq_attribute_instance using btree (service_instance_id)</sql>
+        <sql>create index idx_subscription_id_charge_type on ${db.schema.adapted}billing_charge_instance using btree (subscription_id, charge_type)</sql>
+    </changeSet>
+    
+    <changeSet id="USAGE_RERATE_RT_JOB" author="Mohammed_ElAzzouzi"/>
 
     <changeSet id="#INTRD-4798_20220303" author="MohamedSTITANE"/>     
     <changeSet id="#INTRD-7954_20220616" author="AbdelmounaimAkadid"/>

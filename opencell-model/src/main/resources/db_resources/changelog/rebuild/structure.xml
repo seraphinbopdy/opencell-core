@@ -20899,6 +20899,7 @@
     <changeSet id="#INTRD-20685_simple_customer_settings" author="a.rouaguebe" />
     <changeSet id="INTRD-22259_20240409" author="zbariki" />
     <changeSet id="INTRD-22195_20240417" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-22617_20240520" author="Mohammed_ElAzzouzi"/>
     <changeSet id="INTRD-22557_20240425" author="TarikFA." />
     <changeSet id="INTRD-22385_20240429" author="TarikFA." />
     <changeSet id="#INTRD_22492_20240506" author="zelmeliani" />
@@ -20909,6 +20910,7 @@
     <changeSet id="#INTRD-20586_20240515" author="aeljaouhari" />
     <changeSet id="#INTRD-22947_20240516" author="TarikFA." />
     <changeSet id="#INTRD-23049_20240520" author="TarikFA." />
+    <changeSet id="#INTRD-22952_20240520" author="ZBariki" />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

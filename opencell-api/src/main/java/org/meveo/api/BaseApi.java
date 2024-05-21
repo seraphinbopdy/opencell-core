@@ -61,6 +61,7 @@ import org.meveo.api.dto.CustomEntityInstanceDto;
 import org.meveo.api.dto.CustomFieldDto;
 import org.meveo.api.dto.CustomFieldValueDto;
 import org.meveo.api.dto.CustomFieldsDto;
+import org.meveo.api.dto.EntityReferenceDto;
 import org.meveo.api.dto.LanguageDescriptionDto;
 import org.meveo.api.dto.audit.AuditableFieldDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
@@ -399,7 +400,7 @@ public abstract class BaseApi {
 
                         for (CustomEntityInstanceDto ceiDto : ((List<CustomEntityInstanceDto>) valueConverted)) {
                             customEntityInstanceApi.createOrUpdate(ceiDto);
-                            childEntityReferences.add(new EntityReferenceWrapper(CustomEntityInstance.class.getName(), ceiDto.getCetCode(), ceiDto.getCode()));
+                            childEntityReferences.add(new EntityReferenceWrapper(CustomEntityInstance.class.getName(), ceiDto.getCetCode(), ceiDto.getCode(), ceiDto.getId()));
                         }
 
                         customFieldInstanceService.setCFValue(entity, cfDto.getCode(), childEntityReferences);
@@ -778,11 +779,15 @@ public abstract class BaseApi {
         if (cfDto.getMapValue() != null && !cfDto.getMapValue().isEmpty()) {
             return CustomFieldValueDto.fromDTO(cfDto.getMapValue());
         } else if (cfDto.getListValue() != null && !cfDto.getListValue().isEmpty()) {
-			try{
-				return CustomFieldValueDto.fromDTO(cfDto.getListValue());
-			}catch(Exception e){
-				throw new MissingParameterException(e.getMessage());
-			}
+			cfDto.getListValue().forEach(cfdto -> {
+				if(cfdto.getValue() instanceof EntityReferenceDto) {
+					EntityReferenceDto entityReferenceDto = (EntityReferenceDto) cfdto.getValue();
+					if(Strings.isBlank(entityReferenceDto.getClassname())) {
+						entityReferenceDto.setClassname(cft.getEntityClazz());
+					}
+				}
+			});
+			return CustomFieldValueDto.fromDTO(cfDto.getListValue());
         
         } else if (!StringUtils.isBlank(cfDto.getFileValue())) {
             return fromDTO(cft, cfDto);
@@ -798,8 +803,7 @@ public abstract class BaseApi {
             return cfDto.getLongValue();
         } else if (cfDto.getEntityReferenceValue() != null) {
 			if(Strings.isBlank(cfDto.getEntityReferenceValue().getClassname())) {
-				missingParameters.add("classname");
-				handleMissingParameters();
+				cfDto.getEntityReferenceValue().setClassname(cft.getEntityClazz());
 			}
             return cfDto.getEntityReferenceValue().fromDTO();
             // } else {

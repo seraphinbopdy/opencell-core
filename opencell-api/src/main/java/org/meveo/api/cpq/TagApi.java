@@ -13,12 +13,9 @@ import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.model.admin.Seller;
-import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.cpq.tags.Tag;
 import org.meveo.model.cpq.tags.TagType;
 import org.meveo.service.admin.impl.SellerService;
-import org.meveo.service.billing.impl.BillingAccountService;
-import org.meveo.service.cpq.ProductVersionService;
 import org.meveo.service.cpq.TagService;
 import org.meveo.service.cpq.TagTypeService;
 
@@ -31,14 +28,12 @@ public class TagApi extends BaseApi {
 
 	@Inject
 	private TagService tagService;
-    @Inject
+    
+	@Inject
     private SellerService sellerService;
+
     @Inject
     private TagTypeService tagTypeService;
-    @Inject
-    private BillingAccountService billingAccountService;
-    @Inject
-    private ProductVersionService productVersionService;
 
 	/**
 	 * create new Tag from TagDto.<br />

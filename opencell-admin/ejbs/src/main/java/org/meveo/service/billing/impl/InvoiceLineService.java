@@ -46,6 +46,7 @@ import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.Session;
+import org.hibernate.exception.DataException;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.AggregationConfiguration;
 import org.meveo.admin.job.InvoiceLinesFactory;
@@ -71,6 +72,7 @@ import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.ExtraMinAmount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceLine;
+import org.meveo.model.billing.InvoiceLineStatusEnum;
 import org.meveo.model.billing.InvoiceLineTaxModeEnum;
 import org.meveo.model.billing.InvoiceLinesGroup;
 import org.meveo.model.billing.InvoiceSubCategory;
@@ -82,6 +84,7 @@ import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.Tax;
+import org.meveo.model.billing.ThresholdOptionsEnum;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.billing.UserAccount;
 import org.meveo.model.catalog.DiscountPlan;
@@ -700,9 +703,19 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
      * @return Created Invoice Line {@link InvoiceLine}
      */
     public InvoiceLine createInvoiceLine(InvoiceLine invoiceLine) {
-        create(invoiceLine);
-        getEntityManager().flush();
-        return invoiceLine;
+        try {
+            create(invoiceLine);
+            getEntityManager().flush();
+            return invoiceLine;
+        } catch (RuntimeException exception) {
+            if(exception.getCause() instanceof DataException) {
+                Throwable throwable = exception.getCause() != null
+                        ? exception.getCause().getCause() : exception;
+                throw new BusinessException(throwable.getCause().getMessage());
+            } else {
+                throw new BusinessException(exception.getMessage());
+            }
+        }
     }
 
 	public InvoiceLine initInvoiceLineFromResource(org.meveo.apiv2.billing.InvoiceLine resource, InvoiceLine invoiceLine) {
@@ -1463,7 +1476,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
     public void deleteByBillingRun(long billingRunId) {
         List<Long> invoiceLinesIds = loadInvoiceLinesIdByBillingRun(billingRunId);
         if(!invoiceLinesIds.isEmpty()) {
-            detachRatedTransactions(invoiceLinesIds);
+            ratedTransactionService.detachRatedTransactions(invoiceLinesIds);
             getEntityManager()
                     .createNamedQuery("InvoiceLine.deleteByBillingRun")
                     .setParameter("billingRunId", billingRunId)
@@ -1476,13 +1489,6 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 .setParameter("billingRunId", billingRunId)
                 .getResultList();
     }
-
-    public void detachRatedTransactions(List<Long> invoiceLinesIds) {
-        ratedTransactionService.getEntityManager()
-                .createNamedQuery("RatedTransaction.detachFromInvoiceLines")
-                .setParameter("ids", invoiceLinesIds)
-                .executeUpdate();
-    }
     
     public List<Long> loadInvoiceLinesByBillingRunNotValidatedInvoices(long billingRunId) {
         return getEntityManager().createNamedQuery("InvoiceLine.listByBillingRunNotValidatedInvoices")
@@ -1493,7 +1499,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 	public void deleteInvoiceLines(BillingRun billingRun) {
 		List<Long> invoiceLinesIds = loadInvoiceLinesByBillingRunNotValidatedInvoices(billingRun.getId());
         if(!invoiceLinesIds.isEmpty()) {
-            detachRatedTransactions(invoiceLinesIds);
+            ratedTransactionService.detachRatedTransactions(invoiceLinesIds);
             getEntityManager()
                     .createNamedQuery("InvoiceLine.deleteByBillingRunNotValidatedInvoices")
                     .setParameter("billingRunId", billingRun.getId())
@@ -1553,7 +1559,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                     .setParameter("now", new Date())
                     .executeUpdate();
             if(!invoicesLines.isEmpty()) {
-                detachRatedTransactions(invoicesLines);
+                ratedTransactionService.detachRatedTransactions(invoicesLines);
                 getEntityManager()
                         .createQuery("DELETE FROM InvoiceLine WHERE id in (:ids)")
                         .setParameter("ids", invoicesLines)
@@ -1821,15 +1827,15 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
     /**
      * Bridge Invoice lines that correspond to discount type rated transactions with invoices lines that they discount<BR/>
      * Note: Each discount type Rated Transaction correspond to a single Invoice line
-     * 
+     *
      * @param billingRunId Billing run Id
-     * @param minId Minimum Rated transaction Id
-     * @param maxId Maximum Rated transaction Id
+     * @param minId        Minimum Rated transaction Id
+     * @param maxId        Maximum Rated transaction Id
      */
     public void bridgeDiscountILs(Long billingRunId, Long minId, Long maxId) {
 
         getEntityManager().createNamedQuery("InvoiceLine.massUpdateWithDiscountedIL" + (EntityManagerProvider.isDBOracle() ? "Oracle" : "")).setParameter("brId", billingRunId).setParameter("minId", minId)
-            .setParameter("maxId", maxId).executeUpdate();
+                .setParameter("maxId", maxId).executeUpdate();
     }
 
     public List<Object[]> getInvoiceLineStatistics(Long billingRunId) {
@@ -1837,4 +1843,206 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 .setParameter("billingRunId", billingRunId)
                 .getResultList();
     }
+
+    /**
+     * Check B2B threshold by invoice
+     *
+     * @param billingRunId       the billingRun Id
+     * @param invoicingThreshold the invoicing threshold
+     * @param checkThreshold     check threshold
+     * @return list of array of billing accounts Ids and invoice lines Ids
+     */
+    public List<Object[]> checkThresholdB2B(Long billingRunId, BigDecimal invoicingThreshold, ThresholdOptionsEnum checkThreshold) {
+        if (StringUtils.isBlank(billingRunId) || invoicingThreshold == null || checkThreshold == null) {
+            return Collections.emptyList();
+        }
+        try {
+            return getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2B")
+                    .setParameter("billingRunId", billingRunId)
+                    .setParameter("invoicingThreshold", invoicingThreshold)
+                    .setParameter("checkThreshold", checkThreshold.toString())
+                    .getResultList();
+        } catch (NoResultException e) {
+            log.warn("checkThresholdB2B : no result found for the provided billingRun = " + billingRunId);
+            return emptyList();
+        }
+    }
+
+    /**
+     * Check B2C threshold by invoice
+     *
+     * @param billingRunId       the billingRun Id
+     * @param invoicingThreshold the invoicing threshold
+     * @param checkThreshold     check threshold
+     * @return list of array of billing accounts Ids and invoice lines Ids
+     */
+    public List<Object[]> checkThresholdB2C(Long billingRunId, BigDecimal invoicingThreshold, ThresholdOptionsEnum checkThreshold) {
+        if (StringUtils.isBlank(billingRunId) || invoicingThreshold == null || checkThreshold == null) {
+            return Collections.emptyList();
+        }
+        try {
+            return getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2C")
+                    .setParameter("billingRunId", billingRunId)
+                    .setParameter("invoicingThreshold", invoicingThreshold)
+                    .setParameter("checkThreshold", checkThreshold.toString())
+                    .getResultList();
+        } catch (NoResultException e) {
+            log.warn("checkThresholdB2C : no result found for the provided billingRun = " + billingRunId);
+            return emptyList();
+        }
+    }
+
+    /**
+     * Check B2B threshold by billing account
+     *
+     * @param billingRunId the billingRun Id
+     * @return billing accounts Ids
+     */
+    public List<Long> checkThresholdB2BByBA(Long billingRunId) {
+        if (StringUtils.isBlank(billingRunId)) {
+            return Collections.emptyList();
+        }
+        try {
+            return getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByBA")
+                    .setParameter("billingRunId", billingRunId)
+                    .getResultList();
+        } catch (NoResultException e) {
+            log.warn("checkThresholdB2BByBA : no billing account found for the provided billingRun = " + billingRunId);
+            return emptyList();
+        }
+    }
+
+    /**
+     * Check B2C threshold by billing account
+     *
+     * @param billingRunId the billingRun Id
+     * @return billing accounts Ids
+     */
+    public List<Long> checkThresholdB2CByBA(Long billingRunId) {
+        if (StringUtils.isBlank(billingRunId)) {
+            return Collections.emptyList();
+        }
+        try {
+            return getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2CByBA")
+                    .setParameter("billingRunId", billingRunId)
+                    .getResultList();
+        } catch (NoResultException e) {
+            log.warn("checkThresholdB2CByBA : no billing account found for the provided billingRun = " + billingRunId);
+            return emptyList();
+        }
+    }
+
+    /**
+     * Check B2B threshold by customer account
+     *
+     * @param billingRunId the billingRun Id
+     * @return billing accounts Ids concatenated and separated by ","
+     */
+    public String checkThresholdB2BByCA(Long billingRunId) {
+        if (StringUtils.isBlank(billingRunId)) {
+            return null;
+        }
+        try {
+            return (String) getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByCA")
+                    .setParameter("billingRunId", billingRunId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            log.warn("checkThresholdB2BByCA : no billing account found for the provided billingRun = " + billingRunId);
+            return null;
+        }
+    }
+
+    /**
+     * Check B2C threshold by customer account
+     *
+     * @param billingRunId the billingRun Id
+     * @return billing accounts Ids concatenated and separated by ","
+     */
+    public String checkThresholdB2CByCA(Long billingRunId) {
+        if (StringUtils.isBlank(billingRunId)) {
+            return null;
+        }
+        try {
+            return (String) getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByCA")
+                    .setParameter("billingRunId", billingRunId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            log.warn("checkThresholdB2CByCA : no billing account found for the provided billingRun = " + billingRunId);
+            return null;
+        }
+    }
+
+    /**
+     * Check B2B threshold by customer
+     *
+     * @param billingRunId the billingRun Id
+     * @return billing accounts Ids concatenated and separated by ","
+     */
+    public String checkThresholdB2BByC(Long billingRunId) {
+        if (StringUtils.isBlank(billingRunId)) {
+            return null;
+        }
+        try {
+            return (String) getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByC")
+                    .setParameter("billingRunId", billingRunId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            log.warn("checkThresholdB2BByC : no billing account found for the provided billingRun = " + billingRunId);
+            return null;
+        }
+    }
+
+    /**
+     * Check B2C threshold by customer
+     *
+     * @param billingRunId the billingRun Id
+     * @return billing accounts Ids concatenated and separated by ","
+     */
+    public String checkThresholdB2CByC(Long billingRunId) {
+        if (StringUtils.isBlank(billingRunId)) {
+            return null;
+        }
+        try {
+            return (String) getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByC")
+                    .setParameter("billingRunId", billingRunId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            log.warn("checkThresholdB2CByC : no billing account found for the provided billingRun = " + billingRunId);
+            return null;
+        }
+    }
+
+
+    /**
+     * Cancel the provided invoice lines
+     *
+     * @param invoiceLinesIds the invoice lines Ids
+     */
+    public void cancelInvoiceLines(Collection<Long> invoiceLinesIds) {
+        if (invoiceLinesIds == null || invoiceLinesIds.isEmpty()) {
+            return;
+        }
+        getEntityManager().createNamedQuery("InvoiceLine.cancelInvoiceLines")
+                .setParameter("now", new Date())
+                .setParameter("ids", invoiceLinesIds)
+                .executeUpdate();
+    }
+
+    /**
+     * Cancel invoice lines of provided billingRun and billing accounts
+     *
+     * @param billingRunId       the billingRun Id
+     * @param billingAccountsIds billing accounts ids
+     */
+    public void cancelInvoiceLines(Long billingRunId, Collection<Long> billingAccountsIds) {
+        if (billingRunId == null || billingAccountsIds == null || billingAccountsIds.isEmpty()) {
+            return;
+        }
+        getEntityManager().createNamedQuery("InvoiceLine.cancelInvoiceLinesByBRandBAs")
+                .setParameter("now", new Date())
+                .setParameter("billingRunId", billingRunId)
+                .setParameter("baIds", billingAccountsIds)
+                .executeUpdate();
+    }
+
 }

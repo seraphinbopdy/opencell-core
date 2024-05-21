@@ -84,7 +84,7 @@ public class InvoicingJobV2Bean extends BaseJobBean {
     public void execute(JobExecutionResultImpl result, JobInstance jobInstance) {
         log.debug("Running InvoiceSplitJob with parameter={}", jobInstance.getParametres());
             List<EntityReferenceWrapper> billingRunWrappers =
-                    (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "InvoicingJobV2_billingRun");
+                    (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "billingRuns");
             List<Long> billingRunIds = billingRunWrappers != null ? extractBRIds(billingRunWrappers) : emptyList();
             Map<String, Object> filters = new HashedMap();
             if (billingRunIds.isEmpty()) {

@@ -706,7 +706,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         if (DateUtils.compare(startDate, new Date()) < 0) {
             qb.addSql("ao.invoice.status = '" + VALIDATED + "' and ao.invoice.invoiceDate <= '"
                     + DateUtils.formatDateWithPattern(setDateToEndOfDay(startDate), "yyyy-MM-dd HH:mm:ss") + "'");
-            qb.addSql("(ao.invoice.paymentStatus = '" + PENDING + "' or ao.invoice.paymentStatus = '" + PPAID + "' or ao.invoice.paymentStatus ='" + UNPAID + "')");
+            qb.addSql("(ao.invoice.paymentStatus = '" + PENDING + "' or ao.invoice.paymentStatus = '" + PPAID + "' or ao.invoice.paymentStatus ='" + UNPAID + "' or ao.matchingStatus='"+MatchingStatusEnum.I+"' )");
         }
 
         qb.addGroupCriterion("ao.customerAccount.id, ao.customerAccount.dunningLevel, ao.customerAccount.name, ao.customerAccount.description, ao.seller.description, ao.seller.code, ao.dueDate, ao.amount, ao.invoice.tradingCurrency.currency.currencyCode, ao.invoice.id, ao.invoice.invoiceNumber, ao.invoice.amountWithTax, ao.customerAccount.code, ao.invoice.transactionalAmountWithTax, ao.invoice.billingAccount.id, ao.transactionCategory ");
@@ -722,7 +722,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
                 "inner join billing_invoice inv on ao.invoice_id=inv.id " +
                 "inner join billing_invoice_type invt on inv.invoice_type_id=invt.id ";
         String where = " where ao.transaction_type='I' ";
-        where = where.concat(" and (ao.matching_status='"+MatchingStatusEnum.O+"' or ao.matching_status='"+MatchingStatusEnum.P+"')");
+        where = where.concat(" and (ao.matching_status='"+MatchingStatusEnum.O+"' or ao.matching_status='"+MatchingStatusEnum.P+"' or ao.matching_status='"+MatchingStatusEnum.I+"' ) ");
         where = where.concat(" and invt.exclude_from_aged_trial_balance = 0");
 
 
@@ -749,7 +749,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         if (DateUtils.compare(startDate, new Date()) < 0) {
             where = where.concat(" and inv.status = '" + VALIDATED + "' and inv.invoice_date <= '"
                     + DateUtils.formatDateWithPattern(setDateToEndOfDay(startDate), "yyyy-MM-dd HH:mm:ss") + "'");
-            where = where.concat(" and (inv.payment_status = '" + PENDING + "' or inv.payment_status = '" + PPAID + "' or inv.payment_status ='" + UNPAID + "')");
+            where = where.concat(" and (inv.payment_status = '" + PENDING + "' or inv.payment_status = '" + PPAID + "' or inv.payment_status ='" + UNPAID + "' or ao.matching_status='"+MatchingStatusEnum.I+"')");
         }
 
         String datePattern = "yyyy-MM-dd";

@@ -118,6 +118,7 @@ import org.meveo.model.payments.PaymentRejectionCodesGroup;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.RejectedPayment;
+import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.payments.impl.AccountOperationService;
@@ -779,14 +780,6 @@ public class PaymentApi extends BaseApi {
 		PaymentRejectionCode rejectionCode = ofNullable(rejectionCodeService.findById(id)).orElseThrow(() -> new NotFoundException(PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE));
 		if (rejectionCode.getPaymentRejectionCodesGroup() == null || (rejectionCode.getPaymentRejectionCodesGroup() != null && forceDelete)) {
 			PaymentRejectionCodesGroup rejectionCodesGroup = rejectionCode.getPaymentRejectionCodesGroup();
-			if (rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
-				removeRejectionCodeGroup(rejectionCodesGroup.getId());
-			} else {
-				if(rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && !rejectionCodesGroup.getPaymentRejectionCodes().isEmpty()) {
-					rejectionCodesGroup.getPaymentRejectionCodes().remove(rejectionCode);
-				}
-				rejectionCodeService.remove(rejectionCode);
-			}
 			paymentRejectionActionReportService.getEntityManager()
 					.createNamedQuery("PaymentRejectionActionReport.removeActionReferenceToPendingAndInProgressReports")
 					.setParameter("rejectionCode", rejectionCode.getCode())
@@ -796,13 +789,20 @@ public class PaymentApi extends BaseApi {
 					.createNamedQuery("PaymentRejectionActionReport.removeActionReference")
 					.setParameter("rejectionCode", rejectionCode.getCode())
 					.executeUpdate();
-			
+
 			paymentRejectionActionReportService.getEntityManager().flush();
-			
-			rejectedPaymentService.getEntityManager()
-					.createNamedQuery("RejectedPayment.updateRejectionActionsStatus")
-					.setParameter("rejectedCode", rejectionCode.getCode())
-					.executeUpdate();
+
+			// update AO status : (PENDING, NO_ACTION) ==> NO_ACTION | (RUNNING, FAILED, CANCELED) => CANCELED | (COMPLETED) => COMPLETED
+			rejectedPaymentService.updateRejectionActionsStatus(rejectionCode.getCode(), List.of(RejectionActionStatus.PENDING), RejectionActionStatus.NO_ACTION);
+			rejectedPaymentService.updateRejectionActionsStatus(rejectionCode.getCode(), List.of(RejectionActionStatus.FAILED, RejectionActionStatus.RUNNING), RejectionActionStatus.CANCELED);
+			if (rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && rejectionCodesGroup.getPaymentRejectionCodes().size() == 1) {
+				removeRejectionCodeGroup(rejectionCodesGroup.getId());
+			} else {
+				if(rejectionCodesGroup != null && rejectionCodesGroup.getPaymentRejectionCodes() != null && !rejectionCodesGroup.getPaymentRejectionCodes().isEmpty()) {
+					rejectionCodesGroup.getPaymentRejectionCodes().remove(rejectionCode);
+				}
+				rejectionCodeService.remove(rejectionCode);
+			}
 			
 		} else if (rejectionCode.getPaymentRejectionCodesGroup() != null && !forceDelete) {
 			throw new ConflictException("Rejection code " + rejectionCode.getCode() + " is used in a rejection codes group. Use ‘force:true’ to override. If the group becomes empty, it will be deleted too");

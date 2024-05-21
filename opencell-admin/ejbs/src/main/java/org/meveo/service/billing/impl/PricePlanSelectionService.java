@@ -153,10 +153,10 @@ public class PricePlanSelectionService implements Serializable {
         StringBuilder queryBuilder = null;
         if (matchLong) {
             queryBuilder = new StringBuilder(
-                "SELECT new org.meveo.model.catalog.PricePlanMatrixForRating(id,  code, offerTemplate.id,  startSubscriptionDate,  endSubscriptionDate,  startRatingDate,  endRatingDate,  minQuantity, "
-                        + "maxQuantity, minSubscriptionAgeInMonth, maxSubscriptionAgeInMonth,  criteria1Value,  criteria2Value,  criteria3Value,  criteriaEL,  amountWithoutTax, "
-                        + "amountWithTax,  amountWithoutTaxEL,  amountWithTaxEL, tradingCurrency.id, tradingCountry.id,  priority, seller.id, validityCalendar.id, sequence, scriptInstance.id, "
-                        + "totalAmountEL,  minimumAmountEL,  invoiceSubCategoryEL,  validityFrom,  validityDate) from PricePlanMatrix ppm join ppm.chargeTemplates as ct WHERE ppm.disabled = false AND ct.code = :chargeCode");
+                "SELECT new org.meveo.model.catalog.PricePlanMatrixForRating(ppm.id,  ppm.code, ppm.offerTemplate.id,  ppm.startSubscriptionDate,  ppm.endSubscriptionDate,  ppm.startRatingDate,  ppm.endRatingDate,  ppm.minQuantity, "
+                        + "ppm.maxQuantity, ppm.minSubscriptionAgeInMonth, ppm.maxSubscriptionAgeInMonth,  ppm.criteria1Value,  ppm.criteria2Value,  ppm.criteria3Value,  ppm.criteriaEL,  ppm.amountWithoutTax, "
+                        + "ppm.amountWithTax,  ppm.amountWithoutTaxEL,  ppm.amountWithTaxEL, ppm.tradingCurrency.id, ppm.tradingCountry.id,  ppm.priority, ppm.seller.id, ppm.validityCalendar.id, ppm.sequence, ppm.scriptInstance.id, "
+                        + "ppm.totalAmountEL,  ppm.minimumAmountEL,  ppm.invoiceSubCategoryEL,  ppm.validityFrom,  ppm.validityDate) from PricePlanMatrix ppm join ppm.chargeTemplates as ct WHERE ppm.disabled = false AND ct.code = :chargeCode");
         } else {
             queryBuilder = new StringBuilder("SELECT ppm FROM PricePlanMatrix ppm join ppm.chargeTemplates as ct WHERE ppm.disabled = false AND ct.code = :chargeCode");
         }

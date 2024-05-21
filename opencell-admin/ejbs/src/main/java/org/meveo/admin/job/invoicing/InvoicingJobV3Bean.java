@@ -105,15 +105,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 	}
 
 	private List<BillingRun> readValidBillingRunsToProcess(JobInstance jobInstance) {
-		List<EntityReferenceWrapper> billingRunWrappers = (List<EntityReferenceWrapper>) this
-				.getParamOrCFValue(jobInstance, "InvoicingJobV3_billingRun");
-		List<EntityReferenceWrapper> billingRunWrappersV2 = (List<EntityReferenceWrapper>) this
-				.getParamOrCFValue(jobInstance, "InvoicingJobV2_billingRun");
-		if(billingRunWrappers != null) {
-			ofNullable(billingRunWrappersV2).ifPresent(billingRunWrappers::addAll);
-		} else {
-			billingRunWrappers = billingRunWrappersV2;
-		}
+		List<EntityReferenceWrapper> billingRunWrappers = (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "billingRuns");
 		List<Long> billingRunIds = billingRunWrappers != null ? extractBRIds(billingRunWrappers) : emptyList();
 		Map<String, Object> filters = new HashedMap();
 		if (!billingRunIds.isEmpty()) {

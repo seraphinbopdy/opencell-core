@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
@@ -582,12 +583,16 @@ public class ReratingService extends RatingService implements Serializable {
                         // MathContext mc = new MathContext(appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
                         // unitPrice = quantity.compareTo(ZERO) == 0 ? amountWithoutTax : amountWithoutTax.divide(quantity, mc);
 
-                        ILAdjustments adjustment = new ILAdjustments((BigDecimal) rtIlInfo[2], (BigDecimal) rtIlInfo[3], (BigDecimal) rtIlInfo[4], (BigDecimal) rtIlInfo[5], averageUnitAmounts);
+                        BigDecimal rtAmountWithoutTax = (BigDecimal) rtIlInfo[2];
+                        BigDecimal ilAmountWithoutTax = (BigDecimal) rtIlInfo[9];
+                        if (!Objects.equals(ilAmountWithoutTax, rtAmountWithoutTax)) {
+                            ILAdjustments adjustment = new ILAdjustments((BigDecimal) rtIlInfo[2], (BigDecimal) rtIlInfo[3], (BigDecimal) rtIlInfo[4], (BigDecimal) rtIlInfo[5], averageUnitAmounts);
 
-                        if (ilAdjustments.containsKey(ilId)) {
-                            ilAdjustments.get(ilId).addAdjustment(adjustment);
-                        } else {
-                            ilAdjustments.put(ilId, adjustment);
+                            if (ilAdjustments.containsKey(ilId)) {
+                                ilAdjustments.get(ilId).addAdjustment(adjustment);
+                            } else {
+                                ilAdjustments.put(ilId, adjustment);
+                            }
                         }
                     }
                 }

@@ -20911,6 +20911,7 @@
     <changeSet id="#INTRD-22947_20240516" author="TarikFA." />
     <changeSet id="#INTRD-23049_20240520" author="TarikFA." />
     <changeSet id="#INTRD-22952_20240520" author="ZBariki" />
+    <changeSet id="#INTRD-22993_20240514" author="AbdellatifBARI" />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

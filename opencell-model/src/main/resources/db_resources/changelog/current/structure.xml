@@ -12225,5 +12225,12 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="uuid" value="EDRs_Deduplication" />
         </insert>
     </changeSet>
+    
+  	<changeSet id="#INTRD-22976_20240520" author="aeljaouhari">
+		<addColumn tableName="finance_settings">
+            <column name="enable_quotes_feature" type="${type.boolean}" defaultValueNumeric="1" />
+            <column name="display_counters" type="${type.boolean}" defaultValueNumeric="1" />
+		</addColumn>
+	</changeSet>
 
 </databaseChangeLog>

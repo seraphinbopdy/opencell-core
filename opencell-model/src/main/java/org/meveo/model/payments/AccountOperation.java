@@ -116,7 +116,7 @@ import org.meveo.model.finance.AccountingEntry;
         @NamedQuery(name = "AccountOperation.findByCustomerAccount", query = "SELECT ao FROM AccountOperation ao WHERE ao.id in (:AO_IDS) AND ao.customerAccount.id = :CUSTOMERACCOUNT_ID"),
         @NamedQuery(name = "Payment.updateReference", query = "UPDATE Payment pay set pay.reference = (select ph.externalPaymentId from PaymentHistory ph where ph.payment is not null and ph.payment.id = pay.id) where pay.reference is null"),
         @NamedQuery(name = "Refund.updateReference", query = "UPDATE Refund re set re.reference = (select ph.externalPaymentId from PaymentHistory ph where ph.refund is not null and ph.refund.id = re.id) where re.reference is null"),
-        @NamedQuery(name = "RejectedPayment.findByRejectionActionStatus", query = "SELECT rp FROM RejectedPayment rp WHERE rp.rejectionActionsStatus IN (:RA_STATUS)"),
+        @NamedQuery(name = "RejectedPayment.findByRejectionActionStatus", query = "SELECT distinct rp FROM RejectedPayment rp left join fetch rp.paymentRejectionActionReports prar WHERE rp.rejectionActionsStatus IN (:RA_STATUS)"),
         @NamedQuery(name = "RejectedPayment.findByExternalId", query = "SELECT ao FROM AccountOperation ao WHERE ao.reference = :externalId"),
         @NamedQuery(name = "RejectedPayment.findByExternalIdAndPaymentGateWay", query = "SELECT pay FROM Payment pay WHERE pay.reference = :externalId and pay.paymentGateway.code = :paymentGatewayCode")
 })

@@ -27,8 +27,7 @@ import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
-import org.meveo.model.rating.EDR;
-import org.meveo.model.rating.EDRStatusEnum;
+import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.ReratingService;
 
@@ -36,9 +35,12 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * A job implementation to cancel duplicated EDRs and keep only the newest version.
@@ -87,18 +89,21 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Lo
      * @param jobExecutionResult The job execution result.
      */
     protected void applyDeduplication(List<Long> edrIds, JobExecutionResultImpl jobExecutionResult) {
-
+        Set<Long> edrsEV = new HashSet<>();
+        Set<Long> edrs = new HashSet<>();
         for (Long edrId : edrIds) {
-            EDR edrToCancel = edrService.findById(edrId);
-            boolean derivedWOwasCanceled = reratingService.validateAndCancelDerivedWosEdrsAndRts(edrToCancel);
-            edrToCancel.setStatus(EDRStatusEnum.CANCELLED);
+            boolean derivedWOwasCanceled = reratingService.validateAndCancelDerivedWosEdrsAndRts(edrService.findById(edrId));
             if (derivedWOwasCanceled) {
-                edrToCancel.setRejectReason("Received new version EDR[id=" + edrToCancel.getId() + "]");
-                edrToCancel.setEventVersion(edrToCancel.getEventVersion() + 1);
+                edrsEV.add(edrId);
             } else {
-                edrToCancel.setRejectReason("EDR[id=" + edrToCancel.getId() + ", eventKey=" + edrToCancel.getEventKey() + "] has already been invoiced");
+                edrs.add(edrId);
             }
-            edrService.update(edrToCancel);
+        }
+        if (!edrsEV.isEmpty()) {
+            edrService.getEntityManager().createNamedQuery("EDR.cancelEDRsWithRejectReasonAndEventVersion").setParameter("updatedDate", new Date()).setParameter("ids", edrsEV).executeUpdate();
+        }
+        if (!edrs.isEmpty()) {
+            edrService.getEntityManager().createNamedQuery("EDR.cancelEDRsRejectReason").setParameter("updatedDate", new Date()).setParameter("ids", edrs).executeUpdate();
         }
     }
 
@@ -132,7 +137,8 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Lo
 
     private Optional<Iterator<List<Long>>> getSynchronizedIterator(JobExecutionResultImpl jobExecutionResult, int jobItemsLimit) {
         JobInstance jobInstance = jobExecutionResult.getJobInstance();
-        Long updateChunkSize = (Long) getParamOrCFValue(jobInstance, EDRsDeduplicationJob.UPDATE_CHUNK_SIZE, 10000L);
+        Long updateChunkSize = (Long) getParamOrCFValue(jobInstance, EDRsDeduplicationJob.UPDATE_CHUNK_SIZE, EDRsDeduplicationJob.DEFAULT_UPDATE_CHUNK_SIZE);
+        Long finalUpdateChunkSize = Math.min(updateChunkSize, NativePersistenceService.SHORT_MAX_VALUE);
         scrollableResults = getScrollableResult(jobInstance, jobItemsLimit);
         return Optional.of(new SynchronizedMultiItemIterator<>(scrollableResults, -1) {
             long totalItemCount = 0L;
@@ -145,7 +151,7 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Lo
 
             @Override
             public boolean isIncludeItem(Long item) {
-                if (totalItemCount > updateChunkSize) {
+                if (totalItemCount > finalUpdateChunkSize) {
                     return false;
                 }
                 totalItemCount++;

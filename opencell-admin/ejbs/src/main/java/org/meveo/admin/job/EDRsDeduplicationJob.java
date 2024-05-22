@@ -49,7 +49,12 @@ public class EDRsDeduplicationJob extends ScopedJob {
     /**
      * Default value of fetch size of select query
      */
-    public static final Long DEFAULT_SELECT_FETCH_SIZE = 1000000L; //1M
+    public static final Long DEFAULT_SELECT_FETCH_SIZE = 1000L;
+
+    /**
+     * Default value of update chunk size
+     */
+    public static final Long DEFAULT_UPDATE_CHUNK_SIZE = 100L;
 
     /**
      * Custom field that contains the select fetch size value
@@ -104,7 +109,7 @@ public class EDRsDeduplicationJob extends ScopedJob {
         result.put(UPDATE_CHUNK_SIZE,
                 CustomFieldTemplateUtils.buildCF(UPDATE_CHUNK_SIZE,
                         resourceMessages.getString("jobExecution.edrsDeduplication.updateChunkSize"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;fieldGroup:Configuration:0;field:3", "100000", APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Configuration:0;fieldGroup:Configuration:0;field:3", String.valueOf(DEFAULT_UPDATE_CHUNK_SIZE), APPLIES_TO));
 
         result.put(CF_JOB_ITEMS_LIMIT, CustomFieldTemplateUtils.buildCF(CF_JOB_ITEMS_LIMIT, resourceMessages.getString("jobExecution.jobItemsLimit"),
                 CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Configuration:0;field:4", APPLIES_TO));

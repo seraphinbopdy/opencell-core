@@ -96,7 +96,9 @@ import org.meveo.model.billing.WalletOperation;
 		@NamedQuery(name = "EDR.cancelEDRs", query = "UPDATE EDR set status='CANCELLED', rejectReason=:rejectReason, updated=:updatedDate where id in :ids"),
         @NamedQuery(name = "EDR.getDuplicatedEDRs", query = "SELECT e1.id FROM EDR e1 WHERE e1.status != 'CANCELLED' AND e1.eventKey IS NOT NULL AND e1.eventVersion IS NOT NULL " +
                 "AND (e1.eventKey, e1.eventVersion) in (SELECT e2.eventKey, e2.eventVersion FROM EDR e2 WHERE e2.eventKey = e1.eventKey AND e2.eventVersion = e1.eventVersion " +
-                "AND e2.status != 'CANCELLED' AND e2.eventKey IS NOT NULL AND e2.eventVersion IS NOT NULL AND e2.id > e1.id) ORDER BY e1.eventKey, e1.eventVersion DESC, e1.id DESC ")
+                "AND e2.status != 'CANCELLED' AND e2.eventKey IS NOT NULL AND e2.eventVersion IS NOT NULL AND e2.id > e1.id) ORDER BY e1.eventKey, e1.eventVersion DESC, e1.id DESC "),
+        @NamedQuery(name = "EDR.cancelEDRsWithRejectReasonAndEventVersion", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('Received new version EDR[id=',id,']'), eventVersion=eventVersion+1 ,updated=:updatedDate where id in :ids"),
+        @NamedQuery(name = "EDR.cancelEDRsRejectReason", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('EDR[id=', id,', eventKey=', eventKey,'] has already been invoiced'), updated=:updatedDate where id in :ids")
     })
 
 

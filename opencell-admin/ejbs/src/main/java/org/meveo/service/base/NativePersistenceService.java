@@ -862,6 +862,14 @@ public class NativePersistenceService extends BaseService {
         if (!aggFields.isEmpty()) {
             config.getFetchFields().remove("id");
         }
+        
+        var rework = new ArrayList<String>();
+        rework.addAll(fetchFields.stream().filter(predicate.negate()).collect(Collectors.toList()));
+        rework.addAll(fetchFields.stream().filter(predicate).collect(Collectors.toList()));
+        
+        if(config != null) {
+            config.setFetchFields(rework);
+        }
 
         List<String> fetch = new ArrayList<>();
         // add all fields that are not aggregation functions

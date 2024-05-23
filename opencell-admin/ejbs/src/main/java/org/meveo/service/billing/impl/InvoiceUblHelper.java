@@ -266,7 +266,13 @@ public class InvoiceUblHelper {
 			periodType.setStartDate(startDate);
 			target.getInvoicePeriods().add(periodType);
 		}
-		
+
+		// Invoice/Delivery/DeliveryLocation/Address
+		if (source.getBillingAccount() != null && source.getBillingAccount().getUsersAccounts() != null
+				&& source.getBillingAccount().getUsersAccounts().size() == 1 && source.getBillingAccount().getUsersAccounts().get(0).getAddress() != null) {
+			target.getDeliveries().add(getDeliveryType(source));
+		}
+
 		Note note = objectFactorycommonBasic.createNote();
 		note.setValue(source.getDescription());
 		target.getNotes().add(note);
@@ -318,6 +324,11 @@ public class InvoiceUblHelper {
 			endDate.setValue(toXmlDate(source.getEndDate()));
 			periodType.setStartDate(startDate);
 			target.getInvoicePeriods().add(periodType);
+		}
+
+		// Invoice/Delivery/DeliveryLocation/Address
+		if (source.getBillingAccount() != null && source.getBillingAccount().getUsersAccounts() != null && source.getBillingAccount().getUsersAccounts().size() == 1) {
+			target.getDeliveries().add(getDeliveryType(source));
 		}
 		
 		Note note = objectFactorycommonBasic.createNote();
@@ -1239,5 +1250,49 @@ public class InvoiceUblHelper {
 		PartyLegalEntity partyLegalEntity = objectFactoryCommonAggrement.createPartyLegalEntity();
 		partyLegalEntity.setRegistrationName(registrationName);
 		return partyLegalEntity;
+	}
+
+	/**
+	 * Gets the delivery type.
+	 *
+	 * @param pInvoice the invoice
+	 * @return the delivery type
+	 */
+	private static DeliveryType getDeliveryType(org.meveo.model.billing.Invoice pInvoice) {
+		AddressType addressType = objectFactoryCommonAggrement.createAddressType();
+
+		StreetName streetName = objectFactorycommonBasic.createStreetName();
+		streetName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getAddress1());
+		addressType.setStreetName(streetName);
+
+		AdditionalStreetName additionalStreetName = objectFactorycommonBasic.createAdditionalStreetName();
+		additionalStreetName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getAddress2());
+		addressType.setAdditionalStreetName(additionalStreetName);
+
+		CityName cityName = objectFactorycommonBasic.createCityName();
+		cityName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCity());
+		addressType.setCityName(cityName);
+
+		PostalZone postalZone = objectFactorycommonBasic.createPostalZone();
+		postalZone.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getZipCode());
+		addressType.setPostalZone(postalZone);
+
+		CountrySubentity countrySubentity = objectFactorycommonBasic.createCountrySubentity();
+		countrySubentity.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getState());
+		addressType.setCountrySubentity(countrySubentity);
+
+		CountryType countryType = objectFactoryCommonAggrement.createCountryType();
+		IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
+		identificationCode.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry().getCountryCode());
+		countryType.setIdentificationCode(identificationCode);
+		addressType.setCountry(countryType);
+
+		LocationType locationType = objectFactoryCommonAggrement.createLocationType();
+		locationType.setAddress(addressType);
+
+		DeliveryType deliveryType = objectFactoryCommonAggrement.createDeliveryType();
+		deliveryType.setDeliveryLocation(locationType);
+
+		return deliveryType;
 	}
 }

@@ -51,8 +51,10 @@ import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.cpq.Attribute;
+import org.meveo.model.cpq.AttributeValue;
 import org.meveo.model.cpq.ProductVersionAttribute;
 import org.meveo.model.cpq.QuoteAttribute;
+import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.offer.QuoteOffer;
 import org.meveo.model.crm.EntityReferenceWrapper;
@@ -306,6 +308,7 @@ public class MeveoFunctionMapper extends FunctionMapper {
             addFunction("mv", "getLocalizedDescription", MeveoFunctionMapper.class.getMethod("getLocalizedDescription", IEntity.class, String.class));
             addFunction("mv", "getAttributeValue", MeveoFunctionMapper.class.getMethod("getAttributeValue", Long.class, String.class,String.class,String.class));
             addFunction("mv", "getProductAttributeValue", MeveoFunctionMapper.class.getMethod("getProductAttributeValue", ServiceInstance.class, String.class));
+            addFunction("mv", "getOSProductAttributeValue", MeveoFunctionMapper.class.getMethod("getProductElAttributeValue", ServiceInstance.class, String.class, WalletOperation.class));
             addFunction("mv", "getSubscriptionProductAttributeValue", MeveoFunctionMapper.class.getMethod("getSubscriptionProductAttributeValue", Subscription.class, String.class, String.class));
             addFunction("mv", "getProductElAttributeValue", MeveoFunctionMapper.class.getMethod("getProductElAttributeValue", ServiceInstance.class,String.class, WalletOperation.class));
             
@@ -1998,15 +2001,19 @@ public class MeveoFunctionMapper extends FunctionMapper {
     	return getProductElAttributeValue(serviceInstance, attributeCode,null);
     }
     public static Object getProductElAttributeValue(ServiceInstance serviceInstance, String attributeCode,WalletOperation walletOperation) {
-        if (serviceInstance == null) {
-            throw new EntityDoesNotExistsException("The service instance passed as parameter to 'mv:getProductAttributeValue' function is null.");
+    	OrderProduct orderProduct= walletOperation!=null && walletOperation.getOrderInfo()!=null && walletOperation.getOrderInfo().getOrderProduct()!=null?walletOperation.getOrderInfo().getOrderProduct():null;
+    	serviceInstance=serviceInstance == null && walletOperation != null ? walletOperation.getServiceInstance() : serviceInstance;
+        if (serviceInstance == null && orderProduct==null) {
+    		throw new EntityDoesNotExistsException("The service instance passed as parameter to 'mv:getProductAttributeValue' function is null.");
         }
         Attribute attribute = getAttributeService().findByCode(attributeCode);
         if (attribute == null) {
             throw new EntityDoesNotExistsException(Attribute.class, attributeCode);
         }
+        
+        List<? extends AttributeValue> attributeValues = orderProduct==null? serviceInstance.getAttributeInstances() : orderProduct.getOrderAttributes();
 
-    	Optional<AttributeInstance> attributInstance=serviceInstance.getAttributeInstances().stream().filter(qt -> qt.getAttribute().getCode().equals(attributeCode)).findFirst();
+    	Optional<? extends AttributeValue> attributInstance=attributeValues.stream().filter(qt -> qt.getAttribute().getCode().equals(attributeCode)).findFirst();
     	
     	if(attribute.getAttributeType()!=null && attributInstance.isPresent()) {
 			Object defaultValue = getDefaultValue(attributeCode, attribute, attribute.getAttributeType());

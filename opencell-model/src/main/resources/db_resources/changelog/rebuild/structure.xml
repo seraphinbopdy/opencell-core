@@ -513,7 +513,7 @@
         <createSequence sequenceName="ar_payment_rejection_codes_group_seq" startValue="1" />
         <createSequence sequenceName="ar_payment_rejection_action_report_seq" startValue="1" />
         <createSequence sequenceName="payment_term_seq" startValue="1"/>
-            
+
     </changeSet>
 
 
@@ -12138,6 +12138,8 @@
                 <constraints nullable="true" />
             </column>
             <column name="enable_empty_subscription_activation" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="enable_quotes_feature" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="display_counters" type="${type.boolean}" defaultValueNumeric="0" />
       </createTable>
     </changeSet>
     <changeSet id="#INTRD-3461_20212128-rebuild-str-tbl" author="hichamElHaloui">
@@ -12649,6 +12651,7 @@
             <column name="collection" type="${type.boolean}" defaultValueNumeric="0">
                 <constraints nullable="false" />
             </column>
+            <column name="filters" type="${type.json}"/>
         </createTable>
     </changeSet>
 
@@ -14089,6 +14092,28 @@
             <column name="start_date" type="datetime" />
             <column name="end_date" type="datetime" />
             <column name="action_script_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="#INTRD-23049_20240520_build" author="TarikFA.">
+        <createSequence sequenceName="payment_term_seq" startValue="1"/>
+        <createTable tableName="payment_term">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="payment_term_pkey" />
+            </column>
+            <column name="version" type="int4" defaultValueNumeric="0" />
+            <column name="created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="updated" type="datetime" />
+            <column name="creator" type="varchar(100)" />
+            <column name="updater" type="varchar(100)" />
+            <column name="code" type="varchar(255)" />
+            <column name="description" type="varchar(255)" />
+            <column name="disabled" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false" />
+            </column>
+            <column name="description_i18n" type="${type.json}"></column>
         </createTable>
     </changeSet>
 
@@ -20096,6 +20121,14 @@
         <sql>create table ${db.schema.adapted}billing_rated_transaction_other partition of ${db.schema.adapted}billing_rated_transaction default</sql>
     </changeSet>
 
+    <changeSet id="USAGE_RERATE_RT_JOB_BUILD" author="Mohammed_ElAzzouzi">
+        <sql>create index billing_redirection_rule__idx_contract_id_priority on ${db.schema.adapted}billing_redirection_rule using btree (contract_id, priority)</sql>
+        <sql>create index cpq_attribute_instance__service_instance_index on ${db.schema.adapted}cpq_attribute_instance using btree (service_instance_id)</sql>
+        <sql>create index idx_subscription_id_charge_type on ${db.schema.adapted}billing_charge_instance using btree (subscription_id, charge_type)</sql>
+    </changeSet>
+
+    <changeSet id="USAGE_RERATE_RT_JOB" author="Mohammed_ElAzzouzi"/>
+
     <changeSet id="#INTRD-4798_20220303" author="MohamedSTITANE"/>     
     <changeSet id="#INTRD-7954_20220616" author="AbdelmounaimAkadid"/>
     <changeSet id="#INTRD-9854-20220915-contact-category-many-to-many" author="a.rouaguebe"/>
@@ -20890,6 +20923,7 @@
     <changeSet id="#INTRD-20685_simple_customer_settings" author="a.rouaguebe" />
     <changeSet id="INTRD-22259_20240409" author="zbariki" />
     <changeSet id="INTRD-22195_20240417" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-22617_20240520" author="Mohammed_ElAzzouzi"/>
     <changeSet id="INTRD-22557_20240425" author="TarikFA." />
     <changeSet id="INTRD-22385_20240429" author="TarikFA." />
     <changeSet id="#INTRD_22492_20240506" author="zelmeliani" />
@@ -20900,6 +20934,9 @@
     <changeSet id="#INTRD-20586_20240515" author="aeljaouhari" />
     <changeSet id="#INTRD-22947_20240516" author="TarikFA." />
     <changeSet id="#INTRD-23049_20240520" author="TarikFA." />
+    <changeSet id="#INTRD-22952_20240520" author="ZBariki" />
+    <changeSet id="#INTRD-22993_20240514" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-22976_20240520" author="aeljaouhari" />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

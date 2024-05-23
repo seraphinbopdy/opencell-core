@@ -56,6 +56,7 @@ import org.meveo.model.customEntities.CustomEntityTemplate;
 import org.meveo.model.notification.Notification;
 import org.meveo.model.notification.NotificationEventTypeEnum;
 import org.meveo.model.report.query.ReportQuery;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.model.transformer.AliasToEntityOrderedMapResultTransformer;
 import org.meveo.security.keycloak.CurrentUserProvider;
@@ -64,6 +65,7 @@ import org.meveo.service.base.expressions.NativeExpressionFactory;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CustomEntityTemplateService;
 import org.meveo.service.notification.GenericNotificationService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.meveo.util.MeveoParamBean;
 
 import javax.enterprise.event.Event;
@@ -92,6 +94,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -142,6 +145,9 @@ public class NativePersistenceService extends BaseService {
     @Inject
     @MeveoJpa
     private EntityManagerWrapper emWrapper;
+
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
 
     @Inject
     @MeveoParamBean
@@ -848,32 +854,84 @@ public class NativePersistenceService extends BaseService {
     public QueryBuilder getQuery(String tableName, PaginationConfiguration config, Long id) {
         tableName = addCurrentSchema(tableName);
         Predicate<String> predicate = field -> this.checkAggFunctions(field.toUpperCase().trim());
+        List<String> fetchFields = new ArrayList<>();
+        if(config != null && config.getFetchFields() != null) {
+            fetchFields.addAll(config.getFetchFields());
+        }
         String aggFields = (config != null && config.getFetchFields() != null) ? aggregationFields(config.getFetchFields(), predicate) : "";
         if (!aggFields.isEmpty()) {
             config.getFetchFields().remove("id");
         }
-
-        List<String> fetch = (config != null && config.getFetchFields() != null) ? config.getFetchFields().stream().filter(s -> s.contains(".")).map(s -> s.substring(0, s.lastIndexOf("."))).distinct().collect(Collectors.toList()) : Collections.emptyList();
-        Map<String, String> fetchAlias = fetch.stream().collect(Collectors.toMap(Function.identity(), s -> QueryBuilder.getJoinAlias("a", s)));
-
-        String fieldsToRetrieve = (config != null && config.getFetchFields() != null) ? retrieveFields(config.getFetchFields(), predicate.negate()) : "";
-        if (fieldsToRetrieve.isEmpty() && aggFields.isEmpty()) {
-            fieldsToRetrieve = "*";
+        
+        var rework = new ArrayList<String>();
+        rework.addAll(fetchFields.stream().filter(predicate.negate()).collect(Collectors.toList()));
+        rework.addAll(fetchFields.stream().filter(predicate).collect(Collectors.toList()));
+        
+        if(config != null) {
+            config.setFetchFields(rework);
         }
-        StringBuilder fetchSql = new StringBuilder();
-        if (!ListUtils.isEmtyCollection(fetch)) {
-            for (String fetchField : fetch) {
-                String joinAlias = fetchField.contains(QueryBuilder.JOIN_AS) ? "" : QueryBuilder.JOIN_AS + fetchAlias.get(fetchField);
-                fetchSql.append(" left join " + "a" + "." + fetchField + joinAlias);
+
+        List<String> fetch = new ArrayList<>();
+        // add all fields that are not aggregation functions
+        fetch.addAll(fetchFields.stream()
+                                .filter(predicate.negate())
+                                .filter(s -> s.contains("."))
+                                .map(s -> s.substring(0, s.lastIndexOf(".")))
+                                .distinct()
+                                .collect(Collectors.toList()));
+        fetch.addAll(fetchFields.stream()
+                                .filter(predicate)
+                                .map(this::extractAggregatedField)
+                                .filter(s -> s.contains("."))
+                                .map(s -> s.substring(0, s.lastIndexOf(".")))
+                                .distinct()
+                                .collect(Collectors.toList()));
+        
+        String fieldsToRetrieve;
+        if (fetchFields.isEmpty()) {
+            fieldsToRetrieve = "*";
+        } else {
+            fieldsToRetrieve = retrieveFields(fetchFields, predicate.negate());
+            if(fetchFields.stream().anyMatch(predicate)) {
+                fieldsToRetrieve = fieldsToRetrieve + ", {aggregationFields}";
             }
         }
-        StringBuilder sql = new StringBuilder("select " + buildFields(fieldsToRetrieve, aggFields) + " from " + tableName + " a ");
-        sql.append(fetchSql);
+        StringBuilder sql = new StringBuilder("select " + fieldsToRetrieve + " from " + tableName + " a ");
         sql.append(" ");
         QueryBuilder queryBuilder = new QueryBuilder(sql.toString(), "a");
+        AdvancedSettings fieldSeparator = advancedSettingsService.findByCode("standardExports.fieldsSeparator");
+        String listAggregationSeparator;
+        if (fieldSeparator != null) {
+            listAggregationSeparator = fieldSeparator.getValue();
+        } else {
+            listAggregationSeparator = "|";
+        }
+
+        List<String> aggregationFields = fetchFields.stream()
+                                                    .filter(predicate)
+                                                    .map(s -> {
+                                                        String fieldName = extractAggregatedField(s);
+                                                        if(s.toLowerCase().startsWith("count(")) {
+                                                            // the dummy field is a workaround to be able to calculate inner joins using queryBuilder as the count need only the collection
+                                                            fieldName+= ".dummy"; 
+                                                        }
+                                                        if (fieldName != null) {
+                                                            fieldName = queryBuilder.createExplicitInnerJoinsForAggregation(new String(fieldName));
+                                                            String sToReplace = extractAggregatedField(s);
+                                                            if(s.toLowerCase().startsWith("list(")) {
+                                                                return String.format("string_agg(%s, '%s')", fieldName, listAggregationSeparator);
+                                                            }
+                                                            return s.replaceAll(sToReplace, fieldName.replace(".dummy", ""));
+                                                        }
+                                                        return s;
+                                                    })
+                                                    .collect(Collectors.toList());
+
+        queryBuilder.setQ(new StringBuilder(queryBuilder.getSqlStringBuffer().toString().replace("{aggregationFields}", String.join(",", aggregationFields))));
 
         if (id != null) {
             queryBuilder.addSql(" a.id ='" + id + "'");
+            
         }
 
         if (config == null) {
@@ -894,7 +952,7 @@ public class NativePersistenceService extends BaseService {
             queryBuilder.addPaginationConfiguration(config, "a");
         }
         if (!aggFields.isEmpty() && !fieldsToRetrieve.isEmpty()) {
-            queryBuilder.addGroupCriterion(fieldsToRetrieve);
+            queryBuilder.addGroupCriterion(retrieveFields(fetchFields, predicate.negate()));
         }
 
         // log.trace("Filters is {}", filters);
@@ -902,6 +960,15 @@ public class NativePersistenceService extends BaseService {
         // log.trace("Query params are {}", queryBuilder.getParams());
         return queryBuilder;
 
+    }
+
+    public String extractAggregatedField(String input) {
+        Pattern pattern = Pattern.compile("\\((.*?)\\)");
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
     /**
@@ -1165,7 +1232,7 @@ public class NativePersistenceService extends BaseService {
     private boolean checkAggFunctions(String field) {
         if (field.startsWith("SUM(") || field.startsWith("COUNT(") || field.startsWith("AVG(")
                 || field.startsWith("MAX(") || field.startsWith("MIN(") || field.startsWith("COALESCE(SUM(")
-                || field.startsWith("STRING_AGG_LONG") || field.startsWith("TO_CHAR(") || field.startsWith("CAST(")) {
+                || field.startsWith("STRING_AGG_LONG") || field.startsWith("LIST") || field.startsWith("TO_CHAR(") || field.startsWith("CAST(")) {
             return true;
         } else {
             return false;

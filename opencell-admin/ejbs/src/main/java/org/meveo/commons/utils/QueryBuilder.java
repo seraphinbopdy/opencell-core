@@ -1434,6 +1434,10 @@ public class QueryBuilder {
         return concatenatedFields;
     }
 
+    public String createExplicitInnerJoinsForAggregation(String concatenatedFields) {
+        return calculateExplicitInnerJoins(concatenatedFields);
+    }
+
     private String calculateExplicitInnerJoins(String concatenatedFields) {
         if(concatenatedFields.contains(FROM_JSON_FUNCTION)){
             return concatenatedFields;

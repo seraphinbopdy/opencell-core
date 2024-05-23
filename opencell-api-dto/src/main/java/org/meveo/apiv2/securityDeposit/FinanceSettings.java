@@ -134,4 +134,16 @@ public interface FinanceSettings extends Resource {
     default Boolean getEnableEmptySubscriptionActivation() {
         return false;
     }
+    
+    @Value.Default
+    @Schema(description = "Enable Quotes Feature")
+    default boolean getEnableQuotesFeature() {
+        return FALSE;
+    }
+    
+    @Value.Default
+    @Schema(description = "Display Counters")
+    default boolean getDisplayCounters() {
+        return FALSE;
+    }
 }

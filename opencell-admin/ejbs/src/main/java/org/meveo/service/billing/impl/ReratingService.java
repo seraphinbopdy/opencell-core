@@ -11,10 +11,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.ejb.EJB;
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -23,8 +27,6 @@ import javax.persistence.TypedQuery;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.commons.utils.MethodCallingUtils;
-import org.meveo.jpa.EntityManagerWrapper;
-import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.Amounts;
 import org.meveo.model.billing.BillingRun;
@@ -35,6 +37,7 @@ import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.billing.WalletOperationStatusEnum;
 import org.meveo.model.catalog.ChargeTemplate.ChargeMainTypeEnum;
+import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.model.shared.DateUtils;
@@ -125,12 +128,18 @@ public class ReratingService extends RatingService implements Serializable {
 
     @Inject
     private RecurringChargeInstanceService recurringChargeInstanceService;
+    
+    @Inject
+    UsageRatingService usageRatingService;
 
     @Inject
     private MethodCallingUtils methodCallingUtils;
 
     @Inject
     private EdrService edrService;
+
+    @EJB
+    private ReratingService reratingService;
 
     /**
      * Re-rate service instance charges
@@ -404,7 +413,7 @@ public class ReratingService extends RatingService implements Serializable {
 
             // Rate a copy of wallet operation, rate it, link with previous WO and trigger EDRS
 
-            rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan);
+            rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan, true);
 
         } catch (Exception e) {
             methodCallingUtils.callMethodInNewTx(() -> {
@@ -574,12 +583,16 @@ public class ReratingService extends RatingService implements Serializable {
                         // MathContext mc = new MathContext(appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
                         // unitPrice = quantity.compareTo(ZERO) == 0 ? amountWithoutTax : amountWithoutTax.divide(quantity, mc);
 
-                        ILAdjustments adjustment = new ILAdjustments((BigDecimal) rtIlInfo[2], (BigDecimal) rtIlInfo[3], (BigDecimal) rtIlInfo[4], (BigDecimal) rtIlInfo[5], averageUnitAmounts);
+                        BigDecimal rtAmountWithoutTax = (BigDecimal) rtIlInfo[2];
+                        BigDecimal ilAmountWithoutTax = (BigDecimal) rtIlInfo[9];
+                        if (!Objects.equals(ilAmountWithoutTax, rtAmountWithoutTax)) {
+                            ILAdjustments adjustment = new ILAdjustments((BigDecimal) rtIlInfo[2], (BigDecimal) rtIlInfo[3], (BigDecimal) rtIlInfo[4], (BigDecimal) rtIlInfo[5], averageUnitAmounts);
 
-                        if (ilAdjustments.containsKey(ilId)) {
-                            ilAdjustments.get(ilId).addAdjustment(adjustment);
-                        } else {
-                            ilAdjustments.put(ilId, adjustment);
+                            if (ilAdjustments.containsKey(ilId)) {
+                                ilAdjustments.get(ilId).addAdjustment(adjustment);
+                            } else {
+                                ilAdjustments.put(ilId, adjustment);
+                            }
                         }
                     }
                 }
@@ -628,8 +641,24 @@ public class ReratingService extends RatingService implements Serializable {
      * 
      * @param operationToRerate Operation to rerate
      * @param useSamePricePlan Shall a same price plan will be used, or a new one should be looked up again
+     * @param update Should we apply update on database
      */
-    private void rerateWalletOperationAndInstantiateTriggeredEDRs(WalletOperation operationToRerate, boolean useSamePricePlan) {
+    public void rerateWalletOperationAndInstantiateTriggeredEDRs(WalletOperation operationToRerate, boolean useSamePricePlan, boolean update) {
+    	rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan, update, false);
+    }
+    
+    /**
+     * Rate a copy of Wallet operation to rerate, preserving or not a priceplan. New Wallet operation will be associated with a rerated WalletOperation. OldWalletOperation.reratedWalletOperation = new WalletOperation
+     * If rateTriggeredEDR=true, triggeredEDR will be rated
+     * 
+     * @param operationToRerate Operation to rerate
+     * @param useSamePricePlan Shall a same price plan will be used, or a new one should be looked up again
+     * @param update Should we apply update on database
+     * @param rateTriggeredEDR Should we rate triggered EDRs
+     * 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void rerateWalletOperationAndInstantiateTriggeredEDRs(WalletOperation operationToRerate, boolean useSamePricePlan, boolean update, boolean rateTriggeredEDR) {
 
         RatingResult ratingResult = null;
         try {
@@ -638,12 +667,15 @@ public class ReratingService extends RatingService implements Serializable {
             ratingResult = rateRatedWalletOperation(operationToRerate, useSamePricePlan);
             WalletOperation newWO = ratingResult.getWalletOperations().stream().filter(e -> e.getDiscountPlanType() == null).findFirst().orElse(null);
 
-            operationToRerate.changeStatus(WalletOperationStatusEnum.RERATED);
-            operationToRerate.setReratedWalletOperation(newWO);
-            walletOperationService.update(operationToRerate);
+            newWO.setReratedWalletOperation(operationToRerate);
+            if(update) {
+            	operationToRerate.changeStatus(WalletOperationStatusEnum.RERATED);
+                walletOperationService.update(operationToRerate);
+            }
 
             // Trigger EDRs
             for (WalletOperation walletOperation : ratingResult.getWalletOperations()) {
+            	 walletOperationService.create(walletOperation);
                 List<EDR> triggeredEdrs = instantiateTriggeredEDRs(walletOperation, operationToRerate.getEdr(), false, true);
                 ratingResult.addTriggeredEDRs(triggeredEdrs);
             }
@@ -651,6 +683,9 @@ public class ReratingService extends RatingService implements Serializable {
             if (ratingResult.getTriggeredEDRs() != null) {
                 for (EDR triggeredEdr : ratingResult.getTriggeredEDRs()) {
                     edrService.create(triggeredEdr);
+                    if(rateTriggeredEDR) {
+                    	usageRatingService.rateUsage(triggeredEdr, false, false, 0, 0, null, false);
+                    }
                 }
             }
             for (WalletOperation walletOperation : ratingResult.getWalletOperations()) {
@@ -724,4 +759,25 @@ public class ReratingService extends RatingService implements Serializable {
             this.quantity = this.quantity.add(adjustmentToAdd.getQuantity());
         }
     }
+    
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void applyMassRerate(List<Long> ids, boolean useSamePricePlan, JobExecutionResultImpl jobExecutionResult) {
+		String readWOsQuery = "FROM WalletOperation wo left join fetch wo.chargeInstance ci left join fetch ci.serviceInstance si left join fetch si.attributeInstances ai left join fetch wo.edr edr WHERE wo.status='TO_RERATE' AND wo.id IN (:ids)";
+		List<WalletOperation> walletOperations = getEntityManager().createQuery(readWOsQuery, WalletOperation.class).setParameter("ids", ids).getResultList();
+		Map<String, List<Long>> errorsMap = new HashMap<>();
+		walletOperations.stream().forEach(operationToRerate -> {
+		    try {
+		    	reratingService.rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan, false, true);
+		    } catch (Exception e) {
+		        errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(operationToRerate.getId());
+		    }
+		});
+		errorsMap.forEach((key, value) ->jobExecutionResult.registerError(""+value.size()+" errors of: "+key+" IDs: "+ value.stream().map(String::valueOf).collect(Collectors.joining(", ")), value.size()));
+		ids.removeAll(errorsMap.values().stream().flatMap(List::stream).collect(Collectors.toList()));
+		if(!ids.isEmpty()) {
+			Date now = new Date();
+			String updateILQuery = "UPDATE WalletOperation SET status='RERATED', updated = :now where id in (:ids) ";
+			getEntityManager().createQuery(updateILQuery).setParameter("ids", ids).setParameter("now", now).executeUpdate();
+		}
+	}
 }

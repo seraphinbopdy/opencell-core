@@ -11,7 +11,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -619,9 +618,9 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 					offer.setOrderLineType(orderOffer.getOrderLineType());
 					orderOfferService.create(offer);
 					offer.setProducts(orderOffer.getProducts().stream()
-							.map(orderProduct -> duplicateProduct(orderProduct, offer))
+							.map(orderProduct -> duplicateProduct(orderProduct, offer, duplicatedOrder))
 							.collect(Collectors.toList()));
-					duplicatedOrder.getOffers().add(offer);
+					duplicatedOrder.setOffers(List.of(offer));
 				});
 	}
 
@@ -678,9 +677,9 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		return duplicatedCommercialOrderDto;
 	}
 
-	private OrderProduct duplicateProduct(OrderProduct orderProduct, OrderOffer offer) {
+	private OrderProduct duplicateProduct(OrderProduct orderProduct, OrderOffer offer, CommercialOrder duplicatedOrder) {
 		OrderProduct newProduct = new OrderProduct();
-		newProduct.setOrder(orderProduct.getOrder());
+		newProduct.setOrder(duplicatedOrder);
 		newProduct.setOrderServiceCommercial(orderProduct.getOrderServiceCommercial());
 		newProduct.setProductVersion(orderProduct.getProductVersion());
 		newProduct.setQuantity(orderProduct.getQuantity());
@@ -995,6 +994,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 						orderProduct.getOrderAttributes()));
 		createOrderAttribute(orderOfferDto.getOrderAttributes(),null,orderOffer);
 		if(isQuickOrder && orderOfferDto.getOrderLineType() == OfferLineTypeEnum.APPLY_ONE_SHOT){
+			commercialOrder.getOffers().add(orderOffer);
 			commercialOrderService.validateOrder(commercialOrder, false);
 		}
 		return orderOfferDto;
@@ -1360,7 +1360,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 			orderProductService.create(orderProduct);
 			//create order attributes linked to orderProduct
 			createOrderAttribute(orderProductDto.getOrderAttributes(), orderProduct,null);
-			orderOffer.getProducts().add(orderProduct); 
+			orderOffer.getProductswithoutDuplication().add(orderProduct);
 		}
 	}
 	

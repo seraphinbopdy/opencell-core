@@ -4,7 +4,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="dev.xml"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="pdf\DataAdapter.xml"/>
 	<style name="table">
 		<box>
 			<pen lineWidth="1.0" lineColor="#000000"/>
@@ -387,15 +387,16 @@
 			<band height="292" splitType="Immediate">
 				<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 				<frame>
-					<reportElement positionType="Float" stretchType="ElementGroupHeight" x="0" y="0" width="232" height="292" uuid="4082489e-0d38-453d-a2b9-9f7bd9111c14">
+					<reportElement positionType="Float" stretchType="ElementGroupHeight" isPrintRepeatedValues="false" x="0" y="0" width="232" height="292" uuid="4082489e-0d38-453d-a2b9-9f7bd9111c14">
 						<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 					</reportElement>
 					<frame>
-						<reportElement x="0" y="0" width="232" height="290" uuid="55da0144-b7d5-44e3-baf3-36b1d48f33b3">
+						<reportElement isPrintRepeatedValues="false" x="0" y="0" width="232" height="290" uuid="55da0144-b7d5-44e3-baf3-36b1d48f33b3">
 							<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+							<property name="ShowOutOfBoundContent" value="true"/>
 						</reportElement>
 						<rectangle radius="10">
-							<reportElement x="16" y="3" width="216" height="217" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ab33f039-d780-4304-9a78-c8a1b32b72e4"/>
+							<reportElement isPrintRepeatedValues="false" x="16" y="3" width="216" height="217" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ab33f039-d780-4304-9a78-c8a1b32b72e4"/>
 							<graphicElement>
 								<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 							</graphicElement>
@@ -419,7 +420,7 @@
 							<text><![CDATA[Customer]]></text>
 						</staticText>
 						<rectangle radius="0">
-							<reportElement x="16" y="206" width="216" height="104" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="62eca460-82c3-42a2-8462-a8e3a4f60aee"/>
+							<reportElement isPrintRepeatedValues="false" x="16" y="206" width="216" height="104" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="62eca460-82c3-42a2-8462-a8e3a4f60aee"/>
 							<graphicElement>
 								<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 							</graphicElement>
@@ -514,7 +515,7 @@
 + "\n"]]></textFieldExpression>
 						</textField>
 						<staticText>
-							<reportElement mode="Opaque" x="15" y="-71" width="217" height="54" forecolor="#F0F7FA" backcolor="rgba(169, 173, 176, 0.0)" uuid="6ec6b279-7d84-4be1-b2d2-eec6845ed69b">
+							<reportElement isPrintRepeatedValues="false" mode="Opaque" x="15" y="-71" width="217" height="54" forecolor="#F0F7FA" backcolor="rgba(169, 173, 176, 0.0)" uuid="6ec6b279-7d84-4be1-b2d2-eec6845ed69b">
 								<property name="com.jaspersoft.studio.unit.x" value="px"/>
 								<property name="com.jaspersoft.studio.unit.y" value="px"/>
 								<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -555,7 +556,7 @@
 		<groupHeader>
 			<band height="260" splitType="Immediate">
 				<subreport isUsingCache="true" runToBottom="false">
-					<reportElement isPrintRepeatedValues="false" x="0" y="-20" width="594" height="272" uuid="3c6dcd4b-38d1-4096-b8cd-54f56b3ae9f7">
+					<reportElement x="0" y="-20" width="594" height="272" uuid="3c6dcd4b-38d1-4096-b8cd-54f56b3ae9f7">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					</reportElement>
 					<subreportParameter name="xmlDateFormat">
@@ -574,7 +575,7 @@
 		<groupHeader>
 			<band height="70" splitType="Immediate">
 				<subreport>
-					<reportElement x="0" y="-343" width="594" height="399" uuid="47798d30-7f84-4a23-90aa-1f1e129f231b"/>
+					<reportElement x="0" y="-242" width="594" height="298" uuid="47798d30-7f84-4a23-90aa-1f1e129f231b"/>
 					<subreportParameter name="logoPath">
 						<subreportParameterExpression><![CDATA[$P{logoPath}]]></subreportParameterExpression>
 					</subreportParameter>

@@ -990,7 +990,6 @@ public class InvoiceUblHelper {
 		return orderReference;
 	}
 	private void setOrderReference(org.meveo.model.billing.Invoice source, Invoice target){
-		source.getExternalPurchaseOrderNumber();
 		target.setOrderReference(getOrderReference(source.getCommercialOrder(), source.getInvoiceDate()));
 	}
 	private void setOrderReference(org.meveo.model.billing.Invoice source, CreditNote target){

@@ -172,12 +172,14 @@ public class InvoiceUblHelper {
 			setGeneralInfo(invoice, creditNote);
 			setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
+			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
 			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax));
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
 			setBillingReference(invoice, invoiceXml);
 			setOrderReference(invoice, invoiceXml);
+			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
 			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax));
 			setBillingReferenceForInvoice(invoice, invoiceXml);
@@ -203,8 +205,29 @@ public class InvoiceUblHelper {
 
 		return pathCreatedFile;
 	}
-	
-	
+
+	/**
+	 * Set the billing reference for the invoice
+	 * @param invoice the invoice
+	 * @param invoiceXml the invoice xml
+	 */
+	private void setOrderReferenceId(org.meveo.model.billing.Invoice invoice, Invoice invoiceXml) {
+		if(StringUtils.isNotBlank(invoice.getExternalPurchaseOrderNumber())) {
+			if (invoiceXml.getOrderReference() == null) {
+				OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
+				ID id  = objectFactorycommonBasic.createID();
+				id.setValue(invoice.getExternalPurchaseOrderNumber());
+				orderReference.setID(id);
+				invoiceXml.setOrderReference(orderReference);
+			} else {
+				ID id  = objectFactorycommonBasic.createID();
+				id.setValue(invoice.getExternalPurchaseOrderNumber());
+				invoiceXml.getOrderReference().setID(id);
+			}
+		}
+	}
+
+
 	public void toXml(Object invoiceXml, File absoluteFileName) throws JAXBException {
 		if(absoluteFileName == null || !absoluteFileName.isFile()) {
 			throw new BusinessException("The file doesn't exist");
@@ -967,6 +990,7 @@ public class InvoiceUblHelper {
 		return orderReference;
 	}
 	private void setOrderReference(org.meveo.model.billing.Invoice source, Invoice target){
+		source.getExternalPurchaseOrderNumber();
 		target.setOrderReference(getOrderReference(source.getCommercialOrder(), source.getInvoiceDate()));
 	}
 	private void setOrderReference(org.meveo.model.billing.Invoice source, CreditNote target){

@@ -24,6 +24,8 @@ import org.meveo.model.EnableBusinessEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.util.Map;
@@ -32,6 +34,10 @@ import java.util.Map;
 @Table(name = "payment_term", uniqueConstraints = @UniqueConstraint(columnNames = {"code"}))
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
 		@Parameter(name = "sequence_name", value = "payment_term_seq")})
+@NamedQueries({
+		@NamedQuery(name = "PaymentTerm.findByCode", query = "from PaymentTerm pt where lower(pt.code)=:code and pt.disabled=false"),
+		@NamedQuery(name = "PaymentTerm.findAllEnabledPaymentTerm", query = "from PaymentTerm pt where pt.disabled=false")
+})
 public class PaymentTerm extends EnableBusinessEntity {
 
 	private static final long serialVersionUID = 1L;

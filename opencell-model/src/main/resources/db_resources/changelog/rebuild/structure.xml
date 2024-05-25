@@ -14096,28 +14096,6 @@
     </changeSet>
 
     <changeSet id="#INTRD-23049_20240520_build" author="TarikFA.">
-        <createSequence sequenceName="payment_term_seq" startValue="1"/>
-        <createTable tableName="payment_term">
-            <column name="id" type="bigint" autoIncrement="${id.auto}">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="payment_term_pkey" />
-            </column>
-            <column name="version" type="int4" defaultValueNumeric="0" />
-            <column name="created" type="datetime">
-                <constraints nullable="false" />
-            </column>
-            <column name="updated" type="datetime" />
-            <column name="creator" type="varchar(100)" />
-            <column name="updater" type="varchar(100)" />
-            <column name="code" type="varchar(255)" />
-            <column name="description" type="varchar(255)" />
-            <column name="disabled" type="${type.boolean}" defaultValueNumeric="0">
-                <constraints nullable="false" />
-            </column>
-            <column name="description_i18n" type="${type.json}"></column>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="#INTRD-23049_20240520_build" author="TarikFA.">
         <createTable tableName="payment_term">
             <column name="id" type="bigint" autoIncrement="${id.auto}">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="payment_term_pkey" />
@@ -20937,6 +20915,7 @@
     <changeSet id="#INTRD-22952_20240520" author="ZBariki" />
     <changeSet id="#INTRD-22993_20240514" author="AbdellatifBARI" />
     <changeSet id="#INTRD-22976_20240520" author="aeljaouhari" />
+    <changeSet id="#INTRD-23293_20240524" author="TarikFA." />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

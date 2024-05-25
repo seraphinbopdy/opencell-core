@@ -438,6 +438,22 @@
                </xsd:documentation>
             </xsd:annotation>
          </xsd:element>
+         <xsd:element ref="cac:Delivery" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+               <xsd:documentation>
+                  <ccts:Component>
+                     <ccts:ComponentType>ASBIE</ccts:ComponentType>
+                     <ccts:DictionaryEntryName>Invoice. Delivery</ccts:DictionaryEntryName>
+                     <ccts:Definition>A delivery associated with this document.</ccts:Definition>
+                     <ccts:Cardinality>0..n</ccts:Cardinality>
+                     <ccts:ObjectClass>Invoice</ccts:ObjectClass>
+                     <ccts:PropertyTerm>Delivery</ccts:PropertyTerm>
+                     <ccts:AssociatedObjectClass>Delivery</ccts:AssociatedObjectClass>
+                     <ccts:RepresentationTerm>Delivery</ccts:RepresentationTerm>
+                  </ccts:Component>
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
          <xsd:element ref="cac:OrderReference" minOccurs="0" maxOccurs="1">
             <xsd:annotation>
                <xsd:documentation>
@@ -714,22 +730,6 @@
                      <ccts:PropertyTerm>Party</ccts:PropertyTerm>
                      <ccts:AssociatedObjectClass>Party</ccts:AssociatedObjectClass>
                      <ccts:RepresentationTerm>Party</ccts:RepresentationTerm>
-                  </ccts:Component>
-               </xsd:documentation>
-            </xsd:annotation>
-         </xsd:element>
-         <xsd:element ref="cac:Delivery" minOccurs="0" maxOccurs="unbounded">
-            <xsd:annotation>
-               <xsd:documentation>
-                  <ccts:Component>
-                     <ccts:ComponentType>ASBIE</ccts:ComponentType>
-                     <ccts:DictionaryEntryName>Invoice. Delivery</ccts:DictionaryEntryName>
-                     <ccts:Definition>A delivery associated with this document.</ccts:Definition>
-                     <ccts:Cardinality>0..n</ccts:Cardinality>
-                     <ccts:ObjectClass>Invoice</ccts:ObjectClass>
-                     <ccts:PropertyTerm>Delivery</ccts:PropertyTerm>
-                     <ccts:AssociatedObjectClass>Delivery</ccts:AssociatedObjectClass>
-                     <ccts:RepresentationTerm>Delivery</ccts:RepresentationTerm>
                   </ccts:Component>
                </xsd:documentation>
             </xsd:annotation>

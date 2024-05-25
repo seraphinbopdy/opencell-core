@@ -86,6 +86,7 @@ import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.DDPaymentMethod;
 import org.meveo.model.payments.PaymentMethod;
+import org.meveo.model.payments.PaymentTerm;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
@@ -116,8 +117,8 @@ public class InvoiceUblHelper {
 	private final static oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ObjectFactory objectFactoryCommonAggrement;
 	
 	private final static UntdidAllowanceCodeService untdidAllowanceCodeService;
-	private final static UntdidTaxationCategoryService UntdidTaxationCategoryService;
 	private final static InvoiceAgregateService invoiceAgregateService;
+	private final static PaymentTermService paymentTermService;
 	private static final String XUN = "XUN";
 	public static final String ISO_IEC_6523 = "ISO/IEC 6523";
 	public static final String SIRET = "0009";
@@ -132,7 +133,7 @@ public class InvoiceUblHelper {
 		objectFactoryCommonAggrement = new oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ObjectFactory();
 		invoiceAgregateService = (InvoiceAgregateService) EjbUtils.getServiceInterface(InvoiceAgregateService.class.getSimpleName());
 		untdidAllowanceCodeService = (UntdidAllowanceCodeService) EjbUtils.getServiceInterface(UntdidAllowanceCodeService.class.getSimpleName());
-		UntdidTaxationCategoryService = (UntdidTaxationCategoryService) EjbUtils.getServiceInterface(UntdidTaxationCategoryService.class.getSimpleName());
+		paymentTermService = (PaymentTermService) EjbUtils.getServiceInterface(PaymentTermService.class.getSimpleName());
 	}
 	
 	private InvoiceUblHelper(){}
@@ -159,7 +160,7 @@ public class InvoiceUblHelper {
 					.collect(Collectors.toList());
 			setTaxTotal(taxInvoiceAgregates, invoice.getAmountTax(), invoiceXml, creditNote,  invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null);
 		}
-		setPaymentTerms(invoiceXml, creditNote, invoice.getInvoiceType());
+		setPaymentTerms(invoiceXml, creditNote, invoice.getInvoiceType(), invoiceLanguageCode);
 		setAccountingSupplierParty(invoice.getSeller(), invoiceXml, creditNote, invoiceLanguageCode);
 		setAccountingCustomerParty(invoice.getBillingAccount(), invoiceXml, creditNote);
 		setPaymentMeans(invoice.getPaymentMethod(), invoiceXml, creditNote);
@@ -171,12 +172,14 @@ public class InvoiceUblHelper {
 			setGeneralInfo(invoice, creditNote);
 			setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
+			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
 			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax));
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
 			setBillingReference(invoice, invoiceXml);
 			setOrderReference(invoice, invoiceXml);
+			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
 			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax));
 			setBillingReferenceForInvoice(invoice, invoiceXml);
@@ -202,8 +205,29 @@ public class InvoiceUblHelper {
 
 		return pathCreatedFile;
 	}
-	
-	
+
+	/**
+	 * Set the billing reference for the invoice
+	 * @param invoice the invoice
+	 * @param invoiceXml the invoice xml
+	 */
+	private void setOrderReferenceId(org.meveo.model.billing.Invoice invoice, Invoice invoiceXml) {
+		if(StringUtils.isNotBlank(invoice.getExternalPurchaseOrderNumber())) {
+			if (invoiceXml.getOrderReference() == null) {
+				OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
+				ID id  = objectFactorycommonBasic.createID();
+				id.setValue(invoice.getExternalPurchaseOrderNumber());
+				orderReference.setID(id);
+				invoiceXml.setOrderReference(orderReference);
+			} else {
+				ID id  = objectFactorycommonBasic.createID();
+				id.setValue(invoice.getExternalPurchaseOrderNumber());
+				invoiceXml.getOrderReference().setID(id);
+			}
+		}
+	}
+
+
 	public void toXml(Object invoiceXml, File absoluteFileName) throws JAXBException {
 		if(absoluteFileName == null || !absoluteFileName.isFile()) {
 			throw new BusinessException("The file doesn't exist");
@@ -215,13 +239,17 @@ public class InvoiceUblHelper {
 		marshaller.marshal(invoiceXml, absoluteFileName);
 	}
 	
-	private void setPaymentTerms(Invoice target, CreditNote creditNote, InvoiceType invoiceType) {
+	private void setPaymentTerms(Invoice target, CreditNote creditNote, InvoiceType invoiceType, String invoiceLanguageCode) {
 		if(invoiceType != null && invoiceType.getUntdidInvoiceCodeType() != null && invoiceType.getUntdidInvoiceCodeType().getCode().equals("380")) {
 			PaymentTermsType paymentTermsType = objectFactoryCommonAggrement.createPaymentTermsType();
-			Note note = objectFactorycommonBasic.createNote();
-			note.setValue("No early payment discount. Any amounts owned that are not paid will due shall bear interest, from the time the payment was due until the time paid, " +
-					"at a rate of 10% per annum compounded annually");
-			paymentTermsType.getNotes().add(note);
+			paymentTermService.findAllEnabledPaymentTerm().forEach(pt -> {
+				String noteValue = pt.getDescriptionI18n().get(invoiceLanguageCode);
+				if(noteValue != null) {
+					Note note = objectFactorycommonBasic.createNote();
+					note.setValue(noteValue);
+					paymentTermsType.getNotes().add(note);
+				}
+			});
 			if(creditNote == null)
 				target.getPaymentTerms().add(paymentTermsType);
 			else{
@@ -266,7 +294,13 @@ public class InvoiceUblHelper {
 			periodType.setStartDate(startDate);
 			target.getInvoicePeriods().add(periodType);
 		}
-		
+
+		// Invoice/Delivery/DeliveryLocation/Address
+		if (source.getBillingAccount() != null && source.getBillingAccount().getUsersAccounts() != null
+				&& source.getBillingAccount().getUsersAccounts().size() == 1 && source.getBillingAccount().getUsersAccounts().get(0).getAddress() != null) {
+			target.getDeliveries().add(getDeliveryType(source));
+		}
+
 		Note note = objectFactorycommonBasic.createNote();
 		note.setValue(source.getDescription());
 		target.getNotes().add(note);
@@ -318,6 +352,11 @@ public class InvoiceUblHelper {
 			endDate.setValue(toXmlDate(source.getEndDate()));
 			periodType.setStartDate(startDate);
 			target.getInvoicePeriods().add(periodType);
+		}
+
+		// Invoice/Delivery/DeliveryLocation/Address
+		if (source.getBillingAccount() != null && source.getBillingAccount().getUsersAccounts() != null && source.getBillingAccount().getUsersAccounts().size() == 1) {
+			target.getDeliveries().add(getDeliveryType(source));
 		}
 		
 		Note note = objectFactorycommonBasic.createNote();
@@ -1239,5 +1278,49 @@ public class InvoiceUblHelper {
 		PartyLegalEntity partyLegalEntity = objectFactoryCommonAggrement.createPartyLegalEntity();
 		partyLegalEntity.setRegistrationName(registrationName);
 		return partyLegalEntity;
+	}
+
+	/**
+	 * Gets the delivery type.
+	 *
+	 * @param pInvoice the invoice
+	 * @return the delivery type
+	 */
+	private static DeliveryType getDeliveryType(org.meveo.model.billing.Invoice pInvoice) {
+		AddressType addressType = objectFactoryCommonAggrement.createAddressType();
+
+		StreetName streetName = objectFactorycommonBasic.createStreetName();
+		streetName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getAddress1());
+		addressType.setStreetName(streetName);
+
+		AdditionalStreetName additionalStreetName = objectFactorycommonBasic.createAdditionalStreetName();
+		additionalStreetName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getAddress2());
+		addressType.setAdditionalStreetName(additionalStreetName);
+
+		CityName cityName = objectFactorycommonBasic.createCityName();
+		cityName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCity());
+		addressType.setCityName(cityName);
+
+		PostalZone postalZone = objectFactorycommonBasic.createPostalZone();
+		postalZone.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getZipCode());
+		addressType.setPostalZone(postalZone);
+
+		CountrySubentity countrySubentity = objectFactorycommonBasic.createCountrySubentity();
+		countrySubentity.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getState());
+		addressType.setCountrySubentity(countrySubentity);
+
+		CountryType countryType = objectFactoryCommonAggrement.createCountryType();
+		IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
+		identificationCode.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry().getCountryCode());
+		countryType.setIdentificationCode(identificationCode);
+		addressType.setCountry(countryType);
+
+		LocationType locationType = objectFactoryCommonAggrement.createLocationType();
+		locationType.setAddress(addressType);
+
+		DeliveryType deliveryType = objectFactoryCommonAggrement.createDeliveryType();
+		deliveryType.setDeliveryLocation(locationType);
+
+		return deliveryType;
 	}
 }

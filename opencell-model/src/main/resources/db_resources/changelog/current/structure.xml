@@ -12232,5 +12232,20 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="display_counters" type="${type.boolean}" defaultValueNumeric="1" />
 		</addColumn>
 	</changeSet>
+    
+    <changeSet id="#INTRD-23293_20240524" author="TarikFA.">
+        <insert tableName="payment_term">
+            <column name="id" valueSequenceNext="payment_term_seq" />
+            <column name="code" value="Default" />
+            <column name="description" value="Payment conditions No early payment discount. Any amounts owned that are not paid will due shall bear interest, from the time the payment was due until the time paid, at a rate of 10% per annum compounded annually" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Tout incident de paiement est passible de pénalités de retard ainsi que de l'indemnité forfaitaire pour frais de recouvrement de 40 euros prévue par la loi n°2012-387 du 22 mars 2012 et le décret du 2 octobre 2012. Le montant des pénalités résulte de l'application aux sommes restant dues d'un taux égal au taux d'intérêt appliqué par la Banque centrale européenne à son opération de refinancement la plus récente majoré de 10 points de pourcentage","ENG":"Payment conditions No early payment discount. Any amounts owned that are not paid will due shall bear interest, from the time the payment was due until the time paid, at a rate of 10% per annum compounded annually"}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="version" valueNumeric="0" />
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

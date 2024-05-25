@@ -1873,6 +1873,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         sellerTag.setAttribute("code", seller.getCode());
         sellerTag.setAttribute("description", getDefaultIfNull(seller.getDescription(), ""));
         sellerTag.setAttribute("legalType", getDefaultIfNull(seller.getLegalType(), ""));
+		sellerTag.setAttribute("legalForm", getDefaultIfNull((seller.getLegalEntityType() != null) ? seller.getLegalEntityType().getDescription() : "", ""));
         sellerTag.setAttribute("vatNo", getDefaultIfNull(seller.getVatNo(), ""));
 	    sellerTag.setAttribute("registrationNo", getDefaultIfNull(getRegisterNumberJoining(seller.getRegistrationNumbers()), ""));
 	    sellerTag.appendChild(createPartyIdentification(doc, seller.getRegistrationNumbers()));

@@ -12004,7 +12004,7 @@ public class DummyPaymentGatewayScript extends Script {
         <sql>create index cpq_attribute_instance__service_instance_index on ${db.schema.adapted}cpq_attribute_instance using btree (service_instance_id)</sql>
         <sql>create index idx_subscription_id_charge_type on ${db.schema.adapted}billing_charge_instance using btree (subscription_id, charge_type)</sql>
     </changeSet>
-    
+
     <changeSet id="#INTRD-22617_20240520" author="Mohammed_ElAzzouzi">
         <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
@@ -12075,7 +12075,7 @@ public class DummyPaymentGatewayScript extends Script {
             </column>
         </insert>
     </changeSet>
-    
+
     <changeSet id="INTRD-22557_20240425" author="TarikFA.">
         <update tableName="iso_icd">
             <column name="scheme_name" value="SIREN" />
@@ -12156,13 +12156,13 @@ public class DummyPaymentGatewayScript extends Script {
             <where>id = '-66'</where>
         </update>
     </changeSet>
-    
+
   	<changeSet id="#INTRD-20586_20240520" author="aeljaouhari">
     	<delete tableName="job_execution_error">
             <where>job_instance_id  = (select id from meveo_job_instance where code = 'XML_Job')</where>
         </delete>
     </changeSet>
-    
+
   	<changeSet id="#INTRD-20586_20240515" author="aeljaouhari">
     	<update tableName="meveo_job_instance">
             <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'EInvoice_job')"/>
@@ -12182,7 +12182,7 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="vat_date_code" type="int4" defaultValueNumeric="432"/>
         </addColumn>
     </changeSet>
-    
+
     <changeSet id="#INTRD-23049_20240520" author="TarikFA.">
         <createSequence sequenceName="payment_term_seq" startValue="1"/>
         <createTable tableName="payment_term">
@@ -12225,7 +12225,7 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="uuid" value="EDRs_Deduplication" />
         </insert>
     </changeSet>
-    
+
   	<changeSet id="#INTRD-22976_20240520" author="aeljaouhari">
 		<addColumn tableName="finance_settings">
             <column name="enable_quotes_feature" type="${type.boolean}" defaultValueNumeric="1" />

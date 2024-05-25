@@ -35,8 +35,8 @@ import java.util.Map;
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
 		@Parameter(name = "sequence_name", value = "payment_term_seq")})
 @NamedQueries({
-		@NamedQuery(name = "PaymentTerm.findByCode", query = "from PaymentTerm pt where lower(pt.code)=:code and pt.disabled=false"),
-		@NamedQuery(name = "PaymentTerm.findAllEnabledPaymentTerm", query = "from PaymentTerm pt where pt.disabled=false")
+	@NamedQuery(name = "PaymentTerm.findByCode", query = "from PaymentTerm pt where lower(pt.code)=:code and pt.disabled=false"),
+	@NamedQuery(name = "PaymentTerm.findAllEnabledPaymentTerm", query = "from PaymentTerm pt where pt.disabled=false")
 })
 public class PaymentTerm extends EnableBusinessEntity {
 

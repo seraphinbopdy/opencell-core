@@ -1,0 +1,159 @@
+{
+	"info": {
+		"_postman_id": "de9f5846-9cb4-4295-b3a8-eeae9477eaf4",
+		"name": "INTRD-22812  - File Search",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26920418"
+	},
+	"item": [
+		{
+			"name": "File Search - likeCriteria",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filters\": {\n        \"likeCriteria name\": \"invoice*\"\n    },\n    \"limit\": 20,\n    \"offset\": 0,\n    \"sortBy\": \"name\",\n    \"sortOrder\": \"DESCENDING\",\n    \"directory\": \"ubl\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/files/search",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"files",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "File Search - likeCriteriaOrIgnoreCase",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filters\": {\n        \"likeCriteria name\": \"INVOICE*\"\n    },\n    \"limit\": 20,\n    \"offset\": 0,\n    \"sortBy\": \"name\",\n    \"sortOrder\": \"DESCENDING\",\n    \"directory\": \"ubl\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/files/search",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"files",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "File Search - toRange size",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filters\": {\n        \"toSize size\": \"5000\"\n    },\n    \"limit\": 20,\n    \"offset\": 0,\n    \"sortBy\": \"size\",\n    \"sortOrder\": \"DESCENDING\",\n    \"directory\": \"ubl\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/files/search",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"files",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "File Search - toRange date",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filters\": {\n        \"toRange date\": \"2024-05-26\"\n    },\n    \"limit\": 20,\n    \"offset\": 0,\n    \"sortBy\": \"date\",\n    \"sortOrder\": \"DESCENDING\",\n    \"directory\": \"ubl\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{opencell.url}}/v2/files/search",
+					"host": [
+						"{{opencell.url}}"
+					],
+					"path": [
+						"v2",
+						"files",
+						"search"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{opencell.password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{opencell.username}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

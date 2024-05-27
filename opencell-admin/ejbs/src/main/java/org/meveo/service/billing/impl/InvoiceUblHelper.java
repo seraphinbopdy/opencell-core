@@ -22,6 +22,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Credited
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentityCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Department;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Description;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DocumentCurrencyCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
@@ -73,6 +74,7 @@ import org.meveo.model.RegistrationNumber;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.ElectronicInvoiceSetting;
 import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.InvoiceTypeEnum;
@@ -82,6 +84,7 @@ import org.meveo.model.billing.Tax;
 import org.meveo.model.billing.TaxInvoiceAgregate;
 import org.meveo.model.billing.UntdidAllowanceCode;
 import org.meveo.model.billing.UntdidTaxationCategory;
+import org.meveo.model.billing.VatDateCodeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.DDPaymentMethod;
@@ -119,6 +122,7 @@ public class InvoiceUblHelper {
 	private final static UntdidAllowanceCodeService untdidAllowanceCodeService;
 	private final static InvoiceAgregateService invoiceAgregateService;
 	private final static PaymentTermService paymentTermService;
+	private final static EinvoiceSettingService einvoiceSettingService;
 	private static final String XUN = "XUN";
 	public static final String ISO_IEC_6523 = "ISO/IEC 6523";
 	public static final String SIRET = "0009";
@@ -134,6 +138,7 @@ public class InvoiceUblHelper {
 		invoiceAgregateService = (InvoiceAgregateService) EjbUtils.getServiceInterface(InvoiceAgregateService.class.getSimpleName());
 		untdidAllowanceCodeService = (UntdidAllowanceCodeService) EjbUtils.getServiceInterface(UntdidAllowanceCodeService.class.getSimpleName());
 		paymentTermService = (PaymentTermService) EjbUtils.getServiceInterface(PaymentTermService.class.getSimpleName());
+		einvoiceSettingService = (EinvoiceSettingService) EjbUtils.getServiceInterface(EinvoiceSettingService.class.getSimpleName());
 	}
 	
 	private InvoiceUblHelper(){}
@@ -292,6 +297,10 @@ public class InvoiceUblHelper {
 			startDate.setValue(toXmlDate(source.getStartDate()));
 			endDate.setValue(toXmlDate(source.getEndDate()));
 			periodType.setStartDate(startDate);
+			VatDateCodeEnum vatDateCode = einvoiceSettingService.findEinvoiceSetting().getVatDateCode();
+			DescriptionCode descriptionCode = objectFactorycommonBasic.createDescriptionCode();
+			descriptionCode.setValue(String.valueOf(vatDateCode.getPaidToDays()));
+			periodType.getDescriptionCodes().add(descriptionCode);
 			target.getInvoicePeriods().add(periodType);
 		}
 

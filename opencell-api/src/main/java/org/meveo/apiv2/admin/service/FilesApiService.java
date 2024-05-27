@@ -84,21 +84,41 @@ public class FilesApiService extends BaseApi {
                                         }
                                         break;
                                     case "likeCriterias":
+                                    case "likeCriteria":
                                         if (exp.getFieldName().equalsIgnoreCase("name")) {
                                             String regex = ((String) value).replace("*", ".*?");
                                             conditions.add(p.getFileName().toString().matches(regex));
+                                        }
+                                        break;
+                                    case "likeCriteriaOrIgnoreCase":
+                                        if (exp.getFieldName().equalsIgnoreCase("name")) {
+                                            String regex = ((String) value).replace("*", ".*?");
+                                            conditions.add(p.getFileName().toString().toLowerCase().matches(regex.toLowerCase()));
                                         }
                                         break;
                                     case "fromRange":
                                         if (exp.getFieldName().equalsIgnoreCase("date")) {
                                             Date date = DateUtils.parseDate(value);
                                             if (date != null) {
-                                                conditions.add(date.getTime() >= p.toFile().lastModified());
+                                                conditions.add(p.toFile().lastModified() >= date.getTime());
                                             }
                                         } else if (exp.getFieldName().equalsIgnoreCase("size")) {
                                             Long size = NumberUtils.toLong((String) value, -1);
                                             if (size > -1) {
-                                                conditions.add(size >= p.toFile().length());
+                                                conditions.add(p.toFile().length() >= size);
+                                            }
+                                        }
+                                        break;
+                                    case "toRange":
+                                        if (exp.getFieldName().equalsIgnoreCase("date")) {
+                                            Date date = DateUtils.parseDate(value);
+                                            if (date != null) {
+                                                conditions.add(p.toFile().lastModified() < date.getTime());
+                                            }
+                                        } else if (exp.getFieldName().equalsIgnoreCase("size")) {
+                                            long size = NumberUtils.toLong((String) value, -1);
+                                            if (size > -1) {
+                                                conditions.add(p.toFile().length() < size);
                                             }
                                         }
                                         break;

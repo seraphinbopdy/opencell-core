@@ -20,17 +20,21 @@ package org.meveo.admin.job;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.model.crm.CustomFieldTemplate;
+import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
+import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.service.job.ScopedJob;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Job definition to cancel duplicated EDRs and keep only the newest version.
@@ -49,12 +53,12 @@ public class EDRsDeduplicationJob extends ScopedJob {
     /**
      * Default value of fetch size of select query
      */
-    public static final Long DEFAULT_SELECT_FETCH_SIZE = 1000L;
+    public static final Long DEFAULT_SELECT_FETCH_SIZE = 10000L;
 
     /**
      * Default value of update chunk size
      */
-    public static final Long DEFAULT_UPDATE_CHUNK_SIZE = 100L;
+    public static final Long DEFAULT_UPDATE_CHUNK_SIZE = 1000L;
 
     /**
      * Custom field that contains the select fetch size value
@@ -65,6 +69,11 @@ public class EDRsDeduplicationJob extends ScopedJob {
      * Custom field that contains the update chunk value
      */
     public static final String UPDATE_CHUNK_SIZE = "updateChunkSize";
+
+    /**
+     * Custom field that contains the edr status
+     */
+    public static final String EDR_STATUS = "edrStatus";
 
     /**
      * Job bean
@@ -94,31 +103,49 @@ public class EDRsDeduplicationJob extends ScopedJob {
 
         result.put(CF_NB_RUNS,
                 CustomFieldTemplateUtils.buildCF(CF_NB_RUNS, resourceMessages.getString("jobExecution.nbRuns"),
-                        CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Configuration:0;fieldGroup:Configuration:0;field:0", "-1", APPLIES_TO));
+                        CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Execution configuration:0;field:0", "-1", APPLIES_TO));
 
         result.put(CF_WAITING_MILLIS,
                 CustomFieldTemplateUtils.buildCF(CF_WAITING_MILLIS,
                         resourceMessages.getString("jobExecution.waitingMillis"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;fieldGroup:Configuration:0;field:1", "0", APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:1", "0", APPLIES_TO));
 
         result.put(SELECT_FETCH_SIZE,
                 CustomFieldTemplateUtils.buildCF(SELECT_FETCH_SIZE,
                         resourceMessages.getString("jobExecution.edrsDeduplication.selectFetchSize"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;fieldGroup:Configuration:0;field:2", String.valueOf(DEFAULT_SELECT_FETCH_SIZE), APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:2", String.valueOf(DEFAULT_SELECT_FETCH_SIZE), APPLIES_TO));
 
         result.put(UPDATE_CHUNK_SIZE,
                 CustomFieldTemplateUtils.buildCF(UPDATE_CHUNK_SIZE,
                         resourceMessages.getString("jobExecution.edrsDeduplication.updateChunkSize"), CustomFieldTypeEnum.LONG,
-                        "tab:Configuration:0;fieldGroup:Configuration:0;fieldGroup:Configuration:0;field:3", String.valueOf(DEFAULT_UPDATE_CHUNK_SIZE), APPLIES_TO));
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:3", String.valueOf(DEFAULT_UPDATE_CHUNK_SIZE), APPLIES_TO));
 
         result.put(CF_JOB_ITEMS_LIMIT, CustomFieldTemplateUtils.buildCF(CF_JOB_ITEMS_LIMIT, resourceMessages.getString("jobExecution.jobItemsLimit"),
-                CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Configuration:0;field:4", APPLIES_TO));
+                CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Execution configuration:0;field:4", APPLIES_TO));
 
         result.put(CF_JOB_DURATION_LIMIT, CustomFieldTemplateUtils.buildCF(CF_JOB_DURATION_LIMIT, resourceMessages.getString("jobExecution.jobDurationLimit"),
-                CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Configuration:0;field:5", APPLIES_TO));
+                CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Execution configuration:0;field:5", APPLIES_TO));
 
         result.put(CF_JOB_TIME_LIMIT, CustomFieldTemplateUtils.buildCF(CF_JOB_TIME_LIMIT, resourceMessages.getString("jobExecution.jobTimeLimit"),
-                CustomFieldTypeEnum.STRING, "tab:Configuration:0;fieldGroup:Configuration:0;field:6", APPLIES_TO, 5L));
+                CustomFieldTypeEnum.STRING, "tab:Configuration:0;fieldGroup:Execution configuration:0;field:6", APPLIES_TO, 5L));
+
+        CustomFieldTemplate edrStatusCf = new CustomFieldTemplate();
+        edrStatusCf.setCode(EDR_STATUS);
+        edrStatusCf.setAppliesTo(APPLIES_TO);
+        edrStatusCf.setActive(true);
+        edrStatusCf.setDescription(resourceMessages.getString("jobExecution.edrsDeduplication.edrStatus"));
+        edrStatusCf.setFieldType(CustomFieldTypeEnum.CHECKBOX_LIST);
+        edrStatusCf.setStorageType(CustomFieldStorageTypeEnum.LIST);
+        edrStatusCf.setValueRequired(false);
+        SortedMap<String, String> edrStatusList = new TreeMap<>();
+        for (EDRStatusEnum status : EDRStatusEnum.values()) {
+            if (status != EDRStatusEnum.CANCELLED) {
+                edrStatusList.put(status.name(), resourceMessages.getString(status.getLabel()));
+            }
+        }
+        edrStatusCf.setListValues(edrStatusList);
+        edrStatusCf.setGuiPosition("tab:Configuration:0;fieldGroup:Data configuration:0;field:0");
+        result.put(EDR_STATUS, edrStatusCf);
 
         return result;
     }

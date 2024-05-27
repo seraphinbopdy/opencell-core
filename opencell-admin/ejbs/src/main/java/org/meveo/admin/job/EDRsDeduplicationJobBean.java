@@ -23,10 +23,12 @@ import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.query.Query;
 import org.meveo.admin.async.SynchronizedMultiItemIterator;
+import org.meveo.admin.exception.BusinessException;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
+import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.ReratingService;
@@ -103,7 +105,7 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Lo
             edrService.getEntityManager().createNamedQuery("EDR.cancelEDRsWithRejectReasonAndEventVersion").setParameter("updatedDate", new Date()).setParameter("ids", edrsEV).executeUpdate();
         }
         if (!edrs.isEmpty()) {
-            edrService.getEntityManager().createNamedQuery("EDR.cancelEDRsRejectReason").setParameter("updatedDate", new Date()).setParameter("ids", edrs).executeUpdate();
+            edrService.getEntityManager().createNamedQuery("EDR.cancelEDRsWithRejectReason").setParameter("updatedDate", new Date()).setParameter("ids", edrs).executeUpdate();
         }
     }
 
@@ -115,6 +117,11 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Lo
      * @return the scrollable results
      */
     public ScrollableResults getScrollableResult(JobInstance jobInstance, int maxResults) {
+        List<EDRStatusEnum> edrStatus = getTargetStatusList(jobInstance, EDRStatusEnum.class, EDRsDeduplicationJob.EDR_STATUS);
+        if (edrStatus.isEmpty()) {
+            log.error("At least one status is required");
+            throw new BusinessException("At least one status is required");
+        }
         Long selectFetchSize = (Long) getParamOrCFValue(jobInstance, EDRsDeduplicationJob.SELECT_FETCH_SIZE);
         Long nbThreads = (Long) this.getParamOrCFValue(jobInstance, EDRsDeduplicationJob.CF_NB_RUNS, -1L);
         if (nbThreads == -1) {
@@ -124,7 +131,7 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Lo
             selectFetchSize = EDRsDeduplicationJob.DEFAULT_SELECT_FETCH_SIZE * nbThreads.intValue();
         }
         statelessSession = emWrapper.getEntityManager().unwrap(Session.class).getSessionFactory().openStatelessSession();
-        Query query = statelessSession.createNamedQuery("EDR.getDuplicatedEDRs");
+        Query query = statelessSession.createNamedQuery("EDR.getDuplicatedEDRs").setParameter("status", edrStatus);
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }

@@ -94,10 +94,15 @@ import org.meveo.model.billing.WalletOperation;
         @NamedQuery(name = "EDR.getByWO", query = "SELECT edr FROM EDR edr WHERE edr.walletOperation.id IN (:WO_IDS)"),
         @NamedQuery(name = "EDR.deleteByWO", query = "DELETE FROM EDR edr WHERE edr.walletOperation.id IN (:WO_IDS)"),
 		@NamedQuery(name = "EDR.cancelEDRs", query = "UPDATE EDR set status='CANCELLED', rejectReason=:rejectReason, updated=:updatedDate where id in :ids"),
-        @NamedQuery(name = "EDR.getDuplicatedEDRs", query = "SELECT e1.id FROM EDR e1 WHERE (e1.eventKey, e1.eventVersion, e1.status) in (SELECT e2.eventKey, e2.eventVersion, e2.status FROM EDR e2 " +
-                "WHERE e2.status != 'CANCELLED' AND e2.eventKey IS NOT NULL AND e2.eventVersion IS NOT NULL AND e2.id > e1.id) ORDER BY e1.eventKey, e1.eventVersion DESC, e1.id DESC "),
+        /*
+        @NamedQuery(name = "EDR.getDuplicatedEDRs", query = "SELECT e0.id FROM EDR e0 WHERE EXISTS (SELECT 1 FROM EDR e1 WHERE e1.eventKey = e0.eventKey AND e1.eventVersion = e0.eventVersion AND e1.status = e0.status " +
+               " AND e1.status IN (:status) AND e1.eventKey IS NOT NULL AND e1.eventVersion IS NOT NULL AND e1.id > e0.id) ORDER BY e0.eventKey, e0.eventVersion DESC, e0.id desc"),
+        */
+        @NamedQuery(name = "EDR.getDuplicatedEDRs", query = "SELECT e0.id FROM EDR e0 INNER JOIN EDR e1 ON e1.eventKey = e0.eventKey AND e1.eventVersion = e0.eventVersion AND e1.status = e0.status AND e1.id > e0.id " +
+                " WHERE e0.status IN (:status) AND e0.eventKey IS NOT NULL AND e0.eventVersion IS NOT NULL GROUP BY e0.eventKey, e0.eventVersion, e0.id " +
+                " ORDER BY e0.eventKey, e0.eventVersion DESC, e0.id desc"),
         @NamedQuery(name = "EDR.cancelEDRsWithRejectReasonAndEventVersion", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('Received new version EDR[id=',id,']'), eventVersion=eventVersion+1 ,updated=:updatedDate where id in :ids"),
-        @NamedQuery(name = "EDR.cancelEDRsRejectReason", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('EDR[id=', id,', eventKey=', eventKey,'] has already been invoiced'), updated=:updatedDate where id in :ids")
+        @NamedQuery(name = "EDR.cancelEDRsWithRejectReason", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('EDR[id=', id,', eventKey=', eventKey,'] has already been invoiced'), updated=:updatedDate where id in :ids")
     })
 
 

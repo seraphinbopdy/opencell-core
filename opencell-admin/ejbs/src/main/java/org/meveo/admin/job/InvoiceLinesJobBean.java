@@ -85,7 +85,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
 
     @Inject
     private JobInstanceService jobInstanceService;
-
+    
     private AggregationConfiguration aggregationConfiguration;
     private boolean incrementalInvoiceLines;
 

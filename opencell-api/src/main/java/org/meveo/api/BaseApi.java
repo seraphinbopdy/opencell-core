@@ -378,7 +378,7 @@ public abstract class BaseApi {
                                 cet = customTableService.getCET(cft.getEntityClazzCetCode());
                             }
                             if(cet != null && cet.isStoreAsTable()){
-                                recordExist = !customTableService.findById(cet.getDbTablename(), entityRefWrapper.getId()).isEmpty();
+                                recordExist = !customTableService.findById(cet.getDbTablename(), Long.parseLong(entityRefWrapper.getCode())).isEmpty();
                             }else{
                                     Class entityRefClass = Class.forName(entityRefWrapper.getClassname());
                                     referencedEntity = businessEntityService.findByEntityClassAndCode(entityRefClass, entityRefWrapper.getCode());

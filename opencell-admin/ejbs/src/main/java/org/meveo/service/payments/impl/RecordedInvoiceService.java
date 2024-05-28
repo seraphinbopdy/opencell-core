@@ -25,6 +25,7 @@ import static org.meveo.model.billing.InvoicePaymentStatusEnum.PAID;
 import static org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING;
 import static org.meveo.model.billing.InvoicePaymentStatusEnum.PPAID;
 import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNREFUNDED;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 import static org.meveo.model.payments.MatchingStatusEnum.I;
 import static org.meveo.model.payments.OperationCategoryEnum.DEBIT;
@@ -447,10 +448,10 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
                 create(recordedInvoiceCatAgregate);
             }
             invoice.setRecordedInvoice(recordedInvoice);
-            if(invoice.getDueDate() != null) {
-                var currentStatus = invoice.getDueDate().compareTo(new Date()) >= 1 ? PENDING : UNPAID;
-                log.info("[Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
-                        invoice.getPaymentStatus() + " - newPaymentStatus : " + currentStatus + "]");
+            if (invoice.getDueDate() != null) {
+				InvoicePaymentStatusEnum currentStatus = invoice.getDueDate().compareTo(new Date()) >= 1 ? PENDING
+						: (invoice.getInvoiceType().getCode().contains("ADJ")) ? UNREFUNDED : UNPAID;
+                log.info("[Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + invoice.getPaymentStatus() + " - newPaymentStatus : " + currentStatus + "]");
                 invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), currentStatus);
             }
 

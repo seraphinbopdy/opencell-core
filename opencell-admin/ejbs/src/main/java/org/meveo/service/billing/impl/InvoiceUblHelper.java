@@ -445,6 +445,7 @@ public class InvoiceUblHelper {
 			invoicedQuantity.setUnitCode(XUN);
 			invoiceLineType.setInvoicedQuantity(invoicedQuantity);
 			setPriceAndCreditLine(invoiceLine, invoiceLineType, itemType);
+			invoiceLineType.getInvoicePeriods().add(setPeriodTypeInvoiceLine(invoiceLine.getInvoice(), invoiceLine));
 			target.getInvoiceLines().add(invoiceLineType);
 		});
 	}
@@ -459,6 +460,7 @@ public class InvoiceUblHelper {
 			invoicedQuantity.setValue(invoiceLine.getQuantity());
 			invoiceLineType.setCreditedQuantity(invoicedQuantity);
 			setPriceAndCreditLine(invoiceLine, invoiceLineType, itemType);
+			invoiceLineType.getInvoicePeriods().add(setPeriodTypeInvoiceLine(invoiceLine.getInvoice(), invoiceLine));
 			target.getCreditNoteLines().add(invoiceLineType);
 		});
 	}
@@ -1331,5 +1333,27 @@ public class InvoiceUblHelper {
 		deliveryType.setDeliveryLocation(locationType);
 
 		return deliveryType;
+	}
+	
+	private PeriodType setPeriodTypeInvoiceLine(org.meveo.model.billing.Invoice invoice, InvoiceLine invoiceLine) {
+		if(invoiceLine.getSubscription() == null || invoice == null) return null;
+		
+		PeriodType periodType = objectFactoryCommonAggrement.createPeriodType();
+		if(invoice.getStartDate() != null){
+			StartDate startDate = objectFactorycommonBasic.createStartDate();
+			startDate.setValue(toXmlDate(invoice.getStartDate()));
+			periodType.setStartDate(startDate);
+		}
+		if(invoice.getEndDate() != null){
+			EndDate endDate = objectFactorycommonBasic.createEndDate();
+			endDate.setValue(toXmlDate(invoice.getEndDate()));
+			periodType.setEndDate(endDate);
+		}
+		
+		VatDateCodeEnum vatDateCode = einvoiceSettingService.findEinvoiceSetting().getVatDateCode();
+		DescriptionCode descriptionCode = objectFactorycommonBasic.createDescriptionCode();
+		descriptionCode.setValue(String.valueOf(vatDateCode.getPaidToDays()));
+		periodType.getDescriptionCodes().add(descriptionCode);
+		return periodType;
 	}
 }

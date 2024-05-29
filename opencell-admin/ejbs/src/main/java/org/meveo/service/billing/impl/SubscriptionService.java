@@ -18,6 +18,8 @@
 package org.meveo.service.billing.impl;
 
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+import static org.meveo.apiv2.accounts.ApplyOneShotChargeListModeEnum.PROCESS_ALL;
+import static org.meveo.apiv2.accounts.ApplyOneShotChargeListModeEnum.ROLLBACK_ON_ERROR;
 import static org.meveo.model.billing.SubscriptionStatusEnum.ACTIVE;
 import static org.meveo.model.billing.SubscriptionStatusEnum.CANCELED;
 import static org.meveo.model.billing.SubscriptionStatusEnum.CLOSED;
@@ -35,29 +37,56 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotResiliatedOrCanceledException;
 import org.meveo.admin.exception.IncorrectServiceInstanceException;
 import org.meveo.admin.exception.IncorrectSusbcriptionException;
+import org.meveo.admin.exception.RatingException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.meveo.api.dto.account.ApplyOneShotChargeInstanceRequestDto;
+import org.meveo.api.dto.billing.AttributeInstanceDto;
+import org.meveo.api.dto.billing.WalletOperationDto;
 import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
+import org.meveo.api.exception.BusinessApiException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.api.exception.InvalidParameterException;
+import org.meveo.api.exception.MeveoApiException;
+import org.meveo.api.exception.MissingParameterException;
+import org.meveo.apiv2.accounts.AppliedChargeResponseDto;
+import org.meveo.apiv2.accounts.ApplyOneShotChargeListInput;
+import org.meveo.apiv2.accounts.ApplyOneShotChargeListModeEnum;
+import org.meveo.apiv2.accounts.ProcessApplyChargeListResult;
 import org.meveo.audit.logging.annotations.MeveoAudit;
+import org.meveo.commons.utils.ListUtils;
+import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.RatingResult;
+import org.meveo.model.billing.AttributeInstance;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingRun;
@@ -65,6 +94,7 @@ import org.meveo.model.billing.ChargeApplicationModeEnum;
 import org.meveo.model.billing.DiscountPlanInstance;
 import org.meveo.model.billing.InstanceStatusEnum;
 import org.meveo.model.billing.OneShotChargeInstance;
+import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.Renewal;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
@@ -73,6 +103,7 @@ import org.meveo.model.billing.SubscriptionRenewal.RenewalPeriodUnitEnum;
 import org.meveo.model.billing.SubscriptionStatusEnum;
 import org.meveo.model.billing.SubscriptionTerminationReason;
 import org.meveo.model.billing.UserAccount;
+import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.OfferServiceTemplate;
@@ -80,6 +111,10 @@ import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplateTypeEnum;
 import org.meveo.model.catalog.ServiceTemplate;
+import org.meveo.model.catalog.WalletTemplate;
+import org.meveo.model.cpq.Product;
+import org.meveo.model.cpq.ProductVersion;
+import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.offer.OfferComponent;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.mediation.Access;
@@ -93,8 +128,11 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.catalog.impl.CalendarService;
 import org.meveo.service.catalog.impl.OfferTemplateService;
+import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
+import org.meveo.service.cpq.AttributeService;
+import org.meveo.service.cpq.ProductService;
+import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.crm.impl.SubscriptionActivationException;
-import org.meveo.service.crm.impl.SubscriptionServiceException;
 import org.meveo.service.medina.impl.AccessService;
 import org.meveo.service.order.OrderHistoryService;
 import org.meveo.service.payments.impl.CustomerAccountService;
@@ -142,6 +180,24 @@ public class SubscriptionService extends BusinessService<Subscription> {
 
     @Inject
     private FinanceSettingsService financeSettingsService;
+    @Inject
+    private AttributeService attributeService;
+    @Inject
+    private ProductService productService;
+    @Inject
+    private RatedTransactionService ratedTransactionService;
+    @Inject
+    private OneShotChargeTemplateService oneShotChargeTemplateService;
+    @Inject
+    private CommercialOrderService commercialOrderService;
+    @Inject
+    private WalletTemplateService walletTemplateService;
+    @Resource(lookup = "java:jboss/ee/concurrency/executor/job_executor")
+    protected ManagedExecutorService executor;
+    @Inject
+    private SubscriptionService subscriptionService;
+    @Inject
+    private MethodCallingUtils methodCallingUtils;
 
     @MeveoAudit
     @Override
@@ -1128,5 +1184,324 @@ public class SubscriptionService extends BusinessService<Subscription> {
 		getEntityManager().createNamedQuery("Subscription.unlinkPaymentMehtodByBA")
 				.setParameter("billingAccount", billingAccount)
 				.executeUpdate();
+    }
+
+    /**
+     * Apply an one shot charge on a subscription
+     *
+     * @param postData The apply one shot charge instance request dto
+     * @return OneShotChargeInstance
+     * @throws MeveoApiException Meveo api exception
+     */
+    public OneShotChargeInstance applyOneShotChargeInstance(ApplyOneShotChargeInstanceRequestDto postData,
+                                                            boolean isVirtual) throws MeveoApiException {
+        checkOneShotChargeInstancePrice(postData);
+        Date operationDate = postData.getOperationDate();
+        if (operationDate == null) {
+            postData.setOperationDate(new Date());
+        }
+        OneShotChargeTemplate oneShotChargeTemplate = oneShotChargeTemplateService.findByCode(postData.getOneShotCharge());
+        if (oneShotChargeTemplate == null) {
+            throw new EntityDoesNotExistsException(OneShotChargeTemplate.class, postData.getOneShotCharge());
+        }
+        Subscription subscription = findByCodeAndValidityDate(postData.getSubscription(), postData.getSubscriptionValidityDate());
+        if (subscription == null) {
+            throw new EntityDoesNotExistsException(Subscription.class, postData.getSubscription(), postData.getSubscriptionValidityDate());
+        }
+        CommercialOrder commercialOrder = null;
+        if (postData.getCommercialOrderId() != null) {
+            commercialOrder = commercialOrderService.findById(postData.getCommercialOrderId());
+            if (commercialOrder == null) {
+                throw new EntityDoesNotExistsException(CommercialOrder.class, postData.getOneShotCharge());
+            }
+        }
+        if (postData.getWallet() != null) {
+            WalletTemplate walletTemplate = walletTemplateService.findByCode(postData.getWallet());
+            if (walletTemplate == null) {
+                throw new EntityDoesNotExistsException(WalletTemplate.class, postData.getWallet());
+            }
+            if ((!postData.getWallet().equals("PRINCIPAL")) && !subscription.getUserAccount().getPrepaidWallets().containsKey(postData.getWallet())) {
+                if (postData.getCreateWallet() != null && postData.getCreateWallet()) {
+                    subscription.getUserAccount().getWalletInstance(postData.getWallet());
+                } else {
+                    throw new MeveoApiException("Wallet " + postData.getWallet() + " is not attached to the user account, but were instructed not to create it");
+                }
+            }
+        }
+        OneShotChargeInstance oneShotChargeInstance = new OneShotChargeInstance();
+        try {
+            ServiceInstance serviceInstance = buildServiceInstanceForOSO(postData, subscription);
+
+            OneShotChargeInstance osho = oneShotChargeInstanceService
+                    .instantiateAndApplyOneShotCharge(subscription, serviceInstance, oneShotChargeTemplate, postData.getWallet(), postData.getOperationDate(),
+                            postData.getAmountWithoutTax(), postData.getAmountWithTax(), postData.getQuantity(), postData.getCriteria1(), postData.getCriteria2(),
+                            postData.getCriteria3(), postData.getDescription(), null, oneShotChargeInstance.getCfValues(), true, ChargeApplicationModeEnum.SUBSCRIPTION, isVirtual, commercialOrder);
+
+            if (StringUtils.isNotBlank(postData.getBusinessKey())) {
+                osho.getWalletOperations().stream().forEach(wo -> {
+                    wo.setBusinessKey(postData.getBusinessKey());
+                });
+            }
+
+            if (Boolean.TRUE.equals(postData.getGenerateRTs())) {
+                osho.getWalletOperations().stream().forEach(wo -> {
+                    RatedTransaction ratedTransaction = ratedTransactionService.createRatedTransaction(wo, isVirtual);
+                    ratedTransaction.setBusinessKey(wo.getBusinessKey());
+                    ratedTransaction.setContract(wo.getContract());
+                    ratedTransaction.setContractLine(wo.getContractLine());
+                });
+            }
+
+            return osho;
+        } catch (RatingException e) {
+            log.trace("Failed to apply one shot charge {}: {}", oneShotChargeTemplate.getCode(), e.getRejectionReason());
+            throw new MeveoApiException(e.getMessage());
+
+        } catch (BusinessException e) {
+            log.error("Failed to apply one shot charge {}: {}", oneShotChargeTemplate.getCode(), e.getMessage(), e);
+            throw e;
+        }
+
+    }
+
+    private void checkOneShotChargeInstancePrice(ApplyOneShotChargeInstanceRequestDto postData) {
+        if (appProvider.isEntreprise()) {
+            if (postData.getUnitPrice() != null && postData.getAmountWithoutTax() != null && postData.getUnitPrice().compareTo(postData.getAmountWithoutTax()) != 0) {
+                throw new MeveoApiException("unitPrice and amountWithoutTax must be equal. Futhermore, ‘amountWithoutTax' is deprecated, you should only send 'unitPrice’.");
+            }
+            if (postData.getUnitPrice() == null && postData.getAmountWithoutTax() == null && postData.getAmountWithTax() != null) {
+                throw new MeveoApiException("Provider is in B2B mode (entreprise=true). This means that unit prices are without tax. Furthermore, ‘amountWithTax’ is deprecated, you should send ‘unitPrice’.");
+            }
+            if (postData.getUnitPrice() != null) {
+                postData.setAmountWithoutTax(postData.getUnitPrice());
+            }
+            postData.setAmountWithTax(null);
+        } else {
+            if (postData.getUnitPrice() != null && postData.getAmountWithTax() != null && postData.getUnitPrice().compareTo(postData.getAmountWithTax()) != 0) {
+                throw new MeveoApiException("unitPrice and amountWithTax must be equal. Furthermore, ‘amountWithTax' is deprecated, you should only send 'unitPrice’.");
+            }
+            if (postData.getUnitPrice() == null && postData.getAmountWithTax() == null && postData.getAmountWithoutTax() != null) {
+                throw new MeveoApiException("Provider is in B2C mode (entreprise=false). This means that unit prices are with tax. Furthermore, ‘amountWithoutTax’ is deprecated, you should send ‘unitPrice’.");
+            }
+            if (postData.getUnitPrice() != null) {
+                postData.setAmountWithTax(postData.getUnitPrice());
+            }
+            postData.setAmountWithoutTax(null);
+        }
+    }
+
+    /**
+     * Build ServiceInstance from OSO Payload
+     *
+     * @param postData     OSO payload
+     * @param subscription subscription
+     * @return Virtual or Real ServiceInstance
+     */
+    private ServiceInstance buildServiceInstanceForOSO(ApplyOneShotChargeInstanceRequestDto postData, Subscription subscription) {
+        ServiceInstance serviceInstance = null;
+        if (postData.getAttributes() != null) {
+            serviceInstance = new ServiceInstance(); // Create a virtual ServiceInstance
+            serviceInstance.setSubscription(subscription);
+
+            // Product data
+            if (StringUtils.isNotBlank(postData.getProductCode())) {
+                Product product = productService.findByCode(postData.getProductCode());
+                ProductVersion pVersion = new ProductVersion();
+                pVersion.setProduct(product);
+                serviceInstance.setCode(product.getCode());
+                serviceInstance.setProductVersion(pVersion);
+            }
+            // add attributes
+            for (AttributeInstanceDto attributeInstanceDto : postData.getAttributes()) {
+                AttributeInstance attributeInstance = new AttributeInstance();
+                attributeInstance.setAttribute(attributeService.findByCode(attributeInstanceDto.getAttributeCode()));
+                attributeInstance.setServiceInstance(serviceInstance);
+                attributeInstance.setSubscription(subscription);
+                attributeInstance.setDoubleValue(attributeInstanceDto.getDoubleValue());
+                attributeInstance.setStringValue(attributeInstanceDto.getStringValue());
+                attributeInstance.setBooleanValue(attributeInstanceDto.getBooleanValue());
+                attributeInstance.setDateValue(attributeInstanceDto.getDateValue());
+                serviceInstance.addAttributeInstance(attributeInstance);
+            }
+        } else { // no attributs provided in payload (OSO case for example)
+            List<ServiceInstance> alreadyInstantiatedServices = null;
+            if (StringUtils.isNotBlank(postData.getProductCode())) {
+                alreadyInstantiatedServices = serviceInstanceService.findByCodeSubscriptionAndStatus(postData.getProductCode(), subscription,
+                        InstanceStatusEnum.ACTIVE);
+                if (alreadyInstantiatedServices == null || alreadyInstantiatedServices.isEmpty()) {
+                    throw new BusinessException("The product instance " + postData.getProductCode() + " doest not exist for this subscription or is not active");
+                }
+            } else {
+                alreadyInstantiatedServices = subscription.getServiceInstances().stream()
+                        .filter(si -> si.getStatus() == InstanceStatusEnum.ACTIVE)
+                        .collect(Collectors.toList());
+            }
+            if (alreadyInstantiatedServices.size() > 1) {
+                if (postData.getProductInstanceId() == null) {
+                    throw new BusinessException("More than one Product Instance found for Product '" + postData.getProductCode()
+                            + "' and Subscription '" + subscription.getCode() + "'. Please provide productInstanceId field");
+                } else {
+                    serviceInstance = serviceInstanceService.findById(postData.getProductInstanceId());
+                    if (serviceInstance == null) {
+                        throw new BusinessException("No Product Instance found with id=" + postData.getProductInstanceId());
+                    }
+                }
+            } else {
+                serviceInstance = alreadyInstantiatedServices.get(0);
+            }
+        }
+        return serviceInstance;
+    }
+
+    public ProcessApplyChargeListResult applyOneShotChargeList(ApplyOneShotChargeListInput postData) {
+        if(postData == null) {
+            throw new InvalidParameterException("The input parameters are required");
+        }
+        if(ListUtils.isEmtyCollection(postData.getChargesToApply())) {
+            throw new InvalidParameterException("The charges to apply are required");
+        }
+        postData.getChargesToApply().forEach(c -> c.setGenerateRTs(postData.isGenerateRTs()));
+
+        SynchronizedIterator<ApplyOneShotChargeInstanceRequestDto> syncCharges = new SynchronizedIterator<>(postData.getChargesToApply());
+
+        ProcessApplyChargeListResult result = new ProcessApplyChargeListResult(postData.getMode(), syncCharges.getSize());
+
+        int nbThreads = (postData.getMode() == PROCESS_ALL) ? Runtime.getRuntime().availableProcessors() : 1;
+        if (nbThreads > postData.getChargesToApply().size()) {
+            nbThreads = postData.getChargesToApply().size();
+        }
+
+        List<Runnable> tasks = new ArrayList<>(nbThreads);
+        List<Future<?>> futures = new ArrayList<>();
+
+        for (int k = 0; k < nbThreads; k++) {
+            tasks.add(() ->
+                    this.subscriptionService.applyOneShotChargeInstance(syncCharges, result, postData.isGenerateRTs(), postData.isReturnWalletOperations(),
+                            postData.isReturnWalletOperationDetails(), postData.isVirtual())
+            );
+        }
+
+        for (Runnable task : tasks) {
+            futures.add(executor.submit(task));
+        }
+
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+
+            } catch (InterruptedException | CancellationException e) {
+                log.error("Failed to execute Mediation API async method", e);
+            } catch (ExecutionException e) {
+                log.error("Failed to execute Mediation API async method", e);
+            }
+        }
+
+        // Summary
+        AtomicReference<BigDecimal> amountWithTax = new AtomicReference<>(BigDecimal.ZERO);
+        AtomicReference<BigDecimal> amountWithoutTax = new AtomicReference<>(BigDecimal.ZERO);
+        AtomicReference<BigDecimal> amountTax = new AtomicReference<>(BigDecimal.ZERO);
+        AtomicInteger walletOperationCount = new AtomicInteger(0);
+        Arrays.stream(result.getAppliedCharges()).forEach(charge -> {
+            if (charge != null) {
+                amountWithTax.accumulateAndGet(Optional.ofNullable(charge.getAmountWithTax()).orElse(BigDecimal.ZERO), BigDecimal::add);
+                amountWithoutTax.accumulateAndGet(Optional.ofNullable(charge.getAmountWithoutTax()).orElse(BigDecimal.ZERO), BigDecimal::add);
+                amountTax.accumulateAndGet(Optional.ofNullable(charge.getAmountTax()).orElse(BigDecimal.ZERO), BigDecimal::add);
+
+                walletOperationCount.addAndGet(Optional.ofNullable(charge.getWalletOperationCount()).orElse(0));
+            } else {
+                log.warn("cdrProcessingResult amouts and WOCount will have default 0 value, due to charge null");
+            }
+        });
+
+        result.setAmountWithTax(amountWithTax.get());
+        result.setAmountWithoutTax(amountWithoutTax.get());
+        result.setAmountTax(amountTax.get());
+        result.setWalletOperationCount(walletOperationCount.get());
+
+        return result;
+    }
+
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void applyOneShotChargeInstance(SynchronizedIterator<ApplyOneShotChargeInstanceRequestDto> syncCharges, ProcessApplyChargeListResult result,
+                                           boolean generateRTs, boolean returnWalletOperations, boolean returnWalletOperationDetails,
+                                           boolean isVirtual) {
+
+        while(true) {
+            SynchronizedIterator<ApplyOneShotChargeInstanceRequestDto>.NextItem<ApplyOneShotChargeInstanceRequestDto> nextWPosition = syncCharges.nextWPosition();
+
+            if(nextWPosition == null) {
+                break;
+            }
+
+            int chargePosition = nextWPosition.getPosition();
+            ApplyOneShotChargeInstanceRequestDto chargeToApply = nextWPosition.getValue();
+
+            try {
+                log.info("applyOneShotChargeInstance #{}", chargePosition);
+                AppliedChargeResponseDto oshoDto;
+                if (result.getMode() == ROLLBACK_ON_ERROR) {
+                    OneShotChargeInstance osho = applyOneShotChargeInstance(chargeToApply, isVirtual);
+                    oshoDto = createAppliedChargeResponseDto(osho, returnWalletOperations, returnWalletOperationDetails);
+                } else {
+                    oshoDto = methodCallingUtils.callCallableInNewTx(() -> {
+                        OneShotChargeInstance osho = applyOneShotChargeInstance(chargeToApply, isVirtual);
+                        return createAppliedChargeResponseDto(osho, returnWalletOperations, returnWalletOperationDetails);
+                    });
+                }
+
+                result.addAppliedCharge(chargePosition, oshoDto);
+                result.getStatistics().addSuccess();
+            } catch (Exception e) {
+                log.error("Error when applying OSO at position #["+chargePosition+"]" , e);
+                result.getStatistics().addFail();
+                result.addAppliedCharge(chargePosition, createAppliedChargeResponseErrorDto(e.getMessage()));
+                if(result.getMode() == PROCESS_ALL) {
+                    continue;
+                } else if (result.getMode() == ApplyOneShotChargeListModeEnum.STOP_ON_FIRST_FAIL) {
+                    result.setAppliedCharges(Arrays.copyOf(result.getAppliedCharges(), chargePosition + 1));
+                    break;
+                } else {
+                    result.setAppliedCharges(new AppliedChargeResponseDto[] {createAppliedChargeResponseErrorDto(e.getMessage())});
+                    throw new BusinessApiException(e);
+                }
+            }
+        }
+
+    }
+
+    private AppliedChargeResponseDto createAppliedChargeResponseDto(OneShotChargeInstance osho,
+                                                                    boolean returnWalletOperation, boolean returnWallerOperationDetails) {
+        AppliedChargeResponseDto lDto = new AppliedChargeResponseDto();
+
+        lDto.setWalletOperationCount(osho.getWalletOperations().size());
+        BigDecimal amountWithTax = BigDecimal.ZERO;
+        BigDecimal amountWithoutTax = BigDecimal.ZERO;
+        BigDecimal amountTax = BigDecimal.ZERO;
+        for (WalletOperation wo : osho.getWalletOperations()) {
+            if(returnWallerOperationDetails) {
+                lDto.getWalletOperations().add(new WalletOperationDto(wo, wo.getAccountingArticle()));
+            } else if(returnWalletOperation) {
+                WalletOperationDto woDto = new WalletOperationDto();
+                woDto.setId(wo.getId());
+                lDto.getWalletOperations().add(woDto);
+            }
+            amountWithTax = amountWithTax.add(wo.getAmountWithTax() != null ? wo.getAmountWithTax() : BigDecimal.ZERO);
+            amountWithoutTax = amountWithoutTax.add(wo.getAmountWithoutTax() != null ? wo.getAmountWithoutTax() : BigDecimal.ZERO);
+            amountTax = amountTax.add(wo.getAmountTax() != null ? wo.getAmountTax() : BigDecimal.ZERO);
+        }
+        lDto.setAmountTax(amountTax);
+        lDto.setAmountWithoutTax(amountWithoutTax);
+        lDto.setAmountWithTax(amountWithTax);
+
+        return lDto;
+    }
+
+    private AppliedChargeResponseDto createAppliedChargeResponseErrorDto(String errorMessage) {
+        AppliedChargeResponseDto lDto = new AppliedChargeResponseDto();
+
+        lDto.setError(new AppliedChargeResponseDto.CdrError(errorMessage));
+
+        return lDto;
     }
 }

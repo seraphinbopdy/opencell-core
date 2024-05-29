@@ -118,7 +118,8 @@ import org.meveo.model.finance.AccountingEntry;
         @NamedQuery(name = "Refund.updateReference", query = "UPDATE Refund re set re.reference = (select ph.externalPaymentId from PaymentHistory ph where ph.refund is not null and ph.refund.id = re.id) where re.reference is null"),
         @NamedQuery(name = "RejectedPayment.findByRejectionActionStatus", query = "SELECT distinct rp FROM RejectedPayment rp left join fetch rp.paymentRejectionActionReports prar WHERE rp.rejectionActionsStatus IN (:RA_STATUS)"),
         @NamedQuery(name = "RejectedPayment.findByExternalId", query = "SELECT ao FROM AccountOperation ao WHERE ao.reference = :externalId"),
-        @NamedQuery(name = "RejectedPayment.findByExternalIdAndPaymentGateWay", query = "SELECT pay FROM Payment pay WHERE pay.reference = :externalId and pay.paymentGateway.code = :paymentGatewayCode")
+        @NamedQuery(name = "RejectedPayment.findByExternalIdAndPaymentGateWay", query = "SELECT pay FROM Payment pay WHERE pay.reference = :externalId and pay.paymentGateway.code = :paymentGatewayCode"),
+        @NamedQuery(name = "RejectedPayment.findByRejectPayment", query = "SELECT pay FROM Payment pay WHERE pay.rejectedPayment.id = :rejectedPaymentId")
 })
 public class AccountOperation extends BusinessEntity implements ICustomFieldEntity, ISearchable, IWFEntity {
 

@@ -33,6 +33,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.hibernate.proxy.HibernateProxy;
@@ -1122,5 +1123,21 @@ public class PaymentService extends PersistenceService<Payment> {
                 .setParameter("externalId", externalId)
                 .setParameter("paymentGatewayCode", paymentGatewayCode)
                 .getResultList();
+    }
+
+    /**
+     * Find Payment by associated reject payment
+     *
+     * @param rejectPaymentId reject payment Id
+     * @return Payment
+     */
+    public Payment findByRejectPayment(Long rejectPaymentId) {
+        try {
+            return getEntityManager().createNamedQuery("RejectedPayment.findByRejectPayment", Payment.class)
+                    .setParameter("rejectedPaymentId", rejectPaymentId)
+                    .getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
     }
 }

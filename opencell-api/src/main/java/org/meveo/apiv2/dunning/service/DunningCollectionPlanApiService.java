@@ -24,6 +24,7 @@ import java.util.TreeSet;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.ResourceBundle;
@@ -60,7 +61,6 @@ import org.meveo.model.dunning.DunningStopReason;
 import org.meveo.model.payments.ActionModeEnum;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.billing.impl.BillingAccountService;
@@ -177,6 +177,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public Optional<DunningCollectionPlan> switchCollectionPlan(Long collectionPlanId, SwitchDunningCollectionPlan switchDunningCollectionPlan) {
         globalSettingsVerifier.checkActivateDunning();
         DunningCollectionPlan oldCollectionPlan = dunningCollectionPlanService.findById(collectionPlanId);
@@ -200,6 +201,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public void massSwitchCollectionPlan(MassSwitchDunningCollectionPlan massSwitchDunningCollectionPlan) {
         globalSettingsVerifier.checkActivateDunning();
         DunningPolicy policy = dunningPolicyService.findById(massSwitchDunningCollectionPlan.getDunningPolicy().getId());
@@ -585,6 +587,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public Optional<DunningLevelInstance> updateDunningLevelInstance(UpdateLevelInstanceInput updateLevelInstanceInput, Long levelInstanceId) {
         globalSettingsVerifier.checkActivateDunning();
         try {
@@ -593,7 +596,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 throw new EntityDoesNotExistsException("No Dunning Level Instance found with id : " + levelInstanceId);
             }
 
-            DunningCollectionPlan collectionPlan = levelInstanceToUpdate.getCollectionPlan();
+            DunningCollectionPlan collectionPlan = dunningCollectionPlanService.findById(levelInstanceToUpdate.getCollectionPlan().getId());
 
             // 1- Can not update the dunning level instance if :
             // status is DONE

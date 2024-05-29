@@ -12808,10 +12808,10 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 	<changeSet id="INTRD-22954_20240521" author="ZBariki">
 		<insert tableName="meveo_script_instance">
 			<column name="id" valueSequenceNext="meveo_script_instance_seq" />
-			<column name="code" value="org.meveo.service.script.payment.ApplyChargeScript" />
+			<column name="code" value="org.meveo.service.script.ApplyChargeScript" />
 			<column name="script">
-				<![CDATA[package org.meveo.service.script.payment;
-				public class ApplyChargeScript extends Script {}]]>
+				<![CDATA[package org.meveo.service.script;
+				public class ApplyChargeScript extends ApplyChargePaymentScript {}]]>
 			</column>
 			<column name="created" valueDate="${db.current.time}" />
 			<column name="creator" value="applicationInitializer" />
@@ -12828,7 +12828,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
 			<column name="version" valueNumeric="0" />
 			<column name="code" value="chargeTemplate" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
 			<column name="description_i18n" value='{"FRA":"Charge à appliquer","ENG":"Charge to apply"}'/>
 			<column name="class_name" value="org.meveo.model.catalog.OneShotChargeTemplate" />
 			<column name="mandatory" valueNumeric="1" />
@@ -12840,7 +12840,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
 			<column name="version" valueNumeric="0" />
 			<column name="code" value="amountOverride" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
 			<column name="description_i18n" value='{"FRA":"Surcharge du montant","ENG":"Amount override"}'/>
 			<column name="class_name" value="java.math.BigDecimal" />
 			<column name="mandatory" valueNumeric="0" />
@@ -12849,7 +12849,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
 			<column name="version" valueNumeric="0" />
 			<column name="code" value="descriptionOverride" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
 			<column name="description_i18n" value='{"FRA":"Surcharge du libellé de la charge","ENG":"Charge label override"}'/>
 			<column name="mandatory" valueNumeric="0" />
 			<column name="class_name" value="java.lang.String" />
@@ -12858,31 +12858,33 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
 			<column name="version" valueNumeric="0" />
 			<column name="code" value="subscriptionSearchScope" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
 			<column name="description_i18n" value='{"FRA":"Périmètre de la recherche de souscription","ENG":"Subscription search scope"}'/>
 			<column name="mandatory" valueNumeric="0" />
 			<column name="class_name" value="java.lang.String" />
-			<column name="collection" valueNumeric="1" />
+			<column name="collection" valueNumeric="0" />
 			<column name="allowed_values" value="invoices|billing accounts|customer account" />
 			<column name="default_value" value="invoices" />
+			<column name="values_separator" value="\|" />
 		</insert>
 		<insert tableName="meveo_script_parameter">
 			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
 			<column name="version" valueNumeric="0" />
 			<column name="code" value="subscriptionSelection" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
 			<column name="description_i18n" value='{"FRA":"Selection de la souscription","ENG":"Subscription selection"}'/>
 			<column name="mandatory" valueNumeric="0" />
 			<column name="class_name" value="java.lang.String" />
-			<column name="collection" valueNumeric="1" />
+			<column name="collection" valueNumeric="0" />
 			<column name="allowed_values" value="oldest|newest" />
 			<column name="default_value" value="newest" />
+			<column name="values_separator" value="\|" />
 		</insert>
 		<insert tableName="meveo_script_parameter">
 			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
 			<column name="version" valueNumeric="0" />
 			<column name="code" value="subscriptionFilter" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
 			<column name="description_i18n" value='{"FRA":"Filtre code de souscription","ENG":"Subscription code filter"}'/>
 			<column name="mandatory" valueNumeric="0" />
 			<column name="class_name" value="java.lang.String" />
@@ -12891,19 +12893,20 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
 			<column name="version" valueNumeric="0" />
 			<column name="code" value="subscriptionOperator" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
 			<column name="description_i18n" value='{"FRA":"Opérateur du filtre de souscription (insensible à la casse)","ENG":"Subscription filter operator (case insensitive)"}'/>
 			<column name="mandatory" valueNumeric="0" />
 			<column name="class_name" value="java.lang.String" />
-			<column name="collection" valueNumeric="1" />
+			<column name="collection" valueNumeric="0" />
 			<column name="allowed_values" value="equals|begins with|contains|ends with" />
 			<column name="default_value" value="equals" />
+			<column name="values_separator" value="\|" />
 		</insert>
 		<insert tableName="meveo_script_parameter">
 			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
 			<column name="version" valueNumeric="0" />
 			<column name="code" value="generateRTs" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
 			<column name="description_i18n" value='{"FRA":"Générer l’élément valorisé (de manière à ce que la charge soit immédiatement facturable) ?","ENG":"Generate rated item (so the charge will be ready for invoicing)?"}'/>
 			<column name="mandatory" valueNumeric="0" />
 			<column name="class_name" value="java.lang.Boolean" />

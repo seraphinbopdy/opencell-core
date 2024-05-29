@@ -34,6 +34,10 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNREFUNDED;
+
 import java.util.Date;
 
 /**
@@ -56,12 +60,12 @@ public class UnitUpdateUnpaidInvoiceStatusJobBean {
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void execute(JobExecutionResultImpl result, Long unpaidInvoiceId) {
-        log.debug("update Invoice[id={}] status to unpaid", unpaidInvoiceId);
+        log.debug("update Invoice[id={}] status to unpaid or unrefunded", unpaidInvoiceId);
         try {
             Invoice invoice = invoiceService.findById(unpaidInvoiceId);
-            log.info("[Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
-                    invoice.getPaymentStatus() + " - newPaymentStatus : " + InvoicePaymentStatusEnum.UNPAID + "]");
-            invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), InvoicePaymentStatusEnum.UNPAID);
+            InvoicePaymentStatusEnum newPaymentStatus = (invoice.getInvoiceType().getCode().contains("ADJ")) ? UNREFUNDED : UNPAID;
+            log.info("[Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + invoice.getPaymentStatus() + " - newPaymentStatus : " + newPaymentStatus + "]");
+            invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), newPaymentStatus);
             invoice.setPaymentStatusDate(new Date());
             invoice = invoiceService.updateNoCheck(invoice);
             entityUpdatedEventProducer.fire(invoice);
@@ -69,7 +73,7 @@ public class UnitUpdateUnpaidInvoiceStatusJobBean {
             result.registerSucces();
 
         } catch (Exception e) {
-            log.error("Failed to update Invoice[id={}] status to unpaid", unpaidInvoiceId, e);
+            log.error("Failed to update Invoice[id={}] status to unpaid or unrefunded", unpaidInvoiceId, e);
             result.registerError(e.getMessage());
         }
     }

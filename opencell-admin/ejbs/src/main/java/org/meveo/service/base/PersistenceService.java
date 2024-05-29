@@ -33,6 +33,7 @@ import java.math.BigInteger;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -56,6 +57,7 @@ import javax.ejb.EJB;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.CacheRetrieveMode;
+import javax.persistence.Embeddable;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.Id;
@@ -844,12 +846,15 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
                 Map<String, Object> mapStringAndType = new HashMap();
                 mapStringAndType.put("fullQualifiedTypeName", att.getJavaType().toString());
                 mapStringAndType.put("shortTypeName", att.getJavaType().getSimpleName());
-                Boolean isEntity = BaseEntity.class.isAssignableFrom(att.getJavaType()) || ServiceTemplate.class.isAssignableFrom(att.getJavaType());
+                boolean isEntity = BaseEntity.class.isAssignableFrom(att.getJavaType()) || ServiceTemplate.class.isAssignableFrom(att.getJavaType());
+                boolean isEmbeddable =  att.getJavaType().isAnnotationPresent(Embeddable.class);
                 if(StringUtils.isNotBlank(filter) && (!isEntity || maxDepth == (currentDepth+1) ) && !att.getName().toLowerCase().contains(filter.toLowerCase())) {
                 	continue;
                 }
 				mapStringAndType.put("isEntity",  Boolean.toString(isEntity));
-				if(isEntity && !att.getJavaType().equals(parentEntity) && (maxDepth == 0 || currentDepth < maxDepth) && currentDepth <= MAX_DEPTH) {
+                mapStringAndType.put("isEnum",  Boolean.toString(att.getJavaType().isEnum()));
+                mapStringAndType.put("isEmbeddable", Boolean.toString(isEmbeddable));
+				if((isEntity || isEmbeddable) && !att.getJavaType().equals(parentEntity) && (maxDepth == 0 || currentDepth < maxDepth) && currentDepth <= MAX_DEPTH) {
 					PersistenceService<?> persistenceService = (PersistenceService<?>) EjbUtils.getServiceInterface(att.getJavaType().getSimpleName() + "Service");
 					if(persistenceService == null){
 						persistenceService = (PersistenceService) EjbUtils.getServiceInterface("BaseEntityService");
@@ -860,7 +865,9 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
 						continue;
 					}
 					mapStringAndType.put("entityDetails", relatedFields);
-				}
+				} else if (att.getJavaType().isEnum()) {
+                    mapStringAndType.put("enumValues", Arrays.asList(att.getJavaType().getEnumConstants()));
+                }
                 mapAttributeAndType.put(att.getName(), mapStringAndType);
             } else {
                 if (!resultsCFTmpl.isEmpty()) {

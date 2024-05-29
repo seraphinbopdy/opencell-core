@@ -54,6 +54,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7818,6 +7820,39 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			return (List<Invoice>) getEntityManager().createQuery("SELECT inv FROM Invoice inv WHERE inv.invoiceNumber = :invoiceNumber")
 					.setParameter("invoiceNumber", invoiceNumber).setMaxResults(1)
 					.getResultList();
+	}
+	
+	public void setInvoicingPeriod(BillingRun billingRun, Long invoiceId) {
+		Invoice invoice = findById(invoiceId);
+		if (invoice == null) {
+			throw new EntityDoesNotExistsException(Invoice.class, invoiceId);
+		}
+		if(billingRun.getBillingCycle() == null) {
+			invoice.setStartDate(invoice.getInvoiceDate());
+			invoice.setEndDate(invoice.getInvoiceDate());
+			update(invoice);
+			return;
+		}
+		Invoice previousInvoice = null;
+		try{
+			previousInvoice = (Invoice) getEntityManager().createNamedQuery("Invoice.findByBillingCycle").setParameter("billingCycleType", billingRun.getBillingCycle().getType()).getSingleResult();
+		}catch(NoResultException e) {
+			log.warn("no previous invoice found for billing cycle type {}, for billing run id : {}", billingRun.getBillingCycle().getType(), billingRun.getId());
+			return;
+		}
+		if(previousInvoice != null) {
+			invoice.setStartDate(previousInvoice.getEndDate().from(previousInvoice.getEndDate().toInstant().plus(1, ChronoUnit.DAYS)));
+			invoice.setEndDate(invoice.getInvoiceDate());
+			update(invoice);
+		}
+		Date startDate = invoice.getStartDate();
+		Date endDate = invoice.getEndDate();
+		if(startDate != null && endDate != null && startDate.after(endDate)) {
+			invoice.setStartDate(invoice.getInvoiceDate());
+			invoice.setEndDate(invoice.getInvoiceDate());
+			update(invoice);
+			return;
+		}
 	}
 
 }

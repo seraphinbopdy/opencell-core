@@ -6842,6 +6842,53 @@
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD-23293_20240524_build" author="TarikFA.">
+        <insert tableName="payment_term">
+            <column name="id" valueSequenceNext="payment_term_seq" />
+            <column name="code" value="Default" />
+            <column name="description" value="Payment conditions No early payment discount. Any amounts owned that are not paid will due shall bear interest, from the time the payment was due until the time paid, at a rate of 10% per annum compounded annually" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Tout incident de paiement est passible de pénalités de retard ainsi que de l'indemnité forfaitaire pour frais de recouvrement de 40 euros prévue par la loi n°2012-387 du 22 mars 2012 et le décret du 2 octobre 2012. Le montant des pénalités résulte de l'application aux sommes restant dues d'un taux égal au taux d'intérêt appliqué par la Banque centrale européenne à son opération de refinancement la plus récente majoré de 10 points de pourcentage","ENG":"Payment conditions No early payment discount. Any amounts owned that are not paid will due shall bear interest, from the time the payment was due until the time paid, at a rate of 10% per annum compounded annually"}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="version" valueNumeric="0" />
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-22810_20240514_build" author="TarikFA.">
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="PPL_CREATION" />
+            <column name="description" value="PPL_CREATION" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <column name="account_code_client_side" value="null" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '416000000')" />
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-23038_20240515_build" author="TarikFA." >
+        <insert tableName="ar_occ_template" >
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="PPL_INSTALLMENT" />
+            <column name="description" value="Payment plan Installment" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <column name="manual_creation_enabled" valueNumeric="0" />
+        </insert>
+    </changeSet>
+
 	<changeSet id="#INTRD-22516_20240503" author="aeljaouhari" />
 
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->

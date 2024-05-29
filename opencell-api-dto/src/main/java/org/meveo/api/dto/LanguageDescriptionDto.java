@@ -19,7 +19,9 @@
 package org.meveo.api.dto;
 
 import java.io.Serializable;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +31,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.meveo.commons.utils.StringUtils;
 
 /**
  * The Class LanguageDescriptionDto.
@@ -131,4 +134,35 @@ public class LanguageDescriptionDto implements Serializable {
 
         return translationInfos;
     }
+	
+	public static Map<String, String> convertMultiLanguageToMapOfValues(List<LanguageDescriptionDto> translationInfos, Map<String, String> currentValues, List<String> supportedLanguages) throws InvalidParameterException {
+		if (translationInfos == null || translationInfos.isEmpty()) {
+			return null;
+		}
+		
+		
+		Map<String, String> values = null;
+		if (currentValues == null) {
+			values = new HashMap<>();
+		} else {
+			values = currentValues;
+		}
+		
+		for (LanguageDescriptionDto translationInfo : translationInfos) {
+			if (!supportedLanguages.contains(translationInfo.getLanguageCode())) {
+				throw new InvalidParameterException("Language " + translationInfo.getLanguageCode() + " is not supported by the provider.");
+			}
+			if (StringUtils.isBlank(translationInfo.getDescription())) {
+				values.remove(translationInfo.getLanguageCode());
+			} else {
+				values.put(translationInfo.getLanguageCode(), translationInfo.getDescription());
+			}
+		}
+		
+		if (values.isEmpty()) {
+			return null;
+		} else {
+			return values;
+		}
+	}
 }

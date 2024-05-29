@@ -3,6 +3,7 @@ package org.meveo.api.dto;
 import static org.meveo.api.dto.LanguageDescriptionDto.convertMultiLanguageFromMapOfValues;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -46,13 +47,16 @@ public class ScriptParameterDto extends BaseEntityDto {
 	
 	private List<LanguageDescriptionDto> languageDescriptions;
 
+	@Schema(description = "Script parameter filters")
+	private Map<String, Object> filters;
+
 	public ScriptParameterDto() {
 	}
 	
 	 /**
      * Instantiates a new script parameter dto from scriptParameter entity
      */
-	public ScriptParameterDto (ScriptParameter scriptParameter) {
+	public ScriptParameterDto(ScriptParameter scriptParameter) {
         super();
         code = scriptParameter.getCode();
         className = scriptParameter.getClassName();
@@ -62,6 +66,7 @@ public class ScriptParameterDto extends BaseEntityDto {
         valuesSeparator = scriptParameter.getValuesSeparator();
         collection = scriptParameter.isCollection();
         languageDescriptions = convertMultiLanguageFromMapOfValues(scriptParameter.getDescriptionI18n());
+		filters = scriptParameter.getFilters();
     }
 	
 	public ScriptParameter mapToEntity() {
@@ -74,6 +79,7 @@ public class ScriptParameterDto extends BaseEntityDto {
 		scriptParameter.setValuesSeparator(StringUtils.isBlank(valuesSeparator)? "\\|" : valuesSeparator);
 		scriptParameter.setCollection(collection);
 		scriptParameter.setDescriptionI18n(languageDescriptions.stream().collect(Collectors.toMap(LanguageDescriptionDto::getLanguageCode, LanguageDescriptionDto::getDescription)));
+		scriptParameter.setFilters(this.filters);
 		return scriptParameter;
 	}
 
@@ -132,5 +138,12 @@ public class ScriptParameterDto extends BaseEntityDto {
 	public void setLanguageDescriptions(List<LanguageDescriptionDto> languageDescriptions) {
 		this.languageDescriptions = languageDescriptions;
 	}
-	
+
+	public Map<String, Object> getFilters() {
+		return filters;
+	}
+
+	public void setFilters(Map<String, Object> filters) {
+		this.filters = filters;
+	}
 }

@@ -124,8 +124,8 @@ public class OtherCreditAndChargeService extends
 		
 		if (customerAccount != null) {
 		    customerAccount.getAccountOperations().add(otherCreditAndCharge);
+			otherCreditAndCharge.setTransactionalCurrency(customerAccount.getTradingCurrency());
 		}
-		
 		create(otherCreditAndCharge);
 		if (customerAccount != null) {
 		    log.info(

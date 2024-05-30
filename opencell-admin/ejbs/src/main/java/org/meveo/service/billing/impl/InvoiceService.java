@@ -7827,32 +7827,30 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		if (invoice == null) {
 			throw new EntityDoesNotExistsException(Invoice.class, invoiceId);
 		}
-		if(billingRun.getBillingCycle() == null) {
+		if(billingRun == null || billingRun.getBillingCycle() == null) {
 			invoice.setStartDate(invoice.getInvoiceDate());
 			invoice.setEndDate(invoice.getInvoiceDate());
 			update(invoice);
 			return;
 		}
 		Invoice previousInvoice = null;
-		try{
-			previousInvoice = (Invoice) getEntityManager().createNamedQuery("Invoice.findByBillingCycle").setParameter("billingCycleType", billingRun.getBillingCycle().getType()).getSingleResult();
-		}catch(NoResultException e) {
-			log.warn("no previous invoice found for billing cycle type {}, for billing run id : {}", billingRun.getBillingCycle().getType(), billingRun.getId());
-			return;
+		List<Invoice> previousInvoices = getEntityManager().createNamedQuery("Invoice.findByBillingCycle")
+																.setParameter("currentInvoiceId", invoiceId).setParameter("billingCycleType", billingRun.getBillingCycle().getType()).setMaxResults(1).getResultList();
+		if(CollectionUtils.isNotEmpty(previousInvoices)) {
+			previousInvoice = previousInvoices.get(0); // get the second previous invoice because the first one is the current invoice
 		}
+		
 		if(previousInvoice != null) {
-			invoice.setStartDate(previousInvoice.getEndDate().from(previousInvoice.getEndDate().toInstant().plus(1, ChronoUnit.DAYS)));
+			invoice.setStartDate(previousInvoice.getInvoiceDate().from(previousInvoice.getInvoiceDate().toInstant().plus(1, ChronoUnit.DAYS)));
 			invoice.setEndDate(invoice.getInvoiceDate());
-			update(invoice);
 		}
 		Date startDate = invoice.getStartDate();
 		Date endDate = invoice.getEndDate();
 		if(startDate != null && endDate != null && startDate.after(endDate)) {
 			invoice.setStartDate(invoice.getInvoiceDate());
 			invoice.setEndDate(invoice.getInvoiceDate());
-			update(invoice);
-			return;
 		}
+		update(invoice);
 	}
 
 }

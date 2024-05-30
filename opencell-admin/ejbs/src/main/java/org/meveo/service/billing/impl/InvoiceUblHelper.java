@@ -810,6 +810,11 @@ public class InvoiceUblHelper {
 		if(seller.getContactInformation() != null) {
 			//AccountingSupplierParty/Party/Contact/Telephone
 			ContactType contactType = getContactInformation(seller.getContactInformation());
+			if(StringUtils.isNotBlank(seller.getDescription())){
+				oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
+				name.setValue(seller.getDescription());
+				contactType.setName(name);
+			}
 			partyType.setContact(contactType);
 		}
 		// AccountingSupplierParty/Party/Person

@@ -266,6 +266,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 				invoiceService.recalculateDates(invoiceId);
 				invoiceService.assignInvoiceNumber(invoiceId, invoicesToNumberInfo);
 				invoiceService.updateStatus(invoiceId, InvoiceStatusEnum.VALIDATED);
+				invoiceService.setInvoicingPeriod(billingRun, invoiceId);
 			};
 			iteratorBasedJobProcessing.processItems(jobExecutionResult, new SynchronizedIterator<>(invoiceIds), task,
 					null, null, nbRuns, waitingMillis, false, true);

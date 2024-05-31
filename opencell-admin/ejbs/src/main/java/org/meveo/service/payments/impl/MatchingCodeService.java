@@ -266,8 +266,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), InvoicePaymentStatusEnum.ABANDONED);
                     } else if (withRefund) {
                         log.info("matching - [Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
-                                invoice.getPaymentStatus() + " - newPaymentStatus : " + InvoicePaymentStatusEnum.REFUNDED + "]");
-                        invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), InvoicePaymentStatusEnum.REFUNDED);
+                                invoice.getPaymentStatus() + " - newPaymentStatus : " + ((fullMatch) ? InvoicePaymentStatusEnum.REFUNDED : InvoicePaymentStatusEnum.PREFUNDED) + "]");
+                        invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), ((fullMatch) ? InvoicePaymentStatusEnum.REFUNDED : InvoicePaymentStatusEnum.PREFUNDED));
                     } else if (isPplCreationCreditAo) {
                         log.info("matching - [Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
                                 invoice.getPaymentStatus() + " - newPaymentStatus : " + InvoicePaymentStatusEnum.PENDING_PLAN + "]");
@@ -414,8 +414,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), InvoicePaymentStatusEnum.ABANDONED);
                     } else if(withRefund) {
                         log.info("matching- [Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
-                                invoice.getPaymentStatus() + " - newPaymentStatus : " + InvoicePaymentStatusEnum.REFUNDED + "]");
-                        invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), InvoicePaymentStatusEnum.REFUNDED);
+                                invoice.getPaymentStatus() + " - newPaymentStatus : " + ((fullMatch) ? InvoicePaymentStatusEnum.REFUNDED : InvoicePaymentStatusEnum.PREFUNDED) + "]");
+                        invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), ((fullMatch) ? InvoicePaymentStatusEnum.REFUNDED : InvoicePaymentStatusEnum.PREFUNDED));
                     } else if(fullMatch) {
                         log.info("matching- [Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
                                 invoice.getPaymentStatus() + " - newPaymentStatus : " + InvoicePaymentStatusEnum.PAID + "]");

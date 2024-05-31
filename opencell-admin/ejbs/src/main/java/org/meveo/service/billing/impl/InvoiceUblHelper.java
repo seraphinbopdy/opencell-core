@@ -60,6 +60,8 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxableA
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Telephone;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionID;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IndustryClassificationCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrimaryAccountNumberID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.HolderName;
 import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNote;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.Invoice;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.ObjectFactory;
@@ -400,7 +402,8 @@ public class InvoiceUblHelper {
 			paymentMeansCode.setValue(paymentMethod.getPaymentMeans().getCode());
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
 		}
-		
+
+		// DirectDebit
 		if(Hibernate.unproxy(paymentMethod) instanceof DDPaymentMethod) {
 			paymentMeans.getPaymentMeansCode().setName("DirectDebit");
 			FinancialAccountType financialAccountType = objectFactoryCommonAggrement.createFinancialAccountType();
@@ -445,6 +448,31 @@ public class InvoiceUblHelper {
 			}
 
 			paymentMeans.setPayeeFinancialAccount(financialAccountType);
+		}
+
+		// CreditCard
+		if(Hibernate.unproxy(paymentMethod) instanceof CardPaymentMethod) {
+			paymentMeans.getPaymentMeansCode().setName("CreditCard");
+			CardPaymentMethod card = (CardPaymentMethod) Hibernate.unproxy(paymentMethod);
+
+			// PaymentMeans/CardAccount
+			CardAccount cardAccount = objectFactoryCommonAggrement.createCardAccount();
+
+			// PaymentMeans/CardAccount/PrimaryAccountNumberID
+			if (StringUtils.isNotBlank(card.getHiddenCardNumber())) {
+				PrimaryAccountNumberID primaryAccountNumberID = objectFactorycommonBasic.createPrimaryAccountNumberID();
+				primaryAccountNumberID.setValue(card.getHiddenCardNumber());
+				cardAccount.setPrimaryAccountNumberID(primaryAccountNumberID);
+			}
+
+			// PaymentMeans/CardAccount/HolderName
+			if (StringUtils.isNotBlank(card.getOwner())) {
+				HolderName holderName = objectFactorycommonBasic.createHolderName();
+				holderName.setValue(card.getOwner());
+				cardAccount.setHolderName(holderName);
+			}
+
+			paymentMeans.setCardAccount(cardAccount);
 		}
 
 		if(paymentMeans.getPaymentMeansCode() != null || paymentMeans.getPayeeFinancialAccount() != null){

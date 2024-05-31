@@ -586,6 +586,7 @@ public class CustomFieldValues implements Cloneable, Serializable {
 
         CustomFieldValue valueByPeriod = getCfValueByPeriod(cfCode, priority, period, true, true);
 
+        Integer oldPriority = valueByPeriod.getPriority();
         if (priority == null && valueByPeriod.isNewPeriod()) {
             valueByPeriod.setPriority(0);
         } else if (priority != null && priority.intValue() >= 0) {
@@ -609,6 +610,14 @@ public class CustomFieldValues implements Cloneable, Serializable {
                 // Mark dirty fields - value change
                 dirtyCfValues.add(cfCode);
             }
+            DatePeriod oldPeriod = valueByPeriod.getPeriod();
+            if (oldPriority != null && oldPriority == priority && oldPeriod != null && period != null && (!Objects.equals(oldPeriod.getFrom(), period.getFrom())
+                    || !Objects.equals(oldPeriod.getTo(), period.getTo()))) {
+                valueByPeriod.setPeriod(period);
+
+                // Mark dirty fields - value change
+                dirtyCfValues.add(cfCode);
+            }
         }
 
     }
@@ -621,16 +630,17 @@ public class CustomFieldValues implements Cloneable, Serializable {
                     valueFound = value;
 
                 } else if (value.getPeriod() != null && value.getPeriod().isCorrespondsToPeriod(period, strictMatch)) {
-                    if (priority != null && priority >= 0) {
-                        if (value.getPriority() == priority) {
-                            valueFound = value;
-                            break;
-                        }
+                    if (priority != null && priority >= 0 && value.getPriority() == priority) {
+                        valueFound = value;
+                        break;
                     } else {
                         if (valueFound == null || valueFound.getPriority() < value.getPriority()) {
                             valueFound = value;
                         }
                     }
+                } else if (priority != null && priority >= 0 && value.getPriority() == priority) {
+                    valueFound = value;
+                    break;
                 }
             }
         }

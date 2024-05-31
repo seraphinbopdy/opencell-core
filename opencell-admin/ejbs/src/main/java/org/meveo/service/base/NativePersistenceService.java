@@ -53,8 +53,10 @@ import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.model.customEntities.CustomEntityTemplate;
+import org.meveo.model.jaxb.account.UserAccount;
 import org.meveo.model.notification.Notification;
 import org.meveo.model.notification.NotificationEventTypeEnum;
+import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.report.query.ReportQuery;
 import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.model.shared.DateUtils;
@@ -74,6 +76,7 @@ import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -870,22 +873,6 @@ public class NativePersistenceService extends BaseService {
         if(config != null) {
             config.setFetchFields(rework);
         }
-
-        List<String> fetch = new ArrayList<>();
-        // add all fields that are not aggregation functions
-        fetch.addAll(fetchFields.stream()
-                                .filter(predicate.negate())
-                                .filter(s -> s.contains("."))
-                                .map(s -> s.substring(0, s.lastIndexOf(".")))
-                                .distinct()
-                                .collect(Collectors.toList()));
-        fetch.addAll(fetchFields.stream()
-                                .filter(predicate)
-                                .map(this::extractAggregatedField)
-                                .filter(s -> s.contains("."))
-                                .map(s -> s.substring(0, s.lastIndexOf(".")))
-                                .distinct()
-                                .collect(Collectors.toList()));
         
         String fieldsToRetrieve;
         if (fetchFields.isEmpty()) {
@@ -907,6 +894,14 @@ public class NativePersistenceService extends BaseService {
             listAggregationSeparator = "|";
         }
 
+        Class<?> entity = null;
+        try {
+            entity = Class.forName(tableName);
+        } catch (ClassNotFoundException e) {
+            throw new BusinessException(String.format("Unknown entity %s", tableName));
+        }
+
+        Class<?> finalEntity = entity;
         List<String> aggregationFields = fetchFields.stream()
                                                     .filter(predicate)
                                                     .map(s -> {
@@ -914,8 +909,20 @@ public class NativePersistenceService extends BaseService {
                                                         if(s.toLowerCase().startsWith("count(")) {
                                                             // the dummy field is a workaround to be able to calculate inner joins using queryBuilder as the count need only the collection
                                                             fieldName+= ".dummy"; 
+                                                        } else if(!fieldName.contains(".")) {
+                                                            throw new BusinessException("Aggregation functions can be used only for values in nested lists");
                                                         }
                                                         if (fieldName != null) {
+                                                            // as fieldName contains nested fields, get parent field
+                                                            String parentField = removeLastSegment(fieldName);
+                                                            Field field1 = ReflectionUtils.getField(finalEntity, parentField);
+                                                            if(field1 != null && !List.class.isAssignableFrom(field1.getType())) {
+                                                                String functionName = s.split("\\(")[0];
+                                                                throw new BusinessException(String.format("Aggregation function “%s” cannot be applied to “%s” of type “%s”",
+                                                                        functionName, parentField, field1.getType().getSimpleName()));
+                                                            }
+
+
                                                             fieldName = queryBuilder.createExplicitInnerJoinsForAggregation(new String(fieldName));
                                                             String sToReplace = extractAggregatedField(s);
                                                             if(s.toLowerCase().startsWith("list(")) {
@@ -960,6 +967,14 @@ public class NativePersistenceService extends BaseService {
         // log.trace("Query params are {}", queryBuilder.getParams());
         return queryBuilder;
 
+    }
+
+    public static String removeLastSegment(String input) {
+        String[] segments = input.split("\\.");
+        if (segments.length > 1) {
+            return String.join(".", Arrays.copyOf(segments, segments.length - 1));
+        }
+        return "";
     }
 
     public String extractAggregatedField(String input) {

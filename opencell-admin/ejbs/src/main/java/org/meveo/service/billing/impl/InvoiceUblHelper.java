@@ -64,6 +64,7 @@ import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNote;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.Invoice;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.ObjectFactory;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.storage.StorageFactory;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -74,7 +75,6 @@ import org.meveo.model.RegistrationNumber;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.billing.BillingAccount;
-import org.meveo.model.billing.ElectronicInvoiceSetting;
 import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.InvoiceTypeEnum;
@@ -86,10 +86,7 @@ import org.meveo.model.billing.UntdidAllowanceCode;
 import org.meveo.model.billing.UntdidTaxationCategory;
 import org.meveo.model.billing.VatDateCodeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
-import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.DDPaymentMethod;
-import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.payments.PaymentTerm;
+import org.meveo.model.payments.*;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
@@ -402,36 +399,60 @@ public class InvoiceUblHelper {
 			paymentMeansCode.setListName("Payment Means");
 			paymentMeansCode.setValue(paymentMethod.getPaymentMeans().getCode());
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
-			
 		}
 		
-		if(paymentMethod instanceof DDPaymentMethod) {
+		if(Hibernate.unproxy(paymentMethod) instanceof DDPaymentMethod) {
+			paymentMeans.getPaymentMeansCode().setName("DirectDebit");
 			FinancialAccountType financialAccountType = objectFactoryCommonAggrement.createFinancialAccountType();
-			DDPaymentMethod bank = (DDPaymentMethod)  paymentMethod;
-			ID id = null;
+			DDPaymentMethod bank = (DDPaymentMethod) Hibernate.unproxy(paymentMethod);
+
 			// PaymentMeans/PayeeFinancialAccount/ID
-			if(StringUtils.isNotBlank(bank.getBankCoordinates().getIban())){
-				id = objectFactorycommonBasic.createID();
-				id.setValue(bank.getBankCoordinates().getIban());
-				financialAccountType.setID(id);
+			if(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())){
+				ID payeeFinancialAccountId = objectFactorycommonBasic.createID();
+				payeeFinancialAccountId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
+				financialAccountType.setID(payeeFinancialAccountId);
 			}
+
+			// PaymentMeans/PayeeFinancialAccount/Name
+			if(StringUtils.isNotBlank(bank.getBankCoordinates().getAccountOwner())){
+				oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
+				name.setValue(bank.getBankCoordinates().getAccountOwner());
+				financialAccountType.setName(name);
+			}
+
 			// PaymentMeans/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID
 			if(StringUtils.isNotBlank(bank.getBankCoordinates().getBankCode())){
-				id = objectFactorycommonBasic.createID();
-				id.setValue(bank.getBankCoordinates().getBankCode());
-				FinancialInstitution financialInstitution = objectFactoryCommonAggrement.createFinancialInstitution();
-				financialInstitution.setID(id);
 				BranchType branchType = objectFactoryCommonAggrement.createBranchType();
+				FinancialInstitution financialInstitution = objectFactoryCommonAggrement.createFinancialInstitution();
+				ID financialInstitutionId = objectFactorycommonBasic.createID();
+
+				financialInstitutionId.setValue(bank.getBankCoordinates().getBankCode());
+				financialInstitution.setID(financialInstitutionId);
 				branchType.setFinancialInstitution(financialInstitution);
 				financialAccountType.setFinancialInstitutionBranch(branchType);
 			}
+
+			// PaymentMeans/PayeeFinancialAccount/FinancialInstitutionBranch/ID
+			if(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())){
+				ID financialInstitutionBranchId = objectFactorycommonBasic.createID();
+				financialInstitutionBranchId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
+				if (financialAccountType.getFinancialInstitutionBranch() == null) {
+					BranchType branchType = objectFactoryCommonAggrement.createBranchType();
+					financialAccountType.setFinancialInstitutionBranch(branchType);
+				}
+
+				financialAccountType.getFinancialInstitutionBranch().setID(financialInstitutionBranchId);
+			}
+
 			paymentMeans.setPayeeFinancialAccount(financialAccountType);
 		}
+
 		if(paymentMeans.getPaymentMeansCode() != null || paymentMeans.getPayeeFinancialAccount() != null){
-			if(creditNote == null)
+			if(creditNote == null) {
 				target.getPaymentMeans().add(paymentMeans);
-			else
+			} else {
 				creditNote.getPaymentMeans().add(paymentMeans);
+			}
 		}
 	}
 	private void setInvoiceLine(List<InvoiceLine> invoiceLines, Invoice target, String invoiceLanguageCode){

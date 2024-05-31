@@ -258,7 +258,7 @@ public class GenericApiLoadService {
                                                    .map(String::trim)
                                                    .collect(Collectors.toList()));
         }
-
+        
         return (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, null)
                                                                                .find(nativePersistenceService.getEntityManager())
                                                                                .stream()

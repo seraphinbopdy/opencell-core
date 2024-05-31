@@ -364,7 +364,8 @@ public class InvoiceUblHelper {
 		}
 
 		// Invoice/Delivery/DeliveryLocation/Address
-		if (source.getBillingAccount() != null && source.getBillingAccount().getUsersAccounts() != null && source.getBillingAccount().getUsersAccounts().size() == 1) {
+		if (source.getBillingAccount() != null && source.getBillingAccount().getUsersAccounts() != null && source.getBillingAccount().getUsersAccounts().size() == 1 &&
+			 source.getBillingAccount().getUsersAccounts().get(0).getAddress() != null) {
 			target.getDeliveries().add(getDeliveryType(source));
 		}
 		
@@ -874,11 +875,7 @@ public class InvoiceUblHelper {
 		if(seller.getLegalEntityType() != null) {
 			// AccountingSupplierParty/Party/PartyLegalEntity/CompanyLegalForm
 			CompanyLegalForm companyLegalForm = objectFactorycommonBasic.createCompanyLegalForm();
-			String value = seller.getLegalEntityType().getDescription();
-			if(seller.getLegalEntityType().getDescriptionI18n().get(invoiceLanguageCode) != null){
-				value = seller.getLegalEntityType().getDescriptionI18n().get(invoiceLanguageCode);
-			}
-			companyLegalForm.setValue(value);
+			companyLegalForm.setValue(seller.getLegalEntityType().getCode());
 			partyLegalEntity.setCompanyLegalForm(companyLegalForm);
 		}
 		partyType.getPartyLegalEntities().add(partyLegalEntity);
@@ -1308,28 +1305,30 @@ public class InvoiceUblHelper {
 		StreetName streetName = objectFactorycommonBasic.createStreetName();
 		streetName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getAddress1());
 		addressType.setStreetName(streetName);
-
+		
 		AdditionalStreetName additionalStreetName = objectFactorycommonBasic.createAdditionalStreetName();
 		additionalStreetName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getAddress2());
 		addressType.setAdditionalStreetName(additionalStreetName);
-
+		
 		CityName cityName = objectFactorycommonBasic.createCityName();
 		cityName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCity());
 		addressType.setCityName(cityName);
-
+		
 		PostalZone postalZone = objectFactorycommonBasic.createPostalZone();
 		postalZone.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getZipCode());
 		addressType.setPostalZone(postalZone);
-
+		
 		CountrySubentity countrySubentity = objectFactorycommonBasic.createCountrySubentity();
 		countrySubentity.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getState());
 		addressType.setCountrySubentity(countrySubentity);
-
+		
 		CountryType countryType = objectFactoryCommonAggrement.createCountryType();
 		IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
 		identificationCode.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry().getCountryCode());
 		countryType.setIdentificationCode(identificationCode);
 		addressType.setCountry(countryType);
+		
+
 
 		LocationType locationType = objectFactoryCommonAggrement.createLocationType();
 		locationType.setAddress(addressType);

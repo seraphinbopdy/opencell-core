@@ -391,9 +391,16 @@ public class InvoiceUblHelper {
 		monetaryTotalType.setPayableAmount(payableAmount);
 		target.setLegalMonetaryTotal(monetaryTotalType);
 	}
-	
+
+	/**
+	 * Set the payment means for the invoice
+	 * @param paymentMethod the payment method
+	 * @param target the invoice
+	 * @param creditNote The credit note
+	 */
 	private void setPaymentMeans(PaymentMethod paymentMethod, Invoice target, CreditNote creditNote){
 		PaymentMeans paymentMeans = objectFactoryCommonAggrement.createPaymentMeans();
+
 		if(paymentMethod != null && paymentMethod.getPaymentMeans() != null) {
 			PaymentMeansCode paymentMeansCode = objectFactorycommonBasic.createPaymentMeansCode();
 			paymentMeansCode.setListID("UN/ECE 4461");
@@ -406,74 +413,24 @@ public class InvoiceUblHelper {
 
 		// DirectDebit
 		if(Hibernate.unproxy(paymentMethod) instanceof DDPaymentMethod) {
-			paymentMeans.getPaymentMeansCode().setName("DirectDebit");
-			FinancialAccountType financialAccountType = objectFactoryCommonAggrement.createFinancialAccountType();
 			DDPaymentMethod bank = (DDPaymentMethod) Hibernate.unproxy(paymentMethod);
 
-			// PaymentMeans/PayeeFinancialAccount/ID
-			if(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())){
-				ID payeeFinancialAccountId = objectFactorycommonBasic.createID();
-				payeeFinancialAccountId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
-				financialAccountType.setID(payeeFinancialAccountId);
+			if (paymentMeans.getPaymentMeansCode() == null) {
+				PaymentMeansCode paymentMeansCode = objectFactorycommonBasic.createPaymentMeansCode();
+				paymentMeansCode.setListID("UN/ECE 4461");
+				paymentMeans.setPaymentMeansCode(paymentMeansCode);
 			}
 
-			// PaymentMeans/PayeeFinancialAccount/Name
-			if(StringUtils.isNotBlank(bank.getBankCoordinates().getAccountOwner())){
-				oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
-				name.setValue(bank.getBankCoordinates().getAccountOwner());
-				financialAccountType.setName(name);
+			if (!StringUtils.isBlank(bank.getMandateIdentification()) || !StringUtils.isBlank(bank.getTokenId()) ) {
+				setPaymentMeansForSEPA(bank, paymentMeans);
+			} else {
+				setPaymentMeansForDirectDebit(bank, paymentMeans);
 			}
-
-			// PaymentMeans/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID
-			if(StringUtils.isNotBlank(bank.getBankCoordinates().getBankCode())){
-				BranchType branchType = objectFactoryCommonAggrement.createBranchType();
-				FinancialInstitution financialInstitution = objectFactoryCommonAggrement.createFinancialInstitution();
-				ID financialInstitutionId = objectFactorycommonBasic.createID();
-
-				financialInstitutionId.setValue(bank.getBankCoordinates().getBankCode());
-				financialInstitution.setID(financialInstitutionId);
-				branchType.setFinancialInstitution(financialInstitution);
-				financialAccountType.setFinancialInstitutionBranch(branchType);
-			}
-
-			// PaymentMeans/PayeeFinancialAccount/FinancialInstitutionBranch/ID
-			if(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())){
-				ID financialInstitutionBranchId = objectFactorycommonBasic.createID();
-				financialInstitutionBranchId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
-				if (financialAccountType.getFinancialInstitutionBranch() == null) {
-					BranchType branchType = objectFactoryCommonAggrement.createBranchType();
-					financialAccountType.setFinancialInstitutionBranch(branchType);
-				}
-
-				financialAccountType.getFinancialInstitutionBranch().setID(financialInstitutionBranchId);
-			}
-
-			paymentMeans.setPayeeFinancialAccount(financialAccountType);
 		}
 
 		// CreditCard
 		if(Hibernate.unproxy(paymentMethod) instanceof CardPaymentMethod) {
-			paymentMeans.getPaymentMeansCode().setName("CreditCard");
-			CardPaymentMethod card = (CardPaymentMethod) Hibernate.unproxy(paymentMethod);
-
-			// PaymentMeans/CardAccount
-			CardAccount cardAccount = objectFactoryCommonAggrement.createCardAccount();
-
-			// PaymentMeans/CardAccount/PrimaryAccountNumberID
-			if (StringUtils.isNotBlank(card.getHiddenCardNumber())) {
-				PrimaryAccountNumberID primaryAccountNumberID = objectFactorycommonBasic.createPrimaryAccountNumberID();
-				primaryAccountNumberID.setValue(card.getHiddenCardNumber());
-				cardAccount.setPrimaryAccountNumberID(primaryAccountNumberID);
-			}
-
-			// PaymentMeans/CardAccount/HolderName
-			if (StringUtils.isNotBlank(card.getOwner())) {
-				HolderName holderName = objectFactorycommonBasic.createHolderName();
-				holderName.setValue(card.getOwner());
-				cardAccount.setHolderName(holderName);
-			}
-
-			paymentMeans.setCardAccount(cardAccount);
+			setPaymentMeansForCreditCard(paymentMethod, paymentMeans);
 		}
 
 		if(paymentMeans.getPaymentMeansCode() != null || paymentMeans.getPayeeFinancialAccount() != null){
@@ -484,6 +441,128 @@ public class InvoiceUblHelper {
 			}
 		}
 	}
+
+	/**
+	 * Set the payment means for credit card payment method
+	 * @param paymentMethod the payment method
+	 * @param paymentMeans the payment means
+	 */
+	private static void setPaymentMeansForCreditCard(PaymentMethod paymentMethod, PaymentMeans paymentMeans) {
+		CardPaymentMethod card = (CardPaymentMethod) Hibernate.unproxy(paymentMethod);
+
+		if (paymentMeans.getPaymentMeansCode() == null) {
+			PaymentMeansCode paymentMeansCode = objectFactorycommonBasic.createPaymentMeansCode();
+			paymentMeansCode.setListID("UN/ECE 4461");
+			paymentMeans.getPaymentMeansCode().setName("CreditCard");
+			paymentMeans.setPaymentMeansCode(paymentMeansCode);
+		}
+
+		// PaymentMeans/CardAccount
+		CardAccount cardAccount = objectFactoryCommonAggrement.createCardAccount();
+
+		// PaymentMeans/CardAccount/PrimaryAccountNumberID
+		if (StringUtils.isNotBlank(card.getHiddenCardNumber())) {
+			PrimaryAccountNumberID primaryAccountNumberID = objectFactorycommonBasic.createPrimaryAccountNumberID();
+			primaryAccountNumberID.setValue(card.getHiddenCardNumber());
+			cardAccount.setPrimaryAccountNumberID(primaryAccountNumberID);
+		}
+
+		// PaymentMeans/CardAccount/HolderName
+		if (StringUtils.isNotBlank(card.getOwner())) {
+			HolderName holderName = objectFactorycommonBasic.createHolderName();
+			holderName.setValue(card.getOwner());
+			cardAccount.setHolderName(holderName);
+		}
+
+		paymentMeans.setCardAccount(cardAccount);
+	}
+
+	/**
+	 * Set the payment means for direct debit payment method
+	 * @param bank the bank
+	 * @param paymentMeans the payment means
+	 */
+	private static void setPaymentMeansForDirectDebit(DDPaymentMethod bank, PaymentMeans paymentMeans) {
+		paymentMeans.getPaymentMeansCode().setName("DirectDebit");
+		paymentMeans.getPaymentMeansCode().setValue("49");
+		FinancialAccountType financialAccountType = objectFactoryCommonAggrement.createFinancialAccountType();
+
+		// PaymentMeans/PayeeFinancialAccount/ID
+		if(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())){
+			ID payeeFinancialAccountId = objectFactorycommonBasic.createID();
+			payeeFinancialAccountId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
+			financialAccountType.setID(payeeFinancialAccountId);
+		}
+
+		// PaymentMeans/PayeeFinancialAccount/Name
+		if(StringUtils.isNotBlank(bank.getBankCoordinates().getAccountOwner())){
+			oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
+			name.setValue(bank.getBankCoordinates().getAccountOwner());
+			financialAccountType.setName(name);
+		}
+
+		// PaymentMeans/PayeeFinancialAccount/FinancialInstitutionBranch/FinancialInstitution/ID
+		if(StringUtils.isNotBlank(bank.getBankCoordinates().getBankCode())){
+			BranchType branchType = objectFactoryCommonAggrement.createBranchType();
+			FinancialInstitution financialInstitution = objectFactoryCommonAggrement.createFinancialInstitution();
+			ID financialInstitutionId = objectFactorycommonBasic.createID();
+
+			financialInstitutionId.setValue(bank.getBankCoordinates().getBankCode());
+			financialInstitution.setID(financialInstitutionId);
+			branchType.setFinancialInstitution(financialInstitution);
+			financialAccountType.setFinancialInstitutionBranch(branchType);
+		}
+
+		// PaymentMeans/PayeeFinancialAccount/FinancialInstitutionBranch/ID
+		if(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())){
+			ID financialInstitutionBranchId = objectFactorycommonBasic.createID();
+			financialInstitutionBranchId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
+			if (financialAccountType.getFinancialInstitutionBranch() == null) {
+				BranchType branchType = objectFactoryCommonAggrement.createBranchType();
+				financialAccountType.setFinancialInstitutionBranch(branchType);
+			}
+
+			financialAccountType.getFinancialInstitutionBranch().setID(financialInstitutionBranchId);
+		}
+
+		paymentMeans.setPayeeFinancialAccount(financialAccountType);
+	}
+
+	/**
+	 * Set the payment means for SEPA payment method
+	 * @param bank the bank
+	 * @param paymentMeans the payment means
+	 */
+	private static void setPaymentMeansForSEPA(DDPaymentMethod bank, PaymentMeans paymentMeans) {
+		paymentMeans.getPaymentMeansCode().setName("SEPA");
+		paymentMeans.getPaymentMeansCode().setValue("59");
+
+		// PaymentMeans/PaymentMandate
+		if (StringUtils.isNotBlank(bank.getMandateIdentification())) {
+			PaymentMandate paymentMandate = objectFactoryCommonAggrement.createPaymentMandate();
+			ID mandateID = objectFactorycommonBasic.createID();
+			mandateID.setValue(bank.getMandateIdentification());
+			paymentMandate.setID(mandateID);
+			paymentMeans.setPaymentMandate(paymentMandate);
+		}
+
+		if (StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())) {
+			// PaymentMeans/PartyIdentification
+			PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
+			ID partyIdentificationId = objectFactorycommonBasic.createID();
+			partyIdentificationId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
+			partyIdentification.setID(partyIdentificationId);
+			paymentMeans.setPartyIdentification(partyIdentification);
+
+			// PaymentMeans/PayerFinancialAccount
+			FinancialAccountType payerFinancialAccount = objectFactoryCommonAggrement.createFinancialAccountType();
+			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
+			payerFinancialAccountId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
+			payerFinancialAccount.setID(payerFinancialAccountId);
+			paymentMeans.setPayerFinancialAccount(payerFinancialAccount);
+		}
+	}
+
 	private void setInvoiceLine(List<InvoiceLine> invoiceLines, Invoice target, String invoiceLanguageCode){
 		invoiceLines.forEach(invoiceLine -> {
 			// InvoiceLine/ Item/ ClassifiedTaxCategory/ Percent

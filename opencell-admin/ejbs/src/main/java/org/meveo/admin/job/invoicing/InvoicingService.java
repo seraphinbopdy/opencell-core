@@ -201,12 +201,15 @@ public class InvoicingService extends PersistenceService<Invoice> {
         if(!isFullAutomatic) {
             invoices.stream().forEach(invoice->invoice.setTemporaryInvoiceNumber(serviceSingleton.getTempInvoiceNumber(billingRun.getId())));
         } else {
-        	invoices.stream().forEach(invoice->serviceSingleton.assignInvoiceNumberVirtual(invoice));
+        	invoices.stream().forEach(invoice-> {
+				serviceSingleton.assignInvoiceNumberVirtual(invoice);
+	        });
         	invoiceService.incrementBAInvoiceDate(billingRun, invoices.get(0).getBillingAccount());
         }
 		invoices.stream().forEach(invoice -> {
 			invoiceService.create(invoice);
 			invoiceService.postCreate(invoice);
+			invoiceService.setInvoicingPeriod(billingRun, invoice.getId());
 		});
     }
     

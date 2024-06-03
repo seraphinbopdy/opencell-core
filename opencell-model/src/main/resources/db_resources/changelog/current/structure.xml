@@ -13236,4 +13236,30 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
 
+    <changeSet id="INTRD-22955_20240521" author="ZBariki">
+        <update tableName="meveo_script_instance">
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+                public class ApplyChargeScript extends ApplyChargePaymentScript {}]]>
+            </column>
+            <column name="code" value="org.meveo.service.script.ApplyChargeScript" />
+            <where>code = 'org.meveo.service.script.payment.ApplyChargeScript'</where>
+        </update>
+
+        <update tableName="meveo_script_parameter">
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <where>code = 'subscriptionSelection'</where>
+        </update>
+        <update tableName="meveo_script_parameter">
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <where>code = 'subscriptionSearchScope'</where>
+        </update>
+        <update tableName="meveo_script_parameter">
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <where>code = 'subscriptionOperator'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

@@ -407,8 +407,12 @@ public class PricePlanMatrixLineService extends PersistenceService<PricePlanMatr
 	private String appendAttributesToQuery(List<Map<String, Object>> attributesSearch) {
 		return attributesSearch.stream()
 				.map(stringObjectMap ->
-						 resolveType((String) stringObjectMap.get("type"), stringObjectMap.get("value"), (String) stringObjectMap.getOrDefault("operator", "=")))
-				.collect(Collectors.joining(" OR "));
+                                String.format(
+                                        "ppml in (SELECT pv.pricePlanMatrixLine FROM PricePlanMatrixColumn pc INNER JOIN pc.pricePlanMatrixValues pv WHERE pc.code='%s' AND %s)",
+                                        stringObjectMap.get("column"),
+                                        resolveType((String) stringObjectMap.get("type"), stringObjectMap.get("value"), (String) stringObjectMap.getOrDefault("operator", "=")))
+						 )
+				.collect(Collectors.joining(" AND "));
 	}
 
 
@@ -417,36 +421,36 @@ public class PricePlanMatrixLineService extends PersistenceService<PricePlanMatr
         String rangeType = "";
 	    switch(type.toLowerCase()){
 		    case "string":
-			    return "(LOWER(ppmv.stringValue) " + formattedOperation(operator, value.toString().toLowerCase()) + ")";
+			    return "(LOWER(pv.stringValue) " + formattedOperation(operator, value.toString().toLowerCase()) + ")";
 		    case "long":
-			    return "(ppmv.longValue " + formattedOperation(operator, value) + ")";
+			    return "(pv.longValue " + formattedOperation(operator, value) + ")";
 		    case "double":
 			    if("=".equals(operator)){
-				    rangeType = "(ppmc.isRange = true and ppmv.fromDoubleValue <=" + Double.valueOf(value.toString())+ "  and ppmv.toDoubleValue >="+ Double.valueOf(value.toString()) + ")";
+				    rangeType = "(pc.isRange = true and pv.fromDoubleValue <=" + Double.valueOf(value.toString())+ "  and pv.toDoubleValue >="+ Double.valueOf(value.toString()) + ")";
 				    return rangeType;
 			    }else if("!=".equals(operator)){
-				    rangeType = "(ppmc.isRange = true and ppmv.toDoubleValue <" + Double.valueOf(value.toString())+ "  and ppmv.fromDoubleValue >"+ Double.valueOf(value.toString()) + ")";
+				    rangeType = "(pc.isRange = true and pv.toDoubleValue <" + Double.valueOf(value.toString())+ "  and pv.fromDoubleValue >"+ Double.valueOf(value.toString()) + ")";
 				    return rangeType;
 			    }
 			    if(operator.contentEquals("BETWEEN")){
-				    return "(ppmv.doubleValue " + formattedOperation(operator, value.toString())+ " )";
+				    return "(pv.doubleValue " + formattedOperation(operator, value.toString())+ " )";
 			    }
-			    return "(ppmv.doubleValue " + formattedOperation(operator, Double.valueOf(value.toString()))+ " )";
+			    return "(pv.doubleValue " + formattedOperation(operator, Double.valueOf(value.toString()))+ " )";
 		    case "boolean":
-			    return "(ppmv.booleanValue " + formattedOperation(operator, Boolean.valueOf(value.toString()))+ " )";
+			    return "(pv.booleanValue " + formattedOperation(operator, Boolean.valueOf(value.toString()))+ " )";
 		    case "date":
 			    if("=".equals(operator)){
-				    rangeType = "(ppmc.isRange = true and ppmv.fromDateValue <='" + new java.sql.Date(parseDate(value).getTime())+ "'  and ppmv.toDateValue >='"+ new java.sql.Date(parseDate(value).getTime())+"'";
-				    rangeType +=  " OR (ppmc.isRange = false and (ppmv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ " OR ppmv.dateValue IS NULL)))";
+				    rangeType = "(pc.isRange = true and pv.fromDateValue <='" + new java.sql.Date(parseDate(value).getTime())+ "'  and pv.toDateValue >='"+ new java.sql.Date(parseDate(value).getTime())+"'";
+				    rangeType +=  " OR (pc.isRange = false and (pv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ " OR pv.dateValue IS NULL)))";
 				    return rangeType;
 			    }else if("!=".equals(operator)){
-				    rangeType = "(ppmc.isRange = true and ppmv.toDateValue <'" +  new java.sql.Date(parseDate(value).getTime())+ "'  or ppmv.fromDateValue >'"+ new java.sql.Date(parseDate(value).getTime()) + "'";
-				    rangeType +=  " OR (ppmc.isRange = false and (ppmv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ " OR ppmv.dateValue IS NULL)))";
+				    rangeType = "(pc.isRange = true and pv.toDateValue <'" +  new java.sql.Date(parseDate(value).getTime())+ "'  or pv.fromDateValue >'"+ new java.sql.Date(parseDate(value).getTime()) + "'";
+				    rangeType +=  " OR (pc.isRange = false and (pv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ " OR pv.dateValue IS NULL)))";
 				    return rangeType;
 			    }
-			    return rangeType + "(ppmc.isRange = false and (ppmv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ "))";
+			    return rangeType + "(ppmc.isRange = false and (pv.dateValue " + formattedOperation(operator, new java.sql.Date(parseDate(value).getTime()))+ "))";
 		    default:
-			    return "stringValue = ''";
+			    return "pv.stringValue = ''";
 	    }
     }
 

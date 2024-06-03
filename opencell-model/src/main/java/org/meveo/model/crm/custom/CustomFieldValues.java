@@ -584,8 +584,9 @@ public class CustomFieldValues implements Cloneable, Serializable {
             valuesByCode = new HashMap<>();
         }
 
-        CustomFieldValue valueByPeriod = getCfValueByPeriod(cfCode, period, true, true);
+        CustomFieldValue valueByPeriod = getCfValueByPeriod(cfCode, priority, period, true, true);
 
+        Integer oldPriority = valueByPeriod.getPriority();
         if (priority == null && valueByPeriod.isNewPeriod()) {
             valueByPeriod.setPriority(0);
         } else if (priority != null && priority.intValue() >= 0) {
@@ -609,11 +610,19 @@ public class CustomFieldValues implements Cloneable, Serializable {
                 // Mark dirty fields - value change
                 dirtyCfValues.add(cfCode);
             }
+            DatePeriod oldPeriod = valueByPeriod.getPeriod();
+            if (oldPriority != null && oldPriority == priority && oldPeriod != null && period != null && (!Objects.equals(oldPeriod.getFrom(), period.getFrom())
+                    || !Objects.equals(oldPeriod.getTo(), period.getTo()))) {
+                valueByPeriod.setPeriod(period);
+
+                // Mark dirty fields - value change
+                dirtyCfValues.add(cfCode);
+            }
         }
 
     }
 
-    private CustomFieldValue getCfValueByPeriod(String cfCode, DatePeriod period, boolean strictMatch, Boolean createIfNotFound) {
+    private CustomFieldValue getCfValueByPeriod(String cfCode, Integer priority, DatePeriod period, boolean strictMatch, Boolean createIfNotFound) {
         CustomFieldValue valueFound = null;
         if (valuesByCode != null && valuesByCode.containsKey(cfCode)) {
             for (CustomFieldValue value : valuesByCode.get(cfCode)) {
@@ -621,9 +630,17 @@ public class CustomFieldValues implements Cloneable, Serializable {
                     valueFound = value;
 
                 } else if (value.getPeriod() != null && value.getPeriod().isCorrespondsToPeriod(period, strictMatch)) {
-                    if (valueFound == null || valueFound.getPriority() < value.getPriority()) {
+                    if (priority != null && priority >= 0 && value.getPriority() == priority) {
                         valueFound = value;
+                        break;
+                    } else {
+                        if (valueFound == null || valueFound.getPriority() < value.getPriority()) {
+                            valueFound = value;
+                        }
                     }
+                } else if (priority != null && priority >= 0 && value.getPriority() == priority) {
+                    valueFound = value;
+                    break;
                 }
             }
         }
@@ -636,6 +653,10 @@ public class CustomFieldValues implements Cloneable, Serializable {
             valuesByCode.get(cfCode).add(valueFound);
         }
         return valueFound;
+    }
+
+    private CustomFieldValue getCfValueByPeriod(String cfCode, DatePeriod period, boolean strictMatch, Boolean createIfNotFound) {
+        return getCfValueByPeriod(cfCode, null, period, strictMatch, createIfNotFound);
     }
 
     /**

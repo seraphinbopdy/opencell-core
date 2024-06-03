@@ -472,7 +472,9 @@ public class ServiceSingleton {
     	invoice.setStatus(InvoiceStatusEnum.VALIDATED);
     	invoice.setRejectedByRule(null);
     	invoice.setRejectReason(null);
-    	return assignInvoiceNumber(invoice, true);
+		invoice = assignInvoiceNumber(invoice, true);
+	    invoiceService.setInvoicingPeriod(invoice.getBillingRun(), invoiceId);
+    	return invoice;
     }
 
     private BigDecimal getExchangeRate(Invoice invoice) {

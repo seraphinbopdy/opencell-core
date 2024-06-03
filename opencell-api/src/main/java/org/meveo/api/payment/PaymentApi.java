@@ -1354,6 +1354,7 @@ public class PaymentApi extends BaseApi {
 		rejectedPayment.setRejectedDescription(rejectionPayment.getComment());
 		rejectedPayment.setRejectedCode(rejectionPayment.getRejectionCode());
 		rejectedPayment.setListAaccountOperationSupposedPaid(paymentService.getAccountOperationThatWasPaid(payment));
+		rejectedPayment.setCustomerAccount(payment.getCustomerAccount());
 		return rejectedPayment;
 	}
 

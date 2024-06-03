@@ -115,6 +115,8 @@ public class OtherCreditAndChargeService extends
 		otherCreditAndCharge.setAmount(amount);
 		otherCreditAndCharge.setUnMatchingAmount(amount);
 		otherCreditAndCharge.setMatchingStatus(MatchingStatusEnum.O);
+		otherCreditAndCharge.setTransactionalAmount(amount);
+		otherCreditAndCharge.setTransactionalUnMatchingAmount(amount);
 
 		if (OCC_PPL_INSTALLMENT.equals(codeOCCTemplate)) {
 			// for PPL CREATION, collection date shall have the same value of due date
@@ -124,8 +126,8 @@ public class OtherCreditAndChargeService extends
 		
 		if (customerAccount != null) {
 		    customerAccount.getAccountOperations().add(otherCreditAndCharge);
+			otherCreditAndCharge.setTransactionalCurrency(customerAccount.getTradingCurrency());
 		}
-		
 		create(otherCreditAndCharge);
 		if (customerAccount != null) {
 		    log.info(

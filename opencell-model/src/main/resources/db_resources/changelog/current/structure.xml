@@ -12379,6 +12379,7 @@ public class DummyPaymentGatewayScript extends Script {
             <where>code = 'subscriptionOperator'</where>
         </update>
     </changeSet>
+
     <changeSet id="INTRD-23392_20240604" author="TarikFA.">
         <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq" />
@@ -12419,4 +12420,9 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD-22961_20240604" author="Zbariki">
+        <addColumn tableName="ar_account_operation">
+            <column name="payment_requests" type="bigint"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

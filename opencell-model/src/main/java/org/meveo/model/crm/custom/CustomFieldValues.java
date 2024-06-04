@@ -626,21 +626,20 @@ public class CustomFieldValues implements Cloneable, Serializable {
         CustomFieldValue valueFound = null;
         if (valuesByCode != null && valuesByCode.containsKey(cfCode)) {
             for (CustomFieldValue value : valuesByCode.get(cfCode)) {
-                if (value.getPeriod() == null && (valueFound == null || valueFound.getPriority() < value.getPriority())) {
-                    valueFound = value;
-
-                } else if (value.getPeriod() != null && value.getPeriod().isCorrespondsToPeriod(period, strictMatch)) {
-                    if (priority != null && priority >= 0 && value.getPriority() == priority) {
+                if (priority != null) {
+                    if (value.getPriority() == priority) {
                         valueFound = value;
                         break;
-                    } else {
+                    }
+                } else {
+                    if (value.getPeriod() == null && (valueFound == null || valueFound.getPriority() < value.getPriority())) {
+                        valueFound = value;
+
+                    } else if (value.getPeriod() != null && value.getPeriod().isCorrespondsToPeriod(period, strictMatch)) {
                         if (valueFound == null || valueFound.getPriority() < value.getPriority()) {
                             valueFound = value;
                         }
                     }
-                } else if (priority != null && priority >= 0 && value.getPriority() == priority) {
-                    valueFound = value;
-                    break;
                 }
             }
         }

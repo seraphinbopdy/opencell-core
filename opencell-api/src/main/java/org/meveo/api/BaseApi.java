@@ -389,6 +389,10 @@ public abstract class BaseApi {
                         if (referencedEntity == null && !recordExist) {
                             throw new InvalidReferenceException(entityRefWrapper.getClassname(), entityRefWrapper.getCode());
                         }
+                        if (referencedEntity != null) {
+                            entityRefWrapper.setId(referencedEntity.getId());
+                            entityRefWrapper.setCode(referencedEntity.getCode());
+                        }
                     }
 
                     // In case of child entity save CustomEntityInstance objects

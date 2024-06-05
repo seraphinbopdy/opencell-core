@@ -12425,4 +12425,81 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="payment_requests" type="bigint"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="#INTRD-22962_20240605" author="ZakariaB">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+            <column name="code" value="org.meveo.service.script.RetryPaymentScript"/>
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+ public class RetryPaymentScript extends Script {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="version" valueNumeric="0" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Retry payment script"/>
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"<p> This action will set up the invoices linked to the rejected payment for a new payment request. Invoice’s payment request count will be increment by 1, and collection date will be set to rejection date + retry delay.</p><p>If the number of payment requests on the invoice is already greater that the maximum number of retries, you can choose to send the invoices to litigation, or do nothing (and wait for dunning to trigger, if you implemented it).</p>", "FRA":"<p>Cette action représentera pour payment les factures liées au paiement rejeté. Le nombre de demande de payment des factures sera augmenté de 1, et la date de mise en payment sera date de rejet + delay de rejet.</p> <p>Si le nombre de demandes de paiement sur la facture est déjà supérieur au nombre maximum de rejeux, vous pouvez décider de passer les factures en litige, ou ne rien faire (et attendre le déclenchement du dunning, si vous l’avez implémenté).</p>"}]]>
+            </column>
+            <column name="script_instance_cat_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"/>
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="maxRetries" />
+            <column name="description_i18n" value='{"FRA":"Nombre maximum de rejeux","ENG":"Maximum retries count"}'/>
+            <column name="mandatory" valueNumeric="1" />
+            <column name="class_name" value="java.lang.Integer" />
+            <column name="default_value" value="1" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="firstRetryDelay" />
+            <column name="description_i18n" value='{"FRA":"Délai de premier rejeu (jours)","ENG":"First retry delay (days)"}'/>
+            <column name="mandatory" valueNumeric="1" />
+            <column name="class_name" value="java.lang.Integer" />
+            <column name="default_value" value="0" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="nextRetriesDelay" />
+            <column name="description_i18n" value='{"FRA":"Délai des rejeux suivants (jours)","ENG":"Next retries delay (days)"}'/>
+            <column name="mandatory" valueNumeric="1" />
+            <column name="class_name" value="java.lang.Integer" />
+            <column name="default_value" value="10" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="litigationAfterRetry" />
+            <column name="description_i18n" value='{"FRA":"Entrer en litige après le nombre de rejeu max ?","ENG":"Enter litigation after max retries?"}'/>
+            <column name="class_name" value="java.lang.Boolean" />
+            <column name="mandatory" valueNumeric="0" />
+            <column name="default_value" value="true" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

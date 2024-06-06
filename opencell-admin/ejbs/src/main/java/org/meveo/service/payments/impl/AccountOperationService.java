@@ -315,7 +315,8 @@ public class AccountOperationService extends PersistenceService<AccountOperation
             }
 
             if (OperationCategoryEnum.CREDIT == opCatToProcess) {
-                query.setParameter("REFUNDABLE_ADJUSTEMENT_CODES", System.getProperty("refundable.adjustement.codes", "ADJ_REF"));
+            	String refundableCodes = ParamBean.getInstance().getProperty("refundable.adjustement.codes", "ADJ_REF,INV_CRN");
+                query.setParameter("REFUNDABLE_ADJUSTEMENT_CODES", Arrays.asList(refundableCodes.split(",")));
             }
 
             return (List<AccountOperation>) query.getResultList();

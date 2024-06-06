@@ -16,6 +16,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -56,10 +57,10 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	
 	private boolean useSamePricePlan;
 	
-	private boolean useLastPartition;
-	
     @Inject
     private ReratingService reratingService;
+    
+    private String lastEDRPartition;
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -83,10 +84,10 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		if (nbThreads == -1) {
 			nbThreads = (long) Runtime.getRuntime().availableProcessors();
 		}
+		
+		lastEDRPartition = getOperationDate(jobInstance);
 
 		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_NR_ITEMS_PER_TX, 10000L);
-		
-		useLastPartition = (Boolean) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_LAST_PARTITION_ONLY, true);
 		
 		entityManager = emWrapper.getEntityManager();
 		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();
@@ -140,9 +141,19 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	private void rerateByGroup(List<Long> reratingTree, JobExecutionResultImpl jobExecutionResult) {
     	final int maxValue = ParamBean.getInstance().getPropertyAsInteger("database.number.of.inlist.limit", reratingService.SHORT_MAX_VALUE);
     	List<List<Long>> subList = partition(reratingTree, maxValue);
-    	String lastEDRPartition = tablesPartitioningService.getLastPartitionDateAsString(tablesPartitioningService.EDR_PARTITION_SOURCE);
-		String edrDateCondition = useLastPartition && lastEDRPartition != null ? " AND edr.eventDate>'" + lastEDRPartition+"'" : "";
+    	
+		String edrDateCondition = lastEDRPartition != null ? " AND edr.eventDate>'" + lastEDRPartition+"'" : "";
 		subList.forEach(ids -> reratingService.applyMassRerate(ids, useSamePricePlan, jobExecutionResult, edrDateCondition));
+	}
+	
+	private String getOperationDate(JobInstance jobInstance) {
+		String operationDateConfig = (String) this.getParamOrCFValue(jobInstance,
+				ReRatingV2Job.CF_OPERATIONS_STARTING_DATE, ReRatingV2Job.NO_DATE_LIMITE);
+		boolean useLimitDate = operationDateConfig != ReRatingV2Job.NO_DATE_LIMITE
+				&& CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate("edr"));
+		return useLimitDate ? 
+				(operationDateConfig == ReRatingV2Job.USE_LAST_PARTITION ? tablesPartitioningService.getLastPartitionStartingDateAsString("edr") : operationDateConfig)
+				: null;
 	}
 
 

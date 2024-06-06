@@ -5,7 +5,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +16,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -83,11 +83,9 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 		entityManager = emWrapper.getEntityManager();
 		boolean useExistingViews = (boolean) getParamOrCFValue(jobInstance, RatingCancellationJob.CF_USE_EXISTING_VIEWS, false);
 
-		boolean useLastPartitions = (boolean) getParamOrCFValue(jobInstance, RatingCancellationJob.CF_LAST_PARTITION_ONLY, true);
-		
-		lastWOPartition = useLastPartitions ? tablesPartitioningService.getLastPartitionDateAsString(tablesPartitioningService.WO_PARTITION_SOURCE) : null;
-		lastRTPartition = useLastPartitions ? tablesPartitioningService.getLastPartitionDateAsString(tablesPartitioningService.RT_PARTITION_SOURCE) : null;
-		lastEDRPartition = useLastPartitions ? tablesPartitioningService.getLastPartitionDateAsString(tablesPartitioningService.EDR_PARTITION_SOURCE) : null;
+		lastWOPartition = getOperationDate(jobInstance, "wo");
+		lastRTPartition = getOperationDate(jobInstance, "rt");
+		lastEDRPartition = getOperationDate(jobInstance, "edr");
 		
 		createViews(configuredNrPerTx, useExistingViews);
 		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();
@@ -122,6 +120,16 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 						return true;
 					}
 				});
+	}
+
+	private String getOperationDate(JobInstance jobInstance, String alias) {
+		String operationDateConfig = (String) this.getParamOrCFValue(jobInstance,
+				RatingCancellationJob.getOperationDateCFName(alias), RatingCancellationJob.NO_DATE_LIMITE);
+		boolean useLimitDate = operationDateConfig != RatingCancellationJob.NO_DATE_LIMITE
+				&& CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate(alias));
+		return useLimitDate ? 
+				(operationDateConfig == RatingCancellationJob.USE_LAST_PARTITION ? tablesPartitioningService.getLastPartitionStartingDateAsString(alias) : operationDateConfig)
+				: null;
 	}
 
 	private void applyRatingCancellation(List<Object[]> reratingTree, JobExecutionResultImpl jobExecutionResult) {

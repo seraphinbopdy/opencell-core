@@ -53,11 +53,16 @@ public class UpdateStepExecutor extends IteratorBasedJobBean<Long[]> {
         String readQuery = (String) jobExecutionResult.getJobParam(PARAM_READ_INTERVAL_QUERY);
         isNativeQuery = jobExecutionResult.getJobParam(PARAM_NATIVE_QUERY)!=null?(boolean) jobExecutionResult.getJobParam(PARAM_NATIVE_QUERY):true;
         Object[] result=null;
+        Long minId=null;
+        Long maxId=null;
         if(!StringUtils.isEmpty(readQuery)){
             result= isNativeQuery? (Object[]) emWrapper.getEntityManager().createNativeQuery(readQuery).getSingleResult() : (Object[]) emWrapper.getEntityManager().createQuery(readQuery).getSingleResult();
+            minId = result != null && result[0] !=null ? ((Number)result[0]).longValue() : 0L;
+            maxId = result != null && result[0] !=null ? ((Number)result[1]).longValue() : 0L;
         }
-        Long minId = result != null ? ((Number)result[0]).longValue() :  (Long)jobExecutionResult.getJobParam(PARAM_MIN_ID);
-        Long maxId = result != null ? ((Number)result[1]).longValue() :  (Long)jobExecutionResult.getJobParam(PARAM_MAX_ID);
+        
+        minId = minId==null ? (Long)jobExecutionResult.getJobParam(PARAM_MIN_ID) : minId;
+        maxId = maxId==null ? (Long)jobExecutionResult.getJobParam(PARAM_MAX_ID) : maxId;
         Long chunkSize = (Long) jobExecutionResult.getJobParam(PARAM_CHUNK_SIZE);
 
         if (minId == null || maxId == null || chunkSize == null) {

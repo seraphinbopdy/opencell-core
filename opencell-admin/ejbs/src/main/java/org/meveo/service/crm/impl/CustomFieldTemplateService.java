@@ -97,7 +97,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 @Stateless
 public class CustomFieldTemplateService extends BusinessService<CustomFieldTemplate> {
 
-    @Inject
+    public static final String UPDATE_EXISTING = "#updateExisting#";
+
+	@Inject
     private CustomFieldsCacheContainerProvider customFieldsCache;
 
     @Inject
@@ -582,6 +584,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         if (templates != null) {
             CustomFieldTemplate existingCustomField = null;
             for (CustomFieldTemplate cft : templates) {
+            	updateExisting=updateExisting || (cft.getTags()!=null && cft.getTags().contains(UPDATE_EXISTING));
                 if (!allTemplates.containsKey(cft.getCode())) {
                     log.debug("Create a missing CFT {} for {} entity", cft.getCode(), appliesTo);
                     create(cft);

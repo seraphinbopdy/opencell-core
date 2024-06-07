@@ -20919,7 +20919,7 @@
     <changeSet id="#INTRD-23293_20240524" author="TarikFA." />
     <changeSet id="INTRD-23392_20240604" author="TarikFA." />
     <changeSet id="#INTRD-22961_20240604" author="Zbariki"/>
-
+    <changeSet id="#INTRD-22962_20240605" author="ZakariaB" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

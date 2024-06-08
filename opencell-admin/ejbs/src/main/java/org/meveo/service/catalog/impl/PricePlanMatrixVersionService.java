@@ -813,10 +813,13 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             StringBuilder fileName = new StringBuilder();
             fileName.append(ppmv.getId());
             if (ppmv.getPricePlanMatrix() != null) {
-				ChargeTemplate chargeTemplate = ppmv.getPricePlanMatrix().getChargeTemplates().stream().sorted(Comparator.comparing(ChargeTemplate::getId)).findFirst().orElse(null);
-                 fileName.append(fileNameSeparator).append(chargeTemplate.getId());
-                 fileName.append(fileNameSeparator).append(chargeTemplate.getDescription());
-	             fileName.append(fileNameSeparator).append(chargeTemplate.getCode());
+                if(!ListUtils.isEmtyCollection(ppmv.getPricePlanMatrix().getChargeTemplates()) && ppmv.getPricePlanMatrix().getChargeTemplates().size() == 1) {
+                    ChargeTemplate chargeTemplate = ppmv.getPricePlanMatrix().getChargeTemplates().iterator().next();
+                    fileName.append(fileNameSeparator + chargeTemplate.getId());
+                    fileName.append(fileNameSeparator + chargeTemplate.getDescription()).append(fileNameSeparator + chargeTemplate.getCode());
+                } else {
+                    fileName.append(fileNameSeparator + ppmv.getPricePlanMatrix().getCode());
+                }
             }
 	        
 	        fileName.append(fileNameSeparator + ppmv.getLabel());

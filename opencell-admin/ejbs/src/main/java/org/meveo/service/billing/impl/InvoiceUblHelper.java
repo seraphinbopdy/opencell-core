@@ -93,6 +93,7 @@ import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
+import org.meveo.service.base.ValueExpressionWrapper;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -164,7 +165,7 @@ public class InvoiceUblHelper {
 					.collect(Collectors.toList());
 			setTaxTotal(taxInvoiceAgregates, invoice.getAmountTax(), invoiceXml, creditNote,  invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null);
 		}
-		setPaymentTerms(invoiceXml, creditNote, invoice.getInvoiceType(), invoiceLanguageCode);
+		setPaymentTerms(invoice, invoiceXml, creditNote, invoice.getInvoiceType(), invoiceLanguageCode);
 		setAccountingSupplierParty(invoice.getSeller(), invoiceXml, creditNote, invoiceLanguageCode);
 		setAccountingCustomerParty(invoice.getBillingAccount(), invoiceXml, creditNote);
 		setPaymentMeans(invoice.getPaymentMethod(), invoiceXml, creditNote);
@@ -243,14 +244,14 @@ public class InvoiceUblHelper {
 		marshaller.marshal(invoiceXml, absoluteFileName);
 	}
 	
-	private void setPaymentTerms(Invoice target, CreditNote creditNote, InvoiceType invoiceType, String invoiceLanguageCode) {
+	private void setPaymentTerms(org.meveo.model.billing.Invoice source, Invoice target, CreditNote creditNote, InvoiceType invoiceType, String invoiceLanguageCode) {
 		if(invoiceType != null && invoiceType.getUntdidInvoiceCodeType() != null && invoiceType.getUntdidInvoiceCodeType().getCode().equals("380")) {
 			PaymentTermsType paymentTermsType = objectFactoryCommonAggrement.createPaymentTermsType();
 			paymentTermService.findAllEnabledPaymentTerm().forEach(pt -> {
 				String noteValue = pt.getDescriptionI18n().get(invoiceLanguageCode);
 				if(noteValue != null) {
 					Note note = objectFactorycommonBasic.createNote();
-					note.setValue(noteValue);
+					note.setValue(ValueExpressionWrapper.evaluateToStringMultiVariable(noteValue, "invoice", source, "inv", source));
 					paymentTermsType.getNotes().add(note);
 				}
 			});

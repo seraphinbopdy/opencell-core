@@ -177,8 +177,10 @@ public class UnitSepaDirectDebitJobBean {
 	}
 
 	private boolean isPaidItem(DDRequestItem ddrequestItem) {
-		for(AccountOperation ao :ddrequestItem.getAccountOperations() ) {
-			if( ao instanceof Payment || ao instanceof AutomatedPayment || ao instanceof Refund || ao instanceof AutomatedRefund ) {
+		String refundableCodes = ParamBean.getInstance().getProperty("refundable.adjustement.codes", "ADJ_REF,INV_CRN");
+		for (AccountOperation ao :ddrequestItem.getAccountOperations()) {
+			if ((ddrequestItem.getDdRequestLOT().getPaymentOrRefundEnum().getOperationCategoryToProcess() == OperationCategoryEnum.CREDIT && !refundableCodes.contains(ao.getCode())) 
+					&& (ao instanceof Payment || ao instanceof AutomatedPayment || ao instanceof Refund	|| ao instanceof AutomatedRefund)) {
 				return true;
 			}			
 		}

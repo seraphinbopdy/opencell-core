@@ -157,4 +157,21 @@ public class PaymentHistoryService extends PersistenceService<PaymentHistory> {
 		}
 		return paymentHistory;
 	}
+
+	/**
+	 * @param paymentId Payment id
+	 * @param paymentStatus Payment status
+	 * @return PaymentHistory
+	 */
+	public PaymentHistory findPaymentHistoryByPaymentIdAndPaymentStatus(Long paymentId, PaymentStatusEnum paymentStatus) {
+		try {
+			QueryBuilder qb = new QueryBuilder(PaymentHistory.class, "a");
+			qb.addCriterion("payment.id", "=", paymentId, false);
+			qb.addCriterion("status", "=", paymentStatus, false);
+			List<PaymentHistory> paymentHistories = (List<PaymentHistory>) qb.getQuery(getEntityManager()).getResultList();
+			return paymentHistories != null && !paymentHistories.isEmpty() ? paymentHistories.get(0) : null;
+		} catch (NoResultException ne) {
+			return null;
+		}
+	}
 }

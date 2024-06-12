@@ -984,7 +984,11 @@ public class AccountOperationApi extends BaseApi {
         // Get account operation to export and the amounts summary
         AccountOperationsResult summary = customerBalanceService.getAccountOperations(exportConfig);
         Map<String, Object> filters = new HashMap<>();
-        filters.put("inList id", Objects.requireNonNullElse(summary.accountOperationIds(), Collections.emptyList()));
+
+        if (summary.accountOperationIds() != null && !Objects.requireNonNull(summary.accountOperationIds()).isEmpty()) {
+            filters.put("inList id", Objects.requireNonNullElse(summary.accountOperationIds(), Collections.emptyList()));
+        }
+
         if(exportConfig.transactionalCurrency() != null) {
             filters.put("transactionalCurrency.id", exportConfig.transactionalCurrency().getId());
         }
@@ -1174,7 +1178,7 @@ public class AccountOperationApi extends BaseApi {
 
             
             // Autosize columns
-            for(int i=0; i < sheet.getRow(7).getLastCellNum(); i++) {
+            for(int i=0; i < sheet.getRow(6).getLastCellNum(); i++) {
                 sheet.autoSizeColumn(i);
             }
 

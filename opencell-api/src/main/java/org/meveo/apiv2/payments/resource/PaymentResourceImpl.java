@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.meveo.api.dto.ActionStatus;
@@ -337,6 +338,14 @@ public class PaymentResourceImpl implements PaymentResource {
                         ",\"message\":\"Rejection payment successfully created\"},\"id\":"
                         + created.getId() + ", \"code\": \""
                         + created.getCode() + "\"}")
+                .build();
+    }
+
+    @Override
+    public Response retryRejectedPayment(@PathParam("id") Long paymentId) throws Exception {
+        paymentApi.retryRejectedPayment(paymentId);
+        return ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Payment successfully retried\"}}")
                 .build();
     }
 }

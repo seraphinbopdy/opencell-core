@@ -268,4 +268,10 @@ public interface PaymentResource {
                     @ApiResponse(responseCode = "500", description = "Rejection action sequence update failed")
             })
     Response createRejectionPayment(@Parameter(required = true) RejectionPayment rejectionPayment);
+
+
+
+    @POST
+    @Path("/{id}/retry")
+    Response retryRejectedPayment(@PathParam("id") Long paymentId) throws Exception;
 }

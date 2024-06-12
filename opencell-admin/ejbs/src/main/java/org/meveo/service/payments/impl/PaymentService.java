@@ -755,7 +755,7 @@ public class PaymentService extends PersistenceService<Payment> {
         payment.setDescription(occTemplate.getDescription());
         payment.setType(doPaymentResponseDto.getPaymentBrand());
         payment.setTransactionCategory(occTemplate.getOccCategory());
-        payment.setAccountCodeClientSide(doPaymentResponseDto.getCodeClientSide());
+        payment.setAccountCodeClientSide(!StringUtils.isBlank(doPaymentResponseDto.getCodeClientSide()) ? doPaymentResponseDto.getCodeClientSide() : occTemplate.getAccountCodeClientSide());
         payment.setCustomerAccount(customerAccount);
         payment.setReference(doPaymentResponseDto.getPaymentID());
         payment.setMatchingStatus(MatchingStatusEnum.O);

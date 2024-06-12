@@ -12419,6 +12419,14 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="description" value="taking input csv file and instantiating a discount on existants subscription or billing accounts called by a job"/>
         </insert>
     </changeSet>
+    <changeSet id="INTRD-23624_20240612" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"<p> Applique un frais à un abonnement du compte de facturation. </p><p>Vous devrez sélectionner une charge exceptionnelle (type “autre”) à appliquer, avec la possibilité de remplacer le montant (cela générera une erreur si la charge ne permettent pas la surcharge du montant) et le libellé.</p><p>Nous devrons sélectionner un abonnement actif auquel appliquer le frais. Par défaut, nous utiliserons l&apos;abonnement actif le plus récent facturé sur les factures impayées. Vous pouvez fournir un filtre supplémentaire pour affiner la liste des abonnements. Ce filtre est en fait une expression qui doit s&apos;évaluée en une chaîne qui sera comparée au code des abonnements dans la portée de recherche d&apos;abonnement, à l&apos;aide de l&apos;opérateur fourni. L’expression aura accès au rejet de paiement, au paiement, aux entités du périmètre (liste des factures, compte de facturation, compte client) et à la liste des abonnements dans le périmètre. Si aucun abonnement actif n&apos;est trouvé, le script échouera et une erreur sera remontée.</p>", "ENG":"<p>Applies a charge to a subscription of the billing account.</p><p>You will have to select a one shot charge (type “other”) to apply, with the ability to override the amount (will raise an error if the charge doesn’t allow amount override) and label.</p> <p>We will need to select an active subscription to apply the charge to. By default, we will use the most recent active subscription invoiced on the unpaid invoices. You can provide an additional filter to narrow down the list of subscriptions. This filter is actually an expression that must evaluate to a string that will be compared to the code of subscriptions in the subscription search scope, using the provided operator. Expression will have access to the rejected payment, the payment, and the scope entities (list of invoices, billing account, customer account) and the list of subscriptions in the scope. If no active subscription is found, the script will fail and an error will be raised.</p>"}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.ApplyChargeScript'</where>
+        </update>
+    </changeSet>
 
     <changeSet id="#INTRD-22961_20240604" author="Zbariki">
         <addColumn tableName="ar_account_operation">

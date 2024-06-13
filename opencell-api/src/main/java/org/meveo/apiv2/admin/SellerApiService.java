@@ -124,6 +124,9 @@ public class SellerApiService extends BaseApi {
 		seller.setAddress(postSeller.getAddress());
 		seller.setLegalType(postSeller.getLegalType());
 		seller.setLegalEntityType(postSeller.getLegalEntityType());
+		if(postSeller.getSeller() != null && postSeller.getSeller().getCode().equals(seller.getCode())) {
+			throw new BusinessException("Seller can't be its own parent");
+		}
 		seller.setSeller(postSeller.getSeller());
 		if(CollectionUtils.isNotEmpty(postSeller.getMedias())){
 			seller.getMedias().clear();

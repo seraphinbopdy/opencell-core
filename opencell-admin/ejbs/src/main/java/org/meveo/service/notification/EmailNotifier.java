@@ -139,15 +139,14 @@ public class EmailNotifier {
             }
 
             List<String> to = new ArrayList<>();
-            to.add(ValueExpressionWrapper.evaluateExpression(notification.getEmailToEl(), userMap, String.class));
-           
-            String result = context.containsKey("EMAIL_TO_LIST") ? (String)context.get("EMAIL_TO_LIST") : "" ;
-            for (String mail : result.split(",")) {
+
+            String emailToList = context.get("EMAIL_TO_LIST") != null ? (String)context.get("EMAIL_TO_LIST") : "" ;
+            for (String mail : emailToList.split(",")) {
             	if(!StringUtils.isBlank(mail)) {
             		to.add(mail);
             	}
             }
-            
+
             if (notification.getEmails() != null) {
                 to.addAll(notification.getEmails());
             }

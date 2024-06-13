@@ -1507,9 +1507,9 @@ public class SubscriptionService extends BusinessService<Subscription> {
 	
 	public List<Subscription> listByOfferAndOrProduct(String offerCode, String productCode) {
 		QueryBuilder qb = new QueryBuilder(Subscription.class, "c");
-		if(offerCode != null)
+		if(StringUtils.isNotBlank(offerCode))
 			qb.addCriterionEntity("offer.code", offerCode);
-		if(productCode != null)
+		if(StringUtils.isNotBlank(productCode))
 			qb.addCriterionEntity("serviceInstances.productInstance.productTemplate.code", productCode);
 		
 		qb.addCriterion("status", "=",SubscriptionStatusEnum.ACTIVE, false);

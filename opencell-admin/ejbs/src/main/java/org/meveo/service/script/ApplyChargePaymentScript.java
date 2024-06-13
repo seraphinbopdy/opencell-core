@@ -1,6 +1,5 @@
 package org.meveo.service.script;
 
-import static java.lang.Long.valueOf;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
@@ -50,9 +49,11 @@ public class ApplyChargePaymentScript extends Script {
         log.info("Execute apply charge script");
         OneShotChargeTemplate oneShotCharge =
                 oneShotChargeTemplateService.refreshOrRetrieve((OneShotChargeTemplate) context.get("chargeTemplate"));
-        RejectedPayment rejectedPayment = rejectedPaymentService.findById(valueOf((String) context.get("rejectedPayment")));
+        Object paymentReject = ofNullable(context.get("rejectedPayment"))
+                .orElseThrow(() -> new BusinessException("No payment reject provided"));
+        RejectedPayment rejectedPayment = rejectedPaymentService.findById((Long) paymentReject);
         PaymentRejectionActionReport actionReport =
-                ofNullable(paymentRejectionActionReportService.findByCode(rejectedPayment.getCode()))
+                ofNullable(paymentRejectionActionReportService.findByCode(rejectedPayment.getRejectedCode()))
                         .orElseThrow(() -> new BusinessException("No action report found"));
         ofNullable(oneShotCharge).orElseThrow(()
                 ->  new BusinessException("One-shot other charge does’t exist for payment rejection action "
@@ -123,13 +124,10 @@ public class ApplyChargePaymentScript extends Script {
                         amountOverride, descriptionOverride, rejectedPayment, payment, actionReport);
 
         subscriptionService.applyOneShotChargeList(applyOneShotChargeListInput);
-        log.info("Charge applied to subscription{}", selectedSubscription.getCode());
-
-        actionReport.setReport("Charge [code=" + oneShotCharge.getCode()
-                + "] has been applied to subscription [code="+ selectedSubscription.getCode() +"]");
-        paymentRejectionActionReportService.update(actionReport);
-        context.put(RESULT_VALUE, "Charge [code=" + oneShotCharge.getCode()
+        log.info("Charge applied to subscription {}", selectedSubscription.getCode());
+        context.put(REJECTION_ACTION_REPORT, "Charge [code=" + oneShotCharge.getCode()
                 +"] has been applied to subscription [code=" + selectedSubscription.getCode() +"]");
+        context.put(REJECTION_ACTION_RESULT, true);
         log.info("Apply charge script successfully executed");
     }
 

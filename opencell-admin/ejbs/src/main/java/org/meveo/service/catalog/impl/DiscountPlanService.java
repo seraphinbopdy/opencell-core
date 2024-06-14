@@ -250,7 +250,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     			
     		    discountWalletOperation.setUnitAmountTax(walletOperationDiscountAmount);
 				if (discountPlanItem.getDiscountPlanItemType() == DiscountPlanItemTypeEnum.PERCENTAGE) {
-					discountWalletOperation.setAmountWithoutTax(quantity.compareTo(BigDecimal.ZERO)>0?amounts[0].multiply(walletOperation.getQuantity()):BigDecimal.ZERO);
+					discountWalletOperation.setAmountWithoutTax(amounts[0].multiply(walletOperation.getQuantity()));
 					discountWalletOperation.setAmountWithTax(amounts[1].multiply(walletOperation.getQuantity()));
 					discountWalletOperation.setAmountTax(amounts[2].multiply(walletOperation.getQuantity()));
 					discountWalletOperation.setDiscountValue(discountValue.multiply(walletOperation.getQuantity()));

@@ -1504,4 +1504,23 @@ public class SubscriptionService extends BusinessService<Subscription> {
 
         return lDto;
     }
+	
+	public List<Subscription> listByOfferAndOrProduct(String offerCode, String productCode) {
+		QueryBuilder qb = new QueryBuilder(Subscription.class, "c");
+		if(offerCode != null)
+			qb.addCriterionEntity("offer.code", offerCode);
+		if(productCode != null)
+			qb.addCriterionEntity("serviceInstances.productInstance.productTemplate.code", productCode);
+		
+		qb.addCriterion("status", "=",SubscriptionStatusEnum.ACTIVE, false);
+		// criterion for subscription does not have discount plan
+		qb.addSql("c.code not in (select distinct s.code from Subscription s join s.discountPlanInstances dpi)");
+			return (List<Subscription>) qb.getQuery(getEntityManager()).getResultList();
+	}
+	
+	public List<Subscription> findByListOfCodes(List<String> codes) {
+		QueryBuilder qb = new QueryBuilder(Subscription.class, "c");
+		qb.addSqlCriterion("c.code in (:codes)", "codes", codes);
+		return (List<Subscription>) qb.getQuery(getEntityManager()).getResultList();
+	}
 }

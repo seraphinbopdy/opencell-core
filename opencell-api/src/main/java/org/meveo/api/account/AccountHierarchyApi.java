@@ -185,6 +185,9 @@ public class AccountHierarchyApi extends BaseApi {
     @ApplicationProvider
     private Provider appProvider;
 
+    @Inject
+    private AccessApi accessApi;
+
     public static final String CUSTOMER_PREFIX = "CUST_";
     public static final String CUSTOMER_ACCOUNT_PREFIX = "CA_";
     public static final String BILLING_ACCOUNT_PREFIX = "BA_";
@@ -980,6 +983,9 @@ public class AccountHierarchyApi extends BaseApi {
                                                         subscriptionDto.setUserAccount(userAccountDto.getCode());
                                                     }
 	                                                processSubscriptionOnTransitionStatus(subscriptionDto);
+                                                    if(subscriptionDto.getAccesses() != null) {
+                                                        createAccess(subscriptionDto);
+                                                    }
                                                 }
                                             }
                                         }
@@ -989,6 +995,26 @@ public class AccountHierarchyApi extends BaseApi {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void createAccess(SubscriptionDto subscriptionDto) {
+        if (subscriptionDto.getAccesses() != null) {
+            for (AccessDto accessDto : subscriptionDto.getAccesses().getAccess()) {
+                if (StringUtils.isBlank(accessDto.getCode())) {
+                    log.warn("access code is null={}", accessDto);
+                    continue;
+                }
+                if (!StringUtils.isBlank(accessDto.getSubscription())
+                        && !accessDto.getSubscription().equalsIgnoreCase(subscriptionDto.getCode())) {
+                    throw new MeveoApiException("Access's subscription " + accessDto.getSubscription()
+                            + " doesn't match with parent subscription " + subscriptionDto.getCode());
+                } else {
+                    accessDto.setSubscription(subscriptionDto.getCode());
+                    accessDto.setSubscriptionValidity(subscriptionDto.getValidityDate());
+                }
+                accessApi.createOrUpdatePartial(accessDto);
             }
         }
     }

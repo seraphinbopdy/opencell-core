@@ -18,6 +18,7 @@
 
 package org.meveo.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -51,6 +52,7 @@ import java.util.Map.Entry;
 @XmlRootElement(name = "CustomField")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties({"empty"})
 public class CustomFieldDto {
 
     /** The code. */

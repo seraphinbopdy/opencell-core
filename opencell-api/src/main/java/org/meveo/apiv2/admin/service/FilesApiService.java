@@ -123,7 +123,7 @@ public class FilesApiService extends BaseApi {
                                         }
                                         break;
                                     default: {
-                                        if (StringUtils.isBlank(exp.getCondition())) {
+                                        if (StringUtils.isBlank(exp.getCondition()) || "eq".equals(exp.getCondition())) {
                                             if (exp.getFieldName().equalsIgnoreCase("name")) {
                                                 conditions.add(p.getFileName().toString().equalsIgnoreCase((String) value));
                                             } else if (exp.getFieldName().equalsIgnoreCase("date")) {

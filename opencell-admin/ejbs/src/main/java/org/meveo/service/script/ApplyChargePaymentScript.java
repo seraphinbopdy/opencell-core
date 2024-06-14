@@ -57,23 +57,23 @@ public class ApplyChargePaymentScript extends Script {
                         .orElseThrow(() -> new BusinessException("No action report found"));
         ofNullable(oneShotCharge).orElseThrow(()
                 ->  new BusinessException("One-shot other charge does’t exist for payment rejection action "
-                + actionReport.getId() + " [gateway="+ rejectedPayment.getPaymentGateway().getCode()
-                + ", rejection code="+ rejectedPayment.getPaymentGateway().getCode() +"]"));
+                + actionReport.getAction().getId() + " [gateway="+ rejectedPayment.getPaymentGateway().getCode()
+                + ", rejection code="+ actionReport.getCode() +"]"));
         if (oneShotCharge.getOneShotChargeTemplateType() != OTHER) {
             throw new BusinessException("Charge [code=" + oneShotCharge.getCode()
                     + "] is not a one-shot charge of type ‘other' "
-                    + "for payment rejection action " +  actionReport.getId()
+                    + "for payment rejection action " +  actionReport.getAction().getId()
                     + " [gateway="+ rejectedPayment.getPaymentGateway().getCode()
-                    + ", rejection code=" + rejectedPayment.getCode() + "]");
+                    + ", rejection code=" + actionReport.getCode() + "]");
         }
         BigDecimal amountOverride = (BigDecimal) context.get("amountOverride");
         String descriptionOverride = (String) context.get("descriptionOverride");
         if(amountOverride != null
                 && (oneShotCharge.getAmountEditable() != null && !oneShotCharge.getAmountEditable())) {
             throw new BusinessException("Charge [code="+ oneShotCharge.getCode()
-                    +"] does’t allow amount override for payment rejection action " + actionReport.getId()
+                    +"] does’t allow amount override for payment rejection action " + actionReport.getAction().getId()
                     + " [gateway="+ rejectedPayment.getPaymentGateway().getCode()
-                    + ", rejection code=" + rejectedPayment.getCode() + "]");
+                    + ", rejection code=" + actionReport.getCode() + "]");
         }
         Payment payment = paymentService.findByRejectPayment(rejectedPayment.getId());
         String subscriptionSearchScope = (String) context.get("subscriptionSearchScope");
@@ -81,10 +81,10 @@ public class ApplyChargePaymentScript extends Script {
         List<Subscription> subscriptions = loadSubscriptions(subscriptionSearchScope, payment);
         if (subscriptions == null || subscriptions.isEmpty()) {
             throw new BusinessException("No subscription matches the criteria "
-                    + "for payment rejection action {{id}} [gateway="
+                    + "for payment rejection action " + actionReport.getAction().getId() + " [gateway="
                     + rejectedPayment.getPaymentGateway().getCode()
-                    + ", rejection code=" + rejectedPayment.getCode() + "] "
-                    + "and rejected payment [id=" + rejectedPayment.getCode()
+                    + ", rejection code=" + actionReport.getCode() + "] "
+                    + "and rejected payment [id=" + rejectedPayment.getId()
                     + ", reference=" + rejectedPayment.getReference() + "]");
         }
         String subscriptionFilter = (String) context.get("subscriptionFilter");
@@ -112,7 +112,7 @@ public class ApplyChargePaymentScript extends Script {
         }
         ofNullable(selectedSubscription)
                 .orElseThrow(() ->  new BusinessException("No subscription matches the criteria "
-                        + "for payment rejection action {{id}} [gateway="
+                        + "for payment rejection action " + actionReport.getAction().getId() + " [gateway="
                         + rejectedPayment.getPaymentGateway().getCode()
                         + ", rejection code=" + rejectedPayment.getCode() + "] "
                         + "and rejected payment [id=" + rejectedPayment.getCode()

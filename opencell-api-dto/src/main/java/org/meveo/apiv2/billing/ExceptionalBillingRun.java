@@ -18,6 +18,7 @@ import org.meveo.model.billing.DiscountAggregationModeEnum;
 
 import javax.annotation.Nullable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Immutable
@@ -157,4 +158,9 @@ public interface ExceptionalBillingRun extends Resource {
     
     @Nullable
     String getApplicationEl();
+
+    @Nullable
+    @Schema(description = "Additional aggregation fields")
+    @JsonProperty("additionalAggregationFields")
+    List<String> getAdditionalAggregationFields();
 }

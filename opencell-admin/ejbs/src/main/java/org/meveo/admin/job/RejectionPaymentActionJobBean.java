@@ -173,22 +173,24 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
 			if (chargeCode != null) {
 				BusinessEntity chargeTemplate = chargeTemplateService.findByCode(chargeCode);
 				if (chargeTemplate == null) {
-					throw new BusinessException("One-shot other charge does’t exist for payment rejection action "
-							+ actionReport.getId() + " [gateway=" + actionReport.getRejectedPayment().getPaymentGateway().getCode()
-							+ ", rejection code=" + actionReport.getRejectedPayment().getPaymentGateway().getCode() + "]");
+					throw new BusinessException("One-shot other charge " + chargeCode
+							+ " does’t exist for payment rejection action "
+							+ actionReport.getAction().getId() + " [gateway=" + actionReport.getRejectedPayment().getPaymentGateway().getCode()
+							+ ", rejection code=" + actionReport.getCode() + "]");
 				}
 				if (!(chargeTemplate instanceof OneShotChargeTemplate)) {
 					throw new BusinessException("Charge [code=" + chargeTemplate.getCode()
-							+ "] is not a one-shot charge " + "for payment rejection action " + actionReport.getId()
+							+ "] is not a one-shot charge "
+							+ "for payment rejection action " + actionReport.getAction().getId()
 							+ " [gateway=" + actionReport.getRejectedPayment().getPaymentGateway().getCode()
-							+ ", rejection code=" + actionReport.getRejectedPayment().getCode() + "]");
+							+ ", rejection code=" + actionReport.getCode() + "]");
 				}
 				OneShotChargeTemplate oneShotChargeTemplate = getOneShotChargeTemplate(actionReport, chargeTemplate);
 				if (scriptParams.get("amountOverride") != null && !oneShotChargeTemplate.getAmountEditable()) {
 					throw new BusinessException("Charge [code=" + oneShotChargeTemplate.getCode()
-							+ "] does’t allow amount override for payment rejection action " + actionReport.getId()
+							+ "] does’t allow amount override for payment rejection action " + actionReport.getAction().getId()
 							+ " [gateway=" + actionReport.getRejectedPayment().getPaymentGateway().getCode()
-							+ ", rejection code=" + actionReport.getRejectedPayment().getCode() + "]");
+							+ ", rejection code=" + actionReport.getCode() + "]");
 				}
 			}
 		}

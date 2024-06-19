@@ -103,6 +103,11 @@ public class MassInstantiateDiscountScript  extends Script{
 	private void processBillingAccountDiscount(boolean isBA, String targetCodes, DiscountPlan discountPlan) {
 		if(!isBA) return;
 		List<String> billingAccountsCode = List.of(targetCodes.split("\\|"));
+		// check if the discount plan is one of PROMO_CODE, INVOICE, PRODUCT, OFFER
+		List<DiscountPlanTypeEnum> discountPlanTypeList = List.of(DiscountPlanTypeEnum.PRODUCT, DiscountPlanTypeEnum.OFFER, DiscountPlanTypeEnum.PROMO_CODE, DiscountPlanTypeEnum.INVOICE);
+		if(!discountPlanTypeList.contains(discountPlan.getDiscountPlanType())) {
+			throw new BusinessException("The discount plan type : " + discountPlan.getDiscountPlanType().name() + " is not supported!");
+		}
 		billingAccountsCode.forEach( billingAccountCode -> {
 			BillingAccount billingAccount = billingAccountService.findByCode(billingAccountCode);
 			if(billingAccount == null) {

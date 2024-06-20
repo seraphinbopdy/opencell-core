@@ -493,7 +493,9 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 		if(invoice.getLinkedInvoices() != null && !invoice.getLinkedInvoices().isEmpty()) {
 			invoice.getLinkedInvoices().forEach(relatedInvoice -> {
-				if(VALIDATED == relatedInvoice.getLinkedInvoiceValue().getStatus()) {
+				if(relatedInvoice.getLinkedInvoiceValue().getInvoiceType() != null
+						&& !ADV.equals(invoiceTypeService.refreshOrRetrieve(relatedInvoice.getLinkedInvoiceValue().getInvoiceType()).getCode())
+						&& VALIDATED == relatedInvoice.getLinkedInvoiceValue().getStatus()) {
 					throw new BadRequestException("You cannot create ADJ on invoice with an already validated ADJ");
 				}
 			});

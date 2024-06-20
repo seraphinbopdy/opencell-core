@@ -88,11 +88,13 @@ import org.meveo.model.billing.UntdidAllowanceCode;
 import org.meveo.model.billing.UntdidTaxationCategory;
 import org.meveo.model.billing.VatDateCodeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
+import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.*;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
+import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.base.ValueExpressionWrapper;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -123,6 +125,8 @@ public class InvoiceUblHelper {
 	private final static InvoiceAgregateService invoiceAgregateService;
 	private final static PaymentTermService paymentTermService;
 	private final static EinvoiceSettingService einvoiceSettingService;
+	private final static ProviderService providerService;
+
 	private static final String XUN = "XUN";
 	public static final String ISO_IEC_6523 = "ISO/IEC 6523";
 	public static final String SIRET = "0009";
@@ -139,6 +143,7 @@ public class InvoiceUblHelper {
 		untdidAllowanceCodeService = (UntdidAllowanceCodeService) EjbUtils.getServiceInterface(UntdidAllowanceCodeService.class.getSimpleName());
 		paymentTermService = (PaymentTermService) EjbUtils.getServiceInterface(PaymentTermService.class.getSimpleName());
 		einvoiceSettingService = (EinvoiceSettingService) EjbUtils.getServiceInterface(EinvoiceSettingService.class.getSimpleName());
+		providerService = (ProviderService) EjbUtils.getServiceInterface(ProviderService.class.getSimpleName());
 	}
 	
 	private InvoiceUblHelper(){}
@@ -415,23 +420,7 @@ public class InvoiceUblHelper {
 		// DirectDebit
 		if(Hibernate.unproxy(paymentMethod) instanceof DDPaymentMethod) {
 			DDPaymentMethod bank = (DDPaymentMethod) Hibernate.unproxy(paymentMethod);
-
-			if (paymentMeans.getPaymentMeansCode() == null) {
-				PaymentMeansCode paymentMeansCode = objectFactorycommonBasic.createPaymentMeansCode();
-				paymentMeansCode.setListID("UN/ECE 4461");
-				paymentMeans.setPaymentMeansCode(paymentMeansCode);
-			}
-
-			if (!StringUtils.isBlank(bank.getMandateIdentification()) || !StringUtils.isBlank(bank.getTokenId()) ) {
-				setPaymentMeansForSEPA(bank, paymentMeans);
-			} else {
-				setPaymentMeansForDirectDebit(bank, paymentMeans);
-			}
-		}
-
-		// CreditCard
-		if(Hibernate.unproxy(paymentMethod) instanceof CardPaymentMethod) {
-			setPaymentMeansForCreditCard(paymentMethod, paymentMeans);
+			setPaymentMeansForSEPA(bank, paymentMeans);
 		}
 
 		if(paymentMeans.getPaymentMeansCode() != null || paymentMeans.getPayeeFinancialAccount() != null){
@@ -448,15 +437,17 @@ public class InvoiceUblHelper {
 	 * @param paymentMethod the payment method
 	 * @param paymentMeans the payment means
 	 */
+	// We can use this method in the future when we will have only the credit card payment method
 	private static void setPaymentMeansForCreditCard(PaymentMethod paymentMethod, PaymentMeans paymentMeans) {
 		CardPaymentMethod card = (CardPaymentMethod) Hibernate.unproxy(paymentMethod);
 
 		if (paymentMeans.getPaymentMeansCode() == null) {
 			PaymentMeansCode paymentMeansCode = objectFactorycommonBasic.createPaymentMeansCode();
-			paymentMeansCode.setListID("UN/ECE 4461");
-			paymentMeans.getPaymentMeansCode().setName("CreditCard");
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
 		}
+
+		paymentMeans.getPaymentMeansCode().setListID("UN/ECE 4461");
+		paymentMeans.getPaymentMeansCode().setName("CreditCard");
 
 		// PaymentMeans/CardAccount
 		CardAccount cardAccount = objectFactoryCommonAggrement.createCardAccount();
@@ -483,6 +474,7 @@ public class InvoiceUblHelper {
 	 * @param bank the bank
 	 * @param paymentMeans the payment means
 	 */
+	// We can use this method in the future when we will have only the direct debit payment method
 	private static void setPaymentMeansForDirectDebit(DDPaymentMethod bank, PaymentMeans paymentMeans) {
 		paymentMeans.getPaymentMeansCode().setName("DirectDebit");
 		paymentMeans.getPaymentMeansCode().setValue("49");
@@ -535,8 +527,16 @@ public class InvoiceUblHelper {
 	 * @param paymentMeans the payment means
 	 */
 	private static void setPaymentMeansForSEPA(DDPaymentMethod bank, PaymentMeans paymentMeans) {
+		if (paymentMeans.getPaymentMeansCode() == null) {
+			PaymentMeansCode paymentMeansCode = objectFactorycommonBasic.createPaymentMeansCode();
+			paymentMeans.setPaymentMeansCode(paymentMeansCode);
+		}
+
+		paymentMeans.getPaymentMeansCode().setListID("UN/ECE 4461");
 		paymentMeans.getPaymentMeansCode().setName("SEPA");
 		paymentMeans.getPaymentMeansCode().setValue("59");
+
+		Provider provider = providerService.getProvider();
 
 		// PaymentMeans/PaymentMandate
 		if (StringUtils.isNotBlank(bank.getMandateIdentification())) {
@@ -547,15 +547,17 @@ public class InvoiceUblHelper {
 			paymentMeans.setPaymentMandate(paymentMandate);
 		}
 
-		if (StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())) {
-			// PaymentMeans/PartyIdentification
+		// PaymentMeans/PartyIdentification
+		if (provider != null && (StringUtils.isNotBlank(provider.getBankCoordinates().getIban()) || StringUtils.isNotBlank(provider.getBankCoordinates().getBankId()))) {
 			PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
 			ID partyIdentificationId = objectFactorycommonBasic.createID();
-			partyIdentificationId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
+			partyIdentificationId.setValue(StringUtils.isNotBlank(provider.getBankCoordinates().getIban()) ? provider.getBankCoordinates().getIban() : provider.getBankCoordinates().getBankId());
 			partyIdentification.setID(partyIdentificationId);
 			paymentMeans.setPartyIdentification(partyIdentification);
+		}
 
-			// PaymentMeans/PayerFinancialAccount
+		// PaymentMeans/PayeeFinancialAccount
+		if (StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())) {
 			FinancialAccountType payerFinancialAccount = objectFactoryCommonAggrement.createFinancialAccountType();
 			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
 			payerFinancialAccountId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());

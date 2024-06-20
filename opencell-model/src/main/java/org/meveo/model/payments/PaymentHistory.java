@@ -32,6 +32,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -52,6 +54,8 @@ import org.meveo.model.AuditableEntity;
 @Table(name = "ar_payment_history")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
         @Parameter(name = "sequence_name", value = "ar_payment_history_seq"), })
+@NamedQueries({
+        @NamedQuery(name = "PaymentHistory.findByPaymentId", query = "SELECT paymentHistory FROM PaymentHistory paymentHistory WHERE paymentHistory.payment.id=:paymentId") })
 public class PaymentHistory extends AuditableEntity {
 
 

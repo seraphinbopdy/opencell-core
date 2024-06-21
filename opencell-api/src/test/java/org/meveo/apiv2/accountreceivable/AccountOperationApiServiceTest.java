@@ -192,7 +192,7 @@ public class AccountOperationApiServiceTest {
     @Test
     public void shouldReturnBusinessExceptionForAmountEqualToAccountOprtation() throws BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException, Exception {
         List<AccountOperationAndSequence> operationAndSequence = List.of(ImmutableAccountOperationAndSequence.builder().id(1L).sequence(0).build(),
-            ImmutableAccountOperationAndSequence.builder().id(2L).sequence(1).amountToMatch(new BigDecimal(9000)).build());
+            ImmutableAccountOperationAndSequence.builder().id(2L).sequence(1).amountToMatch(new BigDecimal(9001)).build());
 
         AccountOperation aoInvoice = init("I", 2L, new BigDecimal(9000), BigDecimal.ZERO, MatchingStatusEnum.O, new BigDecimal(9000), AccountOperationStatus.POSTED);
         AccountOperation aoP1 = init("P", 3L, new BigDecimal(2000), BigDecimal.ZERO, MatchingStatusEnum.O, new BigDecimal(2000), AccountOperationStatus.POSTED);

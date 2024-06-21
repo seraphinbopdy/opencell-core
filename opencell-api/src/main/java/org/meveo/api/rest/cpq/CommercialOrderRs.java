@@ -180,8 +180,8 @@ public interface CommercialOrderRs {
 
 	})
 
-	Response createOrderOffer(	@Parameter( name = "orderOfferDto",
-	description = "order offer dto for a new insertion") OrderOfferDto orderOfferDto, @QueryParam("isQuickOrder") boolean isQuickOrder);
+	Response createOrderOffer(	@Parameter( name = "orderOfferDto",	description = "order offer dto for a new insertion") OrderOfferDto orderOfferDto, 
+			@QueryParam("isQuickOrder") boolean isQuickOrder, @QueryParam("saveAsDraft") boolean saveAsDraft);
 
 
 	@PUT

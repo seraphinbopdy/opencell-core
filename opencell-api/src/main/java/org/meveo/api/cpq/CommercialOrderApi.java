@@ -842,7 +842,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 	} 
 	
 	
-	public OrderOfferDto createOrderOffer(OrderOfferDto orderOfferDto, boolean isQuickOrder) throws MeveoApiException, BusinessException {
+	public OrderOfferDto createOrderOffer(OrderOfferDto orderOfferDto, boolean isQuickOrder, boolean saveAsDraft) throws MeveoApiException, BusinessException {
 		OrderOffer orderOffer = new OrderOffer();
 		if (orderOfferDto.getCommercialOrderId()==null) {
 			missingParameters.add("commercialOrderId");
@@ -993,9 +993,11 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 						orderOffer.getProducts().get(0).getProductVersion().getAttributes(),
 						orderProduct.getOrderAttributes()));
 		createOrderAttribute(orderOfferDto.getOrderAttributes(),null,orderOffer);
-		if(isQuickOrder && orderOfferDto.getOrderLineType() == OfferLineTypeEnum.APPLY_ONE_SHOT){
+		if (isQuickOrder && orderOfferDto.getOrderLineType() == OfferLineTypeEnum.APPLY_ONE_SHOT){
 			commercialOrder.getOffers().add(orderOffer);
-			commercialOrderService.validateOrder(commercialOrder, false);
+			if (!saveAsDraft) {
+				commercialOrderService.validateOrder(commercialOrder, false);
+			}
 		}
 		return orderOfferDto;
 	}

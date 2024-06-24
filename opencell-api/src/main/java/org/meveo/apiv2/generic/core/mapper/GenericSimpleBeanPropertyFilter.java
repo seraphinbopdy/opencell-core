@@ -43,7 +43,7 @@ class GenericSimpleBeanPropertyFilter extends SimpleBeanPropertyFilter.FilterExc
         Object[] propsToInclude = GenericSimpleBeanPropertyFilterPropertiesToInclude.toArray();
         for(int i = 0; i< propsToInclude.length; i++){
             String lowerCase = ((String) propsToInclude[i]).toLowerCase();
-            if ( lowerCase.endsWith(fieldPattern.toLowerCase()) || Arrays.asList("id","code","description").contains(writer.getName())) {
+            if ( lowerCase.startsWith(fieldPattern.toLowerCase()) || lowerCase.endsWith(fieldPattern.toLowerCase()) || Arrays.asList("id","code","description").contains(writer.getName())) {
                 return true;
             }
         }

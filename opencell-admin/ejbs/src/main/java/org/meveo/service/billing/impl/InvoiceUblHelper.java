@@ -315,7 +315,7 @@ public class InvoiceUblHelper {
 		}
 
 		Note note = objectFactorycommonBasic.createNote();
-		note.setValue(source.getDescription());
+		note.setValue(source.getComment());
 		target.getNotes().add(note);
 		
 		setTaxCurrencyCodeAndDocumentCurrencyCode(objectFactorycommonBasic, source, target);
@@ -374,7 +374,7 @@ public class InvoiceUblHelper {
 		}
 		
 		Note note = objectFactorycommonBasic.createNote();
-		note.setValue(source.getDescription());
+		note.setValue(source.getComment());
 		target.getNotes().add(note);
 		
 		setTaxCurrencyCodeAndDocumentCurrencyCode(objectFactorycommonBasic, source, target);

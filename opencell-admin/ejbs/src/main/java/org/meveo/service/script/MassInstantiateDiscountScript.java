@@ -134,7 +134,13 @@ public class MassInstantiateDiscountScript  extends Script{
 			if(CollectionUtils.isNotEmpty(subscription.getDiscountPlanInstances())){
 				throw new BusinessException("The subscription : " + subscription.getCode() + " already has a discount plan instance!");
 			}
-			discountPlanInstanceService.instantiateDiscountPlan(subscription, discountPlan, null, false);
+			if(discountPlan.getDiscountPlanType() == DiscountPlanTypeEnum.PRODUCT && productCode != null) {
+				subscription.getServiceInstances().forEach(serviceInstance -> discountPlanInstanceService.instantiateDiscountPlan(serviceInstance, discountPlan, null, false));
+			}else if(discountPlan.getDiscountPlanType() == DiscountPlanTypeEnum.OFFER && offerProductTemplateCode != null) {
+				discountPlanInstanceService.instantiateDiscountPlan(subscription, discountPlan, null, false);
+			}else{
+				throw new BusinessException("The discount plan type : " + discountPlan.getDiscountPlanType().name() + " is not supported!");
+			}
 		});
 	}
 	

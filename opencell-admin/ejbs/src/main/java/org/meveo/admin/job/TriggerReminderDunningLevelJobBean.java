@@ -195,19 +195,22 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
     private DunningLevelInstance launchActions(BillingAccount pBillingAccount, CustomerAccount pCustomerAccount, Invoice pInvoice, DunningPolicyLevel pDunningPolicyLevel) {
         // Check if a dunning level instance already exists for the pInvoice
         List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByInvoice(pInvoice);
+
+        DunningLevelInstance reminderDunningLevelInstance = null;
         if (dunningLevelInstances != null && !dunningLevelInstances.isEmpty()) {
             // Check if we have already processed the pInvoice for the current level
             for (DunningLevelInstance dunningLevelInstance : dunningLevelInstances) {
                 if (dunningLevelInstance.getDunningLevel().getId().equals(pDunningPolicyLevel.getDunningLevel().getId())) {
-                    return dunningLevelInstance;
+                    reminderDunningLevelInstance = dunningLevelInstance;
                 }
             }
         }
 
-        // Create a new level instance
-        DunningLevelInstance dunningLevelInstance = dunningLevelInstanceService.createDunningLevelInstanceWithoutCollectionPlan(pCustomerAccount, pInvoice, pDunningPolicyLevel, DunningLevelInstanceStatusEnum.IN_PROGRESS);
+        if (reminderDunningLevelInstance == null) {
+            reminderDunningLevelInstance = dunningLevelInstanceService.createDunningLevelInstanceWithoutCollectionPlan(pCustomerAccount, pInvoice, pDunningPolicyLevel, DunningLevelInstanceStatusEnum.IN_PROGRESS);
+        }
 
-        for (DunningActionInstance action : dunningLevelInstance.getActions()) {
+        for (DunningActionInstance action : reminderDunningLevelInstance.getActions()) {
             if (action.getActionMode().equals(AUTOMATIC) && (action.getActionType().equals(SCRIPT) || action.getActionType().equals(SEND_NOTIFICATION))) {
                 if (action.getActionType().equals(SCRIPT)) {
                     ScriptInstance scriptInstance = action.getDunningAction().getScriptInstance();
@@ -225,7 +228,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
             }
         }
 
-        return dunningLevelInstance;
+        return reminderDunningLevelInstance;
     }
 
     /**

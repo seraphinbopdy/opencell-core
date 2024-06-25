@@ -185,9 +185,14 @@ public class FilesBean implements Serializable {
 	    String writeOffDirOUT = importDir + DirectoriesConstants.OUTPUT_SUBFOLDER;
 	    String writeOffDirKO = importDir + DirectoriesConstants.REJECT_SUBFOLDER;
 	    String writeOffDirArchiv = importDir + DirectoriesConstants.INVOICE_WRITEOF_ARCHIVE_ROOT_FOLDER;
+	    importDir = getFilePath() + File.separator + DirectoriesConstants.IMPORTS_ROOT_FOLDER + File.separator + "discount" + File.separator;
+	    String discountDirIN = importDir + DirectoriesConstants.INPUT_SUBFOLDER;
+	    String discountDirOUT = importDir + DirectoriesConstants.OUTPUT_SUBFOLDER;
+	    String discountDirKO = importDir + DirectoriesConstants.REJECT_SUBFOLDER;
+	    String discountDirArchiv = importDir + DirectoriesConstants.INVOICE_WRITEOF_ARCHIVE_ROOT_FOLDER;
         List<String> filePaths = Arrays.asList("", customerDirIN, customerDirOUT, customerDirERR, customerDirWARN, customerDirKO, accountDirIN, accountDirOUT, accountDirERR, accountDirWARN, accountDirKO, subDirIN,
             subDirOUT, subDirERR, subDirWARN, catDirIN, catDirOUT, catDirKO, subDirKO, meterDirIN, meterDirOUT, meterDirKO, invoicePdfDir, invoiceXmlDir, jasperDir, priceplanVersionsDir, cdrFlatFileDirIn, cdrFlatFileDirOut
-            , writeOffDirIN, writeOffDirOUT, writeOffDirKO, writeOffDirArchiv);
+            , writeOffDirIN, writeOffDirOUT, writeOffDirKO, writeOffDirArchiv, discountDirIN, discountDirOUT, discountDirKO, discountDirArchiv);
         for (String custDirs : filePaths) {
             File subDir = new File(custDirs);
             if (!subDir.exists()) {

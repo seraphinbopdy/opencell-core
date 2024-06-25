@@ -895,13 +895,15 @@ public class NativePersistenceService extends BaseService {
         }
 
         Class<?> entity = null;
-        try {
-            entity = Class.forName(tableName);
-        } catch (ClassNotFoundException e) {
-            throw new BusinessException(String.format("Unknown entity %s", tableName));
+        if(!tableName.toUpperCase().startsWith("CT_")) {
+            try {
+                entity = Class.forName(tableName);
+            } catch (ClassNotFoundException e) {
+                throw new BusinessException(String.format("Unknown entity %s", tableName));
+            }
         }
-
         Class<?> finalEntity = entity;
+
         List<String> aggregationFields = fetchFields.stream()
                                                     .filter(predicate)
                                                     .map(s -> {

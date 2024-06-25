@@ -286,7 +286,6 @@ public class AccountOperationService extends PersistenceService<AccountOperation
         try {
             StringBuilder queryName = new StringBuilder("SELECT ao FROM AccountOperation AS ao, PaymentMethod AS pm")
                     .append(" WHERE ao.transactionCategory=:opCatToProcessIN ")
-                    .append(" AND ao.type IN ('I','OCC') ")
                     .append(" AND (ao.matchingStatus ='O' OR ao.matchingStatus ='P') ")
                     .append(" AND ao.customerAccount.excludedFromPayment = FALSE ")
                     .append(" AND ao.customerAccount.id = pm.customerAccount.id ")
@@ -300,6 +299,10 @@ public class AccountOperationService extends PersistenceService<AccountOperation
                 queryName.append(" AND ao.seller =:sellerIN ");
             }
 
+            if (OperationCategoryEnum.DEBIT == opCatToProcess) {
+                queryName.append(" AND ao.type IN ('I','OCC') ");
+            }
+            
             if (OperationCategoryEnum.CREDIT == opCatToProcess) {
                 queryName.append(" AND ao.code IN (:REFUNDABLE_ADJUSTEMENT_CODES) ");
             }
@@ -315,7 +318,8 @@ public class AccountOperationService extends PersistenceService<AccountOperation
             }
 
             if (OperationCategoryEnum.CREDIT == opCatToProcess) {
-                query.setParameter("REFUNDABLE_ADJUSTEMENT_CODES", System.getProperty("refundable.adjustement.codes", "ADJ_REF"));
+            	String refundableCodes = ParamBean.getInstance().getProperty("refundable.adjustement.codes", "ADJ_REF,INV_CRN");
+                query.setParameter("REFUNDABLE_ADJUSTEMENT_CODES", Arrays.asList(refundableCodes.split("\\s*,\\s*")));
             }
 
             return (List<AccountOperation>) query.getResultList();

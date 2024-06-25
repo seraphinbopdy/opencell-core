@@ -1275,7 +1275,7 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
         result.setTradingCurrency(tradingCurrency);
         result.setReratingBatch(reratingBatch);
         result.setOrderInfo(orderInfo);
-
+        result.setAccountingArticle(accountingArticle);
         return result;
     }
 

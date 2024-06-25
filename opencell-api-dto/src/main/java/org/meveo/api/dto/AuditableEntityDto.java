@@ -76,15 +76,6 @@ public abstract @Hidden class AuditableEntityDto extends BaseEntityDto {
         }
     }
 
-    @Schema(hidden = true)
-    public AuditableDto getAuditableNullSafe() {
-        if (auditable == null) {
-            auditable = new AuditableDto();
-        }
-
-        return auditable;
-    }
-
     public AuditableDto getAuditable() {
         return auditable;
     }

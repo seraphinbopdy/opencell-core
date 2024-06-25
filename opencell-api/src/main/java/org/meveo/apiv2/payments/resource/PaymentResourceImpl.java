@@ -2,7 +2,6 @@ package org.meveo.apiv2.payments.resource;
 
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 import static javax.ws.rs.core.Response.ok;
 
@@ -12,6 +11,7 @@ import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.meveo.api.dto.ActionStatus;
@@ -337,6 +337,14 @@ public class PaymentResourceImpl implements PaymentResource {
                         ",\"message\":\"Rejection payment successfully created\"},\"id\":"
                         + created.getId() + ", \"code\": \""
                         + created.getCode() + "\"}")
+                .build();
+    }
+
+    @Override
+    public Response retryRejectedPayment(@PathParam("id") Long paymentId) throws Exception {
+        paymentApi.retryRejectedPayment(paymentId);
+        return ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Payment successfully retried\"}}")
                 .build();
     }
 }

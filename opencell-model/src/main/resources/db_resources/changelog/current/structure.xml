@@ -13262,4 +13262,135 @@ public class DummyPaymentGatewayScript extends Script {
             <where>code = 'subscriptionOperator'</where>
         </update>
     </changeSet>
+
+    <changeSet id="INTRD-23392_20240604" author="TarikFA.">
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq" />
+            <column name="version" valueNumeric="1" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="job_category" value="MEDIATION" />
+            <column name="job_template" value="FlatFileProcessingJob" />
+            <column name="code" value="massInstantiateDiscountJob" />
+            <column name="description" value="mass instantiate discount job"/>
+            <column name="creator" value="opencell.admin" />
+            <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
+            <column name="verbose_report" valueNumeric="1" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="cf_values">
+                <![CDATA[
+                {"nbRuns": [{"long": 1}], "oneFilePerJob": [{"boolean": false}],
+                "sortingOption": [{"string": "ALPHA"}], "waitingMillis": [{"long": 0}],
+                "FlatFileProcessingJob_inputDir": [{"string": "imports/discount/input"}],
+                "FlatFileProcessingJob_outputDir": [{"string": "/imports/discount/outputs"}],
+                "FlatFileProcessingJob_archiveDir": [{"string": "/imports/discount/archives"}],
+                "FlatFileProcessingJob_errorAction": [{"string": "CONTINUE"}],
+                "FlatFileProcessingJob_mappingConf": [{"string": "<beanio\r\n\txmlns=\"http://www.beanio.org/2012/03\"\r\n\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n  xsi:schemaLocation=\"http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd\">\r\n\t<stream name=\"record\" format=\"csv\">\r\n\t\t<parser>\r\n\t\t\t<property name=\"delimiter\" value=\";\" />\r\n\t\t\t<property name=\"comments\" value=\"END\" />\r\n\t\t\t<property name=\"multilineEnabled\" value=\"true\" />\r\n\t\t</parser>\r\n\t\t<record name=\"header\" minOccurs=\"1\" maxOccurs=\"1\" class=\"map\">\r\n\t\t\t<field name=\"DISCOUNT_CODE\" ignore=\"false\"/>\r\n\t\t\t<field name=\"OFFER_CODE\" ignore=\"true\"/>\r\n\t\t\t<field name=\"PRODUCT_CODE\" ignore=\"true\"/>\r\n\t\t\t<field name=\"TARGET_TYPE\" ignore=\"true\"/>\r\n\t\t\t<field name=\"TARGET_CODES\" ignore=\"true\"/>\r\n\t\t</record>\r\n\t\t<record name=\"details\" minOccurs=\"1\" maxOccurs=\"unbounded\" class=\"map\">\r\n          \t<field name=\"DISCOUNT_CODE\" required=\"true\"/>\r\n\t\t\t<field name=\"OFFER_CODE\" required=\"false\"/>\r\n\t\t\t<field name=\"PRODUCT_CODE\" required=\"false\"/>\r\n\t\t\t<field name=\"TARGET_TYPE\" required=\"false\"/>\r\n\t\t\t<field name=\"TARGET_CODES\" required=\"false\"/>\r\n\t\t</record>\r\n\t</stream>\r\n</beanio>"}],
+                "FlatFileProcessingJob_scriptsFlow": [{"string": "org.meveo.service.script.MassInstantiateDiscountScript"}],
+                "FlatFileProcessingJob_formatTransfo": [{"string": "None"}], "FlatFileProcessingJob_originFilename":
+                [{"string": "origin_filename"}], "FlatFileProcessingJob_nbLinesToProcess": [{"long": 1}],
+                "FlatFileProcessingJob_fileNameExtension": [{"string": "csv"}], "FlatFileProcessingJob_recordVariableName": [{"string": "record"}]}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="code" value="org.meveo.service.script.MassInstantiateDiscountScript" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="version" valueNumeric="0" />
+            <column name="src_type" value="JAVA_CLASS" />
+            <column name="description" value="taking input csv file and instantiating a discount on existants subscription or billing accounts called by a job"/>
+        </insert>
+    </changeSet>
+    <changeSet id="INTRD-23624_20240612" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"<p> Applique un frais à un abonnement du compte de facturation. </p><p>Vous devrez sélectionner une charge exceptionnelle (type “autre”) à appliquer, avec la possibilité de remplacer le montant (cela générera une erreur si la charge ne permettent pas la surcharge du montant) et le libellé.</p><p>Nous devrons sélectionner un abonnement actif auquel appliquer le frais. Par défaut, nous utiliserons l&apos;abonnement actif le plus récent facturé sur les factures impayées. Vous pouvez fournir un filtre supplémentaire pour affiner la liste des abonnements. Ce filtre est en fait une expression qui doit s&apos;évaluée en une chaîne qui sera comparée au code des abonnements dans la portée de recherche d&apos;abonnement, à l&apos;aide de l&apos;opérateur fourni. L’expression aura accès au rejet de paiement, au paiement, aux entités du périmètre (liste des factures, compte de facturation, compte client) et à la liste des abonnements dans le périmètre. Si aucun abonnement actif n&apos;est trouvé, le script échouera et une erreur sera remontée.</p>", "ENG":"<p>Applies a charge to a subscription of the billing account.</p><p>You will have to select a one shot charge (type “other”) to apply, with the ability to override the amount (will raise an error if the charge doesn’t allow amount override) and label.</p> <p>We will need to select an active subscription to apply the charge to. By default, we will use the most recent active subscription invoiced on the unpaid invoices. You can provide an additional filter to narrow down the list of subscriptions. This filter is actually an expression that must evaluate to a string that will be compared to the code of subscriptions in the subscription search scope, using the provided operator. Expression will have access to the rejected payment, the payment, and the scope entities (list of invoices, billing account, customer account) and the list of subscriptions in the scope. If no active subscription is found, the script will fail and an error will be raised.</p>"}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.ApplyChargeScript'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-22961_20240604" author="Zbariki">
+        <addColumn tableName="ar_account_operation">
+            <column name="payment_requests" type="bigint"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="#INTRD-22962_20240605" author="ZakariaB">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+            <column name="code" value="org.meveo.service.script.RetryPaymentScript"/>
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+ public class RetryPaymentScript extends Script {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="version" valueNumeric="0" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Retry payment script"/>
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"<p> This action will set up the invoices linked to the rejected payment for a new payment request. Invoice’s payment request count will be increment by 1, and collection date will be set to rejection date + retry delay.</p><p>If the number of payment requests on the invoice is already greater that the maximum number of retries, you can choose to send the invoices to litigation, or do nothing (and wait for dunning to trigger, if you implemented it).</p>", "FRA":"<p>Cette action représentera pour payment les factures liées au paiement rejeté. Le nombre de demande de payment des factures sera augmenté de 1, et la date de mise en payment sera date de rejet + delay de rejet.</p> <p>Si le nombre de demandes de paiement sur la facture est déjà supérieur au nombre maximum de rejeux, vous pouvez décider de passer les factures en litige, ou ne rien faire (et attendre le déclenchement du dunning, si vous l’avez implémenté).</p>"}]]>
+            </column>
+            <column name="script_instance_cat_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"/>
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="maxRetries" />
+            <column name="description_i18n" value='{"FRA":"Nombre maximum de rejeux","ENG":"Maximum retries count"}'/>
+            <column name="mandatory" valueNumeric="1" />
+            <column name="class_name" value="java.lang.Integer" />
+            <column name="default_value" value="1" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="firstRetryDelay" />
+            <column name="description_i18n" value='{"FRA":"Délai de premier rejeu (jours)","ENG":"First retry delay (days)"}'/>
+            <column name="mandatory" valueNumeric="1" />
+            <column name="class_name" value="java.lang.Integer" />
+            <column name="default_value" value="0" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="nextRetriesDelay" />
+            <column name="description_i18n" value='{"FRA":"Délai des rejeux suivants (jours)","ENG":"Next retries delay (days)"}'/>
+            <column name="mandatory" valueNumeric="1" />
+            <column name="class_name" value="java.lang.Integer" />
+            <column name="default_value" value="10" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="litigationAfterRetry" />
+            <column name="description_i18n" value='{"FRA":"Entrer en litige après le nombre de rejeu max ?","ENG":"Enter litigation after max retries?"}'/>
+            <column name="class_name" value="java.lang.Boolean" />
+            <column name="mandatory" valueNumeric="0" />
+            <column name="default_value" value="true" />
+            <column name="values_separator" value="\|" />
+            <column name="collection" valueNumeric="0" />
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

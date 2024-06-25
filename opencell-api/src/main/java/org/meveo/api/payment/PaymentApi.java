@@ -30,6 +30,7 @@ import static org.meveo.apiv2.payments.SequenceActionType.DOWN;
 import static org.meveo.apiv2.payments.SequenceActionType.UP;
 import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.model.payments.MatchingStatusEnum.O;
+import static org.meveo.model.payments.PaymentMethodEnum.CARD;
 import static org.meveo.model.payments.RejectedType.MANUAL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.ENCODED_FILE_RESULT_LABEL;
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.EXPORT_SIZE_RESULT_LABEL;
@@ -44,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.BadRequestException;
@@ -100,25 +103,7 @@ import org.meveo.model.billing.ExchangeRate;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
-import org.meveo.model.payments.AccountOperation;
-import org.meveo.model.payments.AutomatedPayment;
-import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.MatchingAmount;
-import org.meveo.model.payments.MatchingTypeEnum;
-import org.meveo.model.payments.OCCTemplate;
-import org.meveo.model.payments.OtherCreditAndCharge;
-import org.meveo.model.payments.Payment;
-import org.meveo.model.payments.PaymentGateway;
-import org.meveo.model.payments.PaymentHistory;
-import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.payments.PaymentMethodEnum;
-import org.meveo.model.payments.PaymentRejectionAction;
-import org.meveo.model.payments.PaymentRejectionCode;
-import org.meveo.model.payments.PaymentRejectionCodesGroup;
-import org.meveo.model.payments.PaymentStatusEnum;
-import org.meveo.model.payments.RecordedInvoice;
-import org.meveo.model.payments.RejectedPayment;
-import org.meveo.model.payments.RejectionActionStatus;
+import org.meveo.model.payments.*;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.payments.impl.AccountOperationService;
@@ -479,7 +464,53 @@ public class PaymentApi extends BaseApi {
 		return customerAccountService.customerAccountBalanceDue(customerAccount, new Date()).doubleValue();
 	}
 
-	
+	/**
+	 * Retry Rejected Payment
+	 * @param id Rejected payment id
+	 * @throws Exception exception
+	 */
+	@SecuredBusinessEntityMethod(validate = @SecureMethodParameter(entityClass = CustomerAccount.class))
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void retryRejectedPayment(Long id) throws Exception {
+		// Get rejected payment
+		Payment payment = ofNullable(paymentService.findById(id))
+				.orElseThrow(() -> new NotFoundException("Payment not found for id=" + id));
+
+		// Get rejected payment history
+		PaymentHistory paymentHistory = ofNullable(paymentHistoryService.findPaymentHistoryByPaymentIdAndPaymentStatus(payment.getId(), PaymentStatusEnum.REJECTED))
+				.orElseThrow(() -> new NotFoundException("Rejected payment not found for id=" + id));
+
+		// Get customer account
+		CustomerAccount customerAccount = payment.getCustomerAccount();
+		// Get rejected payment invoices
+		List<Long> ids = new ArrayList<>();
+		paymentHistory.getListAoPaid().forEach(invoice -> ids.add(invoice.getId()));
+
+		// Get preferred payment method
+		PaymentMethod preferredPaymentMethod = customerAccount
+				.getPaymentMethods()
+				.stream()
+				.filter(PaymentMethod::isPreferred)
+				.findFirst()
+				.orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
+						+ customerAccount.getCode()));
+
+		// Get payment gateway
+		PaymentGateway paymentGateway = paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
+
+		if (payment.getPaymentMethod().equals(CARD) && preferredPaymentMethod.getPaymentType().equals(CARD)) {
+			CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
+			paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), ids,
+					Boolean.TRUE, Boolean.TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
+					paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
+					paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
+					Boolean.TRUE, preferredPaymentMethod.getPaymentType());
+		} else {
+			paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), ids,
+					Boolean.TRUE, Boolean.TRUE, paymentGateway, null, null,
+					null, null, null, Boolean.TRUE, preferredPaymentMethod.getPaymentType());
+		}
+	}
 	
 	
 	/**

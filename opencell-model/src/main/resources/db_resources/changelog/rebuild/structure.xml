@@ -2199,6 +2199,7 @@
             <column name="source_account_operation_id" type="bigint" />
             <column name="payment_gateway_id" type="bigint" />
             <column name="rejection_actions_status" type="varchar(30)" />
+            <column name="payment_requests" type="bigint" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-146">
@@ -20931,7 +20932,10 @@
     <changeSet id="#INTRD-22993_20240514" author="AbdellatifBARI" />
     <changeSet id="#INTRD-22976_20240520" author="aeljaouhari" />
     <changeSet id="#INTRD-23293_20240524" author="TarikFA." />
-
+    <changeSet id="INTRD-23392_20240604" author="TarikFA." />
+    <changeSet id="#INTRD-22961_20240604" author="Zbariki"/>
+    <changeSet id="#INTRD-22962_20240605" author="ZakariaB" />
+    <changeSet id="INTRD-23624_20240612" author="ZakariaB" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

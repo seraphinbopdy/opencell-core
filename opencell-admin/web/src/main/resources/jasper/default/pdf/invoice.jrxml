@@ -691,7 +691,6 @@
 					</textElement>
 					<textFieldExpression><![CDATA[(($F{sellerDescription}!=null && !String.valueOf($F{sellerDescription}).isEmpty() && !String.valueOf($F{sellerDescription}).equals("null")) ? "<style isBold='true'>" + $F{sellerDescription} + "</style> " : "") +
 (($F{sellerLegalForm}!=null && !String.valueOf($F{sellerLegalForm}).isEmpty() && !String.valueOf($F{sellerLegalForm}).equals("null")) ? " - " + $F{sellerLegalForm} : "") + 
-(($F{sellerLegalType}!=null && !String.valueOf($F{sellerLegalType}).isEmpty() && !String.valueOf($F{sellerLegalType}).equals("null")) ? " - " + $F{sellerLegalType} : "") + 
 (($F{sellerRegNo}!=null && !String.valueOf($F{sellerRegNo}).isEmpty() && !String.valueOf($F{sellerRegNo}).equals("null")) ? "<style isBold='true'> - Reg.nr.: </style>" + $F{sellerRegNo} : "")
 +
 (($F{sellerVatNo}!=null && !String.valueOf($F{sellerVatNo}).isEmpty() && !String.valueOf($F{sellerVatNo}).equals("null")) ? "<style isBold='true'> - VAT Number </style>" + $F{sellerVatNo} : "")
@@ -700,7 +699,7 @@
 +  " - "
 + (($F{sellerAddress1}!=null && !String.valueOf($F{sellerAddress1}).isEmpty() && !String.valueOf($F{sellerAddress1}).equals("null")) ? " " + $F{sellerAddress1} : "")
 + (($F{sellerAddress2}!=null && !String.valueOf($F{sellerAddress2}).isEmpty() && !String.valueOf($F{sellerAddress2}).equals("null")) ? " " + $F{sellerAddress2} : "")
-+ (($F{sellerAddress3}!=null && !String.valueOf($F{sellerAddress3}).isEmpty() && !String.valueOf($F{sellerAddress3}).equals("null")) ? " " + $F{sellerAddress3} : "")
++ (($F{sellerAddress3}!=null && !String.valueOf($F{sellerAddress3}).isEmpty() && !String.valueOf($F{sellerAddress3}).equals("null")) ? ", " + $F{sellerAddress3} : "")
 + (($F{sellerPostalCode}!=null && !String.valueOf($F{sellerPostalCode}).isEmpty() && !String.valueOf($F{sellerPostalCode}).equals("null")) ? ", " + $F{sellerPostalCode} : "")
 + (($F{sellerCity}!=null && !String.valueOf($F{sellerCity}).isEmpty() && !String.valueOf($F{sellerCity}).equals("null")) ? ", " + $F{sellerCity} : "")
 + (($F{sellerCountryName}!=null && !String.valueOf($F{sellerCountryName}).isEmpty() && !String.valueOf($F{sellerCountryName}).equals("null")) ? ", " + $F{sellerCountryName} : "")]]></textFieldExpression>

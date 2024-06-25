@@ -360,9 +360,9 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
         checkSecurityDepositPaymentAmount(securityDeposit, securityDepositPaymentInput.getAmount(), recordedInvoice);
         checkSecurityDepositSubscription(securityDeposit, recordedInvoice);
         checkSecurityDepositServiceInstance(securityDeposit, recordedInvoice);
-        Long securityDepositAOId = createSecurityDepositPaymentAccountOperation(securityDeposit, securityDepositPaymentInput.getAmount());
-        matchSecurityDepositPayments(securityDeposit, recordedInvoice, securityDepositAOId, securityDepositPaymentInput.getAmount());
-        logPaymentHistory(securityDepositPaymentInput, securityDeposit);
+        Payment securityDepositAO = createSecurityDepositPaymentAccountOperation(securityDeposit, securityDepositPaymentInput.getAmount());
+        matchSecurityDepositPayments(securityDeposit, recordedInvoice, securityDepositAO.getId(), securityDepositPaymentInput.getAmount());
+        logPaymentHistory(securityDepositPaymentInput, securityDeposit, securityDepositAO, recordedInvoice.getId());
 
         DebitSecurityDeposit(securityDeposit, securityDepositPaymentInput.getAmount());
         createSecurityDepositTransaction(securityDeposit,
@@ -375,10 +375,15 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
 
     }
 
-    public Long createSecurityDepositPaymentAccountOperation(SecurityDeposit securityDeposit, BigDecimal amount) {
-
+    /**
+     * Create security deposit payment account operation payment.
+     *
+     * @param securityDeposit the security deposit
+     * @param amount          the amount
+     * @return the payment
+     */
+    public Payment createSecurityDepositPaymentAccountOperation(SecurityDeposit securityDeposit, BigDecimal amount) {
         OCCTemplate occTemplate = occTemplateService.findByCode(OCC_PAY_SD_TEMPLATE);
-
         Payment securityDepositPaymentAccountOperation = new Payment();
 
         paymentService.calculateAmountsByTransactionCurrency(securityDepositPaymentAccountOperation, securityDeposit.getCustomerAccount(),
@@ -398,19 +403,35 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
         securityDepositPaymentAccountOperation.setTransactionDate(new Date());
         securityDepositPaymentAccountOperation.setAccountingDate(new Date());
 
-        return accountOperationService.createAndReturnReference(securityDepositPaymentAccountOperation);
+        Long securityDepositAOId = accountOperationService.createAndReturnReference(securityDepositPaymentAccountOperation);
+        securityDepositPaymentAccountOperation.setId(securityDepositAOId);
+        return securityDepositPaymentAccountOperation;
 
     }
 
-    private void logPaymentHistory(SecurityDepositPaymentInput securityDepositPaymentInput, SecurityDeposit securityDeposit) {
-        paymentHistoryService.addHistory(securityDeposit.getCustomerAccount(),
-            		null,
-    				null,
+    /**
+     * Log payment history.
+     *
+     * @param securityDepositPaymentInput the security deposit payment input
+     * @param securityDeposit             the security deposit
+     * @param securityDepositAO           the security deposit AO
+     * @param recordedInvoiceId           the recorded invoice id
+     */
+    private void logPaymentHistory(SecurityDepositPaymentInput securityDepositPaymentInput, SecurityDeposit securityDeposit, Payment securityDepositAO, Long recordedInvoiceId) {
+        paymentHistoryService.addHistory(
+                securityDeposit.getCustomerAccount(),
+                securityDepositAO,
+                null,
                 securityDepositPaymentInput.getAmount().multiply(new BigDecimal(100)).longValue(),
-    				PaymentStatusEnum.ACCEPTED, null, null,
-                "paid by security deposit", null, null,
-    				null,null,
-                Collections.EMPTY_LIST);
+                PaymentStatusEnum.ACCEPTED,
+                null,
+                null,
+                "paid by security deposit",
+                null,
+                null,
+                null,
+                null,
+                List.of(recordedInvoiceId));
     }
 
     private void DebitSecurityDeposit(SecurityDeposit securityDeposit, BigDecimal amount) {

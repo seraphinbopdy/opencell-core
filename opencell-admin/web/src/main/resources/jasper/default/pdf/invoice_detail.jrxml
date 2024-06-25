@@ -10,7 +10,7 @@
 			<![CDATA[/invoice/detail/userAccounts/userAccount/categories/category/subCategories/subCategory/line]]>
 		</queryString>
 		<field name="articleLabelLine" class="java.lang.String">
-			<fieldDescription><![CDATA[article/@label]]></fieldDescription>
+			<fieldDescription><![CDATA[label]]></fieldDescription>
 		</field>
 		<field name="periodStartDate" class="java.lang.String">
 			<property name="net.sf.jasperreports.xpath.field.expression" value="@periodStartDate"/>
@@ -21,7 +21,7 @@
 			<fieldDescription><![CDATA[@periodEndDate]]></fieldDescription>
 		</field>
 		<field name="label_line" class="java.lang.String">
-			<fieldDescription><![CDATA[label]]></fieldDescription>
+			<fieldDescription><![CDATA[article/@label]]></fieldDescription>
 		</field>
 		<field name="articleCodeLine" class="java.lang.String">
 			<fieldDescription><![CDATA[article/@code]]></fieldDescription>
@@ -67,13 +67,13 @@
 		<fieldDescription><![CDATA[@taxIndex]]></fieldDescription>
 	</field>
 	<field name="label_line" class="java.lang.String">
-		<fieldDescription><![CDATA[label]]></fieldDescription>
+		<fieldDescription><![CDATA[article/@label]]></fieldDescription>
 	</field>
 	<field name="articleCodeLine" class="java.lang.String">
 		<fieldDescription><![CDATA[article/@code]]></fieldDescription>
 	</field>
 	<field name="articleLabelLine" class="java.lang.String">
-		<fieldDescription><![CDATA[article/@label]]></fieldDescription>
+		<fieldDescription><![CDATA[label]]></fieldDescription>
 	</field>
 	<field name="sortIndex" class="java.lang.String">
 		<fieldDescription><![CDATA[@sortIndex]]></fieldDescription>

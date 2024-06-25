@@ -38,7 +38,7 @@ public class PaymentTermApi extends BaseApi {
 	public PaymentTerm update(PaymentTerm postData, String paymentTermCode) {
 		PaymentTerm paymentTerm = paymentTermService.findByCode(paymentTermCode);
 		if(paymentTerm == null){
-			throw new EntityDoesNotExistsException(PaymentTerm.class, postData.getCode());
+			throw new EntityDoesNotExistsException(PaymentTerm.class, paymentTermCode);
 		}
 		if(StringUtils.isBlank(postData.getCode())){
 			missingParameters.add("code");
@@ -48,6 +48,7 @@ public class PaymentTermApi extends BaseApi {
 		}
 		handleMissingParameters();
 		paymentTerm.setDescription(postData.getDescription());
+		paymentTerm.setCode(postData.getCode());
 		if(MapUtils.isNotEmpty(postData.getDescriptionI18n())){
 			paymentTerm.setDescriptionI18n(postData.getDescriptionI18n());
 		}

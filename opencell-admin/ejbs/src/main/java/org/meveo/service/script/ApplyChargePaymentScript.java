@@ -1,6 +1,5 @@
 package org.meveo.service.script;
 
-import static java.lang.Long.valueOf;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
@@ -50,29 +49,31 @@ public class ApplyChargePaymentScript extends Script {
         log.info("Execute apply charge script");
         OneShotChargeTemplate oneShotCharge =
                 oneShotChargeTemplateService.refreshOrRetrieve((OneShotChargeTemplate) context.get("chargeTemplate"));
-        RejectedPayment rejectedPayment = rejectedPaymentService.findById(valueOf((String) context.get("rejectedPayment")));
+        Object paymentReject = ofNullable(context.get("rejectedPayment"))
+                .orElseThrow(() -> new BusinessException("No payment reject provided"));
+        RejectedPayment rejectedPayment = rejectedPaymentService.findById((Long) paymentReject);
         PaymentRejectionActionReport actionReport =
-                ofNullable(paymentRejectionActionReportService.findByCode(rejectedPayment.getCode()))
+                ofNullable(paymentRejectionActionReportService.findByCode(rejectedPayment.getRejectedCode()))
                         .orElseThrow(() -> new BusinessException("No action report found"));
         ofNullable(oneShotCharge).orElseThrow(()
                 ->  new BusinessException("One-shot other charge does’t exist for payment rejection action "
-                + actionReport.getId() + " [gateway="+ rejectedPayment.getPaymentGateway().getCode()
-                + ", rejection code="+ rejectedPayment.getPaymentGateway().getCode() +"]"));
+                + actionReport.getAction().getId() + " [gateway="+ rejectedPayment.getPaymentGateway().getCode()
+                + ", rejection code="+ actionReport.getCode() +"]"));
         if (oneShotCharge.getOneShotChargeTemplateType() != OTHER) {
             throw new BusinessException("Charge [code=" + oneShotCharge.getCode()
                     + "] is not a one-shot charge of type ‘other' "
-                    + "for payment rejection action " +  actionReport.getId()
+                    + "for payment rejection action " +  actionReport.getAction().getId()
                     + " [gateway="+ rejectedPayment.getPaymentGateway().getCode()
-                    + ", rejection code=" + rejectedPayment.getCode() + "]");
+                    + ", rejection code=" + actionReport.getCode() + "]");
         }
         BigDecimal amountOverride = (BigDecimal) context.get("amountOverride");
         String descriptionOverride = (String) context.get("descriptionOverride");
         if(amountOverride != null
                 && (oneShotCharge.getAmountEditable() != null && !oneShotCharge.getAmountEditable())) {
             throw new BusinessException("Charge [code="+ oneShotCharge.getCode()
-                    +"] does’t allow amount override for payment rejection action " + actionReport.getId()
+                    +"] does’t allow amount override for payment rejection action " + actionReport.getAction().getId()
                     + " [gateway="+ rejectedPayment.getPaymentGateway().getCode()
-                    + ", rejection code=" + rejectedPayment.getCode() + "]");
+                    + ", rejection code=" + actionReport.getCode() + "]");
         }
         Payment payment = paymentService.findByRejectPayment(rejectedPayment.getId());
         String subscriptionSearchScope = (String) context.get("subscriptionSearchScope");
@@ -80,10 +81,10 @@ public class ApplyChargePaymentScript extends Script {
         List<Subscription> subscriptions = loadSubscriptions(subscriptionSearchScope, payment);
         if (subscriptions == null || subscriptions.isEmpty()) {
             throw new BusinessException("No subscription matches the criteria "
-                    + "for payment rejection action {{id}} [gateway="
+                    + "for payment rejection action " + actionReport.getAction().getId() + " [gateway="
                     + rejectedPayment.getPaymentGateway().getCode()
-                    + ", rejection code=" + rejectedPayment.getCode() + "] "
-                    + "and rejected payment [id=" + rejectedPayment.getCode()
+                    + ", rejection code=" + actionReport.getCode() + "] "
+                    + "and rejected payment [id=" + rejectedPayment.getId()
                     + ", reference=" + rejectedPayment.getReference() + "]");
         }
         String subscriptionFilter = (String) context.get("subscriptionFilter");
@@ -111,7 +112,7 @@ public class ApplyChargePaymentScript extends Script {
         }
         ofNullable(selectedSubscription)
                 .orElseThrow(() ->  new BusinessException("No subscription matches the criteria "
-                        + "for payment rejection action {{id}} [gateway="
+                        + "for payment rejection action " + actionReport.getAction().getId() + " [gateway="
                         + rejectedPayment.getPaymentGateway().getCode()
                         + ", rejection code=" + rejectedPayment.getCode() + "] "
                         + "and rejected payment [id=" + rejectedPayment.getCode()
@@ -123,13 +124,10 @@ public class ApplyChargePaymentScript extends Script {
                         amountOverride, descriptionOverride, rejectedPayment, payment, actionReport);
 
         subscriptionService.applyOneShotChargeList(applyOneShotChargeListInput);
-        log.info("Charge applied to subscription{}", selectedSubscription.getCode());
-
-        actionReport.setReport("Charge [code=" + oneShotCharge.getCode()
-                + "] has been applied to subscription [code="+ selectedSubscription.getCode() +"]");
-        paymentRejectionActionReportService.update(actionReport);
-        context.put(RESULT_VALUE, "Charge [code=" + oneShotCharge.getCode()
+        log.info("Charge applied to subscription {}", selectedSubscription.getCode());
+        context.put(REJECTION_ACTION_REPORT, "Charge [code=" + oneShotCharge.getCode()
                 +"] has been applied to subscription [code=" + selectedSubscription.getCode() +"]");
+        context.put(REJECTION_ACTION_RESULT, true);
         log.info("Apply charge script successfully executed");
     }
 

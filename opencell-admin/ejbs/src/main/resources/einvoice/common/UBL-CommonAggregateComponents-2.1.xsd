@@ -23602,6 +23602,22 @@ Thus, the column Preference Criterion will indicate either A, B, C,...</ccts:Exa
                </xsd:documentation>
             </xsd:annotation>
          </xsd:element>
+         <xsd:element ref="cac:PartyIdentification" minOccurs="0" maxOccurs="1">
+              <xsd:annotation>
+                  <xsd:documentation>
+                      <ccts:Component>
+                          <ccts:ComponentType>ASBIE</ccts:ComponentType>
+                          <ccts:DictionaryEntryName>Party. Party Identification</ccts:DictionaryEntryName>
+                          <ccts:Definition>An identifier for this party.</ccts:Definition>
+                          <ccts:Cardinality>0..n</ccts:Cardinality>
+                          <ccts:ObjectClass>Party</ccts:ObjectClass>
+                          <ccts:PropertyTerm>Party Identification</ccts:PropertyTerm>
+                          <ccts:AssociatedObjectClass>Party Identification</ccts:AssociatedObjectClass>
+                          <ccts:RepresentationTerm>Party Identification</ccts:RepresentationTerm>
+                      </ccts:Component>
+                  </xsd:documentation>
+              </xsd:annotation>
+          </xsd:element>
       </xsd:sequence>
    </xsd:complexType>
    <xsd:complexType name="PaymentTermsType">

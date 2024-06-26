@@ -91,7 +91,7 @@ public class GenericApiLoadService {
         	// get specific custom fields with meta data
         	SearchResult searchResult = persistenceDelegate.list(entityClass, searchConfig);
             searchConfig.setFetchFields(new ArrayList<>(genericFields));
-            List<List<Object>> list = (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, id)
+            List<List<Object>> list = (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, id, Boolean.FALSE)
                     .find(nativePersistenceService.getEntityManager()).stream()
                     .map(ObjectArrays -> Arrays.asList(ObjectArrays))
                     .collect(toList());
@@ -259,7 +259,7 @@ public class GenericApiLoadService {
                                                    .collect(Collectors.toList()));
         }
         
-        return (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, null)
+        return (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, null, Boolean.TRUE)
                                                                                .find(nativePersistenceService.getEntityManager())
                                                                                .stream()
                                                                                .map(ObjectArrays -> Arrays.asList(ObjectArrays))

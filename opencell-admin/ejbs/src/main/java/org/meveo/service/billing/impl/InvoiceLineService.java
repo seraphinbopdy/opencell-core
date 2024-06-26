@@ -1312,8 +1312,12 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
             numberOrRts = numberOrRts + associatedRtIds.size();
             i++;
         }
-        
-        List<InvoiceLinesGroup> customInvoiceLinesGroups = billingRun != null ? executeBillingCycleScript(invoiceLines, billingRun, billingAccount) : null;
+        List<InvoiceLinesGroup> customInvoiceLinesGroups = null;
+        if(billingRun != null &&  billingRun.getBillingCycle() != null
+                && billingRun.getBillingCycle().getScriptInstance() != null) {
+            invoiceLines.forEach(this::create);
+            customInvoiceLinesGroups = executeBillingCycleScript(invoiceLines, billingRun, billingAccount);
+        }
 
         if (customInvoiceLinesGroups != null && !customInvoiceLinesGroups.isEmpty()) {
             customInvoiceLinesGroups.forEach(group -> this.writeInvoiceLines(group.getInvoiceLines(), group.getInvoiceKey()));
@@ -1469,7 +1473,11 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
             if(invoiceKey!=null) {
             	invoiceLine.setInvoiceKey(invoiceKey);
             }
-            create(invoiceLine);
+            if(invoiceLine.getId() != null) {
+                update(invoiceLine);
+            } else {
+                create(invoiceLine);
+            }
         });
     }
 

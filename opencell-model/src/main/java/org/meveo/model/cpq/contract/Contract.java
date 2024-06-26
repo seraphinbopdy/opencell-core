@@ -34,9 +34,9 @@ import org.meveo.model.payments.CustomerAccount;
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
         @Parameter(name = "sequence_name", value = "cpq_contract_seq"), })
 @NamedQueries({
-	@NamedQuery(name = "Contract.findBillingAccount", query = "select c from Contract c  left join fetch  c.billingAccount cb where cb.code=:codeBillingAccount"),
-	@NamedQuery(name = "Contract.findCustomerAccount", query = "select c from Contract c left join c.customerAccount cc where cc.code=:codeCustomerAccount"),
-	@NamedQuery(name = "Contract.findCustomer", query = "select c from Contract c left join c.customer cc where cc.code=:codeCustomer"),
+	@NamedQuery(name = "Contract.findBillingAccount", query = "select c from Contract c  left join fetch  c.billingAccount cb where lower(cb.code) = lower(:codeBillingAccount)"),
+	@NamedQuery(name = "Contract.findCustomerAccount", query = "select c from Contract c left join c.customerAccount cc where lower(cc.code) = lower(:codeCustomerAccount)"),
+	@NamedQuery(name = "Contract.findCustomer", query = "select c from Contract c left join c.customer cc where lower(cc.code) = lower(:codeCustomer)"),
     @NamedQuery(name = "Contract.findByAccounts", query = "select c from Contract c where c.status='ACTIVE' and (cast(:operationDate as date) is null or (c.beginDate<=:operationDate and c.endDate>:operationDate)) "
     		+ " and (c.customer.id is null or c.customer.id in :customerIds) "
 				+ " and (c.billingAccount.id is null or c.billingAccount.id=:billingAccountId) and (c.customerAccount.id is null or c.customerAccount.id=:customerAccountId)  "

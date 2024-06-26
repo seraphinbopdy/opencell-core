@@ -12510,4 +12510,13 @@ public class DummyPaymentGatewayScript extends Script {
                     valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-23916_20240625" author="a.rouaguebe">
+        <sql>DROP INDEX IF EXISTS rt_customer_id_contract_index</sql>
+        <sql>DROP INDEX IF EXISTS rt_billing_account_id_contract_index</sql>
+        <sql>DROP INDEX IF EXISTS rt_customer_account_contract_index</sql>
+        <sql>CREATE INDEX rt_customer_id_contract_index ON ${db.schema.adapted}cpq_contract (customer_id)</sql>
+        <sql>CREATE INDEX rt_billing_account_id_contract_index ON ${db.schema.adapted}cpq_contract (billing_account_id)</sql>
+        <sql>CREATE INDEX rt_customer_account_contract_index ON ${db.schema.adapted}cpq_contract (customer_account_id)</sql>
+    </changeSet>
 </databaseChangeLog>

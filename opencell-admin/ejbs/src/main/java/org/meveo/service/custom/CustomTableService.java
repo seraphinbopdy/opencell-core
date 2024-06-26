@@ -260,7 +260,7 @@ public class CustomTableService extends NativePersistenceService {
     public Future<DataImportExportStatistics> exportData(CustomEntityTemplate customEntityTemplate, PaginationConfiguration config) throws BusinessException {
 
         try {
-            QueryBuilder queryBuilder = getQuery(customEntityTemplate.getDbTablename(), config, null);
+            QueryBuilder queryBuilder = getQuery(customEntityTemplate.getDbTablename(), config, null, Boolean.FALSE);
 
             SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
 
@@ -1008,7 +1008,7 @@ public class CustomTableService extends NativePersistenceService {
 
     @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
     private Map<String, Object> findRecordByIdAndTableName(Long id, String tableName) {
-        QueryBuilder queryBuilder = getQuery(tableName, null, null);
+        QueryBuilder queryBuilder = getQuery(tableName, null, null, Boolean.FALSE);
         queryBuilder.addCriterion("id", "=", id, true);
         Query query = queryBuilder.getNativeQuery(getEntityManager(), true);
         return (Map<String, Object>) query.uniqueResult();
@@ -1059,7 +1059,7 @@ public class CustomTableService extends NativePersistenceService {
         fetchFields.addAll(fields);
         PaginationConfiguration pc = new PaginationConfiguration(null);
         pc.setFetchFields(fetchFields);
-        QueryBuilder qb = getQuery(tableName, pc, null);
+        QueryBuilder qb = getQuery(tableName, pc, null, Boolean.FALSE);
         if (!StringUtils.isEmpty(wildCode)) {
             qb.addSql(" cast(" + FIELD_ID + " as varchar(100)) like :id");
         }
@@ -1072,7 +1072,7 @@ public class CustomTableService extends NativePersistenceService {
 
     @SuppressWarnings({ "deprecation", "rawtypes" })
     public boolean containsRecordOfTableByColumn(String tableName, String columnName, Long id) {
-        QueryBuilder queryBuilder = getQuery(tableName, null, null);
+        QueryBuilder queryBuilder = getQuery(tableName, null, null, Boolean.FALSE);
         queryBuilder.addCriterion(columnName, "=", id, true);
         Query query = queryBuilder.getNativeQuery(getEntityManager(), true);
         return !query.list().isEmpty();
@@ -1211,7 +1211,7 @@ public class CustomTableService extends NativePersistenceService {
 
     public List<Map<String, Object>> exportCustomTable(CustomEntityTemplate customEntityTemplate) throws BusinessException {
         PaginationConfiguration pagination = new PaginationConfiguration(null, 0, null, null, null, FIELD_ID, SortOrder.ASCENDING);
-        QueryBuilder queryBuilder = getQuery(customEntityTemplate.getDbTablename(), pagination, null);
+        QueryBuilder queryBuilder = getQuery(customEntityTemplate.getDbTablename(), pagination, null, Boolean.FALSE);
         SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
         List<Map<String, Object>> data = query.list();
         return (data.isEmpty() ? null : data);

@@ -9,6 +9,7 @@ import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanStatusEnum;
+import org.meveo.model.catalog.DiscountPlanTypeEnum;
 import org.meveo.model.catalog.OfferProductTemplate;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.cpq.Product;

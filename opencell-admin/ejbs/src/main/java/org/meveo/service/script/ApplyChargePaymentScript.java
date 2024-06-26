@@ -111,9 +111,9 @@ public class ApplyChargePaymentScript extends Script {
         if (!subscriptions.isEmpty() && subscriptions.size() > 1) {
             subscriptions.sort(comparing(Subscription::getSubscriptionDate));
             if (subscriptionSelection.equals("newest")) {
-                selectedSubscription = subscriptions.get(0);
-            } else {
                 selectedSubscription = subscriptions.get(subscriptions.size() - 1);
+            } else {
+                selectedSubscription = subscriptions.get(0);
             }
         } else if (subscriptions.size() == 1) {
             selectedSubscription = subscriptions.get(0);

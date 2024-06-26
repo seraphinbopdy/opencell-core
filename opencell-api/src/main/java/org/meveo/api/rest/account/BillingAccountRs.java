@@ -71,6 +71,17 @@ public interface BillingAccountRs extends IBaseRs {
     @Path("/")
     @Operation(summary = "Create a new billing account", tags = { "Billing account management" })
     ActionStatus create(BillingAccountDto postData);
+    
+    /**
+     * Create a new billing account V2 with check on legalEntityType, registrationNo and description.
+     * 
+     * @param postData Billing account data
+     * @return Request processing status
+     */
+    @POST
+    @Path("/V2")
+    @Operation(summary = "Create a new billing account", tags = { "Billing account management" })
+    ActionStatus createV2(BillingAccountDto postData);
 
     /**
      * Update existing billing account.

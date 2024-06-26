@@ -336,7 +336,13 @@ public class TaxMappingService extends PersistenceService<TaxMapping> {
 	
 	private void setTaxForWallet(TaxInfo taxInfo, WalletOperation walletOperation) {
 		if(taxInfo != null){
-			walletOperation.setTaxClass(getEntityManager().getReference(TaxClass.class, taxInfo.taxClass.getId()));
+			if(taxInfo.taxClass != null){
+				if(taxInfo.taxClass instanceof TaxClass){
+					walletOperation.setTaxClass(taxInfo.taxClass);
+				}else{
+					walletOperation.setTaxClass((TaxClass) ((HibernateProxy) taxInfo.taxClass).getHibernateLazyInitializer().getImplementation());
+				}
+			}
 			walletOperation.setTax(taxInfo.tax);
 			walletOperation.setTaxPercent(taxInfo.tax.getPercent());
 		}

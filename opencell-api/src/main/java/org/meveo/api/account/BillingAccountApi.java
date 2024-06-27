@@ -289,27 +289,7 @@ public class BillingAccountApi extends AccountEntityApi {
 
         return billingAccount;
     }
-    
-    public BillingAccount createV2(BillingAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel,
-            CustomerAccount associatedCA) throws MeveoApiException, BusinessException {
-    	
-		if(postData.getLegalEntityType() == null) {
-			missingParameters.add("legalEntityType");
-		} else if(StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
-			missingParameters.add("legalEntityType.code");
-		}
 
-		if(StringUtils.isBlank(postData.getDescription())) {
-			missingParameters.add("description");
-		}
-
-		if(CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
-			missingParameters.add("registrationNo");
-		}
-		
-    	create(postData, checkCustomFields, businessAccountModel, associatedCA);
-    }
-    
     private void processTags(BillingAccountDto postData, BillingAccount billingAccount) {
     	Set<String> tagCodes = postData.getTagCodes();
 		if(tagCodes != null && !tagCodes.isEmpty()){

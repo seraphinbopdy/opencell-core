@@ -68,21 +68,6 @@ public class BillingAccountRsImpl extends BaseRs implements BillingAccountRs {
 
         return result;
     }
-    
-    @Override
-    public ActionStatus createV2(BillingAccountDto postData) {
-        ActionStatus result = new ActionStatus(ActionStatusEnum.SUCCESS, "");
-
-        try {
-            BillingAccount billingAccount = billingAccountApi.createV2(postData);
-            result.setEntityCode(billingAccount.getCode());
-            result.setEntityId(billingAccount.getId());
-        } catch (Exception e) {
-            processException(e, result);
-        }
-
-        return result;
-    }
 
     @Override
     public ActionStatus update(BillingAccountDto postData) {

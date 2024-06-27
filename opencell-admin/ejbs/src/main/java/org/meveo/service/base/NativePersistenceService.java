@@ -854,7 +854,7 @@ public class NativePersistenceService extends BaseService {
      * @param id        Id field value to explicitly extract data by ID
      * @return Query builder to filter entities according to pagination configuration data.
      */
-    public QueryBuilder getQuery(String tableName, PaginationConfiguration config, Long id) {
+    public QueryBuilder getQuery(String tableName, PaginationConfiguration config, Long id, Boolean isExport) {
         tableName = addCurrentSchema(tableName);
         Predicate<String> predicate = field -> this.checkAggFunctions(field.toUpperCase().trim());
         List<String> fetchFields = new ArrayList<>();
@@ -895,13 +895,15 @@ public class NativePersistenceService extends BaseService {
         }
 
         Class<?> entity = null;
-        if(!tableName.toUpperCase().startsWith("CT_")) {
+
+        if (Boolean.TRUE.equals(isExport) && !tableName.toUpperCase().startsWith("CT_")) {
             try {
                 entity = Class.forName(tableName);
             } catch (ClassNotFoundException e) {
                 throw new BusinessException(String.format("Unknown entity %s", tableName));
             }
         }
+
         Class<?> finalEntity = entity;
 
         List<String> aggregationFields = fetchFields.stream()
@@ -1269,7 +1271,7 @@ public class NativePersistenceService extends BaseService {
         tableName = tableName.toLowerCase();
 
         tableName = addCurrentSchema(tableName);
-        QueryBuilder queryBuilder = getQuery(tableName, config, null);
+        QueryBuilder queryBuilder = getQuery(tableName, config, null, Boolean.FALSE);
         SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
 
         if (config.isCacheable()) {
@@ -1305,7 +1307,7 @@ public class NativePersistenceService extends BaseService {
     @SuppressWarnings({"deprecation", "rawtypes"})
     public List listAsObjects(String tableName, PaginationConfiguration config) {
         tableName = addCurrentSchema(tableName);
-        QueryBuilder queryBuilder = getQuery(tableName, config, null);
+        QueryBuilder queryBuilder = getQuery(tableName, config, null, Boolean.FALSE);
         SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), false);
 
         if (config.isCacheable()) {
@@ -1365,7 +1367,7 @@ public class NativePersistenceService extends BaseService {
      */
     public long count(String tableName, PaginationConfiguration config) {
         tableName = addCurrentSchema(tableName);
-        QueryBuilder queryBuilder = getQuery(tableName, config, null);
+        QueryBuilder queryBuilder = getQuery(tableName, config, null, Boolean.FALSE);
         Query query = queryBuilder.getNativeCountQuery(getEntityManager());
         Object count = query.setFlushMode(FlushModeType.COMMIT).getSingleResult();
         if (count instanceof Long) {
@@ -1749,7 +1751,7 @@ public class NativePersistenceService extends BaseService {
             qb = this.getAggregateQuery(entityClass.getCanonicalName(), searchConfig, null);
         } else if (isCustomFieldQuery(genericPagingAndFilter.getGenericFields())) {
             searchConfig.setFetchFields(genericFields);
-            qb = this.getQuery(entityClass.getCanonicalName(), searchConfig, null);
+            qb = this.getQuery(entityClass.getCanonicalName(), searchConfig, null, Boolean.FALSE);
         } else {
             qb = PersistenceServiceHelper.getPersistenceService(entityClass, searchConfig).listQueryBuilder(searchConfig);
             String fieldsToRetrieve = !genericFields.isEmpty() ? retrieveFields(genericFields, null) : "";
@@ -1872,7 +1874,7 @@ public class NativePersistenceService extends BaseService {
             if (filters != null && !filters.isEmpty()) {
                 PaginationConfiguration searchConfig = new PaginationConfiguration(filters);
                 searchConfig.setFetchFields(Arrays.asList("id"));
-                String subQuery = getQuery(entityClassName, searchConfig, null).getQueryAsString();
+                String subQuery = getQuery(entityClassName, searchConfig, null, Boolean.FALSE).getQueryAsString();
                 if (subQuery.indexOf("join") > -1) {
                     updateQuery = updateQuery + " WHERE id in (" + subQuery + ")";
                 } else {

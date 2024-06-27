@@ -376,7 +376,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         }
         PaginationConfiguration searchConfig = new PaginationConfiguration(mergedFilters);
         searchConfig.setFetchFields(Arrays.asList("id"));
-        return nativePersistenceService.getQuery(hugeEntityClass.getSimpleName(), searchConfig, null).getQueryAsString();
+        return nativePersistenceService.getQuery(hugeEntityClass.getSimpleName(), searchConfig, null, Boolean.FALSE).getQueryAsString();
     }
 
     /**

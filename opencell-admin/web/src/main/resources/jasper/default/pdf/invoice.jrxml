@@ -400,7 +400,7 @@
 							<property name="ShowOutOfBoundContent" value="true"/>
 						</reportElement>
 						<rectangle radius="10">
-							<reportElement isPrintRepeatedValues="false" x="16" y="3" width="216" height="217" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ab33f039-d780-4304-9a78-c8a1b32b72e4"/>
+							<reportElement x="16" y="3" width="216" height="217" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ab33f039-d780-4304-9a78-c8a1b32b72e4"/>
 							<graphicElement>
 								<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 							</graphicElement>
@@ -424,7 +424,7 @@
 							<text><![CDATA[Customer]]></text>
 						</staticText>
 						<rectangle radius="0">
-							<reportElement isPrintRepeatedValues="false" x="16" y="206" width="216" height="104" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="62eca460-82c3-42a2-8462-a8e3a4f60aee"/>
+							<reportElement x="16" y="206" width="216" height="104" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="62eca460-82c3-42a2-8462-a8e3a4f60aee"/>
 							<graphicElement>
 								<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 							</graphicElement>

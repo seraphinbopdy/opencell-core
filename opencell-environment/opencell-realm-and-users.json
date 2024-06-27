@@ -2962,6 +2962,15 @@
           "attributes": {}
         },
         {
+          "id": "ff89da36-98b6-4b21-ae68-a6acde39e738",
+          "name": "SELLER",
+          "description": "Accès à l'application Seller",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
           "id": "cb5643f2-06fa-469b-bfce-3f4ce943347d",
           "name": "QUERY_USER",
           "composite": false,

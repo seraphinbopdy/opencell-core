@@ -19,6 +19,7 @@
 package org.meveo.service.tax;
 
 import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.IncorrectChargeTemplateException;

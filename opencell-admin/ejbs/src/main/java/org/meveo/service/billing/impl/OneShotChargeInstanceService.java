@@ -313,6 +313,7 @@ public class OneShotChargeInstanceService extends BusinessService<OneShotChargeI
                 oneShotChargeInstance.setServiceInstance(null);
             }
         	create(oneShotChargeInstance);
+            getEntityManager().flush();
         }
 
         if (chargeMode == null) {

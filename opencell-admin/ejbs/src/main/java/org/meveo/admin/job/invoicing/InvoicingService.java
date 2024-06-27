@@ -184,7 +184,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
 	        evalDueDate(invoice, billingCycle, null, billingAccountDetailsItem.getCaDueDateDelayEL(), billingRun.isExceptionalBR());
 	        invoiceService.setInitialCollectionDate(invoice, billingCycle, billingRun);
 	        invoice.setSubCategoryInvoiceAgregate(invoiceSCAs);
-	        InvoicingJobV3Bean.addNewAmounts(invoice.getAmountTax(), invoice.getAmountWithoutTax(), invoice.getAmountWithTax());
 	        invoices.add(invoice);
     	}
     }

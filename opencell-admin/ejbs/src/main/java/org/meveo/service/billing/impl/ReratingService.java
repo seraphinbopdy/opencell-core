@@ -691,7 +691,7 @@ public class ReratingService extends RatingService implements Serializable {
             for (WalletOperation walletOperation : ratingResult.getWalletOperations()) {
                 walletOperationService.chargeWalletOperation(walletOperation);
             }
-
+            
         } catch (EJBTransactionRolledbackException e) {
             if (ratingResult != null) {
                 revertCounterChanges(ratingResult.getCounterChanges());
@@ -762,6 +762,7 @@ public class ReratingService extends RatingService implements Serializable {
     
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void applyMassRerate(List<Long> ids, boolean useSamePricePlan, JobExecutionResultImpl jobExecutionResult) {
+		int toProcess=ids.size();
 		String readWOsQuery = "FROM WalletOperation wo left join fetch wo.chargeInstance ci left join fetch wo.edr edr WHERE wo.status='TO_RERATE' AND wo.id IN (:ids)";
 		List<WalletOperation> walletOperations = getEntityManager().createQuery(readWOsQuery, WalletOperation.class).setParameter("ids", ids).getResultList();
 		Map<String, List<Long>> errorsMap = new HashMap<>();
@@ -772,12 +773,20 @@ public class ReratingService extends RatingService implements Serializable {
 		        errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(operationToRerate.getId());
 		    }
 		});
-		errorsMap.forEach((key, value) ->jobExecutionResult.registerError(""+value.size()+" errors of: "+key+" IDs: "+ value.stream().map(String::valueOf).collect(Collectors.joining(", ")), value.size()));
+		
+		errorsMap.forEach((key, value) ->reportErrors(jobExecutionResult, key, value, toProcess));
 		ids.removeAll(errorsMap.values().stream().flatMap(List::stream).collect(Collectors.toList()));
 		if(!ids.isEmpty()) {
 			Date now = new Date();
 			String updateILQuery = "UPDATE WalletOperation SET status='RERATED', updated = :now where id in (:ids) ";
 			getEntityManager().createQuery(updateILQuery).setParameter("ids", ids).setParameter("now", now).executeUpdate();
 		}
+	}
+
+	private void reportErrors(JobExecutionResultImpl jobExecutionResult, String key, List<Long> value, int toProcess) {
+		int errorsToCompute = value.size();
+		errorsToCompute = errorsToCompute == toProcess || errorsToCompute == 0 ? 0 : errorsToCompute;
+		jobExecutionResult.registerError("" + value.size() + " errors of: " + key + " IDs: " + value.stream().map(String::valueOf).collect(Collectors.joining(", ")), errorsToCompute);
+		jobExecutionResult.addNbItemsCorrectlyProcessed(-errorsToCompute);
 	}
 }

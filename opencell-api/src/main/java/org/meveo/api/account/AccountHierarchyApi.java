@@ -2225,7 +2225,9 @@ public class AccountHierarchyApi extends BaseApi {
 			if(subscriptionDto.getStatus() == null) {
 				return;
 			}
-		}
+		} else if(subscriptionDto.getStatus() == null) {
+            return;
+        }
 		String errorMsg = "Transition from status : " + (subscription != null ? subscription.getStatus() : null) + " to status : " + subscriptionDto.getStatus() + " is not allowed";
 		if(subscription != null) {
 			log.info("Subscription : {}, from status : {}, to status : {}", subscription.getCode(), subscription.getStatus(), subscriptionDto.getStatus());

@@ -12426,7 +12426,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enablePricePlanFilters"/>
-		    <column name="description" value="pricePlanFilters.enablePricePlanFilters"/>
+		    <column name="description" value="Activate price plan filters"/>
+            <column name="description_i18n" value='{"FRA":"Activer les filtres de price plan","ENG":"Activate price plan filters"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12439,7 +12440,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableOfferTemplate"/>
-		    <column name="description" value="pricePlanFilters.enableOfferTemplate"/>
+		    <column name="description" value="Offer"/>
+            <column name="description_i18n" value='{"FRA":"Offre","ENG":"Offer"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12452,7 +12454,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableStartSubscriptionDate"/>
-		    <column name="description" value="pricePlanFilters.enableStartSubscriptionDate"/>
+		    <column name="description" value="Subscription date from"/>
+            <column name="description_i18n" value='{"FRA":"Date de souscription depuis","ENG":"Subscription date from"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12465,7 +12468,10 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableEndSubscriptionDate"/>
-		    <column name="description" value="pricePlanFilters.enableEndSubscriptionDate"/>
+		    <column name="description" value="Subscription date to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Date de souscription jusqu'à","ENG":"Subscription date to"}]]>
+            </column>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12478,7 +12484,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableStartRatingDate"/>
-		    <column name="description" value="pricePlanFilters.enableStartRatingDate"/>
+		    <column name="description" value="Rating date from"/>
+            <column name="description_i18n" value='{"FRA":"Date de valorisation depuis","ENG":"Rating date from"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12491,7 +12498,10 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableEndRatingDate"/>
-		    <column name="description" value="pricePlanFilters.enableEndRatingDate"/>
+		    <column name="description" value="Rating date to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Date de valorisation jusqu'à","ENG":"Rating date to"}]]>
+            </column>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12504,7 +12514,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableMinQuantity"/>
-		    <column name="description" value="pricePlanFilters.enableMinQuantity"/>
+		    <column name="description" value="Minimum quantity"/>
+            <column name="description_i18n" value='{"FRA":"Quantité minimale","ENG":"Minimum quantity"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12517,7 +12528,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableMaxQuantity"/>
-		    <column name="description" value="pricePlanFilters.enableMaxQuantity"/>
+		    <column name="description" value="Maximum quantity"/>
+            <column name="description_i18n" value='{"FRA":"Quantité maximale","ENG":"Maximum quantity"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12530,7 +12542,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableMinSubscriptionAgeInMonth"/>
-		    <column name="description" value="pricePlanFilters.enableMinSubscriptionAgeInMonth"/>
+		    <column name="description" value="Minimum subscription age (months)"/>
+            <column name="description_i18n" value='{"FRA":"Âge minimal de la souscription (mois)","ENG":"Minimum subscription age (months)"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12543,7 +12556,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableMaxSubscriptionAgeInMonth"/>
-		    <column name="description" value="pricePlanFilters.enableMaxSubscriptionAgeInMonth"/>
+		    <column name="description" value="Maximum subscription age (months)"/>
+            <column name="description_i18n" value='{"FRA":"Âge maximal de la souscription (mois)","ENG":"Maximum subscription age (months)"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12556,7 +12570,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria1Value"/>
-		    <column name="description" value="pricePlanFilters.enableCriteria1Value"/>
+		    <column name="description" value="Criteria 1"/>
+            <column name="description_i18n" value='{"FRA":"Critère 1","ENG":"Criteria 1"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12569,7 +12584,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria2Value"/>
-		    <column name="description" value="pricePlanFilters.enableCriteria2Value"/>
+		    <column name="description" value="Criteria 2"/>
+            <column name="description_i18n" value='{"FRA":"Critère 2","ENG":"Criteria 2"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12582,7 +12598,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria3Value"/>
-		    <column name="description" value="pricePlanFilters.enableCriteria3Value"/>
+            <column name="description" value="Criteria 3"/>
+            <column name="description_i18n" value='{"FRA":"Critère 3","ENG":"Criteria 3"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12595,7 +12612,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteriaEL"/>
-		    <column name="description" value="pricePlanFilters.enableCriteriaEL"/>
+		    <column name="description" value="Criteria expression"/>
+            <column name="description_i18n" value='{"FRA":"Critère EL","ENG":"Criteria expression"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12608,7 +12626,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableTradingCurrency"/>
-		    <column name="description" value="pricePlanFilters.enableTradingCurrency"/>
+		    <column name="description" value="Trading currency"/>
+            <column name="description_i18n" value='{"FRA":"Devise de transaction","ENG":"Trading currency"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12621,7 +12640,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableTradingCountry"/>
-		    <column name="description" value="pricePlanFilters.enableTradingCountry"/>
+		    <column name="description" value="Trading country"/>
+            <column name="description_i18n" value='{"FRA":"Pays de transaction","ENG":"Trading country"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12634,7 +12654,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableSeller"/>
-		    <column name="description" value="pricePlanFilters.enableSeller"/>
+		    <column name="description" value="Seller"/>
+            <column name="description_i18n" value='{"FRA":"Vendeur","ENG":"Seller"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12647,7 +12668,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableValidityCalendar"/>
-		    <column name="description" value="pricePlanFilters.enableValidityCalendar"/>
+		    <column name="description" value="Validity calendar"/>
+            <column name="description_i18n" value='{"FRA":"Calendrier de validité","ENG":"Validity calendar"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12660,7 +12682,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableValidityFrom"/>
-		    <column name="description" value="pricePlanFilters.enableValidityFrom"/>
+		    <column name="description" value="Valid from"/>
+            <column name="description_i18n" value='{"FRA":"Valide depuis","ENG":"Valid from"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12673,7 +12696,10 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableValidityDate"/>
-		    <column name="description" value="pricePlanFilters.enableValidityDate"/>
+		    <column name="description" value="Validity to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Valide jusqu'à","ENG":"Validity to"}]]>
+            </column>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12686,7 +12712,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="customFields.enableCfValueVersionning"/>
-		    <column name="description" value="customFields.enableCfValueVersionning"/>
+		    <column name="description" value="Enable custom field value versioning"/>
+            <column name="description_i18n" value='{"FRA":"Activer le versionnage des valeurs des champs personnalisé","ENG":"Enable custom field value versioning"}'/>
 		</insert>
         <insert tableName="advanced_settings">
             <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12699,7 +12726,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="property_value" value=","/>
             <column name="creator" value="applicationInitializer"/>
             <column name="code" value="standardExports.fieldsSeparator"/>
-            <column name="description" value="standardExports.fieldsSeparator"/>
+            <column name="description" value="Fields seprator"/>
+            <column name="description_i18n" value='{"FRA":"Séparateur de champs","ENG":"Fields seprator"}'/>
         </insert>
         <insert tableName="advanced_settings">
             <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12712,7 +12740,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="property_value" value="."/>
             <column name="creator" value="applicationInitializer"/>
             <column name="code" value="standardExports.decimalSeparator"/>
-            <column name="description" value="standardExports.decimalSeparator"/>
+            <column name="description" value="Decimal separator"/>
+            <column name="description_i18n" value='{"FRA":"Séparateur décimal","ENG":"Decimal separator"}'/>
         </insert>
         <insert tableName="advanced_settings">
             <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12725,7 +12754,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="property_value" value="csv"/>
             <column name="creator" value="applicationInitializer"/>
             <column name="code" value="standardExports.fileNameExtension"/>
-            <column name="description" value="standardExports.fileNameExtension"/>
+            <column name="description" value="File name extension"/>
+            <column name="description_i18n" value='{"FRA":"Extension du nom de fichier","ENG":"File name extension"}'/>
         </insert>
 		<insert tableName="advanced_settings">
 			<column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12738,7 +12768,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="property_value" valueComputed="(select code from billing_cycle limit 1)"/>
 			<column name="creator" value="applicationInitializer"/>
 			<column name="code" value="crm.defaultBillingCycle"/>
-			<column name="description" value="crm.defaultBillingCycle"/>
+			<column name="description" value="Default billing cycle"/>
+            <column name="description_i18n" value='{"FRA":"Cycle de facturation par défaut","ENG":"Default billing cycle"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 			<column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12751,8 +12782,23 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="property_value" valueComputed="(select code from crm_customer_category limit 1)"/>
 			<column name="creator" value="applicationInitializer"/>
 			<column name="code" value="crm.defaultCustomerCategory"/>
-			<column name="description" value="crm.defaultCustomerCategory"/>
+			<column name="description" value="Default customer category"/>
+            <column name="description_i18n" value='{"FRA":"Catégorie de client par défaut","ENG":"Default customer category"}'/>
 		</insert>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="feature"/>
+            <column name="property_group" value="ordering"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="order.allowPastDeliveryDate"/>
+            <column name="description" value="Allow past delivery dates on orders"/>
+            <column name="description_i18n" value='{"FRA":"Autoriser les dates de livraison dans le passé pour les commandes","ENG":"Allow past delivery dates on orders"}'/>
+        </insert>
 	</changeSet>
 
     <changeSet id="rebuild-customer-balance" author="zelmeliani">

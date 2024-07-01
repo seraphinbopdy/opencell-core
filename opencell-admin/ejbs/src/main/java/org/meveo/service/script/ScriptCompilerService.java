@@ -19,6 +19,7 @@ package org.meveo.service.script;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +47,6 @@ import org.infinispan.context.Flag;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.InvalidScriptException;
 import org.meveo.cache.CacheKeyStr;
-import org.meveo.cache.CompiledScript;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
@@ -55,7 +55,6 @@ import org.meveo.model.scripts.ScriptInstanceError;
 import org.meveo.model.scripts.ScriptSourceTypeEnum;
 import org.meveo.service.base.BusinessService;
 import org.slf4j.Logger;
-
 
 /**
  * Compiles scripts and provides compiled script classes.
@@ -68,13 +67,15 @@ import org.slf4j.Logger;
  */
 @Singleton
 @Lock(LockType.WRITE)
-public class ScriptCompilerService extends BusinessService<ScriptInstance> {
+public class ScriptCompilerService extends BusinessService<ScriptInstance> implements Serializable {
+
+    private static final long serialVersionUID = -2361674789184033495L;
 
     /**
      * Stores compiled scripts. Key format: &lt;cluster node code&gt;_&lt;scriptInstance code&gt;. Value is a compiled script class and class instance
      */
     @Resource(lookup = "java:jboss/infinispan/cache/opencell/opencell-script-cache")
-    private Cache<CacheKeyStr, CompiledScript> compiledScripts;
+    private Cache<CacheKeyStr, Class<ScriptInterface>> compiledScripts;
 
     private CharSequenceCompiler<ScriptInterface> compiler;
 
@@ -86,8 +87,10 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
     public void compileAndInitializeAll() {
 
         List<ScriptInstance> scriptInstances = findByType(ScriptSourceTypeEnum.JAVA_CLASS);
+
+        // Initialize scripts that are defined as java classe
         for (ScriptInstance scriptInstance : scriptInstances) {
-            if (!scriptInstance.isReuse()) {
+            if (!scriptInstance.isUsePool()) {
                 continue;
             }
             try {
@@ -123,7 +126,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
         for (ScriptInstance scriptInstance : scriptInstances) {
             if (!scriptInstance.isError()) {
                 try {
-                    scriptInterfaces.add(getScriptInterfaceWCompile(scriptInstance.getCode()));
+                    scriptInterfaces.add(getOrCompileScript(scriptInstance.getCode()));
                 } catch (ElementNotFoundException | InvalidScriptException e) {
                     // Ignore errors here as they were logged in a call before
                 }
@@ -187,7 +190,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
                             classpath += f.getCanonicalPath() + File.pathSeparator;
                         }
                     }
-             
+
                 }
             }
 
@@ -232,23 +235,23 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
     }
 
     /**
-     * Compile script, a and update script entity status with compilation errors. Successfully compiled script is added to a compiled script cache if active and not in test
-     * compilation mode. Script.init() method will be called during script instantiation (for cache) if script is marked as reusable.
+     * Compile script, a and update script entity status with compilation errors. Successfully compiled script is added to a compiled script cache if active and not in test compilation mode. Script.init() method will be
+     * called during script instantiation (for cache) if script is marked as reusable.
      * 
      * @param script Script entity to compile
      * @param testCompile Is it a compilation for testing purpose. Won't clear nor overwrite existing compiled script cache.
      */
     public void compileScript(ScriptInstance script, boolean testCompile) {
 
-        List<ScriptInstanceError> scriptErrors = compileScript(script.getCode(), script.getSourceTypeEnum(), script.getScript(), script.isActive(), script.isReuse(), testCompile);
+        List<ScriptInstanceError> scriptErrors = compileScript(script.getCode(), script.getSourceTypeEnum(), script.getScript(), script.isActive(), script.isUsePool(), testCompile);
 
         script.setError(scriptErrors != null && !scriptErrors.isEmpty());
         script.setScriptErrors(scriptErrors);
     }
 
     /**
-     * Compile script. DOES NOT update script entity status. Successfully compiled script will be instantiated and added to a compiled script cache. Optionally Script.init() method
-     * is called during script instantiation if requested so.
+     * Compile script. DOES NOT update script entity status. Successfully compiled script will be instantiated and added to a compiled script cache. Optionally Script.init() method is called during script instantiation
+     * if requested so.
      * 
      * Script is not cached if disabled or in test compilation mode.
      * 
@@ -278,6 +281,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
 
                 CacheKeyStr cacheKey = new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode);
 
+                @SuppressWarnings("deprecation")
                 ScriptInterface scriptInstance = compiledScript.newInstance();
                 if (initialize) {
                     log.debug("Will initialize script {}", scriptCode);
@@ -287,7 +291,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
                         log.warn("Failed to initialize script for a cached script instance", e);
                     }
                 }
-                compiledScripts.put(cacheKey, new CompiledScript(compiledScript, scriptInstance));
+                compiledScripts.put(cacheKey, compiledScript);
                 InitialContext ic = new InitialContext();
                 ic.rebind("java:global/" + ParamBean.getInstance().getProperty("opencell.moduleName", "opencell") + "/" + scriptCode, scriptInstance);
 
@@ -308,7 +312,9 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
                     scriptInstanceError.setMessage(diagnostic.getMessage(Locale.getDefault()));
                     scriptInstanceError.setLineNumber(diagnostic.getLineNumber());
                     scriptInstanceError.setColumnNumber(diagnostic.getColumnNumber());
-                    scriptInstanceError.setSourceFile(diagnostic.getSource().toString());
+                    if (diagnostic.getSource() != null) {
+                        scriptInstanceError.setSourceFile(diagnostic.getSource().toString());
+                    }
                     // scriptInstanceError.setScript(scriptInstance);
                     scriptErrors.add(scriptInstanceError);
                     // scriptInstanceErrorService.create(scriptInstanceError, scriptInstance.getAuditable().getCreator());
@@ -350,12 +356,10 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
     }
 
     /**
-     * Supplement classpath with classes needed for the particular script compilation. Solves issue when classes server as jboss modules are referenced in script. E.g.
-     * org.slf4j.Logger
+     * Supplement classpath with classes needed for the particular script compilation. Solves issue when classes server as jboss modules are referenced in script. E.g. org.slf4j.Logger
      * 
      * @param javaSrc Java source to compile
      */
-    @SuppressWarnings("rawtypes")
     private void supplementClassPathWithMissingImports(String javaSrc) {
 
         String regex = "import (.*?);";
@@ -363,8 +367,8 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
         Matcher matcher = pattern.matcher(javaSrc);
         while (matcher.find()) {
             String className = matcher.group(1);
-            if(className.startsWith("static ")) {
-            	className=className.substring(7, className.lastIndexOf("."));
+            if (className.startsWith("static ")) {
+                className = className.substring(7, className.lastIndexOf("."));
             }
             addToClassPath(className);
         }
@@ -380,6 +384,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
 
         try {
             if (!className.startsWith("java.") && !className.startsWith("org.meveo")) {
+                @SuppressWarnings({ "rawtypes" })
                 Class clazz = Class.forName(className);
 
                 String location = clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
@@ -410,45 +415,14 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
      * Compile the script class for a given script code if it is not compile yet.
      * 
      * @param scriptCode Script code
-     * @return Script interface Class
+     * @return Script class
      * @throws InvalidScriptException Were not able to instantiate or compile a script
      * @throws ElementNotFoundException Script not found
      */
-    public Class<ScriptInterface> getScriptInterfaceWCompile(String scriptCode) throws ElementNotFoundException, InvalidScriptException {
-
-        CompiledScript compiledScript = getOrCompileScript(scriptCode);
-
-        return compiledScript.getScriptClass();
-    }
-
-    /**
-     * Compile the script class for a given script code if it is not compile yet and return its instance. NOTE: Will return the SAME (cached) script class instance for subsequent
-     * calls. If you need a new instance of a class, use getScriptInterfaceWCompile() and instantiate class yourself.
-     * 
-     * @param scriptCode Script code
-     * @return Script instance
-     * @throws InvalidScriptException Were not able to instantiate or compile a script
-     * @throws ElementNotFoundException Script not found
-     */
-    public ScriptInterface getScriptInstanceWCompile(String scriptCode) throws ElementNotFoundException, InvalidScriptException {
-
-        CompiledScript compiledScript = getOrCompileScript(scriptCode);
-
-        return compiledScript.getScriptInstance();
-    }
-
-    /**
-     * Compile the script class for a given script code if it is not compile yet.
-     * 
-     * @param scriptCode Script code
-     * @return Script instance
-     * @throws InvalidScriptException Were not able to instantiate or compile a script
-     * @throws ElementNotFoundException Script not found
-     */
-    private CompiledScript getOrCompileScript(String scriptCode) throws ElementNotFoundException, InvalidScriptException {
+    public Class<ScriptInterface> getOrCompileScript(String scriptCode) throws ElementNotFoundException, InvalidScriptException {
         CacheKeyStr cacheKey = new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode);
 
-        CompiledScript compiledScript = compiledScripts.get(cacheKey);
+        Class<ScriptInterface> compiledScript = compiledScripts.get(cacheKey);
         if (compiledScript == null) {
 
             ScriptInstance script = findByCode(scriptCode);
@@ -489,10 +463,10 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
         String currentProvider = currentUser.getProviderCode();
         log.info("Clear CFTS cache for {}/{} ", currentProvider, currentUser);
         // cftsByAppliesTo.keySet().removeIf(key -> (key.getProvider() == null) ? currentProvider == null : key.getProvider().equals(currentProvider));
-        Iterator<Entry<CacheKeyStr, CompiledScript>> iter = compiledScripts.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).entrySet().iterator();
+        Iterator<Entry<CacheKeyStr, Class<ScriptInterface>>> iter = compiledScripts.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).entrySet().iterator();
         ArrayList<CacheKeyStr> itemsToBeRemoved = new ArrayList<>();
         while (iter.hasNext()) {
-            Entry<CacheKeyStr, CompiledScript> entry = iter.next();
+            Entry<CacheKeyStr, Class<ScriptInterface>> entry = iter.next();
             boolean comparison = (entry.getKey().getProvider() == null) ? currentProvider == null : entry.getKey().getProvider().equals(currentProvider);
             if (comparison) {
                 itemsToBeRemoved.add(entry.getKey());

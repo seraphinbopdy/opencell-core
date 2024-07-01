@@ -17,6 +17,8 @@
 package org.meveo.event.monitoring;
 
 import java.io.Serializable;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -30,7 +32,8 @@ import javax.jms.ObjectMessage;
 
 import org.meveo.admin.job.IteratorBasedJobBean;
 import org.meveo.commons.utils.EjbUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.commons.utils.ReflectionUtils;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.customEntities.CustomEntityTemplate;
 import org.meveo.model.jobs.JobInstance;
@@ -38,6 +41,7 @@ import org.meveo.model.jobs.JobLauncherEnum;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.base.NativePersistenceService;
+import org.meveo.service.base.PersistenceService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CfValueAccumulator;
 import org.meveo.service.custom.CustomEntityTemplateService;
@@ -45,6 +49,7 @@ import org.meveo.service.job.Job;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.script.ScriptCompilerService;
+import org.meveo.service.script.ScriptInstanceService;
 import org.slf4j.Logger;
 
 /**
@@ -69,6 +74,9 @@ public class ClusterEventMonitor implements MessageListener {
 
     @Inject
     private ScriptCompilerService scriptCompilerService;
+
+    @Inject
+    private ScriptInstanceService scriptInstanceService;
 
     @Inject
     private CurrentUserProvider currentUserProvider;
@@ -96,7 +104,8 @@ public class ClusterEventMonitor implements MessageListener {
         try {
             if (rcvMessage instanceof ObjectMessage) {
                 ClusterEventDto eventDto = (ClusterEventDto) ((ObjectMessage) rcvMessage).getObject();
-                if (EjbUtils.getCurrentClusterNode().equals(eventDto.getSourceNode())) {
+                // Ignore message from same node unless it is Endpoint execution result lookup - JMS message is send in all cases when operating in cluster mode
+                if (EjbUtils.getCurrentClusterNode().equals(eventDto.getSourceNode()) && eventDto.getAction() != ClusterEventActionEnum.getEndpointExecutionResult) {
                     return;
                 }
                 log.info("{} Received cluster synchronization event message {}", EjbUtils.getCurrentClusterNode(), eventDto);
@@ -104,7 +113,7 @@ public class ClusterEventMonitor implements MessageListener {
                 Object responseValue = processClusterEvent(eventDto);
 
                 // If reply was requested, send a response message with event processing result value
-                if (rcvMessage.getJMSReplyTo() != null) {
+                if (rcvMessage.getJMSReplyTo() != null && responseValue != null) {
 
                     JMSProducer jmsProducer = context.createProducer();
                     Message responseMessage = context.createObjectMessage((Serializable) responseValue);
@@ -128,35 +137,37 @@ public class ClusterEventMonitor implements MessageListener {
      * 
      * @param eventDto Data synchronization between cluster nodes event.
      * @return A response value of processing an event
+     * @throws Exception Any exception during message processing
      */
-    private Object processClusterEvent(ClusterEventDto eventDto) {
+    private Object processClusterEvent(ClusterEventDto eventDto) throws Exception {
 
         currentUserProvider.forceAuthentication(eventDto.getUserName(), eventDto.getProviderCode());
 
         if (eventDto.getClazz().equals(ScriptInstance.class.getSimpleName())) {
             scriptCompilerService.clearCompiledScripts(eventDto.getCode());
+            scriptInstanceService.clearScriptInstancePool(eventDto.getCode());
 
         } else if (eventDto.getClazz().equals(JobInstance.class.getSimpleName())) {
 
-            if (eventDto.getAction() == CrudActionEnum.execute) {
+            if (eventDto.getAction() == ClusterEventActionEnum.execute) {
                 JobLauncherEnum jobLauncher = eventDto.getAdditionalInfo() != null && eventDto.getAdditionalInfo().get(Job.JOB_PARAM_LAUNCHER) != null
                         ? (JobLauncherEnum) eventDto.getAdditionalInfo().get(Job.JOB_PARAM_LAUNCHER)
                         : null;
 
                 return jobExecutionService.executeJob(jobInstanceService.findById(eventDto.getId()), null, jobLauncher, false);
 
-            } else if (eventDto.getAction() == CrudActionEnum.executeWorker) {
+            } else if (eventDto.getAction() == ClusterEventActionEnum.executeWorker) {
                 JobLauncherEnum jobLauncher = JobLauncherEnum.WORKER;
 
                 return jobExecutionService.executeJob(jobInstanceService.findById(eventDto.getId()), eventDto.getAdditionalInfo(), jobLauncher, false);
 
-            } else if (eventDto.getAction() == CrudActionEnum.stop) {
+            } else if (eventDto.getAction() == ClusterEventActionEnum.stop) {
                 jobExecutionService.stopJob(jobInstanceService.findById(eventDto.getId()), false);
 
-            } else if (eventDto.getAction() == CrudActionEnum.stopByForce) {
+            } else if (eventDto.getAction() == ClusterEventActionEnum.stopByForce) {
                 jobExecutionService.stopJobByForce(jobInstanceService.findById(eventDto.getId()), false);
 
-            } else if (eventDto.getAction() == CrudActionEnum.lastJobDataMessageReceived) {
+            } else if (eventDto.getAction() == ClusterEventActionEnum.lastJobDataMessageReceived) {
                 IteratorBasedJobBean.releaseJobDataProcessingThreads(eventDto.getId());
 
                 // Any modify/update
@@ -168,18 +179,46 @@ public class ClusterEventMonitor implements MessageListener {
             CustomFieldTemplate cft = customFieldTemplateService.findById(eventDto.getId());
             cfValueAccumulator.refreshCfAccumulationRules(cft);
             // Refresh native table field to data type mapping
-            if (cft.getAppliesTo().startsWith(CustomEntityTemplate.CFT_PREFIX) && (eventDto.getAction() == CrudActionEnum.create || eventDto.getAction() == CrudActionEnum.update)) {
+            if (cft.getAppliesTo().startsWith(CustomEntityTemplate.CFT_PREFIX) && (eventDto.getAction() == ClusterEventActionEnum.create || eventDto.getAction() == ClusterEventActionEnum.update)) {
                 nativePersistenceService.refreshTableFieldMapping(CustomEntityTemplate.getCodeFromAppliesTo(cft.getAppliesTo()));
             }
 
+            // Refresh custom entity template cache
         } else if (eventDto.getClazz().equals(CustomEntityTemplate.class.getSimpleName())) {
 
-            if (eventDto.getAction() == CrudActionEnum.create || eventDto.getAction() == CrudActionEnum.enable) {
+            if (eventDto.getAction() == ClusterEventActionEnum.create || eventDto.getAction() == ClusterEventActionEnum.enable) {
                 CustomEntityTemplate cet = customEntityTemplateService.findByCode(eventDto.getCode()); // Find by code instead of ID, so it would be added to a cache
 
-            } else if (eventDto.getAction() == CrudActionEnum.update) {
+            } else if (eventDto.getAction() == ClusterEventActionEnum.update) {
                 CustomEntityTemplate cet = customEntityTemplateService.findByCode(eventDto.getCode()); // Find by code instead of ID, so it would be added to a cache
             }
+
+            // Get or wait for endpoint execution result
+        } else if (eventDto.getAction() == ClusterEventActionEnum.getEndpointExecutionResult) {
+
+            String asyncId = (String) eventDto.getAdditionalInfo().get("asyncId");
+            boolean isCancel = (boolean) eventDto.getAdditionalInfo().get("isCancel");
+            boolean isKeep = (boolean) eventDto.getAdditionalInfo().get("isKeep");
+            boolean isWait = (boolean) eventDto.getAdditionalInfo().get("isWait");
+            Long delayMax = (Long) eventDto.getAdditionalInfo().get("delayMax");
+            TimeUnit delayUnit = (TimeUnit) eventDto.getAdditionalInfo().get("delayUnit");
+
+            @SuppressWarnings("rawtypes")
+            PersistenceService endpointServiceBean = (PersistenceService) EjbUtils.getServiceInterface("EndpointService");
+            Optional<Object> executionResult = ReflectionUtils.getMethodValue(endpointServiceBean, "getOrWaitForEndpointExecutionResult", String.class, asyncId, boolean.class, isCancel, boolean.class, isKeep,
+                boolean.class, isWait, Long.class, delayMax, TimeUnit.class, delayUnit);
+
+            return executionResult.orElse(null);
+
+            // Any CRUD action on Endpoint shall refresh the cache of endpoints by code
+        } else if (eventDto.getClazz().equals("Endpoint")) {
+
+            @SuppressWarnings("rawtypes")
+            Class endpointCacheContainerProviderClass = ReflectionUtils.getClassBySimpleNameAndPackage("EndpointCacheContainerProvider", "org.meveo.service.endpoint");
+            @SuppressWarnings("unchecked")
+            Object endpointCacheContainerProviderBean = EjbUtils.getCdiBean(endpointCacheContainerProviderClass);
+            ReflectionUtils.getMethodValue(endpointCacheContainerProviderBean, "refreshCache", String.class, "opencell-endpoints");
+
         }
         return null;
     }

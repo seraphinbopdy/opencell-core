@@ -22,10 +22,23 @@
 package org.meveo.service.script;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
+import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.scripts.ScriptInstance;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.javadoc.JavadocBlockTag;
 
 /**
  * @author melyoussoufi
@@ -130,33 +143,205 @@ public abstract class ScriptUtils {
 
     /**
      * Convert Comparison operator to an sql or java operator
+     * 
      * @param comparison operator
      * @param toSql or toJava
      * @return sql Comparison operator
      */
     public static String buildOperator(String operator, boolean toSql) {
-		String operatorExpression;
-		switch (operator) {
-		case "<":
+        String operatorExpression;
+        switch (operator) {
+        case "<":
             operatorExpression = "<";
             break;
-		case "≤":
+        case "≤":
             operatorExpression = "<=";
             break;
-		case "=":
-            operatorExpression = toSql? "=" : "==";
+        case "=":
+            operatorExpression = toSql ? "=" : "==";
             break;
-		case "≠":
-			operatorExpression = toSql? "<>" : "!=";
-			break;
-		case "≥":
-			operatorExpression = ">=";
-			break;
-		default:
-			operatorExpression = ">";
-			break;
-		}
-		return operatorExpression;
-	}
+        case "≠":
+            operatorExpression = toSql ? "<>" : "!=";
+            break;
+        case "≥":
+            operatorExpression = ">=";
+            break;
+        default:
+            operatorExpression = ">";
+            break;
+        }
+        return operatorExpression;
+    }
 
+    /**
+     * Get a list of getters from a script instance
+     * 
+     * @param methods A list of class methods
+     * @return List of getter property information
+     */
+    public static List<Accessor> getGetters(final List<MethodDeclaration> methods) {
+        return methods.stream().filter(e -> e.getNameAsString().startsWith(Accessor.GET) || e.getNameAsString().startsWith(Accessor.IS)).filter(e -> e.getAnnotationByClass(JsonIgnore.class).isEmpty())
+            .filter(e -> e.getModifiers().stream().anyMatch(modifier -> modifier.getKeyword().equals(Modifier.Keyword.PUBLIC))).filter(e -> e.getParameters().isEmpty()).map(methodDeclaration -> {
+                Accessor getter = new Accessor();
+                String accessorFieldName;
+                if (methodDeclaration.getNameAsString().startsWith(Accessor.GET)) {
+                    accessorFieldName = methodDeclaration.getNameAsString().substring(3);
+                } else {
+                    accessorFieldName = methodDeclaration.getNameAsString().substring(2);
+                }
+                getter.setName(Character.toLowerCase(accessorFieldName.charAt(0)) + accessorFieldName.substring(1));
+                getter.setMethodName(methodDeclaration.getNameAsString());
+                getter.setType(methodDeclaration.getTypeAsString());
+                methodDeclaration.getComment().ifPresent(comment -> comment.ifJavadocComment(javadocComment -> {
+                    javadocComment.parse().getBlockTags().stream().filter(e -> e.getType() == JavadocBlockTag.Type.RETURN).findFirst()
+                        .ifPresent(javadocBlockTag -> getter.setDescription(javadocBlockTag.getContent().toText()));
+                }));
+                return getter;
+            }).collect(Collectors.toList());
+    }
+
+    /**
+     * Get a list of setters from a script instance
+     * 
+     * @param methods A list of class methods
+     * @return List of setter property information
+     */
+    private static List<Accessor> getSetters(final List<MethodDeclaration> methods) {
+        return methods.stream().filter(e -> e.getNameAsString().startsWith(Accessor.SET)).filter(e -> e.getAnnotationByClass(JsonIgnore.class).isEmpty())
+            .filter(e -> e.getModifiers().stream().anyMatch(modifier -> modifier.getKeyword().equals(Modifier.Keyword.PUBLIC))).filter(e -> e.getParameters().size() == 1).map(methodDeclaration -> {
+                Accessor setter = new Accessor();
+                String accessorFieldName = methodDeclaration.getNameAsString().substring(3);
+                setter.setName(Character.toLowerCase(accessorFieldName.charAt(0)) + accessorFieldName.substring(1));
+                setter.setType(methodDeclaration.getParameter(0).getTypeAsString());
+                setter.setMethodName(methodDeclaration.getNameAsString());
+                methodDeclaration.getComment().ifPresent(comment -> comment.ifJavadocComment(javadocComment -> {
+                    javadocComment.parse().getBlockTags().stream().filter(e -> e.getType() == JavadocBlockTag.Type.PARAM).findFirst()
+                        .ifPresent(javadocBlockTag -> setter.setDescription(javadocBlockTag.getContent().toText()));
+                }));
+                return setter;
+            }).collect(Collectors.toList());
+    }
+
+    /**
+     * Get a list of getters from a scrip instance ina form of property names
+     * 
+     * @param scriptInstance ScriptInstance
+     * @return List of property names
+     */
+    public static List<String> getGetterPropertyNames(ScriptInstance scriptInstance) {
+
+        List<Accessor> gettersList = getGetters(scriptInstance);
+        List<String> getters = gettersList.stream().map(e -> e.getName()).collect(Collectors.toList());
+
+        return getters;
+    }
+
+    /**
+     * Get a list of getters from a script instance
+     * 
+     * @param scriptInstance ScriptInstance
+     * @return List of getter property information
+     */
+    public static List<Accessor> getGetters(ScriptInstance scriptInstance) {
+
+        CompilationUnit compilationUnit;
+        try {
+            compilationUnit = new JavaParser().parse(scriptInstance.getScript()).getResult().get();
+            final ClassOrInterfaceDeclaration classOrInterfaceDeclaration = compilationUnit.getChildNodes().stream().filter(e -> e instanceof ClassOrInterfaceDeclaration).map(e -> (ClassOrInterfaceDeclaration) e)
+                .findFirst().get();
+
+            final List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMembers().stream().filter(e -> e instanceof MethodDeclaration).map(e -> (MethodDeclaration) e).collect(Collectors.toList());
+
+            final List<Accessor> gettersList = getGetters(methods);
+            return gettersList;
+
+        } catch (Exception e) {
+            throw new BusinessException("Failed to get a list of getter property names for a script " + scriptInstance.getCode(), e);
+        }
+    }
+
+    /**
+     * Get a list of setters from a script instance in a form of property names
+     * 
+     * @param scriptInstance
+     * @return List of property names
+     */
+    public static List<String> getSetterPropertyNames(ScriptInstance scriptInstance) {
+
+        List<Accessor> settersList = getGetters(scriptInstance);
+        List<String> setters = settersList.stream().map(e -> e.getName()).collect(Collectors.toList());
+
+        return setters;
+    }
+
+    /**
+     * Get a list of setters from a script instance
+     * 
+     * @param scriptInstance ScriptInstance
+     * @return List of setter property information
+     */
+    public static List<Accessor> getSetters(ScriptInstance scriptInstance) {
+        CompilationUnit compilationUnit;
+        try {
+            compilationUnit = new JavaParser().parse(scriptInstance.getScript()).getResult().get();
+            final ClassOrInterfaceDeclaration classOrInterfaceDeclaration = compilationUnit.getChildNodes().stream().filter(e -> e instanceof ClassOrInterfaceDeclaration).map(e -> (ClassOrInterfaceDeclaration) e)
+                .findFirst().get();
+
+            final List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMembers().stream().filter(e -> e instanceof MethodDeclaration).map(e -> (MethodDeclaration) e).collect(Collectors.toList());
+
+            final List<Accessor> settersList = getSetters(methods);
+            return settersList;
+
+        } catch (Exception e) {
+            throw new BusinessException("Failed to get a list of setter property names for a script " + scriptInstance.getCode(), e);
+        }
+    }
+
+    /**
+     * Determine a type of a variable in a script instance
+     * 
+     * @param scriptInstance Script instance
+     * @param variableName Variable name - property name of a corresponding getter method
+     * @return Classname of a variable
+     */
+    public static String findScriptVariableType(ScriptInstance scriptInstance, String variableName) {
+
+        String result = "Object";
+        CompilationUnit compilationUnit;
+
+        try {
+            compilationUnit = new JavaParser().parse(scriptInstance.getScript()).getResult().get();
+            final ClassOrInterfaceDeclaration classOrInterfaceDeclaration = compilationUnit.getChildNodes().stream().filter(e -> e instanceof ClassOrInterfaceDeclaration).map(e -> (ClassOrInterfaceDeclaration) e)
+                .findFirst().get();
+
+            final List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMembers().stream().filter(e -> e instanceof MethodDeclaration).map(e -> (MethodDeclaration) e).collect(Collectors.toList());
+
+            final List<Accessor> getters = getGetters(methods);
+
+            Optional<Accessor> returnMethod = getters.stream().filter(e -> e.getName().equals(variableName)).findAny();
+
+            if (returnMethod.isPresent()) {
+                result = returnMethod.get().getType();
+            }
+
+        } catch (Exception e) {
+        }
+
+        return result;
+    }
+
+    /**
+     * Determine if a variable is multivalued - is a collection, map, set or array
+     * 
+     * @param scriptInstance Script instance
+     * @param variableName Variable name - property name of a corresponding getter method
+     * @return True if a variable is multivalued
+     */
+    public static boolean isScriptVariableMultivalued(ScriptInstance scriptInstance, String variableName) {
+        String type = findScriptVariableType(scriptInstance, variableName);
+        if (type.contains("List<") || type.contains("Set<") || type.contains("Collection<") || type.contains("Map<") || type.endsWith("[]")) {
+            return true;
+        }
+        return false;
+    }
 }

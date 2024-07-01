@@ -183,7 +183,7 @@ public class AtosWalletGatewayPayment implements GatewayPaymentInterface {
 			context.put("interfaceVersion", interfaceVersion);
 			context.put("PaymentGateway", paymentGateway);
 
-			context = getScriptInstanceService().executeCached(scriptInstanceCode, context);
+			context = getScriptInstanceService().executePooled(scriptInstanceCode, context);
 			request = (WalletOrderRequest) context.get("WalletOrderRequest");
 
 		}

@@ -222,6 +222,17 @@ http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_3.xsd">
 		<to-view-id>/pages/admin/scriptInstanceCategories/scriptInstanceCategoryDetail.xhtml</to-view-id>
 		<redirect />
 	</navigation-case>
+	
+	<navigation-case>
+		<from-outcome>endpoints</from-outcome>
+		<to-view-id>/pages/admin/endpoints/endpoints.xhtml</to-view-id>
+		<redirect />
+	</navigation-case>
+	<navigation-case>
+		<from-outcome>endpointDetail</from-outcome>
+		<to-view-id>/pages/admin/endpoints/endpointDetail.xhtml</to-view-id>
+		<redirect />
+	</navigation-case>	
 
 	<navigation-case>
 		<from-outcome>timers</from-outcome>

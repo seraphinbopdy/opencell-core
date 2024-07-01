@@ -18,6 +18,7 @@
         <module>opencell-api</module>
         <module>opencell-client</module>
         <module>opencell-scripts</module>
+		<module>opencell-custom-api</module>
     </modules>
 
     <properties>
@@ -120,6 +121,13 @@
             </dependency>
             <dependency>
                 <groupId>com.opencellsoft</groupId>
+				<artifactId>opencell-api</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.opencellsoft</groupId>
                 <artifactId>opencell-api-dto</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -158,6 +166,11 @@
                 <artifactId>opencell-scripts</artifactId>
                 <version>${project.version}</version>
             </dependency>
+			<dependency>
+				<groupId>com.opencellsoft</groupId>
+				<artifactId>opencell-custom-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -673,6 +686,11 @@
                 <artifactId>swagger-annotations</artifactId>
                 <version>${swagger.version}</version>
             </dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-models</artifactId>
+				<version>1.5.20</version>
+			</dependency>			
 
             <dependency>
                 <groupId>io.springfox</groupId>
@@ -692,6 +710,18 @@
 				<version>3.0.0</version>
 			</dependency>
 
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>1.5.20</version>
+			</dependency>
+            
+            <dependency>
+                <groupId>com.ibm.jsonata4java</groupId>
+                <artifactId>JSONata4Java</artifactId>
+                <version>2.5.0</version>
+            </dependency>            
+			
 			<dependency>
                 <groupId>org.immutables</groupId>
                 <artifactId>value</artifactId>
@@ -720,6 +750,13 @@
             </dependency>
 
             <dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-core-spi</artifactId>
+				<version>4.7.7.Final</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
                 <groupId>jakarta.jws</groupId>
                 <artifactId>jakarta.jws-api</artifactId>
                 <version>3.0.0</version>
@@ -771,7 +808,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.9.0</version>
+				<version>5.12.0</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -795,6 +832,24 @@
                 <scope>provided</scope>
             </dependency>
 
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-pool2</artifactId>
+				<version>2.11.1</version>
+			</dependency>
+		
+			<dependency>
+			    <groupId>com.github.javaparser</groupId>
+			    <artifactId>javaparser-core</artifactId>
+			    <version>3.25.10</version>
+			</dependency>
+				
+	        <dependency>
+	            <groupId>com.github.javaparser</groupId>
+	            <artifactId>javaparser-symbol-solver-core</artifactId>
+	            <version>3.25.10</version>
+	        </dependency>
+        				
         </dependencies>
     </dependencyManagement>
 
@@ -1144,7 +1199,10 @@
                 <db.driver>oracle.jdbc.OracleDriver</db.driver>
                 <db.url>jdbc:oracle:thin:@//oracle_host:1521/XE</db.url>
                 <db.username>opencell</db.username>
-                <!-- A setup for oracle XE <db.url>jdbc:oracle:thin:@//localhost:1521/XE</db.url> <db.username>c##opencell</db.username> <db.password>opencell</db.password> -->
+				<!-- A setup for oracle XE
+				<db.url>jdbc:oracle:thin:@//localhost:1521/XE</db.url>
+				<db.username>c##opencell</db.username>
+				<db.password>opencell</db.password> -->
                 <db.password>opencell</db.password>
                 <opencell.dialect>oracle.MeveoOracleDialect</opencell.dialect>
             </properties>

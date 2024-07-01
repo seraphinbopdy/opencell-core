@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -29,15 +30,21 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.meveo.api.dto.AuditableDto;
 import org.meveo.api.dto.AuditableEntityDto;
 import org.meveo.api.dto.CustomFieldsDto;
+import org.meveo.api.dto.audit.AuditableFieldDto;
 import org.meveo.api.dto.payment.PaymentMethodDto;
 import org.meveo.commons.utils.CustomDateSerializer;
+import org.meveo.model.AuditableEntity;
 import org.tmf.dsmapi.catalog.resource.RelatedParty;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 
 /**
@@ -50,7 +57,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @XmlType(name = "ProductOrder", namespace = "http://www.tmforum.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonInclude(value = Include.NON_NULL)
-public class ProductOrder extends AuditableEntityDto {
+public class ProductOrder implements Serializable{
 
     private static final long serialVersionUID = -4883520016795545598L;
 
@@ -118,6 +125,15 @@ public class ProductOrder extends AuditableEntityDto {
      */
     private String emailTemplate;
 
+    @Schema(hidden = true)
+    @JsonIgnore
+    private AuditableDto auditable;
+
+    @XmlElementWrapper(name = "auditableFields")
+    @XmlElement(name = "auditableField")
+    @Schema(hidden = true)
+    private List<AuditableFieldDto> auditableFields;
+    
     /**
      * A list of emails separated by comma
      */
@@ -341,5 +357,55 @@ public class ProductOrder extends AuditableEntityDto {
 
     public void setCcedEmails(String ccedEmails) {
         this.ccedEmails = ccedEmails;
+    }
+    
+
+    // invoked by Marshaller before marshalling
+    void beforeMarshal(Marshaller marshaller) {
+        if (auditableFields != null && auditableFields.isEmpty()) {
+            auditableFields = null;
+        }
+    }
+
+    @Schema(hidden = true)
+    public void setAuditableEntity(AuditableEntity e) {
+        if (e != null && e.getAuditable() != null) {
+            auditable = new AuditableDto(e.getAuditable());
+        }
+    }
+
+    @Schema(hidden = true)
+    public AuditableDto getAuditableNullSafe() {
+        if (auditable == null) {
+            auditable = new AuditableDto();
+        }
+
+        return auditable;
+    }
+
+    public AuditableDto getAuditable() {
+        return auditable;
+    }
+
+    public void setAuditable(AuditableDto auditable) {
+        this.auditable = auditable;
+    }
+
+    /**
+     * Gets the auditableFields
+     *
+     * @return the auditableFields
+     */
+    public List<AuditableFieldDto> getAuditableFields() {
+        return auditableFields;
+    }
+
+    /**
+     * Sets the auditableFields.
+     *
+     * @param auditableFields the new auditableFields
+     */
+    public void setAuditableFields(List<AuditableFieldDto> auditableFields) {
+        this.auditableFields = auditableFields;
     }
 }

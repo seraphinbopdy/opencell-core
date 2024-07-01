@@ -56,7 +56,7 @@ import org.meveo.cache.JobRunningStatusEnum;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.ParamBean;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.event.qualifier.LastJobDataMessageReceived;
 import org.meveo.model.IEntity;
@@ -402,7 +402,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                 additionalInformation.put(Job.JOB_PARAM_HISTORY_PARENT_ID, jobExecutionResult.getId());
                 additionalInformation.put(Job.JOB_PARAM_LAUNCHER, JobLauncherEnum.WORKER);
 
-                clusterEventPublisher.publishEventAsync(jobInstance, CrudActionEnum.executeWorker, additionalInformation, currentUser.getProviderCode(), currentUser.getUserName());
+                clusterEventPublisher.publishEventAsync(jobInstance, ClusterEventActionEnum.executeWorker, additionalInformation, currentUser.getProviderCode(), currentUser.getUserName());
             }
 
             // Wait for all async methods to finish

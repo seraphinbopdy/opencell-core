@@ -107,7 +107,24 @@ public class DeletionService {
     }
 
     private Stream<Optional<Object>> getCodeAsStream(IEntity dependency) {
-        return Stream.of(ReflectionUtils.getPropertyValueOrNull(dependency, "code"), ReflectionUtils.getMethodValue(dependency, "getCode"));
+
+        Optional<Object> codeProperty = Optional.empty();
+        Optional<Object> codeMethod = Optional.empty();
+        try {
+            codeProperty = ReflectionUtils.getPropertyValueOrNull(dependency, "code");
+
+        } catch (Exception e) {
+            log.error("Failed to get code field value for entity {}", dependency, e);
+        }
+        
+        try {
+            codeMethod = ReflectionUtils.getMethodValue(dependency, "getCode");
+        
+        } catch (Exception e) {
+            log.error("Failed to get code field value for entity {}", dependency, e);
+        }
+       
+        return Stream.of(codeProperty, codeMethod);
     }
 
     private boolean existsAsRecordInCustomTable(CustomFieldTemplate customField, IEntity entity) {

@@ -193,8 +193,9 @@ public class RoleService extends PersistenceService<Role> {
      */
     @Override
     public void remove(Role role) throws BusinessException {
-		if(canSynchroWithKC())
+		if(canSynchroWithKC()) {
             keycloakAdminClientService.deleteRole(role.getName(), role.isClientRole());
+		}
         super.remove(role);
     }
     

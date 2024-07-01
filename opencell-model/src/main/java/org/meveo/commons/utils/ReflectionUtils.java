@@ -17,7 +17,6 @@
  */
 package org.meveo.commons.utils;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -36,7 +35,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.stream.Collectors;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Embeddable;
@@ -71,6 +69,37 @@ public class ReflectionUtils {
     private static Map<Class, Map<Class, List<Field>>> classReferences = new HashMap<>();
 
     /**
+     * Java native data types.
+     */
+    private static final List<String> primitiveDataType = new ArrayList<>();
+    private static final List<String> primitiveWrapperDataType = new ArrayList<>();
+    private static final Map<String, Object> defaultPrimitiveDataTypeValues = Map.of("byte", 0, "short", 0, "int", 0, "long", 0L, "float", 0F, "double", 0D, "char", "", "boolean", false);
+
+    static {
+        primitiveDataType.add("byte");
+        primitiveDataType.add("short");
+        primitiveDataType.add("int");
+        primitiveDataType.add("long");
+        primitiveDataType.add("float");
+        primitiveDataType.add("double");
+        primitiveDataType.add("char");
+        primitiveDataType.add("boolean");
+    }
+
+    static {
+        primitiveWrapperDataType.add("Boolean");
+        primitiveWrapperDataType.add("Byte");
+        primitiveWrapperDataType.add("Character");
+        primitiveWrapperDataType.add("Short");
+        primitiveWrapperDataType.add("Integer");
+        primitiveWrapperDataType.add("Long");
+        primitiveWrapperDataType.add("Double");
+        primitiveWrapperDataType.add("Float");
+        primitiveWrapperDataType.add("Void");
+        primitiveWrapperDataType.add("String");
+    }
+
+    /**
      * Creates instance from class name.
      *
      * @param className Class name for which instance is created.
@@ -99,7 +128,7 @@ public class ReflectionUtils {
      * @return A list of classes
      */
     @SuppressWarnings("rawtypes")
-    public static List<Class> getClasses(String packageName)  {
+    public static List<Class> getClasses(String packageName) {
 
         try {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -498,7 +527,7 @@ public class ReflectionUtils {
      *
      * @param c Class to start with
      * @param fieldName Field name
-     * @param trySubclass 
+     * @param trySubclass
      * @return A field definition
      * @throws SecurityException security excetion
      * @throws NoSuchFieldException no such field exception.
@@ -515,7 +544,7 @@ public class ReflectionUtils {
         }
         return field;
     }
-    
+
     /**
      * Get a field from a given class. Fieldname can refer to an immediate field of a class or traverse class relationship hierarchy e.g. customerAccount.customer.seller
      *
@@ -526,14 +555,14 @@ public class ReflectionUtils {
      * @throws NoSuchFieldException no such field exception.
      */
     public static Field getFieldThrowException(Class<?> c, String fieldName) throws NoSuchFieldException {
-    	return getFieldThrowException(c, fieldName, false);
+        return getFieldThrowException(c, fieldName, false);
     }
 
     @SuppressWarnings("rawtypes")
     public static Field getField(Class<?> c, String fieldName) {
-    	return getField(c, fieldName, false);
+        return getField(c, fieldName, false);
     }
-    
+
     @SuppressWarnings("rawtypes")
     public static Field getField(Class<?> c, String fieldName, boolean trySubclass) {
 
@@ -550,11 +579,11 @@ public class ReflectionUtils {
                 String iterationFieldName = tokenizer.nextToken();
                 field = getField(iterationClazz, iterationFieldName, trySubclass);
                 if (field != null) {
-                	if(Collection.class.isAssignableFrom(field.getType())){
-                		iterationClazz = getFieldGenericsType(field);
-                	} else {
-                		iterationClazz = field.getType();
-                	}
+                    if (Collection.class.isAssignableFrom(field.getType())) {
+                        iterationClazz = getFieldGenericsType(field);
+                    } else {
+                        iterationClazz = field.getType();
+                    }
                 } else {
                     Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
                     log.error("No field {} in {}", iterationFieldName, iterationClazz);
@@ -562,33 +591,33 @@ public class ReflectionUtils {
                 }
             }
         } else {
-        	boolean found=false;
-        	if(trySubclass && Modifier.isAbstract(c.getModifiers())) {
-	        	Reflections reflections = new Reflections(c);
-	        	for(Class subclass : reflections.getSubTypesOf(c)) {
-	        		try {
-	                    field = subclass.getDeclaredField(fieldName);
-	                    found=true;
-	                    break;
-	                } catch (NoSuchFieldException e) {
-	                }
-	        	}
-        	}
-        	
-        	while(!found) {
-        		try {
+            boolean found = false;
+            if (trySubclass && Modifier.isAbstract(c.getModifiers())) {
+                Reflections reflections = new Reflections(c);
+                for (Class subclass : reflections.getSubTypesOf(c)) {
+                    try {
+                        field = subclass.getDeclaredField(fieldName);
+                        found = true;
+                        break;
+                    } catch (NoSuchFieldException e) {
+                    }
+                }
+            }
+
+            while (!found) {
+                try {
                     // log.debug("get declared field {}",fieldName);
                     field = c.getDeclaredField(fieldName);
-                    found=true;
+                    found = true;
                 } catch (NoSuchFieldException e) {
                     // log.debug("No field {} in {} might be in super {} ", fieldName, c, c.getSuperclass());
                     if (field == null && c.getSuperclass() != null) {
-                        c=c.getSuperclass();
+                        c = c.getSuperclass();
                     } else {
-                    	found=true;
+                        found = true;
                     }
                 }
-        	}
+            }
         }
         return field;
     }
@@ -790,14 +819,93 @@ public class ReflectionUtils {
         return getMethodFromInterface(method.getDeclaringClass(), annotationClass, method.getName(), method.getParameterTypes());
     }
 
-    public static Optional<Object> getMethodValue(Object object, String methodName, Object... args) {
-        Class[] classes = (args == null || args.length == 0) ? null : Arrays.stream(args).map(Object::getClass).collect(Collectors.toList()).toArray(new Class[args.length]);
+    /**
+     * Call a method and return a value if applicable
+     * 
+     * @param object Object on which a method shall be called
+     * @param methodName Method name to call
+     * @param args A set of classes and arguments to pass. Format: class1, parameter1, class2, parameyer2...
+     * @return An optional with a return value in case when method is a function
+     * @throws Exception Any exception while calling a method
+     */
+    public static Optional<Object> getMethodValue(Object object, String methodName, Object... args) throws Exception {
+
+        Class[] classes = null;
+        Object[] parameters = null;
+        if (args != null && args.length > 0) {
+            classes = new Class[(args.length + 1) / 2];
+            parameters = new Object[classes.length];
+
+            for (int i = 0; i < classes.length; i++) {
+                classes[i] = (Class) args[i * 2];
+                parameters[i] = args[i * 2 + 1];
+            }
+        }
+
         try {
             Method method = object.getClass().getDeclaredMethod(methodName, classes);
-            return Optional.ofNullable(method.invoke(object, args));
+            return Optional.ofNullable(method.invoke(object, parameters));
         } catch (Exception e) {
-            return Optional.empty();
+            Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
+            log.error("Failed to call a method {} with parameters {}", methodName, parameters, e);
+            throw e;
         }
     }
 
+    /**
+     * Return values of getter methods
+     * 
+     * @param obj An object which getter method values to return
+     * @return A map of getter values with property name as a map key
+     */
+    public static Map<String, Object> getGetterValues(Object obj) {
+        Map<String, Object> result = new HashMap<>();
+        Method[] methods = obj.getClass().getMethods();
+
+        for (Method method : methods) {
+            if ((method.getName().startsWith("get") || method.getName().startsWith("is")) && method.getParameterTypes().length == 0 && !void.class.equals(method.getReturnType())) {
+                try {
+                    String propName = method.getName().substring(method.getName().startsWith("is") ? 2 : 3);
+                    propName = Character.toLowerCase(propName.charAt(0)) + propName.substring(1);
+                    Object value = method.invoke(obj);
+                    if (value != null) {
+                        result.put(propName, value);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Set null to setter methods
+     * 
+     * @param obj An object which setter method values should be set to null
+     */
+    public static void resetSetterValues(Object obj) {
+        Method[] methods = obj.getClass().getMethods();
+
+        for (Method method : methods) {
+            if (method.getName().startsWith("set") && method.getParameterTypes().length == 1 && void.class.equals(method.getReturnType())) {
+                try {
+                    if (method.getParameterTypes()[0].isPrimitive()) {
+                        method.invoke(obj, defaultPrimitiveDataTypeValues.get(method.getParameterTypes()[0].getSimpleName()));
+
+                    } else {
+                        method.invoke(obj, (Object) null);
+                    }
+
+                } catch (Exception e) {
+                    Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
+                    log.error("Failed to call setter method {} with value null", method.getName(), e);
+                }
+            }
+        }
+    }
+
+    public static boolean isPrimitiveOrWrapperType(String key) {
+        return primitiveDataType.contains(key) || primitiveWrapperDataType.contains(key);
+    }
 }

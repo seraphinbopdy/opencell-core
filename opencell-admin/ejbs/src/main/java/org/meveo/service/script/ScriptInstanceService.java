@@ -17,19 +17,23 @@
  */
 package org.meveo.service.script;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -39,6 +43,9 @@ import javax.tools.JavaFileObject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.pool2.ObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.SoftReferenceObjectPool;
 import org.infinispan.Cache;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
@@ -46,17 +53,22 @@ import org.meveo.admin.exception.InvalidPermissionException;
 import org.meveo.admin.exception.InvalidScriptException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.cache.CacheKeyStr;
-import org.meveo.cache.CompiledScript;
+import org.meveo.commons.utils.DataTypeUtils;
+import org.meveo.commons.utils.DataTypeUtils.ClassAndValue;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ReflectionUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.jpa.JpaAmpNewTx;
+import org.meveo.model.persistence.JacksonUtil;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.scripts.ScriptInstanceError;
 import org.meveo.model.scripts.ScriptParameter;
+import org.meveo.model.scripts.ScriptPool;
 import org.meveo.model.scripts.ScriptSourceTypeEnum;
 import org.meveo.service.base.BusinessService;
+
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * Script service implementation.
@@ -66,7 +78,9 @@ import org.meveo.service.base.BusinessService;
  *
  */
 @Stateless
-public class ScriptInstanceService extends BusinessService<ScriptInstance> {
+public class ScriptInstanceService extends BusinessService<ScriptInstance> implements Serializable {
+
+    private static final long serialVersionUID = -560761831622106789L;
 
     @Inject
     private ResourceBundle resourceMessages;
@@ -76,12 +90,17 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
 
     @Inject
     private ScriptCompilerService scriptCompilerService;
-    
+
     /**
      * Stores compiled scripts. Key format: &lt;cluster node code&gt;_&lt;scriptInstance code&gt;. Value is a compiled script class and class instance
      */
     @Resource(lookup = "java:jboss/infinispan/cache/opencell/opencell-script-cache")
-    private Cache<CacheKeyStr, CompiledScript> compiledScripts;
+    private Cache<CacheKeyStr, Class<ScriptInterface>> compiledScripts;
+
+    /**
+     * Stores a pooled instances of scripts. Key is Script code. Value is a pooled instance of a script instances.
+     */
+    private static Map<String, ObjectPool<ScriptInterface>> poolOfScriptInstances = new ConcurrentHashMap<>();
 
     /**
      * Get all ScriptInstances with error.
@@ -102,8 +121,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
     }
 
     /**
-     * Only users having a role in executionRoles can execute the script, not having the role should throw an InvalidPermission exception that extends businessException. A script
-     * with no executionRoles can be executed by any user.
+     * Only users having a role in executionRoles can execute the script, not having the role should throw an InvalidPermission exception that extends businessException. A script with no executionRoles can be executed by
+     * any user.
      *
      * @param scriptInstance instance of script
      * @throws InvalidPermissionException invalid permission exception.
@@ -226,8 +245,9 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
 
             super.create(script);
             scriptCompilerService.compileScript(script, false);
+            clearScriptInstancePool(script.getCode());
 
-            clusterEventPublisher.publishEvent(script, CrudActionEnum.create);
+            clusterEventPublisher.publishEvent(script, ClusterEventActionEnum.create);
         }
     }
 
@@ -260,8 +280,9 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
             script = super.update(script);
 
             scriptCompilerService.compileScript(script, false);
+            clearScriptInstancePool(script.getCode());
 
-            clusterEventPublisher.publishEvent(script, CrudActionEnum.update);
+            clusterEventPublisher.publishEvent(script, ClusterEventActionEnum.update);
 
         }
         return script;
@@ -272,7 +293,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
     public void remove(ScriptInstance script) throws BusinessException {
         super.remove(script);
         if (script.getSourceTypeEnum() != ScriptSourceTypeEnum.JAVA_CLASS) {
-            clusterEventPublisher.publishEvent(script, CrudActionEnum.remove);
+            clearScriptInstancePool(script.getCode());
+            clusterEventPublisher.publishEvent(script, ClusterEventActionEnum.remove);
         }
     }
 
@@ -280,7 +302,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
     public ScriptInstance enable(ScriptInstance script) throws BusinessException {
         script = super.enable(script);
         if (script.getSourceTypeEnum() != ScriptSourceTypeEnum.JAVA_CLASS) {
-            clusterEventPublisher.publishEvent(script, CrudActionEnum.enable);
+            clearScriptInstancePool(script.getCode());
+            clusterEventPublisher.publishEvent(script, ClusterEventActionEnum.enable);
         }
         return script;
     }
@@ -289,7 +312,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
     public ScriptInstance disable(ScriptInstance script) throws BusinessException {
         script = super.disable(script);
         if (script.getSourceTypeEnum() != ScriptSourceTypeEnum.JAVA_CLASS) {
-            clusterEventPublisher.publishEvent(script, CrudActionEnum.disable);
+            clearScriptInstancePool(script.getCode());
+            clusterEventPublisher.publishEvent(script, ClusterEventActionEnum.disable);
         }
         return script;
     }
@@ -307,28 +331,13 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
     public Map<String, Object> execute(String scriptCode, Map<String, Object> context) throws InvalidPermissionException, ElementNotFoundException, BusinessException {
 
         ScriptInstance scriptInstance = findByCode(scriptCode, true);
-        if(scriptInstance == null) {
+        if (scriptInstance == null) {
             throw new BusinessException("Script instance not found code : " + scriptCode);
         }
         // Check access to the script
         isUserHasExecutionRole(scriptInstance);
 
-        log.trace("Script {} to be executed with parameters {}", scriptCode, context);
-
-        if (context == null) {
-            context = new HashMap<String, Object>();
-        }
-        if (context.get(Script.CONTEXT_ACTION) == null) {
-            context.put(Script.CONTEXT_ACTION, scriptCode);
-        }
-        context.put(Script.CONTEXT_CURRENT_USER, currentUser);
-        context.put(Script.CONTEXT_APP_PROVIDER, appProvider);
-
-        ScriptInterface classInstance = getScriptInstance(scriptCode);
-        processScript(scriptInstance, classInstance, context);
-
-        log.trace("Script {} executed with parameters {}", scriptCode, context);
-        return context;
+        return execute(scriptCode, context, false, true, false);
     }
 
     /**
@@ -369,7 +378,7 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
     }
 
     /**
-     * Execute action on an entity/event. Reuse an existing, earlier initialized script interface. Does not call init() nor finalize() methods of the script.
+     * Execute action on an entity/event. Reuse an existing, earlier initialized script interface from a pool of script instances. Does not call init() nor finalize() methods of the script.
      * 
      * @param entityOrEvent Entity or event to execute action on. Will be added to context under Script.CONTEXT_ENTITY key.
      * @param scriptCode Script to execute, identified by a code. Will be added to context under Script.CONTEXT_ACTION key.
@@ -380,18 +389,18 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
      * @throws InvalidPermissionException Insufficient access to run the script
      * @throws BusinessException Any execution exception
      */
-    public Map<String, Object> executeCached(Object entityOrEvent, String scriptCode, Map<String, Object> context) throws BusinessException {
+    public Map<String, Object> executeFromPool(Object entityOrEvent, String scriptCode, Map<String, Object> context) throws BusinessException {
 
         if (context == null) {
             context = new HashMap<String, Object>();
         }
         context.put(Script.CONTEXT_ENTITY, entityOrEvent);
 
-        return executeCached(scriptCode, context);
+        return executePooled(scriptCode, context);
     }
 
     /**
-     * Execute action on an entity/event. Reuse an existing, earlier initialized script interface. Does not call init() nor finalize() methods of the script.
+     * Execute action on an entity/event. Reuse an existing, earlier initialized script interface from a pool of script instances. Does not call init() nor finalize() methods of the script.
      * 
      * @param scriptCode Script to execute, identified by a code. Will be added to context under Script.CONTEXT_ACTION key.
      * @param context Additional parameters
@@ -401,9 +410,9 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
      * @throws InvalidPermissionException Insufficient access to run the script
      * @throws BusinessException Any execution exception
      */
-    public Map<String, Object> executeCached(String scriptCode, Map<String, Object> context) throws BusinessException {
+    public Map<String, Object> executePooled(String scriptCode, Map<String, Object> context) throws BusinessException {
 
-        log.trace("Script (cached) {} to be executed with parameters {}", scriptCode, context);
+        log.trace("Script (pooled) {} to be executed with parameters {}", scriptCode, context);
 
         if (context == null) {
             context = new HashMap<String, Object>();
@@ -414,10 +423,27 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
         context.put(Script.CONTEXT_CURRENT_USER, currentUser);
         context.put(Script.CONTEXT_APP_PROVIDER, appProvider);
 
-        ScriptInterface classInstance = getCachedScriptInstance(scriptCode);
+        ScriptInterface classInstance = getPooledScriptInstance(scriptCode);
+
+        // Inject default values and validate script Params
+        ScriptInstance scriptInstance = findByCode(scriptCode, true);
+        if (scriptInstance.getScriptParameters() != null && !scriptInstance.getScriptParameters().isEmpty()) {
+            validateScriptParams(scriptInstance, context);
+        }
+
+        applyParametersToScriptInstance(classInstance, context);
+
         classInstance.execute(context);
 
-        log.trace("Script (cached) {} executed with parameters {}", scriptCode, context);
+        // Append getter values after script has completed
+        Map<String, Object> getterValues = ReflectionUtils.getGetterValues(classInstance);
+        if (getterValues != null) {
+            context.put(Script.CONTEXT_RESULT_GETTER_VALUES, getterValues);
+        }
+
+        returnScriptInstanceToPool(scriptCode, classInstance);
+
+        log.trace("Script (pooled) {} executed with parameters {}", scriptCode, context);
         return context;
     }
 
@@ -442,7 +468,7 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
         Map<String, Object> result = executeWInitAndFinalize(scriptCode, context);
         return result;
     }
-    
+
     /**
      * Execute action on an entity/event.
      * 
@@ -455,13 +481,13 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
      * @throws InvalidPermissionException Insufficient access to run the script
      * @throws BusinessException Any execution exception
      */
-    public Map<String, Object> execute(Object entityOrEvent, String scriptCode, Map<String, Object> context,boolean isToInit, boolean isToExecute, boolean isToTerminate) throws BusinessException {
+    public Map<String, Object> execute(Object entityOrEvent, String scriptCode, Map<String, Object> context, boolean isToInit, boolean isToExecute, boolean isToTerminate) throws BusinessException {
 
         if (context == null) {
             context = new HashMap<>();
         }
         context.put(Script.CONTEXT_ENTITY, entityOrEvent);
-        Map<String, Object> result = execute(scriptCode, context,isToInit, isToExecute, isToTerminate);
+        Map<String, Object> result = execute(scriptCode, context, isToInit, isToExecute, isToTerminate);
         return result;
     }
 
@@ -478,62 +504,60 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
      */
     public Map<String, Object> executeWInitAndFinalize(String scriptCode, Map<String, Object> context) throws BusinessException {
 
-       return execute(scriptCode, context, true, true, true);
+        return execute(scriptCode, context, true, true, true);
     }
-    
+
     /**
-     * Execute script. 
+     * Execute script.
      * 
      * @param scriptCode Script to execute, identified by a code. Will be added to context under Script.CONTEXT_ACTION key.
      * @param context Method context
-     * @param isToInit 
-     * @param isToExecute
-     * @param isToTerminate
+     * @param isToInit Shall init() method be called in a script
+     * @param isToExecute Shall execute() method be called in a script
+     * @param isToTerminate Shall terminate() method be called in a script
      * @return Context parameters. Will not be null even if "context" parameter is null.
      * @throws InvalidScriptException Were not able to instantiate or compile a script
      * @throws ElementNotFoundException Script not found
      * @throws InvalidPermissionException Insufficient access to run the script
      * @throws BusinessException Any execution exception
      */
-	public Map<String, Object> execute(String scriptCode, Map<String, Object> context, boolean isToInit, boolean isToExecute, boolean isToTerminate)
-			throws BusinessException {
+    public Map<String, Object> execute(String scriptCode, Map<String, Object> context, boolean isToInit, boolean isToExecute, boolean isToTerminate) throws BusinessException {
 
-		log.trace("Script {} to be executed with parameters {}", scriptCode, context);
+        // log.trace("Script {} to be executed with parameters {}", scriptCode, context);
 
-		if (context == null) {
-			context = new HashMap<String, Object>();
-		}
-		if (context.get(Script.CONTEXT_ACTION) == null) {
-			context.put(Script.CONTEXT_ACTION, scriptCode);
-		}
-		context.put(Script.CONTEXT_CURRENT_USER, currentUser);
-		context.put(Script.CONTEXT_APP_PROVIDER, appProvider);
+        if (context == null) {
+            context = new HashMap<String, Object>();
+        }
+        if (context.get(Script.CONTEXT_ACTION) == null) {
+            context.put(Script.CONTEXT_ACTION, scriptCode);
+        }
+        context.put(Script.CONTEXT_CURRENT_USER, currentUser);
+        context.put(Script.CONTEXT_APP_PROVIDER, appProvider);
 
-		ScriptInterface classInstance = getScriptInstance(scriptCode);
-		if (isToInit) {
-			classInstance.init(context);
-		}
-		if (isToExecute) {
-			processScript(findByCode(scriptCode), classInstance, context);
-		}
-		if (isToTerminate) {
-			classInstance.terminate(context);
-		}
+        // Inject default values and validate script Params
+        ScriptInstance scriptInstance = findByCode(scriptCode, true);
+        if (scriptInstance.getScriptParameters() != null && !scriptInstance.getScriptParameters().isEmpty()) {
+            validateScriptParams(scriptInstance, context);
+        }
 
-		log.trace("Script {} executed with parameters {}", scriptCode, context);
-		return context;
-	}
+        ScriptInterface classInstance = getScriptInstance(scriptCode);
+
+        return execute(classInstance, context, isToInit, isToExecute, isToTerminate);
+    }
 
     /**
-     * Execute script. DOES call init() or finalize() methods of the script.
+     * Execute script
      * 
-     * @param compiledScript Compiled script class
+     * @param classInstance Compiled script class
      * @param context Method context
+     * @param isToInit Shall init() method be called in a script
+     * @param isToExecute Shall execute() method be called in a script
+     * @param isToTerminate Shall terminate() method be called in a script
      * 
      * @return Context parameters. Will not be null even if "context" parameter is null.
      * @throws BusinessException Any execution exception
      */
-    protected Map<String, Object> executeWInitAndFinalize(ScriptInterface compiledScript, Map<String, Object> context) throws BusinessException {
+    protected Map<String, Object> execute(ScriptInterface classInstance, Map<String, Object> context, boolean isToInit, boolean isToExecute, boolean isToTerminate) throws BusinessException {
 
         if (context == null) {
             context = new HashMap<String, Object>();
@@ -541,13 +565,26 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
         context.put(Script.CONTEXT_CURRENT_USER, currentUser);
         context.put(Script.CONTEXT_APP_PROVIDER, appProvider);
 
-        log.trace("Script {} to be executed with parameters {}", compiledScript.getClass(), context);
+        log.trace("Script {} to be executed with parameters {}", classInstance.getClass(), context);
 
-        compiledScript.init(context);
-        compiledScript.execute(context);
-        compiledScript.terminate(context);
+        applyParametersToScriptInstance(classInstance, context);
 
-        log.trace("Script {} executed with parameters {}", compiledScript.getClass(), context);
+        if (isToInit) {
+            classInstance.init(context);
+        }
+        if (isToExecute) {
+            classInstance.execute(context);
+        }
+        if (isToTerminate) {
+            classInstance.terminate(context);
+        }
+
+        // Append getter values after script has completed
+        Map<String, Object> getterValues = ReflectionUtils.getGetterValues(classInstance);
+        if (getterValues != null && !getterValues.isEmpty()) {
+            context.put(Script.CONTEXT_RESULT_GETTER_VALUES, getterValues);
+        }
+        log.trace("Script {} executed with parameters {}", classInstance.getClass(), context);
         return context;
     }
 
@@ -567,7 +604,7 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
             Class<ScriptInterface> compiledScript = scriptCompilerService.compileJavaSource(javaSrc);
             ScriptInterface scriptClassInstance = compiledScript.getDeclaredConstructor().newInstance();
 
-            executeWInitAndFinalize(scriptClassInstance, context);
+            execute(scriptClassInstance, context, true, true, true);
 
             String logMessages = scriptClassInstance.getLogMessages();
             return logMessages;
@@ -604,8 +641,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
     }
 
     /**
-     * Compile script, a and update script entity status with compilation errors. Successfully compiled script is added to a compiled script cache if active and not in test
-     * compilation mode. Pass-through to ScriptCompilerService.compileScript().
+     * Compile script, a and update script entity status with compilation errors. Successfully compiled script is added to a compiled script cache if active and not in test compilation mode. Pass-through to
+     * ScriptCompilerService.compileScript().
      * 
      * @param script Script entity to compile
      * @param testCompile Is it a compilation for testing purpose. Won't clear nor overwrite existing compiled script cache.
@@ -625,14 +662,14 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
     public Class<ScriptInterface> getScriptInterface(String scriptCode) throws ElementNotFoundException, InvalidScriptException {
         CacheKeyStr cacheKey = new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode);
 
-        CompiledScript compiledScript = compiledScripts.get(cacheKey);
+        Class<ScriptInterface> compiledScript = compiledScripts.get(cacheKey);
         if (compiledScript == null) {
-            return scriptCompilerService.getScriptInterfaceWCompile(scriptCode);
+            return scriptCompilerService.getOrCompileScript(scriptCode);
         }
 
-        return compiledScript.getScriptClass();
+        return compiledScript;
     }
-    
+
     /**
      * Get a compiled script class
      * 
@@ -652,6 +689,7 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
 
         try {
             // Then check if its a deployed class
+            @SuppressWarnings("rawtypes")
             Class clazz = Class.forName(scriptCode);
             if (clazz != null) {
                 script = (ScriptInterface) clazz.getDeclaredConstructor().newInstance();
@@ -660,9 +698,9 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             log.error("Failed to instantiate script {}", scriptCode, e);
             throw new InvalidScriptException(scriptCode, getEntityClass().getName());
-        
-        } catch(ClassNotFoundException e) {
-            // Ignore error -  its not deployed class
+
+        } catch (ClassNotFoundException e) {
+            // Ignore error - its not deployed class
         }
 
         // Otherwise get it from the compiled source code
@@ -685,153 +723,258 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
      * 
      * @param scriptCode Script code
      * @return A compiled script class
-     * @throws ElementNotFoundException ElementNotFoundException
-     * @throws InvalidScriptException InvalidScriptException
+     * @throws InvalidScriptException Failed to instantiate a script instance
      */
-    public ScriptInterface getCachedScriptInstance(String scriptCode) throws ElementNotFoundException, InvalidScriptException {
-        CacheKeyStr cacheKey = new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode);
+    private ScriptInterface getPooledScriptInstance(String scriptCode) throws InvalidScriptException {
 
-        // First check if there is a compiled script already
-        CompiledScript compiledScript = compiledScripts.get(cacheKey);
-        if (compiledScript != null) {
+        ObjectPool<ScriptInterface> pool = poolOfScriptInstances.get(scriptCode);
 
-            return compiledScript.getScriptInstance();
+        if (pool == null) {
+            synchronized (poolOfScriptInstances) {
+
+                // Double check in case of serialized calls to this method
+                if (poolOfScriptInstances.get(scriptCode) == null) {
+                    pool = buildPool(scriptCode);
+                    poolOfScriptInstances.put(scriptCode, pool);
+                }
+            }
         }
 
-        // Then check if it is a deployed script
-        ScriptInterface script = (ScriptInterface) EjbUtils.getServiceInterface(scriptCode.lastIndexOf('.') > 0 ? scriptCode.substring(scriptCode.lastIndexOf('.') + 1) : scriptCode);
-        if (script != null) {
-            return script;
+        try {
+            return pool.borrowObject();
+        } catch (Exception e) {
+            throw new InvalidScriptException("Failed to get a script instance from a pool", scriptCode, e);
         }
-
-        // And lastly get it from the compiled source code
-        return scriptCompilerService.getScriptInstanceWCompile(scriptCode);
     }
 
     /**
-     * Get a summary of cached information.
+     * Return a pooled script instance back to the pool
      * 
-     * @return A list of a map containing cache information with cache name as a key and cache as a value
+     * @param scriptCode Script code
+     * @param script Script instance
      */
-    // @Override
-    @SuppressWarnings("rawtypes")
-    public Map<String, Cache> getCaches() {
-        Map<String, Cache> summaryOfCaches = new HashMap<String, Cache>();
-        summaryOfCaches.put(compiledScripts.getName(), compiledScripts);
-
-        return summaryOfCaches;
-    }
-
-    /**
-     * Refresh cache by name. Removes <b>current provider's</b> data from cache and populates it again
-     * 
-     * @param cacheName Name of cache to refresh or null to refresh all caches
-     */
-    // @Override
-    @Asynchronous
-    public void refreshCache(String cacheName) {
-
-        if (cacheName == null || cacheName.equals(compiledScripts.getName()) || cacheName.contains(compiledScripts.getName())) {
-            scriptCompilerService.clearCompiledScripts();
-            scriptCompilerService.compileAndInitializeAll();
+    public void returnScriptInstanceToPool(String scriptCode, ScriptInterface script) {
+        ObjectPool<ScriptInterface> pool = poolOfScriptInstances.get(scriptCode);
+        if (pool != null) {
+            try {
+                pool.returnObject(script);
+            } catch (Exception e) {
+                log.error("Failed to return script {} to pool", scriptCode, e);
+            }
         }
     }
 
     /**
-     * Populate cache by name
+     * Remove a script from a script instance pool
      * 
-     * @param cacheName Name of cache to populate or null to populate all caches
+     * @param scriptCode Script to remove
      */
-    // @Override
-    public void populateCache(String cacheName) {
-
-        if (cacheName == null || cacheName.equals(compiledScripts.getName())) {
-            scriptCompilerService.compileAndInitializeAll();
+    public void clearScriptInstancePool(String scriptCode) {
+        ObjectPool<ScriptInterface> pool = poolOfScriptInstances.get(scriptCode);
+        if (pool != null) {
+            try {
+                pool.clear();
+                poolOfScriptInstances.remove(scriptCode);
+            } catch (Exception e) {
+                log.error("Failed to clear script pool {}", scriptCode, e);
+            }
         }
     }
-    
+
     /**
-     * inject default values, validate script Params and execute script 
-     * @param scriptInstance
-     * @param classInstance
-     * @param context
+     * Build a pool of script instances
+     * 
+     * @param scriptCode Script code
+     * @return A pool of script instances
+     * @throws InvalidScriptException Failed to instantiate a script instance
      */
-    private void processScript(ScriptInstance scriptInstance, ScriptInterface classInstance, Map<String, Object> context) {
-    	if (scriptInstance.getScriptParameters() != null && !scriptInstance.getScriptParameters().isEmpty()) {
-    		validateScriptParams(scriptInstance, context);
-    	} 
-    	classInstance.execute(context);
+    private ObjectPool<ScriptInterface> buildPool(String scriptCode) throws InvalidScriptException {
+
+        // Script is not necessarily is defined as a Script Instance. It can be a simple bean deployed as a regular class in a .jar file
+        ScriptPool poolConfig = null;
+        ScriptInstance scriptInstance = findByCode(scriptCode, true);
+        if (scriptInstance != null) {
+            poolConfig = scriptInstance.getPool();
+        } else {
+            poolConfig = new ScriptPool();
+        }
+
+        ScriptInstancePoolFactory factory = new ScriptInstancePoolFactory(() -> getScriptInstance(scriptCode));
+
+        ObjectPool<ScriptInterface> pool = null;
+
+        if (poolConfig.getMaxIdleTime() == null && poolConfig.getMax() == null) {
+            pool = new SoftReferenceObjectPool<>(factory);
+
+        } else {
+            pool = new GenericObjectPool<ScriptInterface>(factory);
+            if (poolConfig.getMaxIdleTime() != null) {
+                ((GenericObjectPool<ScriptInterface>) pool).setMinEvictableIdle(Duration.of(poolConfig.getMaxIdleTime(), ChronoUnit.SECONDS));
+                // ((GenericObjectPool<ScriptInterface>) pool).setSoftMinEvictableIdle(Duration.of(poolConfig.getMaxIdleTime(), ChronoUnit.SECONDS));
+                // ((GenericObjectPool<ScriptInterface>) pool).setTimeBetweenEvictionRuns(Duration.of(poolConfig.getMaxIdleTime(), ChronoUnit.SECONDS));
+            }
+
+            if (poolConfig.getMax() != null) {
+                ((GenericObjectPool<ScriptInterface>) pool).setMaxTotal(poolConfig.getMax());
+            }
+
+            if (poolConfig.getMin() != null) {
+                ((GenericObjectPool<ScriptInterface>) pool).setMinIdle(poolConfig.getMin());
+            }
+        }
+
+        if (poolConfig.getMin() != null) {
+            try {
+                pool.addObjects(poolConfig.getMin());
+            } catch (Exception e) {
+                throw new InvalidScriptException(scriptCode, scriptCode, e);
+            }
+        }
+
+        return pool;
     }
-    
+
     /**
-     * Validate script Params : inject default values, check mantadory params and allowed values 
+     * Validate script Params : inject default values, check mantadory params and allowed values
+     * 
      * @param scriptInstance
      * @param context
      */
     private void validateScriptParams(ScriptInstance scriptInstance, Map<String, Object> context) {
-    	// Inject default values on context for missing params
-    	injectDefaultValues(scriptInstance, context);
-    	
-    	// Check mantadory params and allowed values
-    	scriptInstance.getScriptParameters().stream().forEach(sp -> {
-    		if (sp.isMandatory() && !context.containsKey(sp.getCode())) {
-    			throw new BusinessException(resourceMessages.getString("message.scriptInstance.paramMandatory", sp.getCode(), sp.getClassName(), scriptInstance.getCode()));
-    		}
-    		if (StringUtils.isNotEmpty(sp.getAllowedValues()) && context.containsKey(sp.getCode()) && Arrays.stream(sp.getAllowedValues().split(sp.getValuesSeparator())).noneMatch(context.get(sp.getCode())::equals)) {
-    			throw new BusinessException(resourceMessages.getString("message.scriptInstance.allowedValues", sp.getCode(), sp.getAllowedValues()));
-    		}
-    		if (context.containsKey(sp.getCode())) {
-				context.put(sp.getCode(), (sp.isCollection())? parseListFromString(String.valueOf(context.get(sp.getCode())), sp.getClassName(), sp.getValuesSeparator())
-								: parseObjectFromString(String.valueOf(context.get(sp.getCode())), sp.getClassName()));
-    		}
-    	});
-    	
+        // Inject default values on context for missing params
+        injectDefaultValues(scriptInstance, context);
+
+        // Check mantadory params and allowed values
+        scriptInstance.getScriptParameters().stream().forEach(sp -> {
+            if (sp.isMandatory() && !context.containsKey(sp.getCode())) {
+                throw new BusinessException(resourceMessages.getString("message.scriptInstance.paramMandatory", sp.getCode(), sp.getClassName(), scriptInstance.getCode()));
+            }
+            if (StringUtils.isNotEmpty(sp.getAllowedValues()) && context.containsKey(sp.getCode()) && Arrays.stream(sp.getAllowedValues().split(sp.getValuesSeparator())).noneMatch(context.get(sp.getCode())::equals)) {
+                throw new BusinessException(resourceMessages.getString("message.scriptInstance.allowedValues", sp.getCode(), sp.getAllowedValues()));
+            }
+            if (context.containsKey(sp.getCode())) {
+                context.put(sp.getCode(), (sp.isCollection()) ? parseListFromString(String.valueOf(context.get(sp.getCode())), sp.getClassName(), sp.getValuesSeparator())
+                        : parseObjectFromString(String.valueOf(context.get(sp.getCode())), sp.getClassName()));
+            }
+        });
+
     }
-    
+
     /**
      * Inject default values on context for missing params
+     * 
      * @param scriptInstance
      * @param context
      */
     private void injectDefaultValues(ScriptInstance scriptInstance, Map<String, Object> context) {
-    	List<ScriptParameter> paramsWithDefaultValue = scriptInstance.getScriptParameters().stream().filter(sp -> StringUtils.isNotEmpty(sp.getDefaultValue())).collect(Collectors.toList());
-    	paramsWithDefaultValue.stream().filter(sp -> !context.containsKey(sp.getCode())).forEach(sp -> context.put(sp.getCode(), sp.getDefaultValue()));
+        List<ScriptParameter> paramsWithDefaultValue = scriptInstance.getScriptParameters().stream().filter(sp -> StringUtils.isNotEmpty(sp.getDefaultValue())).collect(Collectors.toList());
+        paramsWithDefaultValue.stream().filter(sp -> !context.containsKey(sp.getCode())).forEach(sp -> context.put(sp.getCode(), sp.getDefaultValue()));
     }
-    
+
     /**
      * Parse a list of object from String
+     * 
      * @param value
      * @param clazzName
      * @return the object or the entity parsed
      */
-	public <T> List<T> parseListFromString(String value, String clazzName, String separator) {
-		try {
-			if (StringUtils.isBlank(value)) return null;
-			else return (List<T>) Arrays.stream(value.split(separator)).map(val -> parseObjectFromString(val, clazzName)).collect(Collectors.toList());
-		} catch (Exception e) {
-			throw new BusinessException(String.format("Failed to parse %s as list of %s", value, clazzName));
-		}
-	}
+    @SuppressWarnings("unchecked")
+    public <T> List<T> parseListFromString(String value, String clazzName, String separator) {
+        try {
+            if (StringUtils.isBlank(value))
+                return null;
+            else
+                return (List<T>) Arrays.stream(value.split(separator)).map(val -> parseObjectFromString(val, clazzName)).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new BusinessException(String.format("Failed to parse %s as list of %s", value, clazzName));
+        }
+    }
 
     /**
      * Parse an object from String
+     * 
      * @param value
      * @param clazzName
      * @return the object or the entity parsed
      */
     public <T> T parseObjectFromString(String value, String clazzName) {
         try {
+            @SuppressWarnings("unchecked")
             Class<T> clazz = (Class<T>) Class.forName(clazzName);
-			if(clazzName.startsWith("org.meveo.model")){
-				if(value.matches("\\d+")){
-					return (T) getEntityManager().find(clazz, Long.parseLong(value));
-				}
-				return (T) getEntityManager().createQuery("from " + clazzName + " where code = :code", clazz).setParameter("code", value).getSingleResult();
-			}
-	  
-			return (T) clazz.getConstructor(new Class[] {String.class }).newInstance(value);
+            if (clazzName.startsWith("org.meveo.model")) {
+                if (value.matches("\\d+")) {
+                    return (T) getEntityManager().find(clazz, Long.parseLong(value));
+                }
+                return (T) getEntityManager().createQuery("from " + clazzName + " where code = :code", clazz).setParameter("code", value).getSingleResult();
+            }
+
+            return (T) clazz.getConstructor(new Class[] { String.class }).newInstance(value);
         } catch (Exception e) {
             throw new BusinessException(String.format("Failed to parse %s as %s", value, clazzName));
         }
     }
+
+    /**
+     * Apply parameters to script instance by calling corresponding setter methods on the script instance.
+     * 
+     * @param scriptInstance Script instance
+     * @param parameters Parameters to apply
+     */
+    public void applyParametersToScriptInstance(ScriptInterface scriptInstance, Map<String, Object> parameters) {
+
+        for (Method method : scriptInstance.getClass().getDeclaredMethods()) {
+            if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
+                String parameterName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+                Object setterValue = parameters.get(parameterName);
+                if (setterValue == null) {
+                    continue;
+                }
+                Class<?> paramType = method.getParameterTypes()[0];
+                DataTypeUtils.ClassAndValue classAndValue = new DataTypeUtils.ClassAndValue(setterValue);
+                if (setterValue instanceof String && !String.class.isAssignableFrom(paramType)) {
+                    classAndValue = DataTypeUtils.convertFromString(paramType, (String) setterValue);
+                    setterValue = classAndValue.getValue();
+                } else if (setterValue instanceof Number && !paramType.isAssignableFrom(setterValue.getClass())) {
+                    classAndValue = DataTypeUtils.convertFromNumber(paramType, (Number) setterValue);
+                    setterValue = classAndValue.getValue();
+                } else if (setterValue instanceof Boolean && paramType.isPrimitive() && boolean.class.isAssignableFrom(paramType)) {
+                    classAndValue = new ClassAndValue(((Boolean) setterValue).booleanValue());
+                    classAndValue.setClass(boolean.class);
+                }
+
+                // log.trace("Converting input value " + setterValue + " of type " + setterValue.getClass() + " to " + paramType + " type for setter " + method.getName() + " converted value is " +
+                // classAndValue);
+
+                try {
+                    if (!classAndValue.getTypeClass().isAssignableFrom(paramType)) {
+
+                        // If value is a map or a custom entity instance, convert into target class
+                        if (setterValue instanceof Map || setterValue instanceof Collection) {
+                            setterValue = JacksonUtil.convert(setterValue, paramType);
+
+                            // } else if (setterValue instanceof CustomEntityInstance) { // TODO
+                            // CustomEntityInstance cei = (CustomEntityInstance) setterValue;
+                            // setterValue = CEIUtils.ceiToPojo(cei, paramType);
+
+                        } else if (Collection.class.isAssignableFrom(paramType)) {
+                            // If value which is supposed to be a collection comes with a single value, automatically deserialize it to a collection
+                            var type = method.getParameters()[0].getParameterizedType();
+                            var jacksonType = TypeFactory.defaultInstance().constructType(type);
+                            setterValue = (Collection<?>) JacksonUtil.convert(setterValue, jacksonType);
+
+                        } else {
+                            log.error("Failed to convert input value {} of type {} to {} type for setter {}", setterValue, setterValue.getClass(), paramType, method.getName());
+                            throw new IllegalArgumentException("Failed to convert input value " + setterValue + " of type " + setterValue.getClass() + " to " + paramType + " type for setter " + method.getName());
+                        }
+                    }
+                    method.invoke(scriptInstance, setterValue);
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        }
+    }
+
 }

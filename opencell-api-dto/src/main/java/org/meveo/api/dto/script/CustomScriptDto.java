@@ -46,11 +46,17 @@ public abstract class CustomScriptDto extends EnableBusinessDto {
      * Shall same script instance be utilized in repeated calls
      */
     @XmlElement
+    @Deprecated
     private Boolean reuse;
 
     /** The script. */
     @XmlElement(required = true)
     private String script;
+
+    /**
+     * Use a pool of script instances for script execution
+     */
+    private ScriptPoolDto pool;
 
     /**
      * Instantiates a new custom script dto.
@@ -68,7 +74,10 @@ public abstract class CustomScriptDto extends EnableBusinessDto {
         super(scriptInstance);
         this.type = scriptInstance.getSourceTypeEnum();
         this.script = scriptInstance.getScript();
-        this.reuse = scriptInstance.getReuse();
+        this.reuse = scriptInstance.isUsePool();
+        if (scriptInstance.isUsePool()) {
+            this.pool = new ScriptPoolDto(scriptInstance.getPool());
+        }
     }
 
     /**
@@ -119,6 +128,14 @@ public abstract class CustomScriptDto extends EnableBusinessDto {
      */
     public void setReuse(Boolean reuse) {
         this.reuse = reuse;
+    }
+
+    public ScriptPoolDto getPool() {
+        return pool;
+    }
+
+    public void setPool(ScriptPoolDto pool) {
+        this.pool = pool;
     }
 
     /**

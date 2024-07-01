@@ -55,7 +55,7 @@ import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.BusinessEntity;
@@ -295,7 +295,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
 
         customFieldsCache.addUpdateCustomFieldTemplate(cft);
 
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.create);
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.create);
 
         if (CfValueAccumulator.isAccumulateCf()) {
             boolean reaccumulateCFValues = cfValueAccumulator.refreshCfAccumulationRules(cft);
@@ -393,7 +393,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         CustomFieldTemplate cftUpdated = super.update(cft);
 
         customFieldsCache.addUpdateCustomFieldTemplate(cftUpdated);
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.update);
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.update);
 
         if (updateUniqueConstraint) {
             updateConstraintByOldColumnsAndCet(oldConstraintColumns, cet, cetFields);
@@ -438,7 +438,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         if (CfValueAccumulator.isAccumulateCf()) {
             cfValueAccumulator.refreshCfAccumulationRules(cft);
         }
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.remove);
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.remove);
     }
 
     @Override
@@ -446,7 +446,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         cft = refreshOrRetrieve(cft);
         cft = super.enable(cft);
         customFieldsCache.addUpdateCustomFieldTemplate(cft);
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.enable);
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.enable);
         return cft;
     }
 
@@ -454,7 +454,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
     public CustomFieldTemplate disable(CustomFieldTemplate cft) throws BusinessException {
         cft = super.disable(cft);
         customFieldsCache.removeCustomFieldTemplate(cft);
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.disable);
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.disable);
         return cft;
     }
 

@@ -397,9 +397,14 @@
             <artifactId>wildfly-elytron-http-oidc</artifactId>
             <scope>provided</scope>
         </dependency>
-
+		
         <!-- End of libraries included in Jboss -->
 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+		</dependency>
+		
         <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
@@ -941,7 +946,12 @@
             <artifactId>arquillian-junit-container</artifactId>
             <scope>test</scope>
         </dependency>
-
+        
+		<dependency>
+		    <groupId>com.github.javaparser</groupId>
+		    <artifactId>javaparser-core</artifactId>
+		</dependency>
+			
     </dependencies>
 
     <profiles>

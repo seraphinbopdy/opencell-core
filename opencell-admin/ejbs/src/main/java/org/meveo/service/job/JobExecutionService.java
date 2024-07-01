@@ -42,7 +42,7 @@ import org.meveo.cache.JobRunningStatusEnum;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.PersistenceUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
@@ -187,7 +187,7 @@ public class JobExecutionService extends BaseService {
                 jobParameters.putAll(params);
             }
             jobParameters.put(Job.JOB_PARAM_LAUNCHER, jobLauncher);
-            jobExecutionResultId = (Long) clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.execute, jobParameters, true);
+            jobExecutionResultId = (Long) clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.execute, jobParameters, true, null, null);
         }
         return jobExecutionResultId;
     }
@@ -280,7 +280,7 @@ public class JobExecutionService extends BaseService {
 
         // Publish to other cluster nodes to cancel job execution
         if (triggerStopOnOtherNodes) {
-            clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.stop);
+            clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.stop);
         }
     }
 
@@ -331,7 +331,7 @@ public class JobExecutionService extends BaseService {
 
         // Publish to other cluster nodes to cancel job execution
         if (triggerStopOnOtherNodes) {
-            clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.stopByForce);
+            clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.stopByForce);
         }
     }
 
@@ -446,8 +446,7 @@ public class JobExecutionService extends BaseService {
         JobRunningStatusEnum isRunning = jobCacheContainerProvider.isJobRunning(jobInstance.getId());
         if (isRunning == JobRunningStatusEnum.NOT_RUNNING) {
             return true;
-        } else if (isRunning == JobRunningStatusEnum.RUNNING_THIS || isRunning == JobRunningStatusEnum.LOCKED_THIS
-                || isRunning == JobRunningStatusEnum.REQUEST_TO_STOP) {
+        } else if (isRunning == JobRunningStatusEnum.RUNNING_THIS || isRunning == JobRunningStatusEnum.LOCKED_THIS || isRunning == JobRunningStatusEnum.REQUEST_TO_STOP) {
             return false;
         } else {
             return JobExecutionService.isRunnableOnNode(jobInstance.getRunOnNodesResolved());

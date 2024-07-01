@@ -48,7 +48,7 @@ import org.slf4j.Logger;
  * @author Abdellatif BARI
  * @lastModifiedVersion 7.0
  */
-public class TenantCacheContainerProvider implements Serializable { // CacheContainerProvider, Serializable {
+public class TenantCacheContainerProvider implements CacheContainerProvider, Serializable {
 
     private static final long serialVersionUID = 180156064688145292L;
 
@@ -80,7 +80,7 @@ public class TenantCacheContainerProvider implements Serializable { // CacheCont
      * 
      * @return A map containing cache information with cache name as a key and cache as a value
      */
-    // @Override
+    @Override
     @SuppressWarnings("rawtypes")
     public Map<String, Cache> getCaches() {
         Map<String, Cache> summaryOfCaches = new HashMap<String, Cache>();
@@ -94,7 +94,7 @@ public class TenantCacheContainerProvider implements Serializable { // CacheCont
      * 
      * @param cacheName Name of cache to refresh or null to refresh all caches
      */
-    // @Override
+    @Override
     @Asynchronous
     public void refreshCache(String cacheName) {
 
@@ -108,7 +108,7 @@ public class TenantCacheContainerProvider implements Serializable { // CacheCont
      * 
      * @param cacheName Name of cache to populate or null to populate all caches
      */
-    // @Override
+    @Override
     public void populateCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(tenants.getName()) || cacheName.contains(tenants.getName())) {

@@ -35,7 +35,7 @@ import org.meveo.event.CounterPeriodEvent;
 import org.meveo.event.communication.InboundCommunicationEvent;
 import org.meveo.event.logging.LoggedEvent;
 import org.meveo.event.monitoring.BusinessExceptionEvent;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.event.qualifier.AdvancementRateIncreased;
 import org.meveo.event.qualifier.Created;
@@ -257,7 +257,7 @@ public class DefaultObserver {
         IteratorBasedJobBean.releaseJobDataProcessingThreads(jobInstanceId);
 
         // Publish event to other nodes
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.lastJobDataMessageReceived);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.lastJobDataMessageReceived);
     }
 
     public void businesException(@Observes BusinessExceptionEvent bee) {

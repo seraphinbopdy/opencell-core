@@ -467,7 +467,10 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
      * @param targetBatches  Target batch codes
      * @param nbToRetrieve   Number of wallet operations to retrieve
      * @return The wallet operations list to rerate
+     * 
+     * @deprecated since 16.1
      */
+    @Deprecated(since = "16.1")
     public List<Long> listToRerate(String reratingTarget, List<String> targetBatches, int nbToRetrieve) {
         // null | ALL
         TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletOperation.listToRerate", Long.class);

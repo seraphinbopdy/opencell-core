@@ -9140,20 +9140,7 @@
 		</insert>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-data-jobs">
-
-        <insert tableName="meveo_job_instance">
-            <column name="id" valueNumeric="-1" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="1" />
-            <column name="created" valueDate="2015-03-19 00:04:19.913" />
-            <column name="job_category" value="RATING" />
-            <column name="job_template" value="ReRatingJob" />
-            <column name="code" value="Rerate_Job" />
-
-            <column name="creator" value="OPENCELL.ADMIN" />
-            <column name="timerentity_id" valueNumeric="-1" />
-            <column name="uuid" value="Rerate_Job" />
-        </insert>
+		
         <insert tableName="meveo_job_instance">
             <column name="id" valueNumeric="-3" />
             <column name="version" valueNumeric="0" />
@@ -9648,9 +9635,9 @@
             <column name="creator" value="applicationInitializer"/>
             <column name="job_category" value="RATING"/>
             <column name="job_template" value="RatingCancellationJob"/>
-            <column name="code" value="RatingCancellationJob"/>
+            <column name="code" value="Rerate_Job"/>
             <column name="uuid" value="RatingCancellationJob"/>
-            <column name="description" value="Cancellation of operations to be rerated"/>
+            <column name="description" value="Rerating process V2. This job cancels rating for marked wallet operation, and is chained with actual rerating job."/>
             <column name="cf_values">
                 <![CDATA[
                     {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}], "JobInstance_RatingCancellationJob_UseExistingViews": [{"boolean": false}], "JobInstance_RatingCancellationJob_MaxRTsPerTransaction": [{"long": 100000}]}
@@ -9674,6 +9661,10 @@
                 ]]>
             </column>
         </insert>
+		<update tableName="meveo_job_instance">
+			<column name="following_job_id" valueComputed="(select id from meveo_job_instance where code = 'ReRatingV2Job')" />
+			<where>code='Rerate_Job'</where>
+		</update>
         <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
             <column name="version" valueNumeric="0"/>

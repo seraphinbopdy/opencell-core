@@ -42,8 +42,10 @@ import org.meveo.service.job.ScopedJob;
 
 /**
  * Job definition to rerate wallet operations
+ * @deprecated since 16.1
  */
 @Stateless
+@Deprecated(since = "16.1")
 public class ReRatingJob extends ScopedJob {
 
     /** The re rating job bean. */

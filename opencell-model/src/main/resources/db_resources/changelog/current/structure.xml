@@ -12541,4 +12541,9 @@ public class DummyPaymentGatewayScript extends Script {
         </update>
     </changeSet>
 
+    <changeSet id="INTRD-23881_20240701" author="TarikFA.">
+        <addColumn tableName="advanced_settings">
+            <column name="description_i18n" type="${type.json}" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

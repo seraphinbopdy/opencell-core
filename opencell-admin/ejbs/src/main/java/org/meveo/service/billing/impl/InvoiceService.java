@@ -439,6 +439,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
     @Inject
     private MatchingCodeService matchingCodeService;
 
+    @Inject
+    private InvoiceAgregateService invoiceAgregateService;
+
     /**
      * folder for pdf .
      */
@@ -6202,6 +6205,15 @@ public class InvoiceService extends PersistenceService<Invoice> {
                     } else {
                         for (InvoiceAgregate invoiceAggregate : invoice.getInvoiceAgregates()) {
                             if (invoiceAggregate.getId() == null) {
+                                if(invoiceAggregate instanceof CategoryInvoiceAgregate) {
+                                    ((CategoryInvoiceAgregate) invoiceAggregate).getSubCategoryInvoiceAgregates()
+                                            .forEach(subCategoryInvoiceAgregate
+                                                    -> {
+                                                if (subCategoryInvoiceAgregate.getId() == null) {
+                                                    invoiceAgregateService.create(subCategoryInvoiceAgregate);
+                                                }
+                                            });
+                                }
                                 em.persist(invoiceAggregate);
                             }
                         }
@@ -6434,6 +6446,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                     descriptionMap.put(translationSCKey, descTranslated);
                 }
                 scAggregate.setDescription(descTranslated);
+                invoiceAgregateService.create(scAggregate);
 
                 subCategoryAggregates.put(scaKey, scAggregate);
                 invoice.addInvoiceAggregate(scAggregate);
@@ -7049,9 +7062,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
         return createAggregatesAndInvoiceFromIls(billingAccount, billingAccount.getBillingRun(), null,null, invoice.getInvoiceDate(), null, null, invoice.isDraft(), billingAccount.getBillingCycle(), billingAccount,
             billingAccount.getPaymentMethod(), invoice.getInvoiceType(), null, false, false, invoice, InvoiceProcessTypeEnum.MANUAL,null, null);
     }
-
-    @Inject
-    private InvoiceAgregateService invoiceAgregateService;
 
     private final String TAX_INVOICE_AGREGATE = "T";
     private final String CATEGORY_INVOICE_AGREGATE = "R";

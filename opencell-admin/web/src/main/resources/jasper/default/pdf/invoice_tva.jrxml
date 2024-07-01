@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Invoice_tva" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoPages" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryNewPage="true" uuid="801855a9-548e-443b-81d5-d27d42b5df88">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="externalPurchaseOrderNumber"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="dev.xml"/>
 	<style name="table">
 		<box>
 			<pen lineWidth="0.0" lineColor="#000000"/>
@@ -297,11 +297,15 @@
 		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/amount/advances/@totalAmountWithTax"/>
 		<fieldDescription><![CDATA[/invoice/amount/advances/@totalAmountWithTax]]></fieldDescription>
 	</field>
+	<field name="paymentTerms_description" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/header/paymentTerms/description"/>
+		<fieldDescription><![CDATA[/invoice/header/paymentTerms/description]]></fieldDescription>
+	</field>
 	<group name="subCategory"/>
 	<group name="1"/>
 	<group name="2">
 		<groupHeader>
-			<band height="354">
+			<band height="477">
 				<rectangle radius="10">
 					<reportElement x="254" y="196" width="327" height="43" forecolor="#F2F4F5" backcolor="#F2F4F5" uuid="cea08215-b38e-46aa-bd62-e0051c5b3821">
 						<property name="com.jaspersoft.studio.element.name" value="coordonnees_container"/>
@@ -420,24 +424,24 @@
 					</graphicElement>
 				</line>
 				<rectangle>
-					<reportElement x="16" y="270" width="564" height="60" backcolor="#F2F2F2" uuid="5891029e-09c5-4a9e-b520-da38f1595c7e"/>
+					<reportElement x="18" y="415" width="564" height="60" backcolor="#F2F2F2" uuid="5891029e-09c5-4a9e-b520-da38f1595c7e"/>
 				</rectangle>
 				<staticText>
-					<reportElement x="18" y="274" width="532" height="20" uuid="c9aaec53-65b2-40b7-8e9e-63dbea0515aa"/>
+					<reportElement x="20" y="419" width="532" height="20" uuid="c9aaec53-65b2-40b7-8e9e-63dbea0515aa"/>
 					<textElement>
 						<font fontName="SansSerif" size="11" isBold="true"/>
 					</textElement>
 					<text><![CDATA[Payment conditions]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="18" y="290" width="562" height="19" uuid="57e14117-db1e-4cda-9ac2-948eaf827aef"/>
+					<reportElement x="20" y="435" width="562" height="19" uuid="57e14117-db1e-4cda-9ac2-948eaf827aef"/>
 					<textElement>
 						<font fontName="SansSerif" size="10" isBold="false"/>
 					</textElement>
 					<text><![CDATA[No early payment discount.]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="18" y="302" width="562" height="27" uuid="45b74835-9020-4793-a7f5-d04df4070983"/>
+					<reportElement x="20" y="447" width="562" height="27" uuid="45b74835-9020-4793-a7f5-d04df4070983"/>
 					<textElement>
 						<font fontName="SansSerif" size="10" isBold="false"/>
 					</textElement>
@@ -468,7 +472,9 @@
 					<textFieldExpression><![CDATA[$F{customerPo}]]></textFieldExpression>
 				</textField>
 				<rectangle radius="10">
-					<reportElement x="16" y="154" width="216" height="85" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ae38bef1-ae59-4b3a-a094-0f815a9032ca"/>
+					<reportElement x="16" y="150" width="216" height="259" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ae38bef1-ae59-4b3a-a094-0f815a9032ca">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
 					<graphicElement>
 						<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 					</graphicElement>
@@ -492,7 +498,7 @@
 					<text><![CDATA[Beneficiary payment]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="28" y="190" width="102" height="20" uuid="c09284ef-6416-452b-99f5-d02f3d9020bb">
+					<reportElement x="28" y="186" width="102" height="20" uuid="c09284ef-6416-452b-99f5-d02f3d9020bb">
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					</reportElement>
 					<box padding="1"/>
@@ -502,14 +508,14 @@
 					<text><![CDATA[Payment method:]]></text>
 				</staticText>
 				<textField isBlankWhenNull="true">
-					<reportElement x="130" y="191" width="102" height="20" uuid="7fb9a2aa-4144-4430-9a93-c9c26dd17baf"/>
+					<reportElement x="130" y="187" width="102" height="20" uuid="7fb9a2aa-4144-4430-9a93-c9c26dd17baf"/>
 					<textElement verticalAlignment="Top">
 						<font fontName="SansSerif" size="10" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{paymentMethod}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement x="28" y="210" width="204" height="20" uuid="af0af1ab-ae72-400d-a3f0-e644045e1f91"/>
+					<reportElement x="28" y="208" width="204" height="18" uuid="af0af1ab-ae72-400d-a3f0-e644045e1f91"/>
 					<textElement verticalAlignment="Top">
 						<font fontName="SansSerif" size="10" isBold="false"/>
 					</textElement>
@@ -745,6 +751,23 @@
 						</jr:column>
 					</jr:table>
 				</componentElement>
+				<staticText>
+					<reportElement x="28" y="228" width="102" height="20" uuid="2dc771c5-dcbf-4ca3-9472-5a453b3fcc5c">
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					</reportElement>
+					<box padding="1"/>
+					<textElement markup="none">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Payment terms:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement positionType="Float" x="28" y="248" width="204" height="160" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="7820201d-f9c5-43d4-a9d8-89957c184358"/>
+					<textElement verticalAlignment="Top">
+						<font fontName="SansSerif" size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{paymentTerms_description}]]></textFieldExpression>
+				</textField>
 			</band>
 			<band/>
 		</groupHeader>

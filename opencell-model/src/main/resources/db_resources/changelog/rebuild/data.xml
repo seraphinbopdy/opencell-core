@@ -13019,5 +13019,104 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="script_instance_id"
 					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
 		</insert>
+	</changeSet><changeSet id="INTRD-24052_ReRateV2_filter_data" author="a.rouaguebe">
+
+	<insert tableName="crm_custom_field_tmpl">
+		<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+		<column name="version" valueNumeric="0" />
+		<column name="disabled" valueNumeric="0" />
+		<column name="created" valueDate="${db.current.time}" />
+		<column name="code" value="ReRatingJobBean_reratingTarget"/>
+		<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+		<column name="description" value="Rerating Target"/>
+		<column name="field_type" value="LIST"/>
+		<column name="storage_type" value="SINGLE"/>
+		<column name="default_value" value="ALL"/>
+		<column name="value_required" value="0"/>
+		<column name="creator" value="applicationInitializer"/>
+		<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:4"/>
+	</insert>
+
+	<insert tableName="crm_custom_field_tmpl_val">
+		<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+		<column name="listvalues" value="ALL" />
+		<column name="listvalues_key" value="ALL" />
+	</insert>
+	<insert tableName="crm_custom_field_tmpl_val">
+		<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+		<column name="listvalues" value="NO_BATCH" />
+		<column name="listvalues_key" value="NO BATCH" />
+	</insert>
+	<insert tableName="crm_custom_field_tmpl_val">
+		<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+		<column name="listvalues" value="WITH_BATCH" />
+		<column name="listvalues_key" value="WITH BATCH" />
+	</insert>
+
+	<insert tableName="crm_custom_field_tmpl">
+		<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+		<column name="version" valueNumeric="0" />
+		<column name="disabled" valueNumeric="0" />
+		<column name="created" valueDate="${db.current.time}" />
+		<column name="code" value="ReRatingJobBean_targetBatches"/>
+		<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+		<column name="description" value="Target batches"/>
+		<column name="field_type" value="ENTITY"/>
+		<column name="storage_type" value="LIST"/>
+		<column name="value_required" value="0"/>
+		<column name="entity_clazz" value="org.meveo.model.billing.BatchEntity" />
+		<column name="creator" value="applicationInitializer"/>
+		<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
+	</insert>
+</changeSet>
+	<changeSet id="INTRD-24052_ReRateV2_filter_data" author="a.rouaguebe">
+
+		<insert tableName="crm_custom_field_tmpl">
+			<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="code" value="ReRatingJobBean_reratingTarget"/>
+			<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+			<column name="description" value="Rerating Target"/>
+			<column name="field_type" value="LIST"/>
+			<column name="storage_type" value="SINGLE"/>
+			<column name="default_value" value="ALL"/>
+			<column name="value_required" value="0"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:4"/>
+		</insert>
+
+		<insert tableName="crm_custom_field_tmpl_val">
+			<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+			<column name="listvalues" value="ALL" />
+			<column name="listvalues_key" value="ALL" />
+		</insert>
+		<insert tableName="crm_custom_field_tmpl_val">
+			<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+			<column name="listvalues" value="NO_BATCH" />
+			<column name="listvalues_key" value="NO BATCH" />
+		</insert>
+		<insert tableName="crm_custom_field_tmpl_val">
+			<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+			<column name="listvalues" value="WITH_BATCH" />
+			<column name="listvalues_key" value="WITH BATCH" />
+		</insert>
+
+		<insert tableName="crm_custom_field_tmpl">
+			<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="code" value="ReRatingJobBean_targetBatches"/>
+			<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+			<column name="description" value="Target batches"/>
+			<column name="field_type" value="ENTITY"/>
+			<column name="storage_type" value="LIST"/>
+			<column name="value_required" value="0"/>
+			<column name="entity_clazz" value="org.meveo.model.billing.BatchEntity" />
+			<column name="creator" value="applicationInitializer"/>
+			<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
+		</insert>
 	</changeSet>
 </databaseChangeLog>

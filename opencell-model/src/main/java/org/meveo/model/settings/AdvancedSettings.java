@@ -9,7 +9,11 @@ import javax.persistence.QueryHint;
 import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import org.meveo.model.BusinessEntity;
+
+import java.util.Map;
+
 /**
  * Represents advanced configuration settings.
  */
@@ -47,6 +51,12 @@ public class AdvancedSettings extends BusinessEntity {
      */
     @Column(name = "property_type", length = 255)
     protected String type;
+	/**
+	 * Translated descriptions in JSON format with language code as a key and translated description as a value
+	 */
+	@Type(type = "json")
+	@Column(name = "description_i18n", columnDefinition = "jsonb")
+	private Map<String, String> descriptionI18n;
     /**
      * Get the old configuration origin.
      *
@@ -127,4 +137,12 @@ public class AdvancedSettings extends BusinessEntity {
     public void setType(String type) {
         this.type = type;
     }
+	
+	public Map<String, String> getDescriptionI18n() {
+		return descriptionI18n;
+	}
+	
+	public void setDescriptionI18n(Map<String, String> descriptionI18n) {
+		this.descriptionI18n = descriptionI18n;
+	}
 }

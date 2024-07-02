@@ -20924,6 +20924,7 @@
     <changeSet id="#INTRD-23916_20240625" author="a.rouaguebe" />
     <changeSet id="INTRD-24031_20240626" author="ZakariaB" />
     <changeSet id="INTRD-24051_ReRateV2" author="a.rouaguebe" />
+    <changeSet id="INTRD-24052_ReRateV2_filter" author="a.rouaguebe" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

@@ -695,8 +695,10 @@ public class PaymentService extends PersistenceService<Payment> {
             throw new BusinessException(doPaymentResponseDto.getErrorCode());
         }
         
-        paymentHistoryService.addHistory(customerAccount, null, refund, ctsAmount, doPaymentResponseDto.getPaymentStatus(),doPaymentResponseDto.getErrorCode(), doPaymentResponseDto.getErrorMessage(),
-                doPaymentResponseDto.getPaymentID(), errorType, operationCat, paymentGateway.getCode(), preferredMethod,aoIdsToPay);
+		paymentHistoryService.addHistory(customerAccount, null, refund, ctsAmount,
+				(doPaymentResponseDto.getPaymentStatus() != null) ? doPaymentResponseDto.getPaymentStatus()	: PaymentStatusEnum.PENDING,
+				doPaymentResponseDto.getErrorCode(), doPaymentResponseDto.getErrorMessage(), doPaymentResponseDto.getPaymentID(), 
+				errorType, operationCat, paymentGateway.getCode(), preferredMethod,	aoIdsToPay);
         
         return aoPaymentId;
     }

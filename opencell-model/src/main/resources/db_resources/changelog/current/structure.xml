@@ -12592,9 +12592,163 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
 
-    <changeSet id="INTRD-23881_20240701" author="TarikFA.">
+    <changeSet id="INTRD-23881_20240702" author="TarikFA.">
         <addColumn tableName="advanced_settings">
             <column name="description_i18n" type="${type.json}" />
         </addColumn>
     </changeSet>
+
+    <changeSet id="INTRD-23882_20240702" author="TarikFA.">
+        <update tableName="advanced_settings">
+            <column name="description" value="Activate price plan filters"/>
+            <column name="description_i18n" value='{"FRA":"Activer les filtres de price plan","ENG":"Activate price plan filters"}'/>
+            <where>code = 'pricePlanFilters.enablePricePlanFilters'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Offer"/>
+            <column name="description_i18n" value='{"FRA":"Offre","ENG":"Offer"}'/>
+            <where>code = 'pricePlanFilters.enableOfferTemplate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Subscription date from"/>
+            <column name="description_i18n" value='{"FRA":"Date de souscription depuis","ENG":"Subscription date from"}'/>
+            <where>code = 'pricePlanFilters.enableStartSubscriptionDate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Subscription date to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Date de souscription jusqu'à","ENG":"Subscription date to"}]]>
+            </column>
+            <where>code = 'pricePlanFilters.enableEndSubscriptionDate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Rating date from"/>
+            <column name="description_i18n" value='{"FRA":"Date de valorisation depuis","ENG":"Rating date from"}'/>
+            <where>code = 'pricePlanFilters.enableStartRatingDate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Rating date to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Date de valorisation jusqu'à","ENG":"Rating date to"}]]>
+            </column>
+            <where>code = 'pricePlanFilters.enableEndRatingDate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Minimum quantity"/>
+            <column name="description_i18n" value='{"FRA":"Quantité minimale","ENG":"Minimum quantity"}'/>
+            <where>code = 'pricePlanFilters.enableMinQuantity'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Maximum quantity"/>
+            <column name="description_i18n" value='{"FRA":"Quantité maximale","ENG":"Maximum quantity"}'/>
+            <where>code = 'pricePlanFilters.enableMaxQuantity'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Minimum subscription age (months)"/>
+            <column name="description_i18n" value='{"FRA":"Âge minimal de la souscription (mois)","ENG":"Minimum subscription age (months)"}'/>
+            <where>code = 'pricePlanFilters.enableMinSubscriptionAgeInMonth'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Maximum subscription age (months)"/>
+            <column name="description_i18n" value='{"FRA":"Âge maximal de la souscription (mois)","ENG":"Maximum subscription age (months)"}'/>
+            <where>code = 'pricePlanFilters.enableMaxSubscriptionAgeInMonth'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Criteria 1"/>
+            <column name="description_i18n" value='{"FRA":"Critère 1","ENG":"Criteria 1"}'/>
+            <where>code = 'pricePlanFilters.enableCriteria1Value'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Criteria 2"/>
+            <column name="description_i18n" value='{"FRA":"Critère 2","ENG":"Criteria 2"}'/>
+            <where>code = 'pricePlanFilters.enableCriteria2Value'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Criteria 3"/>
+            <column name="description_i18n" value='{"FRA":"Critère 3","ENG":"Criteria 3"}'/>
+            <where>code = 'pricePlanFilters.enableCriteria3Value'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Criteria expression"/>
+            <column name="description_i18n" value='{"FRA":"Critère EL","ENG":"Criteria expression"}'/>
+            <where>code = 'pricePlanFilters.enableCriteriaEL'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Trading currency"/>
+            <column name="description_i18n" value='{"FRA":"Devise de transaction","ENG":"Trading currency"}'/>
+            <where>code = 'pricePlanFilters.enableTradingCurrency'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Trading country"/>
+            <column name="description_i18n" value='{"FRA":"Pays de transaction","ENG":"Trading country"}'/>
+            <where>code = 'pricePlanFilters.enableTradingCountry'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Seller"/>
+            <column name="description_i18n" value='{"FRA":"Vendeur","ENG":"Seller"}'/>
+            <where>code = 'pricePlanFilters.enableSeller'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Validity calendar"/>
+            <column name="description_i18n" value='{"FRA":"Calendrier de validité","ENG":"Validity calendar"}'/>
+            <where>code = 'pricePlanFilters.enableValidityCalendar'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Valid from"/>
+            <column name="description_i18n" value='{"FRA":"Valide depuis","ENG":"Valid from"}'/>
+            <where>code = 'pricePlanFilters.enableValidityFrom'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Validity to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Valide jusqu'à","ENG":"Validity to"}]]>
+            </column>
+            <where>code = 'pricePlanFilters.enableValidityFrom'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Enable custom field value versioning"/>
+            <column name="description_i18n" value='{"FRA":"Activer le versionnage des valeurs des champs personnalisé","ENG":"Enable custom field value versioning"}'/>
+            <where>code = 'customFields.enableCfValueVersionning'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Fields seprator"/>
+            <column name="description_i18n" value='{"FRA":"Séparateur de champs","ENG":"Fields seprator"}'/>
+            <where>code = 'standardExports.fieldsSeparator'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Decimal separator"/>
+            <column name="description_i18n" value='{"FRA":"Séparateur décimal","ENG":"Decimal separator"}'/>
+            <where>code = 'standardExports.decimalSeparator'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="File name extension"/>
+            <column name="description_i18n" value='{"FRA":"Extension du nom de fichier","ENG":"File name extension"}'/>
+            <where>code = 'standardExports.fileNameExtension'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Default billing cycle"/>
+            <column name="description_i18n" value='{"FRA":"Cycle de facturation par défaut","ENG":"Default billing cycle"}'/>
+            <where>code = 'crm.defaultBillingCycle'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Default customer category"/>
+            <column name="description_i18n" value='{"FRA":"Catégorie de client par défaut","ENG":"Default customer category"}'/>
+            <where>code = 'crm.defaultCustomerCategory'</where>
+        </update>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="feature"/>
+            <column name="property_group" value="ordering"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="order.allowPastDeliveryDate"/>
+            <column name="description" value="Allow past delivery dates on orders"/>
+            <column name="description_i18n" value='{"FRA":"Autoriser les dates de livraison dans le passé pour les commandes","ENG":"Allow past delivery dates on orders"}'/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

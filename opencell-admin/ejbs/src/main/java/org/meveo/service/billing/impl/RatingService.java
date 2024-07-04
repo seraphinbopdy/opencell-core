@@ -1569,7 +1569,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
     					discountPlanItemService.getApplicableDiscountPlanItems(walletOperation.getBillingAccount(), discountPlan, DiscountPlanItemTypeEnum.FIXED, walletOperation.getOperationDate(), 
     							walletOperation.getSubscription(), walletOperation, walletOperation.getAccountingArticle()));
 
-                if( (CollectionUtils.isNotEmpty(applicableDiscountPlanItems) || CollectionUtils.isNotEmpty(fixedDiscountPlanItems) ) && !isVirtual)  {
+                if(discountPlan.getApplicationLimit() != 0 && (CollectionUtils.isNotEmpty(applicableDiscountPlanItems) || CollectionUtils.isNotEmpty(fixedDiscountPlanItems) ) && !isVirtual)  {
                     discountPlanInstance.setApplicationCount( discountPlanInstance.getApplicationCount() == null ? 1 : discountPlanInstance.getApplicationCount() + 1);
                 }
 

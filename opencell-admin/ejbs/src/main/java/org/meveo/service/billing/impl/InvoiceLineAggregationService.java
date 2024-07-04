@@ -183,10 +183,11 @@ public class InvoiceLineAggregationService implements Serializable {
         case MONTH_OF_USAGE_DATE:
             return " TO_CHAR(" + alias + "." + usageDateColumn + ", 'YYYY-MM') ";
         case DAY_OF_USAGE_DATE:
-            case NO_DATE_AGGREGATION:
-                return " TO_CHAR(" + alias + "." + usageDateColumn + ", 'YYYY-MM-DD') ";
+            return " TO_CHAR(" + alias + "." + usageDateColumn + ", 'YYYY-MM-DD') ";
         case WEEK_OF_USAGE_DATE:
             return " TO_CHAR(" + alias + "." + usageDateColumn + ", 'YYYY-WW') ";
+        case NO_DATE_AGGREGATION:
+            return usageDateColumn;
         }
         return usageDateColumn;
     }

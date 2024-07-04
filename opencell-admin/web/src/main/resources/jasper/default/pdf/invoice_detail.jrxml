@@ -464,10 +464,7 @@
 								<textElement textAlignment="Left" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="11" isBold="false"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{articleLabelLine} != null ? ("  " + $F{articleLabelLine}.substring(0, 1).toUpperCase() + $F{articleLabelLine}.substring(1)) + "\n"  : "" +
-($F{country}=="US" ? "  " + java.time.LocalDate.parse($F{periodStartDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : "  " + java.time.LocalDate.parse($F{periodStartDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))
- + ($F{periodEndDate}.isEmpty() ? "" : " - " + "  " + $F{periodEndDate}) + "\n" +
-"  " + $F{label_line}.substring(0, 1).toUpperCase() + $F{label_line}.substring(1)]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{articleLabelLine} != null ? ("  " + $F{articleLabelLine}.substring(0, 1).toUpperCase() + $F{articleLabelLine}.substring(1)) : ""]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

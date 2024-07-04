@@ -44,6 +44,7 @@ import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.RecordedInvoice;
+import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.WriteOff;
 import org.meveo.model.securityDeposit.AuxiliaryAccounting;
 import org.meveo.model.securityDeposit.FinanceSettings;
@@ -584,8 +585,8 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
     }
 
     public void assignMatchingCodeToJournalEntries(AccountOperation ao, List<JournalEntry> createdEntries) {
-        if (!(ao instanceof RecordedInvoice || ao instanceof Payment)) {
-            log.warn("AccountOperation id={}-type={} is not managed by Assigning matching code processing, Expected type : RecordedInvoice and Payment.", ao.getId(), ao.getType());
+        if (!(ao instanceof RejectedPayment || ao instanceof RecordedInvoice || ao instanceof Payment)) {
+            log.warn("AccountOperation id={}-type={} is not managed by Assigning matching code processing, Expected type : RecordedInvoice, Payment and RejectedPayment.", ao.getId(), ao.getType());
             return;
         }
 

@@ -67,6 +67,7 @@ import org.meveo.model.order.Order;
 import org.meveo.model.pricelist.PriceList;
 import org.meveo.model.pricelist.PriceListStatusEnum;
 import org.meveo.model.scripts.ScriptInstance;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.billing.impl.*;
@@ -89,6 +90,7 @@ import org.meveo.service.order.OrderService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.tmf.dsmapi.catalog.resource.order.ProductOrder;
 
 
@@ -159,6 +161,9 @@ public class CommercialOrderApi extends BaseApi {
 
 	@Inject
 	private PriceListService priceListService;
+	
+	@Inject
+	private AdvancedSettingsService advancedSettingsService;
 
 	private static final String ADMINISTRATION_VISUALIZATION = "administrationVisualization";
     private static final String ADMINISTRATION_MANAGEMENT = "administrationManagement";
@@ -255,10 +260,8 @@ public class CommercialOrderApi extends BaseApi {
 
 		Date today = new Date();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-
-		if (orderDto.getDeliveryDate() != null && orderDto.getDeliveryDate().before(today) && !formatter.format(orderDto.getDeliveryDate()).equals(formatter.format(today))) {
-			throw new MeveoApiException("Delivery date can't be in the past");
-		}
+		
+		checkDeliveryDate(orderDto.getDeliveryDate());
 		order.setDeliveryDate(orderDto.getDeliveryDate());
         
 		order.setCustomerServiceBegin(orderDto.getCustomerServiceBegin());
@@ -444,10 +447,8 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 			order.setProgressDate(orderDto.getProgressDate());
 		if(orderDto.getOrderDate() != null)
 			order.setOrderDate(orderDto.getOrderDate());
-
-    	if(orderDto.getDeliveryDate() != null && orderDto.getDeliveryDate().before(new Date())) {
-    		throw new MeveoApiException("Delivery date should be in the future");	
-    	}
+		
+		checkDeliveryDate(orderDto.getDeliveryDate());
     	order.setDeliveryDate(orderDto.getDeliveryDate());
         
 		if(orderDto.getCustomerServiceBegin() != null)
@@ -899,9 +900,8 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		orderOffer.setOfferTemplate(offerTemplate);
 		orderOffer.setDiscountPlan(discountPlan);
 		
-    	if(orderOfferDto.getDeliveryDate()!=null && orderOfferDto.getDeliveryDate().before(new Date())) {
-    		throw new MeveoApiException("Delivery date should be in the future");	
-    	}
+		
+		checkDeliveryDate(orderOfferDto.getDeliveryDate());
         orderOffer.setDeliveryDate(orderOfferDto.getDeliveryDate());
         if(orderOfferDto.getOrderLineType() == OfferLineTypeEnum.AMEND) {
         	if (orderOfferDto.getSubscriptionCode() == null) {
@@ -1060,10 +1060,9 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		if (!StringUtils.isBlank(orderOfferDto.getContractCode())) {
 			orderOffer.setContract(contractHierarchyHelper.checkContractHierarchy(orderOffer.getUserAccount().getBillingAccount(), orderOfferDto.getContractCode()));
 		}
-    	
-    	if(orderOfferDto.getDeliveryDate()!=null && orderOfferDto.getDeliveryDate().before(new Date())) {
-    		throw new MeveoApiException("Delivery date should be in the future");	
-    	}
+		
+		
+		checkDeliveryDate(orderOfferDto.getDeliveryDate());
     	orderOffer.setDeliveryDate(orderOfferDto.getDeliveryDate());
         orderOffer.setOrderLineType(orderOfferDto.getOrderLineType());
         
@@ -1473,5 +1472,14 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		if(orderOffer == null)
 			throw new EntityDoesNotExistsException(OrderOffer.class, id);
 		return new OrderOfferDto(orderOffer, true,true,true);
+	}
+	
+	private void checkDeliveryDate(Date deliveryDate) {
+		Boolean allowPastDeliveryDate = (Boolean) advancedSettingsService.getParameter("order.allowPastDeliveryDate");
+		if(deliveryDate != null && ( allowPastDeliveryDate == null && deliveryDate.before(new Date()))) {
+			throw new MeveoApiException("Delivery date should be in the future");
+		}else if(deliveryDate != null && !allowPastDeliveryDate && deliveryDate.before(new Date())) {
+			throw new MeveoApiException(resourceMessages.getString("order.allowPastDeliveryDate.false"));
+		}
 	}
 }

@@ -104,6 +104,7 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Ob
     protected void applyDeduplication(List<Object[]> items, JobExecutionResultImpl jobExecutionResult) {
         Set<Long> edrsEV = new HashSet<>();
         Set<Long> edrs = new HashSet<>();
+        boolean firstException=true;
 		for(Object[] item: items) {
 			List<Long> idList = Arrays.stream(((String) item[1]).split(",")).map(Long::valueOf).collect(Collectors.toList());
 			idList.stream().max(Long::compareTo).ifPresent(idList::remove);
@@ -116,7 +117,11 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Ob
 		                edrs.add(edrId);
 		            }
 				}catch(Exception e) {
-					jobExecutionResult.addNbItemsProcessedWithError(idList.size()-1);
+					if(!firstException) {
+						jobExecutionResult.addNbItemsProcessedWithError(1);
+					} else {
+						firstException=false;
+					}
 				}
 	        }
 			if(idList.size()>1) {

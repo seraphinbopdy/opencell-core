@@ -12958,6 +12958,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="job_category" value="MEDIATION" />
             <column name="job_template" value="FlatFileProcessingJob" />
             <column name="code" value="massInstantiateDiscountJob" />
+            <column name="uuid" value="massInstantiateDiscountJob-uuid" />
             <column name="description" value="mass instantiate discount job"/>
             <column name="creator" value="opencell.admin" />
             <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />

@@ -609,10 +609,7 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
         lookupMatchedAO(ao.getMatchingAmounts(), aoIdWithTransactionCategory, processedMatchingAmounts, isValidAo);
 
         if (isValidAo.get()) {
-            aoIdWithTransactionCategory.forEach((aoId, transactionCategory) -> aoJEs.addAll(getEntityManager().createNamedQuery(GET_BY_ACCOUNT_OPERATION_AND_DIRECTION_QUERY)
-                    .setParameter(PARAM_ID_AO, aoId)
-                    .setParameter(PARAM_DIRECTION, JournalEntryDirectionEnum.getValue(transactionCategory))
-                    .getResultList()));
+            aoIdWithTransactionCategory.forEach((aoId, transactionCategory) -> aoJEs.addAll(this.findByAoAndDirection(aoId, JournalEntryDirectionEnum.getValue(transactionCategory))));
 
             // add passed journalEntries
             aoJEs.addAll(getJournalEntries(ao, createdEntries));
@@ -771,6 +768,20 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
                                     });
                         }
                 );
+    }
+
+    /**
+     * 
+     * 
+     * @param aoID
+     * @param direction
+     * @return
+     */
+    public List<JournalEntry> findByAoAndDirection(Long aoID, JournalEntryDirectionEnum direction) {
+        return getEntityManager().createNamedQuery(GET_BY_ACCOUNT_OPERATION_AND_DIRECTION_QUERY)
+                                 .setParameter(PARAM_ID_AO, aoID)
+                                 .setParameter(PARAM_DIRECTION, direction)
+                                 .getResultList();
     }
 
 }

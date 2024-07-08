@@ -48,6 +48,8 @@ import org.meveo.event.qualifier.Updated;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.MatchingReturnObject;
 import org.meveo.model.PartialMatchingOccToSelect;
+import org.meveo.model.accountingScheme.JournalEntry;
+import org.meveo.model.accountingScheme.JournalEntryDirectionEnum;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoicePaymentStatusEnum;
@@ -66,6 +68,7 @@ import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.PaymentScheduleInstanceItem;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.Refund;
+import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.UnMatchingAmount;
 import org.meveo.model.payments.UnMatchingCode;
 import org.meveo.model.payments.WriteOff;
@@ -678,6 +681,11 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         getTransactionalMatchingAmount().subtract(ofNullable(matchingAmount.getTransactionalMatchingAmount()).orElse(ZERO)));
                 if (ZERO.compareTo(operation.getMatchingAmount()) == 0) {
                     operation.setMatchingStatus(MatchingStatusEnum.O);
+                    List<JournalEntry> byAoAndDirection = journalEntryService.findByAoAndDirection(operation.getId(), JournalEntryDirectionEnum.getValue(operation.getTransactionCategory()
+                                                                                                                                                                  .getId()));
+                    
+                    byAoAndDirection.forEach(je -> je.setMatchingCode(null));
+                    
                     if (operation instanceof RecordedInvoice) {
                         Invoice invoice = ((RecordedInvoice)operation).getInvoice();
                         if (invoice != null) {

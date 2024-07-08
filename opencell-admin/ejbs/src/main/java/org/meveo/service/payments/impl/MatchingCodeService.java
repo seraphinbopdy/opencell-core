@@ -459,8 +459,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         (accountOperation.getAmount().multiply(accountOperation.getTransactionalMatchingAmount()))
                                 .divide(accountOperation.getTransactionalAmount(),
                                         appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
-                accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(computedMatchingAmount)).abs());
-                accountOperation.setMatchingAmount(computedMatchingAmount);
+                accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(amountToMatch)).abs());
+                accountOperation.setMatchingAmount(amountToMatch);
                 matchingAmount.setMatchingAmount((matchedAmount.subtract(accountOperation.getMatchingAmount())).abs());
                 matchingAmount.setTransactionalMatchingAmount((transactionMatchedAmount
                         .subtract(accountOperation.getTransactionalMatchingAmount()).abs()));

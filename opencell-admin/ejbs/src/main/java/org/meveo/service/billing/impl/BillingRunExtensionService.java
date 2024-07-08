@@ -75,6 +75,12 @@ public class BillingRunExtensionService extends PersistenceService<BillingRun> {
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public BillingRun updateBillingRun(Long billingRunId, Integer sizeBA, Integer billableBA, BillingRunStatusEnum status, Date dateStatus) throws BusinessException {
+        return updateBillingRun(billingRunId, sizeBA, billableBA, status, dateStatus, null, null, null, null);
+    }
+
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public BillingRun updateBillingRun(Long billingRunId, Integer sizeBA, Integer billableBA, BillingRunStatusEnum status, Date dateStatus, BigDecimal amountWithTax, BigDecimal amountWithoutTax, BigDecimal amountTax, Integer countInvoices) throws BusinessException {
 
         log.debug("Update BillingRun {} to status {}", billingRunId, status);
         BillingRun billingRun = findById(billingRunId);
@@ -88,7 +94,23 @@ public class BillingRunExtensionService extends PersistenceService<BillingRun> {
         if (dateStatus != null) {
             billingRun.setProcessDate(dateStatus);
         }
-        billingRun.setStatus(status);
+        if (amountWithTax != null) {
+            billingRun.setPrAmountWithTax(amountWithTax);
+        }
+        if (amountWithoutTax != null) {
+            billingRun.setPrAmountWithoutTax(amountWithoutTax);
+        }
+        if (amountTax != null) {
+            billingRun.setPrAmountTax(amountTax);
+        }
+        if (countInvoices != null) {
+            billingRun.setInvoiceNumber(countInvoices);
+        }
+
+        if (status != null) {
+            billingRun.setStatus(status);
+        }
+
         return updateNoCheck(billingRun);
     }
     

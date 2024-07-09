@@ -1378,7 +1378,7 @@ public class CpqQuoteApi extends BaseApi {
 		boolean isNew = false;
 		QuoteProduct q = null;
 		if (quoteProductDTO.getProductCode() != null) {
-			q = quoteProductService.findByQuoteAndOfferAndProduct(quoteOffer.getQuoteVersion().getId(), quoteOffer.getCode(), quoteProductDTO.getProductCode());
+			q = quoteProductService.findByQuoteAndOfferAndProductAndQuantity(quoteOffer.getQuoteVersion().getId(), quoteOffer.getCode(), quoteProductDTO.getProductCode(), quoteProductDTO.getQuantity());
 			isNew = false;
 		}
         if (q == null) {
@@ -1471,7 +1471,7 @@ public class CpqQuoteApi extends BaseApi {
             isNew = true;
             quoteAttribute = new QuoteAttribute();
         }else{
-            if(quoteProduct.getId() != quoteAttribute.getQuoteProduct().getId())
+            if(quoteProduct.getId() != quoteAttribute.getQuoteProduct().getId() && quoteProduct.getQuantity() == quoteAttribute.getQuoteProduct().getQuantity())
                 throw new MeveoApiException("Quote Attribute is Already attached to : " + quoteAttribute.getQuoteProduct().getId());
         }
         quoteAttribute.setAttribute(attribute);

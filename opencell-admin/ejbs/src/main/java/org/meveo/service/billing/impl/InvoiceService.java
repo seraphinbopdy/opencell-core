@@ -7730,7 +7730,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                         try {
                             matchingCodeService.matchOperations(aoAdjInvoice.getCustomerAccount().getId(), aoAdjInvoice.getCustomerAccount().getCode(),
                                     List.of(aoAdjInvoice.getId(), aoOriginalInvoice.getId()), aoOriginalInvoice.getId(),
-                                    MatchingTypeEnum.A, aoOriginalInvoice.getUnMatchingAmount());
+                                    MatchingTypeEnum.A, aoOriginalInvoice.getAmount());
                         } catch (Exception e) {
                             log.error("Error on payment callback processing:", e);
                             throw new BusinessException(e.getMessage(), e);

@@ -93,6 +93,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -905,37 +906,59 @@ public class NativePersistenceService extends BaseService {
         }
 
         Class<?> finalEntity = entity;
+        fetchFields.stream().filter(predicate).forEach(s -> {
+            
+        });
 
         List<String> aggregationFields = fetchFields.stream()
                                                     .filter(predicate)
                                                     .map(s -> {
                                                         String fieldName = extractAggregatedField(s);
+                                                        if(fieldName == null) {
+                                                            return null;
+                                                        }
                                                         if(s.toLowerCase().startsWith("count(")) {
                                                             // the dummy field is a workaround to be able to calculate inner joins using queryBuilder as the count need only the collection
                                                             fieldName+= ".dummy"; 
                                                         } else if(!fieldName.contains(".")) {
                                                             throw new BusinessException("Aggregation functions can be used only for values in nested lists");
                                                         }
-                                                        if (fieldName != null) {
-                                                            // as fieldName contains nested fields, get parent field
-                                                            String parentField = removeLastSegment(fieldName);
-                                                            Field field1 = ReflectionUtils.getField(finalEntity, parentField);
-                                                            if(field1 != null && !List.class.isAssignableFrom(field1.getType())) {
-                                                                String functionName = s.split("\\(")[0];
-                                                                throw new BusinessException(String.format("Aggregation function “%s” cannot be applied to “%s” of type “%s”",
-                                                                        functionName, parentField, field1.getType().getSimpleName()));
-                                                            }
 
+                                                        // as fieldName contains nested fields, get parent field
+                                                        String parentField = removeLastSegment(fieldName);
 
-                                                            fieldName = queryBuilder.createExplicitInnerJoinsForAggregation(new String(fieldName));
-                                                            String sToReplace = extractAggregatedField(s);
-                                                            if(s.toLowerCase().startsWith("list(")) {
-                                                                return String.format("string_agg(%s, '%s')", fieldName, listAggregationSeparator);
+                                                        String[] parts = parentField.split("\\.");
+                                                        
+                                                        List<String> subFields = new ArrayList<>();
+                                                        StringBuilder sb = new StringBuilder();
+
+                                                        for (int i = 0; i < parts.length; i++) {
+                                                            if (i > 0) {
+                                                                sb.append(".");
                                                             }
-                                                            return s.replaceAll(sToReplace, fieldName.replace(".dummy", ""));
+                                                            sb.append(parts[i]);
+                                                            subFields.add(sb.toString());
                                                         }
-                                                        return s;
+                                                        
+                                                        if(subFields.stream().noneMatch(subField -> {
+                                                            Field sf = ReflectionUtils.getField(finalEntity, subField);
+                                                            return sf != null && List.class.isAssignableFrom(sf.getType());
+                                                        })) {
+                                                            String functionName = s.split("\\(")[0];
+                                                            Field f = ReflectionUtils.getField(finalEntity, parentField);
+                                                            assert f != null;
+                                                            throw new BusinessException(String.format("Aggregation function “%s” cannot be applied to “%s” of type “%s”",
+                                                                    functionName, parentField, f.getType().getSimpleName()));
+                                                        }                                                      
+
+                                                        fieldName = queryBuilder.createExplicitInnerJoinsForAggregation(fieldName);
+                                                        String sToReplace = extractAggregatedField(s);
+                                                        if(s.toLowerCase().startsWith("list(")) {
+                                                            return String.format("string_agg(%s, '%s')", fieldName, listAggregationSeparator);
+                                                        }
+                                                        return s.replaceAll(sToReplace, fieldName.replace(".dummy", ""));
                                                     })
+                                                    .filter(Objects::nonNull)
                                                     .collect(Collectors.toList());
 
         queryBuilder.setQ(new StringBuilder(queryBuilder.getSqlStringBuffer().toString().replace("{aggregationFields}", String.join(",", aggregationFields))));

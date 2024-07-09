@@ -1,5 +1,6 @@
 package org.meveo.service.cpq;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -29,6 +30,19 @@ public class QuoteProductService extends PersistenceService<QuoteProduct> {
 														.setParameter("quoteOfferCode", quoteOfferCode)
 														.setParameter("productCode",productCode)
 															.getSingleResult();
+		}catch(NoResultException e ) {
+			log.warn("cant find QuoteProduct with  quote version: {} and product version : {}", quoteVersionId, quoteOfferCode);
+			return null;
+		}
+	}
+	public QuoteProduct findByQuoteAndOfferAndProductAndQuantity(Long quoteVersionId, String quoteOfferCode,String productCode, BigDecimal quantity) {
+		try {
+			return (QuoteProduct) this.getEntityManager().createNamedQuery("QuoteProduct.findByQuoteVersionAndQuoteOfferAndQuantity")
+					.setParameter("quoteVersionId", quoteVersionId)
+					.setParameter("quoteOfferCode", quoteOfferCode)
+					.setParameter("productCode",productCode)
+					.setParameter("quantity", quantity)
+					.getSingleResult();
 		}catch(NoResultException e ) {
 			log.warn("cant find QuoteProduct with  quote version: {} and product version : {}", quoteVersionId, quoteOfferCode);
 			return null;

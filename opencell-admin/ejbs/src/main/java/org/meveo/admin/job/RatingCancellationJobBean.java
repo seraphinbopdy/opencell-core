@@ -28,10 +28,12 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
+import org.meveo.model.billing.BatchEntity;
 import org.meveo.model.billing.ReratingTargetEnum;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
+import org.meveo.service.billing.impl.BatchEntityService;
 import org.meveo.service.job.Job;
 
 @Stateless
@@ -45,6 +47,9 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	@Inject
 	@MeveoJpa
 	private EntityManagerWrapper emWrapper;
+	
+	@Inject
+	private BatchEntityService batchEntityService;
 	
 	@EJB
 	RatingCancellationJobBean cancellationJobBean;
@@ -92,7 +97,10 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 
 		String reRatingTarget = (String) this.getParamOrCFValue(jobInstance, ReRatingJob.CF_RERATING_TARGET);
 		List<EntityReferenceWrapper> batchEntityWrappers = (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, ReRatingJob.CF_TARGET_BATCHES);
-		List<Long> targetBatches = CollectionUtils.isNotEmpty(batchEntityWrappers) ? batchEntityWrappers.stream().map(EntityReferenceWrapper::getId).collect(Collectors.toList()) : Collections.emptyList();
+		List<Long> targetBatches = CollectionUtils.isNotEmpty(batchEntityWrappers) ? batchEntityWrappers.stream()
+																										.map(e -> (BatchEntity) batchEntityService.findBusinessEntityByCode(e.getCode()))
+																										.map(BatchEntity::getId)
+																										.collect(Collectors.toList()) : Collections.emptyList();
 		
 		createViews(configuredNrPerTx, useExistingViews, reRatingTarget, targetBatches);
 		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();

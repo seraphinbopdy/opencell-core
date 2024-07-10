@@ -33,9 +33,9 @@ import org.meveo.service.job.Job;
 public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[]>> {
 
 	private static final long serialVersionUID = -4097694568061727769L;
-	private static final String mainViewName = "main_rerate_tree";
-	private static final String billedViewName = "rerate_billed_il";
-	private static final String triggeredViewName = "triggered_rerate_tree";
+	public static final String MAIN_VIEW_NAME = "main_rerate_tree";
+	public static final String BILLED_VIEW_NAME = "rerate_billed_il";
+	public static final String TRIGGERED_VIEW_NAME = "triggered_rerate_tree";
 
 	@Inject
 	@MeveoJpa
@@ -56,8 +56,17 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::applyRatingCancellation, null, null, this::closeResultset, null);
+        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::applyRatingCancellation, null, null, this::closeResultset, this::addFailedToRerateReport);
     }
+	
+	private void addFailedToRerateReport(JobExecutionResultImpl jobExecutionResult) {
+		Object count = (Object) entityManager.createNativeQuery("select sum(rr.count_wo) from "+MAIN_VIEW_NAME+" rr inner join "+BILLED_VIEW_NAME+" bil ON rr.id = bil.id").getSingleResult();
+		Long failedTorerateCount = count != null ? ((Number) count).longValue() : 0;
+		Optional.ofNullable(failedTorerateCount)
+        .ifPresent(failedToRerateCount -> jobExecutionResult.addReport(
+            String.format("%d WOs were reported as 'F_TO_RERATE' ", failedToRerateCount)
+        ));
+	}
 
 	private Optional<Iterator<List<Object[]>>> initJobAndGetDataToProcess(JobExecutionResultImpl jobExecutionResult) {
 
@@ -80,11 +89,10 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 		if (nrOfInitialWOs.intValue() == 0) {
 			return Optional.empty();
 		}
-		jobExecutionResult.addReport(" Start rerate cancelllation process for " + nrOfInitialWOs + " WOs");
 		
 		final long nrPerTx = (nrOfInitialWOs / nbThreads) < configuredNrPerTx ? nrOfInitialWOs / nbThreads : configuredNrPerTx;
 		int fetchSize = ((Long) nrPerTx).intValue() * nbThreads.intValue();
-		org.hibernate.query.Query nativeQuery = statelessSession.createNativeQuery("select id, count_wo from " + mainViewName + " order by id");
+		org.hibernate.query.Query nativeQuery = statelessSession.createNativeQuery("select id, count_wo from " + MAIN_VIEW_NAME + " order by id");
 		scrollableResults = nativeQuery.setReadOnly(true).setCacheable(false).setMaxResults(processNrInJobRun).setFetchSize(fetchSize).scroll(ScrollMode.FORWARD_ONLY);
 
 		return Optional.of(
@@ -126,16 +134,16 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 		
 		markFailedToRerate(min, max);
 		
-		recalculateInvoiceLinesAndCancelRTs("",mainViewName, min, max);
-		recalculateInvoiceLinesAndCancelRTs("d",mainViewName, min, max);
-		recalculateInvoiceLinesAndCancelRTs("t",triggeredViewName, min, max);
-		recalculateInvoiceLinesAndCancelRTs("td",triggeredViewName, min, max);
+		recalculateInvoiceLinesAndCancelRTs("",MAIN_VIEW_NAME, min, max);
+		recalculateInvoiceLinesAndCancelRTs("d",MAIN_VIEW_NAME, min, max);
+		recalculateInvoiceLinesAndCancelRTs("t",TRIGGERED_VIEW_NAME, min, max);
+		recalculateInvoiceLinesAndCancelRTs("td",TRIGGERED_VIEW_NAME, min, max);
 		
 		markCanceledEDRs(min, max);
 		
-		markCanceledWOs("d",mainViewName, min, max);
-		markCanceledWOs("t",triggeredViewName, min, max);
-		markCanceledWOs("td",triggeredViewName, min, max);
+		markCanceledWOs("d",MAIN_VIEW_NAME, min, max);
+		markCanceledWOs("t",TRIGGERED_VIEW_NAME, min, max);
+		markCanceledWOs("td",TRIGGERED_VIEW_NAME, min, max);
 		
 
 		
@@ -156,7 +164,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	}
 
 	private void getProcessingSummary() {
-		Object[] count = (Object[]) entityManager.createNativeQuery("select sum(count_wo), count(id) from " + mainViewName)
+		Object[] count = (Object[]) entityManager.createNativeQuery("select sum(count_wo), count(id) from " + MAIN_VIEW_NAME)
 				.getSingleResult();
 
 		nrOfInitialWOs = count[0] != null ? ((Number) count[0]).longValue() : 0;
@@ -170,7 +178,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	}
 
 	private void createMainView(long configuredNrPerTx, boolean useExistingViews) {
-		String query = "CREATE MATERIALIZED VIEW " + mainViewName + " AS\n"
+		String query = "CREATE MATERIALIZED VIEW " + MAIN_VIEW_NAME + " AS\n"
 				+ "SELECT string_agg(wo.id::text, ',') AS wo_id, string_agg(rt.id::text, ',') AS rt_id, il.id AS il_id, SUM(CASE WHEN rt.status = 'BILLED' THEN rt.amount_without_tax ELSE 0 END) AS rt_amount_without_tax,\n"
 				+ "	    SUM(CASE WHEN rt.status = 'BILLED' THEN rt.amount_with_tax ELSE 0 END) AS rt_amount_with_tax, SUM(CASE WHEN rt.status = 'BILLED' THEN rt.amount_tax ELSE 0 END) AS rt_amount_tax, SUM(CASE WHEN rt.status = 'BILLED' THEN rt.quantity ELSE 0 END) AS rt_quantity,\n"
 				+ "	    string_agg(dwo.id::text, ',') AS dwo_id, string_agg(drt.id::text, ',') AS drt_id, dil.id AS dil_id, SUM(CASE WHEN drt.status = 'BILLED' THEN drt.amount_without_tax ELSE 0 END) AS drt_amount_without_tax,\n"
@@ -185,11 +193,11 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 				+ "	WHERE wo.status = 'TO_RERATE'\n"
 				+ "GROUP BY ba_id, il_id, dil_id, lot";
 
-		cancellationJobBean.createMaterializedView(query, mainViewName, useExistingViews);
+		cancellationJobBean.createMaterializedView(query, MAIN_VIEW_NAME, useExistingViews);
 	}
 	
 	private void createTriggeredOperationsView(boolean useExistingViews) {
-		String query = "CREATE MATERIALIZED VIEW " + triggeredViewName + " AS\n"
+		String query = "CREATE MATERIALIZED VIEW " + TRIGGERED_VIEW_NAME + " AS\n"
 				+ "select mrt.id AS id, til.id AS til_id, string_agg(edr.id::text, ',') AS edr_id, string_agg(two.id::text, ',') AS two_id, string_agg(trt.id::text, ',') AS trt_id,\n"
 				+ "	    SUM(CASE WHEN trt.status = 'BILLED' THEN trt.amount_without_tax ELSE 0 END) AS trt_amount_without_tax,\n"
 				+ "	    SUM(CASE WHEN trt.status = 'BILLED' THEN trt.amount_with_tax ELSE 0 END) AS trt_amount_with_tax,\n"
@@ -198,7 +206,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 				+ "	    string_agg(tdwo.id::text, ',') AS tdwo_id, string_agg(tdrt.id::text, ',') AS tdrt_id, tdil.id AS tdil_id, SUM(CASE WHEN tdrt.status = 'BILLED' THEN tdrt.amount_without_tax ELSE 0 END) AS tdrt_amount_without_tax,\n"
 				+ "	    SUM(CASE WHEN tdrt.status = 'BILLED' THEN tdrt.amount_with_tax ELSE 0 END) AS tdrt_amount_with_tax, SUM(CASE WHEN tdrt.status = 'BILLED' THEN tdrt.amount_tax ELSE 0 END) AS tdrt_amount_tax, SUM(CASE WHEN tdrt.status = 'BILLED' THEN tdrt.quantity ELSE 0 END) AS tdrt_quantity,\n"
 				+ "	    CASE WHEN til.status = 'BILLED' THEN til.id WHEN tdil.status = 'BILLED' THEN tdil.id ELSE null END AS billed_il\n"
-				+ "	FROM " + mainViewName + " mrt\n"
+				+ "	FROM " + MAIN_VIEW_NAME + " mrt\n"
 				+ "		JOIN rating_edr edr on mrt.billed_il is null and edr.wallet_operation_id = ANY(string_to_array(CASE WHEN mrt.dwo_id IS NULL THEN mrt.wo_id ELSE mrt.wo_id || ',' || mrt.dwo_id END, ',')::bigint[])\n"
 				+ "		LEFT JOIN billing_wallet_operation two ON two.edr_id = edr.id and edr.status<>'CANCELLED'\n"
 				+ "		LEFT JOIN billing_rated_transaction trt ON trt.id = two.rated_transaction_id and trt.status<>'CANCELED'\n"
@@ -208,16 +216,16 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 				+ "		LEFT JOIN billing_invoice_line tdil ON tdil.id = tdrt.invoice_line_id\n"
 				+ "GROUP BY mrt.id, til.id, tdil.id";
 		
-		cancellationJobBean.createMaterializedView(query, triggeredViewName, useExistingViews);
+		cancellationJobBean.createMaterializedView(query, TRIGGERED_VIEW_NAME, useExistingViews);
 	}
 	
 	
 	private void createBilledILsView(boolean useExistingViews) {
-		String query = "CREATE MATERIALIZED VIEW " + billedViewName + " AS\n"
-				+ "	(SELECT id, MIN(BILLED_IL) AS BILLED_IL FROM " + triggeredViewName + " WHERE BILLED_IL IS NOT NULL GROUP BY id\n"
-				+ "		UNION SELECT ID as id, BILLED_IL FROM " + mainViewName + " where BILLED_IL is not null)";
+		String query = "CREATE MATERIALIZED VIEW " + BILLED_VIEW_NAME + " AS\n"
+				+ "	(SELECT id, MIN(BILLED_IL) AS BILLED_IL FROM " + TRIGGERED_VIEW_NAME + " WHERE BILLED_IL IS NOT NULL GROUP BY id\n"
+				+ "		UNION SELECT ID as id, BILLED_IL FROM " + MAIN_VIEW_NAME + " where BILLED_IL is not null)";
 		
-		cancellationJobBean.createMaterializedView(query, billedViewName, useExistingViews);
+		cancellationJobBean.createMaterializedView(query, BILLED_VIEW_NAME, useExistingViews);
 	}
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -246,7 +254,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	                statement.execute(viewQuery);
 	                statement.execute("create index idx__" + viewName + "__billed_il ON " + viewName + " USING btree (billed_il) ");
 	                statement.execute("create index idx__" + viewName + "__main_id ON " + viewName + " USING btree (id) ");
-	                if(viewName.equals(mainViewName)) {
+	                if(viewName.equals(MAIN_VIEW_NAME)) {
 	                	statement.execute("create index idx__" + viewName + "__billing_account_id ON " + viewName + " USING btree (ba_id) ");
 	                }
 	            } catch (Exception e) {
@@ -261,7 +269,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	private void markFailedToRerate(long min, long max) {
 		String updateQuery = "UPDATE billing_wallet_operation wo\n"
 				+ "	SET status='F_TO_RERATE', updated = CURRENT_TIMESTAMP, reject_reason = 'failed to rerate operation because invoiceLine ' || bil.billed_il || ' already billed' "
-				+ "		FROM " + mainViewName + " rr CROSS JOIN unnest(string_to_array(wo_id, ',')) AS to_update JOIN " + billedViewName + " bil ON rr.id = bil.id "
+				+ "		FROM " + MAIN_VIEW_NAME + " rr CROSS JOIN unnest(string_to_array(wo_id, ',')) AS to_update JOIN " + BILLED_VIEW_NAME + " bil ON rr.id = bil.id "
 				+ "			WHERE rr.id BETWEEN :min AND :max and wo.id = CAST(to_update AS bigint)";
 		cancellationJobBean.runInNewTransaction(min, max, updateQuery, null);
 	}
@@ -269,9 +277,9 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	private void markCanceledEDRs(long min, long max) {
 	    String updateQuery = "UPDATE rating_EDR edr " +
 	            "SET status='CANCELLED', last_updated = CURRENT_TIMESTAMP, reject_Reason='Origin wallet operation has been rerated' " +
-	            "	FROM " + triggeredViewName + " rr CROSS JOIN unnest(string_to_array(edr_id, ',')) AS to_update " +
+	            "	FROM " + TRIGGERED_VIEW_NAME + " rr CROSS JOIN unnest(string_to_array(edr_id, ',')) AS to_update " +
 	            "		WHERE rr.id BETWEEN :min AND :max " +
-	            "			AND rr.id NOT IN (SELECT id FROM " + billedViewName + ") " +
+	            "			AND rr.id NOT IN (SELECT id FROM " + BILLED_VIEW_NAME + ") " +
 	            "			AND edr.id = CAST(to_update AS bigint)";
 	    
 	    cancellationJobBean.runInNewTransaction(min, max, updateQuery, null);
@@ -282,7 +290,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	            "SET status='CANCELED', updated = CURRENT_TIMESTAMP, reject_Reason='Origin wallet operation has been rerated' " +
 	            "	FROM " + viewName + " rr CROSS JOIN unnest(string_to_array(" + prefix + "wo_id, ',')) AS to_update " +
 	            "		WHERE rr.id BETWEEN :min AND :max " +
-	            "			AND rr.id NOT IN (SELECT id FROM " + billedViewName + ") " +
+	            "			AND rr.id NOT IN (SELECT id FROM " + BILLED_VIEW_NAME + ") " +
 	            "			AND wo.id = CAST(to_update AS bigint)";
 	    
 	    cancellationJobBean.runInNewTransaction(min, max, updateQuery, null);
@@ -294,7 +302,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	    		"	SET amount_without_tax = il.amount_without_tax + rr." + prefix + "rt_amount_without_tax, amount_with_tax = il.amount_with_tax + rr." + prefix + "rt_amount_with_tax," +
 	    		"		quantity = il.quantity + rr." + prefix + "rt_quantity, amount_tax = il.amount_tax + rr." + prefix + "rt_amount_tax, updated = CURRENT_TIMESTAMP " +
 	            "	FROM " + viewName + " rr " +
-	            "		WHERE rr.id NOT IN (SELECT id FROM "+billedViewName+") " +
+	            "		WHERE rr.id NOT IN (SELECT id FROM "+BILLED_VIEW_NAME+") " +
 	            "		AND rr." + prefix + "il_id IS NOT NULL " +
 	            "		AND il.id = rr." + prefix + "il_id " +
 	            "		AND rr.id BETWEEN :min AND :max ";
@@ -303,7 +311,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	            "SET status='CANCELED', updated = CURRENT_TIMESTAMP, reject_Reason='Origin wallet operation has been rerated' " +
 	            "	FROM " + viewName + " rr CROSS JOIN unnest(string_to_array(" + prefix + "rt_id, ',')) AS to_update" +
 	            "		WHERE rr.id BETWEEN :min AND :max " +
-	            "			AND rr.id NOT IN (SELECT id FROM " + billedViewName + ") " +
+	            "			AND rr.id NOT IN (SELECT id FROM " + BILLED_VIEW_NAME + ") " +
 	            "			AND rt.id = CAST(to_update AS bigint)";
 
 	    cancellationJobBean.runInNewTransaction(min, max, updateRTsQuery, updateILQuery);

@@ -286,7 +286,6 @@ public class DefaultNotificationService {
                 MeveoUser lastCurrentUser = currentUser.unProxy();
                 EmailNotification  emailNotification = (EmailNotification) notif;
                 context.put("EMAIL_FROM", evaluateExpression(emailNotification.getEmailFrom(), userMap, String.class));
-                context.put("EMAIL_TO_LIST", evaluateExpression(emailNotification.getEmailToEl(), userMap, String.class));
                 addParamsTo(context, emailNotification.getParams(), userMap);
                 if(notif.getScriptInstance() != null) {
                     // script context overwrite

@@ -34,6 +34,7 @@ import org.meveo.model.cpq.offer.QuoteOffer;
 		@NamedQuery(name = "QuoteProduct.findByQuoteId", query = "select q from QuoteProduct q where q.quote.id=:id"),
 		@NamedQuery(name = "QuoteProduct.findByQuoteVersionId", query = "select q from QuoteProduct q where q.quoteVersion.id=:id"),
 		@NamedQuery(name = "QuoteProduct.findByQuoteVersionAndQuoteOffer", query = "select q from QuoteProduct q left join q.quoteVersion qq left join q.quoteOffer qqo left join q.productVersion pv where qq.id=:quoteVersionId and qqo.code=:quoteOfferCode and pv.product.code=:productCode"),
+		@NamedQuery(name = "QuoteProduct.findByQuoteVersionAndQuoteOfferAndQuantity", query = "select q from QuoteProduct q left join q.quoteVersion qq left join q.quoteOffer qqo left join q.productVersion pv where qq.id=:quoteVersionId and qqo.code=:quoteOfferCode and pv.product.code=:productCode and q.quantity=:quantity"),
 		@NamedQuery(name = "QuoteProduct.findQuoteAttribute", query = "select qp from QuoteProduct qp left join qp.quoteVersion qv left join qp.quoteOffer qf left join qp.productVersion pv "
 				+ " where qv.id=:quoteVersionId and qf.offerTemplate.code=:offerCode and pv.product.code=:productCode ")
 

@@ -3801,6 +3801,7 @@
 																												"  setTimeout(function(){\r",
 																												"          console.log(\"Sleeping for 1 seconds before next request.\");\r",
 																												"  }, 1000);\r",
+																												"pm.variables.set(\"access_token\", null);\r",
 																												""
 																											],
 																											"type": "text/javascript"
@@ -3840,6 +3841,26 @@
 											"item": [
 												{
 													"name": "CET|ct_ref_index_bt47|CT String with one entry|Index Elec",
+													"event": [
+																																						{
+																																							"listen": "test",
+																																							"script": {
+																																								"exec": [
+																																									"if( pm.response.code === 200) {\r",
+																																									"    var jsonData = JSON.parse(responseBody);\r",
+																																									"    \r",
+																																									"}\r",
+																																									"\r",
+																																									"  setTimeout(function(){\r",
+																																									"          console.log(\"Sleeping for 1 seconds before next request.\");\r",
+																																									"  }, 1000);\r",
+																																									"pm.variables.set(\"access_token\", null);\r",
+																																									""
+																																								],
+																																								"type": "text/javascript"
+																																							}
+																																						}
+																																					],
 													"request": {
 														"method": "POST",
 														"header": [

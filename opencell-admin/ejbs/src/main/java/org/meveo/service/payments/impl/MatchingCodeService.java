@@ -314,7 +314,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                                         appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
                 accountOperation.setMatchingAmount(computedMatchingAmount);
                 accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(computedMatchingAmount)).abs());
-                accountOperation.setMatchingStatus(fullMatch ? MatchingStatusEnum.L : MatchingStatusEnum.P);
+				if(accountOperation.getMatchingStatus() != MatchingStatusEnum.I) {
+					accountOperation.setMatchingStatus(fullMatch ? MatchingStatusEnum.L : MatchingStatusEnum.P);
+				}
 
                 matchingAmount.setMatchingAmount((matchedAmount.subtract(accountOperation.getMatchingAmount())).abs());
                 matchingAmount.setTransactionalMatchingAmount((transactionMatchedAmount

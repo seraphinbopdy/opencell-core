@@ -117,6 +117,10 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
         // Check if collection plan is active and invoice is paid
         if(collectionPlan.getStatus().getStatus() == ACTIVE && collectionPlan.getRelatedInvoice().getPaymentStatus() == PAID) {
+            // Ignore levels and actions after paying invoice
+            collectionPlanService.ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(collectionPlan);
+
+            // Update collection plan status to success
             collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
             collectionPlanService.update(collectionPlan);
         } else {

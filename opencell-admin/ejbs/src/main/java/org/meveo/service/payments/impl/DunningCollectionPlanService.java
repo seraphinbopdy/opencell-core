@@ -98,32 +98,25 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         return result != null && !result.isEmpty() ? result.get(0) : null;
     }
 
+    /**
+     * Switch collection plan
+     * @param oldCollectionPlan Old collection plan
+     * @param policy Dunning policy
+     * @param selectedPolicyLevel Selected policy level
+     * @return New collection plan
+     */
     public DunningCollectionPlan switchCollectionPlan(DunningCollectionPlan oldCollectionPlan, DunningPolicy policy, DunningPolicyLevel selectedPolicyLevel) {
         DunningStopReason stopReason = dunningStopReasonsService.findByStopReason(STOP_REASON);
         policy = policyService.refreshOrRetrieve(policy);
-        DunningCollectionPlanStatus collectionPlanStatusStop
-        = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.STOPPED);
+        DunningCollectionPlanStatus collectionPlanStatusStop = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.STOPPED);
 
-        oldCollectionPlan.setStopReason(stopReason);
-        oldCollectionPlan.setCloseDate(new Date());
-        oldCollectionPlan.setStatus(collectionPlanStatusStop);
+        // Update the old collection plan after switching
+        updateOldDunningCollectionPlanAfterSwitchAction(oldCollectionPlan, stopReason, collectionPlanStatusStop);
 
-        DunningCollectionPlanStatus collectionPlanStatusActif
-                = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
-        DunningCollectionPlan newCollectionPlan = new DunningCollectionPlan();
-        newCollectionPlan.setRelatedPolicy(policy);
-        newCollectionPlan.setBillingAccount(oldCollectionPlan.getBillingAccount());
-        newCollectionPlan.setRelatedInvoice(oldCollectionPlan.getRelatedInvoice());
-        newCollectionPlan.setCurrentDunningLevelSequence(selectedPolicyLevel.getSequence());
-        newCollectionPlan.setTotalDunningLevels(policy.getTotalDunningLevels());
-        newCollectionPlan.setStartDate(oldCollectionPlan.getStartDate());
-        newCollectionPlan.setStatus(collectionPlanStatusActif);
-        newCollectionPlan.setBalance(oldCollectionPlan.getBalance());
-        newCollectionPlan.setInitialCollectionPlan(oldCollectionPlan);
-        newCollectionPlan.setLastAction(oldCollectionPlan.getLastAction());
-        newCollectionPlan.setLastActionDate(oldCollectionPlan.getLastActionDate());
-        create(newCollectionPlan);
-       
+        // Create a new collection plan after switching
+        DunningCollectionPlanStatus collectionPlanStatusActif = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
+        DunningCollectionPlan newCollectionPlan = createNewDunningCollectionPlanAfterSwitchAction(policy, selectedPolicyLevel, oldCollectionPlan, collectionPlanStatusActif);
+
         if (policy.getDunningLevels() != null && !policy.getDunningLevels().isEmpty()) {
             List<DunningLevelInstance> levelInstances = new ArrayList<>();
             for (DunningPolicyLevel policyLevel : policy.getDunningLevels()) {
@@ -132,7 +125,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                     levelInstance = dunningLevelInstanceService.createDunningLevelInstanceWithCollectionPlan(newCollectionPlan, collectionPlanStatusActif, policyLevel, DONE);
                 } else {
                     levelInstance = dunningLevelInstanceService.createDunningLevelInstanceWithCollectionPlan(newCollectionPlan, collectionPlanStatusActif, policyLevel, TO_BE_DONE);
-                    if (policyLevel.getSequence() == selectedPolicyLevel.getSequence()) {
+                    if (policyLevel.getSequence().equals(selectedPolicyLevel.getSequence())) {
                         DunningLevel nextLevel = findLevelBySequence(policy.getDunningLevels(), policyLevel.getSequence());
                         if(nextLevel != null
                                 && nextLevel.getDunningActions() != null && !nextLevel.getDunningActions().isEmpty()) {
@@ -161,6 +154,47 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         newCollectionPlan.setCollectionPlanNumber("C" + newCollectionPlan.getId());
         update(newCollectionPlan);
         update(oldCollectionPlan);
+        return newCollectionPlan;
+    }
+
+    /**
+     * Update the old collection plan after switch action
+     * @param oldCollectionPlan Old collection plan
+     * @param stopReason Dunning stop reason
+     * @param collectionPlanStatusStop Collection plan status object
+     */
+    private void updateOldDunningCollectionPlanAfterSwitchAction(DunningCollectionPlan oldCollectionPlan, DunningStopReason stopReason, DunningCollectionPlanStatus collectionPlanStatusStop) {
+        // Ignore levels and actions after paying invoice
+        ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(oldCollectionPlan);
+
+        // Update the old collection plan with the stop reason and status
+        oldCollectionPlan.setStopReason(stopReason);
+        oldCollectionPlan.setCloseDate(new Date());
+        oldCollectionPlan.setStatus(collectionPlanStatusStop);
+    }
+
+    /**
+     * Create a new collection plan after switch action
+     * @param policy Dunning policy
+     * @param selectedPolicyLevel Selected policy level
+     * @param oldCollectionPlan Old collection plan
+     * @param collectionPlanStatusActif Collection plan status object
+     * @return New collection plan
+     */
+    private DunningCollectionPlan createNewDunningCollectionPlanAfterSwitchAction(DunningPolicy policy, DunningPolicyLevel selectedPolicyLevel, DunningCollectionPlan oldCollectionPlan, DunningCollectionPlanStatus collectionPlanStatusActif) {
+        DunningCollectionPlan newCollectionPlan = new DunningCollectionPlan();
+        newCollectionPlan.setRelatedPolicy(policy);
+        newCollectionPlan.setBillingAccount(oldCollectionPlan.getBillingAccount());
+        newCollectionPlan.setRelatedInvoice(oldCollectionPlan.getRelatedInvoice());
+        newCollectionPlan.setCurrentDunningLevelSequence(selectedPolicyLevel.getSequence());
+        newCollectionPlan.setTotalDunningLevels(policy.getTotalDunningLevels());
+        newCollectionPlan.setStartDate(oldCollectionPlan.getStartDate());
+        newCollectionPlan.setStatus(collectionPlanStatusActif);
+        newCollectionPlan.setBalance(oldCollectionPlan.getBalance());
+        newCollectionPlan.setInitialCollectionPlan(oldCollectionPlan);
+        newCollectionPlan.setLastAction(oldCollectionPlan.getLastAction());
+        newCollectionPlan.setLastActionDate(oldCollectionPlan.getLastActionDate());
+        create(newCollectionPlan);
         return newCollectionPlan;
     }
 
@@ -321,28 +355,71 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		update(collectionPlanToPause);
 		return collectionPlanToPause; 
 	}
-	
+
+    /**
+     * Stop a collection plan
+     * @param collectionPlanToStop Collection plan to stop
+     * @param dunningStopReason Dunning stop reason
+     * @return {@link DunningCollectionPlan}
+     */
 	public DunningCollectionPlan stopCollectionPlan(DunningCollectionPlan collectionPlanToStop, DunningStopReason dunningStopReason) {
+        // Refresh or retrieve the collection plan to stop, get the dunning collection plan status
 		collectionPlanToStop = dunningCollectionPlanService.refreshOrRetrieve(collectionPlanToStop);
-		collectionPlanToStop = refreshLevelInstances(collectionPlanToStop);
+        DunningCollectionPlanStatus dunningCollectionPlanStatus = dunningCollectionPlanStatusService.refreshOrRetrieve(collectionPlanToStop.getStatus());
 
-		DunningCollectionPlanStatus dunningCollectionPlanStatus = dunningCollectionPlanStatusService.refreshOrRetrieve(collectionPlanToStop.getStatus());
+        // Check if the collection plan status is not success or failed
+        if(dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.SUCCESS)) {
+            throw new BusinessApiException("Collection Plan with id "+collectionPlanToStop.getId()+" cannot be stopped, the collection plan status is success");
+        }
 
-		if(dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.SUCCESS)) {
-			throw new BusinessApiException("Collection Plan with id "+collectionPlanToStop.getId()+" cannot be stopped, the collection plan status is success");
-		}
-		if(dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.FAILED)) {
-			throw new BusinessApiException("Collection Plan with id "+collectionPlanToStop.getId()+" cannot be stopped, the collection plan status is failed");
-		}
-		
-		DunningCollectionPlanStatus collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.STOPPED);
-		collectionPlanToStop.setStatus(collectionPlanStatus);
-		collectionPlanToStop.setCloseDate(new Date());
-		collectionPlanToStop.setDaysOpen((int) daysBetween(collectionPlanToStop.getCloseDate(), new Date()) + 1);
-		collectionPlanToStop.setStopReason(dunningStopReason);
-		update(collectionPlanToStop);
+        if(dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.FAILED)) {
+            throw new BusinessApiException("Collection Plan with id "+collectionPlanToStop.getId()+" cannot be stopped, the collection plan status is failed");
+        }
+
+        // Ignore levels and actions after stopping dunning collection plan
+        ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(collectionPlanToStop);
+
+        // Update the dunning collection plan infos after stop action
+        updateDunningCollectionPlanInfosAfterStopAction(collectionPlanToStop, dunningStopReason);
+
+        // Update the collection plan
+        update(collectionPlanToStop);
 		return collectionPlanToStop; 
 	}
+
+    /**
+     * Ignore levels and actions after stopping dunning collection plan
+     * @param collectionPlanToStop Collection plan to stop
+     */
+    public void ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(DunningCollectionPlan collectionPlanToStop) {
+        // Get the dunning level instance to update status if is to be done
+        List<DunningLevelInstance> dunningLevelInstances = new ArrayList<>();
+
+        // Update the dunning level instance status to ignored
+        collectionPlanToStop.getDunningLevelInstances().forEach(levelInstance -> {
+            if (!DONE.equals(levelInstance.getLevelStatus()) && !IGNORED.equals(levelInstance.getLevelStatus())) {
+                levelInstance.setLevelStatus(IGNORED);
+                levelInstance.getActions().forEach(actionInstance -> actionInstance.setActionStatus(DunningActionInstanceStatusEnum.IGNORED));
+            }
+            dunningLevelInstances.add(levelInstance);
+        });
+
+        // Update the collection plan with the dunning level instances
+        collectionPlanToStop.setDunningLevelInstances(dunningLevelInstances);
+    }
+
+    /**
+     * Update the dunning collection plan infos after stop action
+     * @param collectionPlanToStop Collection plan to stop
+     * @param dunningStopReason Dunning stop reason
+     */
+    private void updateDunningCollectionPlanInfosAfterStopAction(DunningCollectionPlan collectionPlanToStop, DunningStopReason dunningStopReason) {
+        DunningCollectionPlanStatus collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.STOPPED);
+        collectionPlanToStop.setStatus(collectionPlanStatus);
+        collectionPlanToStop.setCloseDate(new Date());
+        collectionPlanToStop.setDaysOpen((int) daysBetween(collectionPlanToStop.getCloseDate(), new Date()) + 1);
+        collectionPlanToStop.setStopReason(dunningStopReason);
+    }
 
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)

@@ -745,6 +745,8 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         return of(dunningActionInstance);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public Optional<DunningActionInstance> updateDunningActionInstance(DunningActionInstanceInput dunningActionInstanceInput, Long actionInstanceId) {
         globalSettingsVerifier.checkActivateDunning();
         try {
@@ -754,7 +756,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             }
 
             if (dunningActionInstanceToUpdate.getActionStatus() == DunningActionInstanceStatusEnum.DONE) {
-                throw new ActionForbiddenException("Can not update a DONE dunningActionInstace");
+                throw new ActionForbiddenException("Can not update a DONE dunningActionInstance");
             }
 
             List<String> fields = new ArrayList<>();
@@ -982,6 +984,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 collectionPlan.setNextAction(null);
                 collectionPlan.setNextActionDate(null);
                 collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED));
+
+                // Ignore levels and actions after stopping dunning collection plan
+                dunningCollectionPlanService.ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(collectionPlan);
             }
 
             dunningCollectionPlanService.update(collectionPlan);

@@ -125,7 +125,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	private String getOperationDate(JobInstance jobInstance, String alias) {
 		String operationDateConfig = (String) this.getParamOrCFValue(jobInstance,
 				RatingCancellationJob.getOperationDateCFName(alias), RatingCancellationJob.NO_DATE_LIMITE);
-		boolean useLimitDate = operationDateConfig != RatingCancellationJob.NO_DATE_LIMITE
+		boolean useLimitDate = !operationDateConfig.equals(RatingCancellationJob.NO_DATE_LIMITE)
 				&& CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate(alias));
 		return useLimitDate ? 
 				(operationDateConfig == RatingCancellationJob.USE_LAST_PARTITION ? tablesPartitioningService.getLastPartitionStartingDateAsString(alias) : operationDateConfig)

@@ -149,7 +149,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	private String getOperationDate(JobInstance jobInstance) {
 		String operationDateConfig = (String) this.getParamOrCFValue(jobInstance,
 				ReRatingV2Job.CF_OPERATIONS_STARTING_DATE, ReRatingV2Job.NO_DATE_LIMITE);
-		boolean useLimitDate = operationDateConfig != ReRatingV2Job.NO_DATE_LIMITE
+		boolean useLimitDate = !operationDateConfig.equals(ReRatingV2Job.NO_DATE_LIMITE)
 				&& CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate("edr"));
 		return useLimitDate ? 
 				(operationDateConfig == ReRatingV2Job.USE_LAST_PARTITION ? tablesPartitioningService.getLastPartitionStartingDateAsString("edr") : operationDateConfig)

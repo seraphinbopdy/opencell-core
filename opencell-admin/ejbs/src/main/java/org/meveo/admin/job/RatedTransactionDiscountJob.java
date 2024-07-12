@@ -79,7 +79,7 @@ public class RatedTransactionDiscountJob extends Job {
 		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_CHUNK_SIZE,
 				(Long) getParamOrCFValue(jobInstance, RatedTransactionDiscountJob.CF_MASS_UPDATE_CHUNK, 100000L));
 		String usePartitionConfig =  (String)this.getParamOrCFValue(jobInstance, RatedTransactionDiscountJob.CF_OPERATIONS_STARTING_DATE, NO_DATE_LIMITE);
-		boolean useLimitDate = usePartitionConfig!=NO_DATE_LIMITE && CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate("rt"));
+		boolean useLimitDate = !usePartitionConfig.equals(NO_DATE_LIMITE) && CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate("rt"));
 		String namedQuery = "RatedTransaction.massUpdateWithDiscountedRTStep"+(useLimitDate?"ForDate":"");
 		if(useLimitDate) {
 			Date operationDate = null;

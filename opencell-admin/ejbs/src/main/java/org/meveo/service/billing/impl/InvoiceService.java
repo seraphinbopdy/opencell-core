@@ -5707,7 +5707,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
 
     protected InvoiceLinesToInvoice getInvoiceLinesGroups(IBillableEntity entityToInvoice, BillingAccount billingAccount, BillingRun billingRun, BillingCycle defaultBillingCycle, InvoiceType defaultInvoiceType,
-            Filter filter,Map<String, Object> filterParams, Date firstTransactionDate, Date lastTransactionDate, boolean isDraft, PaymentMethod defaultPaymentMethod, Invoice existingInvoice, InvoiceProcessTypeEnum invoiceProcessTypeEnum, List<InvoiceLine> invoiceLines, String openOrderCode) throws BusinessException {
+            Filter filter,Map<String, Object> filterParams, Date firstTransactionDate, Date lastTransactionDate, boolean isDraft, PaymentMethod defaultPaymentMethod, Invoice existingInvoice, InvoiceProcessTypeEnum invoiceProcessTypeEnum, List<InvoiceLine> invoiceLines, String openOrderCode, boolean executeSplitScript) throws BusinessException {
         if(CollectionUtils.isEmpty(invoiceLines)) {
             invoiceLines = existingInvoice != null ? invoiceLinesService.listInvoiceLinesByInvoice(existingInvoice.getId())
                     : getInvoiceLines(billingRun, entityToInvoice, filter,filterParams, firstTransactionDate, lastTransactionDate, isDraft);
@@ -5777,7 +5777,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         List<InvoiceLinesGroup> convertedIlGroups = new ArrayList<>();
         for (InvoiceLinesGroup linesGroup : invoiceLinesGroup.values()) {
 
-            if (linesGroup.getBillingCycle().getScriptInstance() != null) {
+            if (linesGroup.getBillingCycle().getScriptInstance() != null && executeSplitScript) {
                 convertedIlGroups.addAll(executeBCScriptWithInvoiceLines(billingRun, linesGroup.getInvoiceType(), linesGroup.getInvoiceLines(), entityToInvoice, linesGroup.getBillingCycle().getScriptInstance().getCode(),
                     linesGroup.getPaymentMethod()));
             } else {
@@ -6046,7 +6046,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
 
             return createAggregatesAndInvoiceFromIlsAndSubscription(entityToInvoice, billingRun, filter,filterParams, invoiceDate, firstTransactionDate, lastTransactionDate, isDraft, billingCycle, ba, paymentMethod, invoiceType, balance,
-                automaticInvoiceCheck, hasMin, null, null, invoiceLines, openOrderCode, subscription);
+                automaticInvoiceCheck, hasMin, null, null, invoiceLines, openOrderCode, subscription, true);
         } catch (Exception e) {
             log.error("Error for entity {}", entityToInvoice.getCode(), e);
             if (entityToInvoice instanceof BillingAccount) {
@@ -6066,16 +6066,16 @@ public class InvoiceService extends PersistenceService<Invoice> {
     @SuppressWarnings("unchecked")
     private List<Invoice> createAggregatesAndInvoiceFromIls(IBillableEntity entityToInvoice, BillingRun billingRun, Filter filter, Map<String, Object> filterParams, Date invoiceDate, Date firstTransactionDate, Date lastTransactionDate, boolean isDraft,
                                                             BillingCycle defaultBillingCycle, BillingAccount billingAccount, PaymentMethod defaultPaymentMethod, InvoiceType defaultInvoiceType, BigDecimal balance, boolean automaticInvoiceCheck, boolean hasMin,
-                                                            Invoice existingInvoice, InvoiceProcessTypeEnum invoiceProcessTypeEnum, List<InvoiceLine> existingInvoiceLines, String openOrderCode) throws BusinessException {
+                                                            Invoice existingInvoice, InvoiceProcessTypeEnum invoiceProcessTypeEnum, List<InvoiceLine> existingInvoiceLines, String openOrderCode, boolean executeSplitScript) throws BusinessException {
         return createAggregatesAndInvoiceFromIlsAndSubscription(entityToInvoice, billingRun, filter, filterParams, invoiceDate, firstTransactionDate, lastTransactionDate, isDraft,
                 defaultBillingCycle, billingAccount, defaultPaymentMethod, defaultInvoiceType, balance, automaticInvoiceCheck, hasMin,
-                existingInvoice, invoiceProcessTypeEnum, existingInvoiceLines, openOrderCode, null);
+                existingInvoice, invoiceProcessTypeEnum, existingInvoiceLines, openOrderCode, null, executeSplitScript);
     }
 
     @SuppressWarnings("unchecked")
     private List<Invoice> createAggregatesAndInvoiceFromIlsAndSubscription(IBillableEntity entityToInvoice, BillingRun billingRun, Filter filter,Map<String, Object> filterParams, Date invoiceDate, Date firstTransactionDate, Date lastTransactionDate, boolean isDraft,
             BillingCycle defaultBillingCycle, BillingAccount billingAccount, PaymentMethod defaultPaymentMethod, InvoiceType defaultInvoiceType, BigDecimal balance, boolean automaticInvoiceCheck, boolean hasMin,
-            Invoice existingInvoice, InvoiceProcessTypeEnum invoiceProcessTypeEnum, List<InvoiceLine> existingInvoiceLines, String openOrderCode, Subscription subscription) throws BusinessException {
+            Invoice existingInvoice, InvoiceProcessTypeEnum invoiceProcessTypeEnum, List<InvoiceLine> existingInvoiceLines, String openOrderCode, Subscription subscription, boolean executeSplitScript) throws BusinessException {
         List<Invoice> invoiceList = new ArrayList<>();
         boolean moreInvoiceLinesExpected = true;
         Map<String, InvoiceAggregateProcessingInfo> invoiceLineGroupToInvoiceMap = new HashMap<>();
@@ -6090,7 +6090,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
                 // TODO check getInvoiceLinesGroups(entityToInvoice
             InvoiceLinesToInvoice iLsToInvoice = getInvoiceLinesGroups(entityToInvoice, billingAccount, billingRun, defaultBillingCycle, defaultInvoiceType, filter,filterParams, firstTransactionDate, lastTransactionDate, isDraft,
-                defaultPaymentMethod, existingInvoice, invoiceProcessTypeEnum, existingInvoiceLines, openOrderCode);
+                defaultPaymentMethod, existingInvoice, invoiceProcessTypeEnum, existingInvoiceLines, openOrderCode, executeSplitScript);
             List<InvoiceLinesGroup> invoiceLinesGroupsPaged = iLsToInvoice.invoiceLinesGroups;
             moreInvoiceLinesExpected = iLsToInvoice.moreInvoiceLines;
             if (moreInvoiceLinesExpected) {
@@ -7055,12 +7055,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param invoice
      * @return
      */
-    public Object calculateInvoice(Invoice invoice) {
+    public Object calculateInvoice(Invoice invoice, boolean excuteSplitScript) {
         invoice = invoiceService.retrieveIfNotManaged(invoice);
         final BillingAccount billingAccount = billingAccountService.retrieveIfNotManaged(invoice.getBillingAccount());
         invoiceService.updateBillingRunStatistics(invoice);
         return createAggregatesAndInvoiceFromIls(billingAccount, billingAccount.getBillingRun(), null,null, invoice.getInvoiceDate(), null, null, invoice.isDraft(), billingAccount.getBillingCycle(), billingAccount,
-            billingAccount.getPaymentMethod(), invoice.getInvoiceType(), null, false, false, invoice, InvoiceProcessTypeEnum.MANUAL,null, null);
+            billingAccount.getPaymentMethod(), invoice.getInvoiceType(), null, false, false, invoice, InvoiceProcessTypeEnum.MANUAL,null, null, excuteSplitScript);
     }
 
     private final String TAX_INVOICE_AGREGATE = "T";
@@ -7273,7 +7273,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     private void calculateOrUpdateInvoice(List<Long> invoiceLinesIds, Invoice adjustmentInvoice) {
         if (invoiceLinesIds != null && !invoiceLinesIds.isEmpty()) {
-            calculateInvoice(adjustmentInvoice);
+            calculateInvoice(adjustmentInvoice, true);
         }
         else {
             update(adjustmentInvoice);
@@ -7308,7 +7308,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             invoice.getInvoiceLines().add(duplicateInvoiceLine);
         }
 
-        calculateInvoice(invoice);
+        calculateInvoice(invoice, true);
         return update(invoice);
     }
 

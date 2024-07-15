@@ -12751,5 +12751,28 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="description_i18n" value='{"FRA":"Autoriser les dates de livraison dans le passé pour les commandes","ENG":"Allow past delivery dates on orders"}'/>
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-23732_20240715" author="TarikFA.">
+        <addColumn tableName="ar_account_operation">
+            <column name="origin_call_for_payment_id" type="bigint" />
+            <column name="origin_payment_id" type="bigint" />
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_call_for_payment_id"
+                constraintName="origin_call_for_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_payment_id"
+                constraintName="origin_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+    </changeSet>
 
 </databaseChangeLog>

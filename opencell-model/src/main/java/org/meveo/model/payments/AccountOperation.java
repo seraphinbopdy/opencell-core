@@ -521,6 +521,14 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
 	@JoinColumn( name = "source_account_operation_id" )
 	@ManyToOne(fetch = FetchType.LAZY)
 	private AccountOperation sourceAccountOperation;
+	
+	@JoinColumn( name = "origin_call_for_payment_id" )
+	@ManyToOne(fetch = FetchType.LAZY)
+	private AccountOperation originCallPayment;
+	
+	@JoinColumn( name = "origin_payment_id" )
+	@ManyToOne(fetch = FetchType.LAZY)
+	private AccountOperation originPayment;
 
     public Date getDueDate() {
         return dueDate;
@@ -1225,5 +1233,21 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
 	
 	public void setSourceAccountOperation(AccountOperation sourceAccountOperation) {
 		this.sourceAccountOperation = sourceAccountOperation;
+	}
+	
+	public AccountOperation getOriginCallPayment() {
+		return originCallPayment;
+	}
+	
+	public void setOriginCallPayment(AccountOperation originCallPayment) {
+		this.originCallPayment = originCallPayment;
+	}
+	
+	public AccountOperation getOriginPayment() {
+		return originPayment;
+	}
+	
+	public void setOriginPayment(AccountOperation originPayment) {
+		this.originPayment = originPayment;
 	}
 }

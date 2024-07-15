@@ -12752,4 +12752,45 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD-23734_20240715" author="TarikFA.">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="CallForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="allowUsingUnpaidAdvance"/>
+            <column name="description" value="If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."/>
+            <column name="description_i18n" value='{"FRA":"Si ce paramètre est activé, alors Opencell n’attendra pas qu’un appel acompte validé soit effectivement payé pour l’utiliser sur une facture.
+Habituellement, ce comportement n’est souhaitable que si vous ne gérez pas la balance client dans Opencell.","ENG":"If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."}'/>
+        </insert>
+
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="CallForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="autoCloseAdvanceAfterInvoiceValidation"/>
+            <column name="description" value="Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.
+Meaning that advances won’t be available for further invoices."/>
+            <column name="description_i18n">
+                <![CDATA[{
+	"FRA": "Les appels d’acompte liés à la facture seront automatiquement closes quand la facture est validée.Cela signifie que les acomptes ne seront pas disponibles pour de futures factures.",
+	"ENG": "Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.Meaning that advances won’t be available for further invoices."
+}]]>
+            </column>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

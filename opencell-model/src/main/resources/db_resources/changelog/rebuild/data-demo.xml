@@ -6968,6 +6968,8 @@ Meaning that advances won’t be available for further invoices."/>
 	<changeSet id="#INTRD-22516_20240503" author="aeljaouhari" />
     <changeSet id="#INTRD-23734_20240715" author="TarikFA." />
     <changeSet id="INTRD-23733" author="TarikFA." />
+    <changeSet id="#INTRD-23038_20240515" author="TarikFA." />
+
 
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->
     <changeSet id="#liquibase_hack_data" author="AbdelmounaimAkadid">

@@ -122,6 +122,8 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
             // Update collection plan status to success
             collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+            collectionPlan.setNextActionDate(null);
+            collectionPlan.setNextAction(null);
             collectionPlanService.update(collectionPlan);
         } else {
             collectionPlan.getDunningLevelInstances().sort(Comparator.comparing(DunningLevelInstance::getSequence));
@@ -161,7 +163,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                                             levelInstanceService.update(levelInstance);
                                         }
                                         collectionPlan.setLastActionDate(new Date());
-                                        collectionPlan.setLastAction(actionInstance.getDunningAction().getActionType().toString());
+                                        collectionPlan.setLastAction(actionInstance.getDunningAction().getCode());
                                     }
                                 } catch (Exception exception) {
                                     registerKO = true;
@@ -178,8 +180,8 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                                 DunningLevelInstance currentLevel = levelInstances.get(levelsIndex);
                                 for (int i = levelsIndex + 1; i < levelInstances.size(); i++) {
                                     if(levelInstances.get(i).getActions() != null && !levelInstances.get(i).getActions().isEmpty()) {
-                                        collectionPlan.setNextAction(levelInstances.get(i).getActions().get(0).getDunningAction().getActionType().toString());
-                                        collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), levelInstances.get(i).getDaysOverdue() - currentLevel.getDaysOverdue()));
+                                        collectionPlan.setNextAction(levelInstances.get(i).getActions().get(0).getDunningAction().getCode());
+                                        collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), levelInstances.get(i).getDaysOverdue()));
                                         break;
                                     }
                                 }
@@ -197,17 +199,24 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             jobExecutionResult.addNbItemsProcessedWithError(1L);
                         }
                         levelInstance = levelInstanceService.refreshOrRetrieve(levelInstance);
+
+                        // Set current dunning level sequence
                         if (nextLevel < collectionPlan.getDunningLevelInstances().size()) {
                             collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getDunningLevelInstances().get(nextLevel).getSequence());
                         }
-                        if (levelInstance.getDunningLevel() != null
-                                && levelInstance.getDunningLevel().isEndOfDunningLevel()
-                                && collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.UNPAID)
-                                && nbLevelDone == collectionPlan.getDunningLevelInstances().size()) {
+
+                        // Update collection plan status to FAILED if is end of dunning and invoice is unpaid
+                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.UNPAID)) {
                             collectionPlan.setStatus(collectionPlanStatusService.findByStatus(FAILED));
+                            collectionPlan.setNextAction(null);
+                            collectionPlan.setNextActionDate(null);
                         }
+
+                        // Update collection plan status to SUCCESS if is end of dunning and invoice is paid
                         if (collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.PAID)) {
                             collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+                            collectionPlan.setNextAction(null);
+                            collectionPlan.setNextActionDate(null);
                         }
                         long countActions = levelInstance.getActions().stream().filter(action -> action.getActionStatus() == DONE).count();
                         if (countActions > 0 && countActions < levelInstance.getActions().size()) {

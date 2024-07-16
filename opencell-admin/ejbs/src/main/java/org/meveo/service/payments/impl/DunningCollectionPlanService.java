@@ -17,6 +17,7 @@ import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.shared.DateUtils;
+import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
@@ -218,7 +219,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         collectionPlan.setRelatedPolicy(policy);
         collectionPlan.setBillingAccount(invoice.getBillingAccount());
         collectionPlan.setRelatedInvoice(invoice);
-        collectionPlan.setCurrentDunningLevelSequence(1);
+        collectionPlan.setCurrentDunningLevelSequence(0);
         collectionPlan.setTotalDunningLevels(policy.getTotalDunningLevels());
         collectionPlan.setStartDate(new Date());
         collectionPlan.setStatus(collectionPlanStatus);
@@ -264,11 +265,11 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
             if (firstDunningLevelInstance.isPresent()) {
                 if (firstDunningLevelInstance.get().getLevelStatus().equals(DONE)) {
                     collectionPlan.setLastActionDate(addDaysToDate(collectionPlan.getStartDate(), firstDunningLevelInstance.get().getDaysOverdue()));
-                    collectionPlan.setLastAction(firstDunningLevelInstance.get().getActions().get(0).getDunningAction().getActionType().toString());
+                    collectionPlan.setLastAction(firstDunningLevelInstance.get().getActions().get(0).getCode());
                     collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getCurrentDunningLevelSequence() + 1);
 
                     if (nextDunningLevelInstance.isPresent()) {
-                        collectionPlan.setNextAction(nextDunningLevelInstance.get().getActions().get(0).getDunningAction().getActionType().toString());
+                        collectionPlan.setNextAction(nextDunningLevelInstance.get().getActions().get(0).getDunningAction().getCode());
                         collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), nextDunningLevelInstance.get().getDaysOverdue()));
                     }
                 } else if (firstDunningLevelInstance.get().getLevelStatus().equals(IGNORED)) {
@@ -277,15 +278,19 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                     collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getCurrentDunningLevelSequence() + 1);
 
                     if (nextDunningLevelInstance.isPresent()) {
-                        collectionPlan.setNextAction(nextDunningLevelInstance.get().getActions().get(0).getDunningAction().getActionType().toString());
+                        collectionPlan.setNextAction(nextDunningLevelInstance.get().getActions().get(0).getDunningAction().getCode());
                         collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), nextDunningLevelInstance.get().getDaysOverdue()));
                     }
                 }
             }
         }
 
+        auditLogService.trackOperation("CREATE DunningCollectionPlan", new Date(), collectionPlan, collectionPlan.getCollectionPlanNumber());
         return update(collectionPlan);
     }
+
+    @Inject
+    private AuditLogService auditLogService;
 
     /**
      * Update dunning level instance
@@ -327,7 +332,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		}
 
 		if(dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED)) {
-			throw new BusinessApiException("Collection Plan with id "+collectionPlanToPause.getId()+" cannot be paused, the collection plan status is not stoped");
+			throw new BusinessApiException("Collection Plan with id "+collectionPlanToPause.getId()+" cannot be paused, the collection plan status is not stopped");
 		}
 
 		if(!forcePause) {
@@ -419,6 +424,8 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         collectionPlanToStop.setCloseDate(new Date());
         collectionPlanToStop.setDaysOpen((int) daysBetween(collectionPlanToStop.getCloseDate(), new Date()) + 1);
         collectionPlanToStop.setStopReason(dunningStopReason);
+        collectionPlanToStop.setNextActionDate(null);
+        collectionPlanToStop.setNextAction(null);
     }
 
     @JpaAmpNewTx

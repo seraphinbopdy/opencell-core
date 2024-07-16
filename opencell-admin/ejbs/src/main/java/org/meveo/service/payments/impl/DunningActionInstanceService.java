@@ -63,7 +63,7 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
         for (DunningAction action : pDunningPolicyLevel.getDunningLevel().getDunningActions()) {
             DunningActionInstance dunningActionInstance = createDunningActionInstance(action, pDunningLevelInstance);
             dunningActionInstance.setDunningLevelInstance(pDunningLevelInstance);
-            dunningActionInstance.setCode(action.getCode() + "_" + currentTimeMillis());
+            dunningActionInstance.setCode(action.getCode());
             dunningActionInstance.setDescription(action.getDescription());
 
             if(collectionPlan != null) {

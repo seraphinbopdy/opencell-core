@@ -28,10 +28,7 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.ResourceBundle;
-import org.meveo.api.exception.ActionForbiddenException;
-import org.meveo.api.exception.EntityAlreadyExistsException;
-import org.meveo.api.exception.EntityDoesNotExistsException;
-import org.meveo.api.exception.MeveoApiException;
+import org.meveo.api.exception.*;
 import org.meveo.apiv2.dunning.DunningActionInstanceInput;
 import org.meveo.apiv2.dunning.DunningCollectionPlanPause;
 import org.meveo.apiv2.dunning.DunningCollectionPlanStop;
@@ -184,6 +181,11 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         if (oldCollectionPlan == null) {
             throw new EntityDoesNotExistsException("Dunning collection plan with id " + collectionPlanId + " does not exits");
         }
+
+        if(oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED)) {
+            throw new BusinessApiException("Collection Plan with id " + oldCollectionPlan.getId() + " cannot be switched, the current collection plan status is " + oldCollectionPlan.getStatus().getStatus());
+        }
+
         DunningPolicy policy = dunningPolicyService.findById(switchDunningCollectionPlan.getDunningPolicy().getId());
         if (policy == null) {
             throw new EntityDoesNotExistsException("Policy with id " + switchDunningCollectionPlan.getDunningPolicy().getId() + " does not exits");
@@ -332,9 +334,14 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         }
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public Optional<DunningCollectionPlan> stopCollectionPlan(DunningCollectionPlanStop dunningCollectionPlanStop, Long id) {
         globalSettingsVerifier.checkActivateDunning();
         var collectionPlanToStop = findById(id).orElseThrow(() -> new EntityDoesNotExistsException(NO_DUNNING_FOUND + id));
+        if(collectionPlanToStop.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED)) {
+            throw new BusinessApiException("Collection Plan with id " + collectionPlanToStop.getId() + " cannot be stopped, current status is " + collectionPlanToStop.getStatus().getStatus());
+        }
         DunningStopReason dunningStopReason = dunningStopReasonService.findById(dunningCollectionPlanStop.getDunningStopReason().getId());
         if (dunningStopReason == null) {
             throw new EntityDoesNotExistsException("dunning Pause Reason with id " + dunningCollectionPlanStop.getDunningStopReason().getId() + " does not exits");
@@ -597,6 +604,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             }
 
             DunningCollectionPlan collectionPlan = dunningCollectionPlanService.findById(levelInstanceToUpdate.getCollectionPlan().getId());
+            if(collectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED)) {
+                throw new BusinessApiException("Collection Plan with id " + collectionPlan.getId() + " cannot be edited, the current collection plan status is " + collectionPlan.getStatus().getStatus());
+            }
 
             // 1- Can not update the dunning level instance if :
             // status is DONE
@@ -984,6 +994,8 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 collectionPlan.setNextAction(null);
                 collectionPlan.setNextActionDate(null);
                 collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED));
+                collectionPlan.setNextAction(null);
+                collectionPlan.setNextActionDate(null);
 
                 // Ignore levels and actions after stopping dunning collection plan
                 dunningCollectionPlanService.ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(collectionPlan);

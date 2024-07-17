@@ -182,7 +182,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             throw new EntityDoesNotExistsException("Dunning collection plan with id " + collectionPlanId + " does not exits");
         }
 
-        if(oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED)) {
+        if(oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED) ||
+                oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.FAILED) ||
+                oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.SUCCESS)) {
             throw new BusinessApiException("Collection Plan with id " + oldCollectionPlan.getId() + " cannot be switched, the current collection plan status is " + oldCollectionPlan.getStatus().getStatus());
         }
 

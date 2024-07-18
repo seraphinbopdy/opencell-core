@@ -939,4 +939,13 @@ public class AccountOperationService extends PersistenceService<AccountOperation
                 .setParameter("externalId", externalId)
                 .getResultList();
     }
+	
+	public List<AccountOperation> findByMatchingId(Long matchingCodeId) {
+		return getEntityManager().createQuery("SELECT ao FROM AccountOperation ao join ao.matchingAmounts mas " +
+						"WHERE  ao.matchingStatus in (org.meveo.model.payments.MatchingStatusEnum.L, org.meveo.model.payments.MatchingStatusEnum.P) " +
+						"and mas.id in (:matchingCodeId) " +
+						"and ao.type = 'P'", AccountOperation.class)
+				.setParameter("matchingCodeId", List.of(matchingCodeId))
+				.getResultList();
+	}
 }

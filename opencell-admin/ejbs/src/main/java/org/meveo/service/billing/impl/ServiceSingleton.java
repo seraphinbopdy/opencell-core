@@ -75,6 +75,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -461,7 +462,7 @@ public class ServiceSingleton {
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Invoice validateAndAssignInvoiceNumber(Long invoiceId, boolean refreshExchangeRate) throws BusinessException {
-    	Invoice invoice = invoiceService.findById(invoiceId);
+    	Invoice invoice = invoiceService.findById(invoiceId, List.of("linkedInvoices"));
     	if (invoice == null) {
     		throw new EntityDoesNotExistsException(Invoice.class, invoiceId);
     	}

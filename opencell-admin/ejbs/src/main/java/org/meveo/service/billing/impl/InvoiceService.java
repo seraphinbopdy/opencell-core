@@ -41,6 +41,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -95,6 +96,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -228,8 +230,10 @@ import org.meveo.model.payments.MatchingAmount;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.MatchingTypeEnum;
 import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.model.securityDeposit.SecurityDeposit;
@@ -7912,4 +7916,69 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		}
 		this.updateNoCheck(invoice);
 	}
+	@JpaAmpNewTx
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void generateAoFromAdv(Invoice invoice, List<Invoice> advs) throws ImportInvoiceException, InvoiceExistException {
+		// generate AO for invoice with invoice balance
+		invoice = findById(invoice.getId());
+		RecordedInvoice recordedInvoice = recordedInvoiceService.generateRecordedInvoice(invoice, null, true);
+		update(invoice);
+		// check if the user want to close the ADV
+		Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("autoCloseAdvanceAfterInvoiceValidation");
+		// for each adv we will get the Ao from the adv and copy to a new AO and link to the ADV
+		// and after we will unmatch the old AO from ADV and matched with the invoice
+		Payment newAo = new Payment();
+		advs.forEach(adv -> {
+			// the Adv is paid
+			if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.PAID) {
+				List<AccountOperation> advAo = accountOperationService.listByInvoice(adv);
+				advAo.forEach(ao -> {
+					List<AccountOperation> paymentAo = accountOperationService.findByMatchingId(ao.getId());
+					paymentAo.forEach(pao -> {
+						generateAoAndPaymentForUsedAndPaidAdv(adv, pao, newAo, recordedInvoice.getId(), ao.getId());
+					});
+				});
+			}
+			
+		});
+	}
+	
+	private void generateAoAndPaymentForUsedAndPaidAdv(Invoice invoice, AccountOperation ao, Payment newAo, Long recordInvoiceId, Long advAccountOperationId){
+				if(ao instanceof  Payment) {
+					Payment paymentAo = (Payment) ao;
+					// unmatch the old AO from ADV
+					matchingCodeService.unmatchingOperationAccount(paymentAo);
+					// creation for a new Payment for the ADV
+					try {
+						BeanUtils.copyProperties(newAo, paymentAo);
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						log.error("error when copying ao's object id : " + ao.getId(), e);
+						throw new BusinessException(e);
+					}
+					newAo.setCode("PAY_ADV");
+					newAo.setId(null);
+					newAo.setAccountingEntries(new ArrayList<>());
+					newAo.setAccountingSchemeEntries(new HashSet<>());
+					newAo.setPaymentHistories(new ArrayList<>());
+					newAo.setInvoices(List.of(findById(invoice.getId())));
+					newAo.setMatchingAmounts(new ArrayList<>());
+					accountOperationService.create(newAo);
+					// match the old AO from ADV to new AO of the invoice
+					Long idCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getId();
+					String codeCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getCode();
+					try {
+						// matching the old AO from ADV to new AO of the invoice
+						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, List.of(recordInvoiceId, paymentAo.getId()), paymentAo.getId(), paymentAo.getUnMatchingAmount());
+						// matching the new PAY AO to the ADV AO
+						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, List.of(advAccountOperationId, newAo.getId()), newAo.getId(), newAo.getUnMatchingAmount());
+					} catch (Exception e) {
+						log.error("error while matching the operation for ao id : " + ao.getId(), e);
+						throw new BusinessException(e);
+					}
+				}
+				
+			
+	}
 }
+
+

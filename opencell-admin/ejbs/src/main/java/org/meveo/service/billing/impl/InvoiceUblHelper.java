@@ -1219,7 +1219,9 @@ public class InvoiceUblHelper {
 			UntdidTaxationCategory untdidTaxationCategory = tax.getUntdidTaxationCategory();
 			TaxExemptionReason taxExemptionReason = objectFactorycommonBasic.createTaxExemptionReason();
 			taxExemptionReason.setValue(untdidTaxationCategory.getSemanticModel());
-			taxCategoryType.getTaxExemptionReasons().add(taxExemptionReason);
+			if("E".equalsIgnoreCase(tax.getUntdidTaxationCategory().getCode())) {
+				taxCategoryType.getTaxExemptionReasons().add(taxExemptionReason);
+			}
 			if(!untdidTaxationCategory.getCode().equalsIgnoreCase("S")) {
 				TaxExemptionReasonCode taxExemptionReasonCode = objectFactorycommonBasic.createTaxExemptionReasonCode();
 				taxExemptionReasonCode.setListID("CEF VATEX");

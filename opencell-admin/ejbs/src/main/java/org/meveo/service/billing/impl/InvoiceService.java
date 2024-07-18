@@ -222,6 +222,7 @@ import org.meveo.model.jobs.JobLauncherEnum;
 import org.meveo.model.order.Order;
 import org.meveo.model.ordering.OpenOrder;
 import org.meveo.model.payments.AccountOperation;
+import org.meveo.model.payments.AccountOperationStatus;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.MatchingAmount;
 import org.meveo.model.payments.MatchingStatusEnum;
@@ -267,6 +268,7 @@ import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
 import org.meveo.service.script.billing.TaxScriptService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.meveo.service.tax.TaxClassService;
 import org.meveo.service.tax.TaxMappingService;
 import org.w3c.dom.Node;
@@ -441,8 +443,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     @Inject
     private InvoiceAgregateService invoiceAgregateService;
-
-    /**
+	
+	@Inject
+	private AdvancedSettingsService advancedSettingsService;
+	
+	/**
      * folder for pdf .
      */
     private String PDF_DIR_NAME = "pdf";
@@ -4302,7 +4307,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
         
         if(invoice.getBillingRun()==null &&invoice.getInvoiceType() != null && !invoice.getInvoiceType().getCode().equals("ADV")) {
-        	applyAdvanceInvoice(invoice, checkAdvanceInvoice(invoice));
+	        Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance");
+	        applyAdvanceInvoice(invoice, checkAdvanceInvoice(invoice), allowUsingUnpaidAdvance != null ? allowUsingUnpaidAdvance : false);
         }
     }
 
@@ -7495,11 +7501,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 invoicesWithAdv.get(key).add(adv);
             }
         });
-       invoicesWithAdv.keySet().forEach(inv -> applyAdvanceInvoice(inv, invoicesWithAdv.get(inv)));
-       return null;
+	   Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance");
+	   invoicesWithAdv.keySet().forEach(inv -> applyAdvanceInvoice(inv, invoicesWithAdv.get(inv), allowUsingUnpaidAdvance != null ? allowUsingUnpaidAdvance : false));
+	   return null;
    }
-
-    public void applyAdvanceInvoice(Invoice invoice, List<Invoice> advInvoices) {
+	
+	public void applyAdvanceInvoice(Invoice invoice, List<Invoice> advInvoices, boolean allowUsingUnpaidAdvance) {
+		checkAllowUsingUnpaidAdvance(invoice, advInvoices, allowUsingUnpaidAdvance);
         BigDecimal invoiceBalance = invoice.getTransactionalInvoiceBalance();
         if (invoiceBalance != null && CollectionUtils.isNotEmpty(invoice.getLinkedInvoices())) {
             CommercialOrder orderInvoice = invoice.getCommercialOrder();
@@ -7862,5 +7870,46 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		}
 		update(invoice);
 	}
-
+	private void checkAllowUsingUnpaidAdvance(Invoice invoice, List<Invoice> advs, boolean allowUsingUnpaidAdvance) {
+		if(!allowUsingUnpaidAdvance) {
+			// in this case of invoice is DRAFT and the ADV is UNPAID and not link to ADV then we ignore the ADV
+			if(invoice.getStatus() == InvoiceStatusEnum.DRAFT) {
+				advs.removeIf(adv -> {
+					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);
+					boolean isAoExist = advAos.stream().anyMatch(ao -> ao.getStatus() == AccountOperationStatus.CLOSED);
+					if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID) {
+						if(CollectionUtils.isNotEmpty(advAos)) {
+							AccountOperation advAo = advAos.get(0);
+							if(isAoExist) {
+								cancelInvoiceAdvances(invoice, List.of(adv), true);
+								return true;
+							}
+						}
+					}else if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID || isAoExist) {
+						return true;
+					}
+					return false;
+				});
+			}
+		}else {
+			// the allow using unpaid advance is true
+			// if ADV is paid then the ADV will be attached to the invoice
+			advs.removeIf(adv -> {
+				if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID) {
+					return true;
+				}else if(invoice.getLinkedInvoices().stream().anyMatch(li -> li.getLinkedInvoiceValue().getId() == adv.getId())) {
+					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);
+					if(CollectionUtils.isNotEmpty(advAos)) {
+						AccountOperation advAo = advAos.get(0);
+						if(advAos.stream().anyMatch(ao -> ao.getStatus() == AccountOperationStatus.CLOSED)) {
+							cancelInvoiceAdvances(invoice, List.of(adv), true);
+							return true;
+						}
+					}
+				}
+				return false;
+			});
+		}
+		this.updateNoCheck(invoice);
+	}
 }

@@ -655,18 +655,14 @@ public class InvoiceUblHelper {
 		itemType.getClassifiedTaxCategories().add(taxCategoryType);
 		//InvoiceLine/ Item/ Description
 		Description description = objectFactorycommonBasic.createDescription();
+		
 		// InvoiceLine/ Item/ Name
 		oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
-		if(invoiceLine.getAccountingArticle() != null) {
-			String translatedAccountingArticle = translateAccountingArticle(invoiceLine.getAccountingArticle(), invoiceLanguageCode);
-			name.setValue(translatedAccountingArticle);
-			description.setValue(translatedAccountingArticle);
-		}else{
-			name.setValue(invoiceLine.getLabel());
-			description.setValue(invoiceLine.getLabel());
-		}
+		name.setValue(invoiceLine.getLabel());
+		description.setValue(invoiceLine.getLabel());
 		itemType.setName(name);
 		itemType.getDescriptions().add(description);
+
 		return itemType;
 	}
 	

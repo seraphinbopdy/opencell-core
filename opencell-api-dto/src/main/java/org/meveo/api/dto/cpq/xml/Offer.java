@@ -1,15 +1,13 @@
 package org.meveo.api.dto.cpq.xml;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 import org.meveo.api.dto.CustomFieldsDto;
-import org.meveo.api.dto.cpq.AttributeDTO;
-import org.meveo.api.dto.cpq.QuoteProductDTO;
 import org.meveo.model.cpq.offer.QuoteOffer;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -40,6 +38,14 @@ public class Offer {
 		this.customFields = customFields;
 	}
 	
+	
+
+	public void addProduct(Product product) {
+		if(products==null) {
+			products=new ArrayList<>();
+		}
+		products.add(product);
+	}
 	
 	/**
 	 * @return the productLine

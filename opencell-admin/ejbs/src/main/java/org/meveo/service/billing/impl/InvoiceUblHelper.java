@@ -177,20 +177,25 @@ public class InvoiceUblHelper {
 		BigDecimal amountWithoutTax = invoice.getAmountWithoutTax();
 		BigDecimal amountWithTax = invoice.getAmountWithTax();
 		BigDecimal totalPrepaidAmount = invoice.getLinkedInvoices().stream().filter(li -> li.getType() == InvoiceTypeEnum.ADVANCEMENT_PAYMENT).map(LinkedInvoice::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+		BigDecimal lineExtensionAmount = invoice.getInvoiceLines()
+												.stream()
+												.map(InvoiceLine::getAmountWithTax)
+												.reduce(BigDecimal.ZERO, BigDecimal::add);
+		BigDecimal payableAmount = invoice.getNetToPay();
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
 			setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
-			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax));
+			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
 			setBillingReference(invoice, invoiceXml);
 			setOrderReference(invoice, invoiceXml);
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
-			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax));
+			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
 			setBillingReferenceForInvoice(invoice, invoiceXml);
 		}
 		
@@ -1236,30 +1241,6 @@ public class InvoiceUblHelper {
 		return taxCategoryType;
 	}
 	
-	private static MonetaryTotalType setTaxExclusiveAmount(BigDecimal totalPrepaidAmount, String currency, BigDecimal amountWithoutTax, BigDecimal amountWithTax) {
-		MonetaryTotalType moneyTotalType = objectFactoryCommonAggrement.createMonetaryTotalType();
-		TaxInclusiveAmount taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
-		taxInclusiveAmount.setCurrencyID(currency);
-		taxInclusiveAmount.setValue(amountWithTax);
-		moneyTotalType.setTaxInclusiveAmount(taxInclusiveAmount);
-		
-		TaxExclusiveAmount taxExclusiveAmount = objectFactorycommonBasic.createTaxExclusiveAmount();
-		taxExclusiveAmount.setCurrencyID(currency);
-		taxExclusiveAmount.setValue(amountWithoutTax);
-		moneyTotalType.setTaxExclusiveAmount(taxExclusiveAmount);
-		
-		if(totalPrepaidAmount.compareTo(BigDecimal.ZERO) != 0){
-			PrepaidAmount prepaidAmount = objectFactorycommonBasic.createPrepaidAmount();
-			prepaidAmount.setCurrencyID(currency);
-			prepaidAmount.setValue(totalPrepaidAmount);
-			moneyTotalType.setPrepaidAmount(prepaidAmount);
-		}
-		
-		
-		return moneyTotalType;
-		
-	}
-	
 	private BillingReference setBillingReferenceForInvoice(org.meveo.model.billing.Invoice source, Invoice target) {
 		BillingReference billingReference = setBillingReference(source);
 		DocumentReferenceType documentReferenceType =  billingReference.getInvoiceDocumentReference();
@@ -1270,6 +1251,40 @@ public class InvoiceUblHelper {
 		
 		target.getBillingReferences().add(billingReference);
 		return billingReference;
+	}
+
+	private static MonetaryTotalType setTaxExclusiveAmount(BigDecimal totalPrepaidAmount, String currency, BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal lineExtensionAmount, BigDecimal payableAmount) {
+		MonetaryTotalType moneyTotalType = objectFactoryCommonAggrement.createMonetaryTotalType();
+		TaxInclusiveAmount taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
+		taxInclusiveAmount.setCurrencyID(currency);
+		taxInclusiveAmount.setValue(amountWithTax);
+		moneyTotalType.setTaxInclusiveAmount(taxInclusiveAmount);
+
+		TaxExclusiveAmount taxExclusiveAmount = objectFactorycommonBasic.createTaxExclusiveAmount();
+		taxExclusiveAmount.setCurrencyID(currency);
+		taxExclusiveAmount.setValue(amountWithoutTax);
+		moneyTotalType.setTaxExclusiveAmount(taxExclusiveAmount);
+		
+		LineExtensionAmount lineExtensionAmountType = objectFactorycommonBasic.createLineExtensionAmount();
+		lineExtensionAmountType.setCurrencyID(currency);
+		lineExtensionAmountType.setValue(lineExtensionAmount);
+		moneyTotalType.setLineExtensionAmount(lineExtensionAmountType);
+		
+		PayableAmount payableAmountType = objectFactorycommonBasic.createPayableAmount();
+		payableAmountType.setCurrencyID(currency);
+		payableAmountType.setValue(payableAmount);
+		moneyTotalType.setPayableAmount(payableAmountType);
+
+		if(totalPrepaidAmount.compareTo(BigDecimal.ZERO) != 0){
+			PrepaidAmount prepaidAmount = objectFactorycommonBasic.createPrepaidAmount();
+			prepaidAmount.setCurrencyID(currency);
+			prepaidAmount.setValue(totalPrepaidAmount);
+			moneyTotalType.setPrepaidAmount(prepaidAmount);
+		}
+
+
+		return moneyTotalType;
+
 	}
 	
 	private String translateAccountingArticle(AccountingArticle accountingArticle, String invoiceLanguageCode){

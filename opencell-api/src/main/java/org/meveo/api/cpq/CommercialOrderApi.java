@@ -1158,24 +1158,11 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
                 orderProduct = getOrderProductFromDto(orderProductDto, orderOffer);
                 newOrderProducts.add(orderProduct); 
             }
-            if (!hasExistingOrders) {
-                orderOffer.getProducts().addAll(newOrderProducts);
-            } else {
-                existencOrderProducts.retainAll(newOrderProducts);
-                for (OrderProduct qpNew : newOrderProducts) {
-                    int index = existencOrderProducts.indexOf(qpNew);
-                    if (index >= 0) {
-                        OrderProduct old = existencOrderProducts.get(index);
-                        old.update(qpNew);
-                    } else {
-                        existencOrderProducts.add(qpNew);
-                    }
-                }
-            }
+	        orderOffer.getProductswithoutDuplication().clear();
+	        orderOffer.getProductswithoutDuplication().addAll(newOrderProducts);
         }else if(orderProductDtos != null && orderProductDtos.isEmpty()) {
 	        orderOffer.getProductswithoutDuplication().clear();
         }
-		orderOffer.getProductswithoutDuplication().retainAll(existencOrderProducts);
 		return existencOrderProducts;
     }
 	 private void processOrderProduct(OrderProductDto orderProductDTO, OrderProduct q) {

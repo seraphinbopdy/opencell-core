@@ -301,6 +301,7 @@ public class InvoiceUblHelper {
 			startDate.setValue(toXmlDate(source.getStartDate()));
 			endDate.setValue(toXmlDate(source.getEndDate()));
 			periodType.setStartDate(startDate);
+			periodType.setEndDate(endDate);
 			VatDateCodeEnum vatDateCode = einvoiceSettingService.findEinvoiceSetting().getVatDateCode();
 			DescriptionCode descriptionCode = objectFactorycommonBasic.createDescriptionCode();
 			descriptionCode.setValue(String.valueOf(vatDateCode.getPaidToDays()));

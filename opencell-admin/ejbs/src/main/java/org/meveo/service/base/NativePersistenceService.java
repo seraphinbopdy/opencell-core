@@ -1106,6 +1106,7 @@ public class NativePersistenceService extends BaseService {
     public QueryBuilder getAggregateQuery(String tableName, PaginationConfiguration config, Long id, String extraCondition,
                                           String leftJoinClause) {
         tableName = addCurrentSchema(tableName);
+        config.setOrderings(new Object[]{});
 
         String fieldsToRetrieve = (config != null && config.getFetchFields() != null) ? retrieveFields(config.getFetchFields(), null) : "";
         if (!fieldsToRetrieve.isEmpty()) {

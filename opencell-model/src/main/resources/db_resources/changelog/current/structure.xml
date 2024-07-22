@@ -12851,5 +12851,14 @@ Meaning that advances won’t be available for further invoices."/>
             <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
         </insert>
     </changeSet>
+    <changeSet id="INTRD-22963_20240720" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+                public class RetryPaymentScript extends RetryRejectionPaymentScript {}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.RetryPaymentScript'</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>

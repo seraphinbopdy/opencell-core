@@ -195,6 +195,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         newCollectionPlan.setInitialCollectionPlan(oldCollectionPlan);
         newCollectionPlan.setLastAction(oldCollectionPlan.getLastAction());
         newCollectionPlan.setLastActionDate(oldCollectionPlan.getLastActionDate());
+        newCollectionPlan.setDaysOpen(abs((int) daysBetween(new Date(), newCollectionPlan.getStartDate())) + 1);
         create(newCollectionPlan);
         return newCollectionPlan;
     }
@@ -223,7 +224,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         collectionPlan.setTotalDunningLevels(policy.getTotalDunningLevels());
         collectionPlan.setStartDate(new Date());
         collectionPlan.setStatus(collectionPlanStatus);
-        collectionPlan.setDaysOpen(abs((int) daysBetween(new Date(), collectionPlan.getStartDate())));
+        collectionPlan.setDaysOpen(abs((int) daysBetween(new Date(), collectionPlan.getStartDate())) + 1);
         Optional.ofNullable(invoice.getRecordedInvoice())
                 .ifPresent(recordedInvoice -> collectionPlan.setBalance(recordedInvoice.getTransactionalUnMatchingAmount()));
 

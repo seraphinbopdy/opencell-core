@@ -1681,10 +1681,10 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         return billingRun;
     }
 
-    public void updateBillingRunJobExecution(Long billingRunId, JobExecutionResultImpl result) {
+    public BillingRun updateBillingRunJobExecution(Long billingRunId, JobExecutionResultImpl result) {
         BillingRun billingRun = billingRunService.findById(billingRunId);
         billingRun.addJobExecutions(result);
-        update(billingRun);
+        return update(billingRun);
     }
 
     public Filter createFilter(BillingRun billingRun, boolean invoicingV2) {

@@ -8,7 +8,6 @@ import static java.util.stream.Collectors.toSet;
 import static org.meveo.model.payments.PaymentMethodEnum.CARD;
 import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -245,7 +244,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             invoiceListId.add(collectionPlan.getRelatedInvoice().getId());
         }
         
-        List<Invoice> eligibleInvoice = dunningPolicyService.findEligibleInvoicesForPolicy(policy, invoiceListId);
+        List<Invoice> eligibleInvoice = dunningPolicyService.findEligibleInvoicesForPolicyWithInvoiceIds(policy, invoiceListId);
 
         if (eligibleInvoice != null && !eligibleInvoice.isEmpty()) {
             for (DunningCollectionPlan collectionPlan : collectionPlans) {
@@ -950,27 +949,22 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         dunningLevelInstance.setActions(actions);
     }
 
+    /**
+     * Update collection plan actions
+     * @param dunningLevelInstance Dunning level instance {@link DunningLevelInstance}
+     */
     private void updateCollectionPlanActions(DunningLevelInstance dunningLevelInstance) {
         if (dunningLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE) {
-
             DunningCollectionPlan collectionPlan = dunningLevelInstance.getCollectionPlan();
 
-            if (!dunningLevelInstance.getDunningLevel().isEndOfDunningLevel()) {
-
+            if (Boolean.FALSE.equals(dunningLevelInstance.getDunningLevel().isEndOfDunningLevel())) {
                 Integer currentDunningLevelSequence = collectionPlan.getCurrentDunningLevelSequence();
                 if (currentDunningLevelSequence == null) {
                     currentDunningLevelSequence = 0;
                 }
+
                 collectionPlan.setCurrentDunningLevelSequence(++currentDunningLevelSequence);
-
-                List<DunningActionInstance> lastLevelActions = dunningLevelInstance.getActions();
-                if (lastLevelActions != null && !lastLevelActions.isEmpty()) {
-                    collectionPlan.setLastAction(
-                        lastLevelActions.stream().sorted(Comparator.comparing(a -> a.getAuditable().getLastModified(), Comparator.reverseOrder())).findFirst().get().getCode());
-
-                    collectionPlan.setLastActionDate(new Date());
-                }
-
+                setDunningCollectionPlanLastAction(dunningLevelInstance, collectionPlan);
                 DunningLevelInstance nextLevelInstance = dunningLevelInstanceService.findByCurrentLevelSequence(collectionPlan);
                 String nextLevelAction = null;
                 if (nextLevelInstance != null && nextLevelInstance.getActions() != null && !nextLevelInstance.getActions().isEmpty()) {
@@ -993,8 +987,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     collectionPlan.setNextActionDate(DateUtils.addDaysToDate(collectionPlan.getStartDate(), days));
                 }
             } else {
-                collectionPlan.setNextAction(null);
-                collectionPlan.setNextActionDate(null);
+                setDunningCollectionPlanLastAction(dunningLevelInstance, collectionPlan);
                 collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED));
                 collectionPlan.setNextAction(null);
                 collectionPlan.setNextActionDate(null);
@@ -1004,6 +997,25 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             }
 
             dunningCollectionPlanService.update(collectionPlan);
+        }
+    }
+
+    /**
+     * Set Dunning collection plan last action
+     * @param dunningLevelInstance Dunning level instance {@link DunningLevelInstance}
+     * @param collectionPlan Dunning collection plan {@link DunningCollectionPlan}
+     */
+    private static void setDunningCollectionPlanLastAction(DunningLevelInstance dunningLevelInstance, DunningCollectionPlan collectionPlan) {
+        List<DunningActionInstance> lastLevelActions = dunningLevelInstance.getActions();
+        if (lastLevelActions != null && !lastLevelActions.isEmpty()) {
+            String levelActionCode = lastLevelActions
+                                        .stream()
+                                        .sorted(Comparator.comparing(a -> a.getAuditable().getLastModified(), Comparator.reverseOrder()))
+                                        .findFirst()
+                                        .get()
+                                        .getCode();
+            collectionPlan.setLastAction(levelActionCode);
+            collectionPlan.setLastActionDate(new Date());
         }
     }
 

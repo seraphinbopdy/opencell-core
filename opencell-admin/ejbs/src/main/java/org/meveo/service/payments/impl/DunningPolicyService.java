@@ -40,6 +40,8 @@ import org.meveo.service.billing.impl.InvoiceService;
 @Stateless
 public class DunningPolicyService extends PersistenceService<DunningPolicy> {
 
+    private static final String DUNNING_POLICY_NOT_FOUND = "Policy does not exists";
+
     @Inject
     private InvoiceService invoiceService;
 
@@ -66,9 +68,15 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
+    /**
+     * Find a dunning policy by name
+     * @param policyName Policy name
+     * @return Dunning policy {@link DunningPolicy}
+     */
     public DunningPolicy findByName(String policyName) {
         try {
-            return getEntityManager().createNamedQuery("DunningPolicy.findByName", DunningPolicy.class)
+            return getEntityManager()
+                    .createNamedQuery("DunningPolicy.findByName", DunningPolicy.class)
                     .setParameter("policyName", policyName)
                     .getSingleResult();
         } catch (NoResultException noResultException) {
@@ -78,67 +86,100 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         }
     }
 
+    /**
+     * Find eligible invoices for a dunning policy
+     * @param policy Dunning policy
+     * @return List of invoices {@link Invoice}
+     */
     public List<Invoice> findEligibleInvoicesForPolicy(DunningPolicy policy) {
+        List<Invoice> invoices = new ArrayList<>();
         policy = refreshOrRetrieve(policy);
-        if (policy == null) {
-            throw new BusinessException("Policy does not exists");
-        }
-        if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
-            try {
-                String query = "SELECT inv FROM Invoice inv WHERE (inv.paymentStatus = 'UNPAID' OR inv.paymentStatus = 'PPAID' OR inv.paymentStatus = 'PENDING') AND inv.dunningCollectionPlanTriggered = false AND "
-                        + buildPolicyRulesFilter(policy.getDunningPolicyRules());
-                return (List<Invoice>) invoiceService.executeSelectQuery(query, null);
-            } catch (Exception exception) {
-                throw new BusinessException(exception.getMessage());
+
+        if (policy != null) {
+            if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
+                try {
+                    String query = "SELECT inv FROM Invoice inv WHERE (inv.paymentStatus = 'UNPAID' OR inv.paymentStatus = 'PPAID' OR inv.paymentStatus = 'PENDING') AND inv.dunningCollectionPlanTriggered = false AND "
+                            + buildPolicyRulesFilter(policy.getDunningPolicyRules());
+                    invoices = (List<Invoice>) invoiceService.executeSelectQuery(query, null);
+                } catch (Exception exception) {
+                    throw new BusinessException(exception.getMessage());
+                }
             }
+        } else {
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
-        return EMPTY_LIST;
+
+        return invoices;
     }
-    
-    public List<Invoice> findEligibleInvoicesForPolicy(DunningPolicy policy,List<Long> invoiceIds) {
+
+    /**
+     * Find eligible invoices for a dunning policy with invoice ids
+     * @param policy Dunning policy
+     * @param invoiceIds List of invoice ids
+     * @return List of invoices {@link Invoice}
+     */
+    public List<Invoice> findEligibleInvoicesForPolicyWithInvoiceIds(DunningPolicy policy,List<Long> invoiceIds) {
+        List<Invoice> invoices = new ArrayList<>();
         policy = refreshOrRetrieve(policy);
-        if (policy == null) {
-            throw new BusinessException("Policy does not exists");
-        }
-        
-        if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
-            try {
-                String query = "SELECT inv FROM Invoice inv WHERE inv.id in ("+ invoiceIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") and ( " + buildPolicyRulesFilter(policy.getDunningPolicyRules()) +" )";
-                return (List<Invoice>) invoiceService.executeSelectQuery(query, null);
-            } catch (Exception exception) {
-                throw new BusinessException(exception.getMessage());
+
+        if (policy != null) {
+            if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
+                try {
+                    String query = "SELECT inv FROM Invoice inv WHERE inv.id in ("+ invoiceIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") and ( " + buildPolicyRulesFilter(policy.getDunningPolicyRules()) +" )";
+                    invoices = (List<Invoice>) invoiceService.executeSelectQuery(query, null);
+                } catch (Exception exception) {
+                    throw new BusinessException(exception.getMessage());
+                }
             }
+        } else {
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
-        return EMPTY_LIST;
+
+        return invoices;
     }
-    
+
+    /**
+     * Check if policy has rules
+     * @param policy Dunning policy
+     * @return true if policy has rules, false if not
+     */
     public boolean existPolicyRulesCheck(DunningPolicy policy) {
         policy = refreshOrRetrieve(policy);
-        if (policy == null) {
-            throw new BusinessException("Policy does not exists");
+        if (policy != null) {
+            return (policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty());
+        } else {
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
-        return (policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty());
     }
-    
+
+    /**
+     * Check if policy has levels
+     * @param policy
+     * @param invoice
+     * @return
+     */
     public boolean minBalanceTriggerCurrencyCheck(DunningPolicy policy, Invoice invoice) {
 		boolean minBalanceTriggerCurrencyBool;
         policy = refreshOrRetrieve(policy);
         invoice = invoiceService.refreshOrRetrieve(invoice);
-        if (policy == null) {
-            throw new BusinessException("Policy does not exists");
-        }
 
-    	if(policy.getMinBalanceTriggerCurrency() != null && policy.getMinBalanceTriggerCurrency().getCurrencyCode() != null) {
-    		TradingCurrency tradingCurrency = tradingCurrencyService.findById(invoice.getTradingCurrency().getId());
-    		 if(tradingCurrency != null && policy.getMinBalanceTriggerCurrency().getCurrencyCode().equals(tradingCurrency.getCurrencyCode())) {
-    			 minBalanceTriggerCurrencyBool = true;
-    		 }else {
-    			 minBalanceTriggerCurrencyBool = false;
-    		 }
-    	}else {
-    		minBalanceTriggerCurrencyBool = true;
-    	}
-        return minBalanceTriggerCurrencyBool;
+        if (policy != null) {
+            if(policy.getMinBalanceTriggerCurrency() != null && policy.getMinBalanceTriggerCurrency().getCurrencyCode() != null) {
+                TradingCurrency tradingCurrency = tradingCurrencyService.findById(invoice.getTradingCurrency().getId());
+
+                if(tradingCurrency != null && policy.getMinBalanceTriggerCurrency().getCurrencyCode().equals(tradingCurrency.getCurrencyCode())) {
+                    minBalanceTriggerCurrencyBool = true;
+                } else {
+                    minBalanceTriggerCurrencyBool = false;
+                }
+            } else {
+                minBalanceTriggerCurrencyBool = true;
+            }
+
+            return minBalanceTriggerCurrencyBool;
+        } else {
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
+        }
     }
     
     public boolean minBalanceTriggerCheck(DunningPolicy policy, Invoice invoice) {
@@ -146,7 +187,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         policy = refreshOrRetrieve(policy);
         invoice = invoiceService.refreshOrRetrieve(invoice);
         if (policy == null) {
-            throw new BusinessException("Policy does not exists");
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
 
     	if(policy.getMinBalanceTrigger() != null) {
@@ -399,7 +440,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
 
     /**
      * Check if priority already taken by an other policy
-     * @param priority
+     * @param priority Priority to check
      * @return true if priority already taken, false if not
      */
     public boolean checkIfSamePriorityExists(int priority) {
@@ -412,7 +453,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
     public List<Invoice> findEligibleInvoicesToTriggerReminder(DunningPolicy policy) {
         policy = refreshOrRetrieve(policy);
         if (policy == null) {
-            throw new BusinessException("Policy does not exists");
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
         if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
             try {

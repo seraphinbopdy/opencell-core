@@ -20,6 +20,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountryS
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditNoteTypeCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditedQuantity;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentityCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CustomizationID;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Department;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Description;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionCode;
@@ -324,6 +325,10 @@ public class InvoiceUblHelper {
 		note.setValue(source.getComment());
 		target.getNotes().add(note);
 		
+		CustomizationID customizationID = objectFactorycommonBasic.createCustomizationID();
+		customizationID.setValue("urn:cen.eu:en16931:2017#conformant#urn:ubl.eu:1p0:extended-ctc-fr");
+		target.setCustomizationID(customizationID);
+
 		setTaxCurrencyCodeAndDocumentCurrencyCode(objectFactorycommonBasic, source, target);
 		
 		DueDate dueDate = objectFactorycommonBasic.createDueDate();

@@ -12997,7 +12997,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="code" value="org.meveo.service.script.RetryPaymentScript"/>
 			<column name="script">
 				<![CDATA[package org.meveo.service.script;
-				public class RetryPaymentScript extends Script {}]]>
+				public class RetryPaymentScript extends RetryRejectionPaymentScript {}]]>
 			</column>
 			<column name="created" valueDate="${db.current.time}" />
 			<column name="creator" value="applicationInitializer" />

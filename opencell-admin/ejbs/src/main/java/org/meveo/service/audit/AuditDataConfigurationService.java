@@ -189,9 +189,13 @@ public class AuditDataConfigurationService extends PersistenceService<AuditDataC
             boolean isUpdate = auditDataConfig.getActions() == null || auditDataConfig.getActions().toUpperCase().contains(AuditCrudActionEnum.UPDATE.name());
             boolean isDelete = auditDataConfig.getActions() == null || auditDataConfig.getActions().toUpperCase().contains(AuditCrudActionEnum.DELETE.name());
 
-            em.createNamedStoredProcedureQuery("AuditDataConfiguration.recreateDataAuditTrigger").setParameter("tableName", auditDataHierarchy.getTableName()).setParameter("fields", dbFields)
-                .setParameter("actions", auditDataConfig.getActions()).setParameter("preserveField", auditDataHierarchy.getParentIdDbColumn()).setParameter("saveEvenDiffIsEmpty", auditDataHierarchy.getSaveEvenDiffIsEmpty())
-                .execute();
+            em.createNamedStoredProcedureQuery("AuditDataConfiguration.recreateDataAuditTrigger")
+                    .setParameter("tableName", auditDataHierarchy.getTableName())
+                    .setParameter("fields", dbFields)
+                    .setParameter("actions", auditDataConfig.getActions())
+                    .setParameter("preserveField", null)
+                    .setParameter("saveEvenDiffIsEmpty", false)
+                    .execute();
 
             // Create triggers for any @JoinTable and @OneToMany with Cascade=All/Persist/Merge
             for (AuditDataHierarchy fieldAuditDataHierarchy : auditDataHierarchy.getRelatedEntities()) {
@@ -216,8 +220,12 @@ public class AuditDataConfigurationService extends PersistenceService<AuditDataC
                 }
 
                 if (fieldAuditDataHierarchy.getRelatedEntities().isEmpty()) {
-                    em.createNamedStoredProcedureQuery("AuditDataConfiguration.recreateDataAuditTrigger").setParameter("tableName", fieldAuditDataHierarchy.getTableName()).setParameter("fields", null)
-                        .setParameter("actions", fieldActions).setParameter("preserveField", fieldAuditDataHierarchy.getParentIdDbColumn()).setParameter("saveEvenDiffIsEmpty", fieldAuditDataHierarchy.getSaveEvenDiffIsEmpty())
+                    em.createNamedStoredProcedureQuery("AuditDataConfiguration.recreateDataAuditTrigger")
+                            .setParameter("tableName", fieldAuditDataHierarchy.getTableName())
+                            .setParameter("fields", null)
+                            .setParameter("actions", fieldActions)
+                            .setParameter("preserveField", null)
+                            .setParameter("saveEvenDiffIsEmpty", false)
                         .execute();
 
                 } else {

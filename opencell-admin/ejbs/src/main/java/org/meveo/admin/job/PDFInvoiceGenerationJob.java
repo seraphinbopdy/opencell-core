@@ -27,6 +27,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
@@ -80,7 +81,7 @@ public class PDFInvoiceGenerationJob extends Job {
         customFieldNbRuns.setFieldType(CustomFieldTypeEnum.LONG);
         customFieldNbRuns.setValueRequired(false);
         customFieldNbRuns.setDefaultValue("-1");
-        customFieldNbRuns.setGuiPosition("tab:Configuration:0;field:0");
+        customFieldNbRuns.setGuiPosition("tab:Configuration:0;fieldGroup:Configuration:0;field:0");
         result.put(CF_NB_RUNS, customFieldNbRuns);
 
         CustomFieldTemplate customFieldNbWaiting = new CustomFieldTemplate();
@@ -91,9 +92,14 @@ public class PDFInvoiceGenerationJob extends Job {
         customFieldNbWaiting.setFieldType(CustomFieldTypeEnum.LONG);
         customFieldNbWaiting.setValueRequired(false);
         customFieldNbWaiting.setDefaultValue("0");
-        customFieldNbWaiting.setGuiPosition("tab:Configuration:0;field:1");
+        customFieldNbWaiting.setGuiPosition("tab:Configuration:0;fieldGroup:Configuration:0;field:1");
         result.put(Job.CF_WAITING_MILLIS, customFieldNbWaiting);
 
+        result.put(CF_NB_PUBLISHERS,
+            CustomFieldTemplateUtils.buildCF(CF_NB_PUBLISHERS, resourceMessages.getString("jobExecution.nbPublishers"), CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Configuration:0;field:2", APPLIES_TO));
+        result.put(CF_BATCH_SIZE, CustomFieldTemplateUtils.buildCF(CF_BATCH_SIZE, resourceMessages.getString("jobExecution.batchSize"), CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Configuration:0;field:3",
+            "100", true, APPLIES_TO));
+        
         CustomFieldTemplate customFieldInvToProcess = new CustomFieldTemplate();
         final String cfInvToProcessCode = "invoicesToProcess";
 
@@ -110,22 +116,9 @@ public class PDFInvoiceGenerationJob extends Job {
         customFieldInvToProcess.setFieldType(CustomFieldTypeEnum.LIST);
         customFieldInvToProcess.setValueRequired(true);
         customFieldInvToProcess.setListValues(invoicesToProcessValues);
-        customFieldInvToProcess.setGuiPosition("tab:Configuration:0;field:2");
+        customFieldInvToProcess.setGuiPosition("tab:Configuration:0;field:4");
         result.put(cfInvToProcessCode, customFieldInvToProcess);
         
-
-        CustomFieldTemplate batchSize = new CustomFieldTemplate();
-        batchSize.setCode(CF_BATCH_SIZE);
-        batchSize.setAppliesTo(APPLIES_TO);
-        batchSize.setActive(true);
-        batchSize.setDescription(resourceMessages.getString("jobExecution.batchSize"));
-        batchSize.setFieldType(CustomFieldTypeEnum.LONG);
-        batchSize.setValueRequired(false);
-        batchSize.setDefaultValue("1");
-        batchSize.setMaxValue(10000L);
-        batchSize.setGuiPosition("tab:Configuration:0;field:3");
-        result.put(batchSize.getCode(), batchSize);
-
         return result;
     }
 }

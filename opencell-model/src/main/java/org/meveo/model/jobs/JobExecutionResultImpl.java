@@ -35,6 +35,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.QueryHint;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -64,7 +65,7 @@ import org.meveo.model.NotifiableEntity;
         @NamedQuery(name = "JobExecutionResult.purgeHistoryByDateAndJobInstance", query = "delete JobExecutionResultImpl hist WHERE hist.startDate<=:date and hist.jobInstance=:jobInstance"),
         @NamedQuery(name = "JobExecutionResult.updateProgress", query = "update JobExecutionResultImpl set endDate=:endDate, nbItemsToProcess=:nbItemsToProcess, nbItemsCorrectlyProcessed=:nbItemsCorrectlyProcessed, nbItemsProcessedWithError=:nbItemsProcessedWithError, nbItemsProcessedWithWarning=:nbItemsProcessedWithWarning, report=:report, status=:status where id=:id"),
         @NamedQuery(name = "JobExecutionResult.cancelUnfinishedJobsByNode", query = "update JobExecutionResultImpl je set je.status='SHUTDOWN', je.endDate=NOW(), je.report=CONCAT('Job cancelled due to the server was shutdown in the middle of job execution/n', je.report) where je.status = 'RUNNING' and je.nodeName=:nodeName"),
-        @NamedQuery(name = "JobExecutionResult.listUnfinishedJobs", query = "select jr from JobExecutionResultImpl jr where jr.id in (select distinct (case when je.parentJobExecutionResult is null then je.id else je.parentJobExecutionResult end) from JobExecutionResultImpl je where je.status = 'RUNNING' or je.status = 'SHUTDOWN')") })
+        @NamedQuery(name = "JobExecutionResult.listUnfinishedJobs", query = "select jr from JobExecutionResultImpl jr where jr.id in (select distinct (case when je.parentJobExecutionResult is null then je.id else je.parentJobExecutionResult end) from JobExecutionResultImpl je where je.status = 'RUNNING' or je.status = 'SHUTDOWN')", hints = {@QueryHint(name = "org.hibernate.readOnly", value = "true")}) })
 
 public class JobExecutionResultImpl extends CFEntity {
 

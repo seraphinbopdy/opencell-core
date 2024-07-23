@@ -935,7 +935,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
 
         int cptOccDebit = 0, cptOccCredit = 0, cptPartialAllowed = 0;
         AccountOperation accountOperationForPartialMatching = null;
-
+		operationIds.add(aoToMatchLast);
         for (Long id : operationIds) {
             AccountOperation accountOperation = accountOperationService.findById(id);
             if (accountOperation == null) {
@@ -957,10 +957,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             }
             if (accountOperation.getTransactionCategory() == OperationCategoryEnum.DEBIT) {
                 cptOccDebit++;
+	            amoutCredit = amoutCredit.add(accountOperation.getUnMatchingAmount());
             }
             if (accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT) {
                 cptOccCredit++;
-                amoutCredit = amoutCredit.add(accountOperation.getUnMatchingAmount());
             }
         }
         if (cptOccCredit == 0) {

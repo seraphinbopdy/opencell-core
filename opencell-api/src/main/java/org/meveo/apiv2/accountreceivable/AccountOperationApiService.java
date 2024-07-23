@@ -279,7 +279,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 			matchingResult.setPartialMatchingOcc(partialMatchingOcc);
 			if (CollectionUtils.isNotEmpty(aos)) {
 			    TradingCurrency theFirstTradingCurrency = aos.get(0).getTransactionalCurrency();
-				for (AccountOperation debitAO : debitAOs) {
+				var debitAOIds = debitAOs.stream().map(AccountOperation::getId).collect(Collectors.toList());
 					for (AccountOperation creditAO : creditAOs) {
 						if (!theFirstTradingCurrency.getId().equals(creditAO.getTransactionalCurrency().getId())) {
 							throw new BusinessApiException(resourceMessages.getString("accountOperation.error.sameCurrency"));
@@ -287,7 +287,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 						if (creditAO.getMatchingStatus() != MatchingStatusEnum.O && creditAO.getMatchingStatus() != MatchingStatusEnum.P) {
 							continue;
 						}
-						MatchingReturnObject unitaryResult = matchingCodeService.matchOperations(customer.getId(),	customer.getCode(), List.of(creditAO.getId(), debitAO.getId()), creditAO.getId(), creditAO.getAmountForUnmatching());
+						MatchingReturnObject unitaryResult = matchingCodeService.matchOperations(customer.getId(),	customer.getCode(), debitAOIds, creditAO.getId(), creditAO.getAmountForUnmatching());
 
 						if (matchingResult.getPartialMatchingOcc() != null) {
 							partialMatchingOcc.addAll(matchingResult.getPartialMatchingOcc());
@@ -295,7 +295,6 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 
 						matchingResult.setOk(unitaryResult.isOk());
 					}
-				}
 			}
 
 			if (partialMatchingOcc.isEmpty()) {

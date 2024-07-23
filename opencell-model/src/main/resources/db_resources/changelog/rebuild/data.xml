@@ -13166,4 +13166,39 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
 		</insert>
 	</changeSet>
+
+	<changeSet id="#INTRD-21018_20240723" author="ZakariaB">
+		<insert tableName="meveo_script_instance">
+			<column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+			<column name="code" value="org.meveo.service.script.EnterLitigation"/>
+			<column name="script">
+				<![CDATA[package org.meveo.service.script;
+ public class EnterLitigation extends Script {}]]>
+			</column>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="src_type" value="JAVA"/>
+			<column name="description" value="This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason."/>
+			<column name="description_i18n">
+				<![CDATA[{"ENG":"This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason.", "FRA":"Cette action passera inconditionnellement les factures liées au rejet de paiement en litige, avec le motif fourni."}]]>
+			</column>
+			<column name="script_instance_cat_id"
+					valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"/>
+		</insert>
+
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="code" value="litigationReason"/>
+			<column name="description_i18n" value='{"FRA":"Motif de mise en litige","ENG":"Litigation reason"}'/>
+			<column name="mandatory" valueNumeric="1"/>
+			<column name="class_name" value="java.lang.String"/>
+			<column name="default_value" value=""/>
+			<column name="values_separator" value="\|"/>
+			<column name="collection" valueNumeric="0"/>
+			<column name="script_instance_id"
+					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.EnterLitigation')"/>
+		</insert>
+	</changeSet>
 </databaseChangeLog>

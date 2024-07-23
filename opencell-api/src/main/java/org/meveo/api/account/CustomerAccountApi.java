@@ -398,7 +398,11 @@ public class CustomerAccountApi extends AccountEntityApi {
 			boolean isFirst = true;
 
 			for (PaymentMethodDto paymentMethodDto : postData.getPaymentMethods()) {
-				if (isFirst) {
+                if(paymentMethodDto.getPaymentMethodType() == null) {
+                    throw new MissingParameterException("methodOfPayment.paymentMethodType");
+                }
+
+                if (isFirst) {
 					paymentMethodDto.setPreferred(true);
 					isFirst = false;
 				}

@@ -147,7 +147,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
         currentUserProvider.reestablishAuthentication(lastCurrentUser);
         List<List<Invoice>> invoicesByBA = generateInvoices(billingRun, invoicingItemsList, jobInstanceId, isFullAutomatic, billingCycle, result);
         if(!CollectionUtils.isEmpty(invoicesByBA)) {
-        	validateInvoices(invoicesByBA);
             writeInvoicingData(billingRun, isFullAutomatic, invoicesByBA, billingCycle);
         }
         return new AsyncResult<>("OK");
@@ -194,7 +193,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
         getEntityManager().flush();//to be able to update ILs
         getEntityManager().clear();
         log.info("======== UPDATING ILs ========");
-        invoicesbyBA.stream().forEach(invoices->invoices.stream().forEach(i ->i.getSubCategoryInvoiceAgregate().stream().forEach(sca->updateInvoiceLines(i,billingRun,sca))));
+        invoicesbyBA.forEach(invoices -> invoices.forEach(invoice
+                -> invoice.getSubCategoryInvoiceAgregate().forEach(sca
+                -> updateInvoiceLines(invoice, billingRun, sca))));
+        validateInvoices(invoicesbyBA);
     }
     private void assignNumberAndCreate(BillingRun billingRun, boolean isFullAutomatic, List<Invoice> invoices, BillingCycle billingCycle) {
         if(!isFullAutomatic) {

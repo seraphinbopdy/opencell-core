@@ -941,9 +941,10 @@ public class AccountOperationService extends PersistenceService<AccountOperation
     }
 	
 	public List<AccountOperation> findByMatchingId(Long matchingCodeId) {
-		return getEntityManager().createQuery("SELECT ao FROM AccountOperation ao join ao.matchingAmounts mas " +
+		return getEntityManager().createQuery("SELECT ao FROM AccountOperation ao left join ao.matchingAmounts mas " +
+						"left join mas.matchingCode mc " +
 						"WHERE  ao.matchingStatus in (org.meveo.model.payments.MatchingStatusEnum.L, org.meveo.model.payments.MatchingStatusEnum.P) " +
-						"and mas.id in (:matchingCodeId) " +
+						"and mc.id in (:matchingCodeId) " +
 						"and ao.type = 'P'", AccountOperation.class)
 				.setParameter("matchingCodeId", List.of(matchingCodeId))
 				.getResultList();

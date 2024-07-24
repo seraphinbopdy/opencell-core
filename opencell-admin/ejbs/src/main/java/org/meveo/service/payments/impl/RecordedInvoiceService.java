@@ -273,15 +273,16 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
      * @throws BusinessException business exception.
      */
     public RecordedInvoice generateRecordedInvoice(Invoice invoice, OCCTemplate givenOccTemplate) throws InvoiceExistException, ImportInvoiceException, BusinessException {
-        return generateRecordedInvoice(invoice, givenOccTemplate, false);
+        return generateRecordedInvoice(invoice, givenOccTemplate, true);
     }
 	
-	public RecordedInvoice generateRecordedInvoice(Invoice invoice, OCCTemplate givenOccTemplate, boolean usingInvoiceBalance) throws InvoiceExistException, ImportInvoiceException, BusinessException {
+	public RecordedInvoice generateRecordedInvoice(Invoice invoice, OCCTemplate givenOccTemplate, boolean checkingInvoiceBalance) throws InvoiceExistException, ImportInvoiceException, BusinessException {
 		if (invoice.getInvoiceType().isInvoiceAccountable() && VALIDATED.equals(invoice.getStatus())) {
 			
 			List<RecordedInvoiceCatAgregate> listRecordedInvoiceCatAgregate = new ArrayList<>();
 			
-			boolean useInvoiceBalance = invoice.getInvoiceBalance()!=null && !InvoiceTypeService.DEFAULT_ADVANCE_CODE.equals(invoice.getInvoiceType().getCode());
+			boolean useInvoiceBalance = invoice.getInvoiceBalance()!=null && !InvoiceTypeService.DEFAULT_ADVANCE_CODE.equals(invoice.getInvoiceType().getCode()) && checkingInvoiceBalance;
+			
 			
 			BigDecimal remainingAmountWithoutTaxForRecordedIncoice = invoice.getAmountWithoutTax();
 			BigDecimal remainingAmountWithTaxForRecordedIncoice = useInvoiceBalance?invoice.getInvoiceBalance() : invoice.getAmountWithTax();
@@ -439,7 +440,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 					createRecordedInvoice(remainingAmountWithoutTaxForRecordedIncoice, remainingTransactionalAmountWithoutTaxForRecordedIncoice,
 							remainingAmountWithTaxForRecordedIncoice, remainingTransactionalAmountWithTaxForRecordedIncoice,
 							remainingAmountTaxForRecordedIncoice, remainingTransactionalAmountTaxForRecordedIncoice,
-							usingInvoiceBalance ? invoice.getInvoiceBalance() : invoice.getNetToPay(), invoice.getTransactionalNetToPay(), invoice, occTemplate, occTransactionalTemplate, true);
+							invoice.getNetToPay(), invoice.getTransactionalNetToPay(), invoice, occTemplate, occTransactionalTemplate, true);
 			
 			// Link the recorded invoice to subscription
 			recordedInvoice.setSubscription(invoice.getSubscription());

@@ -60,7 +60,7 @@ public class XMLInvoiceGenerationJobBean extends IteratorBasedJobBean<Long> {
 
     @TransactionAttribute(TransactionAttributeType.NEVER)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, this::generateXml, null, null, null);
+        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::generateXml,this::generateXmlBatch, null, null, null);
     }
 
     /**
@@ -106,6 +106,17 @@ public class XMLInvoiceGenerationJobBean extends IteratorBasedJobBean<Long> {
 
         Invoice invoice = invoiceService.findById(invoiceId);
         invoiceService.produceInvoiceXml(invoice, null, true);
+    }
+    
+    /**
+     * Generate XML files for a list of invoice
+     * 
+     * @param invoiceIds Invoice ids to create XML for
+     * @param jobExecutionResult Job execution result
+     */
+    private void generateXmlBatch(List<Long> invoiceIds, JobExecutionResultImpl jobExecutionResult) {
+
+        invoiceService.produceInvoiceXmls(invoiceIds, true);
     }
 
     private List<Long> fetchInvoiceIdsToProcess(List<InvoiceStatusEnum> statusList, Long billingRunId) {

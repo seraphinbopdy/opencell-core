@@ -12860,5 +12860,11 @@ Meaning that advances won’t be available for further invoices."/>
             <where>code = 'org.meveo.service.script.RetryPaymentScript'</where>
         </update>
     </changeSet>
-
+    
+    <changeSet id="#INTRD-24602_20240722" author="AndriusKarpavicius">
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl_val where customfieldtemplate_id in (select id from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob'))</sql>
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl_mcols where cft_id in (select id from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob'))</sql>
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob')</sql>
+    </changeSet>
+    
 </databaseChangeLog>

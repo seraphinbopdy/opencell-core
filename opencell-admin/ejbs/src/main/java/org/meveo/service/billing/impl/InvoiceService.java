@@ -2392,12 +2392,27 @@ public class InvoiceService extends PersistenceService<Invoice> {
         Invoice invoice = findById(invoiceId);
         produceInvoiceXml(invoice, draftWalletOperationsId, true);
     }
+    
+    /**
+     * Produce xml for invoices 
+     *
+     * @param invoiceIds A list of invoice's id
+     * @param rtBillingProcess invoicing process : true old process using RT, false : new process using invoiceLines
+     * @throws BusinessException business exception
+     */
+    public void produceInvoiceXmls(List<Long> invoiceIds, boolean rtBillingProcess) throws BusinessException {
+        List<Invoice> invoices = findByIds(invoiceIds);
+        for (Invoice invoice : invoices) {
+            produceInvoiceXml(invoice, null, rtBillingProcess);
+        }
+    }
 
     /**
      * Produce invoice's XML file and update invoice record in DB.
      *
      * @param invoice Invoice to produce XML for
      * @param draftWalletOperationsId Wallet operations (ids) to include in a draft invoice
+     * @param rtBillingProcess invoicing process : true old process using RT, false : new process using invoiceLines
      * @return Update invoice entity
      * @throws BusinessException business exception
      */
@@ -2418,6 +2433,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * Produce invoice's XML file.
      *
      * @param invoice Invoice
+     * @param rtBillingProcess invoicing process : true old process using RT, false : new process using invoiceLines
      * @throws BusinessException business exception
      */
     public void produceInvoiceXmlNoUpdate(Invoice invoice, boolean rtBillingProcess) throws BusinessException {

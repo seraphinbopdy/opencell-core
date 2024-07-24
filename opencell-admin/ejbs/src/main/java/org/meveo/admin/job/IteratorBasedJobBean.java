@@ -196,7 +196,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
      * 
      * @param jobExecutionResult Job execution result
      * @param jobInstance Job instance
-     * @param initMainNodeAndRetrieveDataFunction A function to initialize the data to process
+     * @param initMainNodeAndRetrieveDataFunction A function to initialize the data to process on a main node
+     * @param initWorkerNodeFunction A function to initialize a worker node before processing data on a worker node
      * @param processSingleItemFunction A function to process a single item. Will be executed in its own transaction
      * @param processMultipleItemFunction A function to process multiple items. Will be executed in its own transaction.
      * @param hasMoreFunction A function to determine if the are more data to process even though this job run has completed. Optional.

@@ -65,6 +65,7 @@ public class XMLInvoiceCreator extends PersistenceService<Invoice> {
     /**
      * @param invoice invoice used to create xml
      * @param isVirtual true/false (true for Quote/order)
+     * @param rtBillingProcess invoicing process : true old process using RT, false : new process using invoiceLines
      * @return generated xml file
      * @throws BusinessException business exception
      */

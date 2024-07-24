@@ -217,7 +217,7 @@ public class InvoiceLineAggregationService implements Serializable {
             fieldToFetch = new ArrayList<>(
                 asList("string_agg_long(a.id) as rated_transaction_ids", "billingAccount.id as billing_account__id", "SUM(a.quantity) as quantity", unitAmountAggregationFunction + " as unit_amount_without_tax",
                     "SUM(a.amountWithoutTax) as sum_without_tax", "SUM(a.amountWithTax) as sum_with_tax", "offerTemplate.id as offer_id", usageDateAggregationFunction + " as usage_date", "min(a.startDate) as start_date",
-                    "max(a.endDate) as end_date", "taxPercent as tax_percent", "tax.id as tax_id", "orderInfo.productVersion.id as product_version_id", "accountingArticle.id as article_id", "count(a.id) as rt_count", "seller.id as seller_id"));
+                    "max(a.endDate) as end_date", "taxPercent as tax_percent", "tax.id as tax_id", "accountingArticle.id as article_id", "count(a.id) as rt_count", "seller.id as seller_id"));
             if (aggregationConfiguration.getDiscountAggregation() == DiscountAggregationModeEnum.NO_AGGREGATION) {
 	            fieldToFetch.add("discountedRatedTransaction as discounted_ratedtransaction_id");
 	            fieldToFetch.add("discountPlanType as discount_plan_type");
@@ -353,7 +353,6 @@ public class InvoiceLineAggregationService implements Serializable {
         groupBy.add("accountingArticle.id");
         groupBy.add("tax.id");
         groupBy.add("taxPercent");
-        groupBy.add("orderInfo.productVersion.id");
         groupBy.add("seller.id");
         if (aggregationConfiguration.getDiscountAggregation() == DiscountAggregationModeEnum.NO_AGGREGATION) {
 	        groupBy.add("discountedRatedTransaction");

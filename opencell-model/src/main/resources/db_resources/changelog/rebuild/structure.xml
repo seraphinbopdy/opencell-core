@@ -2199,7 +2199,7 @@
             <column name="source_account_operation_id" type="bigint" />
             <column name="payment_gateway_id" type="bigint" />
             <column name="rejection_actions_status" type="varchar(30)" />
-            <column name="payment_requests" type="bigint" />
+            <column name="payment_requests" type="bigint" defaultValue="0" />
             <column name="origin_call_for_payment_id" type="bigint" />
             <column name="origin_payment_id" type="bigint" />
         </createTable>
@@ -20952,6 +20952,7 @@
     <changeSet id="INTRD-22955_20240521" author="ZBariki" />
     <changeSet id="INTRD-22963_20240720" author="ZakariaB" />
     <changeSet id="#INTRD-24602_20240722" author="AndriusKarpavicius" />
+    <changeSet id="INTRD-24619_20240724" author="ZakariaB" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

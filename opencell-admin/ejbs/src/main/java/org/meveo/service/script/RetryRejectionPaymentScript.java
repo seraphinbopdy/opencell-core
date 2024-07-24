@@ -68,10 +68,12 @@ public class RetryRejectionPaymentScript extends Script {
                                 .stream()
                                 .map(Invoice::getId)
                                 .collect(toList());
+                        recordedInvoice.setLitigationReason("Maximum payment retries reached.");
                         invoiceService.getEntityManager()
                                 .createNamedQuery("Invoice.sendToLitigation")
                                 .setParameter("ids", invoices)
                                 .executeUpdate();
+                        recordedInvoiceService.update(recordedInvoice);
                     }
                 }
             } else if (paymentRequests == 1) {

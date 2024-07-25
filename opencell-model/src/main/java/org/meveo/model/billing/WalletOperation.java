@@ -365,7 +365,6 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
     /**
      * Additional rating parameter
      */
-    @Size(max = 4000)
     @Column(name = "parameter_extra")
     private String parameterExtra;
 

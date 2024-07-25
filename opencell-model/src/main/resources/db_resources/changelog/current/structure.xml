@@ -12866,5 +12866,19 @@ Meaning that advances won’t be available for further invoices."/>
         <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl_mcols where cft_id in (select id from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob'))</sql>
         <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob')</sql>
     </changeSet>
+
+    <changeSet id="INTRD-24619_20240724" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"<p> This action will set up the invoices linked to the rejected payment for a new payment request.<br> Invoice’s payment request count will be increment by 1, and collection date will be set to “rejection date + retry delay“.</p><p>If the number of payment requests on the invoice is already greater that the maximum number of retries, you can choose to send the invoices to litigation, or do nothing (and wait for dunning to trigger, if you implemented it).</p>", "FRA":"<p>Cette action représentera pour paiement les factures liées au paiement rejeté.<br>Le nombre de demande de paiement des factures sera augmenté de 1, et la date de mise en paiement sera “date de rejet + délai de rejet“.</p> <p>Si le nombre de demandes de paiement sur la facture est déjà supérieur au nombre maximum de rejeux, vous pouvez décider de passer les factures en litige, ou ne rien faire (et attendre le déclenchement de la relance, si vous l’avez implémenté).</p>"}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.RetryPaymentScript'</where>
+        </update>
+        <update tableName="meveo_script_parameter">
+            <column name="default_value" value="false"/>
+            <where>code = 'litigationAfterRetry'</where>
+        </update>
+        <addDefaultValue tableName="ar_account_operation" columnName="payment_requests" defaultValue="0" />
+    </changeSet>
     
 </databaseChangeLog>

@@ -461,13 +461,12 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 		ServiceInstance serviceInstance = new ServiceInstance();
 		serviceInstance.setCode(product.getCode());
 		serviceInstance.setQuantity(quantity);
-		serviceInstance.setSubscriptionDate(subscription.getSubscriptionDate());
+		serviceInstance.setSubscriptionDate(deliveryDate != null ? deliveryDate : serviceInstance.getSubscriptionDate());
 		if(!AgreementDateSettingEnum.MANUAL.equals(product.getAgreementDateSetting())) {
 			serviceInstance.setEndAgreementDate(subscription.getEndAgreementDate());
 		}
 		serviceInstance.setRateUntilDate(subscription.getEndAgreementDate());
-		ProductVersion productVersion = productService.getCurrentPublishedVersion(serviceInstance.getCode(),
-						deliveryDate != null ? deliveryDate : serviceInstance.getSubscriptionDate())
+		ProductVersion productVersion = productService.getCurrentPublishedVersion(serviceInstance.getCode(), serviceInstance.getSubscriptionDate())
 				.orElseThrow(() -> new BusinessException("No product version found for subscription code: " + subscription.getCode()));
 		serviceInstance.setProductVersion(productVersion);
 		serviceInstance.setOrderProduct(orderProduct);

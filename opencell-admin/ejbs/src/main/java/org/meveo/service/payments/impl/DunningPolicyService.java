@@ -341,34 +341,42 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
     	return dunningLevels.stream().anyMatch(policyLevel -> policyLevel.getDunningLevel().isReminder());
 	}
 
+    /**
+     * Check if invoice is eligible for dunning
+     * @param invoice Invoice
+     * @param policy Dunning policy
+     * @param dayOverDue Days overdue
+     * @return true if invoice is eligible for dunning, false if not
+     */
 	private boolean invoiceEligibilityCheck(Invoice invoice, DunningPolicy policy, Integer dayOverDue) {
         boolean dayOverDueAndThresholdCondition = false;
-        invoice = invoiceService.refreshOrRetrieve(invoice);
-        Date today;
-        Date dueDate;
+
         try {
-            today = simpleDateFormat.parse(simpleDateFormat.format(new Date()));
-            dueDate = simpleDateFormat.parse(simpleDateFormat.format(invoice.getDueDate()));
+            List<DunningCollectionPlan> collectionPlansByInvoiceId = collectionPlanService.findByInvoiceId(invoice.getId());
+
+            if (collectionPlansByInvoiceId.isEmpty()) {
+                // Refresh or retrieve invoice
+                invoice = invoiceService.refreshOrRetrieve(invoice);
+                // Get the current date and due date
+                Date today = simpleDateFormat.parse(simpleDateFormat.format(new Date()));
+                Date dueDate = simpleDateFormat.parse(simpleDateFormat.format(invoice.getDueDate()));
+                // Calculate the difference between the current date and due date
+                long daysDiff = TimeUnit.DAYS.convert((today.getTime() - dueDate.getTime()), TimeUnit.MILLISECONDS);
+                // Get the minimum balance
+                BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
+                        .map(RecordedInvoice::getUnMatchingAmount)
+                        .orElse(BigDecimal.ZERO);
+                // Check if the invoice overdue days is less than or equal to the policy overdue days
+                // And the minimum balance is greater than or equal to the policy minimum balance trigger
+                dayOverDueAndThresholdCondition =
+                        (dayOverDue.longValue() <= daysDiff && minBalance.doubleValue() >= policy.getMinBalanceTrigger()) &&
+                                minBalance.compareTo(BigDecimal.ZERO) > 0;
+            }
         } catch (ParseException exception) {
             throw new BusinessException(exception);
         }
 
-        long daysDiff = TimeUnit.DAYS.convert((today.getTime() - dueDate.getTime()), TimeUnit.MILLISECONDS);
-
-        if (policy.getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE)) {
-            BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
-                    .map(RecordedInvoice::getUnMatchingAmount)
-                    .orElse(BigDecimal.ZERO);
-            dayOverDueAndThresholdCondition = (dayOverDue.longValue() <= daysDiff) && minBalance.compareTo(BigDecimal.ZERO) > 0;
-        } else {
-            BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
-                                            .map(RecordedInvoice::getUnMatchingAmount)
-                                            .orElse(BigDecimal.ZERO);
-            dayOverDueAndThresholdCondition =
-                    (dayOverDue.longValue() <= daysDiff && minBalance.doubleValue() >= policy.getMinBalanceTrigger()) && minBalance.compareTo(BigDecimal.ZERO) > 0;
-        }
-
-        return dayOverDueAndThresholdCondition && collectionPlanService.findByInvoiceId(invoice.getId()).isEmpty();
+        return dayOverDueAndThresholdCondition;
     }
 
     public List<DunningPolicy> availablePoliciesForSwitch(Invoice invoice) {

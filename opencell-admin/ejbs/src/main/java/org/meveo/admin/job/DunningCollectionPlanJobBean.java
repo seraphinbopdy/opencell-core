@@ -20,14 +20,14 @@ import java.util.stream.Collectors;
 public class DunningCollectionPlanJobBean extends BaseJobBean {
 
     @Inject
-    private DunningPolicyService policyService;
+    private DunningPolicyService dunningPolicyService;
 
     @Inject
     private AccountOperationService accountOperationService;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        List<DunningPolicy> policies = policyService.getPolicies(true);
+        List<DunningPolicy> policies = dunningPolicyService.getPolicies(true);
         jobExecutionResult.setNbItemsToProcess(policies.size());
 
         if (policies != null && !policies.isEmpty()) {
@@ -42,7 +42,7 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
                     .collect(Collectors.toList());
             try {
                 for (DunningPolicy policy : sortedPolicies) {
-                    List<Invoice> eligibleInvoice = policyService.findEligibleInvoicesForPolicy(policy);
+                    List<Invoice> eligibleInvoice = dunningPolicyService.findEligibleInvoicesForPolicy(policy);
                     if (eligibleInvoice != null && !eligibleInvoice.isEmpty()) {
                         List<Invoice> invoicesWithDebitTransaction = new ArrayList<>();
                         eligibleInvoice.forEach(invoice -> {
@@ -57,7 +57,7 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
                     }
                 }
 
-                policyService.processEligibleInvoice(eligibleInvoicesByPolicy, jobExecutionResult);
+                dunningPolicyService.processEligibleInvoice(eligibleInvoicesByPolicy, jobExecutionResult);
                 jobExecutionResult.addNbItemsCorrectlyProcessed(sortedPolicies.size() - jobExecutionResult.getNbItemsProcessedWithError());
             } catch (Exception exception) {
                 jobExecutionResult.addErrorReport(exception.getMessage());

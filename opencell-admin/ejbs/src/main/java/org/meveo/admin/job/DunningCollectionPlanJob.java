@@ -26,22 +26,6 @@ public class DunningCollectionPlanJob extends Job {
     private FinanceSettingsService financeSettingsService;
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    protected JobExecutionResultImpl execute(JobExecutionResultImpl result, JobInstance jobInstance) throws BusinessException {
-        checkActivateDunning(result);
-        dunningCollectionPlanJobBean.execute(result, jobInstance);
-        return result;
-    }
-
-    public void checkActivateDunning(JobExecutionResultImpl result) {
-        FinanceSettings lastOne = financeSettingsService.getFinanceSetting();
-        if (lastOne != null && !lastOne.isActivateDunning()) {
-            result.registerError("The action is not possible, GlobalSettings.activateDunning is disabled");
-            throw new BusinessApiException("The action is not possible, GlobalSettings.activateDunning is disabled");
-        }
-    }
-
-    @Override
     public JobCategoryEnum getJobCategory() {
         return MeveoJobCategoryEnum.DUNNING;
     }
@@ -49,5 +33,25 @@ public class DunningCollectionPlanJob extends Job {
     @Override
     public Class getTargetEntityClass(JobInstance jobInstance) {
         return DunningCollectionPlan.class;
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    protected JobExecutionResultImpl execute(JobExecutionResultImpl result, JobInstance jobInstance) throws BusinessException {
+        checkActivateDunning(result);
+        dunningCollectionPlanJobBean.execute(result, jobInstance);
+        return result;
+    }
+
+    /**
+     * Check if dunning is activated
+     * @param result Job execution result
+     */
+    public void checkActivateDunning(JobExecutionResultImpl result) {
+        FinanceSettings lastOne = financeSettingsService.getFinanceSetting();
+        if (lastOne != null && !lastOne.isActivateDunning()) {
+            result.registerError("The action is not possible, GlobalSettings.activateDunning is disabled");
+            throw new BusinessApiException("The action is not possible, GlobalSettings.activateDunning is disabled");
+        }
     }
 }

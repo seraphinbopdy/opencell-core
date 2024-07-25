@@ -13236,7 +13236,7 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
 
-    <changeSet id="INTRD-22955_20240521" author="ZBariki">
+    <changeSet id="INTRD-22955_20240521" author="ZBariki" failOnError="false">
         <update tableName="meveo_script_instance">
             <column name="script">
                 <![CDATA[package org.meveo.service.script;

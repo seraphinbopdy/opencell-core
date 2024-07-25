@@ -637,7 +637,7 @@ public class MediationApiService {
             BigDecimal amountTax = BigDecimal.ZERO;
             for (WalletOperation walletOperation : walletOperations) {
                 if (returnWalletOperationDetails) {
-                    walletOperation = walletOperationService.refreshOrRetrieve(walletOperation);
+                    walletOperation = walletOperationService.retrieveIfNotManaged(walletOperation);
                     WalletOperationDto walletOperationDto = new WalletOperationDto(walletOperation, walletOperation.getAccountingArticle());
                     result.getWalletOperations().add(walletOperationDto);
 

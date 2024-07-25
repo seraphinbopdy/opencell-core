@@ -15,38 +15,18 @@
  * For more information on the GNU Affero General Public License, please consult
  * <https://www.gnu.org/licenses/agpl-3.0.en.html>.
  */
+package org.meveo.admin.exception;
 
-package org.meveo.apiv2.customaction;
+import javax.ejb.ApplicationException;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
-import org.meveo.apiv2.models.Resource;
+@ApplicationException(rollback=true)
+public class ConflictCustomActionException extends BusinessException {
+	private static final long serialVersionUID = 1L;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
+	public ConflictCustomActionException(String message) {
+		super(message);
+	}
 
-@Path("/customAction")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
-public interface CustomActionResource {
-
-	/**
-	 * Execute a custom action
-	 *
-	 * @param entityType entity Type
-	 * @param actionCode action Code
-	 * @param customActionDto custom action Dto
-	 * @return ActionStatus
-	 */
-	@POST
-	@Operation(summary = "Execute a custom action", tags = { "custom action" })
-	@Path("/{entityType}/{actionCode}/execution")
-	Response execute(@PathParam("entityType") String entityType, @PathParam("actionCode") String actionCode, @Parameter(required = true) Resource customActionDto);
 
 }

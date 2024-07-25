@@ -398,7 +398,7 @@ public class EntityCustomActionApi extends BaseApi {
 			try {
 				entityCode = (IEntity) entityCustomActionService.findByEntityClassAndCodeOnly(entityClass, customActionDto.getCode());
 			} catch (Exception e) {
-				throw new ElementNotFoundException(resourceMessages.getString("message.customAction.entity.noCode", appliesTo));
+				throw new BusinessException(resourceMessages.getString("message.customAction.entity.noCode", appliesTo));
 			}
 			if (Objects.nonNull(entityId)) {
 				Optional<Object> value = ReflectionUtils.getPropertyValueOrNull(entityId, "code");

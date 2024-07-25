@@ -22,15 +22,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.exception.ConflictCustomActionException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.InvalidPermissionException;
 import org.meveo.admin.exception.InvalidScriptException;
+import org.meveo.admin.util.ResourceBundle;
 import org.meveo.api.dto.EntityCustomActionDto;
 import org.meveo.api.dto.ScriptInstanceErrorDto;
 import org.meveo.api.exception.BusinessApiException;
@@ -38,6 +42,7 @@ import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
+import org.meveo.apiv2.models.Resource;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.CustomFieldEntity;
@@ -67,6 +72,9 @@ public class EntityCustomActionApi extends BaseApi {
 
     @Inject
     private EntityCustomActionService entityCustomActionService;
+    
+    @Inject
+    private ResourceBundle resourceMessages;
 
     public List<ScriptInstanceErrorDto> create(EntityCustomActionDto actionDto, String appliesTo)
             throws MissingParameterException, EntityAlreadyExistsException, MeveoApiException, BusinessException {
@@ -346,21 +354,72 @@ public class EntityCustomActionApi extends BaseApi {
     @SuppressWarnings("rawtypes")
     public String execute(String actionCode, String appliesTo, String entityCode)
             throws MeveoApiException, InvalidScriptException, ElementNotFoundException, InvalidPermissionException, BusinessException {
-        EntityCustomAction action = entityCustomActionService.findByCodeAndAppliesTo(actionCode, appliesTo);
+
+    	Class entityClass = getEntityClass(appliesTo);
+        
+        IEntity entity = (IEntity) entityCustomActionService.findByEntityClassAndCode(entityClass, entityCode);
+
+        return executeScriptAction(actionCode, appliesTo, entity);
+    }
+    
+    /**
+     * 
+     * @param actionCode Entity custom action code.
+     * @param appliesTo the type of entity to which the CFT applies. eg OfferTemplate, ServiceTemplate.
+     * @param customActionDto
+     * @return GUI redirection or null.
+     * @throws MeveoApiException
+     * @throws InvalidScriptException
+     * @throws ElementNotFoundException
+     * @throws InvalidPermissionException
+     * @throws BusinessException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     */
+    @SuppressWarnings("rawtypes")
+	public String execute(String actionCode, String appliesTo, Resource customActionDto) throws MeveoApiException,
+			InvalidScriptException, ElementNotFoundException, InvalidPermissionException, BusinessException, IllegalArgumentException, IllegalAccessException {
+
+		if (StringUtils.isBlank(customActionDto.getId()) && StringUtils.isBlank(customActionDto.getCode())) {
+			throw new BusinessException(resourceMessages.getString("message.customAction.idNorCode"));
+		}
+
+		Class entityClass = getEntityClass(appliesTo);
+		IEntity entityId = null;
+		if (StringUtils.isNotBlank(customActionDto.getId())) {
+			entityId = (IEntity) entityCustomActionService.findByEntityClassAndId(entityClass, customActionDto.getId());
+			if (Objects.isNull(entityId)) {
+				throw new ElementNotFoundException(resourceMessages.getString("message.customAction.entity.idNotfound", appliesTo, customActionDto.getId()));
+			}
+		}
+
+		IEntity entityCode = null;
+		if (StringUtils.isNotBlank(customActionDto.getCode())) {
+			try {
+				entityCode = (IEntity) entityCustomActionService.findByEntityClassAndCodeOnly(entityClass, customActionDto.getCode());
+			} catch (Exception e) {
+				throw new ElementNotFoundException(resourceMessages.getString("message.customAction.entity.noCode", appliesTo));
+			}
+			if (Objects.nonNull(entityId)) {
+				Optional<Object> value = ReflectionUtils.getPropertyValueOrNull(entityId, "code");
+				if (!entityId.equals(entityCode)) {
+					throw new ConflictCustomActionException(resourceMessages.getString("message.customAction.conflicting.idAndCode", appliesTo, customActionDto.getId(), (value.isPresent())? value.get() : null, customActionDto.getCode()));
+				}
+			} else if (Objects.isNull(entityCode)) {
+				throw new ElementNotFoundException(resourceMessages.getString("message.customAction.entity.codeNotfound", appliesTo, customActionDto.getCode()));
+			}
+		}
+
+		IEntity entity = (Objects.nonNull(entityId)) ? entityId : entityCode;
+
+		return executeScriptAction(actionCode, appliesTo, entity);
+	}
+
+	private String executeScriptAction(String actionCode, String appliesTo, IEntity entity) {
+		EntityCustomAction action = entityCustomActionService.findByCodeAndAppliesTo(actionCode, appliesTo);
         if (action == null) {
             throw new EntityDoesNotExistsException(EntityCustomAction.class, actionCode + "/" + appliesTo);
         }
-
-        Set<Class<?>> cfClasses = ReflectionUtils.getClassesAnnotatedWith(CustomFieldEntity.class);
-        Class entityClass = null;
-        for (Class<?> clazz : cfClasses) {
-            if (appliesTo.equals(clazz.getAnnotation(CustomFieldEntity.class).cftCodePrefix())) {
-                entityClass = clazz;
-                break;
-            }
-        }
-
-        IEntity entity = (IEntity) entityCustomActionService.findByEntityClassAndCode(entityClass, entityCode);
 
         Map<String, Object> context = new HashMap<String, Object>();
 
@@ -371,6 +430,18 @@ public class EntityCustomActionApi extends BaseApi {
         }
 
         return null;
-    }
+	}
+
+	private Class getEntityClass(String appliesTo) {
+		Set<Class<?>> cfClasses = ReflectionUtils.getClassesAnnotatedWith(CustomFieldEntity.class);
+        Class entityClass = null;
+        for (Class<?> clazz : cfClasses) {
+            if (appliesTo.equals(clazz.getAnnotation(CustomFieldEntity.class).cftCodePrefix())) {
+                entityClass = clazz;
+                break;
+            }
+        }
+		return entityClass;
+	}
 
 }

@@ -10384,7 +10384,22 @@
 					"name": "POST"
 				}
 			]
-		 }
+		 },
+          {
+            "name": "Api V2 CustomAction",
+            "ownerManagedAccess": false,
+            "displayName": "",
+            "attributes": {},
+            "_id": "93c5cffa-9854-44d2-83ad-db745f5c1d10",
+            "uris": [
+              "/api/rest/v2/customAction/"
+            ],
+            "scopes": [
+              {
+                "name": "POST"
+              }
+            ]
+          }
         ],
         "policies": [
           {

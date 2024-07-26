@@ -3492,7 +3492,7 @@
             <column name="adjusted_rated_tx" type="bigint" />
             <column name="order_number" type="varchar(100)" />
             <column name="rating_unit_description" type="varchar(20)" />
-            <column name="parameter_extra" type="varchar" />
+            <column name="parameter_extra" type="varchar(4000)" />
             <column name="start_date" type="datetime" />
             <column name="end_date" type="datetime" />
             <column name="subscription_id" type="bigint" />
@@ -4121,7 +4121,7 @@
                 <constraints nullable="true" />
             </column>
             <column name="order_number" type="varchar(100)" />
-            <column name="parameter_extra" type="varchar" />
+            <column name="parameter_extra" type="varchar(4000)" />
             <column name="raw_amount_without_tax" type="numeric(23, 12)" />
             <column name="raw_amount_with_tax" type="numeric(23, 12)" />
             <column name="invoice_sub_category_id" type="bigint" />

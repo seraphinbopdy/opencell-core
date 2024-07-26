@@ -406,6 +406,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     /**
      * Additional parameter used in rating
      */
+    @Size(max = 4000)
     @Column(name = "parameter_extra")
     private String parameterExtra;
 

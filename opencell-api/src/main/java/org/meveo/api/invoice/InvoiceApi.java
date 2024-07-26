@@ -609,10 +609,11 @@ public class InvoiceApi extends BaseApi {
                }
             }
         }
+		List<Invoice> advList = invoice.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV")).map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
+	    invoiceService.checkIfAllAdvArePaid(invoice, advList);
 	    serviceSingleton.validateAndAssignInvoiceNumber(invoiceId, refreshExchangeRate);
         Boolean brGenerateAO = ofNullable(invoice.getBillingRun()).map(BillingRun::getGenerateAO).orElse(false);
         if(brGenerateAO || generateAO) {
-	        List<Invoice> advList = invoice.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV")).map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
 	        if(advList.isEmpty()) {
 		        invoiceService.generateRecordedInvoiceAO(invoice.getId());
 	        }else{

@@ -79,16 +79,20 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
+import javax.enterprise.inject.New;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
+import javax.ws.rs.BadRequestException;
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -138,6 +142,7 @@ import org.meveo.apiv2.billing.BasicInvoice;
 import org.meveo.apiv2.billing.InvoiceLineRTs;
 import org.meveo.apiv2.billing.InvoiceLinesToReplicate;
 import org.meveo.apiv2.billing.RejectReasonInput;
+import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.NumberUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -227,6 +232,7 @@ import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.AccountOperationStatus;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.MatchingAmount;
+import org.meveo.model.payments.MatchingCode;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.MatchingTypeEnum;
 import org.meveo.model.payments.OCCTemplate;
@@ -457,6 +463,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	@Inject
 	private AdvancedSettingsService advancedSettingsService;
 	
+	@Inject
+	private MethodCallingUtils methodCallingUtils;
 	/**
      * folder for pdf .
      */
@@ -7946,7 +7954,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		RecordedInvoice recordedInvoice = recordedInvoiceService.generateRecordedInvoice(invoice, null, false);
 		update(invoice);
 		// check if the user want to close the ADV
-		Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("autoCloseAdvanceAfterInvoiceValidation");
+		Boolean autoCloseAdvanceAfterInvoiceValidation = (Boolean) advancedSettingsService.getParameter("autoCloseAdvanceAfterInvoiceValidation");
+		Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance");
 		// for each adv we will get the Ao from the adv and copy to a new AO and link to the ADV
 		// and after we will unmatch the old AO from ADV and matched with the invoice
 		advs.forEach(adv -> {
@@ -7954,9 +7963,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.PAID) {
 				List<AccountOperation> advAo = accountOperationService.listByInvoice(adv);
 				advAo.forEach(ao -> {
-					List<AccountOperation> paymentAo = accountOperationService.findByMatchingId(ao.getId());
+					Set<Long> amountCodeIds = ao.getMatchingAmounts().stream().map(MatchingAmount::getMatchingCode).map(MatchingCode::getId).collect(Collectors.toSet());
+					List<AccountOperation> paymentAo = accountOperationService.findByMatchingId(amountCodeIds);
 					paymentAo.forEach(pao -> {
-						generateAoAndPaymentForUsedAndPaidAdv(adv, pao, recordedInvoice.getId(), ao, allowUsingUnpaidAdvance);
+						generateAoAndPaymentForUsedAndPaidAdv(adv, pao, recordedInvoice.getId(), ao, autoCloseAdvanceAfterInvoiceValidation);
 					});
 				});
 			}
@@ -7966,12 +7976,15 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	
 	private void generateAoAndPaymentForUsedAndPaidAdv(Invoice invoice, AccountOperation ao, Long recordInvoiceId, AccountOperation advAccountOperation, Boolean allowUsingUnpaidAdvance){
 				if(ao instanceof  Payment) {
+					List<Long> aoIdsToClosed = new ArrayList<>();
+					aoIdsToClosed.add(advAccountOperation.getId());
 					Payment paymentAo = (Payment) ao;
 					// unmatch the old AO from ADV
 					matchingCodeService.unmatchingOperationAccount(paymentAo);
 					// creation for a new Payment for the ADV
 					Payment newAo = copyAndCreateNewPayment(paymentAo, invoice.getId(), "PAY_ADV");
 					accountOperationService.create(newAo);
+					aoIdsToClosed.add(newAo.getId());
 					// match the old AO from ADV to new AO of the invoice
 					Long idCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getId();
 					String codeCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getCode();
@@ -7980,17 +7993,26 @@ public class InvoiceService extends PersistenceService<Invoice> {
 						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoiceId)), paymentAo.getId(), paymentAo.getUnMatchingAmount());
 						// matching the new PAY AO to the ADV AO
 						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(advAccountOperation.getId())), newAo.getId(), newAo.getUnMatchingAmount());
-						AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", invoice.getBillingAccount().getCustomerAccount(), paymentAo.getUnMatchingAmount(), new Date());
-						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());
+						if(allowUsingUnpaidAdvance) {
+							AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", invoice.getBillingAccount().getCustomerAccount(), paymentAo.getUnMatchingAmount(), new Date());
+							matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());
+							aoIdsToClosed.add(closedAdv.getId());
+							newAo.setStatus(AccountOperationStatus.CLOSED);
+							closedAdv.setStatus(AccountOperationStatus.CLOSED);
+							advAccountOperation.setStatus(AccountOperationStatus.CLOSED);
+							
+							// close status for AO INV_ADV, PAY_ADV, CLOSED_ADV
+							/*accountOperationService.getEntityManager().createQuery("update AccountOperation ao set ao.status = :status where ao.id in(:aoIds)")
+									.setParameter("aoIds", aoIdsToClosed)
+									.setParameter("status", AccountOperationStatus.CLOSED).executeUpdate();*/
+						}
 						
 					} catch (Exception e) {
 						log.error("error while matching the operation for ao id : " + ao.getId(), e);
 						throw new BusinessException(e);
 					}
-					// create CLOSED_ADV if the ADV AO has unmatching amount
-					if(allowUsingUnpaidAdvance) {
-						ao.setMatchingStatus(MatchingStatusEnum.C);
-					}
+					
+					
 				}
 				
 			
@@ -8015,9 +8037,15 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		return newAo;
 	}
 	
-	private void createClosedAdvAndMatchWithAdvAo(CustomerAccount customerAccount, BigDecimal unMatchingAmount, Payment advPayment) throws Exception {
-		AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", customerAccount, unMatchingAmount, new Date());
-		matchingCodeService.matchOperations(customerAccount.getId(), customerAccount.getCode(), new ArrayList<>(List.of(closedAdv.getId())), advPayment.getId(), advPayment.getUnMatchingAmount());
+	
+	public void checkIfAllAdvArePaid(Invoice invoice, List<Invoice> advs){
+		// check if advs has one adv with payment status is UNPAID
+		List<Invoice> unpaidAdvs = advs.stream().filter(adv -> adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID).collect(Collectors.toList());
+		if(CollectionUtils.isNotEmpty(unpaidAdvs)) {
+			methodCallingUtils.callMethodInNewTx(() -> cancelInvoiceAdvances(invoice, unpaidAdvs, true));
+			String advsNumber = unpaidAdvs.stream().map(Invoice::getInvoiceNumber).collect(Collectors.joining(","));
+			throw new BusinessApiException("validation fails “Unpaid/closed advance {{"+advsNumber+"}} cannot be used. It will be removed from the invoice.“");
+		}
 	}
 }
 

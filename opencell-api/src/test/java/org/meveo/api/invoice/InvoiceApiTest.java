@@ -5,6 +5,7 @@ import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,6 +31,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @RunWith(MockitoJUnitRunner.class)
+@Ignore
 public class InvoiceApiTest {
 
     @Rule

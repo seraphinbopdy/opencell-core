@@ -41,6 +41,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -78,16 +79,20 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
+import javax.enterprise.inject.New;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
+import javax.ws.rs.BadRequestException;
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -95,6 +100,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -136,6 +142,7 @@ import org.meveo.apiv2.billing.BasicInvoice;
 import org.meveo.apiv2.billing.InvoiceLineRTs;
 import org.meveo.apiv2.billing.InvoiceLinesToReplicate;
 import org.meveo.apiv2.billing.RejectReasonInput;
+import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.NumberUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -222,13 +229,18 @@ import org.meveo.model.jobs.JobLauncherEnum;
 import org.meveo.model.order.Order;
 import org.meveo.model.ordering.OpenOrder;
 import org.meveo.model.payments.AccountOperation;
+import org.meveo.model.payments.AccountOperationStatus;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.MatchingAmount;
+import org.meveo.model.payments.MatchingCode;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.MatchingTypeEnum;
+import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.model.securityDeposit.SecurityDeposit;
@@ -261,12 +273,15 @@ import org.meveo.service.order.OrderService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.MatchingCodeService;
+import org.meveo.service.payments.impl.OCCTemplateService;
+import org.meveo.service.payments.impl.OtherCreditAndChargeService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
 import org.meveo.service.script.billing.TaxScriptService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.meveo.service.tax.TaxClassService;
 import org.meveo.service.tax.TaxMappingService;
 import org.w3c.dom.Node;
@@ -388,6 +403,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     @Inject
     private UserAccountService userAccountService;
+	
+	@Inject
+	private OtherCreditAndChargeService otherCreditAndChargeService;
 
     @Inject
     @PDFGenerated
@@ -441,8 +459,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     @Inject
     private InvoiceAgregateService invoiceAgregateService;
-
-    /**
+	
+	@Inject
+	private AdvancedSettingsService advancedSettingsService;
+	
+	@Inject
+	private MethodCallingUtils methodCallingUtils;
+	/**
      * folder for pdf .
      */
     private String PDF_DIR_NAME = "pdf";
@@ -4318,7 +4341,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
         
         if(invoice.getBillingRun()==null &&invoice.getInvoiceType() != null && !invoice.getInvoiceType().getCode().equals("ADV")) {
-        	applyAdvanceInvoice(invoice, checkAdvanceInvoice(invoice));
+	        Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance");
+	        applyAdvanceInvoice(invoice, checkAdvanceInvoice(invoice), allowUsingUnpaidAdvance != null ? allowUsingUnpaidAdvance : false);
         }
     }
 
@@ -7511,11 +7535,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 invoicesWithAdv.get(key).add(adv);
             }
         });
-       invoicesWithAdv.keySet().forEach(inv -> applyAdvanceInvoice(inv, invoicesWithAdv.get(inv)));
-       return null;
+	   Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance");
+	   invoicesWithAdv.keySet().forEach(inv -> applyAdvanceInvoice(inv, invoicesWithAdv.get(inv), allowUsingUnpaidAdvance != null ? allowUsingUnpaidAdvance : false));
+	   return null;
    }
-
-    public void applyAdvanceInvoice(Invoice invoice, List<Invoice> advInvoices) {
+	
+	public void applyAdvanceInvoice(Invoice invoice, List<Invoice> advInvoices, boolean allowUsingUnpaidAdvance) {
+		checkAllowUsingUnpaidAdvance(invoice, advInvoices, allowUsingUnpaidAdvance);
         BigDecimal invoiceBalance = invoice.getTransactionalInvoiceBalance();
         if (invoiceBalance != null && CollectionUtils.isNotEmpty(invoice.getLinkedInvoices())) {
             CommercialOrder orderInvoice = invoice.getCommercialOrder();
@@ -7878,5 +7904,149 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		}
 		update(invoice);
 	}
-
+	private void checkAllowUsingUnpaidAdvance(Invoice invoice, List<Invoice> advs, boolean allowUsingUnpaidAdvance) {
+		if(!allowUsingUnpaidAdvance) {
+			// in this case of invoice is DRAFT and the ADV is UNPAID and not link to ADV then we ignore the ADV
+			if(invoice.getStatus() == InvoiceStatusEnum.DRAFT) {
+				advs.removeIf(adv -> {
+					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);
+					boolean isAoExist = advAos.stream().anyMatch(ao -> ao.getStatus() == AccountOperationStatus.CLOSED);
+					if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID) {
+						if(CollectionUtils.isNotEmpty(advAos)) {
+							AccountOperation advAo = advAos.get(0);
+							if(isAoExist) {
+								cancelInvoiceAdvances(invoice, List.of(adv), true);
+								return true;
+							}
+						}
+					}else if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID || isAoExist) {
+						return true;
+					}
+					return false;
+				});
+			}
+		}else {
+			// the allow using unpaid advance is true
+			// if ADV is paid then the ADV will be attached to the invoice
+			advs.removeIf(adv -> {
+				if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID) {
+					return true;
+				}else if(invoice.getLinkedInvoices().stream().anyMatch(li -> li.getLinkedInvoiceValue().getId() == adv.getId())) {
+					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);
+					if(CollectionUtils.isNotEmpty(advAos)) {
+						AccountOperation advAo = advAos.get(0);
+						if(advAos.stream().anyMatch(ao -> ao.getStatus() == AccountOperationStatus.CLOSED)) {
+							cancelInvoiceAdvances(invoice, List.of(adv), true);
+							return true;
+						}
+					}
+				}
+				return false;
+			});
+		}
+		this.updateNoCheck(invoice);
+	}
+	@JpaAmpNewTx
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void generateAoFromAdv(Invoice invoice, List<Invoice> advs) throws ImportInvoiceException, InvoiceExistException {
+		// generate AO for invoice with invoice balance
+		invoice = findById(invoice.getId());
+		RecordedInvoice recordedInvoice = recordedInvoiceService.generateRecordedInvoice(invoice, null, false);
+		update(invoice);
+		// check if the user want to close the ADV
+		Boolean autoCloseAdvanceAfterInvoiceValidation = (Boolean) advancedSettingsService.getParameter("autoCloseAdvanceAfterInvoiceValidation");
+		Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance");
+		// for each adv we will get the Ao from the adv and copy to a new AO and link to the ADV
+		// and after we will unmatch the old AO from ADV and matched with the invoice
+		advs.forEach(adv -> {
+			// the Adv is paid
+			if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.PAID) {
+				List<AccountOperation> advAo = accountOperationService.listByInvoice(adv);
+				advAo.forEach(ao -> {
+					Set<Long> amountCodeIds = ao.getMatchingAmounts().stream().map(MatchingAmount::getMatchingCode).map(MatchingCode::getId).collect(Collectors.toSet());
+					List<AccountOperation> paymentAo = accountOperationService.findByMatchingId(amountCodeIds);
+					paymentAo.forEach(pao -> {
+						generateAoAndPaymentForUsedAndPaidAdv(adv, pao, recordedInvoice.getId(), ao, autoCloseAdvanceAfterInvoiceValidation);
+					});
+				});
+			}
+			
+		});
+	}
+	
+	private void generateAoAndPaymentForUsedAndPaidAdv(Invoice invoice, AccountOperation ao, Long recordInvoiceId, AccountOperation advAccountOperation, Boolean allowUsingUnpaidAdvance){
+				if(ao instanceof  Payment) {
+					List<Long> aoIdsToClosed = new ArrayList<>();
+					aoIdsToClosed.add(advAccountOperation.getId());
+					Payment paymentAo = (Payment) ao;
+					// unmatch the old AO from ADV
+					matchingCodeService.unmatchingOperationAccount(paymentAo);
+					// creation for a new Payment for the ADV
+					Payment newAo = copyAndCreateNewPayment(paymentAo, invoice.getId(), "PAY_ADV");
+					accountOperationService.create(newAo);
+					aoIdsToClosed.add(newAo.getId());
+					// match the old AO from ADV to new AO of the invoice
+					Long idCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getId();
+					String codeCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getCode();
+					try {
+						// matching the old AO from ADV to new AO of the invoice
+						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoiceId)), paymentAo.getId(), paymentAo.getUnMatchingAmount());
+						// matching the new PAY AO to the ADV AO
+						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(advAccountOperation.getId())), newAo.getId(), newAo.getUnMatchingAmount());
+						if(allowUsingUnpaidAdvance) {
+							AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", invoice.getBillingAccount().getCustomerAccount(), paymentAo.getUnMatchingAmount(), new Date());
+							matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());
+							aoIdsToClosed.add(closedAdv.getId());
+							newAo.setStatus(AccountOperationStatus.CLOSED);
+							closedAdv.setStatus(AccountOperationStatus.CLOSED);
+							advAccountOperation.setStatus(AccountOperationStatus.CLOSED);
+							
+							// close status for AO INV_ADV, PAY_ADV, CLOSED_ADV
+							/*accountOperationService.getEntityManager().createQuery("update AccountOperation ao set ao.status = :status where ao.id in(:aoIds)")
+									.setParameter("aoIds", aoIdsToClosed)
+									.setParameter("status", AccountOperationStatus.CLOSED).executeUpdate();*/
+						}
+						
+					} catch (Exception e) {
+						log.error("error while matching the operation for ao id : " + ao.getId(), e);
+						throw new BusinessException(e);
+					}
+					
+					
+				}
+				
+			
+	}
+	
+	private Payment copyAndCreateNewPayment(Payment paymentAo, Long invoiceId, String code){
+		Payment newAo = new Payment();
+		try {
+			BeanUtils.copyProperties(newAo, paymentAo);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			log.error("error when copying ao's object id : " + invoiceId, e);
+			throw new BusinessException(e);
+		}
+		newAo.setCode(code);
+		newAo.setReference(code + "_" + newAo.getReference());
+		newAo.setId(null);
+		newAo.setAccountingEntries(new ArrayList<>());
+		newAo.setAccountingSchemeEntries(new HashSet<>());
+		newAo.setPaymentHistories(new ArrayList<>());
+		newAo.setInvoices(List.of(findById(invoiceId)));
+		newAo.setMatchingAmounts(new ArrayList<>());
+		return newAo;
+	}
+	
+	
+	public void checkIfAllAdvArePaid(Invoice invoice, List<Invoice> advs){
+		// check if advs has one adv with payment status is UNPAID
+		List<Invoice> unpaidAdvs = advs.stream().filter(adv -> adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID).collect(Collectors.toList());
+		if(CollectionUtils.isNotEmpty(unpaidAdvs)) {
+			methodCallingUtils.callMethodInNewTx(() -> cancelInvoiceAdvances(invoice, unpaidAdvs, true));
+			String advsNumber = unpaidAdvs.stream().map(Invoice::getInvoiceNumber).collect(Collectors.joining(","));
+			throw new BusinessApiException("validation fails “Unpaid/closed advance {{"+advsNumber+"}} cannot be used. It will be removed from the invoice.“");
+		}
+	}
 }
+
+

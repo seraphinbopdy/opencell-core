@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -261,7 +262,7 @@ public class AttributeService extends BusinessService<Attribute>{
         }
         // Check value type
         if (pvAttribute.getValidationType() == AttributeValidationType.REGEX && !attributeValue.getRealValue().toString().matches(pvAttribute.getValidationPattern())) {
-            throw new BusinessApiException("The attribute " + pvAttribute.getAttribute().getCode() + " does not meet the regEx " + pvAttribute.getValidationPattern());
+            throw new BusinessException(Objects.requireNonNullElse(pvAttribute.getValidationLabel(),"The attribute " + pvAttribute.getAttribute().getCode() + " does not meet the regEx " + pvAttribute.getValidationPattern()));
         }
     }
 

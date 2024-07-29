@@ -146,7 +146,8 @@ public class ExceptionProcessorRs {
             if ("MISSING_PARAMETER".equals(str)//
                     || "INVALID_PARAMETER".equals(str)//
                     || "INVALID_ENUM_VALUE".equals(str)//
-                    || "INVALID_IMAGE_DATA".equals(str)) {
+                    || "INVALID_IMAGE_DATA".equals(str)
+                    || MeveoApiErrorCodeEnum.BUSINESS_API_EXCEPTION.toString().equals(str)) {
                 throw new BadRequestException(status);
             } else if ("UNAUTHORIZED".equals(str) //
                     || "AUTHENTICATION_AUTHORIZATION_EXCEPTION".equals(str)) {

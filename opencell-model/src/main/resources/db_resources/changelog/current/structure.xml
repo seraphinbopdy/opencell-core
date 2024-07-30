@@ -12896,4 +12896,21 @@ Meaning that advances won’t be available for further invoices."/>
         <addDefaultValue tableName="ar_account_operation" columnName="payment_requests" defaultValue="0" />
     </changeSet>
     
+    <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe">
+        <update tableName="advanced_settings">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"Valid from", "FRA":"Valide depuis"}]]>
+            </column>
+            <column name="description" value="Valid from" />
+            <where>code = 'pricePlanFilters.enableValidityFrom'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"Valid to", "FRA":"Valide jusqu'à"}]]>
+            </column>
+            <column name="description" value="Valid to" />
+            <where>code = 'pricePlanFilters.enableValidityDate'</where>
+        </update>
+    </changeSet>
+    
 </databaseChangeLog>

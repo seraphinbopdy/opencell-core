@@ -12593,7 +12593,7 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
     
-    <changeSet id="#INTRD-23038_20240515" author="TarikFA." >
+    <changeSet id="#INTRD-23038_20240515" author="TarikFA." failOnError="false">
         <insert tableName="ar_occ_template" >
             <column name="id" valueSequenceNext="ar_occ_template_seq" />
             <column name="version" valueNumeric="0" />

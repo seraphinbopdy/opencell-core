@@ -160,13 +160,6 @@ public class InvoiceType extends BusinessCFEntity {
     @JoinColumn(name = "vat_payment_option_id")
     private UntdidVatPaymentOption untdidVatPaymentOption;
     
-    /**
-     * UntdidInvoiceSubjectCode
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_subject_code")
-    private UntdidInvoiceSubjectCode invoiceSubjectCode;
-    
     @Type(type = "json")
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;  
@@ -174,14 +167,6 @@ public class InvoiceType extends BusinessCFEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "custom_ubl_script_id")
     private ScriptInstance customUblScript;
-
-    public UntdidInvoiceSubjectCode getInvoiceSubjectCode() {
-        return invoiceSubjectCode;
-    }
-
-    public void setInvoiceSubjectCode(UntdidInvoiceSubjectCode invoiceSubjectCode) {
-        this.invoiceSubjectCode = invoiceSubjectCode;
-    }
     
     public ScriptInstance getInvoiceValidationScript() {
 		return invoiceValidationScript;

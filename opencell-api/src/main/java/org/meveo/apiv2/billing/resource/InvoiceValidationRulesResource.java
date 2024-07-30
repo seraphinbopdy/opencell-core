@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-@Path("/billing/invoicevalidationrules")
+@Path("/v2/billing/invoicevalidationrules")
 @Produces({APPLICATION_JSON})
 @Consumes({APPLICATION_JSON})
 public interface InvoiceValidationRulesResource {

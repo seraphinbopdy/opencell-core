@@ -117,7 +117,7 @@ import org.meveo.apiv2.standardReport.impl.StandardReportResourceImpl;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.slf4j.Logger;
 
-@ApplicationPath("/api/rest/v2")
+@ApplicationPath("/api/rest")
 public class GenericOpencellRestful extends Application {
     private static final String GENERIC_API_REQUEST_LOGGING_CONFIG_KEY = "generic.api.request.logging";
     private static final String GENERIC_API_REQUEST_EXTRACT_LIST_CONFIG_KEY = "generic.api.extract.list";

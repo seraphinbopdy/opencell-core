@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/dunning/dunningAgent")
+@Path("/v2/dunning/dunningAgent")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface DunningAgentResource {

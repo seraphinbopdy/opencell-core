@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
  * @version 13.0.0
  * @category Médiation
  */
-@Path("/mediationSetting")
+@Path("/v2/mediationSetting")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface MediationSettingResource {

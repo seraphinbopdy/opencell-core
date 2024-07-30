@@ -296,11 +296,14 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	                FileUtils.copyDirectory(sourceFile, destDir);
 	            }   
 	            InvoiceType quoteType=invoiceTypeService.getDefaultQuote();
-	            String jasperFilename="quote";
+	            String jasperFilename="main";
 	            if(quoteType!=null && quoteType.getBillingTemplateNameEL()!=null) {
 	            	jasperFilename=evaluateQuoteTemplateName(quoteType.getBillingTemplateNameEL(), quote);
 	            }
 	            File jasperFile = new File(resDir, jasperFilename+".jasper");
+	            if (!jasperFile.exists()) {
+	            	 jasperFile = new File(resDir, "quote.jasper");
+	            }
 	            if (!jasperFile.exists()) {
 	                throw new InvoiceJasperNotFoundException("The jasper file doesn't exist.");
 	            }

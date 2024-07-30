@@ -12,7 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-@Path("/accounting")
+@Path("/v2/accounting")
 @Consumes(APPLICATION_JSON)
 @Produces(APPLICATION_JSON)
 public interface AccountingResource {

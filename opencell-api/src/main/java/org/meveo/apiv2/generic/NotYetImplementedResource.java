@@ -11,7 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 
-@Path("/notImplemented")
+@Path("/v2/notImplemented")
 public class NotYetImplementedResource {
     @GET
     @Operation(summary = "This service represent a non implemented resource",

@@ -31,7 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.meveo.model.billing.RatedTransactionAction;
 
-@Path("/billing/invoices")
+@Path("/v2/billing/invoices")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface InvoiceResource {

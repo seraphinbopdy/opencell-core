@@ -74,16 +74,6 @@ public class InvoiceTypeBean extends CustomFieldBean<InvoiceType> {
         if (!entity.getCode().equals("COMMERCIAL_ORDER") 
                 && !entity.getCode().equals("QUOTE")
                 && !entity.getCode().equals("DRAFT")) {
-            if(entity.getInvoiceSubjectCode() == null && entity.getUntdidInvoiceCodeType() == null) {
-                messages.error(new BundleKey(BUNDLE_KEY_MESSAGES, "invoiceType.invoiceSubjectCode.and.invoiceCodeType.empty"), entity.getCode());
-                facesContext.validationFailed();
-                return "";
-            }
-            if(entity.getInvoiceSubjectCode() == null) {
-                messages.error(new BundleKey(BUNDLE_KEY_MESSAGES, "invoiceType.invoiceSubjectCode.empty"), entity.getCode());
-                facesContext.validationFailed();
-                return "";
-            }
             if(entity.getUntdidInvoiceCodeType() == null) {
                 messages.error(new BundleKey(BUNDLE_KEY_MESSAGES, "invoiceType.invoiceCodeType.empty"), entity.getCode());
                 facesContext.validationFailed();

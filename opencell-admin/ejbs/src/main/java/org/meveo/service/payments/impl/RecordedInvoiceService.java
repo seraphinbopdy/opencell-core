@@ -593,6 +593,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         recordedInvoice.setMatchingStatus(MatchingStatusEnum.O);
         recordedInvoice.setAccountingDate(invoice.getInvoiceDate());
         recordedInvoice.setPaymentMethod(invoice.getPaymentMethodType());
+        recordedInvoice.setPaymentRequests(0L);
 
         return recordedInvoice;
     }

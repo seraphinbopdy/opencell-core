@@ -12895,7 +12895,11 @@ Meaning that advances won’t be available for further invoices."/>
         </update>
         <addDefaultValue tableName="ar_account_operation" columnName="payment_requests" defaultValue="0" />
     </changeSet>
-    
+
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
+
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe">
         <update tableName="advanced_settings">
             <column name="description_i18n">

@@ -466,11 +466,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	@Inject
 	private MethodCallingUtils methodCallingUtils;
 	/**
-     * folder for pdf .
-     */
-    private String PDF_DIR_NAME = "pdf";
-
-    /**
      * folder for adjustment pdf.
      */
     private String ADJUSTEMENT_DIR_NAME = "invoiceAdjustmentPdf";
@@ -478,7 +473,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     /**
      * template jasper name.
      */
-    private String INVOICE_TEMPLATE_FILENAME = "invoice.jasper";
+    private String INVOICE_TEMPLATE_FILENAME = "main.jasper";
 
     /**
      * date format.
@@ -1768,8 +1763,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
         String invoiceXmlFileName = getFullXmlFilePath(invoice, false);
         Map<String, Object> parameters = pDFParametersConstruction.constructParameters(invoice, currentUser.getProviderCode());
 
-        String INVOICE_TAG_NAME = "invoice";
-
         boolean isInvoiceAdjustment = invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode());
 
         File invoiceXmlFile = new File(invoiceXmlFileName);
@@ -1833,7 +1826,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             
             SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
             configuration.setPdfaConformance(PdfaConformanceEnum.PDFA_1A);
-            configuration.setIccProfilePath(resDir + File.separator + billingTemplateName + File.separator + "pdf"+File.separator + "srgb.icc");
+            configuration.setIccProfilePath(resDir + File.separator + billingTemplateName +File.separator + "srgb.icc");
             exporter.setConfiguration(configuration);
             exporter.exportReport();
 
@@ -1864,7 +1857,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @throws IOException {@link IOException}
      */
     public synchronized void generateInvoiceFile(String billingTemplateName, String resDir) throws IOException {
-        File destDir = new File(resDir + File.separator + billingTemplateName + File.separator + "pdf");
+        File destDir = new File(resDir + File.separator + billingTemplateName);
 
         if (!destDir.exists()) {
             log.warn("PDF jasper report {} was not found. A default report will be used.", destDir.getAbsolutePath());
@@ -1895,7 +1888,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @throws IOException {@link IOException}
      */
     public synchronized void generateInvoiceAdjustmentFile(boolean isInvoiceAdjustment, String billingTemplateName, String resDir) throws IOException {
-        File destDirInvoiceAdjustment = new File(resDir + File.separator + billingTemplateName + File.separator + "invoiceAdjustmentPdf");
+        File destDirInvoiceAdjustment = new File(resDir + File.separator + billingTemplateName);
 
         if (!destDirInvoiceAdjustment.exists() && isInvoiceAdjustment) {
             destDirInvoiceAdjustment.mkdirs();
@@ -1960,7 +1953,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @return jasper file
      */
     private File getJasperTemplateFile(String resDir, String billingTemplate, PaymentMethodEnum paymentMethod, boolean isInvoiceAdjustment) {
-        String pdfDirName = new StringBuilder(resDir).append(File.separator).append(billingTemplate).append(File.separator).append(isInvoiceAdjustment ? ADJUSTEMENT_DIR_NAME : PDF_DIR_NAME).toString();
+        String pdfDirName = new StringBuilder(resDir).append(File.separator).append(billingTemplate).toString();
 
         File pdfDir = new File(pdfDirName);
         String paymentMethodFileName = new StringBuilder("invoice_").append(paymentMethod).append(".jasper").toString();
@@ -1968,10 +1961,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         if (paymentMethodFile.exists()) {
             return paymentMethodFile;
-        } else {
+        }else {
             File defaultTemplate = new File(pdfDir, INVOICE_TEMPLATE_FILENAME);
+            if (!defaultTemplate.exists()) {
+            	  defaultTemplate = new File(pdfDir, "invoice.jasper");
+            }
             return defaultTemplate;
         }
+     
     }
 
     /**

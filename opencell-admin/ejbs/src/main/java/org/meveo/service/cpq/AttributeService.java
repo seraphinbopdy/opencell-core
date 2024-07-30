@@ -327,7 +327,7 @@ public class AttributeService extends BusinessService<Attribute>{
         }
         Pattern emailPattern = Pattern.compile(EMAIL_REGEX_VALIDATION);
 
-        return emailPattern.matcher(value.toString()).matches();
+        return emailPattern.matcher(value.toString().toLowerCase()).matches();
     }
 
     private boolean isValidPhone(Object value) {

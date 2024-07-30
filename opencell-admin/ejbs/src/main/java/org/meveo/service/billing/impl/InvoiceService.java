@@ -7730,7 +7730,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                         try {
                             matchingCodeService.matchOperations(aoAdjInvoice.getCustomerAccount().getId(), aoAdjInvoice.getCustomerAccount().getCode(),
                                     List.of(aoAdjInvoice.getId(), aoOriginalInvoice.getId()), aoOriginalInvoice.getId(),
-                                    MatchingTypeEnum.A, aoOriginalInvoice.getUnMatchingAmount());
+                                    MatchingTypeEnum.A, aoOriginalInvoice.getAmount());
                         } catch (Exception e) {
                             log.error("Error on payment callback processing:", e);
                             throw new BusinessException(e.getMessage(), e);
@@ -7976,35 +7976,29 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	
 	private void generateAoAndPaymentForUsedAndPaidAdv(Invoice invoice, AccountOperation ao, Long recordInvoiceId, AccountOperation advAccountOperation, Boolean allowUsingUnpaidAdvance){
 				if(ao instanceof  Payment) {
-					List<Long> aoIdsToClosed = new ArrayList<>();
-					aoIdsToClosed.add(advAccountOperation.getId());
 					Payment paymentAo = (Payment) ao;
 					// unmatch the old AO from ADV
 					matchingCodeService.unmatchingOperationAccount(paymentAo);
 					// creation for a new Payment for the ADV
 					Payment newAo = copyAndCreateNewPayment(paymentAo, invoice.getId(), "PAY_ADV");
 					accountOperationService.create(newAo);
-					aoIdsToClosed.add(newAo.getId());
 					// match the old AO from ADV to new AO of the invoice
 					Long idCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getId();
 					String codeCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getCode();
+					newAo.setOriginPayment(advAccountOperation);
+					newAo.setOriginCallPayment(paymentAo);
 					try {
 						// matching the old AO from ADV to new AO of the invoice
 						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoiceId)), paymentAo.getId(), paymentAo.getUnMatchingAmount());
+						
 						// matching the new PAY AO to the ADV AO
 						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(advAccountOperation.getId())), newAo.getId(), newAo.getUnMatchingAmount());
 						if(allowUsingUnpaidAdvance) {
 							AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", invoice.getBillingAccount().getCustomerAccount(), paymentAo.getUnMatchingAmount(), new Date());
 							matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());
-							aoIdsToClosed.add(closedAdv.getId());
 							newAo.setStatus(AccountOperationStatus.CLOSED);
 							closedAdv.setStatus(AccountOperationStatus.CLOSED);
 							advAccountOperation.setStatus(AccountOperationStatus.CLOSED);
-							
-							// close status for AO INV_ADV, PAY_ADV, CLOSED_ADV
-							/*accountOperationService.getEntityManager().createQuery("update AccountOperation ao set ao.status = :status where ao.id in(:aoIds)")
-									.setParameter("aoIds", aoIdsToClosed)
-									.setParameter("status", AccountOperationStatus.CLOSED).executeUpdate();*/
 						}
 						
 					} catch (Exception e) {

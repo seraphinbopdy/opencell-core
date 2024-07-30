@@ -20953,6 +20953,8 @@
     <changeSet id="INTRD-22963_20240720" author="ZakariaB" />
     <changeSet id="#INTRD-24602_20240722" author="AndriusKarpavicius" />
     <changeSet id="INTRD-24619_20240724" author="ZakariaB" />
+    <changeSet id="INTRD-23881_20240702" author="TarikFA." />
+    <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
 
     <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
         <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date)))</sql>

@@ -209,4 +209,13 @@ public class RecordedInvoice extends AccountOperation {
     public void setPaymentRequests(Long paymentRequests) {
         this.paymentRequests = paymentRequests;
     }
+
+    @Override
+    public void setUnMatchingAmount(BigDecimal unMatchingAmount) {
+        if (unMatchingAmount != null && getUnMatchingAmount() != null
+                && unMatchingAmount.compareTo(getUnMatchingAmount()) < 0) {
+            paymentRequests = paymentRequests + 1;
+        }
+        super.setUnMatchingAmount(unMatchingAmount);
+    }
 }

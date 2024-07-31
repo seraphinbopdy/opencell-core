@@ -18,19 +18,33 @@
 
 package org.meveo.model.persistence;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import org.meveo.model.customEntities.CustomEntityInstance;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class JacksonUtil {
+
+    public static final TypeReference<Map<String, String>> MAP_STRING_STRING = new TypeReference<Map<String, String>>() {
+    };
+    public static final TypeReference<Map<String, Object>> MAP_STRING_OBJECT = new TypeReference<Map<String, Object>>() {
+    };
 
     private static final ThreadLocal<ObjectMapper> OBJECT_MAPPER = new ThreadLocal<ObjectMapper>() {
         @Override
@@ -79,6 +93,20 @@ public class JacksonUtil {
         }
     }
 
+    public static String toStringPrettyPrinted(Object value) {
+        try {
+            ObjectMapper om = OBJECT_MAPPER.get();
+            return om.writerWithDefaultPrettyPrinter().writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("The given Json object value: " + value + " cannot be transformed to a String", e);
+        }
+    }
+
+    public static String beautifyString(String jsonString) {
+        Object obj = fromString(jsonString, Object.class);
+        return toStringPrettyPrinted(obj);
+    }
+
     public static JsonNode toJsonNode(String value) {
         try {
             ObjectMapper om = OBJECT_MAPPER.get();
@@ -97,5 +125,72 @@ public class JacksonUtil {
     @SuppressWarnings("unchecked")
     public static <T> T clone(T value) {
         return fromString(toString(value), (Class<T>) value.getClass());
+    }
+
+    public static Object convert(Object value, JavaType jacksonType) {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.convertValue(value, jacksonType);
+    }
+
+    public static <T> T convert(Object value, Class<T> clazz) {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.convertValue(value, clazz);
+    }
+
+    public static <T> T convert(Object value, TypeReference<T> typeref) {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.convertValue(value, typeref);
+    }
+
+    public static Map<String, Object> convertToMap(CustomEntityInstance value) {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.convertValue(value, MAP_STRING_OBJECT);
+    }
+
+    public static <T> T read(String value, Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.readValue(value, clazz);
+    }
+
+    public static <T> T read(File value, Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.readValue(value, clazz);
+    }
+
+    public static <T> T read(File value, TypeReference<T> clazz) throws JsonParseException, JsonMappingException, IOException {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.readValue(value, clazz);
+    }
+
+    public static <T> T read(InputStream value, Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.readValue(value, clazz);
+    }
+
+    public static <T> T read(InputStream value, TypeReference<T> clazz) throws JsonParseException, JsonMappingException, IOException {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.readValue(value, clazz);
+    }
+
+    public static <T> T read(String string, TypeReference<T> typeReference) throws JsonParseException, JsonMappingException, IOException {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.readValue(string, typeReference);
+    }
+
+    public static Map<String, Object> toMap(InputStream value) throws JsonParseException, JsonMappingException, IOException {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.readValue(value, MAP_STRING_OBJECT);
+    }
+
+    public static Map<String, Object> toMap(Object value) throws JsonParseException, JsonMappingException, IOException {
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.convertValue(value, MAP_STRING_OBJECT);
+    }
+
+    public static List<Map<String, Object>> toList(InputStream value) throws JsonParseException, JsonMappingException, IOException {
+        var typeRef = new TypeReference<List<Map<String, Object>>>() {
+        };
+        ObjectMapper om = OBJECT_MAPPER.get();
+        return om.readValue(value, typeRef);
     }
 }

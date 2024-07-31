@@ -36,6 +36,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.BaseApi;
 import org.meveo.api.dto.CustomFieldDto;
 import org.meveo.api.dto.CustomFieldsDto;
+import org.meveo.api.dto.audit.AuditableFieldDto;
 import org.meveo.api.dto.billing.ApplicableDueDateDelayDto;
 import org.meveo.api.dto.billing.DueDateDelayLevelEnum;
 import org.meveo.api.dto.billing.DueDateDelayReferenceDateEnum;
@@ -52,6 +53,7 @@ import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.order.OrderProductCharacteristicEnum;
 import org.meveo.commons.utils.ParamBean;
+import org.meveo.model.AuditableField;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.BillingCycle;
@@ -1033,7 +1035,10 @@ public class OrderApi extends BaseApi {
     	productOrder.setElectronicBilling(order.getElectronicBilling());
 
         productOrder.setCustomFields(entityToDtoConverter.getCustomFieldsDTO(order, CustomFieldInheritanceEnum.INHERIT_NO_MERGE));
-        setAuditableFieldsDto(order, productOrder);
+        
+        List<AuditableField> auditableFields = auditableFieldService.list(order);
+        List<AuditableFieldDto> auditableFieldsDto = auditableFieldsToDto(auditableFields);
+        productOrder.setAuditableFields(auditableFieldsDto);
         return productOrder;
     }
 

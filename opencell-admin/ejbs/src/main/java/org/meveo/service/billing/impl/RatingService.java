@@ -1488,7 +1488,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             }
             Map<String, Object> context = new HashMap<>();
             context.put("isVirtual", isVirtual);
-            scriptInstanceService.executeCached(bareWalletOperation, scriptInstanceCode, context);
+            scriptInstanceService.executeFromPool(bareWalletOperation, scriptInstanceCode, context);
 
         } catch (RatingException e) {
             throw e;

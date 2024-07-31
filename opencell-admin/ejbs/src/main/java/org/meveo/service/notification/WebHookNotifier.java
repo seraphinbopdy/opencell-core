@@ -215,8 +215,8 @@ public class WebHookNotifier {
                         }
                         paramsEvaluated.put("response", result);
                         paramsEvaluated.put("event", entityOrEvent);
-                        if (webHook.getScriptInstance().isReuse()) {
-                            scriptInstanceService.executeCached(webHook.getScriptInstance().getCode(), paramsEvaluated);
+                        if (webHook.getScriptInstance().isUsePool()) {
+                            scriptInstanceService.executePooled(webHook.getScriptInstance().getCode(), paramsEvaluated);
                         } else {
                             scriptInstanceService.executeWInitAndFinalize(webHook.getScriptInstance().getCode(), paramsEvaluated);
                         }

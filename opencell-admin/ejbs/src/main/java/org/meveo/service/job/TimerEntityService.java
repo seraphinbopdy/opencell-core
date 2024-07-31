@@ -21,7 +21,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.TimerEntity;
@@ -45,7 +45,7 @@ public class TimerEntityService extends BusinessService<TimerEntity> {
             if (jobInstance.isActive()) {
                 jobInstanceService.scheduleUnscheduleJob(jobInstance.getId());
 
-                clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.update);
+                clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.update);
             }
         }
 

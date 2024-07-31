@@ -251,4 +251,13 @@ public class ScriptInstanceBean extends BaseBean<ScriptInstance> {
 
         return null;
     }
+
+    public void onUsePoolChange() {
+
+        if (!entity.isUsePool()) {
+            entity.getPool().setMin(null);
+            entity.getPool().setMax(null);
+            entity.getPool().setMaxIdleTime(null);
+        }
+    }
 }

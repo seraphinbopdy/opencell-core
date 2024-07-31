@@ -18,14 +18,13 @@
 
 package org.meveo.api.dto.document.sign;
 
+import java.io.Serializable;
 import java.util.List;
-
-import org.meveo.api.dto.BaseEntityDto;
 
 /**
  * DTO class for a document request informations.
  */
-public class SignFileRequestDto  extends BaseEntityDto {
+public class SignFileRequestDto  implements Serializable{
     
     /** The Constant serialVersionUID. */ 
     private static final long serialVersionUID = 1L; 

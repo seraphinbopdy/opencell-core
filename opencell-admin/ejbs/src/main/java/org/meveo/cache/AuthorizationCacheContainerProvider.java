@@ -34,7 +34,7 @@ import org.slf4j.Logger;
  * 
  * @author Andrius Karpavicius
  */
-public class AuthorizationCacheContainerProvider implements Serializable { // CacheContainerProvider, Serializable {
+public class AuthorizationCacheContainerProvider implements CacheContainerProvider, Serializable {
 
     private static final long serialVersionUID = 180156064688145292L;
 
@@ -52,7 +52,7 @@ public class AuthorizationCacheContainerProvider implements Serializable { // Ca
      * 
      * @return A map containing cache information with cache name as a key and cache as a value
      */
-    // @Override
+     @Override
     @SuppressWarnings("rawtypes")
     public Map<String, Cache> getCaches() {
         Map<String, Cache> summaryOfCaches = new HashMap<String, Cache>();
@@ -66,7 +66,7 @@ public class AuthorizationCacheContainerProvider implements Serializable { // Ca
      * 
      * @param cacheName Name of cache to refresh or null to refresh all caches
      */
-    // @Override
+     @Override
     @Asynchronous
     public void refreshCache(String cacheName) {
 
@@ -80,8 +80,8 @@ public class AuthorizationCacheContainerProvider implements Serializable { // Ca
      * 
      * @param cacheName Name of cache to populate or null to populate all caches
      */
-    // @Override
-    public void populateCache(String cacheName) {
+     @Override
+     public void populateCache(String cacheName) {
 
         // Nothing to do here
     }
@@ -98,7 +98,7 @@ public class AuthorizationCacheContainerProvider implements Serializable { // Ca
         if (token == null) {
             token = "null";
         }
-        
+
         Map<String, Boolean> authMap = authorizations.get(token);
         if (authMap == null) {
             authMap = new HashMap<String, Boolean>();
@@ -120,7 +120,7 @@ public class AuthorizationCacheContainerProvider implements Serializable { // Ca
         if (token == null) {
             token = "null";
         }
-        
+
         Map<String, Boolean> authMap = authorizations.get(token);
         if (authMap == null) {
             authMap = authorizationInfo;
@@ -140,7 +140,7 @@ public class AuthorizationCacheContainerProvider implements Serializable { // Ca
      * @return True/false if url is (not)authorized or NULL if no information is available yet
      */
     public Boolean isAuthorized(String token, String url) {
-        
+
         if (token == null) {
             token = "null";
         }

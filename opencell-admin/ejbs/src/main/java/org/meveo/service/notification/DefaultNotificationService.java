@@ -167,8 +167,8 @@ public class DefaultNotificationService {
 				context.put(entry.getKey(), ValueExpressionWrapper.evaluateExpression(entry.getValue(), elContext, Object.class));
 			}
 
-			if (scriptInstance.getReuse()) {
-				return scriptInstanceService.executeCached(entityOrEvent, scriptInstance.getCode(), context);
+			if (scriptInstance.isUsePool()) {
+				return scriptInstanceService.executeFromPool(entityOrEvent, scriptInstance.getCode(), context);
 
 			} else {
 				return scriptInstanceService.execute(entityOrEvent, scriptInstance.getCode(), context, isToInit, isToExecute, isToTerminate);

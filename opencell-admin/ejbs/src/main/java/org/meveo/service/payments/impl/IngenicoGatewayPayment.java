@@ -512,7 +512,7 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
 			context.put("CardPaymentMethod", paymentCardToken);
 			context.put("ctsAmount", ctsAmount);
 			context.put("CustomerAccount", customerAccount);
-			context = getScriptInstanceService().executeCached( scriptInstanceCode, context);
+			context = getScriptInstanceService().executePooled( scriptInstanceCode, context);
 			body = (CreatePaymentRequest)context.get("CreatePaymentRequest");
 		}
 		return body;

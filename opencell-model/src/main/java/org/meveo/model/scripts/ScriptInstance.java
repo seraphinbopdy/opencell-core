@@ -28,6 +28,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -99,14 +100,6 @@ public class ScriptInstance extends EnableBusinessEntity {
     protected boolean error = false;
 
     /**
-     * Shall same script instance be utilized in repeated calls
-     */
-    @Type(type = "numeric_boolean")
-    @Column(name = "reuse", nullable = false)
-    @NotNull
-    protected boolean reuse = false;
-
-    /**
      * Script category
      */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -127,20 +120,26 @@ public class ScriptInstance extends EnableBusinessEntity {
      */
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "role")
-    @CollectionTable(name = "adm_script_sourc_role", joinColumns = @JoinColumn(name = "script_instance_id", referencedColumnName = "id"))   
+    @CollectionTable(name = "adm_script_sourc_role", joinColumns = @JoinColumn(name = "script_instance_id", referencedColumnName = "id"))
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Set<String> sourcingRoles = new HashSet<String>();
-    
+
     @Type(type = "json")
     @Column(name = "description_i18n", columnDefinition = "jsonb")
-    private Map<String, String> descriptionI18n;    
-    
+    private Map<String, String> descriptionI18n;
+
     /**
      * A list of script parameters that can use the script
      */
     @OneToMany(mappedBy = "scriptInstance", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    private List<ScriptParameter> scriptParameters=new ArrayList<>();
+    private List<ScriptParameter> scriptParameters = new ArrayList<>();
+
+    /**
+     * Optional - Script instances pool configuration
+     */
+    @Embedded
+    private ScriptPool pool = new ScriptPool();
 
     public ScriptInstance() {
 
@@ -210,27 +209,6 @@ public class ScriptInstance extends EnableBusinessEntity {
     }
 
     /**
-     * @return Shall same script instance be utilized in repeated calls
-     */
-    public boolean getReuse() {
-        return reuse;
-    }
-
-    /**
-     * @return Shall same script instance be utilized in repeated calls
-     */
-    public boolean isReuse() {
-        return reuse;
-    }
-
-    /**
-     * @param reuse Shall same script instance be utilized in repeated calls
-     */
-    public void setReuse(boolean reuse) {
-        this.reuse = reuse;
-    }
-
-    /**
      * @return the executionRoles
      */
     public Set<String> getExecutionRoles() {
@@ -265,7 +243,7 @@ public class ScriptInstance extends EnableBusinessEntity {
     public void setScriptInstanceCategory(ScriptInstanceCategory scriptInstanceCategory) {
         this.scriptInstanceCategory = scriptInstanceCategory;
     }
-    
+
     public Map<String, String> getDescriptionI18n() {
         return descriptionI18n;
     }
@@ -274,12 +252,29 @@ public class ScriptInstance extends EnableBusinessEntity {
         this.descriptionI18n = descriptionI18n;
     }
 
-	public List<ScriptParameter> getScriptParameters() {
-		return scriptParameters;
-	}
+    public List<ScriptParameter> getScriptParameters() {
+        return scriptParameters;
+    }
 
-	public void setScriptParameters(List<ScriptParameter> scriptParameters) {
-		this.scriptParameters = scriptParameters;
-	}
-    
+    public void setScriptParameters(List<ScriptParameter> scriptParameters) {
+        this.scriptParameters = scriptParameters;
+    }
+
+    public ScriptPool getPool() {
+        return pool;
+    }
+
+    public void setPool(ScriptPool pool) {
+        this.pool = pool;
+    }
+
+    /**
+     * @return Are script instances pooled for script execution
+     */
+    public boolean isUsePool() {
+        if (pool != null) {
+            return pool.isUsePool();
+        }
+        return false;
+    }
 }

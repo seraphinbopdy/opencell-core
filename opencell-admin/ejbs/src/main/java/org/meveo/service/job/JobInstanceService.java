@@ -42,7 +42,7 @@ import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -210,7 +210,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
         jobCacheContainerProvider.addUpdateJobInstance(jobInstance, true);
         scheduleJob(jobInstance, null);
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.create);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.create);
     }
 
     @Override
@@ -224,7 +224,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
         jobCacheContainerProvider.addUpdateJobInstance(jobInstance, true);
         scheduleUnscheduleJob(jobInstance);
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.update);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.update);
 
         return jobInstance;
     }
@@ -243,7 +243,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
 
         jobCacheContainerProvider.removeJobInstance(jobInstance.getId());
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.remove);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.remove);
     }
 
     @Override
@@ -253,7 +253,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
         log.info("Enabling jobInstance {}, id={}", jobInstance.getJobTemplate(), jobInstance.getId());
         scheduleUnscheduleJob(jobInstance);
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.enable);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.enable);
 
         return jobInstance;
     }
@@ -265,7 +265,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
         log.info("Disabling jobInstance {}, id={}", jobInstance.getJobTemplate(), jobInstance.getId());
         unscheduleJob(jobInstance.getId());
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.disable);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.disable);
 
         return jobInstance;
     }

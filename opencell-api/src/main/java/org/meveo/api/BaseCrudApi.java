@@ -42,7 +42,7 @@ import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.PersistenceService;
-import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
+import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
 
 /**
  * Base API service for CRUD operations on entity
@@ -312,5 +312,5 @@ public abstract class BaseCrudApi<E extends BaseEntity, T extends BaseEntityDto>
 
         return null;
     }
-    
+
 }

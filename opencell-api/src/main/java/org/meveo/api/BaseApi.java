@@ -183,7 +183,7 @@ public abstract class BaseApi {
     private static final String SUPER_ADMIN_MANAGEMENT = "superAdminManagement";
 
     @Inject
-    private AuditableFieldService auditableFieldService;
+    protected AuditableFieldService auditableFieldService;
 
     @Inject
     protected CustomGenericEntityCodeService customGenericEntityCodeService;

@@ -39,7 +39,7 @@ import org.meveo.security.MeveoUser;
 import org.meveo.service.cpq.CommercialRuleHeaderService;
 import org.slf4j.Logger;
 
-public class CommercialRulesContainerProvider implements Serializable {
+public class CommercialRulesContainerProvider implements CacheContainerProvider, Serializable {
 
     private static final String TIRET = "-";
 
@@ -74,7 +74,8 @@ public class CommercialRulesContainerProvider implements Serializable {
         useCommercialRuleCache = Boolean.parseBoolean(tmpParamBean.getProperty("cache.cacheCommercialRule", "true"));
     }
 
-    public void populateCache() {
+    @Override
+    public void populateCache(String cacheName) {
 
         if (!useCommercialRuleCache) {
             log.info("CommercialRuleHeader cache population will be skipped as cache will not be used");
@@ -122,7 +123,7 @@ public class CommercialRulesContainerProvider implements Serializable {
             offerAndProductContents.add(rule);
         }
 
-        if (rule.getTargetProductCode() != null && rule.getTargetAttribute() != null && rule.getTargetGroupedAttributes() == null ) {
+        if (rule.getTargetProductCode() != null && rule.getTargetAttribute() != null && rule.getTargetGroupedAttributes() == null) {
             CacheKeyStr cache2Key = new CacheKeyStr(null, rule.getTargetAttribute().getCode() + TIRET + rule.getTargetProductCode());
             // Cache 2
             List<CommercialRuleHeader> productAndAtttributeContents = productAndAtttribute.get(cache2Key);
@@ -259,21 +260,39 @@ public class CommercialRulesContainerProvider implements Serializable {
     public List<CommercialRuleHeader> getForOfferAndAttribute(String identifier) {
         return offerAndAttribute.get(new CacheKeyStr(null, identifier));
     }
-    
+
     /**
      * Get a summary of cached information.
      *
      * @return A list of a map containing cache information with cache name as a key and cache as a value
      */
     @SuppressWarnings("rawtypes")
+    @Override
     public Map<String, Cache> getCaches() {
         Map<String, Cache> summaryOfCaches = new HashMap<>();
         summaryOfCaches.put(offerAndAttribute.getName(), offerAndAttribute);
         summaryOfCaches.put(productAndAtttribute.getName(), productAndAtttribute);
-        summaryOfCaches.put(offerAndAttribute.getName(), offerAndAttribute);
+        summaryOfCaches.put(offerAndProduct.getName(), offerAndProduct);
         summaryOfCaches.put(productAndGrpAttribute.getName(), productAndGrpAttribute);
 
         return summaryOfCaches;
     }
 
+    @Override
+    public void refreshCache(String cacheName) {
+        if (cacheName == null || cacheName.equals(offerAndAttribute.getName()) || cacheName.contains(offerAndAttribute.getName())) {
+            offerAndAttribute.clear();
+        }
+        if (cacheName == null || cacheName.equals(productAndAtttribute.getName()) || cacheName.contains(productAndAtttribute.getName())) {
+            productAndAtttribute.clear();
+        }
+        if (cacheName == null || cacheName.equals(offerAndProduct.getName()) || cacheName.contains(offerAndProduct.getName())) {
+            offerAndProduct.clear();
+        }
+        if (cacheName == null || cacheName.equals(productAndGrpAttribute.getName()) || cacheName.contains(productAndGrpAttribute.getName())) {
+            productAndGrpAttribute.clear();
+        }
+
+        populateCache(cacheName);
+    }
 }

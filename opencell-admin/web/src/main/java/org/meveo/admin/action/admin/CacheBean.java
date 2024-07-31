@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import javax.enterprise.inject.Instance;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,18 +38,10 @@ import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
 import org.jboss.seam.international.status.Messages;
 import org.jboss.seam.international.status.builder.BundleKey;
-import org.meveo.cache.AuthorizationCacheContainerProvider;
-import org.meveo.cache.CdrEdrProcessingCacheContainerProvider;
-import org.meveo.cache.CustomFieldsCacheContainerProvider;
-import org.meveo.cache.JobCacheContainerProvider;
-import org.meveo.cache.MetricsConfigurationCacheContainerProvider;
-import org.meveo.cache.NotificationCacheContainerProvider;
-import org.meveo.cache.TenantCacheContainerProvider;
-import org.meveo.cache.WalletCacheContainerProvider;
+import org.meveo.cache.CacheContainerProvider;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.IEntity;
-import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.util.view.LazyDataModelWSize;
 import org.omnifaces.cdi.Param;
 import org.primefaces.model.LazyDataModel;
@@ -59,33 +52,6 @@ import org.primefaces.model.SortOrder;
 public class CacheBean implements Serializable {
 
     private static final long serialVersionUID = -8072659867697109888L;
-
-    @Inject
-    private WalletCacheContainerProvider walletCacheContainerProvider;
-
-    @Inject
-    private CdrEdrProcessingCacheContainerProvider cdrEdrProcessingCacheContainerProvider;
-
-    @Inject
-    private NotificationCacheContainerProvider notificationCacheContainerProvider;
-
-    @Inject
-    private CustomFieldsCacheContainerProvider customFieldsCacheContainerProvider;
-
-    @Inject
-    private JobCacheContainerProvider jobCacheContainerProvider;
-
-    @Inject
-    private TenantCacheContainerProvider tenantCacheContainerProvider;
-
-    @Inject
-    private ScriptInstanceService scriptInstanceService;
-    
-    @Inject
-    private AuthorizationCacheContainerProvider authorizationCacheContainerProvider;
-
-    @Inject
-    private MetricsConfigurationCacheContainerProvider metricsConfigurationCacheContainerProvider;
 
     /** Logger. */
     @Inject
@@ -139,19 +105,18 @@ public class CacheBean implements Serializable {
     @SuppressWarnings("rawtypes")
     protected LazyDataModel cacheItemContents;
 
+    @Inject
+    private Instance<CacheContainerProvider> cacheProviders;
+
     @SuppressWarnings("rawtypes")
     public void preRenderView() {
 
         if (cacheName != null) {
-            Map<String, Cache> caches = walletCacheContainerProvider.getCaches();
-            caches.putAll(cdrEdrProcessingCacheContainerProvider.getCaches());
-            caches.putAll(notificationCacheContainerProvider.getCaches());
-            caches.putAll(customFieldsCacheContainerProvider.getCaches());
-            caches.putAll(jobCacheContainerProvider.getCaches());
-            caches.putAll(tenantCacheContainerProvider.getCaches());
-            caches.putAll(scriptInstanceService.getCaches());
-            caches.putAll(metricsConfigurationCacheContainerProvider.getCaches());
-            caches.putAll(authorizationCacheContainerProvider.getCaches());
+
+            Map<String, Cache> caches = new HashMap<String, Cache>();
+            for (CacheContainerProvider cacheContainerProvider : cacheProviders) {
+                caches.putAll(cacheContainerProvider.getCaches());
+            }
 
             selectedCache = caches.get(cacheName);
         }
@@ -166,15 +131,10 @@ public class CacheBean implements Serializable {
     public List<Map<String, String>> getSummaryOfCaches() {
         List<Map<String, String>> cacheSummary = new ArrayList<Map<String, String>>();
 
-        Map<String, Cache> caches = walletCacheContainerProvider.getCaches();
-        caches.putAll(cdrEdrProcessingCacheContainerProvider.getCaches());
-        caches.putAll(notificationCacheContainerProvider.getCaches());
-        caches.putAll(customFieldsCacheContainerProvider.getCaches());
-        caches.putAll(jobCacheContainerProvider.getCaches());
-        caches.putAll(tenantCacheContainerProvider.getCaches());
-        caches.putAll(scriptInstanceService.getCaches());
-        caches.putAll(metricsConfigurationCacheContainerProvider.getCaches());
-        caches.putAll(authorizationCacheContainerProvider.getCaches());
+        Map<String, Cache> caches = new HashMap<String, Cache>();
+        for (CacheContainerProvider cacheContainerProvider : cacheProviders) {
+            caches.putAll(cacheContainerProvider.getCaches());
+        }
         caches = new TreeMap<String, Cache>(caches);
 
         for (Entry<String, Cache> cache : caches.entrySet()) {
@@ -195,26 +155,17 @@ public class CacheBean implements Serializable {
         if (StringUtils.isBlank(cacheName)) {
             cacheName = null;
         }
-        walletCacheContainerProvider.refreshCache(cacheName);
-        cdrEdrProcessingCacheContainerProvider.refreshCache(cacheName);
-        notificationCacheContainerProvider.refreshCache(cacheName);
-        customFieldsCacheContainerProvider.refreshCache(cacheName);
-        jobCacheContainerProvider.refreshCache(cacheName);
-        scriptInstanceService.refreshCache(cacheName);
-        metricsConfigurationCacheContainerProvider.refreshCache(cacheName);
-        authorizationCacheContainerProvider.refreshCache(cacheName);
+        for (CacheContainerProvider cacheContainerProvider : cacheProviders) {
+            cacheContainerProvider.refreshCache(cacheName);
+        }
+
         messages.info(new BundleKey("messages", "cache.refreshInitiated"));
     }
 
     public void refreshCaches() {
-        walletCacheContainerProvider.refreshCache(null);
-        cdrEdrProcessingCacheContainerProvider.refreshCache(null);
-        notificationCacheContainerProvider.refreshCache(null);
-        customFieldsCacheContainerProvider.refreshCache(null);
-        jobCacheContainerProvider.refreshCache(null);
-        scriptInstanceService.refreshCache(null);
-        metricsConfigurationCacheContainerProvider.refreshCache(null);
-        authorizationCacheContainerProvider.refreshCache(null);
+        for (CacheContainerProvider cacheContainerProvider : cacheProviders) {
+            cacheContainerProvider.refreshCache(null);
+        }
         messages.info(new BundleKey("messages", "cache.refreshInitiated"));
     }
 
@@ -304,7 +255,7 @@ public class CacheBean implements Serializable {
                 public List load(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
                     List valueList;
                     if (selectedCacheItem.getValue() instanceof HashSet) {
-                        valueList = (List) new ArrayList<>((HashSet)selectedCacheItem.getValue());
+                        valueList = (List) new ArrayList<>((HashSet) selectedCacheItem.getValue());
 
                     } else {
                         valueList = (List) selectedCacheItem.getValue();

@@ -364,6 +364,10 @@
             <groupId>com.opencellsoft</groupId>
             <artifactId>opencell-scripts</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.opencellsoft</groupId>
+            <artifactId>opencell-custom-api</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.opencellsoft.wildfly</groupId>

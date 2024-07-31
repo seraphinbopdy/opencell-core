@@ -50,12 +50,12 @@ public class ScriptInstanceDto extends CustomScriptDto {
 
     /** The sourcing roles. */
     private List<String> sourcingRoles = new ArrayList<String>();
-    
+
     private String scriptInstanceCategoryCode;
 
     @Schema(description = "list of the language description")
     private List<LanguageDescriptionDto> languageDescriptions;
-    
+
     @Schema(description = "list of the script parameters")
     private List<ScriptParameterDto> scriptParameters;
 
@@ -83,23 +83,24 @@ public class ScriptInstanceDto extends CustomScriptDto {
             sourcingRoles = new ArrayList<String>();
             sourcingRoles.addAll(scriptInstance.getSourcingRoles());
         }
-        
-        if(scriptInstance.getScriptInstanceCategory() != null) {
-        	scriptInstanceCategoryCode = scriptInstance.getScriptInstanceCategory().getCode();
+
+        if (scriptInstance.getScriptInstanceCategory() != null) {
+            scriptInstanceCategoryCode = scriptInstance.getScriptInstanceCategory().getCode();
         }
-        
-        if(scriptInstance.getScriptParameters() != null) {
-        	scriptParameters = new ArrayList<>();
-        	scriptParameters.addAll(scriptInstance.getScriptParameters().stream().map(ScriptParameterDto::new).collect(Collectors.toList()));
+
+        if (scriptInstance.getScriptParameters() != null) {
+            scriptParameters = new ArrayList<>();
+            scriptParameters.addAll(scriptInstance.getScriptParameters().stream().map(ScriptParameterDto::new).collect(Collectors.toList()));
         }
-        
+
         languageDescriptions = convertMultiLanguageFromMapOfValues(scriptInstance.getDescriptionI18n());
+
     }
 
     @Override
     public String toString() {
-        return "ScriptInstanceDto [code=" + getCode() + ", description=" + getDescription() + ", type=" + getType() + ", script=" + getScript() + ", executionRoles="
-                + executionRoles + ", sourcingRoles=" + sourcingRoles + "]";
+        return "ScriptInstanceDto [code=" + getCode() + ", description=" + getDescription() + ", type=" + getType() + ", script=" + getScript() + ", executionRoles=" + executionRoles + ", sourcingRoles=" + sourcingRoles
+                + "]";
     }
 
     /**
@@ -149,7 +150,7 @@ public class ScriptInstanceDto extends CustomScriptDto {
         if (this == obj) {
             return true;
         }
-        
+
         if (obj == null || !(obj instanceof ScriptInstanceDto)) { // Fails with proxed objects: getClass() != obj.getClass()){
             return false;
         }
@@ -166,14 +167,14 @@ public class ScriptInstanceDto extends CustomScriptDto {
         return true;
     }
 
-	public String getScriptInstanceCategoryCode() {
-		return scriptInstanceCategoryCode;
-	}
+    public String getScriptInstanceCategoryCode() {
+        return scriptInstanceCategoryCode;
+    }
 
-	public void setScriptInstanceCategoryCode(String scriptInstanceCategoryCode) {
-		this.scriptInstanceCategoryCode = scriptInstanceCategoryCode;
-	}
-    
+    public void setScriptInstanceCategoryCode(String scriptInstanceCategoryCode) {
+        this.scriptInstanceCategoryCode = scriptInstanceCategoryCode;
+    }
+
     public List<LanguageDescriptionDto> getLanguageDescriptions() {
         return languageDescriptions;
     }
@@ -182,12 +183,11 @@ public class ScriptInstanceDto extends CustomScriptDto {
         this.languageDescriptions = languageDescriptions;
     }
 
-	public List<ScriptParameterDto> getScriptParameters() {
-		return scriptParameters;
-	}
+    public List<ScriptParameterDto> getScriptParameters() {
+        return scriptParameters;
+    }
 
-	public void setScriptParameters(List<ScriptParameterDto> scriptParameters) {
-		this.scriptParameters = scriptParameters;
-	}
-    
+    public void setScriptParameters(List<ScriptParameterDto> scriptParameters) {
+        this.scriptParameters = scriptParameters;
+    }
 }

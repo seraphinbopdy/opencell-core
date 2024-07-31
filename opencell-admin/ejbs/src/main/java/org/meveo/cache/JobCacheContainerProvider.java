@@ -58,7 +58,7 @@ import com.opencellsoft.wildfly.scripts.JobCacheScripts;
  */
 // @Singleton
 // @Lock(LockType.READ)
-public class JobCacheContainerProvider implements Serializable { // CacheContainerProvider, Serializable {
+public class JobCacheContainerProvider implements CacheContainerProvider, Serializable {
 
     private static final long serialVersionUID = -4730906690144309131L;
 
@@ -88,7 +88,7 @@ public class JobCacheContainerProvider implements Serializable { // CacheContain
      * 
      * @return A list of a map containing cache information with cache name as a key and cache as a value
      */
-    // @Override
+    @Override
     @SuppressWarnings("rawtypes")
     public Map<String, Cache> getCaches() {
         Map<String, Cache> summaryOfCaches = new HashMap<String, Cache>();
@@ -102,7 +102,7 @@ public class JobCacheContainerProvider implements Serializable { // CacheContain
      * 
      * @param cacheName Name of cache to refresh or null to refresh all caches
      */
-    // @Override
+    @Override
     @Asynchronous
     public void refreshCache(String cacheName) {
 
@@ -117,7 +117,7 @@ public class JobCacheContainerProvider implements Serializable { // CacheContain
      * 
      * @param cacheName Name of cache to populate or null to populate all caches
      */
-    // @Override
+    @Override
     public void populateCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(runningJobsCache.getName())) {

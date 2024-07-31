@@ -42,7 +42,7 @@ import javax.jms.Topic;
 
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ReflectionUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.IEntity;
 import org.meveo.security.CurrentUser;
@@ -64,9 +64,14 @@ public class ClusterEventPublisher implements Serializable {
     private static final long serialVersionUID = 4434372450314613654L;
 
     /**
-     * Time to wait for a reply message to a MQ message send
+     * Time to wait for a reply message to a MQ message send. A default wait time - 10 seconds.
      */
     private static final long MQ_RESPONSE_WAIT = 10000L;
+
+    /**
+     * Time to wait for a reply message to a MQ message send. A "wait forever" time - 10 minutes. Anything longer would require a use of asynchronous communication instead.
+     */
+    private static final long MQ_RESPONSE_WAIT_MAX = 600000L;
 
     @Inject
     private Logger log;
@@ -90,8 +95,8 @@ public class ClusterEventPublisher implements Serializable {
      * @param entity Entity that triggered event
      * @param action Action performed
      */
-    public void publishEvent(IEntity entity, CrudActionEnum action) {
-        publishEvent(entity, action, null, false);
+    public void publishEvent(IEntity entity, ClusterEventActionEnum action) {
+        publishEvent(entity, action, null, false, null, null);
     }
 
     /**
@@ -104,12 +109,15 @@ public class ClusterEventPublisher implements Serializable {
      * @param action Action performed
      * @param additionalInformation Additional information about the action
      * @param expectResponse Is expected to receive a response to a message send
+     * @param messageId A JMS message ID prefix. If omitted, an entity.id value will be used
+     * @param timeToWait How long to wait for a response. Value of -1 will wait indefinitely (10 minutes - MQ_RESPONSE_WAIT_MAX value), value of NULL will use a default timeout (10 seconds - MQ_RESPONSE_WAIT value)
      * @return A received response from a message send. Applicable only when expectedResponse = true
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Object publishEvent(IEntity entity, CrudActionEnum action, Map<String, Object> additionalInformation, boolean expectResponse) {
+    public Object publishEvent(IEntity entity, ClusterEventActionEnum action, Map<String, Object> additionalInformation, boolean expectResponse, String messageId, Long timeToWait) {
 
-        if (!EjbUtils.isRunningInClusterMode()) {
+        // Don't send JMS messages if not running in cluster mode expect when its execution result lookup for Endpoint
+        if (!EjbUtils.isRunningInClusterMode() && action != ClusterEventActionEnum.getEndpointExecutionResult) {
             return null;
         }
 
@@ -125,12 +133,12 @@ public class ClusterEventPublisher implements Serializable {
             // Specify Message id and reply queue if response is expected
             if (expectResponse) {
                 message.setJMSReplyTo(replyQueue);
-                String messageId = entity.getId() + "_" + action + "_" + EjbUtils.getCurrentClusterNode() + "_" + (new Date()).getTime();
-                message.setJMSCorrelationID(messageId);
+                String correlationId = (messageId != null ? messageId : entity.getId()) + "_" + action + "_" + EjbUtils.getCurrentClusterNode() + "_" + (new Date()).getTime();
+                message.setJMSCorrelationID(correlationId);
             }
 
             // For create and update CRUD actions, send message with a delivery delay of two seconds, so data is saved to DB already before another node process the message
-            if (action == CrudActionEnum.create || action == CrudActionEnum.update) {
+            if (action == ClusterEventActionEnum.create || action == ClusterEventActionEnum.update) {
                 jmsProducer.setDeliveryDelay(2000L).send(topic, message);
             } else {
                 jmsProducer.send(topic, message);
@@ -141,7 +149,13 @@ public class ClusterEventPublisher implements Serializable {
 
                 String selector = "JMSCorrelationID = '" + message.getJMSCorrelationID() + "'";
                 JMSConsumer consumer = context.createConsumer(replyQueue, selector);
-                ObjectMessage responseMessage = (ObjectMessage) consumer.receive(MQ_RESPONSE_WAIT);
+                if (timeToWait == null) {
+                    timeToWait = MQ_RESPONSE_WAIT;
+
+                } else if (timeToWait.intValue() == -1) {
+                    timeToWait = MQ_RESPONSE_WAIT_MAX;
+                }
+                ObjectMessage responseMessage = (ObjectMessage) consumer.receive(timeToWait);
                 if (responseMessage != null) {
                     Object responseObj = responseMessage.getObject();
 
@@ -150,9 +164,8 @@ public class ClusterEventPublisher implements Serializable {
                     return responseObj;
 
                 } else {
-                    log.warn("Failed to receive a reply message to a data synchronization message send within a time out of {}", MQ_RESPONSE_WAIT);
+                    log.warn("Failed to receive a reply message to a data synchronization message send within a time out of {}", timeToWait);
                 }
-
             }
 
         } catch (Exception e) {
@@ -169,7 +182,7 @@ public class ClusterEventPublisher implements Serializable {
      * @param additionalInformation Additional information about the action
      */
     @Asynchronous
-    public void publishEventAsync(IEntity entity, CrudActionEnum action, Map<String, Object> additionalInformation, String providerCode, String username) {
+    public void publishEventAsync(IEntity entity, ClusterEventActionEnum action, Map<String, Object> additionalInformation, String providerCode, String username) {
 
         if (!EjbUtils.isRunningInClusterMode()) {
             return;

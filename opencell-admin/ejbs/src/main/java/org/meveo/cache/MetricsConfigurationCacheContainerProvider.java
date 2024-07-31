@@ -46,14 +46,13 @@ import org.slf4j.Logger;
  *
  * @author Andrius Karpavicius
  */
-public class MetricsConfigurationCacheContainerProvider implements Serializable {
+public class MetricsConfigurationCacheContainerProvider implements CacheContainerProvider, Serializable {
 
     @Inject
     protected Logger log;
 
     /**
-     * Contains association between metrics and cluster nodes it runs in.
-     * Key format: &lt;metricsName&gt;, value: List of &lt;cluster node name&gt;
+     * Contains association between metrics and cluster nodes it runs in. Key format: &lt;metricsName&gt;, value: List of &lt;cluster node name&gt;
      */
     @Resource(lookup = "java:jboss/infinispan/cache/opencell/opencell-metrics-config")
     private Cache<CacheKeyStr, Map<String, Map<String, String>>> metricsConfigCache;
@@ -71,6 +70,7 @@ public class MetricsConfigurationCacheContainerProvider implements Serializable 
      * @return A list of a map containing cache information with cache name as a key and cache as a value
      */
     @SuppressWarnings("rawtypes")
+    @Override
     public Map<String, Cache> getCaches() {
         Map<String, Cache> summaryOfCaches = new HashMap<>();
         summaryOfCaches.put(metricsConfigCache.getName(), metricsConfigCache);
@@ -83,6 +83,7 @@ public class MetricsConfigurationCacheContainerProvider implements Serializable 
      *
      * @param cacheName Name of cache to refresh or null to refresh all caches
      */
+    @Override
     @Asynchronous
     public void refreshCache(String cacheName) {
 
@@ -105,6 +106,7 @@ public class MetricsConfigurationCacheContainerProvider implements Serializable 
      *
      * @param cacheName Name of cache to populate or null to populate all caches
      */
+    @Override
     public void populateCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(metricsConfigCache.getName())) {

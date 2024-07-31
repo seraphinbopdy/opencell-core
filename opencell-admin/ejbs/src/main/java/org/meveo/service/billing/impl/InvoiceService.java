@@ -1655,7 +1655,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         context.put("invoiceType", invoiceType);
         context.put("invoiceables", invoiceables);
         context.put("paymentMethod", paymentMethod);
-        scriptInstanceService.executeCached(scriptInstanceCode, context);
+        scriptInstanceService.executePooled(scriptInstanceCode, context);
         return (List<RatedTransactionGroup>) context.get(Script.RESULT_VALUE);
     }
 
@@ -6384,7 +6384,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         context.put("invoiceType", invoiceType);
         context.put("invoiceLines", invoiceLines);
         context.put("paymentMethod", paymentMethod);
-        scriptInstanceService.executeCached(scriptInstanceCode, context);
+        scriptInstanceService.executePooled(scriptInstanceCode, context);
         return (List<InvoiceLinesGroup>) context.get(Script.RESULT_VALUE);
     }
 

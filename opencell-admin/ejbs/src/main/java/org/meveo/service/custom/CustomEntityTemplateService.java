@@ -38,7 +38,7 @@ import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.QueryBuilder.QueryLikeStyleEnum;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -182,7 +182,7 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
             }
         }
 
-        clusterEventPublisher.publishEvent(cet, CrudActionEnum.create);
+        clusterEventPublisher.publishEvent(cet, ClusterEventActionEnum.create);
     }
 
     @Override
@@ -194,7 +194,7 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
     	roleService.findOrCreateRole(cet.getModifyPermission(), new Role(paramBean.getProperty("role.modifyAllCE", "ModifyAllCE"), null, true, null));
     	roleService.findOrCreateRole(cet.getReadPermission(), new Role(paramBean.getProperty("role.readAllCE", "ReadAllCE"), null, true, null));
     	
-    	clusterEventPublisher.publishEvent(cet, CrudActionEnum.update);
+    	clusterEventPublisher.publishEvent(cet, ClusterEventActionEnum.update);
     	
     	return cetUpdated;
     }
@@ -215,7 +215,7 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
 
         customFieldsCache.removeCustomEntityTemplate(cet);
 
-        clusterEventPublisher.publishEvent(cet, CrudActionEnum.remove);
+        clusterEventPublisher.publishEvent(cet, ClusterEventActionEnum.remove);
 
     }
 
@@ -476,7 +476,7 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
         cet = super.disable(cet);
         customFieldsCache.removeCustomEntityTemplate(cet);
 
-        clusterEventPublisher.publishEvent(cet, CrudActionEnum.disable);
+        clusterEventPublisher.publishEvent(cet, ClusterEventActionEnum.disable);
         return cet;
     }
 
@@ -486,7 +486,7 @@ public class CustomEntityTemplateService extends BusinessService<CustomEntityTem
         cet = super.enable(cet);
         customFieldsCache.addUpdateCustomEntityTemplate(cet, false);
 
-        clusterEventPublisher.publishEvent(cet, CrudActionEnum.enable);
+        clusterEventPublisher.publishEvent(cet, ClusterEventActionEnum.enable);
         return cet;
     }
 

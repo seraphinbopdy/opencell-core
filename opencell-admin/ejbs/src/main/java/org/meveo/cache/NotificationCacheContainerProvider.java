@@ -64,7 +64,7 @@ import org.slf4j.Logger;
  * @lastModifiedVersion 7.0
  *
  */
-public class NotificationCacheContainerProvider implements Serializable { // CacheContainerProvider, Serializable {
+public class NotificationCacheContainerProvider implements CacheContainerProvider, Serializable {
 
     private static final long serialVersionUID = 358151068726872948L;
 
@@ -190,7 +190,7 @@ public class NotificationCacheContainerProvider implements Serializable { // Cac
                     newNotificationsByEntity.put(cacheKey, new HashSet<Notification>());
                 }
             }
-            
+
             // Solve lazy loading issues when firing notification
             if (notif.getScriptInstance() != null) {
                 notif.getScriptInstance().getCode();
@@ -275,15 +275,15 @@ public class NotificationCacheContainerProvider implements Serializable { // Cac
 
         Class entityClass = entity.getClass();
         // prevent double notification for lazy proxy entities
-        if(entity instanceof HibernateProxy ) {
-        	entityClass = entityClass.getSuperclass();
+        if (entity instanceof HibernateProxy) {
+            entityClass = entityClass.getSuperclass();
         }
 
         int i = 0;
-        
+
         while (!entityClass.isAssignableFrom(BusinessCFEntity.class) && !entityClass.isAssignableFrom(BusinessEntity.class) && !entityClass.isAssignableFrom(BaseEntity.class)
                 && !entityClass.isAssignableFrom(AuditableEntity.class) && !entityClass.isAssignableFrom(Object.class)) {
-            
+
             CacheKeyStr cacheKey = getCacheKey(eventType, entityClass);
             String cacheKeyStr = cacheKey.toString();
             if (eventNotificationCache.containsKey(cacheKey) && !checkNotifications.contains(cacheKeyStr)) {
@@ -310,7 +310,7 @@ public class NotificationCacheContainerProvider implements Serializable { // Cac
      * 
      * @return A list of a map containing cache information with cache name as a key and cache as a value
      */
-    // @Override
+    @Override
     @SuppressWarnings("rawtypes")
     public Map<String, Cache> getCaches() {
         Map<String, Cache> summaryOfCaches = new HashMap<String, Cache>();
@@ -324,7 +324,7 @@ public class NotificationCacheContainerProvider implements Serializable { // Cac
      * 
      * @param cacheName Name of cache to refresh or null to refresh all caches
      */
-    // @Override
+    @Override
     @Asynchronous
     public void refreshCache(String cacheName) {
 
@@ -339,7 +339,7 @@ public class NotificationCacheContainerProvider implements Serializable { // Cac
      * 
      * @param cacheName Name of cache to populate or null to populate all caches
      */
-    // @Override
+    @Override
     public void populateCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(eventNotificationCache.getName()) || cacheName.contains(eventNotificationCache.getName())) {
@@ -349,8 +349,8 @@ public class NotificationCacheContainerProvider implements Serializable { // Cac
 
     private CacheKeyStr getCacheKey(Notification notif, boolean isUpdate) {
         String key = notif.getOldEventTypeFilter().name() + "_" + notif.getOldClassNameFilter();
-        if(!isUpdate) {
-        	key = notif.getEventTypeFilter().name() + "_" + notif.getClassNameFilter();
+        if (!isUpdate) {
+            key = notif.getEventTypeFilter().name() + "_" + notif.getClassNameFilter();
         }
         return new CacheKeyStr(currentUser.getProviderCode(), key);
     }

@@ -6363,7 +6363,13 @@
             <column name="reuse" type="${type.boolean}" defaultValueNumeric="0">
                 <constraints nullable="false" />
             </column>
-            <column name="description_i18n" type="${type.json}"></column>
+            <column name="description_i18n" type="${type.json}"/>
+            <column name="use_pool" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_pool" type="int4"/>
+            <column name="max_pool" type="int4"/>
+            <column name="max_idle_time_pool" type="int4"/>            
         </createTable>
 
     </changeSet>
@@ -14119,6 +14125,90 @@
             <column name="description_i18n" type="${type.json}"></column>
         </createTable>
     </changeSet>
+    <changeSet id="#INTRD-22676-rebuild" author="AndriusKarpavicius">
+        <createTable tableName="adm_endpoint">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="version" type="int4"/>
+            <column name="disabled" type="${type.boolean}" defaultValueNumeric="0"/>
+            <column name="created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="updated" type="datetime" />
+            <column name="description" type="VARCHAR(255)" />
+            <column name="code" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="creator" type="varchar(255)"/>
+            <column name="updater" type="varchar(255)"/>
+            <column name="script_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secured" type="${type.boolean}" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="synchronous" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="method" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="returned_variable_name" type="varchar(50)"/>
+            <column name="returned_value_example" type="varchar(500)"/>
+            <column name="jsonata_transformer" type="varchar(255)"/>
+            <column name="serialize_result" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_type" type="varchar(16)" defaultValue="application/json">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_path" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="path" type="varchar(255)"/>
+        </createTable>
+
+        <createTable tableName="adm_endpoint_path_parameter">
+            <column name="endpoint_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="script_parameter" type="varchar(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="position" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey constraintName="pk_adm_endpoint_path_parameter" tableName="adm_endpoint_path_parameter" columnNames="endpoint_id,script_parameter"/>
+        <sql>
+            ALTER TABLE adm_endpoint_path_parameter
+            ADD CONSTRAINT adm_endpoint_path_parameter_pos_gt_zero
+            CHECK (position >= 0);
+        </sql>
+
+        <createTable tableName="adm_endpoint_parameters">
+            <column name="endpoint_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="script_parameter" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parameter_name" type="varchar(50)" />
+            <column name="multivalued" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>              
+            <column name="default_value" type="varchar(255)"/>
+            <column name="value_required" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="example" type="varchar(500)"/>
+        </createTable>
+        <addPrimaryKey constraintName="pk_adm_endpoint_parameters" tableName="adm_endpoint_parameters" columnNames="endpoint_id,script_parameter"/>
+
+	</changeSet>    
+    
     <!-- end tables -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-def-val-1">
@@ -19387,6 +19477,17 @@
                 onUpdate="NO ACTION" />
     </changeSet>
     
+    <changeSet id="#INTRD-22676-rebuild-fk" author="AndriusKarpavicius">
+        <addForeignKeyConstraint baseTableName="adm_endpoint" baseColumnNames="script_id"
+                                 constraintName="fk_adm_endpoint_script_id" referencedTableName="meveo_script_instance"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="adm_endpoint_path_parameter" baseColumnNames="endpoint_id"
+                                 constraintName="fk_adm_endpoint_path_parameter_endpoint_id" referencedTableName="adm_endpoint"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="adm_endpoint_parameters" baseColumnNames="endpoint_id"
+                                 constraintName="fk_adm_endpoint_parameters_endpoint_id" referencedTableName="adm_endpoint"
+                                 referencedColumnNames="id" />
+    </changeSet>
     <!-- end fk -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-constr-995">
@@ -20956,6 +21057,7 @@
     <changeSet id="INTRD-23881_20240702" author="TarikFA." />
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
     <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-22676" author="AndriusKarpavicius" />
 
     <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
         <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>

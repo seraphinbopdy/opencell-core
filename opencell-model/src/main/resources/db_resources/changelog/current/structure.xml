@@ -12608,13 +12608,13 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
 
-    <changeSet id="INTRD-23881_20240702" author="TarikFA.">
+    <changeSet id="INTRD-23881_20240702" author="TarikFA." failOnError="false">
         <addColumn tableName="advanced_settings">
             <column name="description_i18n" type="${type.json}" />
         </addColumn>
     </changeSet>
 
-    <changeSet id="INTRD-23882_20240702" author="TarikFA.">
+    <changeSet id="INTRD-23882_20240702" author="TarikFA." failOnError="false">
         <update tableName="advanced_settings">
             <column name="description" value="Activate price plan filters"/>
             <column name="description_i18n" value='{"FRA":"Activer les filtres de price plan","ENG":"Activate price plan filters"}'/>
@@ -12767,7 +12767,7 @@ public class DummyPaymentGatewayScript extends Script {
         </insert>
     </changeSet>
     
-    <changeSet id="#INTRD-23732_20240715" author="TarikFA.">
+    <changeSet id="#INTRD-23732_20240715" author="TarikFA." failOnError="false">
         <addColumn tableName="ar_account_operation">
             <column name="origin_call_for_payment_id" type="bigint" />
             <column name="origin_payment_id" type="bigint" />
@@ -12790,7 +12790,7 @@ public class DummyPaymentGatewayScript extends Script {
                 onUpdate="NO ACTION" />
     </changeSet>
 
-    <changeSet id="#INTRD-23734_20240715" author="TarikFA.">
+    <changeSet id="#INTRD-23734_20240715" author="TarikFA." failOnError="false">
         <insert tableName="advanced_settings">
             <column name="id" valueSequenceNext="advanced_settings_seq"/>
             <column name="version" value="0"/>
@@ -12831,7 +12831,7 @@ Meaning that advances won’t be available for further invoices."/>
         </insert>
     </changeSet>
 
-    <changeSet id="INTRD-23733" author="TarikFA.">
+    <changeSet id="INTRD-23733" author="TarikFA." failOnError="false">
         <insert tableName="ar_occ_template">
             <column name="id" valueSequenceNext="ar_occ_template_seq" />
             <column name="version" valueNumeric="0" />
@@ -12894,6 +12894,27 @@ Meaning that advances won’t be available for further invoices."/>
             <where>code = 'litigationAfterRetry'</where>
         </update>
         <addDefaultValue tableName="ar_account_operation" columnName="payment_requests" defaultValue="0" />
+    </changeSet>
+
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
+
+    <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe">
+        <update tableName="advanced_settings">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"Valid from", "FRA":"Valide depuis"}]]>
+            </column>
+            <column name="description" value="Valid from" />
+            <where>code = 'pricePlanFilters.enableValidityFrom'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"Valid to", "FRA":"Valide jusqu'à"}]]>
+            </column>
+            <column name="description" value="Valid to" />
+            <where>code = 'pricePlanFilters.enableValidityDate'</where>
+        </update>
     </changeSet>
     
     <changeSet id="#INTRD-21018_20240723" author="ZakariaB">

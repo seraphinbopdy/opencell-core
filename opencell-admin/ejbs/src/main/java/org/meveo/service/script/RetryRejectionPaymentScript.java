@@ -51,7 +51,7 @@ public class RetryRejectionPaymentScript extends Script {
                 .orElseThrow(() -> new BusinessException("No payment reject provided"));
         RejectedPayment rejectedPayment = rejectedPaymentService.findById((Long) paymentReject);
         Payment payment = paymentService.findByRejectPayment(rejectedPayment.getId());
-        long maxRetries = context.get("maxRetries") != null ? (Long) context.get("maxRetries") : 1;
+        int maxRetries = context.get("maxRetries") != null ? (Integer) context.get("maxRetries") : 1;
         PaymentHistory paymentHistory = ofNullable(paymentHistoryService
                 .findPaymentHistoryByPaymentIdAndPaymentStatus(payment.getId(), REJECTED))
                 .orElseThrow(() -> new BusinessException("No payment history found for payment id = " + payment.getId()));

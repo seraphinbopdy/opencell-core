@@ -61,11 +61,6 @@ public class InvoiceCodeTypeBean extends BaseBean<UntdidInvoiceCodeType> {
             return "invoiceCodeTypeDetail";
         }
     
-        public List<UntdidInvoiceCodeType> listInvoiceCodeType() {
-            return (List<UntdidInvoiceCodeType>) invoiceCodeTypeService
-                    .getListInvoiceCodeTypeByName();
-        }
-    
         /**
          * @see org.meveo.admin.action.BaseBean#getPersistenceService()
          */

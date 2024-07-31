@@ -12916,5 +12916,9 @@ Meaning that advances won’t be available for further invoices."/>
             <where>code = 'pricePlanFilters.enableValidityDate'</where>
         </update>
     </changeSet>
+
+    <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI">
+        <dropColumn columnName="invoice_subject_code" tableName="billing_invoice_type" />
+    </changeSet>
     
 </databaseChangeLog>

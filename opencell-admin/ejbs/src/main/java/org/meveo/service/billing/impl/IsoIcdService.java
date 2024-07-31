@@ -72,11 +72,11 @@ public class IsoIcdService extends PersistenceService<IsoIcd> {
 
     @SuppressWarnings("unchecked")
     public List<IsoIcd> getListIsoIcdByName() {
-        log.debug("start of find list {} SortedByName ..", "InvoiceSubjectCode");
+        log.debug("start of find list {} SortedByName ..", "IsoIcd");
         QueryBuilder qb = new QueryBuilder(IsoIcd.class, "c");
         qb.addOrderCriterion("schemeName", true);
         List<IsoIcd> isoIcds = (List<IsoIcd>) qb.getQuery(getEntityManager()).getResultList();
-        log.debug("start of find list {} SortedByName   result {}", new Object[] { "InvoiceSubjectCode", isoIcds == null ? "null" : isoIcds.size() });
+        log.debug("start of find list {} SortedByName   result {}", new Object[] { "IsoIcd", isoIcds == null ? "null" : isoIcds.size() });
         return isoIcds;
     }
 }

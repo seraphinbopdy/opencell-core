@@ -544,7 +544,7 @@
 			</componentElement>
 		</band>
 	</detail>
-	<pageFooter>
+	<lastPageFooter>
 		<band height="102">
 			<staticText>
 				<reportElement x="267" y="0" width="100" height="17" forecolor="#0D0101" uuid="7d6b994e-8c71-4788-8493-0a4360de8339">
@@ -628,5 +628,5 @@
 				</graphicElement>
 			</line>
 		</band>
-	</pageFooter>
+	</lastPageFooter>
 </jasperReport>

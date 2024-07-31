@@ -2,6 +2,7 @@ package org.meveo.admin.job.invoicing;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.model.billing.BillingProcessTypesEnum.AUTOMATIC;
 import static org.meveo.model.billing.BillingProcessTypesEnum.FULL_AUTOMATIC;
 import static org.meveo.model.billing.BillingRunStatusEnum.DRAFT_INVOICES;
@@ -36,6 +37,7 @@ import org.meveo.admin.job.IteratorBasedJobProcessing;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.admin.job.utils.BillinRunApplicationElFilterUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.JpaAmpNewTx;
@@ -151,6 +153,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			ScriptInstance billingRunValidationScript) {
 		boolean prevalidatedAutomaticPrevBRStatus = false;
 		final boolean isFullAutomatic = billingRun.getProcessType() == FULL_AUTOMATIC;
+		result.addReport((!isBlank(result.getReport()) ? "," : "") + "Billing run #" + billingRun.getId());
 		if (billingRun.getStatus() == INVOICE_LINES_CREATED
 				&& (billingRun.getProcessType() == AUTOMATIC || isFullAutomatic)) {
 		    billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, PREVALIDATED, null);

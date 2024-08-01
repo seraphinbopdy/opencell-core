@@ -909,7 +909,10 @@ public class AccountOperationService extends PersistenceService<AccountOperation
             queryString.append(" AND ao.transactionalCurrency.id = :transactionalCurrencyId");
             parameters.put("transactionalCurrencyId", transactionalCurrencyId);
         }
-
+        // execlude account operation with status closed
+	    queryString.append(" AND ao.status != :status");
+		parameters.put("status", AccountOperationStatus.CLOSED);
+		
         // Creating the query
         Query query = getEntityManager().createQuery(queryString.toString());
 

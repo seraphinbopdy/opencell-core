@@ -221,7 +221,7 @@ public class AttributeService extends BusinessService<Attribute>{
     private void checkListAttribute(ProductVersionAttribute pvAttribute, AttributeValue<?> attributeValue) {
         // Check value content
         // List values
-        if (attributeValue.getValue() == null) {
+        if (StringUtils.isBlank(attributeValue.getRealValue())) {
             return;
         }
 

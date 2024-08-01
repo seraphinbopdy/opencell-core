@@ -42,6 +42,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.admin.util.ResourceBundle;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.qualifier.Updated;
@@ -459,8 +460,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         (accountOperation.getAmount().multiply(accountOperation.getTransactionalMatchingAmount()))
                                 .divide(accountOperation.getTransactionalAmount(),
                                         appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
-                accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(amountToMatch)).abs());
-                accountOperation.setMatchingAmount(amountToMatch);
+                accountOperation.setMatchingAmount(computedMatchingAmount);
+	            accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(computedMatchingAmount)).abs());
                 matchingAmount.setMatchingAmount((matchedAmount.subtract(accountOperation.getMatchingAmount())).abs());
                 matchingAmount.setTransactionalMatchingAmount((transactionMatchedAmount
                         .subtract(accountOperation.getTransactionalMatchingAmount()).abs()));
@@ -970,7 +971,6 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             throw new BusinessException(resourceMessages.getString("matchingService.noDebitOps"));
         }
             BigDecimal balance = amount.subtract(amoutCredit);
-            balance = balance.abs();
 
 
             log.info("matchOperations  balance: {}", balance);
@@ -1007,12 +1007,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             return matchingReturnObject;
         }
 
-        if (amount.compareTo(amoutCredit) > 0) {
-            amount = amoutCredit;
-        }
 
-        if (aoToMatchLast != null) {
-            matching(listOcc, amount, accountOperationService.findById(aoToMatchLast), matchingTypeEnum);
+        if (aoToMatchLast != null && amount.compareTo(amoutCredit) > 0) {
+            matching(listOcc, amoutCredit, accountOperationService.findById(aoToMatchLast), matchingTypeEnum);
             matchingReturnObject.setOk(true);
             log.info("matchOperations successful :  partial ok (idPartial recu)");
             return matchingReturnObject;
@@ -1046,6 +1043,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             matching(listOcc, amount, accountOperationForPartialMatching, matchingTypeEnum);
             matchingReturnObject.setOk(true);
             log.info("matchOperations successful :  partial ok (un idPartial possible)");
+			//throw new BusinessApiException("matchingService.matchingImpossible");
             return matchingReturnObject;
         }
 

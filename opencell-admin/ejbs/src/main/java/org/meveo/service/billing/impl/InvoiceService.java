@@ -7963,7 +7963,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 					Set<Long> amountCodeIds = ao.getMatchingAmounts().stream().map(MatchingAmount::getMatchingCode).map(MatchingCode::getId).collect(Collectors.toSet());
 					List<AccountOperation> paymentAo = accountOperationService.findByMatchingId(amountCodeIds);
 					paymentAo.forEach(pao -> {
-						generateAoAndPaymentForUsedAndPaidAdv(adv, pao, recordedInvoice.getId(), ao, autoCloseAdvanceAfterInvoiceValidation);
+						generateAoAndPaymentForUsedAndPaidAdv(adv, pao, recordedInvoice, ao, autoCloseAdvanceAfterInvoiceValidation);
 					});
 				});
 			}
@@ -7971,7 +7971,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		});
 	}
 	
-	private void generateAoAndPaymentForUsedAndPaidAdv(Invoice invoice, AccountOperation ao, Long recordInvoiceId, AccountOperation advAccountOperation, Boolean allowUsingUnpaidAdvance){
+	private void generateAoAndPaymentForUsedAndPaidAdv(Invoice invoice, AccountOperation ao, RecordedInvoice recordInvoice, AccountOperation advAccountOperation, Boolean allowUsingUnpaidAdvance){
 				if(ao instanceof  Payment) {
 					Payment paymentAo = (Payment) ao;
 					// unmatch the old AO from ADV
@@ -7986,15 +7986,17 @@ public class InvoiceService extends PersistenceService<Invoice> {
 					newAo.setOriginCallPayment(paymentAo);
 					try {
 						// matching the old AO from ADV to new AO of the invoice
-						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoiceId)), paymentAo.getId(), paymentAo.getUnMatchingAmount());
+						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoice.getId())), paymentAo.getId(), recordInvoice.getUnMatchingAmount());
 						
 						// matching the new PAY AO to the ADV AO
 						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(advAccountOperation.getId())), newAo.getId(), newAo.getUnMatchingAmount());
 						if(allowUsingUnpaidAdvance) {
-							AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", invoice.getBillingAccount().getCustomerAccount(), paymentAo.getUnMatchingAmount(), new Date());
-							matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());
+							if(advAccountOperation.getUnMatchingAmount().compareTo(ZERO) > 0) {
+								AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", invoice.getBillingAccount().getCustomerAccount(), paymentAo.getUnMatchingAmount(), new Date());
+								matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), advAccountOperation.getId(), paymentAo.getUnMatchingAmount());
+								closedAdv.setStatus(AccountOperationStatus.CLOSED);
+							}
 							newAo.setStatus(AccountOperationStatus.CLOSED);
-							closedAdv.setStatus(AccountOperationStatus.CLOSED);
 							advAccountOperation.setStatus(AccountOperationStatus.CLOSED);
 						}
 						
@@ -8037,6 +8039,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			String advsNumber = unpaidAdvs.stream().map(Invoice::getInvoiceNumber).collect(Collectors.joining(","));
 			throw new BusinessApiException("validation fails “Unpaid/closed advance {{"+advsNumber+"}} cannot be used. It will be removed from the invoice.“");
 		}
+	}
+	
+	public void abandoneInvoices(List<Long> invoiceIds) {
+		if(CollectionUtils.isEmpty(invoiceIds)) {
+			return;
+		}
+		getEntityManager().createNamedQuery("Invoice.abandoneInvoices").setParameter("ids", invoiceIds).executeUpdate();
 	}
 }
 

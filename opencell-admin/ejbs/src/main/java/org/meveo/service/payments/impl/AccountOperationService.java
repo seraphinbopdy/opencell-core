@@ -23,6 +23,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -37,6 +38,8 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.account.TransferAccountOperationDto;
 import org.meveo.api.dto.account.TransferCustomerAccountDto;
+import org.meveo.api.exception.BusinessApiException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
@@ -47,6 +50,7 @@ import org.meveo.model.accounting.AccountingPeriodForceEnum;
 import org.meveo.model.accounting.AccountingPeriodStatusEnum;
 import org.meveo.model.accounting.SubAccountingPeriod;
 import org.meveo.model.admin.Seller;
+import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.*;
@@ -54,6 +58,7 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.accounting.impl.AccountingPeriodService;
 import org.meveo.service.accounting.impl.SubAccountingPeriodService;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +98,11 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 
     @Inject
     private SubAccountingPeriodService subAccountingPeriodService;
+	
+	@Inject
+	private InvoiceService invoiceService;
+	@Inject
+	private OtherCreditAndChargeService otherCreditAndChargeService;
 
     public AccountOperation createDeferralPayments(AccountOperation accountOperation, PaymentMethodEnum selectedPaymentMethod, Date paymentDate) {
         if(!appProvider.isPaymentDeferral()) {
@@ -952,4 +962,41 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 				.setParameter("matchingCodeId", matchingCodeId)
 				.getResultList();
 	}
+
+	public List<AccountOperation> listByMatchingCodeId(Long matchingCodeId) {
+		return getEntityManager().createQuery("SELECT ao FROM AccountOperation ao left join ao.matchingAmounts mas " +
+						"left join mas.matchingCode mc " +
+						"WHERE  ao.matchingStatus in (org.meveo.model.payments.MatchingStatusEnum.L, org.meveo.model.payments.MatchingStatusEnum.P) " +
+						"and mc.id = :matchingCodeId " +
+						"and ao.type = 'P'", AccountOperation.class)
+				.setParameter("matchingCodeId", matchingCodeId)
+				.getResultList();
+	}
+	
+	public void closeAccountOperations(List<Long> aoIdToBeClosed) {
+		List<AccountOperation> accountOperations = findByIds(aoIdToBeClosed, List.of("matchingAmounts", "customerAccount"));
+		// get all partially matched account operations and create ClOSED_ADV2 account operation
+		for (AccountOperation accountOperation : accountOperations) {
+			matchingCodeService.unmatchingOperationAccount(accountOperation);
+			if(accountOperation instanceof  RecordedInvoice) {
+				var customer = accountOperation.getCustomerAccount();
+				AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", customer, accountOperation.getUnMatchingAmount(), new Date());
+				closedAdv.setCode("CLOSED_ADV2");
+				try {
+					matchingCodeService.matchOperations(customer.getId(), customer.getCode(),
+							new ArrayList<>(List.of(accountOperation.getId())), closedAdv.getId(), accountOperation.getUnMatchingAmount());
+				} catch (Exception e) {
+					throw new BusinessApiException(e.getMessage());
+				}
+			}
+		}
+		this.getEntityManager().flush();
+		var invoiceIds = accountOperations.stream().flatMap(ao -> ao.getInvoices().stream()).map(Invoice::getId).filter(Objects::nonNull).collect(Collectors.toList());
+		invoiceService.abandoneInvoices(invoiceIds);
+		getEntityManager().createQuery("UPDATE AccountOperation ao SET ao.status = :status WHERE ao.id in (:ids)")
+				.setParameter("status", AccountOperationStatus.CLOSED)
+				.setParameter("ids", aoIdToBeClosed)
+				.executeUpdate();
+	}
+	
 }

@@ -60,7 +60,7 @@ public class RetryRejectionPaymentScript extends Script {
         try {
             if (paymentRequests > maxRetries) {
                 boolean litigationAfterRetry = context.get("litigationAfterRetry") != null
-                        ? (Boolean) context.get("maxRetries") : false;
+                        ? (Boolean) context.get("litigationAfterRetry") : false;
                 if (litigationAfterRetry) {
                     if (recordedInvoice.getInvoices() != null && !recordedInvoice.getInvoices().isEmpty()) {
                         log.info("Send linked invoices to litigation after reaching max retries");
@@ -78,12 +78,14 @@ public class RetryRejectionPaymentScript extends Script {
                 }
             } else if (paymentRequests == 1) {
                 createPaymentRequest(payment, paymentHistory);
+                recordedInvoice = recordedInvoiceService.refreshOrRetrieve(recordedInvoice);
                 int firstDelay = context.get("firstDelay") != null ? (Integer) context.get("maxRetries") : 0;
                 recordedInvoice.setCollectionDate(addDaysToDate(rejectedPayment.getRejectedDate(), firstDelay));
                 recordedInvoice.setPaymentRequests(recordedInvoice.getPaymentRequests() + 1);
                 recordedInvoiceService.update(recordedInvoice);
             } else {
                 createPaymentRequest(payment, paymentHistory);
+                recordedInvoice = recordedInvoiceService.refreshOrRetrieve(recordedInvoice);
                 int nextRetriesDelay
                         = context.get("nextRetriesDelay") != null ? (Integer) context.get("nextRetriesDelay") : 0;
                 recordedInvoice.setCollectionDate(addDaysToDate(rejectedPayment.getRejectedDate(), nextRetriesDelay));

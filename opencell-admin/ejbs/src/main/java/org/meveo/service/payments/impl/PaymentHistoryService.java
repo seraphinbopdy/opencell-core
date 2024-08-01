@@ -32,6 +32,8 @@ import org.meveo.service.base.PersistenceService;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static org.meveo.model.payments.PaymentStatusEnum.PENDING;
 import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
 
 /**
@@ -96,7 +98,7 @@ public class PaymentHistoryService extends PersistenceService<PaymentHistory> {
 		paymentHistory.setErrorType(errorType);
 		paymentHistory.setExternalPaymentId(externalPaymentId);
 		paymentHistory.setOperationCategory(payment != null ? OperationCategoryEnum.CREDIT : OperationCategoryEnum.DEBIT );
-		paymentHistory.setSyncStatus(status);
+		paymentHistory.setSyncStatus(ofNullable(status).orElse(PENDING));
 		paymentHistory.setPaymentGatewayCode(paymentGatewayCode);
 		paymentHistory.setLastUpdateDate(paymentHistory.getOperationDate());
 		if (payment != null) {

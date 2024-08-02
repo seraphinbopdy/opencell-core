@@ -465,6 +465,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	
 	@Inject
 	private MethodCallingUtils methodCallingUtils;
+	
+	
+	 /** folder for pdf .*/
+    private String PDF_DIR_NAME = "pdf";
+    
 	/**
      * folder for adjustment pdf.
      */
@@ -473,7 +478,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
     /**
      * template jasper name.
      */
-    private String INVOICE_TEMPLATE_FILENAME = "main.jasper";
+    private String INVOICE_TEMPLATE_FILENAME = "invoice.jasper";
+    private String JASPER_TEMPLATE_MAIN = "main.jasper";
 
     /**
      * date format.
@@ -1776,7 +1782,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if (billingAccount != null && billingAccount.getBillingCycle() != null) {
             billingCycle = billingAccount.getBillingCycle();
         }
-
         String billingTemplateName = getInvoiceTemplateName(invoice, billingCycle, invoice.getInvoiceType());
 
         String resDir = meveoDir + "jasper";
@@ -1953,7 +1958,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @return jasper file
      */
     private File getJasperTemplateFile(String resDir, String billingTemplate, PaymentMethodEnum paymentMethod, boolean isInvoiceAdjustment) {
-        String pdfDirName = new StringBuilder(resDir).append(File.separator).append(billingTemplate).toString();
+        String pdfDirName = new StringBuilder(resDir).append(File.separator).append(billingTemplate).append(File.separator).append(isInvoiceAdjustment ? ADJUSTEMENT_DIR_NAME : PDF_DIR_NAME).toString();
 
         File pdfDir = new File(pdfDirName);
         String paymentMethodFileName = new StringBuilder("invoice_").append(paymentMethod).append(".jasper").toString();
@@ -1964,7 +1969,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }else {
             File defaultTemplate = new File(pdfDir, INVOICE_TEMPLATE_FILENAME);
             if (!defaultTemplate.exists()) {
-            	  defaultTemplate = new File(pdfDir, "invoice.jasper");
+            	 String jasperDirName = new StringBuilder(resDir).append(File.separator).append(billingTemplate).toString();
+            	 File jasperDir = new File(jasperDirName);
+            	  defaultTemplate = new File(jasperDir, JASPER_TEMPLATE_MAIN);
             }
             return defaultTemplate;
         }
@@ -2515,7 +2522,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public boolean isInvoicePdfExist(Invoice invoice) {
 
         String pdfFileName = getFullPdfFilePath(invoice, false);
-        return StorageFactory.exists(pdfFileName);
+        File file=new File(pdfFileName);
+       
+        return StorageFactory.exists(file);
     }
 
     /**
@@ -3302,6 +3311,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public String getInvoiceTemplateName(Invoice invoice, BillingCycle billingCycle, InvoiceType invoiceType) {
 
         String billingTemplateName = null;
+        boolean isInvoiceAdjustment = invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode());
+        
         if (invoiceType != null && !StringUtils.isBlank(invoiceType.getBillingTemplateNameEL())) {
             billingTemplateName = evaluateBillingTemplateName(invoiceType.getBillingTemplateNameEL(), invoice);
 
@@ -3309,7 +3320,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             billingTemplateName = evaluateBillingTemplateName(billingCycle.getBillingTemplateNameEL(), invoice);
         }
         if (billingTemplateName == null) {
-            billingTemplateName = "default";
+        	billingTemplateName = isInvoiceAdjustment ? "adj" : "default";
         }
         return billingTemplateName;
     }

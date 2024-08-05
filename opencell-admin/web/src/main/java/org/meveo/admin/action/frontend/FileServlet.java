@@ -190,12 +190,15 @@ public class FileServlet extends HttpServlet {
 	            }
 	        }
     	} catch (IOException e) {
-            // Log the exception for debugging purposes
-            log.error(e.getMessage());
+    		// Log the exception for debugging purposes
+            log.error("Error processing request", e);
             
-            // Return an error response to the client
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().println("Internal server error occurred while processing the request.");
+            try {
+            	// Return an error response to the client
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error occurred while processing the request.");
+            } catch (IOException ex) {
+                log.error("Error sending error response", ex);
+            }
         }      
     }
 

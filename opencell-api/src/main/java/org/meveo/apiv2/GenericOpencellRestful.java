@@ -32,6 +32,7 @@ import org.meveo.apiv2.accounting.resource.impl.AccountingResourceImpl;
 import org.meveo.apiv2.accountreceivable.accountOperation.AccountReceivableResourceImpl;
 import org.meveo.apiv2.accountreceivable.deferralPayments.AccountReceivableDeferralPaymentsResourceImpl;
 import org.meveo.apiv2.accounts.impl.AccountsManagementResourceImpl;
+import org.meveo.apiv2.accounts.impl.BillingAccountV2ResourceImpl;
 import org.meveo.apiv2.accounts.impl.UserAccountsResourceImpl;
 import org.meveo.apiv2.admin.impl.FilesResourceImpl;
 import org.meveo.apiv2.admin.impl.SellerResourceImpl;
@@ -198,7 +199,8 @@ public class GenericOpencellRestful extends Application {
                 CustomTableResourceImpl.class, AdvancedSettingsResourceImpl.class, CustomerBalanceResourceImpl.class, FileTypeResourceImpl.class, DocumentCategoryResourceImpl.class,
                 ElectronicInvoicingResourceImpl.class,PaymentResourceImpl.class, PriceListResourceImpl.class, SellerResourceImpl.class, PriceListLineResourceImpl.class, CatalogPriceListResourceImpl.class,
                 SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
-                ProductManagementRsImpl.class, HugeEntityResourceImpl.class, PaymentTermResourceImpl.class, CustomActionResourceImpl.class
+                ProductManagementRsImpl.class, HugeEntityResourceImpl.class, PaymentTermResourceImpl.class, CustomActionResourceImpl.class,
+                BillingAccountV2ResourceImpl.class
         ));
 
         resources.add(GenericJacksonProvider.class);

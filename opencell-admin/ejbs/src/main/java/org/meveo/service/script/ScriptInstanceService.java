@@ -313,7 +313,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
         // Check access to the script
         isUserHasExecutionRole(scriptInstance);
 
-        log.trace("Script {} to be executed with parameters {}", scriptCode, context);
+        // INTRD-24801
+        //log.trace("Script {} to be executed with parameters {}", scriptCode, context);
 
         if (context == null) {
             context = new HashMap<String, Object>();
@@ -498,7 +499,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
 	public Map<String, Object> execute(String scriptCode, Map<String, Object> context, boolean isToInit, boolean isToExecute, boolean isToTerminate)
 			throws BusinessException {
 
-		log.trace("Script {} to be executed with parameters {}", scriptCode, context);
+		// INTRD-24801
+		//log.trace("Script {} to be executed with parameters {}", scriptCode, context);
 
 		if (context == null) {
 			context = new HashMap<String, Object>();
@@ -541,7 +543,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
         context.put(Script.CONTEXT_CURRENT_USER, currentUser);
         context.put(Script.CONTEXT_APP_PROVIDER, appProvider);
 
-        log.trace("Script {} to be executed with parameters {}", compiledScript.getClass(), context);
+        // INTRD-24801
+        //log.trace("Script {} to be executed with parameters {}", compiledScript.getClass(), context);
 
         compiledScript.init(context);
         compiledScript.execute(context);

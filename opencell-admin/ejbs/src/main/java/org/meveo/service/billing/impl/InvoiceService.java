@@ -7902,6 +7902,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		update(invoice);
 	}
 	private void checkAllowUsingUnpaidAdvance(Invoice invoice, List<Invoice> advs, boolean allowUsingUnpaidAdvance) {
+        if(org.meveo.commons.utils.ListUtils.isEmtyCollection(advs)) {
+            return;
+        }
 		if(!allowUsingUnpaidAdvance) {
 			// in this case of invoice is DRAFT and the ADV is UNPAID and not link to ADV then we ignore the ADV
 			if(invoice.getStatus() == InvoiceStatusEnum.DRAFT) {

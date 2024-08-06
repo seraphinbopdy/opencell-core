@@ -12955,5 +12955,16 @@ Meaning that advances won’t be available for further invoices."/>
                     valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.EnterLitigation')"/>
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-24686_20240807" author="TarikFa.">
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'CLOSED_ADV')"/>
+        </insert>
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'PAY_ADV')"/>
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

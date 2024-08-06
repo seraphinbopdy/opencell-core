@@ -20967,5 +20967,6 @@
     </changeSet>
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-24686_20240807" author="TarikFa." />
 
 </databaseChangeLog>

@@ -6964,6 +6964,16 @@ Meaning that advances won’t be available for further invoices."/>
             <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
         </insert>
     </changeSet>
+    <changeSet id="#INTRD-24686_20240807_build" author="TarikFa.">
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'CLOSED_ADV')"/>
+        </insert>
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'PAY_ADV')"/>
+        </insert>
+    </changeSet>
 
 	<changeSet id="#INTRD-22516_20240503" author="aeljaouhari" />
     <changeSet id="#INTRD-23734_20240715" author="TarikFA." />

@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.meveo.apiv2.AcountReceivable.*;
 import org.meveo.apiv2.accountreceivable.ChangeStatusDto;
 
-@Path("/accountReceivable/accountOperation")
+@Path("/v2/accountReceivable/accountOperation")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface AccountReceivableResource {

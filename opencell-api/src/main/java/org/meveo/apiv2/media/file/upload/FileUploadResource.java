@@ -11,7 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/media/files")
+@Path("/v2/media/files")
 public interface FileUploadResource {
 
     @POST

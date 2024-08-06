@@ -8,7 +8,7 @@ import org.meveo.apiv2.dunning.DunningTemplate;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
-@Path("/dunning/dunningtemplate")
+@Path("/v2/dunning/dunningtemplate")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface DunningTemplateResource {

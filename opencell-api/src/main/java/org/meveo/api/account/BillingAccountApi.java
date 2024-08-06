@@ -207,15 +207,20 @@ public class BillingAccountApi extends AccountEntityApi {
 	
 
     public BillingAccount create(BillingAccountDto postData) throws MeveoApiException, BusinessException {
-        return create(postData, true);
+        return create(postData, true, null, null, Version.V1);
     }
 
-    public BillingAccount create(BillingAccountDto postData, boolean checkCustomFields) throws MeveoApiException, BusinessException {
-        return create(postData, true, null, null);
+    public BillingAccount create(BillingAccountDto postData, Version versioning) throws MeveoApiException, BusinessException {
+        return create(postData, true, null, null, versioning);
     }
 
     public BillingAccount create(BillingAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel,
                                  CustomerAccount associatedCA) throws MeveoApiException, BusinessException {
+        return create(postData, checkCustomFields, businessAccountModel, associatedCA, Version.V1);
+    }
+
+    public BillingAccount create(BillingAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel,
+                                 CustomerAccount associatedCA, Version versioning) throws MeveoApiException, BusinessException {
 
         if(StringUtils.isBlank(postData.getCode())) {
             addGenericCodeIfAssociated(BillingAccount.class.getName(), postData);
@@ -241,6 +246,20 @@ public class BillingAccountApi extends AccountEntityApi {
             }
         }
 
+        if(Version.V2.equals(versioning)) {
+            if(postData.getLegalEntityType() == null || StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                missingParameters.add("legalEntityType.code");
+            }
+            
+            if(StringUtils.isBlank(postData.getDescription())) {
+                missingParameters.add("description");
+            }
+
+            if(CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
+                missingParameters.add("registrationNumbers");
+            }
+        }
+        
         handleMissingParameters(postData);
 
         if (billingAccountService.findByCode(postData.getCode()) != null) {
@@ -289,6 +308,11 @@ public class BillingAccountApi extends AccountEntityApi {
 
         return billingAccount;
     }
+
+    public BillingAccount create(BillingAccountDto postData, boolean checkCustomFields) throws MeveoApiException, BusinessException {
+        return create(postData, true, null, null);
+    }
+
 
     private void processTags(BillingAccountDto postData, BillingAccount billingAccount) {
     	Set<String> tagCodes = postData.getTagCodes();
@@ -1008,4 +1032,8 @@ public class BillingAccountApi extends AccountEntityApi {
         return result;
     }
 
+    public enum Version {
+        V1, V2
+    }
 }
+

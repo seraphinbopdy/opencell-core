@@ -204,7 +204,7 @@ public class CdrFlatFileImportScript extends Script {
                         cdr.setDateParam3(dateParam3);
                         cdr.setDateParam4(dateParam4);
                         cdr.setDateParam5(dateParam5);
-                        cdr.setDecimalParam1(decimalParam1);
+                        cdr.setDeci[malParam1(decimalParam1);
                         cdr.setDecimalParam2(decimalParam2);
                         cdr.setDecimalParam3(decimalParam3);
                         cdr.setDecimalParam4(decimalParam4);
@@ -231,6 +231,10 @@ public class CdrFlatFileImportScript extends Script {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+        	rejectFile.close();
+            br.close();
+            fread.close();
         }
 
     }

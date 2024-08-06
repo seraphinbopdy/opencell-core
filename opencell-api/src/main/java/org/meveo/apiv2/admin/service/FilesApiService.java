@@ -226,12 +226,11 @@ public class FilesApiService extends BaseApi {
         long count = 0;
         AtomicLong size = new AtomicLong(0);
         List<org.meveo.apiv2.admin.File> files = new ArrayList<>();
-        try {
-            count = Files.walk(path, 1).filter(filter).peek(p -> {
-                size.set(size.get() + p.toFile().length());
-            }).count();
+        
+        try (Stream<Path> fileStream = Files.walk(path, 1)) {
+            count = fileStream.filter(filter).peek(p -> size.set(size.get() + p.toFile().length())).count();
             if (count > 0) {
-                files = Files.walk(path, 1)
+                files = fileStream
                         .sorted(comparator)
                         .filter(filter)
                         .skip(searchConfig.getOffset())
@@ -242,6 +241,7 @@ public class FilesApiService extends BaseApi {
         } catch (IOException e) {
             log.error("Failed to search files from directory {}", dir, e);
         }
+
         Map<String, Object> results = new LinkedHashMap<>();
         results.put("total", count);
         results.put("limit", searchConfig.getLimit());

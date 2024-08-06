@@ -16,6 +16,7 @@ import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.PaymentMethod;
+import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.RejectedPayment;
 import org.meveo.service.billing.impl.InvoiceService;
@@ -79,9 +80,8 @@ public class RetryRejectionPaymentScript extends Script {
             } else if (paymentRequests == 1) {
                 createPaymentRequest(payment, paymentHistory);
                 recordedInvoice = recordedInvoiceService.refreshOrRetrieve(recordedInvoice);
-                int firstDelay = context.get("firstDelay") != null ? (Integer) context.get("maxRetries") : 0;
+                int firstDelay = context.get("firstRetryDelay") != null ? (Integer) context.get("firstRetryDelay") : 0;
                 recordedInvoice.setCollectionDate(addDaysToDate(rejectedPayment.getRejectedDate(), firstDelay));
-                recordedInvoice.setPaymentRequests(recordedInvoice.getPaymentRequests() + 1);
                 recordedInvoiceService.update(recordedInvoice);
             } else {
                 createPaymentRequest(payment, paymentHistory);
@@ -89,9 +89,9 @@ public class RetryRejectionPaymentScript extends Script {
                 int nextRetriesDelay
                         = context.get("nextRetriesDelay") != null ? (Integer) context.get("nextRetriesDelay") : 0;
                 recordedInvoice.setCollectionDate(addDaysToDate(rejectedPayment.getRejectedDate(), nextRetriesDelay));
-                recordedInvoice.setPaymentRequests(paymentRequests + 1);
                 recordedInvoiceService.update(recordedInvoice);
             }
+            context.put(REJECTION_ACTION_RESULT, true);
         } catch (Exception exception) {
             log.error("Error executing retry payment script", exception);
             throw new BusinessException(exception);
@@ -108,7 +108,7 @@ public class RetryRejectionPaymentScript extends Script {
 
     private void createPaymentRequest(Payment payment, PaymentHistory paymentHistory) throws Exception {
         CustomerAccount customerAccount = payment.getCustomerAccount();
-        PaymentMethod preferredPaymentMethod = getPreferredPaymentMethod(customerAccount);
+        PaymentMethod preferredPaymentMethod = getPreferredPaymentMethod(customerAccount, payment.getPaymentMethod());
         PaymentGateway paymentGateway =
                 paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
         List<Long> aosToPay = paymentHistory.getListAoPaid().stream().map(AccountOperation::getId).collect(toList());
@@ -118,22 +118,22 @@ public class RetryRejectionPaymentScript extends Script {
                     TRUE, TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
                     paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
                     paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-                    TRUE, preferredPaymentMethod.getPaymentType());
+                    TRUE, preferredPaymentMethod.getPaymentType(), true);
         } else {
             paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), aosToPay,
                     TRUE, TRUE, paymentGateway, null, null, null,
-                    null, null, TRUE, preferredPaymentMethod.getPaymentType());
+                    null, null, TRUE, preferredPaymentMethod.getPaymentType(), true);
         }
         log.info("Payment request successfully created");
     }
 
-    private PaymentMethod getPreferredPaymentMethod(CustomerAccount customerAccount) {
+    private PaymentMethod getPreferredPaymentMethod(CustomerAccount customerAccount, PaymentMethodEnum paymentMethod) {
         return customerAccount
                 .getPaymentMethods()
                 .stream()
-                .filter(PaymentMethod::isPreferred)
+                .filter(pm -> paymentMethod.equals(pm.getPaymentType()))
                 .findFirst()
-                .orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
+                .orElseThrow(() -> new BusinessException("No payment method found for customer account"
                         + customerAccount.getCode()));
     }
 }

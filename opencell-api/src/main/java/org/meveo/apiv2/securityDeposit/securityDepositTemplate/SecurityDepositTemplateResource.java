@@ -10,7 +10,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/securityDeposit/securityDepositTemplate")
+@Path("/v2/securityDeposit/securityDepositTemplate")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface SecurityDepositTemplateResource {

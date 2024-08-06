@@ -15,7 +15,7 @@ import org.meveo.apiv2.documentCategory.DocumentCategoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/documentCategory")
+@Path("/v2/documentCategory")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface DocumentCategoryResource {

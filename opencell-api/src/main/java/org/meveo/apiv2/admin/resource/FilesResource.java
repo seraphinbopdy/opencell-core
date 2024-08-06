@@ -35,7 +35,7 @@ import javax.ws.rs.core.Response;
  * @author Abdellatif BARI
  * @since 14.1.16
  */
-@Path("/files")
+@Path("/v2/files")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface FilesResource {

@@ -15,7 +15,7 @@ import org.meveo.apiv2.fileType.FileTypeDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/fileType")
+@Path("/v2/fileType")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface FileTypeResource {

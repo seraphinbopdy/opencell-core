@@ -28,7 +28,7 @@ import io.swagger.v3.oas.models.OpenAPI;
  *
  * @author Thang Nguyen
  */
-@Path("/openapi.{type:json|yaml}")
+@Path("/v2/openapi.{type:json|yaml}")
 public class Apiv2SwaggerGeneration extends BaseOpenApiResource {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());

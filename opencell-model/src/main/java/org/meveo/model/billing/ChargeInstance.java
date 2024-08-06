@@ -79,7 +79,10 @@ import org.slf4j.LoggerFactory;
 @AttributeOverrides({ @AttributeOverride(name = "code", column = @Column(name = "code", unique = false)) })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "charge_type", discriminatorType = DiscriminatorType.STRING)
-@NamedQueries({ @NamedQuery(name = "ChargeInstance.listPrepaid", query = "SELECT c FROM ChargeInstance c where c.prepaid=true and  c.status='ACTIVE'") })
+@NamedQueries({
+        @NamedQuery(name = "ChargeInstance.listPrepaid", query = "SELECT c FROM ChargeInstance c where c.prepaid=true and  c.status='ACTIVE'"),
+        @NamedQuery(name = "ChargeInstance.listByAccumulatorCounterInstance", query = "SELECT c FROM ChargeInstance c join c.accumulatorCounterInstances aci where aci = :counterInstance")
+})
 public abstract class ChargeInstance extends BusinessCFEntity {
 
     private static final long serialVersionUID = 1L;

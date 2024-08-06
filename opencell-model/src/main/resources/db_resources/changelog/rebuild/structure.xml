@@ -20956,6 +20956,7 @@
     <changeSet id="INTRD-23881_20240702" author="TarikFA." />
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
     <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-24686_20240807" author="TarikFa." />
 
     <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
         <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
@@ -20967,5 +20968,6 @@
     </changeSet>
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
+
 
 </databaseChangeLog>

@@ -16,6 +16,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.io.InputStream;
+
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class FileUploadResourceImpl implements FileUploadResource {

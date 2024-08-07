@@ -216,7 +216,7 @@ public class PaymentJobBean extends IteratorBasedJobBean<PaymentItem> {
         AccountOperationFilterScript aoFilterScript = getAOScriptInstance(jobInstance);
 
         if (aoFilterScript == null) {
-            aos = accountOperationService.getAOsToPayOrRefund(paymentMethodType, fromDueDate, toDueDate, operationCategory, null);
+            aos = accountOperationService.getAOsToPayOrRefund(paymentMethodType, fromDueDate, toDueDate, paymentOrRefundEnum.getOperationCategoryToProcess(), null);
         } else {
             Map<String, Object> methodContext = new HashMap<>();
             methodContext.put(AccountOperationFilterScript.FROM_DUE_DATE, fromDueDate);

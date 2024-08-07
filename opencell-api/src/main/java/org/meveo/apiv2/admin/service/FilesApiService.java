@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.io.InputStream;
+
 
 /**
  * Paging and filtering interface for files.

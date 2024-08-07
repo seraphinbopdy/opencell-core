@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.io.InputStream;
+import java.util.stream.Stream;
 
 
 /**
@@ -229,10 +229,10 @@ public class FilesApiService extends BaseApi {
         AtomicLong size = new AtomicLong(0);
         List<org.meveo.apiv2.admin.File> files = new ArrayList<>();
         
-        try (Stream<Path> fileStream = Files.walk(path, 1)) {
-            count = fileStream.filter(filter).peek(p -> size.set(size.get() + p.toFile().length())).count();
+        try {
+            count = Files.walk(path, 1).filter(filter).peek(p -> size.set(size.get() + p.toFile().length())).count();
             if (count > 0) {
-                files = fileStream
+                files = Files.walk(path, 1)
                         .sorted(comparator)
                         .filter(filter)
                         .skip(searchConfig.getOffset())

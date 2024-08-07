@@ -231,10 +231,6 @@ public class CdrFlatFileImportScript extends Script {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-        	rejectFile.close();
-            br.close();
-            fread.close();
         }
 
     }

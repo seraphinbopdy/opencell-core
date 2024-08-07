@@ -237,6 +237,7 @@ import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.MatchingTypeEnum;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.payments.OtherCreditAndCharge;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
@@ -465,6 +466,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	
 	@Inject
 	private MethodCallingUtils methodCallingUtils;
+	
+	@Inject
+	private OCCTemplateService occtemplateService;
 	/**
      * folder for adjustment pdf.
      */
@@ -8028,9 +8032,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
 								matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), advAccountOperation.getId(), paymentAo.getUnMatchingAmount());
 								closedAdv.setStatus(AccountOperationStatus.CLOSED);
 							}
-							newAo.setStatus(AccountOperationStatus.CLOSED);
-							advAccountOperation.setStatus(AccountOperationStatus.CLOSED);
 						}
+						newAo.setStatus(AccountOperationStatus.CLOSED);
+						advAccountOperation.setStatus(AccountOperationStatus.CLOSED);
 						
 					} catch (Exception e) {
 						log.error("error while matching the operation for ao id : " + ao.getId(), e);
@@ -8078,6 +8082,76 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			return;
 		}
 		getEntityManager().createNamedQuery("Invoice.abandoneInvoices").setParameter("ids", invoiceIds).executeUpdate();
+	}
+	
+	public void rejectAdv(AccountOperation accountOperation){
+		if(accountOperation == null) {
+			throw new BusinessApiException("To reject an advance, you must provide the account operation.");
+		}
+		// get list of matchinf code id to get all matching amounts
+		List<Long> amountCodeIds = accountOperation.getMatchingAmounts().stream().map(MatchingAmount::getMatchingCode).map(MatchingCode::getId).collect(Collectors.toList());
+		// find maching codes
+		List<MatchingCode> matchingCodes = matchingCodeService.findByIds(amountCodeIds);
+		if(CollectionUtils.isEmpty(matchingCodes)) return;
+		// extract all record invoice that has the same maching code
+		List<RecordedInvoice> recordedInvoices = matchingCodes.stream()
+																.flatMap(mc -> mc.getMatchingAmounts().stream())
+																.filter(ao -> ao.getAccountOperation() != null && ao.getAccountOperation().getType().contentEquals("I"))
+																.map(ma -> (RecordedInvoice) ma.getAccountOperation())
+																.collect(toList());
+		if(CollectionUtils.isEmpty(recordedInvoices)) {
+			return;
+		}
+		// extract all ADV related to the invoice COM
+		List<Invoice> advInvoices = recordedInvoices.stream().map(RecordedInvoice::getInvoice)
+															.flatMap(inv -> inv.getLinkedInvoices().stream())
+															.filter(li -> li.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV"))
+															.map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
+		if(CollectionUtils.isNotEmpty(advInvoices)) {
+			Long customerId = accountOperation.getCustomerAccount().getId();
+			String customerCode = accountOperation.getCustomerAccount().getCode();
+			advInvoices.forEach(adv -> {
+				// if the adv is closed
+				RecordedInvoice advRecord = adv.getRecordedInvoice();
+					// get all PAY_ADV from adv Record matching
+					List<Long> advMatchingAmountIds = advRecord.getMatchingAmounts().stream().map(MatchingAmount::getMatchingCode).map(MatchingCode::getId).collect(Collectors.toList());
+					List<MatchingAmount> matchingAmountsAdvs = matchingCodeService.findByIds(advMatchingAmountIds)
+																					.stream()
+																					.flatMap(mc -> mc.getMatchingAmounts().stream())
+																					.filter(ma -> ma.getAccountOperation() != null && ma.getAccountOperation().getType().contentEquals("P"))
+																					.collect(toList());
+					List<Long> payAdvIds = new ArrayList<>();
+					// create a OCC REJ_ADV
+					OCCTemplate occRejAdv = occtemplateService.findByCode("REJ_ADV");
+					if(occRejAdv == null) {
+						throw new EntityDoesNotExistsException(OCCTemplate.class, "REJ_ADV");
+					}
+					OtherCreditAndCharge rejAdv = otherCreditAndChargeService.addOCC(occRejAdv.getCode(), null, accountOperation.getCustomerAccount(), advRecord.getAmount(), new Date());
+					List<Long> rejIos = new ArrayList<>();
+					rejIos.add(rejAdv.getId());
+					if(CollectionUtils.isNotEmpty(matchingAmountsAdvs)) {
+						// get all PAY_ADV from adv Record matching
+						List<AccountOperation> payAdvs = matchingAmountsAdvs.stream().map(MatchingAmount::getAccountOperation).collect(toList());
+						// unmatch all PAY_ADV
+						payAdvs.forEach(payAdv -> {
+							matchingCodeService.unmatchingOperationAccount(payAdv);
+							// match the REJ_ADV with the ADV
+							try {
+								matchingCodeService.matchOperations(customerId, customerCode, rejIos,payAdv.getId(), payAdv.getUnMatchingAmount());
+								rejIos.clear();
+								if(payAdv.getStatus() == AccountOperationStatus.CLOSED) {
+									OtherCreditAndCharge closedAdv2 = otherCreditAndChargeService.addOCC("CLOSED_ADV", null, accountOperation.getCustomerAccount(), advRecord.getUnMatchingAmount(), new Date());
+									closedAdv2.setCode("CLOSED_ADV2");
+									rejIos.add(advRecord.getId());
+									matchingCodeService.matchOperations(customerId, customerCode, rejIos,closedAdv2.getId(), closedAdv2.getUnMatchingAmount());
+								}
+							} catch (Exception e) {
+								throw new BusinessApiException(e.getMessage());
+							}
+						});
+					}
+			});
+		}
 	}
 }
 

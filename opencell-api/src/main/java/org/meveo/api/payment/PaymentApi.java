@@ -105,6 +105,7 @@ import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.payments.*;
 import org.meveo.model.scripts.ScriptInstance;
+import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
@@ -179,13 +180,15 @@ public class PaymentApi extends BaseApi {
 	
 	@Inject
 	private RejectedPaymentService rejectedPaymentService;
+	@Inject
+	private InvoiceService invoiceService;
 
 	private static final String PAYMENT_GATEWAY_NOT_FOUND_ERROR_MESSAGE = "Payment gateway not found";
 	private static final String PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE = "Payment rejection code not found";
 	private final RejectionCodeMapper rejectionCodeMapper = new RejectionCodeMapper();
 	private final RejectionActionMapper rejectionActionMapper = new RejectionActionMapper();
 	private final RejectionGroupMapper groupMapper = new RejectionGroupMapper();
-
+	
 	/**
      * @param paymentDto payment object which encapsulates the input data sent by client
      * @return the id of payment if created successful otherwise null
@@ -1324,7 +1327,7 @@ public class PaymentApi extends BaseApi {
 					+ " not found for gateway[code=" + payment.getPaymentGateway().getCode() + "]");
 		}
 		try {
-
+			invoiceService.rejectAdv(payment);
 			OCCTemplate occTemplate = paymentService.getOCCTemplateRejectPayment(payment);
 			matchingCodeService.unmatchingByAOid(payment.getId());
 

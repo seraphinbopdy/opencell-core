@@ -76,6 +76,7 @@ import org.meveo.util.ApplicationProvider;
 import org.meveo.util.MeveoParamBean;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import java.math.BigDecimal;
@@ -892,6 +893,7 @@ public class AccountHierarchyApi extends BaseApi {
      * @throws MeveoApiException meveo api exception
      * @throws BusinessException business exception
      */
+    @TransactionAttribute
     public void customerHierarchyUpdate(CustomerHierarchyDto postData) throws MeveoApiException, BusinessException {
         if (postData.getSellers() == null || postData.getSellers().getSeller().isEmpty()) {
             missingParameters.add("sellers");
@@ -908,7 +910,8 @@ public class AccountHierarchyApi extends BaseApi {
             currencyApi.findOrCreate(sellerDto.getCurrencyCode());
             languageApi.findOrCreate(sellerDto.getLanguageCode());
 
-            methodCallingUtils.callMethodInNewTx(() -> sellerApi.createOrUpdate(sellerDto));
+            sellerApi.createOrUpdate(sellerDto);
+            sellerService.getEntityManager().flush();
 
             // customers
             if (sellerDto.getCustomers() != null) {
@@ -922,7 +925,8 @@ public class AccountHierarchyApi extends BaseApi {
                     } else {
                         customerDto.setSeller(sellerDto.getCode());
                     }
-                    methodCallingUtils.callMethodInNewTx(() -> customerApi.createOrUpdatePartial(customerDto));
+                    customerApi.createOrUpdatePartial(customerDto);
+                    customerService.getEntityManager().flush();
 
                     // customerAccounts
                     if (customerDto.getCustomerAccounts() != null) {
@@ -937,7 +941,8 @@ public class AccountHierarchyApi extends BaseApi {
                                 customerAccountDto.setCustomer(customerDto.getCode());
                             }
 
-                            methodCallingUtils.callMethodInNewTx(() -> customerAccountApi.createOrUpdatePartial(customerAccountDto));
+                            customerAccountApi.createOrUpdatePartial(customerAccountDto);
+                            customerAccountService.getEntityManager().flush();
 
                             // billing accounts
                             if (customerAccountDto.getBillingAccounts() != null) {
@@ -952,7 +957,8 @@ public class AccountHierarchyApi extends BaseApi {
                                     } else {
                                         billingAccountDto.setCustomerAccount(customerAccountDto.getCode());
                                     }
-                                    methodCallingUtils.callMethodInNewTx(() -> billingAccountApi.createOrUpdatePartial(billingAccountDto));
+                                    billingAccountApi.createOrUpdatePartial(billingAccountDto);
+                                    billingAccountService.getEntityManager().flush();
 
                                     // user accounts
                                     if (billingAccountDto.getUserAccounts() != null) {
@@ -967,7 +973,8 @@ public class AccountHierarchyApi extends BaseApi {
                                             } else {
                                                 userAccountDto.setBillingAccount(billingAccountDto.getCode());
                                             }
-                                            methodCallingUtils.callMethodInNewTx(() -> userAccountApi.createOrUpdatePartial(userAccountDto));
+                                            userAccountApi.createOrUpdatePartial(userAccountDto);
+                                            userAccountService.getEntityManager().flush();
 
                                             // subscriptions
                                             if (userAccountDto.getSubscriptions() != null) {
@@ -2225,7 +2232,9 @@ public class AccountHierarchyApi extends BaseApi {
 			if(subscriptionDto.getStatus() == null) {
 				return;
 			}
-		}
+		} else if(subscriptionDto.getStatus() == null) {
+            return;
+        }
 		String errorMsg = "Transition from status : " + (subscription != null ? subscription.getStatus() : null) + " to status : " + subscriptionDto.getStatus() + " is not allowed";
 		if(subscription != null) {
 			log.info("Subscription : {}, from status : {}, to status : {}", subscription.getCode(), subscription.getStatus(), subscriptionDto.getStatus());

@@ -26,8 +26,7 @@ public class AttributeRsImpl extends BaseRs implements AttributeRs {
         GetAttributeDtoResponse result = new GetAttributeDtoResponse();
         try {
         	Attribute att = attributeApi.create(attributeDto);
-        	result.setId(att.getId());
-        	result.setCode(att.getCode());
+			result = attributeApi.findByCode(att.getCode());
         	return Response.ok(result).build();
         } catch(MeveoApiException e) {
 			return errorResponse(e, result.getActionStatus());
@@ -38,7 +37,8 @@ public class AttributeRsImpl extends BaseRs implements AttributeRs {
 	public Response update(AttributeDTO attributeDto) {
 		GetAttributeDtoResponse result = new GetAttributeDtoResponse();
 	        try {
-	        	attributeApi.update(attributeDto);
+				Attribute att = attributeApi.update(attributeDto);
+				result = attributeApi.findByCode(att.getCode());
 	        	return Response.ok(result).build();
 	        } catch(MeveoApiException e) {
 				return errorResponse(e, result.getActionStatus());

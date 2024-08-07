@@ -255,7 +255,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 			invoice.getInvoiceLines().add(invoiceLine);
 			result.addInvoiceLines(invoiceLineResource);
 		}
-		invoiceService.calculateInvoice(invoice);
+		invoiceService.calculateInvoice(invoice, false);
 		invoiceService.updateBillingRunStatistics(invoice);
 		result.skipValidation(invoiceLinesInput.getSkipValidation());
 		return result.build();
@@ -290,7 +290,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
         // Update Invoice Line
 		invoiceLinesService.updateInvoiceLine(invoiceLine, invoiceLineInput.getInvoiceLine(), discountPlan);
 		invoiceService.getEntityManager().flush();
-		invoiceService.calculateInvoice(invoice);
+		invoiceService.calculateInvoice(invoice, false);
 		BigDecimal lastApliedRate = invoiceService.getCurrentRate(invoice,invoice.getInvoiceDate());
 		invoiceService.refreshAdvanceInvoicesConvertedAmount(invoice,lastApliedRate);
 		invoiceService.updateBillingRunStatistics(invoice);
@@ -302,7 +302,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	 */
 	public void removeLine(Invoice invoice, Long lineId) {
 		invoiceLinesService.remove(invoice, lineId);
-		invoiceService.calculateInvoice(invoice);
+		invoiceService.calculateInvoice(invoice, false);
         invoiceService.updateBillingRunStatistics(invoice);
 	}
 
@@ -346,16 +346,16 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 			populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), updateInvoice, true);
 			invoiceService.update(updateInvoice);
 		}
-        invoiceService.calculateInvoice(updateInvoice);
+		invoiceService.calculateInvoice(updateInvoice, false);
 
-        return updateInvoice;
+		return updateInvoice;
     }
 
 	/**
 	 * @param invoice
 	 */
 	public void calculateInvoice(Invoice invoice) {
-		invoiceService.calculateInvoice(invoice);
+		invoiceService.calculateInvoice(invoice, true);
         invoiceService.updateBillingRunStatistics(invoice);
 	}
 	
@@ -493,7 +493,9 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 		if(invoice.getLinkedInvoices() != null && !invoice.getLinkedInvoices().isEmpty()) {
 			invoice.getLinkedInvoices().forEach(relatedInvoice -> {
-				if(VALIDATED == relatedInvoice.getLinkedInvoiceValue().getStatus()) {
+				if(relatedInvoice.getLinkedInvoiceValue().getInvoiceType() != null
+						&& !ADV.equals(invoiceTypeService.refreshOrRetrieve(relatedInvoice.getLinkedInvoiceValue().getInvoiceType()).getCode())
+						&& VALIDATED == relatedInvoice.getLinkedInvoiceValue().getStatus()) {
 					throw new BadRequestException("You cannot create ADJ on invoice with an already validated ADJ");
 				}
 			});

@@ -476,15 +476,23 @@ public class JobExecutionService extends BaseService {
             if (jobInstance.getClusterBehavior() == JobClusterBehaviorEnum.SPREAD_OVER_CLUSTER_NODES
                     && !IteratorBasedJobBean.areAllMessagesDelivered(jobInstance.getCode(), JobExecutionService.getJobQueueName(jobInstance.getCode()))) {
 
+                log.info("Will start a previously not finished job {} as worker node on node {}. Previous execution status was {},", jobInstance.getCode(), nodeName, jobExecutionResult.getStatus());
+
                 Map<String, Object> jobParams = MapUtils.putAll(new HashMap<String, Object>(), new Object[] { Job.JOB_PARAM_HISTORY_PARENT_ID, jobExecutionResult.getId() });
                 jobExecutionService.executeJob(jobInstance, jobParams, JobLauncherEnum.WORKER, false);
 
                 // For jobs that run in parallel - launch it as regular job
             } else if (jobInstance.getClusterBehavior() == JobClusterBehaviorEnum.RUN_IN_PARALLEL) {
+
+                log.info("Will start a previously not finished job {} as regular node on node {}. Previous execution status was {},", jobInstance.getCode(), nodeName, jobExecutionResult.getStatus());
+
                 jobExecutionService.executeJob(jobInstance, null, JobLauncherEnum.INCOMPLETE, false);
 
                 // For jobs that run one at a time - check if job that was running on the same node and launch it as a regular job
             } else if (jobInstance.getClusterBehavior() == JobClusterBehaviorEnum.LIMIT_TO_SINGLE_NODE && nodeName.equals(jobExecutionResult.getNodeName())) {
+
+                log.info("Will start a previously not finished job {} as regular node on node {}. Previous execution status was {},", jobInstance.getCode(), nodeName, jobExecutionResult.getStatus());
+
                 jobExecutionService.executeJob(jobInstance, null, JobLauncherEnum.INCOMPLETE, false);
             }
         }

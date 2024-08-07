@@ -68,7 +68,7 @@ public class RessourceServlet extends HttpServlet {
     /**
      * Process HEAD request. This returns the same headers as GET request, but without content.
      */
-    protected void doHead(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doHead(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         // Process request without content.
         processRequest(request, response, false);
     }
@@ -76,7 +76,7 @@ public class RessourceServlet extends HttpServlet {
     /**
      * Process GET request.
      */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         // Process request with content.
         processRequest(request, response, true);
     }
@@ -89,7 +89,7 @@ public class RessourceServlet extends HttpServlet {
      * @param content Whether the request body should be written (GET) or not (HEAD).
      * @throws IOException If something fails at I/O level.
      */
-    private void processRequest(HttpServletRequest request, HttpServletResponse response, boolean content) throws IOException {
+    private void processRequest(HttpServletRequest request, HttpServletResponse response, boolean content) {
 
     	try {
 	        // Get requested file by path info.
@@ -382,13 +382,15 @@ public class RessourceServlet extends HttpServlet {
 	            close(output);
 	        }
     	} catch (IOException e) {
-            // Log the exception for debugging purposes
-            log.error(e.getMessage());
+    		// Log the exception for debugging purposes
+            log.error("Error processing request", e);
             
-            // Return an error response to the client
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().println("Internal server error occurred while processing the request.");
-        }      
+            try {
+            	// Return an error response to the client
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error occurred while processing the request.");
+            } catch (IOException ex) {
+                log.error("Error sending error response", ex);
+            }        }      
     }
 
     // Helpers (can be refactored to public utility class) ----------------------------------------

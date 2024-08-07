@@ -9,7 +9,7 @@ import org.meveo.apiv2.dunning.DunningAction;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
-@Path("/dunning/dunningaction")
+@Path("/v2/dunning/dunningaction")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface DunningActionResource {

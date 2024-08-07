@@ -15,6 +15,8 @@ public class Attribute {
     @XmlAttribute
 	private String code;
     @XmlAttribute
+   	private String description;
+    @XmlAttribute
 	private String stringValue;
     private Date dateValue;
     private Double doubleValue;
@@ -24,6 +26,7 @@ public class Attribute {
     
     public Attribute(org.meveo.model.cpq.QuoteAttribute attribute,CustomFieldsDto customFields) {
     	this.code = attribute.getAttribute().getCode();
+    	this.description=attribute.getAttribute().getDescription();
     	this.stringValue = attribute.getStringValue();
     	this.dateValue=attribute.getDateValue();
     	this.doubleValue=attribute.getDoubleValue();
@@ -87,6 +90,15 @@ public class Attribute {
 		this.customFields = customFields;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	
 	
     
 }

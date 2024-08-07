@@ -25,7 +25,7 @@ import org.meveo.apiv2.payments.RejectionPayment;
 import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.refund.CardRefund;
 
-@Path("/payment")
+@Path("/v2/payment")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface PaymentResource {
@@ -268,6 +268,8 @@ public interface PaymentResource {
                     @ApiResponse(responseCode = "500", description = "Rejection action sequence update failed")
             })
     Response createRejectionPayment(@Parameter(required = true) RejectionPayment rejectionPayment);
+
+
 
     @POST
     @Path("/{id}/retry")

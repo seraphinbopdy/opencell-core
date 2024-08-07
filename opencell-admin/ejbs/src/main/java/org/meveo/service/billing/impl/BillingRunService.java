@@ -1802,7 +1802,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         Integer countBA = ((Long) result[3]).intValue();
         Integer countInvoices = ((Long) result[4]).intValue();
 
-        billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null, countBA, null, null, amountWithTax, amountWithoutTax, amountTax, countInvoices);
+        billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null, countBA, billingRun.getStatus(), null, amountWithTax, amountWithoutTax, amountTax, countInvoices);
         return billingRun;
     }
 }

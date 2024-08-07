@@ -29,8 +29,9 @@ public class GroupedAttributeRsImpl  extends BaseRs implements GroupedAttributes
 	        	result.getActionStatus().setEntityId(groupeAttribute.getId());
 	        	return Response.ok(result).build();
 	        } catch (Exception e) {
-	        	return errorResponse(new MeveoApiException(e), result.getActionStatus());
+	        	processException(e, new ActionStatus());
 	        }
+		  return Response.noContent().build();
 	}
 
 	@Override

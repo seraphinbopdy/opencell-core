@@ -113,18 +113,20 @@ public class NativeExpressionFactory {
                     } else {
                         operator = (FilterOperatorEnum) nestedFilterItems.getOrDefault("$operator", FilterOperatorEnum.AND);
                     }
-            		queryBuilder.startNestedFilter(operator);
-                    
-                    Map<String, Object> cfFilters = PersistenceService.extractCustomFieldsFilters(nestedFilterItems);
-                    Map<String, Object> filters = new HashMap<>(nestedFilterItems);
-                    if(MapUtils.isNotEmpty(cfFilters)) {
-                        filters.putAll(cfFilters);
+                    if(nestedFilterItems.keySet().stream().anyMatch(k -> !"$OPERATOR".equalsIgnoreCase(k))) {
+                        queryBuilder.startNestedFilter(operator);
+
+                        Map<String, Object> cfFilters = PersistenceService.extractCustomFieldsFilters(nestedFilterItems);
+                        Map<String, Object> filters = new HashMap<>(nestedFilterItems);
+                        if(MapUtils.isNotEmpty(cfFilters)) {
+                            filters.putAll(cfFilters);
+                        }
+                        filters.keySet().stream()
+                               .sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
+                               .filter(orItemKey -> filters.get(orItemKey) != null && !"$OPERATOR".equalsIgnoreCase(orItemKey))
+                               .forEach(orItemKey -> addFilters(orItemKey, filters.get(orItemKey)));
+                        queryBuilder.endNestedFilter();
                     }
-                    filters.keySet().stream()
-	                    						.sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
-	                    						.filter(orItemKey -> filters.get(orItemKey) != null && !"$OPERATOR".equalsIgnoreCase(orItemKey))
-	                    						.forEach(orItemKey -> addFilters(orItemKey, filters.get(orItemKey)));
-            		queryBuilder.endNestedFilter();
                 } else if (key.startsWith(PersistenceService.SEARCH_SQL)) {
                     queryBuilder.addSearchSqlFilters(value);
                 } else if (key.startsWith(PersistenceService.SEARCH_OR)) {

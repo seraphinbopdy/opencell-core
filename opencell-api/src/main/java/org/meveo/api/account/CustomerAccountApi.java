@@ -398,7 +398,11 @@ public class CustomerAccountApi extends AccountEntityApi {
 			boolean isFirst = true;
 
 			for (PaymentMethodDto paymentMethodDto : postData.getPaymentMethods()) {
-				if (isFirst) {
+                if(paymentMethodDto.getPaymentMethodType() == null) {
+                    throw new MissingParameterException("methodOfPayment.paymentMethodType");
+                }
+
+                if (isFirst) {
 					paymentMethodDto.setPreferred(true);
 					isFirst = false;
 				}
@@ -421,6 +425,16 @@ public class CustomerAccountApi extends AccountEntityApi {
 				} else {
 					PaymentMethod paymentMethod = customerAccount.getPaymentMethods().get(index);
 					paymentMethod.updateWith(paymentMethodFromDto);
+                    try {
+                        populateCustomFields(paymentMethodDto.getCustomFields(), paymentMethod, false, true);
+
+                    } catch (MissingParameterException | InvalidParameterException e) {
+                        log.error("Failed to associate custom field instance to an entity: {}", e.getMessage());
+                        throw e;
+                    } catch (Exception e) {
+                        log.error("Failed to associate custom field instance to an entity", e);
+                        throw e;
+                    }
 					paymentMethodsFromDto.add(paymentMethod);
 					customerAccount.addPaymentMethodToAudit(new Object() {
 					}.getClass().getEnclosingMethod().getName(), paymentMethod);

@@ -1107,6 +1107,13 @@ public class InvoiceLine extends AuditableCFEntity {
 			setDiscountAmount(toFunctional(transactionalDiscountAmount, appliedRate));
 			setRawAmount(toFunctional(transactionalRawAmount, appliedRate));
 			setUnitPrice(toFunctional(transactionalUnitPrice, appliedRate));
+		}else{
+			setTransactionalAmountWithoutTax(amountWithoutTax);
+			setTransactionalAmountWithTax(amountWithTax);
+			setTransactionalAmountTax(amountTax);
+			setTransactionalDiscountAmount(discountAmount);
+			setTransactionalRawAmount(rawAmount);
+			setTransactionalUnitPrice(unitPrice);
 		}
 	}
 

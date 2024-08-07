@@ -44,6 +44,7 @@ import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.RecordedInvoice;
+import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.WriteOff;
 import org.meveo.model.securityDeposit.AuxiliaryAccounting;
 import org.meveo.model.securityDeposit.FinanceSettings;
@@ -584,8 +585,8 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
     }
 
     public void assignMatchingCodeToJournalEntries(AccountOperation ao, List<JournalEntry> createdEntries) {
-        if (!(ao instanceof RecordedInvoice || ao instanceof Payment)) {
-            log.warn("AccountOperation id={}-type={} is not managed by Assigning matching code processing, Expected type : RecordedInvoice and Payment.", ao.getId(), ao.getType());
+        if (!(ao instanceof RejectedPayment || ao instanceof RecordedInvoice || ao instanceof Payment)) {
+            log.warn("AccountOperation id={}-type={} is not managed by Assigning matching code processing, Expected type : RecordedInvoice, Payment and RejectedPayment.", ao.getId(), ao.getType());
             return;
         }
 
@@ -608,10 +609,7 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
         lookupMatchedAO(ao.getMatchingAmounts(), aoIdWithTransactionCategory, processedMatchingAmounts, isValidAo);
 
         if (isValidAo.get()) {
-            aoIdWithTransactionCategory.forEach((aoId, transactionCategory) -> aoJEs.addAll(getEntityManager().createNamedQuery(GET_BY_ACCOUNT_OPERATION_AND_DIRECTION_QUERY)
-                    .setParameter(PARAM_ID_AO, aoId)
-                    .setParameter(PARAM_DIRECTION, JournalEntryDirectionEnum.getValue(transactionCategory))
-                    .getResultList()));
+            aoIdWithTransactionCategory.forEach((aoId, transactionCategory) -> aoJEs.addAll(this.findByAoAndDirection(aoId, JournalEntryDirectionEnum.getValue(transactionCategory))));
 
             // add passed journalEntries
             aoJEs.addAll(getJournalEntries(ao, createdEntries));
@@ -770,6 +768,20 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
                                     });
                         }
                 );
+    }
+
+    /**
+     * 
+     * 
+     * @param aoID
+     * @param direction
+     * @return
+     */
+    public List<JournalEntry> findByAoAndDirection(Long aoID, JournalEntryDirectionEnum direction) {
+        return getEntityManager().createNamedQuery(GET_BY_ACCOUNT_OPERATION_AND_DIRECTION_QUERY)
+                                 .setParameter(PARAM_ID_AO, aoID)
+                                 .setParameter(PARAM_DIRECTION, direction)
+                                 .getResultList();
     }
 
 }

@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -220,7 +221,7 @@ public class AttributeService extends BusinessService<Attribute>{
     private void checkListAttribute(ProductVersionAttribute pvAttribute, AttributeValue<?> attributeValue) {
         // Check value content
         // List values
-        if (attributeValue.getRealValue() == null) {
+        if (StringUtils.isBlank(attributeValue.getValue())) {
             return;
         }
 
@@ -233,8 +234,10 @@ public class AttributeService extends BusinessService<Attribute>{
             if (AttributeTypeEnum.LIST_TEXT == pvAttribute.getAttribute().getAttributeType() && !pvAttribute.getAttribute().getAllowedValues().contains(attributeValue.getRealValue())) {
                 throw new BusinessApiException("The value '" + attributeValue.getRealValue() + "' is not part of allowed values " + pvAttribute.getAttribute().getAllowedValues());
             }else if(AttributeTypeEnum.LIST_NUMERIC == pvAttribute.getAttribute().getAttributeType()){
-	           boolean valueExist = Optional.ofNullable(pvAttribute.getAttribute()
-                                                                   .getAllowedValues()).orElse(Collections.emptyList()).stream().anyMatch(value -> new BigDecimal(value).compareTo(new BigDecimal(attributeValue.getRealValue().toString())) == 0);
+                boolean valueExist = Optional.ofNullable(pvAttribute.getAttribute().getAllowedValues())
+                                             .orElse(Collections.emptyList())
+                                             .stream()
+                                             .anyMatch(value -> new BigDecimal(value).compareTo(BigDecimal.valueOf((double)attributeValue.getValue())) == 0);
 			   if(!valueExist){
 				   throw new BusinessApiException("The value '" + attributeValue.getRealValue() + "' is not part of allowed values " + pvAttribute.getAttribute().getAllowedValues());
 			   }
@@ -259,7 +262,7 @@ public class AttributeService extends BusinessService<Attribute>{
         }
         // Check value type
         if (pvAttribute.getValidationType() == AttributeValidationType.REGEX && !attributeValue.getRealValue().toString().matches(pvAttribute.getValidationPattern())) {
-            throw new BusinessApiException("The attribute " + pvAttribute.getAttribute().getCode() + " does not meet the regEx " + pvAttribute.getValidationPattern());
+            throw new BusinessException(Objects.requireNonNullElse(pvAttribute.getValidationLabel(),"The attribute " + pvAttribute.getAttribute().getCode() + " does not meet the regEx " + pvAttribute.getValidationPattern()));
         }
     }
 
@@ -324,7 +327,7 @@ public class AttributeService extends BusinessService<Attribute>{
         }
         Pattern emailPattern = Pattern.compile(EMAIL_REGEX_VALIDATION);
 
-        return emailPattern.matcher(value.toString()).matches();
+        return emailPattern.matcher(value.toString().toLowerCase()).matches();
     }
 
     private boolean isValidPhone(Object value) {

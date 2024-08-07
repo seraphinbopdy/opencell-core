@@ -162,7 +162,7 @@ public class PaymentService extends PersistenceService<Payment> {
      */
     public PaymentResponseDto payByCardToken(CustomerAccount customerAccount, Long ctsAmount, List<Long> aoIdsToPay, boolean createAO, boolean matchingAO,
             PaymentGateway paymentGateway) throws Exception {
-        return doPayment(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, null, null, null, null, null, true, PaymentMethodEnum.CARD);
+        return doPayment(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, null, null, null, null, null, true, PaymentMethodEnum.CARD, false);
     }
 
     /**
@@ -189,7 +189,7 @@ public class PaymentService extends PersistenceService<Payment> {
             throws Exception {
 
         return doPayment(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, cardNumber, ownerName, cvv, expiryDate, cardType, true,
-            PaymentMethodEnum.CARD);
+            PaymentMethodEnum.CARD, false);
     }
 
     /**
@@ -208,7 +208,7 @@ public class PaymentService extends PersistenceService<Payment> {
      */
     public PaymentResponseDto payByMandat(CustomerAccount customerAccount, long ctsAmount, List<Long> aoIdsToPay, boolean createAO, boolean matchingAO,
             PaymentGateway paymentGateway) throws Exception {
-        return doPayment(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, null, null, null, null, null, true, PaymentMethodEnum.DIRECTDEBIT);
+        return doPayment(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, null, null, null, null, null, true, PaymentMethodEnum.DIRECTDEBIT, false);
     }
 
     /**
@@ -225,7 +225,7 @@ public class PaymentService extends PersistenceService<Payment> {
      */
     public PaymentResponseDto refundByMandat(CustomerAccount customerAccount, long ctsAmount, List<Long> aoIdsToPay, boolean createAO, boolean matchingAO,
             PaymentGateway paymentGateway) throws Exception {
-        return doPayment(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, null, null, null, null, null, false, PaymentMethodEnum.DIRECTDEBIT);
+        return doPayment(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, null, null, null, null, null, false, PaymentMethodEnum.DIRECTDEBIT, false);
     }
 
     /**
@@ -259,7 +259,7 @@ public class PaymentService extends PersistenceService<Payment> {
      */
     public PaymentResponseDto refundByCardToken(CustomerAccount customerAccount, Long ctsAmount, List<Long> aoIdsToRefund, boolean createAO, boolean matchingAO,
             PaymentGateway paymentGateway) throws Exception {
-        return doPayment(customerAccount, ctsAmount, aoIdsToRefund, createAO, matchingAO, paymentGateway, null, null, null, null, null, false, PaymentMethodEnum.CARD);
+        return doPayment(customerAccount, ctsAmount, aoIdsToRefund, createAO, matchingAO, paymentGateway, null, null, null, null, null, false, PaymentMethodEnum.CARD, false);
     }
 
     /**
@@ -285,7 +285,7 @@ public class PaymentService extends PersistenceService<Payment> {
             CreditCardTypeEnum cardType, List<Long> aoToRefund, boolean createAO, boolean matchingAO, PaymentGateway paymentGateway)
             throws Exception {
         return doPayment(customerAccount, ctsAmount, aoToRefund, createAO, matchingAO, paymentGateway, cardNumber, ownerName, cvv, expiryDate, cardType, false,
-            PaymentMethodEnum.CARD);
+            PaymentMethodEnum.CARD, false);
     }
 
     /**
@@ -328,7 +328,8 @@ public class PaymentService extends PersistenceService<Payment> {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     private PaymentResponseDto makeTheRealPayment(CustomerAccount customerAccount, Long ctsAmount, List<Long> aoIdsToPay, boolean createAO, boolean matchingAO, PaymentGateway paymentGateway,
-    		String cardNumber, String ownerName, String cvv, String expiryDate, CreditCardTypeEnum cardType, boolean isPayment, PaymentMethodEnum paymentMethodType,Long aoPaymentId)
+    		String cardNumber, String ownerName, String cvv, String expiryDate, CreditCardTypeEnum cardType,
+                                                  boolean isPayment, PaymentMethodEnum paymentMethodType,Long aoPaymentId, boolean rejectPayment)
     				throws Exception,BusinessException {
     	
         PaymentResponseDto doPaymentResponseDto = new PaymentResponseDto();
@@ -339,7 +340,16 @@ public class PaymentService extends PersistenceService<Payment> {
         try {
             boolean isNewCard = !StringUtils.isBlank(cardNumber);
             AccountOperation aoToPayRefund = accountOperationService.findById(aoIdsToPay.get(0));
-            preferredMethod = customerAccountService.getPreferredPaymentMethod(aoToPayRefund, paymentMethodType);
+            if(rejectPayment) {
+                preferredMethod = customerAccount
+                        .getPaymentMethods()
+                        .stream()
+                        .filter(pm -> paymentMethodType.equals(pm.getPaymentType()))
+                        .findFirst()
+                        .orElseThrow(() -> new BusinessException("No payment method found for customer account"));
+            } else {
+                preferredMethod = customerAccountService.getPreferredPaymentMethod(aoToPayRefund, paymentMethodType);
+            }
             if (preferredMethod instanceof HibernateProxy) {
                 preferredMethod = (PaymentMethod) ((HibernateProxy) preferredMethod).getHibernateLazyInitializer()
                         .getImplementation();
@@ -526,7 +536,7 @@ public class PaymentService extends PersistenceService<Payment> {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public PaymentResponseDto doPayment(CustomerAccount customerAccount, Long ctsAmount, List<Long> aoIdsToPay, boolean createAO, boolean matchingAO, PaymentGateway paymentGateway,
-			String cardNumber, String ownerName, String cvv, String expiryDate, CreditCardTypeEnum cardType, boolean isPayment, PaymentMethodEnum paymentMethodType)
+			String cardNumber, String ownerName, String cvv, String expiryDate, CreditCardTypeEnum cardType, boolean isPayment, PaymentMethodEnum paymentMethodType, boolean rejectPayment)
 			throws Exception {
 
 		PaymentResponseDto doPaymentResponseDto = new PaymentResponseDto();
@@ -538,7 +548,7 @@ public class PaymentService extends PersistenceService<Payment> {
 
 		if (!createAO || !StringUtils.isBlank(aoId)) {
 			doPaymentResponseDto = makeTheRealPayment(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, cardNumber, ownerName, cvv, expiryDate,
-					cardType, isPayment, paymentMethodType, aoId);
+					cardType, isPayment, paymentMethodType, aoId, false);
 			if (doPaymentResponseDto.getPaymentStatus() == PaymentStatusEnum.ACCEPTED || doPaymentResponseDto.getPaymentStatus() == PaymentStatusEnum.PENDING) {					
 				updatePaymentAO(aoId, doPaymentResponseDto);
 			}			
@@ -695,8 +705,10 @@ public class PaymentService extends PersistenceService<Payment> {
             throw new BusinessException(doPaymentResponseDto.getErrorCode());
         }
         
-        paymentHistoryService.addHistory(customerAccount, null, refund, ctsAmount, doPaymentResponseDto.getPaymentStatus(),doPaymentResponseDto.getErrorCode(), doPaymentResponseDto.getErrorMessage(),
-                doPaymentResponseDto.getPaymentID(), errorType, operationCat, paymentGateway.getCode(), preferredMethod,aoIdsToPay);
+		paymentHistoryService.addHistory(customerAccount, null, refund, ctsAmount,
+				(doPaymentResponseDto.getPaymentStatus() != null) ? doPaymentResponseDto.getPaymentStatus()	: PaymentStatusEnum.PENDING,
+				doPaymentResponseDto.getErrorCode(), doPaymentResponseDto.getErrorMessage(), doPaymentResponseDto.getPaymentID(), 
+				errorType, operationCat, paymentGateway.getCode(), preferredMethod,	aoIdsToPay);
         
         return aoPaymentId;
     }

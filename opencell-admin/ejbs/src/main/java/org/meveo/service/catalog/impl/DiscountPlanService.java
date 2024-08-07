@@ -246,11 +246,11 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 				amounts = NumberUtils.computeDerivedAmounts(walletOperationDiscountAmount, walletOperationDiscountAmount, taxPercent, appProvider.isEntreprise(), appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
     			discountedAmount=discountedAmount!=null?discountedAmount.add(walletOperationDiscountAmount).multiply(walletOperation.getQuantity()):null;
     			
-    		     log.info("calculateDiscountplanItems walletOperationDiscountAmount{},unitAmountWithoutTax{} ,discountValue{} ,discountedAmount{} ",walletOperationDiscountAmount,unitAmountWithoutTax,discountValue,discountedAmount);
+    		    log.trace("calculateDiscountplanItems walletOperationDiscountAmount{},unitAmountWithoutTax{} ,discountValue{} ,discountedAmount{} ",walletOperationDiscountAmount,unitAmountWithoutTax,discountValue,discountedAmount);
     			
     		    discountWalletOperation.setUnitAmountTax(walletOperationDiscountAmount);
 				if (discountPlanItem.getDiscountPlanItemType() == DiscountPlanItemTypeEnum.PERCENTAGE) {
-					discountWalletOperation.setAmountWithoutTax(quantity.compareTo(BigDecimal.ZERO)>0?amounts[0].multiply(walletOperation.getQuantity()):BigDecimal.ZERO);
+					discountWalletOperation.setAmountWithoutTax(amounts[0].multiply(walletOperation.getQuantity()));
 					discountWalletOperation.setAmountWithTax(amounts[1].multiply(walletOperation.getQuantity()));
 					discountWalletOperation.setAmountTax(amounts[2].multiply(walletOperation.getQuantity()));
 					discountWalletOperation.setDiscountValue(discountValue.multiply(walletOperation.getQuantity()));

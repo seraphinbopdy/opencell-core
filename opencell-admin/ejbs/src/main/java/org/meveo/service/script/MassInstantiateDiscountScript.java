@@ -142,7 +142,7 @@ public class MassInstantiateDiscountScript  extends Script{
 			}
 			if(discountPlan.getDiscountPlanType() == DiscountPlanTypeEnum.PRODUCT && productCode != null) {
 				subscription.getServiceInstances().forEach(serviceInstance -> discountPlanInstanceService.instantiateDiscountPlan(serviceInstance, discountPlan, null, false));
-			}if(discountPlan.getDiscountPlanType() == DiscountPlanTypeEnum.OFFER && offerProductTemplateCode != null) {
+			}else if(discountPlan.getDiscountPlanType() == DiscountPlanTypeEnum.OFFER && offerProductTemplateCode != null) {
 				discountPlanInstanceService.instantiateDiscountPlan(subscription, discountPlan, null, false);
 			}else{
 				throw new BusinessException("The discount plan type : " + discountPlan.getDiscountPlanType().name() + " is not supported!");

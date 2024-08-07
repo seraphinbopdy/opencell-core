@@ -83,8 +83,11 @@ public class QuoteValidationScript extends ModuleScript {
 		final CpqQuote cpqQuote = cpqQuoteService.findByCode(cpqQuoteTmp.getCode());
 		LOGGER.info("start creation order from quote code {}", cpqQuote.getCode());
 		var quotesVersions = quoteVersionService.findByQuoteIdAndStatusActive(cpqQuote.getId());
-		if(quotesVersions.size() > 1)
+		if(quotesVersions.size() > 1) {
 			throw new BusinessException("More than one quote version is published !!");
+		} else if(quotesVersions.isEmpty()) {
+			throw new BusinessException("No quote version is published !!");
+		}
 		var quoteVersion = quotesVersions.get(0);
 		LOGGER.info("current quote {} with version : {}", cpqQuote.getCode(), quoteVersion.getQuoteVersion());
 		var orderByBillingAccount = new Hashtable<String, List<QuoteOffer>>();

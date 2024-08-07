@@ -1,15 +1,13 @@
 package org.meveo.api.dto.cpq.xml;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 import org.meveo.api.dto.CustomFieldsDto;
-import org.meveo.api.dto.cpq.AttributeDTO;
-import org.meveo.api.dto.cpq.QuoteProductDTO;
 import org.meveo.model.cpq.offer.QuoteOffer;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -21,6 +19,8 @@ public class Offer {
 	private String description; 
 	@XmlElement
 	private String name;
+	@XmlElement
+	private String longDescription; 
 	
 	 private List<Attribute> attributes;
 	 private List<Product> products;
@@ -33,10 +33,19 @@ public class Offer {
 		super();
 		this.code = quoteOffer.getOfferTemplate().getCode();
 		this.description = quoteOffer.getOfferTemplate().getDescription();
+		this.longDescription = quoteOffer.getOfferTemplate().getLongDescription();
 		this.name=quoteOffer.getOfferTemplate().getName();
 		this.customFields = customFields;
 	}
 	
+	
+
+	public void addProduct(Product product) {
+		if(products==null) {
+			products=new ArrayList<>();
+		}
+		products.add(product);
+	}
 	
 	/**
 	 * @return the productLine
@@ -107,6 +116,16 @@ public class Offer {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+
+	public String getLongDescription() {
+		return longDescription;
+	}
+
+
+	public void setLongDescription(String longDescription) {
+		this.longDescription = longDescription;
 	}
 	
 	

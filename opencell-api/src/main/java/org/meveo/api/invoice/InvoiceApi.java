@@ -595,28 +595,36 @@ public class InvoiceApi extends BaseApi {
         }
         if(invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode())) {
             Set<LinkedInvoice> linkedInvoices = invoice.getLinkedInvoices();
-            if (linkedInvoices != null && !linkedInvoices.isEmpty()) {
-                Invoice originalInvoice = linkedInvoices.stream().map(LinkedInvoice::getLinkedInvoiceValue).findFirst().get();
-                if (originalInvoice.getLinkedInvoices() != null && !originalInvoice.getLinkedInvoices().isEmpty()) {
-                    long validatedAdj = originalInvoice.getLinkedInvoices().stream()
-                            .filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getStatus().equals(VALIDATED))
-                            .count();
-                    if (validatedAdj == 1) {
-                        throw new BusinessApiException("Can not validate multiple adjustment on the same Invoice");
-                    }
-                }
+            if(linkedInvoices != null && !linkedInvoices.isEmpty()) {
+               Invoice originalInvoice = linkedInvoices.stream().map(LinkedInvoice::getLinkedInvoiceValue).findFirst().get();
+               if(originalInvoice.getLinkedInvoices() != null && !originalInvoice.getLinkedInvoices().isEmpty()) {
+                   long validatedAdj = originalInvoice.getLinkedInvoices().stream()
+                           .filter(linkedInvoice -> (linkedInvoice.getLinkedInvoiceValue().getInvoiceType() != null
+                                   && !"ADV".equals(linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode())
+                                   && linkedInvoice.getLinkedInvoiceValue().getStatus().equals(VALIDATED)))
+                           .count();
+                   if(validatedAdj == 1) {
+                       throw new BusinessApiException("Can not validate multiple adjustment on the same Invoice");
+                   }
+               }
             }
         }
-        serviceSingleton.validateAndAssignInvoiceNumber(invoiceId, refreshExchangeRate);
+		List<Invoice> advList = invoice.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV")).map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
+	    invoiceService.checkIfAllAdvArePaid(invoice, advList);
+	    serviceSingleton.validateAndAssignInvoiceNumber(invoiceId, refreshExchangeRate);
         Boolean brGenerateAO = ofNullable(invoice.getBillingRun()).map(BillingRun::getGenerateAO).orElse(false);
         if(brGenerateAO || generateAO) {
-            invoiceService.generateRecordedInvoiceAO(invoiceId);
+	        if(advList.isEmpty()) {
+		        invoiceService.generateRecordedInvoiceAO(invoice.getId());
+	        }else{
+		        invoiceService.generateAoFromAdv(invoice, advList) ;
+	        }
         }
         invoiceService.recalculateDatesForValidated(invoiceId);
         //serviceSingleton.triggersJobs(); // Commented to avoid performance issues
 
         Date today = new Date();
-        invoice = invoiceService.refreshOrRetrieve(invoice);
+      //  invoice = invoiceService.findById(invoice.getId());
         
         //Create SD
         if (invoice.getInvoiceType() != null && "SECURITY_DEPOSIT".equals(invoice.getInvoiceType().getCode()) && createSD) {

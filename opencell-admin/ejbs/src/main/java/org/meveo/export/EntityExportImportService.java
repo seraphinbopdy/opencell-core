@@ -2407,6 +2407,10 @@ public class EntityExportImportService implements Serializable {
         String finalVersion = null;
         List<File> tempFiles = new ArrayList<File>();
         TransformerFactory factory = TransformerFactory.newInstance();
+        factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true);
+        factory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
+        factory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalStylesheet", "");
+
         for (Entry<String, String> changesetInfo : getApplicableExportModelVersionChangesets(sourceVersion).entrySet()) {
             String changesetVersion = changesetInfo.getKey();
             String changesetFile = changesetInfo.getValue();

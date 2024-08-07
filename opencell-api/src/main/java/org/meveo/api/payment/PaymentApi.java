@@ -504,11 +504,11 @@ public class PaymentApi extends BaseApi {
 					Boolean.TRUE, Boolean.TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
 					paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
 					paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-					Boolean.TRUE, preferredPaymentMethod.getPaymentType());
+					Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false);
 		} else {
 			paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), ids,
 					Boolean.TRUE, Boolean.TRUE, paymentGateway, null, null,
-					null, null, null, Boolean.TRUE, preferredPaymentMethod.getPaymentType());
+					null, null, null, Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false);
 		}
 	}
 	

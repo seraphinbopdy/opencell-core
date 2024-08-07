@@ -13394,4 +13394,449 @@ public class DummyPaymentGatewayScript extends Script {
                     valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-23916_20240625" author="a.rouaguebe">
+        <sql>DROP INDEX IF EXISTS rt_customer_id_contract_index</sql>
+        <sql>DROP INDEX IF EXISTS rt_billing_account_id_contract_index</sql>
+        <sql>DROP INDEX IF EXISTS rt_customer_account_contract_index</sql>
+        <sql>CREATE INDEX rt_customer_id_contract_index ON ${db.schema.adapted}cpq_contract (customer_id)</sql>
+        <sql>CREATE INDEX rt_billing_account_id_contract_index ON ${db.schema.adapted}cpq_contract (billing_account_id)</sql>
+        <sql>CREATE INDEX rt_customer_account_contract_index ON ${db.schema.adapted}cpq_contract (customer_account_id)</sql>
+    </changeSet>
+
+    <changeSet id="INTRD-24031_20240626" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"<b> Applique un frais à un abonnement du compte de facturation. </b><p>Vous devrez sélectionner une charge exceptionnelle (type “autre”) à appliquer, avec la possibilité de remplacer le montant (cela générera une erreur si la charge ne permettent pas la surcharge du montant) et le libellé.</p><p>Nous devrons sélectionner un abonnement actif auquel appliquer le frais. Par défaut, nous utiliserons l&apos;abonnement actif le plus récent facturé sur les factures impayées. Vous pouvez fournir un filtre supplémentaire pour affiner la liste des abonnements. Ce filtre est en fait une expression qui doit s&apos;évaluée en une chaîne qui sera comparée au code des abonnements dans la portée de recherche d&apos;abonnement, à l&apos;aide de l&apos;opérateur fourni. L’expression aura accès au rejet de paiement, au paiement, aux entités du périmètre (liste des factures, compte de facturation, compte client) et à la liste des abonnements dans le périmètre. Si aucun abonnement actif n&apos;est trouvé, le script échouera et une erreur sera remontée.</p>", "ENG":"<b>Applies a charge to a subscription of the billing account.</b><p>You will have to select a one shot charge (type “other”) to apply, with the ability to override the amount (will raise an error if the charge doesn’t allow amount override) and label.</p> <p>We will need to select an active subscription to apply the charge to. By default, we will use the most recent active subscription invoiced on the unpaid invoices. You can provide an additional filter to narrow down the list of subscriptions. This filter is actually an expression that must evaluate to a string that will be compared to the code of subscriptions in the subscription search scope, using the provided operator. Expression will have access to the rejected payment, the payment, and the scope entities (list of invoices, billing account, customer account) and the list of subscriptions in the scope. If no active subscription is found, the script will fail and an error will be raised.</p>"}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.ApplyChargeScript'</where>
+        </update>
+    </changeSet>
+    
+    <changeSet id="INTRD-24051_ReRateV2" author="a.rouaguebe">
+        <delete tableName="meveo_job_instance">
+            <where>code = 'Rerate_Job'</where>
+        </delete>
+        <update tableName="meveo_job_instance">
+            <column name="code" value="Rerate_Job" />
+            <column name="description" value="Rerating process V2. This job cancels rating for marked wallet operation, and is chained with actual rerating job." />
+            <column name="following_job_id" valueComputed="(select id from meveo_job_instance where code = 'ReRatingV2Job')" />
+            <where>code='RatingCancellationJob'</where>
+        </update>
+    </changeSet>
+    
+    <changeSet id="INTRD-24052_ReRateV2_filter" author="a.rouaguebe">
+
+        <insert tableName="crm_custom_field_tmpl">
+            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="ReRatingJobBean_reratingTarget"/>
+            <column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+            <column name="description" value="Rerating Target"/>
+            <column name="field_type" value="LIST"/>
+            <column name="storage_type" value="SINGLE"/>
+            <column name="default_value" value="ALL"/>
+            <column name="value_required" value="0"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:4"/>
+        </insert>
+        
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+            <column name="listvalues" value="ALL" />
+            <column name="listvalues_key" value="ALL" />
+        </insert>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+            <column name="listvalues" value="NO_BATCH" />
+            <column name="listvalues_key" value="NO BATCH" />
+        </insert>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+            <column name="listvalues" value="WITH_BATCH" />
+            <column name="listvalues_key" value="WITH BATCH" />
+        </insert>
+
+        <insert tableName="crm_custom_field_tmpl">
+            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="ReRatingJobBean_targetBatches"/>
+            <column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+            <column name="description" value="Target batches"/>
+            <column name="field_type" value="ENTITY"/>
+            <column name="storage_type" value="LIST"/>
+            <column name="value_required" value="0"/>
+            <column name="entity_clazz" value="org.meveo.model.billing.BatchEntity" />
+            <column name="creator" value="applicationInitializer"/>
+            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-23038_20240515" author="TarikFA." failOnError="false">
+        <insert tableName="ar_occ_template" >
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="PPL_INSTALLMENT" />
+            <column name="description" value="Payment plan Installment" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <column name="manual_creation_enabled" valueNumeric="0" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="INTRD-23881_20240702" author="TarikFA." failOnError="false">
+        <addColumn tableName="advanced_settings">
+            <column name="description_i18n" type="${type.json}" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="INTRD-23882_20240702" author="TarikFA." failOnError="false">
+        <update tableName="advanced_settings">
+            <column name="description" value="Activate price plan filters"/>
+            <column name="description_i18n" value='{"FRA":"Activer les filtres de price plan","ENG":"Activate price plan filters"}'/>
+            <where>code = 'pricePlanFilters.enablePricePlanFilters'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Offer"/>
+            <column name="description_i18n" value='{"FRA":"Offre","ENG":"Offer"}'/>
+            <where>code = 'pricePlanFilters.enableOfferTemplate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Subscription date from"/>
+            <column name="description_i18n" value='{"FRA":"Date de souscription depuis","ENG":"Subscription date from"}'/>
+            <where>code = 'pricePlanFilters.enableStartSubscriptionDate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Subscription date to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Date de souscription jusqu'à","ENG":"Subscription date to"}]]>
+            </column>
+            <where>code = 'pricePlanFilters.enableEndSubscriptionDate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Rating date from"/>
+            <column name="description_i18n" value='{"FRA":"Date de valorisation depuis","ENG":"Rating date from"}'/>
+            <where>code = 'pricePlanFilters.enableStartRatingDate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Rating date to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Date de valorisation jusqu'à","ENG":"Rating date to"}]]>
+            </column>
+            <where>code = 'pricePlanFilters.enableEndRatingDate'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Minimum quantity"/>
+            <column name="description_i18n" value='{"FRA":"Quantité minimale","ENG":"Minimum quantity"}'/>
+            <where>code = 'pricePlanFilters.enableMinQuantity'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Maximum quantity"/>
+            <column name="description_i18n" value='{"FRA":"Quantité maximale","ENG":"Maximum quantity"}'/>
+            <where>code = 'pricePlanFilters.enableMaxQuantity'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Minimum subscription age (months)"/>
+            <column name="description_i18n" value='{"FRA":"Âge minimal de la souscription (mois)","ENG":"Minimum subscription age (months)"}'/>
+            <where>code = 'pricePlanFilters.enableMinSubscriptionAgeInMonth'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Maximum subscription age (months)"/>
+            <column name="description_i18n" value='{"FRA":"Âge maximal de la souscription (mois)","ENG":"Maximum subscription age (months)"}'/>
+            <where>code = 'pricePlanFilters.enableMaxSubscriptionAgeInMonth'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Criteria 1"/>
+            <column name="description_i18n" value='{"FRA":"Critère 1","ENG":"Criteria 1"}'/>
+            <where>code = 'pricePlanFilters.enableCriteria1Value'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Criteria 2"/>
+            <column name="description_i18n" value='{"FRA":"Critère 2","ENG":"Criteria 2"}'/>
+            <where>code = 'pricePlanFilters.enableCriteria2Value'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Criteria 3"/>
+            <column name="description_i18n" value='{"FRA":"Critère 3","ENG":"Criteria 3"}'/>
+            <where>code = 'pricePlanFilters.enableCriteria3Value'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Criteria expression"/>
+            <column name="description_i18n" value='{"FRA":"Critère EL","ENG":"Criteria expression"}'/>
+            <where>code = 'pricePlanFilters.enableCriteriaEL'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Trading currency"/>
+            <column name="description_i18n" value='{"FRA":"Devise de transaction","ENG":"Trading currency"}'/>
+            <where>code = 'pricePlanFilters.enableTradingCurrency'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Trading country"/>
+            <column name="description_i18n" value='{"FRA":"Pays de transaction","ENG":"Trading country"}'/>
+            <where>code = 'pricePlanFilters.enableTradingCountry'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Seller"/>
+            <column name="description_i18n" value='{"FRA":"Vendeur","ENG":"Seller"}'/>
+            <where>code = 'pricePlanFilters.enableSeller'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Validity calendar"/>
+            <column name="description_i18n" value='{"FRA":"Calendrier de validité","ENG":"Validity calendar"}'/>
+            <where>code = 'pricePlanFilters.enableValidityCalendar'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Valid from"/>
+            <column name="description_i18n" value='{"FRA":"Valide depuis","ENG":"Valid from"}'/>
+            <where>code = 'pricePlanFilters.enableValidityFrom'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Validity to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Valide jusqu'à","ENG":"Validity to"}]]>
+            </column>
+            <where>code = 'pricePlanFilters.enableValidityFrom'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Enable custom field value versioning"/>
+            <column name="description_i18n" value='{"FRA":"Activer le versionnage des valeurs des champs personnalisé","ENG":"Enable custom field value versioning"}'/>
+            <where>code = 'customFields.enableCfValueVersionning'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Fields seprator"/>
+            <column name="description_i18n" value='{"FRA":"Séparateur de champs","ENG":"Fields seprator"}'/>
+            <where>code = 'standardExports.fieldsSeparator'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Decimal separator"/>
+            <column name="description_i18n" value='{"FRA":"Séparateur décimal","ENG":"Decimal separator"}'/>
+            <where>code = 'standardExports.decimalSeparator'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="File name extension"/>
+            <column name="description_i18n" value='{"FRA":"Extension du nom de fichier","ENG":"File name extension"}'/>
+            <where>code = 'standardExports.fileNameExtension'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Default billing cycle"/>
+            <column name="description_i18n" value='{"FRA":"Cycle de facturation par défaut","ENG":"Default billing cycle"}'/>
+            <where>code = 'crm.defaultBillingCycle'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description" value="Default customer category"/>
+            <column name="description_i18n" value='{"FRA":"Catégorie de client par défaut","ENG":"Default customer category"}'/>
+            <where>code = 'crm.defaultCustomerCategory'</where>
+        </update>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="feature"/>
+            <column name="property_group" value="ordering"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="order.allowPastDeliveryDate"/>
+            <column name="description" value="Allow past delivery dates on orders"/>
+            <column name="description_i18n" value='{"FRA":"Autoriser les dates de livraison dans le passé pour les commandes","ENG":"Allow past delivery dates on orders"}'/>
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-23732_20240715" author="TarikFA." failOnError="false">
+        <addColumn tableName="ar_account_operation">
+            <column name="origin_call_for_payment_id" type="bigint" />
+            <column name="origin_payment_id" type="bigint" />
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_call_for_payment_id"
+                constraintName="origin_call_for_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_payment_id"
+                constraintName="origin_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+    </changeSet>
+
+    <changeSet id="#INTRD-23734_20240715" author="TarikFA." failOnError="false">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="CallForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="allowUsingUnpaidAdvance"/>
+            <column name="description" value="If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."/>
+            <column name="description_i18n" value='{"FRA":"Si ce paramètre est activé, alors Opencell n’attendra pas qu’un appel acompte validé soit effectivement payé pour l’utiliser sur une facture.
+Habituellement, ce comportement n’est souhaitable que si vous ne gérez pas la balance client dans Opencell.","ENG":"If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."}'/>
+        </insert>
+
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="CallForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="autoCloseAdvanceAfterInvoiceValidation"/>
+            <column name="description" value="Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.
+Meaning that advances won’t be available for further invoices."/>
+            <column name="description_i18n">
+                <![CDATA[{
+	"FRA": "Les appels d’acompte liés à la facture seront automatiquement closes quand la facture est validée.Cela signifie que les acomptes ne seront pas disponibles pour de futures factures.",
+	"ENG": "Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.Meaning that advances won’t be available for further invoices."
+}]]>
+            </column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="INTRD-23733" author="TarikFA." failOnError="false">
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="PAY_ADV" />
+            <column name="description" value="Payment account operation to match a call for advance payment. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="CREDIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="CLOSED_ADV" />
+            <column name="description" value="Payment account operation to match a call for advance payment that has been closed while still having unmatched amount. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="CREDIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="REJ_ADV" />
+            <column name="description" value="Dummy payment rejection account operation to match and negate the payment account operation (PAY_ADV) for call for advance payment. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="DEBIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+    </changeSet>
+    <changeSet id="INTRD-22963_20240720" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+                public class RetryPaymentScript extends RetryRejectionPaymentScript {}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.RetryPaymentScript'</where>
+        </update>
+    </changeSet>
+    
+    <changeSet id="#INTRD-24602_20240722" author="AndriusKarpavicius">
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl_val where customfieldtemplate_id in (select id from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob'))</sql>
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl_mcols where cft_id in (select id from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob'))</sql>
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob')</sql>
+    </changeSet>
+
+    <changeSet id="INTRD-24619_20240724" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"<p> This action will set up the invoices linked to the rejected payment for a new payment request.<br> Invoice’s payment request count will be increment by 1, and collection date will be set to “rejection date + retry delay“.</p><p>If the number of payment requests on the invoice is already greater that the maximum number of retries, you can choose to send the invoices to litigation, or do nothing (and wait for dunning to trigger, if you implemented it).</p>", "FRA":"<p>Cette action représentera pour paiement les factures liées au paiement rejeté.<br>Le nombre de demande de paiement des factures sera augmenté de 1, et la date de mise en paiement sera “date de rejet + délai de rejet“.</p> <p>Si le nombre de demandes de paiement sur la facture est déjà supérieur au nombre maximum de rejeux, vous pouvez décider de passer les factures en litige, ou ne rien faire (et attendre le déclenchement de la relance, si vous l’avez implémenté).</p>"}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.RetryPaymentScript'</where>
+        </update>
+        <update tableName="meveo_script_parameter">
+            <column name="default_value" value="false"/>
+            <where>code = 'litigationAfterRetry'</where>
+        </update>
+        <addDefaultValue tableName="ar_account_operation" columnName="payment_requests" defaultValue="0" />
+    </changeSet>
+
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
+
+    <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe">
+        <update tableName="advanced_settings">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"Valid from", "FRA":"Valide depuis"}]]>
+            </column>
+            <column name="description" value="Valid from" />
+            <where>code = 'pricePlanFilters.enableValidityFrom'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"Valid to", "FRA":"Valide jusqu'à"}]]>
+            </column>
+            <column name="description" value="Valid to" />
+            <where>code = 'pricePlanFilters.enableValidityDate'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI">
+        <dropColumn columnName="invoice_subject_code" tableName="billing_invoice_type" />
+    </changeSet>
+    
+    <changeSet id="#INTRD-21018_20240723" author="ZakariaB">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+            <column name="code" value="org.meveo.service.script.EnterLitigation"/>
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+ public class EnterLitigation extends Script {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="src_type" value="JAVA"/>
+            <column name="description" value="This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason."/>
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason.", "FRA":"Cette action passera inconditionnellement les factures liées au rejet de paiement en litige, avec le motif fourni."}]]>
+            </column>
+            <column name="script_instance_cat_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"/>
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="litigationReason"/>
+            <column name="description_i18n" value='{"FRA":"Motif de mise en litige","ENG":"Litigation reason"}'/>
+            <column name="mandatory" valueNumeric="1"/>
+            <column name="class_name" value="java.lang.String"/>
+            <column name="default_value" value=""/>
+            <column name="values_separator" value="\|"/>
+            <column name="collection" valueNumeric="0"/>
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.EnterLitigation')"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

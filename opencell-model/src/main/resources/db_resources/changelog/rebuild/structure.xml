@@ -2199,7 +2199,9 @@
             <column name="source_account_operation_id" type="bigint" />
             <column name="payment_gateway_id" type="bigint" />
             <column name="rejection_actions_status" type="varchar(30)" />
-            <column name="payment_requests" type="bigint" />
+            <column name="payment_requests" type="bigint" defaultValue="0" />
+            <column name="origin_call_for_payment_id" type="bigint" />
+            <column name="origin_payment_id" type="bigint" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-146">
@@ -12031,7 +12033,6 @@
             <column name="last_action_date" type="datetime" />
             <column name="total_dunning_levels" type="int4" />
             <column name="pause_duration" type="int4" />
-            <column name="customer_account_id" type="bigint" />
         </createTable>
         </changeSet>
 
@@ -12692,6 +12693,7 @@
 	        <column name="property_group" type="varchar(100)"/>
 	        <column name="property_value" type="VARCHAR(255)"/>
 	        <column name="property_type" type="VARCHAR(255)"/>
+            <column name="description_i18n" type="${type.json}" />
 	    </createTable>
 	</changeSet>
 
@@ -19367,15 +19369,24 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
-    <changeSet id="#INTRD-21493_20240502-fk" author="zelmeliani">
+    <changeSet id="#INTRD-23732_20240715-rebuild-fk" author="TarikFA.">
         <addForeignKeyConstraint
-                baseTableName="dunning_collection_plan"
-                baseColumnNames="customer_account_id"
-                constraintName="fk_dunning_collection_plan_ar_customer_account"
-                referencedTableName="ar_customer_account" referencedColumnNames="id"
-                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" />
-    </changeSet>
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_call_for_payment_id"
+                constraintName="origin_call_for_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
 
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_payment_id"
+                constraintName="origin_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+    </changeSet>
+    
     <!-- end fk -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-constr-995">
@@ -19727,9 +19738,9 @@
         <sql>CREATE INDEX rt_adjusted_rated_tx ON ${db.schema.adapted}billing_rated_transaction (adjusted_rated_tx) </sql>
         <sql>CREATE INDEX wo_rt_id ON ${db.schema.adapted}billing_wallet_operation (rated_transaction_id) </sql>
         <sql>CREATE INDEX wo_rerated_wo ON ${db.schema.adapted}billing_wallet_operation (reratedwalletoperation_id) </sql>
-        <sql>CREATE INDEX rt_customer_id_contract_index ON ${db.schema.adapted}cpq_contract (customer_id) where status='ACTIVE'</sql>
-        <sql>CREATE INDEX rt_billing_account_id_contract_index ON ${db.schema.adapted}cpq_contract (billing_account_id) where status='ACTIVE'</sql>
-        <sql>CREATE INDEX rt_customer_account_contract_index ON ${db.schema.adapted}cpq_contract (customer_account_id) where status='ACTIVE'</sql>
+        <sql>CREATE INDEX rt_customer_id_contract_index ON ${db.schema.adapted}cpq_contract (customer_id)</sql>
+        <sql>CREATE INDEX rt_billing_account_id_contract_index ON ${db.schema.adapted}cpq_contract (billing_account_id)</sql>
+        <sql>CREATE INDEX rt_customer_account_contract_index ON ${db.schema.adapted}cpq_contract (customer_account_id)</sql>
         <sql>CREATE INDEX cpq_price_plan_matrix_value__ppml_id__idx ON cpq_price_plan_matrix_value(ppml_id)</sql>
         <sql>CREATE INDEX CREATE INDEX cpq_ppl_ppVersion_index ON cpq_price_plan_matrix_line(ppm_version_id, priority, accuracy)</sql>
     </changeSet>
@@ -20917,11 +20928,6 @@
     <changeSet id="INTRD-22385_20240429" author="TarikFA." />
     <changeSet id="#INTRD_22492_20240506" author="zelmeliani" />
     <changeSet id="#INTRD-22825_20240509_allowed_offers_data_recovery" author="a.rouaguebe" />
-    <changeSet id="#INTRD-21493_20240502" author="zelmeliani" />
-    <changeSet id="INTRD-18045_20230829" author="zelmeliani" />
-    <changeSet id="#INTRD-21481_20240517" author="zelmeliani" />
-    <changeSet id="INTRD-12827_20230904" author="zelmeliani" />
-    <changeSet id="#INTRD-12924_20230817" author="zelmeliani" />
     <changeSet id="#INTRD-14889_20240509" author="AbdellatifBARI" />
     <changeSet id="#INTRD-22583_20240509" author="aeljaouhari" />
     <changeSet id="#INTRD-14889_20240509-2" author="AbdelmounaimAkadid" />
@@ -20936,7 +20942,29 @@
     <changeSet id="#INTRD-22961_20240604" author="Zbariki"/>
     <changeSet id="#INTRD-22962_20240605" author="ZakariaB" />
     <changeSet id="INTRD-23624_20240612" author="ZakariaB" />
+    <changeSet id="#INTRD-23916_20240625" author="a.rouaguebe" />
+    <changeSet id="INTRD-24031_20240626" author="ZakariaB" />
+    <changeSet id="INTRD-24051_ReRateV2" author="a.rouaguebe" />
+    <changeSet id="INTRD-24052_ReRateV2_filter" author="a.rouaguebe" />
+    <changeSet id="INTRD-23881_20240701" author="TarikFA." />
+    <changeSet id="INTRD-23882_20240702" author="TarikFA." />
+    <changeSet id="#INTRD-23732_20240715" author="TarikFA." />
     <changeSet id="INTRD-22955_20240521" author="ZBariki" />
+    <changeSet id="INTRD-22963_20240720" author="ZakariaB" />
+    <changeSet id="#INTRD-24602_20240722" author="AndriusKarpavicius" />
+    <changeSet id="INTRD-24619_20240724" author="ZakariaB" />
+    <changeSet id="INTRD-23881_20240702" author="TarikFA." />
+    <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
+    <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI" />
+
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
+    <changeSet id="#INTRD-21018_20240723" author="ZakariaB" />
+
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

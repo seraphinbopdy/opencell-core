@@ -41,8 +41,10 @@ import org.meveo.service.billing.impl.WalletOperationService;
  * Job implementation to rerate wallet operations
  *
  * @author Andrius Karpavicius
+ * @deprecated since 16.1
  */
 @Stateless
+@Deprecated(since = "16.1")
 public class ReRatingJobBean extends IteratorBasedScopedJobBean<Long> {
 
     private static final long serialVersionUID = 2226065462536318643L;

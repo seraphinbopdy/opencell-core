@@ -27,6 +27,7 @@ import javax.persistence.TypedQuery;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.QueryBuilder.QueryLikeStyleEnum;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.BaseEntity;
 import org.meveo.model.BusinessEntity;
 
 /**
@@ -193,6 +194,38 @@ public abstract class BusinessService<P extends BusinessEntity> extends Persiste
         
         try {
             return (BusinessEntity) qb.getQuery(getEntityManager()).getSingleResult();
+        } catch (NoResultException e) {
+            log.debug("No {} of code {} found", getEntityClass().getSimpleName(), code);
+            return null;
+        } catch (NonUniqueResultException e) {
+            log.error("More than one entity of type {} with code {} found", entityClass, code);
+            return null;
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public BaseEntity findByEntityClassAndId(Class clazz, Long id) {
+        QueryBuilder qb = new QueryBuilder(clazz, "be", null);
+        qb.addCriterion("be.id", "=", id, false);
+
+        try {
+            return (BaseEntity) qb.getQuery(getEntityManager()).getSingleResult();
+        } catch (NoResultException e) {
+            log.debug("No {} of id {} found", getEntityClass().getSimpleName(), id);
+            return null;
+        } catch (NonUniqueResultException e) {
+            log.error("More than one entity of type {} with id {} found", entityClass, id);
+            return null;
+        }
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public BaseEntity findByEntityClassAndCodeOnly(Class clazz, String code) {
+        QueryBuilder qb = new QueryBuilder(clazz, "be", null);
+        qb.addCriterion("be.code", "=", code, true);
+
+        try {
+            return (BaseEntity) qb.getQuery(getEntityManager()).getSingleResult();
         } catch (NoResultException e) {
             log.debug("No {} of code {} found", getEntityClass().getSimpleName(), code);
             return null;

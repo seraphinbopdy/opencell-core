@@ -52,6 +52,9 @@ public class ExportTest {
             try {
                 StringWriter writer = new StringWriter();
                 TransformerFactory factory = TransformerFactory.newInstance();
+                factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true);
+                factory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
+                factory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalStylesheet", "");
                 Transformer transformer = factory.newTransformer(new StreamSource(this.getClass().getResourceAsStream("/" + changesetFile)));
                 transformer.setParameter("version", version);
                 transformer.setOutputProperty(OutputKeys.INDENT, "yes");

@@ -17,7 +17,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-@Path("/customerBalance")
+@Path("/v2/customerBalance")
 @Produces({APPLICATION_JSON})
 @Consumes({APPLICATION_JSON})
 public interface CustomerBalanceResource {

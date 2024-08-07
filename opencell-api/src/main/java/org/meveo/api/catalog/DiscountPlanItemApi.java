@@ -138,9 +138,7 @@ public class DiscountPlanItemApi extends BaseApi {
         
         discountPlanItemService.create(discountPlanItem);
         discountPlanItem.setCode(!StringUtils.isBlank(postData.getCode())?postData.getCode():discountPlanItem.getId().toString());
-        if(postData.getSequence() == null) {
-        	discountPlanItemService.setDisountPlanItemSequence(discountPlanItem);
-        }
+  
         discountPlanItemService.update(discountPlanItem);
         return discountPlanItem;
     }
@@ -175,9 +173,7 @@ public class DiscountPlanItemApi extends BaseApi {
                 throw  new BusinessApiException("The sequence of this discount plan item already exist");
             }
         }
-        if(postData.getSequence() == null) {
-        	discountPlanItemService.setDisountPlanItemSequence(discountPlanItem);
-        }
+
         // populate customFields
         try {
             populateCustomFields(postData.getCustomFields(), discountPlanItem, false);
@@ -381,6 +377,10 @@ public class DiscountPlanItemApi extends BaseApi {
         
         if (source.getSequence() != null) {
         	discountPlanItem.setSequence(source.getSequence());
+        }
+        // Calculate sequence value if not provided in entity and/or DTO
+        if (discountPlanItem.getSequence() == null) {
+            discountPlanItemService.setDisountPlanItemSequence(discountPlanItem);
         }
         discountPlanItem.setLastDiscount(source.getLastDiscount()); 
         return discountPlanItem;

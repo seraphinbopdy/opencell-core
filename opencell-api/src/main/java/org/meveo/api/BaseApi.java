@@ -35,7 +35,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -371,6 +370,7 @@ public abstract class BaseApi {
                         // check the if the referenced entity exists
                         EntityReferenceWrapper entityRefWrapper = (EntityReferenceWrapper) valueConverted;
                         BusinessEntity referencedEntity =  null;
+                        BaseEntity referencedBaseEntity =  null;
                         boolean recordExist = false;
                         try {
                             CustomEntityTemplate cet = null;
@@ -381,17 +381,25 @@ public abstract class BaseApi {
                                 recordExist = !customTableService.findById(cet.getDbTablename(), Long.parseLong(entityRefWrapper.getCode())).isEmpty();
                             }else{
                                     Class entityRefClass = Class.forName(entityRefWrapper.getClassname());
-                                    referencedEntity = businessEntityService.findByEntityClassAndCode(entityRefClass, entityRefWrapper.getCode());
+                                    if(BusinessEntity.class.isAssignableFrom(entityRefClass)) {
+                                        referencedEntity = businessEntityService.findByEntityClassAndCode(entityRefClass, entityRefWrapper.getCode());
+                                    } else {
+                                        referencedBaseEntity = businessEntityService.findByEntityClassAndId(entityRefClass, entityRefWrapper.getId());
+                                    }
                             }
                         } catch (ClassNotFoundException e) {
                             throw new InvalidParameterException("Class " + entityRefWrapper.getClassname() + " not found" );
                         }
-                        if (referencedEntity == null && !recordExist) {
+                        if ((referencedEntity == null && referencedBaseEntity == null) && !recordExist) {
                             throw new InvalidReferenceException(entityRefWrapper.getClassname(), entityRefWrapper.getCode());
                         }
                         if (referencedEntity != null) {
                             entityRefWrapper.setId(referencedEntity.getId());
                             entityRefWrapper.setCode(referencedEntity.getCode());
+                        }
+                        if(referencedBaseEntity != null) {
+                            entityRefWrapper.setId(referencedBaseEntity.getId());
+                            entityRefWrapper.setCode(entityRefWrapper.getCode());
                         }
                     }
 

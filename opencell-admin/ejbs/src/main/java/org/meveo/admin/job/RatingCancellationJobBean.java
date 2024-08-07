@@ -5,9 +5,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -16,6 +18,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -25,8 +28,12 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
+import org.meveo.model.billing.BatchEntity;
+import org.meveo.model.billing.ReratingTargetEnum;
+import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
+import org.meveo.service.billing.impl.BatchEntityService;
 import org.meveo.service.job.Job;
 
 @Stateless
@@ -40,6 +47,9 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	@Inject
 	@MeveoJpa
 	private EntityManagerWrapper emWrapper;
+	
+	@Inject
+	private BatchEntityService batchEntityService;
 	
 	@EJB
 	RatingCancellationJobBean cancellationJobBean;
@@ -83,7 +93,16 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 		
 		entityManager = emWrapper.getEntityManager();
 		boolean useExistingViews = (boolean) getParamOrCFValue(jobInstance, RatingCancellationJob.CF_USE_EXISTING_VIEWS, true);
-		createViews(configuredNrPerTx, useExistingViews);
+
+
+		String reRatingTarget = (String) this.getParamOrCFValue(jobInstance, ReRatingJob.CF_RERATING_TARGET);
+		List<EntityReferenceWrapper> batchEntityWrappers = (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, ReRatingJob.CF_TARGET_BATCHES);
+		List<Long> targetBatches = CollectionUtils.isNotEmpty(batchEntityWrappers) ? batchEntityWrappers.stream()
+																										.map(e -> (BatchEntity) batchEntityService.findBusinessEntityByCode(e.getCode()))
+																										.map(BatchEntity::getId)
+																										.collect(Collectors.toList()) : Collections.emptyList();
+		
+		createViews(configuredNrPerTx, useExistingViews, reRatingTarget, targetBatches);
 		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();
 		getProcessingSummary();
 		if (nrOfInitialWOs.intValue() == 0) {
@@ -171,13 +190,29 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	}
 	
 	
-	public void createViews(long configuredNrPerTx, boolean useExistingViews) {
-		createMainView(configuredNrPerTx, useExistingViews);
+	public void createViews(long configuredNrPerTx, boolean useExistingViews, String reRatingTarget, List<Long> targetBatches) {
+		createMainView(configuredNrPerTx, useExistingViews, reRatingTarget, targetBatches);
 		createTriggeredOperationsView(useExistingViews);
 		createBilledILsView(useExistingViews);
 	}
 
-	private void createMainView(long configuredNrPerTx, boolean useExistingViews) {
+	private void createMainView(long configuredNrPerTx, boolean useExistingViews, String reRatingTarget, List<Long> targetBatches) {
+		
+		StringBuilder filterSubQuery = new StringBuilder();
+		if (ReratingTargetEnum.NO_BATCH.name().equals(reRatingTarget)) {
+			filterSubQuery.append(" AND wo.batch_entity_id is null\n");
+		} else if (ReratingTargetEnum.WITH_BATCH.name().equals(reRatingTarget)) {
+			filterSubQuery.append(" AND wo.batch_entity_id is not null\n");
+			if (CollectionUtils.isNotEmpty(targetBatches)) {
+				filterSubQuery.append(" AND wo.batch_entity_id in (")
+                              .append(targetBatches.stream()
+                                                   .map(String::valueOf)
+                                                   .collect(Collectors.joining(", ")))
+                              .append(")");
+			}
+		}
+		
+		
 		String query = "CREATE MATERIALIZED VIEW " + MAIN_VIEW_NAME + " AS\n"
 				+ "SELECT string_agg(wo.id::text, ',') AS wo_id, string_agg(rt.id::text, ',') AS rt_id, il.id AS il_id, SUM(CASE WHEN rt.status = 'BILLED' THEN rt.amount_without_tax ELSE 0 END) AS rt_amount_without_tax,\n"
 				+ "	    SUM(CASE WHEN rt.status = 'BILLED' THEN rt.amount_with_tax ELSE 0 END) AS rt_amount_with_tax, SUM(CASE WHEN rt.status = 'BILLED' THEN rt.amount_tax ELSE 0 END) AS rt_amount_tax, SUM(CASE WHEN rt.status = 'BILLED' THEN rt.quantity ELSE 0 END) AS rt_quantity,\n"
@@ -191,6 +226,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 				+ "		LEFT JOIN billing_rated_transaction drt ON drt.id = dwo.rated_transaction_id  and drt.status<>'CANCELED'\n"
 				+ "		LEFT JOIN billing_invoice_line dil ON dil.id = drt.invoice_line_id\n"
 				+ "	WHERE wo.status = 'TO_RERATE'\n"
+				+ filterSubQuery.toString()
 				+ "GROUP BY ba_id, il_id, dil_id, lot";
 
 		cancellationJobBean.createMaterializedView(query, MAIN_VIEW_NAME, useExistingViews);

@@ -501,13 +501,12 @@ public class DiscountPlanItem extends EnableEntity implements ICustomFieldEntity
 		this.finalSequence = finalSequence;
 	}
 
-	public Integer getFinalSequence() {
-		if(getDiscountPlan()!=null && getSequence()!=null) {
-		finalSequence=(Math.multiplyExact(getDiscountPlan().getSequence(),1000))+getSequence();
-		}
-		return finalSequence;
-	
-	}
+    public Integer getFinalSequence() {
+        if (getDiscountPlan() != null) {
+            finalSequence = (Math.multiplyExact(getDiscountPlan().getSequence() == null ? 1 : getDiscountPlan().getSequence(), 1000)) + (getSequence() == null ? 1 : getSequence());
+        }
+        return finalSequence;
+    }
 
 	public Set<TradingDiscountPlanItem> getTradingDiscountPlanItems() {
 		return tradingDiscountPlanItems;

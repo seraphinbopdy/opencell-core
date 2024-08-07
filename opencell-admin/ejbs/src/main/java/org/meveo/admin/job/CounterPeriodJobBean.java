@@ -37,6 +37,7 @@ import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.CounterInstanceService;
+import org.meveo.service.billing.impl.GenericChargeInstanceService;
 import org.meveo.service.catalog.impl.CounterTemplateService;
 
 /**
@@ -54,6 +55,9 @@ public class CounterPeriodJobBean extends IteratorBasedJobBean<Long> {
 
     @Inject
     private CounterTemplateService counterTemplateService;
+
+    @Inject
+    private GenericChargeInstanceService genericChargeInstanceService;
 
     /**
      * Initialize job settings and retrieve data to process
@@ -92,7 +96,7 @@ public class CounterPeriodJobBean extends IteratorBasedJobBean<Long> {
                 for (Long id : counterInstanceIds) {
                     // accumulator chargeInstance
                     CounterInstance counterInstance = counterInstanceService.findById(id);
-                    for (ChargeInstance chargeInstance : counterInstance.getChargeInstances()) {
+                    for (ChargeInstance chargeInstance : genericChargeInstanceService.findAccumulatorChargeInstances(counterInstance)) {
                         counterInstanceService.createCounterPeriodIfMissing(counterInstance, applicationDate != null ? applicationDate : new Date(), chargeInstance.getSubscription()!=null?chargeInstance.getSubscription().getSubscriptionDate():new Date(),
                             chargeInstance, null, null, true);
                         break;

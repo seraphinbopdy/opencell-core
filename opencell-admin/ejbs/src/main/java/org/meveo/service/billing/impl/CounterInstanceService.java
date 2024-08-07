@@ -123,6 +123,9 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
 
     @Inject
     private CounterUpdateTracking counterUpdatesTracking;
+    
+    @Inject
+    private GenericChargeInstanceService genericChargeInstanceService;
 
     @Inject
     private MethodCallingUtils methodCallingUtils;
@@ -193,7 +196,7 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private CounterInstance instantiateCounter(BusinessService service, ICounterEntity entity, CounterTemplate counterTemplate, ChargeInstance chargeInstance, boolean isVirtual) {
         CounterInstance counterInstance = new CounterInstance();
-        if (!entity.getCounters().containsKey(counterTemplate.getCode()) || !entity.getCounters().get(counterTemplate.getCode()).getChargeInstances().contains(chargeInstance)) {
+        if (!entity.getCounters().containsKey(counterTemplate.getCode()) || chargeInstance.getAccumulatorCounterInstances().stream().noneMatch(c -> c.getCode().equals(counterTemplate.getCode()))) {
             counterInstance.setCounterTemplate(counterTemplate);
 
             if (entity instanceof Customer) {
@@ -211,7 +214,8 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
             }
             
             if(counterTemplate.getAccumulator() != null && counterTemplate.getAccumulator()) {
-            counterInstance.getChargeInstances().add(chargeInstance);
+                chargeInstance.addAccumulatorCounterInstance(counterInstance);
+                genericChargeInstanceService.update(chargeInstance);
             }
 
             if (!isVirtual) {

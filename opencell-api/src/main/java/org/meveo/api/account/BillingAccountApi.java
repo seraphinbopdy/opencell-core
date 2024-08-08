@@ -331,7 +331,11 @@ public class BillingAccountApi extends AccountEntityApi {
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
     public BillingAccount update(BillingAccountDto postData) throws MeveoApiException, BusinessException {
-        return update(postData, true);
+        return update(postData, Version.V1);
+    }
+
+    public BillingAccount update(BillingAccountDto postData, Version version) {
+        return update(postData, true, null, version);
     }
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
@@ -341,9 +345,28 @@ public class BillingAccountApi extends AccountEntityApi {
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
     public BillingAccount update(BillingAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel) throws MeveoApiException, BusinessException {
+        return update(postData, checkCustomFields, businessAccountModel, Version.V1);
+    }
+
+    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
+    public BillingAccount update(BillingAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel, Version version) throws MeveoApiException, BusinessException {
 
         if (StringUtils.isBlank(postData.getCode())) {
             missingParameters.add("code");
+        }
+        
+        if(Version.V2.equals(version)) {
+            if(postData.getLegalEntityType() == null || StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                missingParameters.add("legalEntityType.code");
+            }
+
+            if(StringUtils.isBlank(postData.getDescription())) {
+                missingParameters.add("description");
+            }
+
+            if(CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
+                missingParameters.add("registrationNumbers");
+            }
         }
 
         handleMissingParametersAndValidate(postData);

@@ -30,4 +30,19 @@ public class BillingAccountV2ResourceImpl extends BaseRs implements BillingAccou
         return result;
     }
 
+    @Override
+    public ActionStatus update(BillingAccountDto postData) {
+
+        ActionStatus result = new ActionStatus(ActionStatusEnum.SUCCESS, "");
+
+        try {
+            BillingAccount billingAccount = billingAccountApi.update(postData, BillingAccountApi.Version.V2);
+            result.setEntityCode(billingAccount.getCode());
+            result.setEntityId(billingAccount.getId());
+        } catch (Exception e) {
+            processException(e, result);
+        }
+
+        return result;
+    }
 }

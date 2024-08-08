@@ -346,6 +346,12 @@ public class EDR extends BaseEntity {
     @Column(name = "business_key")
     private String businessKey;
 
+    /**
+     * If true, the WalletOperation will be deleted if rated to 0
+     */
+    @Column(name = "zero_wo_dropped")
+    private Boolean zeroWoDropped = false;
+
     public Subscription getSubscription() {
         return subscription;
     }
@@ -733,4 +739,11 @@ public class EDR extends BaseEntity {
 		this.businessKey = businessKey;
 	}
 
+    public Boolean getZeroWoDropped() {
+        return zeroWoDropped;
+    }
+
+    public void setZeroWoDropped(Boolean zeroWoDropped) {
+        this.zeroWoDropped = zeroWoDropped;
+    }
 }

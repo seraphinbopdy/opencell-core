@@ -12955,5 +12955,11 @@ Meaning that advances won’t be available for further invoices."/>
                     valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.EnterLitigation')"/>
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe">
+        <addColumn tableName="rating_edr">
+            <column name="zero_wo_dropped"  type="${type.boolean}" defaultValueNumeric="0" />
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

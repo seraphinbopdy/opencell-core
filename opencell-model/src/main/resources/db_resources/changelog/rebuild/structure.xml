@@ -6143,6 +6143,7 @@
             <column name="event_version" type="int4" />
 			<column name="wallet_operation_id" type="bigint"/>
 			<column name="business_key" type="VARCHAR(255)" />
+            <column name="zero_wo_dropped"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
         <modifySql dbms="postgresql">
         	<append value=" PARTITION BY LIST(status)"/>
@@ -20962,6 +20963,8 @@
     <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
         <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
     </changeSet>
+
+    <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

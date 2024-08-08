@@ -591,11 +591,11 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                                 true, true, paymentGateway, paymentMethod.getCardNumber(),
                                 paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
                                 paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-                                true, preferredPaymentMethod.getPaymentType());
+                                true, preferredPaymentMethod.getPaymentType(), false);
                     } else {
                         paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
                                 true, true, paymentGateway, null, null,
-                                null, null, null, true, preferredPaymentMethod.getPaymentType());
+                                null, null, null, true, preferredPaymentMethod.getPaymentType(), false);
                     }
                 }
             } catch (Exception exception) {

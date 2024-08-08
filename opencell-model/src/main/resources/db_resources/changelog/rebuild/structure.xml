@@ -12005,7 +12005,6 @@
             <column name="updated" type="datetime" />
             <column name="creator" type="varchar(100)" />
             <column name="updater" type="varchar(100)" />
-
             <column name="collection_plan_number" type="varchar(255)" />
             <column name="related_policy_id" type="bigint" />
             <column name="initial_collection_plan_id" type="bigint" />
@@ -12013,26 +12012,21 @@
             <column name="related_invoice_id" type="bigint" />
             <column name="pause_reason_id" type="bigint" />
             <column name="stop_reason_id" type="bigint" />
-
             <column name="current_dunning_level_sequence" type="int4" />
-
-
-
             <column name="start_date" type="datetime" />
             <column name="days_open" type="int4" />
-             <column name="close_date" type="datetime" />
-
+            <column name="close_date" type="datetime" />
             <column name="status_id" type="bigint" />
             <column name="paused_until_date" type="datetime" />
             <column name="balance" type="numeric(23, 12)"/>
             <column name="retry_payment_on_resume_date" type="${type.boolean}" defaultValueNumeric="0"/>
-
             <column name="next_action" type="varchar(255)" />
             <column name="next_action_date" type="datetime" />
             <column name="last_action" type="varchar(255)" />
             <column name="last_action_date" type="datetime" />
             <column name="total_dunning_levels" type="int4" />
             <column name="pause_duration" type="int4" />
+            <column name="customer_account_id" type="bigint" />
         </createTable>
         </changeSet>
 
@@ -19369,6 +19363,15 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="#INTRD-21493_20240502-fk" author="zelmeliani">
+        <addForeignKeyConstraint
+                baseTableName="dunning_collection_plan"
+                baseColumnNames="customer_account_id"
+                constraintName="fk_dunning_collection_plan_ar_customer_account"
+                referencedTableName="ar_customer_account" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" />
+    </changeSet>
+
     <changeSet id="#INTRD-23732_20240715-rebuild-fk" author="TarikFA.">
         <addForeignKeyConstraint
                 baseTableName="ar_account_operation"
@@ -20928,6 +20931,11 @@
     <changeSet id="INTRD-22385_20240429" author="TarikFA." />
     <changeSet id="#INTRD_22492_20240506" author="zelmeliani" />
     <changeSet id="#INTRD-22825_20240509_allowed_offers_data_recovery" author="a.rouaguebe" />
+    <changeSet id="#INTRD-21493_20240502" author="zelmeliani" />
+    <changeSet id="INTRD-18045_20230829" author="zelmeliani" />
+    <changeSet id="#INTRD-21481_20240517" author="zelmeliani" />
+    <changeSet id="INTRD-12827_20230904" author="zelmeliani" />
+    <changeSet id="#INTRD-12924_20230817" author="zelmeliani" />
     <changeSet id="#INTRD-14889_20240509" author="AbdellatifBARI" />
     <changeSet id="#INTRD-22583_20240509" author="aeljaouhari" />
     <changeSet id="#INTRD-14889_20240509-2" author="AbdelmounaimAkadid" />

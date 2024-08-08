@@ -173,6 +173,7 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Ob
                             + " FROM RATING_EDR "
                             + " WHERE STATUS <> 'CANCELLED'"
                             + dateCondition
+                            + "	AND ORIGIN_BATCH <>'EDR_TABLE'"
                             + "	AND (EVENT_KEY IS NOT NULL)"
                             + " GROUP BY EVENT_KEY"
                             + " HAVING COUNT(ID) > 1";

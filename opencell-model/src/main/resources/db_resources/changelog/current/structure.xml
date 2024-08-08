@@ -12956,6 +12956,17 @@ Meaning that advances won’t be available for further invoices."/>
         </insert>
     </changeSet>
     
+    <changeSet id="#INTRD-24686_20240807" author="TarikFa.">
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'CLOSED_ADV')"/>
+        </insert>
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'PAY_ADV')"/>
+        </insert>
+    </changeSet>
+    
     <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe">
         <addColumn tableName="rating_edr">
             <column name="zero_wo_dropped"  type="${type.boolean}" defaultValueNumeric="0" />

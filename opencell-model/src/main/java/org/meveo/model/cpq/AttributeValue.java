@@ -194,7 +194,7 @@ public class AttributeValue<T extends AttributeValue> extends AuditableCFEntity 
 				case EMAIL:
 				case INFO:
 				case PHONE:
-				case TEXT:	return this.getStringValue();  
+				case TEXT:	return this.getStringValue();
 				case DATE: return this.getDateValue();
 				case BOOLEAN: return this.getBooleanValue();
 			}

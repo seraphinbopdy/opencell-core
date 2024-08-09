@@ -349,6 +349,7 @@ public class EDR extends BaseEntity {
     /**
      * If true, the WalletOperation will be deleted if rated to 0
      */
+    @Type(type = "numeric_boolean")
     @Column(name = "zero_wo_dropped")
     private Boolean zeroWoDropped = false;
 

@@ -11,6 +11,7 @@ import static org.meveo.model.payments.ActionModeEnum.AUTOMATIC;
 import static org.meveo.model.payments.ActionTypeEnum.*;
 import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.*;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
+import static org.meveo.model.shared.DateUtils.daysBetween;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.jpa.JpaAmpNewTx;
@@ -79,16 +80,53 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
+        // Get collection plans to process
         List<Long> collectionPlanToProcess = collectionPlanService.getActiveCollectionPlansIds();
+        // Set number of items to process
         jobExecutionResult.setNbItemsToProcess(collectionPlanToProcess.size());
-        for (Long collectionPlanId : collectionPlanToProcess) {
+        // Process collection plans
+        collectionPlanToProcess.forEach(collectionPlanId -> {
             try {
                 jobBean.process(collectionPlanId, jobExecutionResult);
             } catch (Exception exception) {
                 jobExecutionResult.addErrorReport(exception.getMessage());
             }
-        }
+        });
+
+        // Check all processed collection plan to verify if the invoice is paid
+        getAndUpdateProcessedCollectionPlans(collectionPlanToProcess);
+        // Update job execution result
         jobExecutionResult.setNbItemsCorrectlyProcessed(collectionPlanToProcess.size() - jobExecutionResult.getNbItemsProcessedWithError());
+    }
+
+    /**
+     * Get and update processed collection plans
+     * @param collectionPlanToProcess Collection plan to process
+     */
+    private void getAndUpdateProcessedCollectionPlans(List<Long> collectionPlanToProcess) {
+        // Transform to foreach
+        collectionPlanToProcess.forEach(collectionPlanId -> {
+            DunningCollectionPlan processedCollectionPlan = collectionPlanService.findById(collectionPlanId);
+            checkAndUpdateCollectionPlanWhenPaidInvoice(processedCollectionPlan);
+        });
+    }
+
+    /**
+     * Check and update collection plan when invoice is paid
+     * @param processedCollectionPlan Processed collection plan
+     */
+    private void checkAndUpdateCollectionPlanWhenPaidInvoice(DunningCollectionPlan processedCollectionPlan) {
+        if(processedCollectionPlan.getStatus().getStatus() == ACTIVE && processedCollectionPlan.getRelatedInvoice().getPaymentStatus() == PAID) {
+            // Ignore levels and actions after paying invoice
+            collectionPlanService.ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(processedCollectionPlan);
+            // Update collection plan status to success
+            processedCollectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+            processedCollectionPlan.setNextActionDate(null);
+            processedCollectionPlan.setNextAction(null);
+            processedCollectionPlan.setCloseDate(new Date());
+            processedCollectionPlan.setDaysOpen((int) daysBetween(processedCollectionPlan.getCloseDate(), new Date()) + 1);
+            collectionPlanService.update(processedCollectionPlan);
+        }
     }
 
     /**
@@ -106,8 +144,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         Date today = new Date();
         int index = 0;
         int nextLevel = 0;
-        String lastAction = "";
-        String nextAction = "";
         boolean updateCollectionPlan = false;
 
         // Check if collection plan has levels

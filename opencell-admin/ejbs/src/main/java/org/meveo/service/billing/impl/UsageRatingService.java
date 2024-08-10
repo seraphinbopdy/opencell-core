@@ -461,6 +461,8 @@ public class UsageRatingService extends RatingService implements Serializable {
 	                checkDiscountedWalletOpertion(wo, ratingResult.getWalletOperations());
                     walletOperationService.chargeWalletOperation(wo);
                 }
+                
+                
             }
 
         } catch (EJBTransactionRolledbackException e) {

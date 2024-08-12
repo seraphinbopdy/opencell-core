@@ -962,15 +962,24 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 				.setParameter("matchingCodeId", matchingCodeId)
 				.getResultList();
 	}
-
-	public List<AccountOperation> listByMatchingCodeId(Long matchingCodeId) {
-		return getEntityManager().createQuery("SELECT ao FROM AccountOperation ao left join ao.matchingAmounts mas " +
+	public List<AccountOperation> findByMatchingIdAndType(Set<Long> matchingCodeId, String type) {
+		StringBuilder query = new StringBuilder("SELECT ao FROM AccountOperation ao left join ao.matchingAmounts mas " +
+				"left join mas.matchingCode mc " +
+				"WHERE  ao.matchingStatus in (org.meveo.model.payments.MatchingStatusEnum.L, org.meveo.model.payments.MatchingStatusEnum.P) " +
+				"and mc.id in (:matchingCodeId) ");
+		if(StringUtils.isNotBlank(type)){
+			query.append(" and ao.type = :type");
+		}
+		var sqlQuery = getEntityManager().createQuery("SELECT ao FROM AccountOperation ao left join ao.matchingAmounts mas " +
 						"left join mas.matchingCode mc " +
 						"WHERE  ao.matchingStatus in (org.meveo.model.payments.MatchingStatusEnum.L, org.meveo.model.payments.MatchingStatusEnum.P) " +
-						"and mc.id = :matchingCodeId " +
-						"and ao.type = 'P'", AccountOperation.class)
-				.setParameter("matchingCodeId", matchingCodeId)
-				.getResultList();
+						"and mc.id in (:matchingCodeId) " +
+						"and ao.type = :type", AccountOperation.class)
+				.setParameter("matchingCodeId", matchingCodeId);
+		if(StringUtils.isNotBlank(type)){
+			sqlQuery.setParameter("type", type);
+		}
+		return sqlQuery.getResultList();
 	}
 	
 	public void closeAccountOperations(List<Long> aoIdToBeClosed) {
@@ -981,7 +990,6 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 			if(accountOperation instanceof  RecordedInvoice) {
 				var customer = accountOperation.getCustomerAccount();
 				AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", customer, accountOperation.getUnMatchingAmount(), new Date());
-				closedAdv.setCode("CLOSED_ADV2");
 				try {
 					matchingCodeService.matchOperations(customer.getId(), customer.getCode(),
 							new ArrayList<>(List.of(accountOperation.getId())), closedAdv.getId(), accountOperation.getUnMatchingAmount());

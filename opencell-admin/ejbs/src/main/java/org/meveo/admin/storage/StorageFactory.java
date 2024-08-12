@@ -477,7 +477,7 @@ public class StorageFactory {
      */
     public static boolean exists(File file) {
         if (storageType.equals(NFS)) {
-            return file.exists();
+            return file.exists() && file.isFile() && file.length()>0;
         }
         else if (storageType.equalsIgnoreCase(S3)) {
             String objectKey = formatObjectKey(file.getPath());

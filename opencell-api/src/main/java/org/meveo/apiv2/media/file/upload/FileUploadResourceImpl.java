@@ -16,6 +16,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.io.InputStream;
+
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class FileUploadResourceImpl implements FileUploadResource {
@@ -44,7 +46,9 @@ public class FileUploadResourceImpl implements FileUploadResource {
         if(fileUrl == null){
             throw new BadRequestException("there was an issue during file creation : no file or URL was provided");
         }
-        return fileUrl.openStream().readAllBytes();
+        try (InputStream inputStream = fileUrl.openStream()) {
+        	return inputStream.readAllBytes();
+        }
     }
 
     private Path resolePath(MediaFile.LevelEnum level) {

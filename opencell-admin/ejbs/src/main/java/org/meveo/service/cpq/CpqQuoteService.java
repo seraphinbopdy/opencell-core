@@ -302,7 +302,7 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	            }
 	            File jasperFile = new File(resDir, jasperFilename+".jasper");
 	            if (!jasperFile.exists()) {
-	            	 jasperFile = new File(resDir, "quote.jasper");
+	            	 jasperFile = new File(resDir, "main.jasper");
 	            }
 	            if (!jasperFile.exists()) {
 	                throw new InvoiceJasperNotFoundException("The jasper file doesn't exist.");

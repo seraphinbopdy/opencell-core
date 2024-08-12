@@ -70,7 +70,7 @@ public class MassUpdaterOpenCursorJobBean extends MassUpdaterJobBean {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::processUpdateQueries, null, null, this::finalize, null);
+        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::processUpdateQueries, null, null, this::terminate, null);
     }
 
     /**
@@ -163,11 +163,11 @@ public class MassUpdaterOpenCursorJobBean extends MassUpdaterJobBean {
     }
 
     /**
-     * Finalize function
+     * Terminate function
      *
      * @param jobExecutionResult Job execution result
      */
-    protected void finalize(JobExecutionResultImpl jobExecutionResult) {
+    protected void terminate(JobExecutionResultImpl jobExecutionResult) {
         if (scrollableResults != null) {
             scrollableResults.close();
         }

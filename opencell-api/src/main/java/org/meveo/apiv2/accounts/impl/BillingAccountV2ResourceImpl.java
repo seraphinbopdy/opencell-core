@@ -6,6 +6,7 @@ import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.account.BillingAccountDto;
 import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.apiv2.accounts.resource.BillingAccountV2Resource;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.BillingAccount;
 
 import javax.inject.Inject;
@@ -39,6 +40,22 @@ public class BillingAccountV2ResourceImpl extends BaseRs implements BillingAccou
             BillingAccount billingAccount = billingAccountApi.update(postData, BillingAccountApi.Version.V2);
             result.setEntityCode(billingAccount.getCode());
             result.setEntityId(billingAccount.getId());
+        } catch (Exception e) {
+            processException(e, result);
+        }
+
+        return result;
+    }
+
+    @Override
+    public ActionStatus createOrUpdate(BillingAccountDto postData) {
+        ActionStatus result = new ActionStatus(ActionStatusEnum.SUCCESS, "");
+
+        try {
+            BillingAccount billingAccount = billingAccountApi.createOrUpdate(postData, BillingAccountApi.Version.V2);
+            if (StringUtils.isBlank(postData.getCode())) {
+                result.setEntityCode(billingAccount.getCode());
+            }
         } catch (Exception e) {
             processException(e, result);
         }

@@ -20,21 +20,17 @@ package org.meveo.admin.job;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.model.crm.CustomFieldTemplate;
-import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
-import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.service.job.ScopedJob;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * Job definition to cancel duplicated EDRs and keep only the newest version.
@@ -53,12 +49,12 @@ public class EDRsDeduplicationJob extends ScopedJob {
     /**
      * Default value of fetch size of select query
      */
-    public static final Long DEFAULT_SELECT_FETCH_SIZE = 10000L;
+    public static final Long DEFAULT_SELECT_FETCH_SIZE = 1000L;
 
     /**
      * Default value of update chunk size
      */
-    public static final Long DEFAULT_UPDATE_CHUNK_SIZE = 1000L;
+    public static final Long DEFAULT_UPDATE_CHUNK_SIZE = 100L;
 
     /**
      * Custom field that contains the select fetch size value
@@ -73,7 +69,7 @@ public class EDRsDeduplicationJob extends ScopedJob {
     /**
      * Custom field that contains the number of days to process
      */
-    public static final String DAYS_TO_PROCESS= "daysToProcess";
+    public static final String DAYS_TO_PROCESS = "daysToProcess";
 
     /**
      * Job bean

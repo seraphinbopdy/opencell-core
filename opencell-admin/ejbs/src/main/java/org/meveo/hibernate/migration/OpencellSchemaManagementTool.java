@@ -206,23 +206,33 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
     private void runLiquibase(Connection connection, String changelogFilename) throws LiquibaseException {
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-
         ResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor(getClass().getClassLoader());
+        Liquibase liquibase = null;
 
-        Liquibase liquibase = new Liquibase(changelogFilename, resourceAccessor, database);
+        try {
+            liquibase = new Liquibase(changelogFilename, resourceAccessor, database);
 
-        boolean isPostgressDB = !EntityManagerProvider.isDBOracle();
+            boolean isPostgressDB = !EntityManagerProvider.isDBOracle();
+            if (isPostgressDB) {
+                liquibase.getChangeLogParameters().set("db.schema", "public");
+            }
 
-        if (isPostgressDB) {
-            // database.setDefaultSchemaName("public");
-            liquibase.getChangeLogParameters().set("db.schema", "public");
+            liquibase.getChangeLogParameters().set("liquibase_file_prefix", "");
+
+            log.info("Will execute liquibase update from file " + changelogFilename);
+            liquibase.update(new Contexts(), new LabelExpression());
+        } catch (LiquibaseException e) {
+            log.error("Error executing Liquibase update from file " + changelogFilename, e);
+            throw e;
+        } finally {
+            if (liquibase != null) {
+                try {
+                    liquibase.close();
+                } catch (LiquibaseException e) {
+                    log.error("Failed to close Liquibase instance", e);
+                }
+            }
         }
-
-        liquibase.getChangeLogParameters().set("liquibase_file_prefix", "");
-
-        log.info("Will execute liquibase update from file " + changelogFilename);
-        liquibase.update(new Contexts(), new LabelExpression());
-        liquibase.close();
     }
 
     /**

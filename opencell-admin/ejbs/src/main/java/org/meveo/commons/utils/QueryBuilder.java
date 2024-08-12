@@ -833,19 +833,6 @@ public class QueryBuilder {
      * @param field Field name
      * @param listValue List value to compare to
      * @param condition Comparison type
-     * @return instance of QueryBuilder.
-     */
-    @SuppressWarnings("rawtypes")
-    public QueryBuilder addCriterionInList(String field, List listValue, String condition) {
-        return addCriterionInList(field, listValue, condition);
-    }
-
-    /**
-     * Add a criteria to check field value is in a list passed
-     * 
-     * @param field Field name
-     * @param listValue List value to compare to
-     * @param condition Comparison type
      * @param isFieldValueOptional Is field value optional - a "(field is NULL or ...)" will be added to the criteria
      * @return instance of QueryBuilder.
      */

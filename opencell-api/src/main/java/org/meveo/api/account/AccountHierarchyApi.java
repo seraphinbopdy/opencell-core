@@ -925,9 +925,16 @@ public class AccountHierarchyApi extends BaseApi {
                         log.warn("CustomerDto's code is null={}", customerDto);
                         continue;
                     }
-                    
-                    if(Version.V2.equals(version)) {
-                        
+
+                    if(Boolean.TRUE.equals(customerDto.getIsCompany()) && Version.V2.equals(version)) {
+                        if(customerDto.getLegalEntityType() == null || StringUtils.isBlank(customerDto.getLegalEntityType().getCode())) {
+                            missingParameters.add("customer.legalEntityType.code");
+                        }
+
+                        if(StringUtils.isBlank(customerDto.getDescription())) {
+                            missingParameters.add("customer.description");
+                        }
+
                         if(CollectionUtils.isEmpty(customerDto.getRegistrationNumbers())) {
                             missingParameters.add("customer.registrationNumbers");
                         }
@@ -950,13 +957,20 @@ public class AccountHierarchyApi extends BaseApi {
                                 log.warn("code is null={}", customerAccountDto);
                                 continue;
                             }
-                            
-                            if(Version.V2.equals(version)) {
-                                
+
+                            if(Boolean.TRUE.equals(customerAccountDto.getIsCompany()) && Version.V2.equals(version)) {
+                                if(customerAccountDto.getLegalEntityType() == null || StringUtils.isBlank(customerAccountDto.getLegalEntityType().getCode())) {
+                                    missingParameters.add("customerAccount.legalEntityType.code");
+                                }
+
+                                if(StringUtils.isBlank(customerAccountDto.getDescription())) {
+                                    missingParameters.add("customerAccount.description");
+                                }
+
                                 if(CollectionUtils.isEmpty(customerAccountDto.getRegistrationNumbers())) {
                                     missingParameters.add("customerAccount.registrationNumbers");
                                 }
-                                
+
                                 handleMissingParameters();
                             }
                             
@@ -977,8 +991,7 @@ public class AccountHierarchyApi extends BaseApi {
                                         continue;
                                     }
 
-                                    if(Version.V2.equals(version)) {
-
+                                    if(Boolean.TRUE.equals(billingAccountDto.getIsCompany()) && Version.V2.equals(version)) {
                                         if(billingAccountDto.getLegalEntityType() == null || StringUtils.isBlank(billingAccountDto.getLegalEntityType().getCode())) {
                                             missingParameters.add("billingAccount.legalEntityType.code");
                                         }
@@ -1011,10 +1024,17 @@ public class AccountHierarchyApi extends BaseApi {
                                                 continue;
                                             }
 
-                                            if(Version.V2.equals(version)) {
+                                            if(Boolean.TRUE.equals(userAccountDto.getIsCompany()) && Version.V2.equals(version)) {
+                                                if(userAccountDto.getLegalEntityType() == null || StringUtils.isBlank(userAccountDto.getLegalEntityType().getCode())) {
+                                                    missingParameters.add("userAccount.legalEntityType.code");
+                                                }
+
+                                                if(StringUtils.isBlank(userAccountDto.getDescription())) {
+                                                    missingParameters.add("userAccount.description");
+                                                }
 
                                                 if(CollectionUtils.isEmpty(userAccountDto.getRegistrationNumbers())) {
-                                                    missingParameters.add("userAccountDto.registrationNumbers");
+                                                    missingParameters.add("userAccount.registrationNumbers");
                                                 }
 
                                                 handleMissingParameters();

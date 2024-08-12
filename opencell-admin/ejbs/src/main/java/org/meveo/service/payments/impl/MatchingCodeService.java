@@ -27,10 +27,12 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -1073,6 +1075,17 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             return null;
         }
     }
+	/**
+	 * @param code code of finding matching code
+	 * @return found matching code.
+	 */
+	public List<MatchingCode> findByCodes(Set<String> codes) {
+		if(CollectionUtils.isEmpty(codes)) return Collections.EMPTY_LIST;
+		QueryBuilder qb = new QueryBuilder(MatchingCode.class, "m", null);
+		qb.addCriterion("code", "in", codes, false);
+		return  qb.getQuery(getEntityManager()).getResultList();
+		
+	}
 
     /**
      * unmatching operation account

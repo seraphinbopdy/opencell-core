@@ -12973,4 +12973,14 @@ Meaning that advances won’t be available for further invoices."/>
         </addColumn>
     </changeSet>
 
+    <changeSet id="INTRD-21018_20240806" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+                public class EnterLitigation extends EnterLitigationScript {}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.EnterLitigation'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -94,11 +94,8 @@ import org.meveo.model.billing.WalletOperation;
         @NamedQuery(name = "EDR.getByWO", query = "SELECT edr FROM EDR edr WHERE edr.walletOperation.id IN (:WO_IDS)"),
         @NamedQuery(name = "EDR.deleteByWO", query = "DELETE FROM EDR edr WHERE edr.walletOperation.id IN (:WO_IDS)"),
 		@NamedQuery(name = "EDR.cancelEDRs", query = "UPDATE EDR set status='CANCELLED', rejectReason=:rejectReason, updated=:updatedDate where id in :ids"),
-
-        @NamedQuery(name = "EDR.getDuplicatedEDRsItem", query = "SELECT COUNT(e.id) - 1, STRING_AGG(cast(e.id as text), ','), e.eventKey, e.eventVersion  FROM EDR e  "
-        		+ "              WHERE e.status <> 'CANCELLED' AND e.created > :limitDate AND e.eventKey IS NOT NULL AND e.eventVersion IS NOT NULL  "
-        		+ "              GROUP BY e.eventKey, e.eventVersion  "
-        		+ "              HAVING COUNT(e.id) > 1"),
+        @NamedQuery(name = "EDR.getDuplicatedEDRsItem", query = "SELECT COUNT(e.id) - 1, STRING_AGG(cast(e.id as text), ','), e.eventKey FROM EDR e  "
+                + "              WHERE e.status <> 'CANCELLED' AND e.created > :limitDate AND e.eventKey IS NOT NULL GROUP BY e.eventKey HAVING COUNT(e.id) > 1"),
         @NamedQuery(name = "EDR.cancelEDRsWithRejectReasonAndEventVersion", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('Received new version EDR[id=',id,']'), eventVersion=eventVersion+1 ,updated=:updatedDate where id in :ids"),
         @NamedQuery(name = "EDR.cancelEDRsWithRejectReason", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('EDR[id=', id,', eventKey=', eventKey,'] has already been invoiced'), updated=:updatedDate where id in :ids")
     })
@@ -348,6 +345,13 @@ public class EDR extends BaseEntity {
     
     @Column(name = "business_key")
     private String businessKey;
+
+    /**
+     * If true, the WalletOperation will be deleted if rated to 0
+     */
+    @Type(type = "numeric_boolean")
+    @Column(name = "zero_wo_dropped")
+    private Boolean zeroWoDropped = false;
 
     public Subscription getSubscription() {
         return subscription;
@@ -736,4 +740,11 @@ public class EDR extends BaseEntity {
 		this.businessKey = businessKey;
 	}
 
+    public Boolean getZeroWoDropped() {
+        return zeroWoDropped;
+    }
+
+    public void setZeroWoDropped(Boolean zeroWoDropped) {
+        this.zeroWoDropped = zeroWoDropped;
+    }
 }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
@@ -582,12 +583,16 @@ public class ReratingService extends RatingService implements Serializable {
                         // MathContext mc = new MathContext(appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
                         // unitPrice = quantity.compareTo(ZERO) == 0 ? amountWithoutTax : amountWithoutTax.divide(quantity, mc);
 
-                        ILAdjustments adjustment = new ILAdjustments((BigDecimal) rtIlInfo[2], (BigDecimal) rtIlInfo[3], (BigDecimal) rtIlInfo[4], (BigDecimal) rtIlInfo[5], averageUnitAmounts);
+                        BigDecimal rtAmountWithoutTax = (BigDecimal) rtIlInfo[2];
+                        BigDecimal ilAmountWithoutTax = (BigDecimal) rtIlInfo[9];
+                        if (!Objects.equals(ilAmountWithoutTax, rtAmountWithoutTax)) {
+                            ILAdjustments adjustment = new ILAdjustments((BigDecimal) rtIlInfo[2], (BigDecimal) rtIlInfo[3], (BigDecimal) rtIlInfo[4], (BigDecimal) rtIlInfo[5], averageUnitAmounts);
 
-                        if (ilAdjustments.containsKey(ilId)) {
-                            ilAdjustments.get(ilId).addAdjustment(adjustment);
-                        } else {
-                            ilAdjustments.put(ilId, adjustment);
+                            if (ilAdjustments.containsKey(ilId)) {
+                                ilAdjustments.get(ilId).addAdjustment(adjustment);
+                            } else {
+                                ilAdjustments.put(ilId, adjustment);
+                            }
                         }
                     }
                 }
@@ -686,7 +691,7 @@ public class ReratingService extends RatingService implements Serializable {
             for (WalletOperation walletOperation : ratingResult.getWalletOperations()) {
                 walletOperationService.chargeWalletOperation(walletOperation);
             }
-
+            
         } catch (EJBTransactionRolledbackException e) {
             if (ratingResult != null) {
                 revertCounterChanges(ratingResult.getCounterChanges());
@@ -758,6 +763,7 @@ public class ReratingService extends RatingService implements Serializable {
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void applyMassRerate(List<Long> ids, boolean useSamePricePlan, JobExecutionResultImpl jobExecutionResult, String dateCondition) {
 		String readWOsQuery = "FROM WalletOperation wo left join fetch wo.chargeInstance ci left join fetch wo.edr edr WHERE wo.status='TO_RERATE' "+dateCondition+" AND wo.id IN (:ids)";
+		int toProcess=ids.size();
 		List<WalletOperation> walletOperations = getEntityManager().createQuery(readWOsQuery, WalletOperation.class).setParameter("ids", ids).getResultList();
 		Map<String, List<Long>> errorsMap = new HashMap<>();
 		walletOperations.stream().forEach(operationToRerate -> {
@@ -767,12 +773,20 @@ public class ReratingService extends RatingService implements Serializable {
 		        errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(operationToRerate.getId());
 		    }
 		});
-		errorsMap.forEach((key, value) ->jobExecutionResult.registerError(""+value.size()+" errors of: "+key+" IDs: "+ value.stream().map(String::valueOf).collect(Collectors.joining(", ")), value.size()));
+		
+		errorsMap.forEach((key, value) ->reportErrors(jobExecutionResult, key, value, toProcess));
 		ids.removeAll(errorsMap.values().stream().flatMap(List::stream).collect(Collectors.toList()));
 		if(!ids.isEmpty()) {
 			Date now = new Date();
 			String updateILQuery = "UPDATE WalletOperation SET status='RERATED', updated = :now where id in (:ids) ";
 			getEntityManager().createQuery(updateILQuery).setParameter("ids", ids).setParameter("now", now).executeUpdate();
 		}
+	}
+
+	private void reportErrors(JobExecutionResultImpl jobExecutionResult, String key, List<Long> value, int toProcess) {
+		int errorsToCompute = value.size();
+		errorsToCompute = errorsToCompute == toProcess || errorsToCompute == 0 ? 0 : errorsToCompute;
+		jobExecutionResult.registerError("" + value.size() + " errors of: " + key + " IDs: " + value.stream().map(String::valueOf).collect(Collectors.joining(", ")), errorsToCompute);
+		jobExecutionResult.addNbItemsCorrectlyProcessed(-errorsToCompute);
 	}
 }

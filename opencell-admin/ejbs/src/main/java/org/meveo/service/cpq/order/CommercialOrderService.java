@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -58,6 +59,7 @@ import org.meveo.model.cpq.enums.PriceVersionDateSettingEnum;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentMethod;
+import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.DiscountPlanInstanceService;
 import org.meveo.service.billing.impl.OneShotChargeInstanceService;
@@ -78,7 +80,7 @@ import org.meveo.service.payments.impl.PaymentMethodService;
  *
  */
 @Stateless
-public class CommercialOrderService extends PersistenceService<CommercialOrder>{
+public class CommercialOrderService extends BusinessService<CommercialOrder> {
 
     @Inject
     private ServiceSingleton serviceSingleton;
@@ -460,13 +462,12 @@ public class CommercialOrderService extends PersistenceService<CommercialOrder>{
 		ServiceInstance serviceInstance = new ServiceInstance();
 		serviceInstance.setCode(product.getCode());
 		serviceInstance.setQuantity(quantity);
-		serviceInstance.setSubscriptionDate(subscription.getSubscriptionDate());
+		serviceInstance.setSubscriptionDate(Optional.ofNullable(deliveryDate).or(() ->Optional.ofNullable(serviceInstance.getDeliveryDate())).orElse(subscription.getSubscriptionDate()));
 		if(!AgreementDateSettingEnum.MANUAL.equals(product.getAgreementDateSetting())) {
 			serviceInstance.setEndAgreementDate(subscription.getEndAgreementDate());
 		}
 		serviceInstance.setRateUntilDate(subscription.getEndAgreementDate());
-		ProductVersion productVersion = productService.getCurrentPublishedVersion(serviceInstance.getCode(),
-						deliveryDate != null ? deliveryDate : serviceInstance.getSubscriptionDate())
+		ProductVersion productVersion = productService.getCurrentPublishedVersion(serviceInstance.getCode(), serviceInstance.getSubscriptionDate())
 				.orElseThrow(() -> new BusinessException("No product version found for subscription code: " + subscription.getCode()));
 		serviceInstance.setProductVersion(productVersion);
 		serviceInstance.setOrderProduct(orderProduct);

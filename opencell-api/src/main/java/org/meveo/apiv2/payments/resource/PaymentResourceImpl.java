@@ -12,12 +12,12 @@ import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.payment.PayByCardOrSepaDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
-import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.payment.PaymentApi;
@@ -134,21 +134,10 @@ public class PaymentResourceImpl implements PaymentResource {
      */
     @Override
     public Response removeRejectionCode(Long id, RejectionCodeDeleteInput rejectionCodeDeleteInput) {
-        try {
-            paymentApi.removeRejectionCode(id, rejectionCodeDeleteInput.getForce());
-            return ok()
-                    .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
-                            ",\"message\":\"Rejection code successfully deleted\"}}")
-                    .build();
-        } catch (MeveoApiException exception) {
-            return buildErrorResponse(exception.getMessage());
-        }
-    }
-
-    private static Response buildErrorResponse(String message) {
-        return Response.status(CONFLICT)
-                .entity("{\"actionStatus\":{\"status\":\"ERROR\"" +
-                        ",\"message\":\"" + message + "\"}}")
+        paymentApi.removeRejectionCode(id, rejectionCodeDeleteInput.getForce());
+        return ok()
+                .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Rejection code successfully deleted\"}}")
                 .build();
     }
 
@@ -159,13 +148,10 @@ public class PaymentResourceImpl implements PaymentResource {
      */
     @Override
     public Response clearAll(RejectionCodeClearInput clearInput) {
-        try {
-            return ok()
-                    .entity(paymentApi.clearAll(clearInput))
-                    .build();
-        } catch (MeveoApiException exception) {
-            return buildErrorResponse(exception.getMessage());
-        }
+        return ok()
+                .entity(paymentApi.clearAll(clearInput))
+                .build();
+
     }
 
     /**
@@ -245,23 +231,23 @@ public class PaymentResourceImpl implements PaymentResource {
     /**
      * Delete rejection code based on filters
      *
-     * @param filters PagingAndFiltering
+     * @param rejectionCodeDeleteInput RejectionCodeDeleteInput
      */
     @Override
-    public Response removeRejectionCode(PagingAndFiltering filters) {
-        if (filters == null || filters.getFilters() == null || filters.getFilters().isEmpty()) {
+    public Response removeRejectionCode(RejectionCodeDeleteInput rejectionCodeDeleteInput) {
+        if (rejectionCodeDeleteInput == null || rejectionCodeDeleteInput.getFilters() == null
+                || rejectionCodeDeleteInput.getFilters().getFilters().isEmpty()) {
             throw new MissingParameterException("No filter provided");
         }
-        try {
-            final int deletedCodeCount = paymentApi.removeRejectionCode(filters);
-            return ok()
-                    .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
-                            ",\"message\":\"Payment rejection codes successfully deleted\"}," +
-                            " \"numberOfDeletedCodes\":" + deletedCodeCount + "}")
-                    .build();
-        } catch (MeveoApiException exception) {
-            return buildErrorResponse(exception.getMessage());
-        }
+        PagingAndFiltering pagingAndFiltering = new PagingAndFiltering();
+        pagingAndFiltering.setFilters(rejectionCodeDeleteInput.getFilters().getFilters());
+        final int deletedCodeCount = paymentApi.removeRejectionCode(pagingAndFiltering,
+                rejectionCodeDeleteInput.getForce());
+        return ok()
+                .entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Payment rejection codes successfully deleted\"}," +
+                        " \"numberOfDeletedCodes\":" + deletedCodeCount + "}")
+                .build();
     }
 
     /**
@@ -352,6 +338,14 @@ public class PaymentResourceImpl implements PaymentResource {
                         ",\"message\":\"Rejection payment successfully created\"},\"id\":"
                         + created.getId() + ", \"code\": \""
                         + created.getCode() + "\"}")
+                .build();
+    }
+
+    @Override
+    public Response retryRejectedPayment(@PathParam("id") Long paymentId) throws Exception {
+        paymentApi.retryRejectedPayment(paymentId);
+        return ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
+                        ",\"message\":\"Payment successfully retried\"}}")
                 .build();
     }
 }

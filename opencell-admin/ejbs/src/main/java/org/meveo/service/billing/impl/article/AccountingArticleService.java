@@ -201,9 +201,11 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
             if (bestMatch != null) {
                 accountingArticle = bestMatch.getAccountingArticle();
 
-            } else {
-			ParamBean paramBean = ParamBean.getInstance();
-			String defaultArticle = paramBean.getProperty("default.article", "ART-STD");
+			} else if (walletOperation != null && walletOperation.getAccountingArticle() != null) {
+				accountingArticle = walletOperation.getAccountingArticle();
+			} else {
+				ParamBean paramBean = ParamBean.getInstance();
+				String defaultArticle = paramBean.getProperty("default.article", "ART-STD");
                 accountingArticle = findByCode(defaultArticle, Arrays.asList("taxClass"));
 
                 if (accountingArticle != null) {

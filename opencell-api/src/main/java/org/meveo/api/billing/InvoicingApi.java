@@ -434,13 +434,14 @@ public class InvoicingApi extends BaseApi {
         if(dto.getPreReportAutoOnCreate() != null) {
             billingRun.setPreReportAutoOnCreate(dto.getPreReportAutoOnCreate());
         } else {
-            billingRun.setPreReportAutoOnCreate(billingRun.getBillingCycle().getReportConfigPreReportAutoOnCreate());
+            billingRun.setPreReportAutoOnCreate(billingCycle != null
+                    ? billingCycle.getReportConfigPreReportAutoOnCreate() : false);
         }
         if(dto.getPreReportAutoOnInvoiceLinesJob() != null) {
             billingRun.setPreReportAutoOnInvoiceLinesJob(dto.getPreReportAutoOnInvoiceLinesJob());
         } else {
-            billingRun.setPreReportAutoOnInvoiceLinesJob(billingRun
-                    .getBillingCycle().getReportConfigPreReportAutoOnInvoiceLinesJob());
+            billingRun.setPreReportAutoOnInvoiceLinesJob(billingCycle != null
+                    ? billingCycle.getReportConfigPreReportAutoOnInvoiceLinesJob() : false);
         }
 
         if (dto.getApplicationEl() != null) { // On update, if applicationEL is null then don’t update the field.

@@ -29,6 +29,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceStatusEnum;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -85,7 +86,7 @@ public class XMLInvoiceGenerationJob extends Job {
         customFieldNbRuns.setFieldType(CustomFieldTypeEnum.LONG);
         customFieldNbRuns.setValueRequired(false);
         customFieldNbRuns.setDefaultValue("-1");
-        customFieldNbRuns.setGuiPosition("tab:Configuration:0;field:0");
+        customFieldNbRuns.setGuiPosition("tab:Configuration:0;fieldGroup:Configuration:0;field:0");
         result.put(CF_NB_RUNS, customFieldNbRuns);
 
         CustomFieldTemplate customFieldNbWaiting = new CustomFieldTemplate();
@@ -96,8 +97,13 @@ public class XMLInvoiceGenerationJob extends Job {
         customFieldNbWaiting.setFieldType(CustomFieldTypeEnum.LONG);
         customFieldNbWaiting.setValueRequired(false);
         customFieldNbWaiting.setDefaultValue("0");
-        customFieldNbWaiting.setGuiPosition("tab:Configuration:0;field:1");
+        customFieldNbWaiting.setGuiPosition("tab:Configuration:0;fieldGroup:Configuration:0;field:1");
         result.put(Job.CF_WAITING_MILLIS, customFieldNbWaiting);
+
+        result.put(CF_NB_PUBLISHERS,
+            CustomFieldTemplateUtils.buildCF(CF_NB_PUBLISHERS, resourceMessages.getString("jobExecution.nbPublishers"), CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Configuration:0;field:2", APPLIES_TO));
+        result.put(CF_BATCH_SIZE, CustomFieldTemplateUtils.buildCF(CF_BATCH_SIZE, resourceMessages.getString("jobExecution.batchSize"), CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Configuration:0;field:3",
+            "100", true, APPLIES_TO));
 
         CustomFieldTemplate customFieldInvToProcess = new CustomFieldTemplate();
         final String cfInvToProcessCode = "invoicesToProcess";
@@ -117,8 +123,9 @@ public class XMLInvoiceGenerationJob extends Job {
         customFieldInvToProcess.setListValues(invoicesStatusToProcessValues);
         customFieldInvToProcess.setDefaultValue(InvoiceStatusEnum.VALIDATED.name());
         
-        customFieldInvToProcess.setGuiPosition("tab:Configuration:0;field:2");
+        customFieldInvToProcess.setGuiPosition("tab:Configuration:0;field:4");
         result.put(cfInvToProcessCode, customFieldInvToProcess);
+
 
         return result;
     }

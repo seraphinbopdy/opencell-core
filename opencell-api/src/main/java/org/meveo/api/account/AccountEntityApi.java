@@ -20,6 +20,7 @@ package org.meveo.api.account;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.meveo.admin.util.ResourceBundle;
 import org.meveo.api.BaseApi;
 import org.meveo.api.dto.account.AccountDto;
 import org.meveo.api.dto.account.RegistrationNumberDto;
@@ -70,6 +71,8 @@ public class AccountEntityApi extends BaseApi {
 	
 	@Inject
 	protected IsoIcdService isoIcdService;
+	@Inject
+	private ResourceBundle resourceBundle;
 
     public void populate(AccountDto postData, AccountEntity accountEntity) throws MeveoApiException {
         Address address = new Address();
@@ -285,12 +288,10 @@ public class AccountEntityApi extends BaseApi {
 				RegistrationNumber registrationNumber = registrationNumberService.findByRegistrationNo(registrationNumberDto.getRegistrationNo());
 				IsoIcd isoIcd = null;
 				
-				if(registrationNumber == null) {
-					registrationNumber = new RegistrationNumber(registrationNumberDto.getRegistrationNo(), isoIcd, accountEntity);
-				}else if(registrationNumber.getAccountEntity(accountEntity) == null ||  accountEntity.getId() == registrationNumber.getAccountEntity(accountEntity).getId()){
+				if(registrationNumber != null && (registrationNumber.getAccountEntity(accountEntity) == null ||  accountEntity.getId() == registrationNumber.getAccountEntity(accountEntity).getId())){
 					registrationNumber.setAccountEntity(accountEntity);
 				}else{
-					throw new BusinessApiException("The register number is already attach to another " + accountEntity.getClass().getSimpleName());
+					registrationNumber = new RegistrationNumber(registrationNumberDto.getRegistrationNo(), isoIcd, accountEntity);
 				}
 				
 				if(org.meveo.commons.utils.StringUtils.isNotBlank(registrationNumberDto.getIsoIcdCode())){
@@ -303,7 +304,9 @@ public class AccountEntityApi extends BaseApi {
 				registrationNumberList.add(registrationNumber);
 				if(registrationNumber.getId() == null){
 					registrationNumberService.create(registrationNumber);
-				}
+				} else {
+                    registrationNumberService.update(registrationNumber);
+                }
 			});
 		}
 	}

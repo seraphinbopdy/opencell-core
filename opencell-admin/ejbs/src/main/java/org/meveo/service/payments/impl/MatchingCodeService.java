@@ -42,12 +42,15 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.admin.util.ResourceBundle;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.qualifier.Updated;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.MatchingReturnObject;
 import org.meveo.model.PartialMatchingOccToSelect;
+import org.meveo.model.accountingScheme.JournalEntry;
+import org.meveo.model.accountingScheme.JournalEntryDirectionEnum;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoicePaymentStatusEnum;
@@ -66,6 +69,7 @@ import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.PaymentScheduleInstanceItem;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.Refund;
+import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.UnMatchingAmount;
 import org.meveo.model.payments.UnMatchingCode;
 import org.meveo.model.payments.WriteOff;
@@ -266,8 +270,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), InvoicePaymentStatusEnum.ABANDONED);
                     } else if (withRefund) {
                         log.info("matching - [Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
-                                invoice.getPaymentStatus() + " - newPaymentStatus : " + InvoicePaymentStatusEnum.REFUNDED + "]");
-                        invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), InvoicePaymentStatusEnum.REFUNDED);
+                                invoice.getPaymentStatus() + " - newPaymentStatus : " + ((fullMatch) ? InvoicePaymentStatusEnum.REFUNDED : InvoicePaymentStatusEnum.PREFUNDED) + "]");
+                        invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), ((fullMatch) ? InvoicePaymentStatusEnum.REFUNDED : InvoicePaymentStatusEnum.PREFUNDED));
                     } else if (isPplCreationCreditAo) {
                         log.info("matching - [Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
                                 invoice.getPaymentStatus() + " - newPaymentStatus : " + InvoicePaymentStatusEnum.PENDING_PLAN + "]");
@@ -311,7 +315,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                                         appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
                 accountOperation.setMatchingAmount(computedMatchingAmount);
                 accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(computedMatchingAmount)).abs());
-                accountOperation.setMatchingStatus(fullMatch ? MatchingStatusEnum.L : MatchingStatusEnum.P);
+				if(accountOperation.getMatchingStatus() != MatchingStatusEnum.I) {
+					accountOperation.setMatchingStatus(fullMatch ? MatchingStatusEnum.L : MatchingStatusEnum.P);
+				}
 
                 matchingAmount.setMatchingAmount((matchedAmount.subtract(accountOperation.getMatchingAmount())).abs());
                 matchingAmount.setTransactionalMatchingAmount((transactionMatchedAmount
@@ -414,8 +420,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), InvoicePaymentStatusEnum.ABANDONED);
                     } else if(withRefund) {
                         log.info("matching- [Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
-                                invoice.getPaymentStatus() + " - newPaymentStatus : " + InvoicePaymentStatusEnum.REFUNDED + "]");
-                        invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), InvoicePaymentStatusEnum.REFUNDED);
+                                invoice.getPaymentStatus() + " - newPaymentStatus : " + ((fullMatch) ? InvoicePaymentStatusEnum.REFUNDED : InvoicePaymentStatusEnum.PREFUNDED) + "]");
+                        invoiceService.checkAndUpdatePaymentStatus(invoice, invoice.getPaymentStatus(), ((fullMatch) ? InvoicePaymentStatusEnum.REFUNDED : InvoicePaymentStatusEnum.PREFUNDED));
                     } else if(fullMatch) {
                         log.info("matching- [Inv.id : " + invoice.getId() + " - oldPaymentStatus : " + 
                                 invoice.getPaymentStatus() + " - newPaymentStatus : " + InvoicePaymentStatusEnum.PAID + "]");
@@ -454,8 +460,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         (accountOperation.getAmount().multiply(accountOperation.getTransactionalMatchingAmount()))
                                 .divide(accountOperation.getTransactionalAmount(),
                                         appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
-                accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(computedMatchingAmount)).abs());
                 accountOperation.setMatchingAmount(computedMatchingAmount);
+	            accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(computedMatchingAmount)).abs());
                 matchingAmount.setMatchingAmount((matchedAmount.subtract(accountOperation.getMatchingAmount())).abs());
                 matchingAmount.setTransactionalMatchingAmount((transactionMatchedAmount
                         .subtract(accountOperation.getTransactionalMatchingAmount()).abs()));
@@ -678,6 +684,11 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         getTransactionalMatchingAmount().subtract(ofNullable(matchingAmount.getTransactionalMatchingAmount()).orElse(ZERO)));
                 if (ZERO.compareTo(operation.getMatchingAmount()) == 0) {
                     operation.setMatchingStatus(MatchingStatusEnum.O);
+                    List<JournalEntry> byAoAndDirection = journalEntryService.findByAoAndDirection(operation.getId(), JournalEntryDirectionEnum.getValue(operation.getTransactionCategory()
+                                                                                                                                                                  .getId()));
+                    
+                    byAoAndDirection.forEach(je -> je.setMatchingCode(null));
+                    
                     if (operation instanceof RecordedInvoice) {
                         Invoice invoice = ((RecordedInvoice)operation).getInvoice();
                         if (invoice != null) {
@@ -925,7 +936,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
 
         int cptOccDebit = 0, cptOccCredit = 0, cptPartialAllowed = 0;
         AccountOperation accountOperationForPartialMatching = null;
-
+		operationIds.add(aoToMatchLast);
         for (Long id : operationIds) {
             AccountOperation accountOperation = accountOperationService.findById(id);
             if (accountOperation == null) {
@@ -947,10 +958,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             }
             if (accountOperation.getTransactionCategory() == OperationCategoryEnum.DEBIT) {
                 cptOccDebit++;
+	            amoutCredit = amoutCredit.add(accountOperation.getUnMatchingAmount());
             }
             if (accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT) {
                 cptOccCredit++;
-                amoutCredit = amoutCredit.add(accountOperation.getUnMatchingAmount());
             }
         }
         if (cptOccCredit == 0) {
@@ -960,7 +971,6 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             throw new BusinessException(resourceMessages.getString("matchingService.noDebitOps"));
         }
             BigDecimal balance = amount.subtract(amoutCredit);
-            balance = balance.abs();
 
 
             log.info("matchOperations  balance: {}", balance);
@@ -974,23 +984,17 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 PaymentHistory paymentHistory = paymentHistoryService.findHistoryByPaymentId(payment.getReference());
                 if (paymentHistory != null) {
                     List<Long> aoIdsToPay = operationIds.stream().filter(aoId -> !aoId.equals(payment.getId())).collect(toList());
-                    if (paymentHistory.getListAoPaid() == null || paymentHistory.getListAoPaid().isEmpty()) {
-                        List<AccountOperation> aoToPay = new ArrayList<>();
-                        for (Long aoId : aoIdsToPay) {
-                            aoToPay.add(accountOperationService.findById(aoId));
-                        }
-                        for (AccountOperation ao : aoToPay) {
-                            if (ao != null) {
-                                if (ao.getPaymentHistories() == null) {
-                                    ao.setPaymentHistories(new ArrayList<>());
-                                }
-                                ao.getPaymentHistories().add(paymentHistory);
-
-                                if (paymentHistory.getListAoPaid() == null) {
-                                    paymentHistory.setListAoPaid(new ArrayList<>());
-                                }
-                                paymentHistory.getListAoPaid().add(ao);
+                    List<AccountOperation> aoToPay = new ArrayList<>();
+                    for (Long aoId : aoIdsToPay) {
+                        aoToPay.add(accountOperationService.findById(aoId));
+                    }
+                    for (AccountOperation ao : aoToPay) {
+                        if (ao != null) {
+                            if (ao.getPaymentHistories() == null) {
+                                ao.setPaymentHistories(new ArrayList<>());
                             }
+                            ao.getPaymentHistories().add(paymentHistory);
+                            paymentHistory.getListAoPaid().add(ao);
                         }
                     }
                 }
@@ -1003,12 +1007,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             return matchingReturnObject;
         }
 
-        if (amount.compareTo(amoutCredit) > 0) {
-            amount = amoutCredit;
-        }
 
-        if (aoToMatchLast != null) {
-            matching(listOcc, amount, accountOperationService.findById(aoToMatchLast), matchingTypeEnum);
+        if (aoToMatchLast != null && amount.compareTo(amoutCredit) > 0) {
+            matching(listOcc, amoutCredit, accountOperationService.findById(aoToMatchLast), matchingTypeEnum);
             matchingReturnObject.setOk(true);
             log.info("matchOperations successful :  partial ok (idPartial recu)");
             return matchingReturnObject;
@@ -1042,6 +1043,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             matching(listOcc, amount, accountOperationForPartialMatching, matchingTypeEnum);
             matchingReturnObject.setOk(true);
             log.info("matchOperations successful :  partial ok (un idPartial possible)");
+			//throw new BusinessApiException("matchingService.matchingImpossible");
             return matchingReturnObject;
         }
 

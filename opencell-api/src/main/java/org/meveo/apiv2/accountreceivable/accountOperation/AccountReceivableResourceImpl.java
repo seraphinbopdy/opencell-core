@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
@@ -281,5 +282,15 @@ public class AccountReceivableResourceImpl implements AccountReceivableResource 
 	public Response transferAmounts(Long accountOperationId, AmountsTransferDto amountsTransferDto) {
 		accountOperationServiceApi.transferAmounts(accountOperationId, amountsTransferDto);
 		return Response.status(Response.Status.OK).build();
+	}
+	
+	@Override
+	public Response closeOperations(AccountOperationClose accountOperations) {
+		if(accountOperations == null || CollectionUtils.isEmpty(accountOperations.getAccountOperations())) {
+			return Response.status(Response.Status.BAD_REQUEST).entity("No accountOperations passed for closing").build();
+		}
+		accountOperationServiceApi.closeOperations(accountOperations.getAccountOperations().stream().map(AccountOperationInput::getId).collect(Collectors.toList()));
+		ActionStatus result = new ActionStatus(ActionStatusEnum.SUCCESS, "");
+		return Response.ok(result).build();
 	}
 }

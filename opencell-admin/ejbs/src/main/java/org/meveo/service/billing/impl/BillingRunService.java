@@ -865,13 +865,13 @@ public class BillingRunService extends PersistenceService<BillingRun> {
             }
             
             if (CollectionUtils.isNotEmpty(toMove)) {
-                invoiceService.quarantineSuspectedInvoicesByBR(billingRun);
+                billingRun = invoiceService.quarantineSuspectedInvoicesByBR(billingRun);
             }
             if (CollectionUtils.isNotEmpty(toQuarantine)) {
-                invoiceService.quarantineRejectedInvoicesByBR(billingRun);
+                billingRun = invoiceService.quarantineRejectedInvoicesByBR(billingRun);
             }
             if (CollectionUtils.isNotEmpty(toCancel)) {
-                invoiceService.cancelInvoicesByStatus(billingRun, toCancel);
+                billingRun = invoiceService.cancelInvoicesByStatus(billingRun, toCancel);
             }
         }
         
@@ -933,7 +933,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         return result;
     }
 
-    public void executeBillingRunValidationScript(BillingRun billingRun) throws BusinessException {
+    public BillingRun executeBillingRunValidationScript(BillingRun billingRun) throws BusinessException {
         if (!billingRun.isSkipValidationScript()) {
             //Not Billing Run Exceptionnel
             if (billingRun.getBillingCycle() != null) {
@@ -949,7 +949,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                             methodContext.put(Script.CONTEXT_APP_PROVIDER, appProvider);
                             methodContext.put("billingRun", billingRun);
                             script.execute(methodContext);                    
-                            update(billingRun);
+                            billingRun = update(billingRun);
                         } catch (javax.validation.ValidationException e) { //RuntimeException 
                             throw new BusinessException(e);
                         }
@@ -957,6 +957,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 }
             }
         }
+        return billingRun;
     }
     
     /**
@@ -1576,7 +1577,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 create(quarantineBillingRun);
                 billingRun.setRejectionReason(null);
                 billingRun.setNextBillingRun(quarantineBillingRun);
-                update(billingRun);
+                billingRun = update(billingRun);
                 return quarantineBillingRun;
             } catch (Exception e) {
                log.error(e.getMessage());
@@ -1598,7 +1599,8 @@ public class BillingRunService extends PersistenceService<BillingRun> {
     public void createAggregatesAndInvoiceWithIl(BillingRun billingRun, long nbRuns, long waitingMillis,
                                                  Long jobInstanceId, JobExecutionResultImpl jobExecutionResult, boolean v11Process) throws BusinessException {
         List<? extends IBillableEntity> entities = getEntitiesToInvoice(billingRun, v11Process);
-        billingRun.setBillableBillingAcountNumber(entities.size());
+        billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null, entities.size(), null, null);
+     
         SubListCreator<? extends IBillableEntity> subListCreator;
         try {
             subListCreator = new SubListCreator<>(entities, (int) nbRuns);
@@ -1673,15 +1675,16 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         InvoicingJobV2Bean.addNewAmounts(amountTax, amountWithoutTax, amountWithTax);
     }
     
-    public void updateBillingRunStatistics(BillingRun billingRun) {
-        recalculateBRStatisticsByInvoices(billingRun);
+    public BillingRun updateBillingRunStatistics(BillingRun billingRun) {
+        billingRun = recalculateBRStatisticsByInvoices(billingRun);
         getEntityManager().createNamedQuery("BillingAccount.linkToBillingRunByInvoice").setParameter("billingRunId", billingRun.getId()).executeUpdate();
+        return billingRun;
     }
 
-    public void updateBillingRunJobExecution(Long billingRunId, JobExecutionResultImpl result) {
+    public BillingRun updateBillingRunJobExecution(Long billingRunId, JobExecutionResultImpl result) {
         BillingRun billingRun = billingRunService.findById(billingRunId);
         billingRun.addJobExecutions(result);
-        update(billingRun);
+        return update(billingRun);
     }
 
     public Filter createFilter(BillingRun billingRun, boolean invoicingV2) {
@@ -1789,7 +1792,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         return query.getResultList();
     }
     
-    public void recalculateBRStatisticsByInvoices(BillingRun billingRun) {
+    public BillingRun recalculateBRStatisticsByInvoices(BillingRun billingRun) {
         Query selectQuery = getEntityManager().createNamedQuery("BillingRun.calculateBRStatisticsByInvoices");
         selectQuery.setParameter("billingRunId", billingRun.getId());
         Object[] result = (Object[]) selectQuery.getSingleResult();
@@ -1798,10 +1801,8 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         BigDecimal amountWithoutTax = (BigDecimal) result[2];
         Integer countBA = ((Long) result[3]).intValue();
         Integer countInvoices = ((Long) result[4]).intValue();
-    	billingRun.setPrAmountTax(amountTax);
-    	billingRun.setPrAmountWithTax(amountWithTax);
-    	billingRun.setPrAmountWithoutTax(amountWithoutTax);
-    	billingRun.setBillableBillingAcountNumber(countBA);
-    	billingRun.setInvoiceNumber(countInvoices);
+
+        billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null, countBA, billingRun.getStatus(), null, amountWithTax, amountWithoutTax, amountTax, countInvoices);
+        return billingRun;
     }
 }

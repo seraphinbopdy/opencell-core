@@ -111,6 +111,10 @@ public class DiscountPlanApi extends BaseCrudApi<DiscountPlan, DiscountPlanDto> 
         discountPlan.setDiscountPlanaApplicableEntities(getApplicableEntities(postData.getApplicableEntities()));
         discountPlan.setUsedQuantity(postData.getUsedQuantity());
         discountPlan.setSequence(postData.getSequence());
+        // Set a default sequence value if not provided
+        if (discountPlan.getSequence() == null) {
+            discountPlanService.setDiscountPlanSequence(discountPlan);
+        }
         discountPlan.setAutomaticApplication(postData.getAutomaticApplication() != null ? postData.getAutomaticApplication() : false);
         discountPlan.setApplicableOnOverriddenPrice(postData.isApplicableOnOverriddenPrice());
         discountPlan.setApplicableOnDiscountedPrice(postData.isApplicableOnDiscountedPrice());
@@ -239,6 +243,10 @@ public class DiscountPlanApi extends BaseCrudApi<DiscountPlan, DiscountPlanDto> 
 		    updateSequence(postData, discountPlan);
 		    discountPlan.setSequence(postData.getSequence());
 	    }
+	    // Set a default sequence value if not provided
+        if (discountPlan.getSequence() == null) {
+            discountPlanService.setDiscountPlanSequence(discountPlan);
+        }
         updateDuration(postData, discountPlan);
 
         if(postData.getEndDate() != null)

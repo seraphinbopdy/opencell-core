@@ -23602,6 +23602,22 @@ Thus, the column Preference Criterion will indicate either A, B, C,...</ccts:Exa
                </xsd:documentation>
             </xsd:annotation>
          </xsd:element>
+         <xsd:element ref="cac:PartyIdentification" minOccurs="0" maxOccurs="1">
+              <xsd:annotation>
+                  <xsd:documentation>
+                      <ccts:Component>
+                          <ccts:ComponentType>ASBIE</ccts:ComponentType>
+                          <ccts:DictionaryEntryName>Party. Party Identification</ccts:DictionaryEntryName>
+                          <ccts:Definition>An identifier for this party.</ccts:Definition>
+                          <ccts:Cardinality>0..n</ccts:Cardinality>
+                          <ccts:ObjectClass>Party</ccts:ObjectClass>
+                          <ccts:PropertyTerm>Party Identification</ccts:PropertyTerm>
+                          <ccts:AssociatedObjectClass>Party Identification</ccts:AssociatedObjectClass>
+                          <ccts:RepresentationTerm>Party Identification</ccts:RepresentationTerm>
+                      </ccts:Component>
+                  </xsd:documentation>
+              </xsd:annotation>
+          </xsd:element>
       </xsd:sequence>
    </xsd:complexType>
    <xsd:complexType name="PaymentTermsType">
@@ -28805,101 +28821,167 @@ Thus, the column Preference Criterion will indicate either A, B, C,...</ccts:Exa
          </xsd:element>
       </xsd:sequence>
    </xsd:complexType>
-   <xsd:complexType name="ServiceProviderPartyType">
-      <xsd:annotation>
-         <xsd:documentation>
-            <ccts:Component>
-               <ccts:ComponentType>ABIE</ccts:ComponentType>
-               <ccts:DictionaryEntryName>Service Provider Party. Details</ccts:DictionaryEntryName>
-               <ccts:Definition>A class to describe a party contracting to provide services, such as transportation, finance, etc.</ccts:Definition>
-               <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
-            </ccts:Component>
-         </xsd:documentation>
-      </xsd:annotation>
-      <xsd:sequence>
-         <xsd:element ref="cbc:ID" minOccurs="0" maxOccurs="1">
-            <xsd:annotation>
-               <xsd:documentation>
-                  <ccts:Component>
-                     <ccts:ComponentType>BBIE</ccts:ComponentType>
-                     <ccts:DictionaryEntryName>Service Provider Party. Identifier</ccts:DictionaryEntryName>
-                     <ccts:Definition>An identifier for this service provider.</ccts:Definition>
-                     <ccts:Cardinality>0..1</ccts:Cardinality>
-                     <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
-                     <ccts:PropertyTerm>Identifier</ccts:PropertyTerm>
-                     <ccts:RepresentationTerm>Identifier</ccts:RepresentationTerm>
-                     <ccts:DataType>Identifier. Type</ccts:DataType>
-                  </ccts:Component>
-               </xsd:documentation>
-            </xsd:annotation>
-         </xsd:element>
-         <xsd:element ref="cbc:ServiceTypeCode" minOccurs="0" maxOccurs="1">
-            <xsd:annotation>
-               <xsd:documentation>
-                  <ccts:Component>
-                     <ccts:ComponentType>BBIE</ccts:ComponentType>
-                     <ccts:DictionaryEntryName>Service Provider Party. Service Type Code. Code</ccts:DictionaryEntryName>
-                     <ccts:Definition>The type of service provided, expressed as a code.</ccts:Definition>
-                     <ccts:Cardinality>0..1</ccts:Cardinality>
-                     <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
-                     <ccts:PropertyTerm>Service Type Code</ccts:PropertyTerm>
-                     <ccts:RepresentationTerm>Code</ccts:RepresentationTerm>
-                     <ccts:DataType>Code. Type</ccts:DataType>
-                  </ccts:Component>
-               </xsd:documentation>
-            </xsd:annotation>
-         </xsd:element>
-         <xsd:element ref="cbc:ServiceType" minOccurs="0" maxOccurs="unbounded">
-            <xsd:annotation>
-               <xsd:documentation>
-                  <ccts:Component>
-                     <ccts:ComponentType>BBIE</ccts:ComponentType>
-                     <ccts:DictionaryEntryName>Service Provider Party. Service Type. Text</ccts:DictionaryEntryName>
-                     <ccts:Definition>The type of service provided, expressed as text.</ccts:Definition>
-                     <ccts:Cardinality>0..n</ccts:Cardinality>
-                     <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
-                     <ccts:PropertyTerm>Service Type</ccts:PropertyTerm>
-                     <ccts:RepresentationTerm>Text</ccts:RepresentationTerm>
-                     <ccts:DataType>Text. Type</ccts:DataType>
-                  </ccts:Component>
-               </xsd:documentation>
-            </xsd:annotation>
-         </xsd:element>
-         <xsd:element ref="cac:Party" minOccurs="1" maxOccurs="1">
-            <xsd:annotation>
-               <xsd:documentation>
-                  <ccts:Component>
-                     <ccts:ComponentType>ASBIE</ccts:ComponentType>
-                     <ccts:DictionaryEntryName>Service Provider Party. Party</ccts:DictionaryEntryName>
-                     <ccts:Definition>The party providing the service.</ccts:Definition>
-                     <ccts:Cardinality>1</ccts:Cardinality>
-                     <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
-                     <ccts:PropertyTerm>Party</ccts:PropertyTerm>
-                     <ccts:AssociatedObjectClass>Party</ccts:AssociatedObjectClass>
-                     <ccts:RepresentationTerm>Party</ccts:RepresentationTerm>
-                  </ccts:Component>
-               </xsd:documentation>
-            </xsd:annotation>
-         </xsd:element>
-         <xsd:element ref="cac:SellerContact" minOccurs="0" maxOccurs="1">
-            <xsd:annotation>
-               <xsd:documentation>
-                  <ccts:Component>
-                     <ccts:ComponentType>ASBIE</ccts:ComponentType>
-                     <ccts:DictionaryEntryName>Service Provider Party. Seller_ Contact. Contact</ccts:DictionaryEntryName>
-                     <ccts:Definition>The contact for the service provider.</ccts:Definition>
-                     <ccts:Cardinality>0..1</ccts:Cardinality>
-                     <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
-                     <ccts:PropertyTermQualifier>Seller</ccts:PropertyTermQualifier>
-                     <ccts:PropertyTerm>Contact</ccts:PropertyTerm>
-                     <ccts:AssociatedObjectClass>Contact</ccts:AssociatedObjectClass>
-                     <ccts:RepresentationTerm>Contact</ccts:RepresentationTerm>
-                  </ccts:Component>
-               </xsd:documentation>
-            </xsd:annotation>
-         </xsd:element>
-      </xsd:sequence>
-   </xsd:complexType>
+    <xsd:complexType name="ServiceProviderPartyType">
+        <xsd:annotation>
+            <xsd:documentation>
+                <ccts:Component>
+                    <ccts:ComponentType>ABIE</ccts:ComponentType>
+                    <ccts:DictionaryEntryName>Service Provider Party. Details</ccts:DictionaryEntryName>
+                    <ccts:Definition>A class to describe a party contracting to provide services, such as transportation, finance, etc.</ccts:Definition>
+                    <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
+                </ccts:Component>
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element ref="cbc:ID" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <ccts:Component>
+                            <ccts:ComponentType>BBIE</ccts:ComponentType>
+                            <ccts:DictionaryEntryName>Service Provider Party. Identifier</ccts:DictionaryEntryName>
+                            <ccts:Definition>An identifier for this service provider.</ccts:Definition>
+                            <ccts:Cardinality>0..1</ccts:Cardinality>
+                            <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
+                            <ccts:PropertyTerm>Identifier</ccts:PropertyTerm>
+                            <ccts:RepresentationTerm>Identifier</ccts:RepresentationTerm>
+                            <ccts:DataType>Identifier. Type</ccts:DataType>
+                        </ccts:Component>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element ref="cbc:ServiceTypeCode" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <ccts:Component>
+                            <ccts:ComponentType>BBIE</ccts:ComponentType>
+                            <ccts:DictionaryEntryName>Service Provider Party. Service Type Code. Code</ccts:DictionaryEntryName>
+                            <ccts:Definition>The type of service provided, expressed as a code.</ccts:Definition>
+                            <ccts:Cardinality>0..1</ccts:Cardinality>
+                            <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
+                            <ccts:PropertyTerm>Service Type Code</ccts:PropertyTerm>
+                            <ccts:RepresentationTerm>Code</ccts:RepresentationTerm>
+                            <ccts:DataType>Code. Type</ccts:DataType>
+                        </ccts:Component>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element ref="cbc:ServiceType" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <ccts:Component>
+                            <ccts:ComponentType>BBIE</ccts:ComponentType>
+                            <ccts:DictionaryEntryName>Service Provider Party. Service Type. Text</ccts:DictionaryEntryName>
+                            <ccts:Definition>The type of service provided, expressed as text.</ccts:Definition>
+                            <ccts:Cardinality>0..n</ccts:Cardinality>
+                            <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
+                            <ccts:PropertyTerm>Service Type</ccts:PropertyTerm>
+                            <ccts:RepresentationTerm>Text</ccts:RepresentationTerm>
+                            <ccts:DataType>Text. Type</ccts:DataType>
+                        </ccts:Component>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element ref="cac:Party" minOccurs="1" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <ccts:Component>
+                            <ccts:ComponentType>ASBIE</ccts:ComponentType>
+                            <ccts:DictionaryEntryName>Service Provider Party. Party</ccts:DictionaryEntryName>
+                            <ccts:Definition>The party providing the service.</ccts:Definition>
+                            <ccts:Cardinality>1</ccts:Cardinality>
+                            <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
+                            <ccts:PropertyTerm>Party</ccts:PropertyTerm>
+                            <ccts:AssociatedObjectClass>Party</ccts:AssociatedObjectClass>
+                            <ccts:RepresentationTerm>Party</ccts:RepresentationTerm>
+                        </ccts:Component>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element ref="cac:SellerContact" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <ccts:Component>
+                            <ccts:ComponentType>ASBIE</ccts:ComponentType>
+                            <ccts:DictionaryEntryName>Service Provider Party. Seller_ Contact. Contact</ccts:DictionaryEntryName>
+                            <ccts:Definition>The contact for the service provider.</ccts:Definition>
+                            <ccts:Cardinality>0..1</ccts:Cardinality>
+                            <ccts:ObjectClass>Service Provider Party</ccts:ObjectClass>
+                            <ccts:PropertyTermQualifier>Seller</ccts:PropertyTermQualifier>
+                            <ccts:PropertyTerm>Contact</ccts:PropertyTerm>
+                            <ccts:AssociatedObjectClass>Contact</ccts:AssociatedObjectClass>
+                            <ccts:RepresentationTerm>Contact</ccts:RepresentationTerm>
+                        </ccts:Component>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element ref="cac:PartyLegalEntity" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <ccts:Component>
+                            <ccts:ComponentType>ASBIE</ccts:ComponentType>
+                            <ccts:DictionaryEntryName>Party. Party Legal Entity</ccts:DictionaryEntryName>
+                            <ccts:Definition>A description of this party as a legal entity.</ccts:Definition>
+                            <ccts:Cardinality>0..1</ccts:Cardinality>
+                            <ccts:ObjectClass>Party</ccts:ObjectClass>
+                            <ccts:PropertyTerm>Party Legal Entity</ccts:PropertyTerm>
+                            <ccts:AssociatedObjectClass>Party Legal Entity</ccts:AssociatedObjectClass>
+                            <ccts:RepresentationTerm>Party Legal Entity</ccts:RepresentationTerm>
+                        </ccts:Component>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element ref="cbc:IndustryClassificationCode" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <ccts:Component>
+                            <ccts:ComponentType>BBIE</ccts:ComponentType>
+                            <ccts:DictionaryEntryName>Party. Industry Classification Code. Code</ccts:DictionaryEntryName>
+                            <ccts:Definition>This party's Industry Classification Code.</ccts:Definition>
+                            <ccts:Cardinality>0..1</ccts:Cardinality>
+                            <ccts:ObjectClass>Party</ccts:ObjectClass>
+                            <ccts:PropertyTerm>Industry Classification Code</ccts:PropertyTerm>
+                            <ccts:RepresentationTerm>Code</ccts:RepresentationTerm>
+                            <ccts:DataType>Code. Type</ccts:DataType>
+                            <ccts:Examples>Public authority , NAIC codes</ccts:Examples>
+                        </ccts:Component>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element ref="cac:PartyName" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <ccts:Component>
+                            <ccts:ComponentType>ASBIE</ccts:ComponentType>
+                            <ccts:DictionaryEntryName>Party. Party Name</ccts:DictionaryEntryName>
+                            <ccts:Definition>A name for this party.</ccts:Definition>
+                            <ccts:Cardinality>0..n</ccts:Cardinality>
+                            <ccts:ObjectClass>Party</ccts:ObjectClass>
+                            <ccts:PropertyTerm>Party Name</ccts:PropertyTerm>
+                            <ccts:AssociatedObjectClass>Party Name</ccts:AssociatedObjectClass>
+                            <ccts:RepresentationTerm>Party Name</ccts:RepresentationTerm>
+                        </ccts:Component>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element ref="cac:PostalAddress" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <ccts:Component>
+                            <ccts:ComponentType>ASBIE</ccts:ComponentType>
+                            <ccts:DictionaryEntryName>Party. Postal_ Address. Address</ccts:DictionaryEntryName>
+                            <ccts:Definition>The party's postal address.</ccts:Definition>
+                            <ccts:Cardinality>0..1</ccts:Cardinality>
+                            <ccts:ObjectClass>Party</ccts:ObjectClass>
+                            <ccts:PropertyTermQualifier>Postal</ccts:PropertyTermQualifier>
+                            <ccts:PropertyTerm>Address</ccts:PropertyTerm>
+                            <ccts:AssociatedObjectClass>Address</ccts:AssociatedObjectClass>
+                            <ccts:RepresentationTerm>Address</ccts:RepresentationTerm>
+                        </ccts:Component>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
    <xsd:complexType name="ShareholderPartyType">
       <xsd:annotation>
          <xsd:documentation>

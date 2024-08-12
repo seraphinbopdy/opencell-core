@@ -396,6 +396,9 @@ public class CustomEntityTemplateApi extends BaseCrudApi<CustomEntityTemplate, C
         }
 
         String appliesTo = EntityCustomizationUtils.getAppliesTo(clazz, null);
+		if(StringUtils.isEmpty(appliesTo)) {
+			return null;
+		}
 
         Map<String, CustomFieldTemplate> cetFields = customFieldTemplateService.findByAppliesTo(appliesTo);
 

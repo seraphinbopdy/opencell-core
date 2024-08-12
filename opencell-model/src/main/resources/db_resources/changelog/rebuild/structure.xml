@@ -512,7 +512,8 @@
         <createSequence sequenceName="ar_payment_rejection_action_seq" startValue="1" />
         <createSequence sequenceName="ar_payment_rejection_codes_group_seq" startValue="1" />
         <createSequence sequenceName="ar_payment_rejection_action_report_seq" startValue="1" />
-            
+        <createSequence sequenceName="payment_term_seq" startValue="1"/>
+
     </changeSet>
 
 
@@ -2198,6 +2199,9 @@
             <column name="source_account_operation_id" type="bigint" />
             <column name="payment_gateway_id" type="bigint" />
             <column name="rejection_actions_status" type="varchar(30)" />
+            <column name="payment_requests" type="bigint" defaultValue="0" />
+            <column name="origin_call_for_payment_id" type="bigint" />
+            <column name="origin_payment_id" type="bigint" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-146">
@@ -6139,6 +6143,7 @@
             <column name="event_version" type="int4" />
 			<column name="wallet_operation_id" type="bigint"/>
 			<column name="business_key" type="VARCHAR(255)" />
+            <column name="zero_wo_dropped"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
         <modifySql dbms="postgresql">
         	<append value=" PARTITION BY LIST(status)"/>
@@ -12103,7 +12108,7 @@
                 <constraints nullable="true" />
             </column>
             <column name="description" type="varchar(255)" />
-            <column name="use_security_deposit" type="${type.boolean}" defaultValueNumeric="1" />
+            <column name="use_security_deposit" type="${type.boolean}" defaultValueNumeric="0" />
             <column name="max_amount_security_deposit" type="numeric(23, 12)"  />
             <column name="max_amount_consumer" type="numeric(23, 12)"  />
             <column name="auto_refund" type="${type.boolean}" defaultValueNumeric="0" />
@@ -12124,9 +12129,9 @@
             <column name="billing_run_process_warning" type="${type.boolean}" defaultValueNumeric="0" />
             <column name="nb_partitions_keep" type="int4" />
             <column name="synchronous_mass_action_limit" type="int4" defaultValueNumeric="10000" />
-            <column name="handle_framework_agreement" type="${type.boolean}" defaultValueNumeric="1" />
-            <column name="handle_invoice_plan" type="${type.boolean}" defaultValueNumeric="1" />
-            <column name="handle_accounting_periods" type="${type.boolean}" defaultValueNumeric="1" />
+            <column name="handle_framework_agreement" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="handle_invoice_plan" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="handle_accounting_periods" type="${type.boolean}" defaultValueNumeric="0" />
             <column name="wo_partition_range_months" type="int4">
                 <constraints nullable="true" />
             </column>
@@ -12137,6 +12142,8 @@
                 <constraints nullable="true" />
             </column>
             <column name="enable_empty_subscription_activation" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="enable_quotes_feature" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="display_counters" type="${type.boolean}" defaultValueNumeric="0" />
       </createTable>
     </changeSet>
     <changeSet id="#INTRD-3461_20212128-rebuild-str-tbl" author="hichamElHaloui">
@@ -12648,6 +12655,7 @@
             <column name="collection" type="${type.boolean}" defaultValueNumeric="0">
                 <constraints nullable="false" />
             </column>
+            <column name="filters" type="${type.json}"/>
         </createTable>
     </changeSet>
 
@@ -12686,6 +12694,7 @@
 	        <column name="property_group" type="varchar(100)"/>
 	        <column name="property_value" type="VARCHAR(255)"/>
 	        <column name="property_type" type="VARCHAR(255)"/>
+            <column name="description_i18n" type="${type.json}" />
 	    </createTable>
 	</changeSet>
 
@@ -13929,6 +13938,7 @@
             <column name= "xml_generation_job" type="varchar(50)" />
             <column name= "pdf_generation_job" type="varchar(50)" />
             <column name= "ubl_generation_job" type="varchar(50)" />
+            <column name="vat_date_code" type="int4" defaultValueNumeric="432"/>
         </createTable>
 
         <createTable tableName="pdp_status_and_history">
@@ -14088,8 +14098,28 @@
             <column name="end_date" type="datetime" />
             <column name="action_script_id" type="bigint"/>
         </createTable>
-    </changeSet>    
-    
+    </changeSet>
+
+    <changeSet id="#INTRD-23049_20240520_build" author="TarikFA.">
+        <createTable tableName="payment_term">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="payment_term_pkey" />
+            </column>
+            <column name="version" type="int4" defaultValueNumeric="0" />
+            <column name="created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="updated" type="datetime" />
+            <column name="creator" type="varchar(100)" />
+            <column name="updater" type="varchar(100)" />
+            <column name="code" type="varchar(255)" />
+            <column name="description" type="varchar(255)" />
+            <column name="disabled" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false" />
+            </column>
+            <column name="description_i18n" type="${type.json}"></column>
+        </createTable>
+    </changeSet>
     <!-- end tables -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-def-val-1">
@@ -19339,6 +19369,24 @@
                                  referencedTableName="meveo_script_instance"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="#INTRD-23732_20240715-rebuild-fk" author="TarikFA.">
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_call_for_payment_id"
+                constraintName="origin_call_for_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_payment_id"
+                constraintName="origin_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+    </changeSet>
     
     <!-- end fk -->
 
@@ -19691,9 +19739,9 @@
         <sql>CREATE INDEX rt_adjusted_rated_tx ON ${db.schema.adapted}billing_rated_transaction (adjusted_rated_tx) </sql>
         <sql>CREATE INDEX wo_rt_id ON ${db.schema.adapted}billing_wallet_operation (rated_transaction_id) </sql>
         <sql>CREATE INDEX wo_rerated_wo ON ${db.schema.adapted}billing_wallet_operation (reratedwalletoperation_id) </sql>
-        <sql>CREATE INDEX rt_customer_id_contract_index ON ${db.schema.adapted}cpq_contract (customer_id) where status='ACTIVE'</sql>
-        <sql>CREATE INDEX rt_billing_account_id_contract_index ON ${db.schema.adapted}cpq_contract (billing_account_id) where status='ACTIVE'</sql>
-        <sql>CREATE INDEX rt_customer_account_contract_index ON ${db.schema.adapted}cpq_contract (customer_account_id) where status='ACTIVE'</sql>
+        <sql>CREATE INDEX rt_customer_id_contract_index ON ${db.schema.adapted}cpq_contract (customer_id)</sql>
+        <sql>CREATE INDEX rt_billing_account_id_contract_index ON ${db.schema.adapted}cpq_contract (billing_account_id)</sql>
+        <sql>CREATE INDEX rt_customer_account_contract_index ON ${db.schema.adapted}cpq_contract (customer_account_id)</sql>
         <sql>CREATE INDEX cpq_price_plan_matrix_value__ppml_id__idx ON cpq_price_plan_matrix_value(ppml_id)</sql>
         <sql>CREATE INDEX CREATE INDEX cpq_ppl_ppVersion_index ON cpq_price_plan_matrix_line(ppm_version_id, priority, accuracy)</sql>
     </changeSet>
@@ -20073,13 +20121,13 @@
         <sql>create table ${db.schema.adapted}billing_rated_transaction_open partition of ${db.schema.adapted}billing_rated_transaction for values in('OPEN')</sql>
         <sql>create table ${db.schema.adapted}billing_rated_transaction_other partition of ${db.schema.adapted}billing_rated_transaction default</sql>
     </changeSet>
-    
+
     <changeSet id="USAGE_RERATE_RT_JOB_BUILD" author="Mohammed_ElAzzouzi">
         <sql>create index billing_redirection_rule__idx_contract_id_priority on ${db.schema.adapted}billing_redirection_rule using btree (contract_id, priority)</sql>
         <sql>create index cpq_attribute_instance__service_instance_index on ${db.schema.adapted}cpq_attribute_instance using btree (service_instance_id)</sql>
         <sql>create index idx_subscription_id_charge_type on ${db.schema.adapted}billing_charge_instance using btree (subscription_id, charge_type)</sql>
     </changeSet>
-    
+
     <changeSet id="USAGE_RERATE_RT_JOB" author="Mohammed_ElAzzouzi"/>
 
     <changeSet id="#INTRD-4798_20220303" author="MohamedSTITANE"/>     
@@ -20876,6 +20924,48 @@
     <changeSet id="#INTRD-20685_simple_customer_settings" author="a.rouaguebe" />
     <changeSet id="INTRD-22259_20240409" author="zbariki" />
     <changeSet id="INTRD-22195_20240417" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-22617_20240520" author="Mohammed_ElAzzouzi"/>
+    <changeSet id="INTRD-22557_20240425" author="TarikFA." />
+    <changeSet id="INTRD-22385_20240429" author="TarikFA." />
+    <changeSet id="#INTRD_22492_20240506" author="zelmeliani" />
+    <changeSet id="#INTRD-22825_20240509_allowed_offers_data_recovery" author="a.rouaguebe" />
+    <changeSet id="#INTRD-14889_20240509" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-22583_20240509" author="aeljaouhari" />
+    <changeSet id="#INTRD-14889_20240509-2" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-20586_20240515" author="aeljaouhari" />
+    <changeSet id="#INTRD-22947_20240516" author="TarikFA." />
+    <changeSet id="#INTRD-23049_20240520" author="TarikFA." />
+    <changeSet id="#INTRD-22952_20240520" author="ZBariki" />
+    <changeSet id="#INTRD-22993_20240514" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-22976_20240520" author="aeljaouhari" />
+    <changeSet id="#INTRD-23293_20240524" author="TarikFA." />
+    <changeSet id="INTRD-23392_20240604" author="TarikFA." />
+    <changeSet id="#INTRD-22961_20240604" author="Zbariki"/>
+    <changeSet id="#INTRD-22962_20240605" author="ZakariaB" />
+    <changeSet id="INTRD-23624_20240612" author="ZakariaB" />
+    <changeSet id="#INTRD-23916_20240625" author="a.rouaguebe" />
+    <changeSet id="INTRD-24031_20240626" author="ZakariaB" />
+    <changeSet id="INTRD-24051_ReRateV2" author="a.rouaguebe" />
+    <changeSet id="INTRD-24052_ReRateV2_filter" author="a.rouaguebe" />
+    <changeSet id="INTRD-23881_20240701" author="TarikFA." />
+    <changeSet id="INTRD-23882_20240702" author="TarikFA." />
+    <changeSet id="#INTRD-23732_20240715" author="TarikFA." />
+    <changeSet id="INTRD-22955_20240521" author="ZBariki" />
+    <changeSet id="INTRD-22963_20240720" author="ZakariaB" />
+    <changeSet id="#INTRD-24602_20240722" author="AndriusKarpavicius" />
+    <changeSet id="INTRD-24619_20240724" author="ZakariaB" />
+    <changeSet id="INTRD-23881_20240702" author="TarikFA." />
+    <changeSet id="#INTRD-21018_20240723" author="ZakariaB" />
+
+    <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
+    <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-24686_20240807" author="TarikFa." />
+    
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
+
+    <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

@@ -82,6 +82,7 @@ import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.ReservationService;
 import org.meveo.service.billing.impl.UsageRatingService;
+import org.meveo.service.billing.impl.WalletOperationService;
 import org.meveo.service.mediation.MediationSettingService;
 import org.meveo.service.medina.impl.AccessService;
 import org.meveo.service.medina.impl.CDRAlreadyProcessedException;
@@ -158,6 +159,9 @@ public class MediationApiService {
 
     @Inject
     private AccessService accessService;
+
+    @Inject
+    private WalletOperationService walletOperationService;
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -633,6 +637,7 @@ public class MediationApiService {
             BigDecimal amountTax = BigDecimal.ZERO;
             for (WalletOperation walletOperation : walletOperations) {
                 if (returnWalletOperationDetails) {
+                    walletOperation = walletOperationService.retrieveIfNotManaged(walletOperation);
                     WalletOperationDto walletOperationDto = new WalletOperationDto(walletOperation, walletOperation.getAccountingArticle());
                     result.getWalletOperations().add(walletOperationDto);
 

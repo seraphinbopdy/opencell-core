@@ -21,17 +21,24 @@ public class Product {
 	private List<Attribute> attributes;
 	private CustomFieldsDto customFields;
 	private List<PriceDTO> prices;
+	@XmlElement
+	private String code;
+	@XmlElement
+	private String description;
 	
 	
 	
 	public  Product(QuoteProduct quoteProduct , CustomFieldsDto customFields, List<PriceDTO> prices) {
 		super();
-		if(quoteProduct.getProductVersion().getProduct().getProductLine() != null) {
+		org.meveo.model.cpq.Product cpqProduct=quoteProduct.getProductVersion().getProduct();
+		if(cpqProduct.getProductLine() != null) {
 			this.productLine = quoteProduct.getProductVersion().getProduct().getProductLine().getCode();
 		}
 	    this.quantity = quoteProduct.getQuantity();
 		this.customFields = customFields;
 		this.prices = prices;
+		this.code=cpqProduct.getCode();
+		this.description=cpqProduct.getDescription();
 	}
 	/**
 	 * @return the productLine
@@ -64,6 +71,18 @@ public class Product {
 	}
 	public CustomFieldsDto getCustomFields() {
 		return customFields;
+	}
+	public String getCode() {
+		return code;
+	}
+	public void setCode(String code) {
+		this.code = code;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	public void setCustomFields(CustomFieldsDto customFields) {
 		this.customFields = customFields;

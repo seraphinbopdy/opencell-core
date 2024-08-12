@@ -8246,14 +8246,14 @@
     <changeSet id="#12132_20221219-rebuild" author="HatimOUDAD">
 		<sql>
 		<![CDATA[
-			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (1, 0, now(), NULL, 'opencell.admin', NULL, '0002', 'System Information et Repertoire des Entreprise et des Etablissements: SIRENE ');
+			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (1, 0, now(), NULL, 'opencell.admin', NULL, '0002', 'SIRENE');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (2, 0, now(), NULL, 'opencell.admin', NULL, '0003', 'Codification Numerique des Etablissments Financiers En Belgique ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (3, 0, now(), NULL, 'opencell.admin', NULL, '0004', 'NBS/OSI NETWORK ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (4, 0, now(), NULL, 'opencell.admin', NULL, '0005', 'USA FED GOV OSI NETWORK ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (5, 0, now(), NULL, 'opencell.admin', NULL, '0006', 'USA DOD OSI NETWORK ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (6, 0, now(), NULL, 'opencell.admin', NULL, '0007', 'Organisationsnummer ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (7, 0, now(), NULL, 'opencell.admin', NULL, '0008', 'LE NUMERO NATIONAL ');
-			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (8, 0, now(), NULL, 'opencell.admin', NULL, '0009', 'SIRET-CODE ');
+			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (8, 0, now(), NULL, 'opencell.admin', NULL, '0009', 'SIRET');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (9, 0, now(), NULL, 'opencell.admin', NULL, '0010', 'Organizational Identifiers for Structured Names under ISO 9541 Part 2 ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (10, 0, now(), NULL, 'opencell.admin', NULL, '0011', 'International Code Designator for the Identification of OSI-based, Amateur Radio Organizations, Network Objects and Application Services. ');
 			INSERT INTO ${db.schema.adapted}iso_icd(id,version,created,updated,creator,updater,code,scheme_name) VALUES (11, 0, now(), NULL, 'opencell.admin', NULL, '0012', 'European Computer Manufacturers Association: ECMA ');
@@ -9140,20 +9140,7 @@
 		</insert>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-data-jobs">
-
-        <insert tableName="meveo_job_instance">
-            <column name="id" valueNumeric="-1" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="1" />
-            <column name="created" valueDate="2015-03-19 00:04:19.913" />
-            <column name="job_category" value="RATING" />
-            <column name="job_template" value="ReRatingJob" />
-            <column name="code" value="Rerate_Job" />
-
-            <column name="creator" value="OPENCELL.ADMIN" />
-            <column name="timerentity_id" valueNumeric="-1" />
-            <column name="uuid" value="Rerate_Job" />
-        </insert>
+		
         <insert tableName="meveo_job_instance">
             <column name="id" valueNumeric="-3" />
             <column name="version" valueNumeric="0" />
@@ -9218,7 +9205,7 @@
             <column name="creator" value="OPENCELL.ADMIN" />
             <column name="timerentity_id" valueNumeric="-1" />
             <column name="uuid" value="XMLEInvoiceGeneration_Job" />
-            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'EInvoice_job')"/>
+            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'PDF_Job')"/>
         </insert>
         <insert tableName="meveo_job_instance">
             <column name="id" valueNumeric="-8" />
@@ -9234,20 +9221,6 @@
             <column name="uuid" value="PDF_Job" />
         </insert>
         <insert tableName="meveo_job_instance">
-            <column name="id" valueNumeric="-7" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="1" />
-            <column name="created" valueDate="2015-03-19 00:04:19.913" />
-            <column name="job_category" value="INVOICING" />
-            <column name="job_template" value="XMLInvoiceGenerationJob" />
-            <column name="code" value="XML_Job" />
-
-            <column name="creator" value="OPENCELL.ADMIN" />
-            <column name="timerentity_id" valueNumeric="-1" />
-            <column name="uuid" value="XML_Job" />
-            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'PDF_Job')"/>
-        </insert>
-        <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq" />
             <column name="version" valueNumeric="0" />
             <column name="disabled" valueNumeric="1" />
@@ -9259,7 +9232,7 @@
             <column name="creator" value="OPENCELL.ADMIN" />
             <column name="timerentity_id" valueNumeric="-1" />
             <column name="uuid" value="Invoicing_Job_V2" />
-            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'XML_Job')"/>
+            <column name="following_job_id" value="null"/>
         </insert>
         <insert tableName="meveo_job_instance">
             <column name="id" valueNumeric="-14" />
@@ -9653,6 +9626,78 @@
             <column name="created" valueDate="${db.current.time}" />
             <column name="description" value="Rejection Payment Action Job" />
             <column name="uuid" value="RejectionPaymentActionJob_Job" />
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="RATING"/>
+            <column name="job_template" value="RatingCancellationJob"/>
+            <column name="code" value="Rerate_Job"/>
+            <column name="uuid" value="RatingCancellationJob"/>
+            <column name="description" value="Rerating process V2. This job cancels rating for marked wallet operation, and is chained with actual rerating job."/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}], "JobInstance_RatingCancellationJob_UseExistingViews": [{"boolean": false}], "JobInstance_RatingCancellationJob_MaxRTsPerTransaction": [{"long": 100000}]}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="RATING"/>
+            <column name="job_template" value="ReRatingV2Job"/>
+            <column name="code" value="ReRatingV2Job"/>
+            <column name="uuid" value="ReRatingV2Job"/>
+            <column name="description" value="rerate operations"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}], "JobInstance_ReRatingV2Job_MaxRTsPerTransaction": [{"long": 1000}]}
+                ]]>
+            </column>
+        </insert>
+		<update tableName="meveo_job_instance">
+			<column name="following_job_id" valueComputed="(select id from meveo_job_instance where code = 'ReRatingV2Job')" />
+			<where>code='Rerate_Job'</where>
+		</update>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="INVOICING"/>
+            <column name="job_template" value="RatedTransactionDiscountJob"/>
+            <column name="code" value="RT_discount_Job"/>
+            <column name="uuid" value="RT_discount_Job"/>
+            <column name="description" value="link rated transactions with associated discounted rated transaction"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}], "CF_MASS_UPDATE_CHUNK": [{"long": 100000}]}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="INVOICING"/>
+            <column name="job_template" value="InvoicingJobV3"/>
+            <column name="code" value="InvoicingJobV3"/>
+            <column name="uuid" value="InvoicingJobV3"/>
+            <column name="description" value="Generate invoices"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}], "waitingMillis": [{"long": 0}]}
+                ]]>
+            </column>
         </insert>
     </changeSet>
 
@@ -12117,7 +12162,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="created" valueDate="${db.current.time}" />
 			<column name="creator" value="applicationInitializer" />
 			<column name="code" valueComputed="${uuid_function}" />
-			<column name="use_security_deposit" value="1" />
+			<column name="use_security_deposit" value="0" />
 		</insert>
 		<insert tableName="security_deposit_templat">
 			<column name="id"
@@ -12235,23 +12280,6 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
         <sql>call proc_recreate_audit_data_trigger('cat_offer_template',null, null, null, false)</sql>
     </changeSet>
 
-    <changeSet id="#INTRD-18352_20230915_data_build" author="TarikFA.">
-        <insert tableName="electronic_invoice_settings">
-            <column name="id" valueSequenceNext="electronic_invoice_settings_seq"/>
-            <column name="version" valueNumeric="1"/>
-            <column name="created" valueDate="${db.current.time}"/>
-            <column name="creator" value="OPENCELL.ADMIN" />
-
-            <column name="force_xml_generation" valueNumeric="1" />
-            <column name="force_pdf_generation" valueNumeric="1" />
-            <column name="force_ubl_generation" valueNumeric="1" />
-            <column name="invoicing_job" value="Invoicing_Job_V2"/>
-            <column name="xml_generation_job" value="XML_Job"/>
-            <column name="pdf_generation_job" value="PDF_Job"/>
-            <column name="ubl_generation_job" value="EInvoice_job"/>
-        </insert>
-    </changeSet>
-	
 	<changeSet id="#INTRD-18587_rebuild" author="aelmalki">
 		<sql>
 		<![CDATA[
@@ -12398,7 +12426,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enablePricePlanFilters"/>
-		    <column name="description" value="pricePlanFilters.enablePricePlanFilters"/>
+		    <column name="description" value="Activate price plan filters"/>
+            <column name="description_i18n" value='{"FRA":"Activer les filtres de price plan","ENG":"Activate price plan filters"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12411,7 +12440,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableOfferTemplate"/>
-		    <column name="description" value="pricePlanFilters.enableOfferTemplate"/>
+		    <column name="description" value="Offer"/>
+            <column name="description_i18n" value='{"FRA":"Offre","ENG":"Offer"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12424,7 +12454,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableStartSubscriptionDate"/>
-		    <column name="description" value="pricePlanFilters.enableStartSubscriptionDate"/>
+		    <column name="description" value="Subscription date from"/>
+            <column name="description_i18n" value='{"FRA":"Date de souscription depuis","ENG":"Subscription date from"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12437,7 +12468,10 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableEndSubscriptionDate"/>
-		    <column name="description" value="pricePlanFilters.enableEndSubscriptionDate"/>
+		    <column name="description" value="Subscription date to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Date de souscription jusqu'à","ENG":"Subscription date to"}]]>
+            </column>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12450,7 +12484,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableStartRatingDate"/>
-		    <column name="description" value="pricePlanFilters.enableStartRatingDate"/>
+		    <column name="description" value="Rating date from"/>
+            <column name="description_i18n" value='{"FRA":"Date de valorisation depuis","ENG":"Rating date from"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12463,7 +12498,10 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableEndRatingDate"/>
-		    <column name="description" value="pricePlanFilters.enableEndRatingDate"/>
+		    <column name="description" value="Rating date to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Date de valorisation jusqu'à","ENG":"Rating date to"}]]>
+            </column>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12476,7 +12514,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableMinQuantity"/>
-		    <column name="description" value="pricePlanFilters.enableMinQuantity"/>
+		    <column name="description" value="Minimum quantity"/>
+            <column name="description_i18n" value='{"FRA":"Quantité minimale","ENG":"Minimum quantity"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12489,7 +12528,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableMaxQuantity"/>
-		    <column name="description" value="pricePlanFilters.enableMaxQuantity"/>
+		    <column name="description" value="Maximum quantity"/>
+            <column name="description_i18n" value='{"FRA":"Quantité maximale","ENG":"Maximum quantity"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12502,7 +12542,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableMinSubscriptionAgeInMonth"/>
-		    <column name="description" value="pricePlanFilters.enableMinSubscriptionAgeInMonth"/>
+		    <column name="description" value="Minimum subscription age (months)"/>
+            <column name="description_i18n" value='{"FRA":"Âge minimal de la souscription (mois)","ENG":"Minimum subscription age (months)"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12515,7 +12556,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableMaxSubscriptionAgeInMonth"/>
-		    <column name="description" value="pricePlanFilters.enableMaxSubscriptionAgeInMonth"/>
+		    <column name="description" value="Maximum subscription age (months)"/>
+            <column name="description_i18n" value='{"FRA":"Âge maximal de la souscription (mois)","ENG":"Maximum subscription age (months)"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12528,7 +12570,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria1Value"/>
-		    <column name="description" value="pricePlanFilters.enableCriteria1Value"/>
+		    <column name="description" value="Criteria 1"/>
+            <column name="description_i18n" value='{"FRA":"Critère 1","ENG":"Criteria 1"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12541,7 +12584,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria2Value"/>
-		    <column name="description" value="pricePlanFilters.enableCriteria2Value"/>
+		    <column name="description" value="Criteria 2"/>
+            <column name="description_i18n" value='{"FRA":"Critère 2","ENG":"Criteria 2"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12554,7 +12598,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="0"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteria3Value"/>
-		    <column name="description" value="pricePlanFilters.enableCriteria3Value"/>
+            <column name="description" value="Criteria 3"/>
+            <column name="description_i18n" value='{"FRA":"Critère 3","ENG":"Criteria 3"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12567,7 +12612,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableCriteriaEL"/>
-		    <column name="description" value="pricePlanFilters.enableCriteriaEL"/>
+		    <column name="description" value="Criteria expression"/>
+            <column name="description_i18n" value='{"FRA":"Critère EL","ENG":"Criteria expression"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12580,7 +12626,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableTradingCurrency"/>
-		    <column name="description" value="pricePlanFilters.enableTradingCurrency"/>
+		    <column name="description" value="Trading currency"/>
+            <column name="description_i18n" value='{"FRA":"Devise de transaction","ENG":"Trading currency"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12593,7 +12640,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableTradingCountry"/>
-		    <column name="description" value="pricePlanFilters.enableTradingCountry"/>
+		    <column name="description" value="Trading country"/>
+            <column name="description_i18n" value='{"FRA":"Pays de transaction","ENG":"Trading country"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12606,7 +12654,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableSeller"/>
-		    <column name="description" value="pricePlanFilters.enableSeller"/>
+		    <column name="description" value="Seller"/>
+            <column name="description_i18n" value='{"FRA":"Vendeur","ENG":"Seller"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12619,7 +12668,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableValidityCalendar"/>
-		    <column name="description" value="pricePlanFilters.enableValidityCalendar"/>
+		    <column name="description" value="Validity calendar"/>
+            <column name="description_i18n" value='{"FRA":"Calendrier de validité","ENG":"Validity calendar"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12632,7 +12682,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableValidityFrom"/>
-		    <column name="description" value="pricePlanFilters.enableValidityFrom"/>
+		    <column name="description" value="Valid from"/>
+            <column name="description_i18n" value='{"FRA":"Valide depuis","ENG":"Valid from"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12645,7 +12696,10 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="pricePlanFilters.enableValidityDate"/>
-		    <column name="description" value="pricePlanFilters.enableValidityDate"/>
+		    <column name="description" value="Validity to"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Valide jusqu'à","ENG":"Validity to"}]]>
+            </column>
 		</insert>
 		<insert tableName="advanced_settings">
 		    <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12658,7 +12712,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		    <column name="property_value" value="false"/>
 		    <column name="creator" value="applicationInitializer"/>
 		    <column name="code" value="customFields.enableCfValueVersionning"/>
-		    <column name="description" value="customFields.enableCfValueVersionning"/>
+		    <column name="description" value="Enable custom field value versioning"/>
+            <column name="description_i18n" value='{"FRA":"Activer le versionnage des valeurs des champs personnalisé","ENG":"Enable custom field value versioning"}'/>
 		</insert>
         <insert tableName="advanced_settings">
             <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12671,7 +12726,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="property_value" value=","/>
             <column name="creator" value="applicationInitializer"/>
             <column name="code" value="standardExports.fieldsSeparator"/>
-            <column name="description" value="standardExports.fieldsSeparator"/>
+            <column name="description" value="Fields seprator"/>
+            <column name="description_i18n" value='{"FRA":"Séparateur de champs","ENG":"Fields seprator"}'/>
         </insert>
         <insert tableName="advanced_settings">
             <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12684,7 +12740,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="property_value" value="."/>
             <column name="creator" value="applicationInitializer"/>
             <column name="code" value="standardExports.decimalSeparator"/>
-            <column name="description" value="standardExports.decimalSeparator"/>
+            <column name="description" value="Decimal separator"/>
+            <column name="description_i18n" value='{"FRA":"Séparateur décimal","ENG":"Decimal separator"}'/>
         </insert>
         <insert tableName="advanced_settings">
             <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12697,7 +12754,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="property_value" value="csv"/>
             <column name="creator" value="applicationInitializer"/>
             <column name="code" value="standardExports.fileNameExtension"/>
-            <column name="description" value="standardExports.fileNameExtension"/>
+            <column name="description" value="File name extension"/>
+            <column name="description_i18n" value='{"FRA":"Extension du nom de fichier","ENG":"File name extension"}'/>
         </insert>
 		<insert tableName="advanced_settings">
 			<column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12710,7 +12768,8 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="property_value" valueComputed="(select code from billing_cycle limit 1)"/>
 			<column name="creator" value="applicationInitializer"/>
 			<column name="code" value="crm.defaultBillingCycle"/>
-			<column name="description" value="crm.defaultBillingCycle"/>
+			<column name="description" value="Default billing cycle"/>
+            <column name="description_i18n" value='{"FRA":"Cycle de facturation par défaut","ENG":"Default billing cycle"}'/>
 		</insert>
 		<insert tableName="advanced_settings">
 			<column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -12723,8 +12782,23 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="property_value" valueComputed="(select code from crm_customer_category limit 1)"/>
 			<column name="creator" value="applicationInitializer"/>
 			<column name="code" value="crm.defaultCustomerCategory"/>
-			<column name="description" value="crm.defaultCustomerCategory"/>
+			<column name="description" value="Default customer category"/>
+            <column name="description_i18n" value='{"FRA":"Catégorie de client par défaut","ENG":"Default customer category"}'/>
 		</insert>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="feature"/>
+            <column name="property_group" value="ordering"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="order.allowPastDeliveryDate"/>
+            <column name="description" value="Allow past delivery dates on orders"/>
+            <column name="description_i18n" value='{"FRA":"Autoriser les dates de livraison dans le passé pour les commandes","ENG":"Allow past delivery dates on orders"}'/>
+        </insert>
 	</changeSet>
 
     <changeSet id="rebuild-customer-balance" author="zelmeliani">
@@ -12740,4 +12814,391 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		</insert>
 	</changeSet>
 
+
+    <changeSet id="INTRD-22385_20240429_build" author="TarikFA.">
+        <insert tableName="cpq_tag_type">
+            <column name="id" valueSequenceNext="cpq_tag_type_seq"></column>
+            <column name="created" value="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="New products" />
+            <column name="description" value="New products" />
+        </insert>
+        <insert tableName="cpq_tag_type">
+            <column name="id" valueSequenceNext="cpq_tag_type_seq"></column>
+            <column name="created" value="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="Stock products" />
+            <column name="description" value="New products" />
+        </insert>
+    </changeSet>
+    
+  	<changeSet id="#INTRD-22516_20240503" author="aeljaouhari">
+        <update tableName="billing_invoice_type">
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')"/>
+            <where>code='ADJ_INV'</where>
+        </update>
+        <update tableName="billing_invoice_type">
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')" />
+            <where>code='ADJ_REF'</where>
+        </update>
+    </changeSet>
+	<changeSet id="INTRD-22954_20240521" author="ZBariki">
+		<insert tableName="meveo_script_instance">
+			<column name="id" valueSequenceNext="meveo_script_instance_seq" />
+			<column name="code" value="org.meveo.service.script.ApplyChargeScript" />
+			<column name="script">
+				<![CDATA[package org.meveo.service.script;
+				public class ApplyChargeScript extends ApplyChargePaymentScript {}]]>
+			</column>
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="creator" value="applicationInitializer" />
+			<column name="version" valueNumeric="0" />
+			<column name="src_type" value="JAVA" />
+			<column name="description" value="Applies a charge to a subscription of the billing account"/>
+			<column name="description_i18n">
+				<![CDATA[{"FRA":"<b> Applique un frais à un abonnement du compte de facturation. </b><p>Vous devrez sélectionner une charge exceptionnelle (type “autre”) à appliquer, avec la possibilité de remplacer le montant (cela générera une erreur si la charge ne permettent pas la surcharge du montant) et le libellé.</p><p>Nous devrons sélectionner un abonnement actif auquel appliquer le frais. Par défaut, nous utiliserons l&apos;abonnement actif le plus récent facturé sur les factures impayées. Vous pouvez fournir un filtre supplémentaire pour affiner la liste des abonnements. Ce filtre est en fait une expression qui doit s&apos;évaluée en une chaîne qui sera comparée au code des abonnements dans la portée de recherche d&apos;abonnement, à l&apos;aide de l&apos;opérateur fourni. L’expression aura accès au rejet de paiement, au paiement, aux entités du périmètre (liste des factures, compte de facturation, compte client) et à la liste des abonnements dans le périmètre. Si aucun abonnement actif n&apos;est trouvé, le script échouera et une erreur sera remontée.</p>", "ENG":"<b>Applies a charge to a subscription of the billing account.</b><p>You will have to select a one shot charge (type “other”) to apply, with the ability to override the amount (will raise an error if the charge doesn’t allow amount override) and label.</p> <p>We will need to select an active subscription to apply the charge to. By default, we will use the most recent active subscription invoiced on the unpaid invoices. You can provide an additional filter to narrow down the list of subscriptions. This filter is actually an expression that must evaluate to a string that will be compared to the code of subscriptions in the subscription search scope, using the provided operator. Expression will have access to the rejected payment, the payment, and the scope entities (list of invoices, billing account, customer account) and the list of subscriptions in the scope. If no active subscription is found, the script will fail and an error will be raised.</p>"}]]>
+			</column>
+			<column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')" />
+		</insert>
+
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="chargeTemplate" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
+			<column name="description_i18n" value='{"FRA":"Charge à appliquer","ENG":"Charge to apply"}'/>
+			<column name="class_name" value="org.meveo.model.catalog.OneShotChargeTemplate" />
+			<column name="mandatory" valueNumeric="1" />
+			<column name="filters">
+				<![CDATA[{"oneShotChargeTemplateType" : "OTHER", "status": "ACTIVE"}]]>
+			</column>
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="amountOverride" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
+			<column name="description_i18n" value='{"FRA":"Surcharge du montant","ENG":"Amount override"}'/>
+			<column name="class_name" value="java.math.BigDecimal" />
+			<column name="mandatory" valueNumeric="0" />
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="descriptionOverride" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
+			<column name="description_i18n" value='{"FRA":"Surcharge du libellé de la charge","ENG":"Charge label override"}'/>
+			<column name="mandatory" valueNumeric="0" />
+			<column name="class_name" value="java.lang.String" />
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="subscriptionSearchScope" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
+			<column name="description_i18n" value='{"FRA":"Périmètre de la recherche de souscription","ENG":"Subscription search scope"}'/>
+			<column name="mandatory" valueNumeric="0" />
+			<column name="class_name" value="java.lang.String" />
+			<column name="collection" valueNumeric="0" />
+			<column name="allowed_values" value="invoices|billing accounts|customer account" />
+			<column name="default_value" value="invoices" />
+			<column name="values_separator" value="\|" />
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="subscriptionSelection" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
+			<column name="description_i18n" value='{"FRA":"Selection de la souscription","ENG":"Subscription selection"}'/>
+			<column name="mandatory" valueNumeric="0" />
+			<column name="class_name" value="java.lang.String" />
+			<column name="collection" valueNumeric="0" />
+			<column name="allowed_values" value="oldest|newest" />
+			<column name="default_value" value="newest" />
+			<column name="values_separator" value="\|" />
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="subscriptionFilter" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
+			<column name="description_i18n" value='{"FRA":"Filtre code de souscription","ENG":"Subscription code filter"}'/>
+			<column name="mandatory" valueNumeric="0" />
+			<column name="class_name" value="java.lang.String" />
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="subscriptionOperator" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
+			<column name="description_i18n" value='{"FRA":"Opérateur du filtre de souscription (insensible à la casse)","ENG":"Subscription filter operator (case insensitive)"}'/>
+			<column name="mandatory" valueNumeric="0" />
+			<column name="class_name" value="java.lang.String" />
+			<column name="collection" valueNumeric="0" />
+			<column name="allowed_values" value="equals|begins with|contains|ends with" />
+			<column name="default_value" value="equals" />
+			<column name="values_separator" value="\|" />
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="code" value="generateRTs" />
+			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
+			<column name="description_i18n" value='{"FRA":"Générer l’élément valorisé (de manière à ce que la charge soit immédiatement facturable) ?","ENG":"Generate rated item (so the charge will be ready for invoicing)?"}'/>
+			<column name="mandatory" valueNumeric="0" />
+			<column name="class_name" value="java.lang.Boolean" />
+			<column name="default_value" value="true" />
+		</insert>
+	</changeSet>
+    <changeSet id="INTRD-23392_20240604_data" author="TarikFA.">
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq" />
+            <column name="version" valueNumeric="1" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="job_category" value="MEDIATION" />
+            <column name="job_template" value="FlatFileProcessingJob" />
+            <column name="code" value="massInstantiateDiscountJob" />
+            <column name="uuid" value="massInstantiateDiscountJob-uuid" />
+            <column name="description" value="mass instantiate discount job"/>
+            <column name="creator" value="opencell.admin" />
+            <column name="cluster_behavior" value="LIMIT_TO_SINGLE_NODE" />
+            <column name="verbose_report" valueNumeric="1" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="cf_values">
+                <![CDATA[
+                {"nbRuns": [{"long": 1}], "oneFilePerJob": [{"boolean": false}],
+                "sortingOption": [{"string": "ALPHA"}], "waitingMillis": [{"long": 0}],
+                "FlatFileProcessingJob_inputDir": [{"string": "imports/discount/input"}],
+                "FlatFileProcessingJob_outputDir": [{"string": "/imports/discount/outputs"}],
+                "FlatFileProcessingJob_archiveDir": [{"string": "/imports/discount/archives"}],
+                "FlatFileProcessingJob_errorAction": [{"string": "CONTINUE"}],
+                "FlatFileProcessingJob_mappingConf": [{"string": "<beanio\r\n\txmlns=\"http://www.beanio.org/2012/03\"\r\n\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n  xsi:schemaLocation=\"http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd\">\r\n\t<stream name=\"record\" format=\"csv\">\r\n\t\t<parser>\r\n\t\t\t<property name=\"delimiter\" value=\";\" />\r\n\t\t\t<property name=\"comments\" value=\"END\" />\r\n\t\t\t<property name=\"multilineEnabled\" value=\"true\" />\r\n\t\t</parser>\r\n\t\t<record name=\"header\" minOccurs=\"1\" maxOccurs=\"1\" class=\"map\">\r\n\t\t\t<field name=\"DISCOUNT_CODE\" ignore=\"true\"/>\r\n\t\t\t<field name=\"OFFER_CODE\" ignore=\"true\"/>\r\n\t\t\t<field name=\"PRODUCT_CODE\" ignore=\"true\"/>\r\n\t\t\t<field name=\"TARGET_TYPE\" ignore=\"true\"/>\r\n\t\t\t<field name=\"TARGET_CODES\" ignore=\"true\"/>\r\n\t\t</record>\r\n\t\t<record name=\"details\" minOccurs=\"1\" maxOccurs=\"unbounded\" class=\"map\">\r\n          \t<field name=\"DISCOUNT_CODE\" required=\"true\"/>\r\n\t\t\t<field name=\"OFFER_CODE\" required=\"false\"/>\r\n\t\t\t<field name=\"PRODUCT_CODE\" required=\"false\"/>\r\n\t\t\t<field name=\"TARGET_TYPE\" required=\"false\"/>\r\n\t\t\t<field name=\"TARGET_CODES\" required=\"false\"/>\r\n\t\t</record>\r\n\t</stream>\r\n</beanio>"}],
+                "FlatFileProcessingJob_scriptsFlow": [{"string": "org.meveo.service.script.MassInstantiateDiscountScript"}],
+                "FlatFileProcessingJob_formatTransfo": [{"string": "None"}], "FlatFileProcessingJob_originFilename":
+                [{"string": "origin_filename"}], "FlatFileProcessingJob_nbLinesToProcess": [{"long": 1}],
+                "FlatFileProcessingJob_fileNameExtension": [{"string": "csv"}], "FlatFileProcessingJob_recordVariableName": [{"string": "record"}]}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="code" value="org.meveo.service.script.MassInstantiateDiscountScript" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="version" valueNumeric="0" />
+            <column name="src_type" value="JAVA_CLASS" />
+            <column name="description" value="taking input csv file and instantiating a discount on existants subscription or billing accounts called by a job"/>
+        </insert>
+    </changeSet>
+
+	<changeSet id="#INTRD-22962_20240605_rebuild" author="ZakariaB">
+		<insert tableName="meveo_script_instance">
+			<column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+			<column name="code" value="org.meveo.service.script.RetryPaymentScript"/>
+			<column name="script">
+				<![CDATA[package org.meveo.service.script;
+				public class RetryPaymentScript extends RetryRejectionPaymentScript {}]]>
+			</column>
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="creator" value="applicationInitializer" />
+			<column name="version" valueNumeric="0" />
+			<column name="src_type" value="JAVA" />
+			<column name="description" value="Retry payment script"/>
+			<column name="description_i18n">
+				<![CDATA[{"ENG":"<p> This action will set up the invoices linked to the rejected payment for a new payment request.<br> Invoice’s payment request count will be increment by 1, and collection date will be set to “rejection date + retry delay“.</p><p>If the number of payment requests on the invoice is already greater that the maximum number of retries, you can choose to send the invoices to litigation, or do nothing (and wait for dunning to trigger, if you implemented it).</p>", "FRA":"<p>Cette action représentera pour paiement les factures liées au paiement rejeté.<br>Le nombre de demande de paiement des factures sera augmenté de 1, et la date de mise en paiement sera “date de rejet + délai de rejet“.</p> <p>Si le nombre de demandes de paiement sur la facture est déjà supérieur au nombre maximum de rejeux, vous pouvez décider de passer les factures en litige, ou ne rien faire (et attendre le déclenchement de la relance, si vous l’avez implémenté).</p>"}]]>
+			</column>
+			<column name="script_instance_cat_id"
+					valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"/>
+		</insert>
+
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="code" value="maxRetries" />
+			<column name="description_i18n" value='{"FRA":"Nombre maximum de rejeux","ENG":"Maximum retries count"}'/>
+			<column name="mandatory" valueNumeric="1" />
+			<column name="class_name" value="java.lang.Integer" />
+			<column name="default_value" value="1" />
+			<column name="mandatory" valueNumeric="1" />
+			<column name="values_separator" value="\|" />
+			<column name="collection" valueNumeric="0" />
+			<column name="script_instance_id"
+					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="code" value="firstRetryDelay" />
+			<column name="description_i18n" value='{"FRA":"Délai de premier rejeu (jours)","ENG":"First retry delay (days)"}'/>
+			<column name="mandatory" valueNumeric="1" />
+			<column name="class_name" value="java.lang.Integer" />
+			<column name="default_value" value="0" />
+			<column name="mandatory" valueNumeric="1" />
+			<column name="values_separator" value="\|" />
+			<column name="collection" valueNumeric="0" />
+			<column name="script_instance_id"
+					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="code" value="nextRetriesDelay" />
+			<column name="description_i18n" value='{"FRA":"Délai des rejeux suivants (jours)","ENG":"Next retries delay (days)"}'/>
+			<column name="mandatory" valueNumeric="1" />
+			<column name="class_name" value="java.lang.Integer" />
+			<column name="default_value" value="10" />
+			<column name="mandatory" valueNumeric="1" />
+			<column name="values_separator" value="\|" />
+			<column name="collection" valueNumeric="0" />
+			<column name="script_instance_id"
+					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+		</insert>
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="code" value="litigationAfterRetry" />
+			<column name="description_i18n" value='{"FRA":"Entrer en litige après le nombre de rejeu max ?","ENG":"Enter litigation after max retries?"}'/>
+			<column name="class_name" value="java.lang.Boolean" />
+			<column name="mandatory" valueNumeric="0" />
+			<column name="default_value" value="false" />
+			<column name="values_separator" value="\|" />
+			<column name="collection" valueNumeric="0" />
+			<column name="script_instance_id"
+					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
+		</insert>
+	</changeSet><changeSet id="INTRD-24052_ReRateV2_filter_data" author="a.rouaguebe">
+
+	<insert tableName="crm_custom_field_tmpl">
+		<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+		<column name="version" valueNumeric="0" />
+		<column name="disabled" valueNumeric="0" />
+		<column name="created" valueDate="${db.current.time}" />
+		<column name="code" value="ReRatingJobBean_reratingTarget"/>
+		<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+		<column name="description" value="Rerating Target"/>
+		<column name="field_type" value="LIST"/>
+		<column name="storage_type" value="SINGLE"/>
+		<column name="default_value" value="ALL"/>
+		<column name="value_required" value="0"/>
+		<column name="creator" value="applicationInitializer"/>
+		<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:4"/>
+	</insert>
+
+	<insert tableName="crm_custom_field_tmpl_val">
+		<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+		<column name="listvalues" value="ALL" />
+		<column name="listvalues_key" value="ALL" />
+	</insert>
+	<insert tableName="crm_custom_field_tmpl_val">
+		<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+		<column name="listvalues" value="NO_BATCH" />
+		<column name="listvalues_key" value="NO BATCH" />
+	</insert>
+	<insert tableName="crm_custom_field_tmpl_val">
+		<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+		<column name="listvalues" value="WITH_BATCH" />
+		<column name="listvalues_key" value="WITH BATCH" />
+	</insert>
+
+	<insert tableName="crm_custom_field_tmpl">
+		<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+		<column name="version" valueNumeric="0" />
+		<column name="disabled" valueNumeric="0" />
+		<column name="created" valueDate="${db.current.time}" />
+		<column name="code" value="ReRatingJobBean_targetBatches"/>
+		<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+		<column name="description" value="Target batches"/>
+		<column name="field_type" value="ENTITY"/>
+		<column name="storage_type" value="LIST"/>
+		<column name="value_required" value="0"/>
+		<column name="entity_clazz" value="org.meveo.model.billing.BatchEntity" />
+		<column name="creator" value="applicationInitializer"/>
+		<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
+	</insert>
+</changeSet>
+	<changeSet id="INTRD-24052_ReRateV2_filter_data" author="a.rouaguebe">
+
+		<insert tableName="crm_custom_field_tmpl">
+			<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="code" value="ReRatingJobBean_reratingTarget"/>
+			<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+			<column name="description" value="Rerating Target"/>
+			<column name="field_type" value="LIST"/>
+			<column name="storage_type" value="SINGLE"/>
+			<column name="default_value" value="ALL"/>
+			<column name="value_required" value="0"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:4"/>
+		</insert>
+
+		<insert tableName="crm_custom_field_tmpl_val">
+			<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+			<column name="listvalues" value="ALL" />
+			<column name="listvalues_key" value="ALL" />
+		</insert>
+		<insert tableName="crm_custom_field_tmpl_val">
+			<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+			<column name="listvalues" value="NO_BATCH" />
+			<column name="listvalues_key" value="NO BATCH" />
+		</insert>
+		<insert tableName="crm_custom_field_tmpl_val">
+			<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
+			<column name="listvalues" value="WITH_BATCH" />
+			<column name="listvalues_key" value="WITH BATCH" />
+		</insert>
+
+		<insert tableName="crm_custom_field_tmpl">
+			<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+			<column name="version" valueNumeric="0" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="code" value="ReRatingJobBean_targetBatches"/>
+			<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
+			<column name="description" value="Target batches"/>
+			<column name="field_type" value="ENTITY"/>
+			<column name="storage_type" value="LIST"/>
+			<column name="value_required" value="0"/>
+			<column name="entity_clazz" value="org.meveo.model.billing.BatchEntity" />
+			<column name="creator" value="applicationInitializer"/>
+			<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="#INTRD-21018_20240723" author="ZakariaB">
+		<insert tableName="meveo_script_instance">
+			<column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+			<column name="code" value="org.meveo.service.script.EnterLitigation"/>
+			<column name="script">
+				<![CDATA[package org.meveo.service.script;
+ public class EnterLitigation extends Script {}]]>
+			</column>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="src_type" value="JAVA"/>
+			<column name="description" value="This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason."/>
+			<column name="description_i18n">
+				<![CDATA[{"ENG":"This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason.", "FRA":"Cette action passera inconditionnellement les factures liées au rejet de paiement en litige, avec le motif fourni."}]]>
+			</column>
+			<column name="script_instance_cat_id"
+					valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"/>
+		</insert>
+
+		<insert tableName="meveo_script_parameter">
+			<column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="code" value="litigationReason"/>
+			<column name="description_i18n" value='{"FRA":"Motif de mise en litige","ENG":"Litigation reason"}'/>
+			<column name="mandatory" valueNumeric="1"/>
+			<column name="class_name" value="java.lang.String"/>
+			<column name="default_value" value=""/>
+			<column name="values_separator" value="\|"/>
+			<column name="collection" valueNumeric="0"/>
+			<column name="script_instance_id"
+					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.EnterLitigation')"/>
+		</insert>
+	</changeSet>
 </databaseChangeLog>

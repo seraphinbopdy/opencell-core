@@ -136,10 +136,10 @@ public class CommercialOrderRsImpl extends BaseRs implements CommercialOrderRs {
 	} 
 
 	@Override
-	public Response createOrderOffer(OrderOfferDto orderOfferDto, boolean isQuickOrder) {
+	public Response createOrderOffer(OrderOfferDto orderOfferDto, boolean isQuickOrder, boolean saveAsDraft) {
 		 GetOrderOfferDtoResponse result = new GetOrderOfferDtoResponse();
 		 try {
-			 result.setOrderOfferDto(commercialOrderApi.createOrderOffer(orderOfferDto, isQuickOrder));
+			 result.setOrderOfferDto(commercialOrderApi.createOrderOffer(orderOfferDto, isQuickOrder, saveAsDraft));
 	            return Response.ok(result).build();
 	        } catch (MeveoApiException e) {
 			       return errorResponse(e, result.getActionStatus());

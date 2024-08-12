@@ -207,15 +207,20 @@ public class BillingAccountApi extends AccountEntityApi {
 	
 
     public BillingAccount create(BillingAccountDto postData) throws MeveoApiException, BusinessException {
-        return create(postData, true);
+        return create(postData, true, null, null, Version.V1);
     }
 
-    public BillingAccount create(BillingAccountDto postData, boolean checkCustomFields) throws MeveoApiException, BusinessException {
-        return create(postData, true, null, null);
+    public BillingAccount create(BillingAccountDto postData, Version versioning) throws MeveoApiException, BusinessException {
+        return create(postData, true, null, null, versioning);
     }
 
     public BillingAccount create(BillingAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel,
                                  CustomerAccount associatedCA) throws MeveoApiException, BusinessException {
+        return create(postData, checkCustomFields, businessAccountModel, associatedCA, Version.V1);
+    }
+
+    public BillingAccount create(BillingAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel,
+                                 CustomerAccount associatedCA, Version versioning) throws MeveoApiException, BusinessException {
 
         if(StringUtils.isBlank(postData.getCode())) {
             addGenericCodeIfAssociated(BillingAccount.class.getName(), postData);
@@ -241,6 +246,20 @@ public class BillingAccountApi extends AccountEntityApi {
             }
         }
 
+        if(Boolean.TRUE.equals(postData.getIsCompany()) && Version.V2.equals(versioning)) {
+            if(postData.getLegalEntityType() == null || StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                missingParameters.add("legalEntityType.code");
+            }
+            
+            if(StringUtils.isBlank(postData.getDescription())) {
+                missingParameters.add("description");
+            }
+
+            if(CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
+                missingParameters.add("registrationNumbers");
+            }
+        }
+        
         handleMissingParameters(postData);
 
         if (billingAccountService.findByCode(postData.getCode()) != null) {
@@ -290,6 +309,11 @@ public class BillingAccountApi extends AccountEntityApi {
         return billingAccount;
     }
 
+    public BillingAccount create(BillingAccountDto postData, boolean checkCustomFields) throws MeveoApiException, BusinessException {
+        return create(postData, true, null, null);
+    }
+
+
     private void processTags(BillingAccountDto postData, BillingAccount billingAccount) {
     	Set<String> tagCodes = postData.getTagCodes();
 		if(tagCodes != null && !tagCodes.isEmpty()){
@@ -307,7 +331,11 @@ public class BillingAccountApi extends AccountEntityApi {
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
     public BillingAccount update(BillingAccountDto postData) throws MeveoApiException, BusinessException {
-        return update(postData, true);
+        return update(postData, Version.V1);
+    }
+
+    public BillingAccount update(BillingAccountDto postData, Version version) {
+        return update(postData, true, null, version);
     }
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
@@ -317,9 +345,28 @@ public class BillingAccountApi extends AccountEntityApi {
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
     public BillingAccount update(BillingAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel) throws MeveoApiException, BusinessException {
+        return update(postData, checkCustomFields, businessAccountModel, Version.V1);
+    }
+
+    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
+    public BillingAccount update(BillingAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel, Version version) throws MeveoApiException, BusinessException {
 
         if (StringUtils.isBlank(postData.getCode())) {
             missingParameters.add("code");
+        }
+
+        if(Boolean.TRUE.equals(postData.getIsCompany()) && Version.V2.equals(version)) {
+            if(postData.getLegalEntityType() == null || StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                missingParameters.add("legalEntityType.code");
+            }
+
+            if(StringUtils.isBlank(postData.getDescription())) {
+                missingParameters.add("description");
+            }
+
+            if(CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
+                missingParameters.add("registrationNumbers");
+            }
         }
 
         handleMissingParametersAndValidate(postData);
@@ -770,7 +817,7 @@ public class BillingAccountApi extends AccountEntityApi {
 
     /**
      * Create or update Billing Account based on Billing Account Code
-     * 
+     *
      * @param postData posted data to API
      * @return the billing account
      * @throws MeveoApiException meveo api exception
@@ -778,10 +825,23 @@ public class BillingAccountApi extends AccountEntityApi {
      */
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
     public BillingAccount createOrUpdate(BillingAccountDto postData) throws MeveoApiException, BusinessException {
+        return createOrUpdate(postData, Version.V1);
+    }
+    
+    /**
+     * Create or update Billing Account based on Billing Account Code
+     * 
+     * @param postData posted data to API
+     * @return the billing account
+     * @throws MeveoApiException meveo api exception
+     * @throws BusinessException business exception.
+     */
+    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = BillingAccount.class))
+    public BillingAccount createOrUpdate(BillingAccountDto postData, Version version) throws MeveoApiException, BusinessException {
         if (!StringUtils.isBlank(postData.getCode()) && billingAccountService.findByCode(postData.getCode()) != null) {
-            return update(postData);
+            return update(postData, version);
         } else {
-            return create(postData);
+            return create(postData, version);
         }
     }
 
@@ -893,8 +953,8 @@ public class BillingAccountApi extends AccountEntityApi {
                 if(postData.isThresholdPerEntity() != null) {
                 	existedBillingAccountDto.setThresholdPerEntity(postData.isThresholdPerEntity());
                 }
-
                 accountHierarchyApi.populateNameAddress(existedBillingAccountDto, postData);
+                existedBillingAccountDto.setIsCompany(postData.getIsCompany());
                 if (postData.getCustomFields() != null && !postData.getCustomFields().isEmpty()) {
                     existedBillingAccountDto.setCustomFields(postData.getCustomFields());
                 }
@@ -1008,4 +1068,8 @@ public class BillingAccountApi extends AccountEntityApi {
         return result;
     }
 
+    public enum Version {
+        V1, V2
+    }
 }
+

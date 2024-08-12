@@ -46,6 +46,10 @@ public class InvoicingMapper extends ResourceMapper<ExceptionalBillingRun, Billi
         billingRun.setPreReportAutoOnCreate(resource.isPreReportAutoOnCreate());
         billingRun.setPreReportAutoOnInvoiceLinesJob(resource.isPreReportAutoOnInvoiceLinesJob());
         billingRun.setApplicationEl(resource.getApplicationEl());
+
+        if (resource.getAdditionalAggregationFields() != null && !resource.getAdditionalAggregationFields().isEmpty()) {
+            billingRun.setAdditionalAggregationFields(resource.getAdditionalAggregationFields());
+        }
         return billingRun;
     }
 

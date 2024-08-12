@@ -108,7 +108,7 @@ import org.meveo.model.finance.AccountingEntry;
     	@NamedQuery(name = "AccountOperation.countUnmatchedAOByCA", query = "Select count(*) from AccountOperation as ao where ao.unMatchingAmount <> 0 and ao"
                 + ".customerAccount=:customerAccount"),
         @NamedQuery(name = "AccountOperation.listByCustomerAccount", query = "select ao from AccountOperation ao inner join ao.customerAccount ca where ca=:customerAccount"),
-        @NamedQuery(name = "AccountOperation.listByInvoice", query = "select ao from AccountOperation ao inner join ao.invoices inv where inv = :invoice"),
+        @NamedQuery(name = "AccountOperation.listByInvoice", query = "select ao from AccountOperation ao where exists (select 1 from Invoice inv where inv.recordedInvoice.id = ao.id and inv = :invoice )"),
         @NamedQuery(name = "AccountOperation.findAoClosedSubPeriodByStatus", query = "SELECT ao FROM AccountOperation ao" +
                 " INNER JOIN SubAccountingPeriod sap ON sap.allUsersSubPeriodStatus = 'CLOSED' AND sap.startDate <= ao.accountingDate AND sap.endDate >= ao.accountingDate" +
                 " AND ao.status IN (:AO_STATUS)"),
@@ -116,9 +116,10 @@ import org.meveo.model.finance.AccountingEntry;
         @NamedQuery(name = "AccountOperation.findByCustomerAccount", query = "SELECT ao FROM AccountOperation ao WHERE ao.id in (:AO_IDS) AND ao.customerAccount.id = :CUSTOMERACCOUNT_ID"),
         @NamedQuery(name = "Payment.updateReference", query = "UPDATE Payment pay set pay.reference = (select ph.externalPaymentId from PaymentHistory ph where ph.payment is not null and ph.payment.id = pay.id) where pay.reference is null"),
         @NamedQuery(name = "Refund.updateReference", query = "UPDATE Refund re set re.reference = (select ph.externalPaymentId from PaymentHistory ph where ph.refund is not null and ph.refund.id = re.id) where re.reference is null"),
-        @NamedQuery(name = "RejectedPayment.findByRejectionActionStatus", query = "SELECT rp FROM RejectedPayment rp WHERE rp.rejectionActionsStatus IN (:RA_STATUS)"),
+        @NamedQuery(name = "RejectedPayment.findByRejectionActionStatus", query = "SELECT distinct rp FROM RejectedPayment rp left join fetch rp.paymentRejectionActionReports prar WHERE rp.rejectionActionsStatus IN (:RA_STATUS)"),
         @NamedQuery(name = "RejectedPayment.findByExternalId", query = "SELECT ao FROM AccountOperation ao WHERE ao.reference = :externalId"),
-        @NamedQuery(name = "RejectedPayment.findByExternalIdAndPaymentGateWay", query = "SELECT pay FROM Payment pay WHERE pay.reference = :externalId and pay.paymentGateway.code = :paymentGatewayCode")
+        @NamedQuery(name = "RejectedPayment.findByExternalIdAndPaymentGateWay", query = "SELECT pay FROM Payment pay WHERE pay.reference = :externalId and pay.paymentGateway.code = :paymentGatewayCode"),
+        @NamedQuery(name = "RejectedPayment.findByRejectPayment", query = "SELECT pay FROM Payment pay WHERE pay.rejectedPayment.id = :rejectedPaymentId")
 })
 public class AccountOperation extends BusinessEntity implements ICustomFieldEntity, ISearchable, IWFEntity {
 
@@ -520,6 +521,14 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
 	@JoinColumn( name = "source_account_operation_id" )
 	@ManyToOne(fetch = FetchType.LAZY)
 	private AccountOperation sourceAccountOperation;
+	
+	@JoinColumn( name = "origin_call_for_payment_id" )
+	@ManyToOne(fetch = FetchType.LAZY)
+	private AccountOperation originCallPayment;
+	
+	@JoinColumn( name = "origin_payment_id" )
+	@ManyToOne(fetch = FetchType.LAZY)
+	private AccountOperation originPayment;
 
     public Date getDueDate() {
         return dueDate;
@@ -1224,5 +1233,21 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
 	
 	public void setSourceAccountOperation(AccountOperation sourceAccountOperation) {
 		this.sourceAccountOperation = sourceAccountOperation;
+	}
+	
+	public AccountOperation getOriginCallPayment() {
+		return originCallPayment;
+	}
+	
+	public void setOriginCallPayment(AccountOperation originCallPayment) {
+		this.originCallPayment = originCallPayment;
+	}
+	
+	public AccountOperation getOriginPayment() {
+		return originPayment;
+	}
+	
+	public void setOriginPayment(AccountOperation originPayment) {
+		this.originPayment = originPayment;
 	}
 }

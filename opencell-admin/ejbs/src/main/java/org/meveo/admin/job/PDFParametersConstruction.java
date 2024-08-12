@@ -74,7 +74,6 @@ public class PDFParametersConstruction {
     @Inject
     private ParamBeanFactory paramBeanFactory;
     
-    private String PDF_DIR_NAME = "pdf";
     private NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("FR"));
 
     public Map<String, Object> constructParameters(Invoice invoice, String provider) {
@@ -99,7 +98,7 @@ public class PDFParametersConstruction {
 
             ParamBean paramBean = paramBeanFactory.getInstance();
             String resDir = paramBean.getChrootDir(provider) + File.separator + "jasper";
-            String templateDir = new StringBuilder(resDir).append(File.separator).append(billingTemplateName).append(File.separator).append(PDF_DIR_NAME).toString();
+            String templateDir = new StringBuilder(resDir).append(File.separator).append(billingTemplateName).toString();
             parameters.put(PdfGeneratorConstants.MESSAGE_PATH_KEY, templateDir + File.separator);
             parameters.put(PdfGeneratorConstants.LOGO_PATH_KEY, templateDir + File.separator);
             parameters.put(PdfGeneratorConstants.CUSTOMER_ADDRESS_KEY, getCustomerAddress(invoice));

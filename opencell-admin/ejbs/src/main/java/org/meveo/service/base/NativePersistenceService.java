@@ -53,9 +53,12 @@ import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.model.customEntities.CustomEntityTemplate;
+import org.meveo.model.jaxb.account.UserAccount;
 import org.meveo.model.notification.Notification;
 import org.meveo.model.notification.NotificationEventTypeEnum;
+import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.report.query.ReportQuery;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.model.transformer.AliasToEntityOrderedMapResultTransformer;
 import org.meveo.security.keycloak.CurrentUserProvider;
@@ -64,6 +67,7 @@ import org.meveo.service.base.expressions.NativeExpressionFactory;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CustomEntityTemplateService;
 import org.meveo.service.notification.GenericNotificationService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.meveo.util.MeveoParamBean;
 
 import javax.enterprise.event.Event;
@@ -72,6 +76,7 @@ import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -88,10 +93,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -142,6 +149,9 @@ public class NativePersistenceService extends BaseService {
     @Inject
     @MeveoJpa
     private EntityManagerWrapper emWrapper;
+
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
 
     @Inject
     @MeveoParamBean
@@ -845,35 +855,117 @@ public class NativePersistenceService extends BaseService {
      * @param id        Id field value to explicitly extract data by ID
      * @return Query builder to filter entities according to pagination configuration data.
      */
-    public QueryBuilder getQuery(String tableName, PaginationConfiguration config, Long id) {
+    public QueryBuilder getQuery(String tableName, PaginationConfiguration config, Long id, Boolean isExport) {
         tableName = addCurrentSchema(tableName);
         Predicate<String> predicate = field -> this.checkAggFunctions(field.toUpperCase().trim());
+        List<String> fetchFields = new ArrayList<>();
+        if(config != null && config.getFetchFields() != null) {
+            fetchFields.addAll(config.getFetchFields());
+        }
         String aggFields = (config != null && config.getFetchFields() != null) ? aggregationFields(config.getFetchFields(), predicate) : "";
         if (!aggFields.isEmpty()) {
             config.getFetchFields().remove("id");
         }
-
-        List<String> fetch = (config != null && config.getFetchFields() != null) ? config.getFetchFields().stream().filter(s -> s.contains(".")).map(s -> s.substring(0, s.lastIndexOf("."))).distinct().collect(Collectors.toList()) : Collections.emptyList();
-        Map<String, String> fetchAlias = fetch.stream().collect(Collectors.toMap(Function.identity(), s -> QueryBuilder.getJoinAlias("a", s)));
-
-        String fieldsToRetrieve = (config != null && config.getFetchFields() != null) ? retrieveFields(config.getFetchFields(), predicate.negate()) : "";
-        if (fieldsToRetrieve.isEmpty() && aggFields.isEmpty()) {
-            fieldsToRetrieve = "*";
+        
+        var rework = new ArrayList<String>();
+        rework.addAll(fetchFields.stream().filter(predicate.negate()).collect(Collectors.toList()));
+        rework.addAll(fetchFields.stream().filter(predicate).collect(Collectors.toList()));
+        
+        if(config != null) {
+            config.setFetchFields(rework);
         }
-        StringBuilder fetchSql = new StringBuilder();
-        if (!ListUtils.isEmtyCollection(fetch)) {
-            for (String fetchField : fetch) {
-                String joinAlias = fetchField.contains(QueryBuilder.JOIN_AS) ? "" : QueryBuilder.JOIN_AS + fetchAlias.get(fetchField);
-                fetchSql.append(" left join " + "a" + "." + fetchField + joinAlias);
+        
+        String fieldsToRetrieve;
+        if (fetchFields.isEmpty()) {
+            fieldsToRetrieve = "*";
+        } else {
+            fieldsToRetrieve = retrieveFields(fetchFields, predicate.negate());
+            if(fetchFields.stream().anyMatch(predicate)) {
+                fieldsToRetrieve = fieldsToRetrieve + ", {aggregationFields}";
             }
         }
-        StringBuilder sql = new StringBuilder("select " + buildFields(fieldsToRetrieve, aggFields) + " from " + tableName + " a ");
-        sql.append(fetchSql);
+        StringBuilder sql = new StringBuilder("select " + fieldsToRetrieve + " from " + tableName + " a ");
         sql.append(" ");
         QueryBuilder queryBuilder = new QueryBuilder(sql.toString(), "a");
+        AdvancedSettings fieldSeparator = advancedSettingsService.findByCode("standardExports.fieldsSeparator");
+        String listAggregationSeparator;
+        if (fieldSeparator != null) {
+            listAggregationSeparator = fieldSeparator.getValue();
+        } else {
+            listAggregationSeparator = "|";
+        }
+
+        Class<?> entity = null;
+
+        if (Boolean.TRUE.equals(isExport) && !tableName.toUpperCase().startsWith("CT_")) {
+            try {
+                entity = Class.forName(tableName);
+            } catch (ClassNotFoundException e) {
+                throw new BusinessException(String.format("Unknown entity %s", tableName));
+            }
+        }
+
+        Class<?> finalEntity = entity;
+        fetchFields.stream().filter(predicate).forEach(s -> {
+            
+        });
+
+        List<String> aggregationFields = fetchFields.stream()
+                                                    .filter(predicate)
+                                                    .map(s -> {
+                                                        String fieldName = extractAggregatedField(s);
+                                                        if(fieldName == null) {
+                                                            return null;
+                                                        }
+                                                        if(s.toLowerCase().startsWith("count(")) {
+                                                            // the dummy field is a workaround to be able to calculate inner joins using queryBuilder as the count need only the collection
+                                                            fieldName+= ".dummy"; 
+                                                        } else if(!fieldName.contains(".")) {
+                                                            throw new BusinessException("Aggregation functions can be used only for values in nested lists");
+                                                        }
+
+                                                        // as fieldName contains nested fields, get parent field
+                                                        String parentField = removeLastSegment(fieldName);
+
+                                                        String[] parts = parentField.split("\\.");
+                                                        
+                                                        List<String> subFields = new ArrayList<>();
+                                                        StringBuilder sb = new StringBuilder();
+
+                                                        for (int i = 0; i < parts.length; i++) {
+                                                            if (i > 0) {
+                                                                sb.append(".");
+                                                            }
+                                                            sb.append(parts[i]);
+                                                            subFields.add(sb.toString());
+                                                        }
+                                                        
+                                                        if(subFields.stream().noneMatch(subField -> {
+                                                            Field sf = ReflectionUtils.getField(finalEntity, subField);
+                                                            return sf != null && List.class.isAssignableFrom(sf.getType());
+                                                        })) {
+                                                            String functionName = s.split("\\(")[0];
+                                                            Field f = ReflectionUtils.getField(finalEntity, parentField);
+                                                            assert f != null;
+                                                            throw new BusinessException(String.format("Aggregation function “%s” cannot be applied to “%s” of type “%s”",
+                                                                    functionName, parentField, f.getType().getSimpleName()));
+                                                        }                                                      
+
+                                                        fieldName = queryBuilder.createExplicitInnerJoinsForAggregation(fieldName);
+                                                        String sToReplace = extractAggregatedField(s);
+                                                        if(s.toLowerCase().startsWith("list(")) {
+                                                            return String.format("string_agg(%s, '%s')", fieldName, listAggregationSeparator);
+                                                        }
+                                                        return s.replaceAll(sToReplace, fieldName.replace(".dummy", ""));
+                                                    })
+                                                    .filter(Objects::nonNull)
+                                                    .collect(Collectors.toList());
+
+        queryBuilder.setQ(new StringBuilder(queryBuilder.getSqlStringBuffer().toString().replace("{aggregationFields}", String.join(",", aggregationFields))));
 
         if (id != null) {
             queryBuilder.addSql(" a.id ='" + id + "'");
+            
         }
 
         if (config == null) {
@@ -894,7 +986,7 @@ public class NativePersistenceService extends BaseService {
             queryBuilder.addPaginationConfiguration(config, "a");
         }
         if (!aggFields.isEmpty() && !fieldsToRetrieve.isEmpty()) {
-            queryBuilder.addGroupCriterion(fieldsToRetrieve);
+            queryBuilder.addGroupCriterion(retrieveFields(fetchFields, predicate.negate()));
         }
 
         // log.trace("Filters is {}", filters);
@@ -902,6 +994,23 @@ public class NativePersistenceService extends BaseService {
         // log.trace("Query params are {}", queryBuilder.getParams());
         return queryBuilder;
 
+    }
+
+    public static String removeLastSegment(String input) {
+        String[] segments = input.split("\\.");
+        if (segments.length > 1) {
+            return String.join(".", Arrays.copyOf(segments, segments.length - 1));
+        }
+        return "";
+    }
+
+    public String extractAggregatedField(String input) {
+        Pattern pattern = Pattern.compile("\\((.*?)\\)");
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
     /**
@@ -1020,6 +1129,7 @@ public class NativePersistenceService extends BaseService {
     public QueryBuilder getAggregateQuery(String tableName, PaginationConfiguration config, Long id, String extraCondition,
                                           String leftJoinClause) {
         tableName = addCurrentSchema(tableName);
+        config.setOrderings(new Object[]{});
 
         String fieldsToRetrieve = (config != null && config.getFetchFields() != null) ? retrieveFields(config.getFetchFields(), null) : "";
         if (!fieldsToRetrieve.isEmpty()) {
@@ -1165,7 +1275,7 @@ public class NativePersistenceService extends BaseService {
     private boolean checkAggFunctions(String field) {
         if (field.startsWith("SUM(") || field.startsWith("COUNT(") || field.startsWith("AVG(")
                 || field.startsWith("MAX(") || field.startsWith("MIN(") || field.startsWith("COALESCE(SUM(")
-                || field.startsWith("STRING_AGG_LONG") || field.startsWith("TO_CHAR(") || field.startsWith("CAST(")) {
+                || field.startsWith("STRING_AGG_LONG") || field.startsWith("LIST") || field.startsWith("TO_CHAR(") || field.startsWith("CAST(")) {
             return true;
         } else {
             return false;
@@ -1185,7 +1295,7 @@ public class NativePersistenceService extends BaseService {
         tableName = tableName.toLowerCase();
 
         tableName = addCurrentSchema(tableName);
-        QueryBuilder queryBuilder = getQuery(tableName, config, null);
+        QueryBuilder queryBuilder = getQuery(tableName, config, null, Boolean.FALSE);
         SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
 
         if (config.isCacheable()) {
@@ -1221,7 +1331,7 @@ public class NativePersistenceService extends BaseService {
     @SuppressWarnings({"deprecation", "rawtypes"})
     public List listAsObjects(String tableName, PaginationConfiguration config) {
         tableName = addCurrentSchema(tableName);
-        QueryBuilder queryBuilder = getQuery(tableName, config, null);
+        QueryBuilder queryBuilder = getQuery(tableName, config, null, Boolean.FALSE);
         SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), false);
 
         if (config.isCacheable()) {
@@ -1281,7 +1391,7 @@ public class NativePersistenceService extends BaseService {
      */
     public long count(String tableName, PaginationConfiguration config) {
         tableName = addCurrentSchema(tableName);
-        QueryBuilder queryBuilder = getQuery(tableName, config, null);
+        QueryBuilder queryBuilder = getQuery(tableName, config, null, Boolean.FALSE);
         Query query = queryBuilder.getNativeCountQuery(getEntityManager());
         Object count = query.setFlushMode(FlushModeType.COMMIT).getSingleResult();
         if (count instanceof Long) {
@@ -1665,7 +1775,7 @@ public class NativePersistenceService extends BaseService {
             qb = this.getAggregateQuery(entityClass.getCanonicalName(), searchConfig, null);
         } else if (isCustomFieldQuery(genericPagingAndFilter.getGenericFields())) {
             searchConfig.setFetchFields(genericFields);
-            qb = this.getQuery(entityClass.getCanonicalName(), searchConfig, null);
+            qb = this.getQuery(entityClass.getCanonicalName(), searchConfig, null, Boolean.FALSE);
         } else {
             qb = PersistenceServiceHelper.getPersistenceService(entityClass, searchConfig).listQueryBuilder(searchConfig);
             String fieldsToRetrieve = !genericFields.isEmpty() ? retrieveFields(genericFields, null) : "";
@@ -1788,7 +1898,7 @@ public class NativePersistenceService extends BaseService {
             if (filters != null && !filters.isEmpty()) {
                 PaginationConfiguration searchConfig = new PaginationConfiguration(filters);
                 searchConfig.setFetchFields(Arrays.asList("id"));
-                String subQuery = getQuery(entityClassName, searchConfig, null).getQueryAsString();
+                String subQuery = getQuery(entityClassName, searchConfig, null, Boolean.FALSE).getQueryAsString();
                 if (subQuery.indexOf("join") > -1) {
                     updateQuery = updateQuery + " WHERE id in (" + subQuery + ")";
                 } else {

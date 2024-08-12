@@ -18,18 +18,25 @@
 
 package org.meveo.api.account;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.*;
 import org.meveo.api.billing.SubscriptionApi;
 import org.meveo.api.dto.*;
 import org.meveo.api.dto.account.*;
+import org.meveo.api.dto.billing.ActivateServicesRequestDto;
+import org.meveo.api.dto.billing.ServiceToActivateDto;
 import org.meveo.api.dto.billing.SubscriptionDto;
+import org.meveo.api.dto.billing.SubscriptionsDto;
+import org.meveo.api.dto.cpq.ProductToInstantiateDto;
 import org.meveo.api.dto.payment.PaymentMethodDto;
 import org.meveo.api.dto.response.account.GetAccountHierarchyResponseDto;
 import org.meveo.api.dto.response.account.GetBillingAccountResponseDto;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
+import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.payment.PaymentMethodApi;
 import org.meveo.api.security.Interceptor.SecuredBusinessEntityMethodInterceptor;
 import org.meveo.api.security.config.annotation.FilterProperty;
@@ -52,20 +59,24 @@ import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.CustomerAccountStatusEnum;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 import org.meveo.service.admin.impl.CountryService;
 import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.billing.impl.BillingAccountService;
+import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.billing.impl.UserAccountService;
 import org.meveo.service.catalog.impl.TitleService;
 import org.meveo.service.crm.impl.*;
 import org.meveo.service.payments.impl.CustomerAccountService;
+import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.util.ApplicationProvider;
 import org.meveo.util.MeveoParamBean;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import java.math.BigDecimal;
@@ -75,6 +86,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.meveo.model.billing.SubscriptionStatusEnum.ACTIVE;
+import static org.meveo.model.billing.SubscriptionStatusEnum.RESILIATED;
+import static org.meveo.model.billing.SubscriptionStatusEnum.SUSPENDED;
 
 /**
  * Creates the customer hierarchy including : - Trading Country - Trading Currency - Trading Language - Customer Brand - Customer Category - Seller - Customer - Customer Account -
@@ -171,6 +186,9 @@ public class AccountHierarchyApi extends BaseApi {
     @ApplicationProvider
     private Provider appProvider;
 
+    @Inject
+    private AccessApi accessApi;
+
     public static final String CUSTOMER_PREFIX = "CUST_";
     public static final String CUSTOMER_ACCOUNT_PREFIX = "CA_";
     public static final String BILLING_ACCOUNT_PREFIX = "BA_";
@@ -180,6 +198,11 @@ public class AccountHierarchyApi extends BaseApi {
     public static final int CA = 2;
     public static final int BA = 4;
     public static final int UA = 8;
+	
+	@Inject
+	private SubscriptionService subscriptionService;
+	@Inject
+	private SubscriptionTerminationReasonService subscriptionTerminationReasonService;
 
     /**
      * Creates the customer heirarchy including : - Trading Country - Trading Currency - Trading Language - Customer Brand - Customer Category - Seller - Customer - Customer
@@ -865,12 +888,18 @@ public class AccountHierarchyApi extends BaseApi {
         return result;
     }
 
+    @TransactionAttribute
+    public void customerHierarchyUpdate(CustomerHierarchyDto postData) throws MeveoApiException, BusinessException {
+        this.customerHierarchyUpdate(postData, Version.V1);
+    }
+
     /**
      * @param postData posted data to API
      * @throws MeveoApiException meveo api exception
      * @throws BusinessException business exception
      */
-    public void customerHierarchyUpdate(CustomerHierarchyDto postData) throws MeveoApiException, BusinessException {
+    @TransactionAttribute
+    public void customerHierarchyUpdate(CustomerHierarchyDto postData, Version version) throws MeveoApiException, BusinessException {
         if (postData.getSellers() == null || postData.getSellers().getSeller().isEmpty()) {
             missingParameters.add("sellers");
             handleMissingParameters();
@@ -886,7 +915,8 @@ public class AccountHierarchyApi extends BaseApi {
             currencyApi.findOrCreate(sellerDto.getCurrencyCode());
             languageApi.findOrCreate(sellerDto.getLanguageCode());
 
-            methodCallingUtils.callMethodInNewTx(() -> sellerApi.createOrUpdate(sellerDto));
+            sellerApi.createOrUpdate(sellerDto);
+            sellerService.getEntityManager().flush();
 
             // customers
             if (sellerDto.getCustomers() != null) {
@@ -895,12 +925,30 @@ public class AccountHierarchyApi extends BaseApi {
                         log.warn("CustomerDto's code is null={}", customerDto);
                         continue;
                     }
+
+                    if(Boolean.TRUE.equals(customerDto.getIsCompany()) && Version.V2.equals(version)) {
+                        if(customerDto.getLegalEntityType() == null || StringUtils.isBlank(customerDto.getLegalEntityType().getCode())) {
+                            missingParameters.add("customer.legalEntityType.code");
+                        }
+
+                        if(StringUtils.isBlank(customerDto.getDescription())) {
+                            missingParameters.add("customer.description");
+                        }
+
+                        if(CollectionUtils.isEmpty(customerDto.getRegistrationNumbers())) {
+                            missingParameters.add("customer.registrationNumbers");
+                        }
+
+                        handleMissingParameters();
+                    }
+                    
                     if (!StringUtils.isBlank(customerDto.getSeller()) && !customerDto.getSeller().equalsIgnoreCase(sellerDto.getCode())) {
                         throw new MeveoApiException("Customer's seller " + customerDto.getSeller() + " doesn't match with parent seller " + sellerDto.getCode());
                     } else {
                         customerDto.setSeller(sellerDto.getCode());
                     }
-                    methodCallingUtils.callMethodInNewTx(() -> customerApi.createOrUpdatePartial(customerDto));
+                    customerApi.createOrUpdatePartial(customerDto);
+                    customerService.getEntityManager().flush();
 
                     // customerAccounts
                     if (customerDto.getCustomerAccounts() != null) {
@@ -909,13 +957,31 @@ public class AccountHierarchyApi extends BaseApi {
                                 log.warn("code is null={}", customerAccountDto);
                                 continue;
                             }
+
+                            if(Boolean.TRUE.equals(customerAccountDto.getIsCompany()) && Version.V2.equals(version)) {
+                                if(customerAccountDto.getLegalEntityType() == null || StringUtils.isBlank(customerAccountDto.getLegalEntityType().getCode())) {
+                                    missingParameters.add("customerAccount.legalEntityType.code");
+                                }
+
+                                if(StringUtils.isBlank(customerAccountDto.getDescription())) {
+                                    missingParameters.add("customerAccount.description");
+                                }
+
+                                if(CollectionUtils.isEmpty(customerAccountDto.getRegistrationNumbers())) {
+                                    missingParameters.add("customerAccount.registrationNumbers");
+                                }
+
+                                handleMissingParameters();
+                            }
+                            
                             if (!StringUtils.isBlank(customerAccountDto.getCustomer()) && !customerAccountDto.getCustomer().equalsIgnoreCase(customerDto.getCode())) {
                                 throw new MeveoApiException("CustomerAccount's customer " + customerAccountDto.getCustomer() + " doesn't match with parent Customer " + customerDto.getCode());
                             } else {
                                 customerAccountDto.setCustomer(customerDto.getCode());
                             }
 
-                            methodCallingUtils.callMethodInNewTx(() -> customerAccountApi.createOrUpdatePartial(customerAccountDto));
+                            customerAccountApi.createOrUpdatePartial(customerAccountDto);
+                            customerAccountService.getEntityManager().flush();
 
                             // billing accounts
                             if (customerAccountDto.getBillingAccounts() != null) {
@@ -924,13 +990,31 @@ public class AccountHierarchyApi extends BaseApi {
                                         log.warn("code is null={}", billingAccountDto);
                                         continue;
                                     }
+
+                                    if(Boolean.TRUE.equals(billingAccountDto.getIsCompany()) && Version.V2.equals(version)) {
+                                        if(billingAccountDto.getLegalEntityType() == null || StringUtils.isBlank(billingAccountDto.getLegalEntityType().getCode())) {
+                                            missingParameters.add("billingAccount.legalEntityType.code");
+                                        }
+
+                                        if(StringUtils.isBlank(billingAccountDto.getDescription())) {
+                                            missingParameters.add("billingAccount.description");
+                                        }
+                                        
+                                        if(CollectionUtils.isEmpty(billingAccountDto.getRegistrationNumbers())) {
+                                            missingParameters.add("billingAccount.registrationNumbers");
+                                        }
+
+                                        handleMissingParameters();
+                                    }
+                                    
                                     if (!StringUtils.isBlank(billingAccountDto.getCustomerAccount()) && !billingAccountDto.getCustomerAccount().equalsIgnoreCase(customerAccountDto.getCode())) {
                                         throw new MeveoApiException(
                                             "BillingAccount's customerAccount " + billingAccountDto.getCustomerAccount() + " doesn't match with parent customerAccount " + customerAccountDto.getCode());
                                     } else {
                                         billingAccountDto.setCustomerAccount(customerAccountDto.getCode());
                                     }
-                                    methodCallingUtils.callMethodInNewTx(() -> billingAccountApi.createOrUpdatePartial(billingAccountDto));
+                                    billingAccountApi.createOrUpdatePartial(billingAccountDto);
+                                    billingAccountService.getEntityManager().flush();
 
                                     // user accounts
                                     if (billingAccountDto.getUserAccounts() != null) {
@@ -939,13 +1023,31 @@ public class AccountHierarchyApi extends BaseApi {
                                                 log.warn("code is null={}", userAccountDto);
                                                 continue;
                                             }
+
+                                            if(Boolean.TRUE.equals(userAccountDto.getIsCompany()) && Version.V2.equals(version)) {
+                                                if(userAccountDto.getLegalEntityType() == null || StringUtils.isBlank(userAccountDto.getLegalEntityType().getCode())) {
+                                                    missingParameters.add("userAccount.legalEntityType.code");
+                                                }
+
+                                                if(StringUtils.isBlank(userAccountDto.getDescription())) {
+                                                    missingParameters.add("userAccount.description");
+                                                }
+
+                                                if(CollectionUtils.isEmpty(userAccountDto.getRegistrationNumbers())) {
+                                                    missingParameters.add("userAccount.registrationNumbers");
+                                                }
+
+                                                handleMissingParameters();
+                                            }
+                                            
                                             if (!StringUtils.isBlank(userAccountDto.getBillingAccount()) && !userAccountDto.getBillingAccount().equalsIgnoreCase(billingAccountDto.getCode())) {
                                                 throw new MeveoApiException(
                                                     "UserAccount's billingAccount " + userAccountDto.getBillingAccount() + " doesn't match with parent billingAccount " + billingAccountDto.getCode());
                                             } else {
                                                 userAccountDto.setBillingAccount(billingAccountDto.getCode());
                                             }
-                                            methodCallingUtils.callMethodInNewTx(() -> userAccountApi.createOrUpdatePartial(userAccountDto));
+                                            userAccountApi.createOrUpdatePartial(userAccountDto);
+                                            userAccountService.getEntityManager().flush();
 
                                             // subscriptions
                                             if (userAccountDto.getSubscriptions() != null) {
@@ -960,7 +1062,10 @@ public class AccountHierarchyApi extends BaseApi {
                                                     } else {
                                                         subscriptionDto.setUserAccount(userAccountDto.getCode());
                                                     }
-                                                    methodCallingUtils.callMethodInNewTx(() -> subscriptionApi.createOrUpdatePartialWithAccessAndServices(subscriptionDto, null, null, null));
+	                                                processSubscriptionOnTransitionStatus(subscriptionDto);
+                                                    if(subscriptionDto.getAccesses() != null) {
+                                                        createAccess(subscriptionDto);
+                                                    }
                                                 }
                                             }
                                         }
@@ -970,6 +1075,26 @@ public class AccountHierarchyApi extends BaseApi {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void createAccess(SubscriptionDto subscriptionDto) {
+        if (subscriptionDto.getAccesses() != null) {
+            for (AccessDto accessDto : subscriptionDto.getAccesses().getAccess()) {
+                if (StringUtils.isBlank(accessDto.getCode())) {
+                    log.warn("access code is null={}", accessDto);
+                    continue;
+                }
+                if (!StringUtils.isBlank(accessDto.getSubscription())
+                        && !accessDto.getSubscription().equalsIgnoreCase(subscriptionDto.getCode())) {
+                    throw new MeveoApiException("Access's subscription " + accessDto.getSubscription()
+                            + " doesn't match with parent subscription " + subscriptionDto.getCode());
+                } else {
+                    accessDto.setSubscription(subscriptionDto.getCode());
+                    accessDto.setSubscriptionValidity(subscriptionDto.getValidityDate());
+                }
+                accessApi.createOrUpdatePartial(accessDto);
             }
         }
     }
@@ -2170,5 +2295,99 @@ public class AccountHierarchyApi extends BaseApi {
             listPaymentMethod.add(paymentMethodDto);
         }
         return listPaymentMethod;
+    }
+	
+	private void processSubscriptionOnTransitionStatus(SubscriptionDto subscriptionDto) {
+		Subscription subscription = subscriptionService.findByCodeAndValidityDate(subscriptionDto.getCode(), subscriptionDto.getValidityDate());
+		List<SubscriptionStatusEnum> allowedStatus =  List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, ACTIVE);
+		if(subscription == null && (subscriptionDto.getStatus() == null || allowedStatus.contains(subscriptionDto.getStatus()))) {
+			subscription = subscriptionApi.create(subscriptionDto);
+			if(subscriptionDto.getStatus() == null) {
+				return;
+			}
+		} else if(subscriptionDto.getStatus() == null) {
+            return;
+        }
+		String errorMsg = "Transition from status : " + (subscription != null ? subscription.getStatus() : null) + " to status : " + subscriptionDto.getStatus() + " is not allowed";
+		if(subscription != null) {
+			log.info("Subscription : {}, from status : {}, to status : {}", subscription.getCode(), subscription.getStatus(), subscriptionDto.getStatus());
+			switch (subscriptionDto.getStatus()) {
+				case ACTIVE:
+                    if(ACTIVE.equals(subscription.getStatus())) {
+                        break;
+                    }
+					allowedStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, SUSPENDED);
+					if(!allowedStatus.contains(subscription.getStatus())){
+						throw new BusinessApiException(errorMsg);
+					}
+					if(subscription.getStatus() == SUSPENDED) {
+						subscriptionService.subscriptionReactivation(subscription, null);
+						break;
+					}
+					if (CollectionUtils.isNotEmpty(subscriptionDto.getProductsToInstantiate())) {
+						ActivateServicesRequestDto activateServices = new ActivateServicesRequestDto();
+						List<ServiceToActivateDto> serviceToActivateDto = new ArrayList<>();
+						for(ProductToInstantiateDto productToInstantiateDto: subscriptionDto.getProductsToInstantiate()){
+							ServiceToActivateDto serviceToActivate = new ServiceToActivateDto();
+							serviceToActivate.setCode(productToInstantiateDto.getProductCode());
+							serviceToActivate.setQuantity(productToInstantiateDto.getQuantity());
+							serviceToActivate.setSubscriptionDate(subscription.getSubscriptionDate());
+							serviceToActivateDto.add(serviceToActivate);
+						}
+						activateServices.getServicesToActivateDto().setService(serviceToActivateDto);
+						activateServices.setSubscription(subscription.getCode());
+						subscriptionApi.activateServices(activateServices);
+					}else{
+						subscriptionService.activateInstantiatedService(subscription);
+					}
+					
+					break;
+				case RESILIATED:
+                    if(RESILIATED.equals(subscription.getStatus())) {
+                        break;
+                    }
+					if(subscriptionDto.getTerminationDate() == null) {
+						missingParameters.add("terminationDate");
+						handleMissingParameters();
+					}
+					allowedStatus = List.of(SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.PENDING, ACTIVE, SUSPENDED);
+					if(!allowedStatus.contains(subscription.getStatus())){
+						throw new BusinessApiException(errorMsg);
+					}
+					//TODO: add comment on US for this RESILIATED status that it requires terminationReason to terminate this subscription
+					if (allowedStatus.contains(subscription.getStatus()) && subscriptionDto.getTerminationDate() != null){
+						SubscriptionTerminationReason terminationReason = null;
+						if(StringUtils.isNotBlank(subscriptionDto.getTerminationReason())){
+							terminationReason = subscriptionTerminationReasonService.findByCodeReason(subscriptionDto.getTerminationReason());
+							if(terminationReason == null) {
+								throw new EntityDoesNotExistsException(SubscriptionTerminationReason.class, subscriptionDto.getTerminationReason());
+							}
+						}
+						
+						subscriptionService.terminateSubscription(subscription, subscriptionDto.getTerminationDate(), terminationReason, ChargeInstance.NO_ORDER_NUMBER);
+					}
+					break;
+					case SUSPENDED:
+                        if(SUSPENDED.equals(subscription.getStatus())) {
+                            break;
+                        }
+						allowedStatus = List.of(ACTIVE);
+						if(!allowedStatus.contains(subscription.getStatus())){
+							throw new BusinessApiException(errorMsg);
+						}
+						if (subscription.getStatus() == ACTIVE) {
+							subscriptionService.subscriptionSuspension(subscription, null);
+						}
+						break;
+				default:
+					throw new BusinessApiException(errorMsg);
+			}
+		}else {
+			throw new BusinessApiException(errorMsg);
+		}
+	}
+
+    public enum Version {
+        V1, V2
     }
 }

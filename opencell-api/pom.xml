@@ -7,7 +7,7 @@
         <groupId>com.opencellsoft</groupId>
         <artifactId>opencell</artifactId>
         <relativePath>../pom.xml</relativePath>
-        <version>16.0.0-SNAPSHOT</version>
+        <version>16.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>opencell-api</artifactId>
     <name>Opencell API</name>
@@ -291,7 +291,9 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <artifactId>mockito-inline</artifactId>
+            <version>4.8.1</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

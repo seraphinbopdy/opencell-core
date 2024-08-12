@@ -25,7 +25,7 @@ import org.meveo.apiv2.payments.RejectionPayment;
 import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.refund.CardRefund;
 
-@Path("/payment")
+@Path("/v2/payment")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface PaymentResource {
@@ -191,7 +191,7 @@ public interface PaymentResource {
                     @ApiResponse(responseCode = "404", description = "No entity found to remove"),
                     @ApiResponse(responseCode = "400", description = "RejectionCode deletion failed")
             })
-    Response removeRejectionCode(@Parameter(required = true) PagingAndFiltering filters);
+    Response removeRejectionCode(@Parameter(required = true) RejectionCodeDeleteInput rejectionCodeDeleteInput);
 
     @POST
     @Path("/rejectionCodes/group")
@@ -268,4 +268,10 @@ public interface PaymentResource {
                     @ApiResponse(responseCode = "500", description = "Rejection action sequence update failed")
             })
     Response createRejectionPayment(@Parameter(required = true) RejectionPayment rejectionPayment);
+
+
+
+    @POST
+    @Path("/{id}/retry")
+    Response retryRejectedPayment(@PathParam("id") Long paymentId) throws Exception;
 }

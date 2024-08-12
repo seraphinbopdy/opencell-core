@@ -19,6 +19,7 @@ package org.meveo.service.payments.impl;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -27,6 +28,7 @@ import javax.persistence.DiscriminatorValue;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.audit.logging.annotations.MeveoAudit;
+import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.CustomerAccountStatusEnum;
 import org.meveo.model.payments.MatchingStatusEnum;
@@ -60,18 +62,24 @@ public class OtherCreditAndChargeService extends
 	public OtherCreditAndCharge addOCC(String codeOCCTemplate, String descToAppend,
 			CustomerAccount customerAccount, BigDecimal amount, Date dueDate
 			) throws BusinessException {
+		return addOCC(codeOCCTemplate, descToAppend, customerAccount, amount, dueDate, customerAccount != null ? customerAccount.getAccountOperations() : null);
+	}
+	
+	public OtherCreditAndCharge addOCC(String codeOCCTemplate, String descToAppend,
+	                                   CustomerAccount customerAccount, BigDecimal amount, Date dueDate, List<AccountOperation> accountOperations
+	) throws BusinessException {
 		log.info(
 				"addOCC  codeOCCTemplate:{}  customerAccount:{} amount:{} dueDate:{}",
 				new Object[] {
 						codeOCCTemplate,
 						(customerAccount == null ? "null" : customerAccount
 								.getCode()), amount, dueDate });
-
+		
 		if (codeOCCTemplate == null) {
 			log.warn("addOCC codeOCCTemplate is null");
 			throw new BusinessException("codeOCCTemplate is null");
 		}
-
+		
 		if (amount == null) {
 			log.warn("addOCC amount is null");
 			throw new BusinessException("amount is null");
@@ -80,7 +88,7 @@ public class OtherCreditAndChargeService extends
 			log.warn("addOCC dueDate is null");
 			throw new BusinessException("dueDate is null");
 		}
-				
+		
 		OCCTemplate occTemplate = occTemplateService.findByCode(
 				codeOCCTemplate);
 		if (occTemplate == null) {
@@ -89,12 +97,12 @@ public class OtherCreditAndChargeService extends
 			throw new BusinessException("cannot find OCCTemplate by code:"
 					+ codeOCCTemplate);
 		}
-
+		
 		if (customerAccount != null && customerAccount.getStatus() == CustomerAccountStatusEnum.CLOSE) {
 			log.warn("addOCC  customerAccount is closed ");
 			throw new BusinessException("customerAccount is closed");
 		}
-
+		
 		OtherCreditAndCharge otherCreditAndCharge = new OtherCreditAndCharge();
 		otherCreditAndCharge.setCustomerAccount(customerAccount);
 		otherCreditAndCharge.setCode(occTemplate.getCode());
@@ -115,27 +123,28 @@ public class OtherCreditAndChargeService extends
 		otherCreditAndCharge.setAmount(amount);
 		otherCreditAndCharge.setUnMatchingAmount(amount);
 		otherCreditAndCharge.setMatchingStatus(MatchingStatusEnum.O);
-
+		otherCreditAndCharge.setTransactionalAmount(amount);
+		otherCreditAndCharge.setTransactionalUnMatchingAmount(amount);
+		
 		if (OCC_PPL_INSTALLMENT.equals(codeOCCTemplate)) {
 			// for PPL CREATION, collection date shall have the same value of due date
 			// https://opencellsoft.atlassian.net/browse/INTRD-8501
 			otherCreditAndCharge.setCollectionDate(dueDate);
 		}
 		
-		if (customerAccount != null) {
-		    customerAccount.getAccountOperations().add(otherCreditAndCharge);
+		if (customerAccount != null && accountOperations != null) {
+			accountOperations.add(otherCreditAndCharge);
+			otherCreditAndCharge.setTransactionalCurrency(customerAccount.getTradingCurrency());
 		}
-		
 		create(otherCreditAndCharge);
 		if (customerAccount != null) {
-		    log.info(
-		        "addOCC  codeOCCTemplate:{}  customerAccount:{} amount:{} dueDate:{} Successful",
-		        new Object[] { codeOCCTemplate, customerAccount.getCode(),
-		                amount, dueDate });
+			log.info(
+					"addOCC  codeOCCTemplate:{}  customerAccount:{} amount:{} dueDate:{} Successful",
+					new Object[] { codeOCCTemplate, customerAccount.getCode(),
+							amount, dueDate });
 		}
 		return otherCreditAndCharge;
 	}
-
     /**
      * Set the discriminatorValue value, so it would be available in the list of entities right away
      * @throws BusinessException business exception.

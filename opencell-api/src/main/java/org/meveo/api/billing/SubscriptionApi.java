@@ -18,19 +18,6 @@
 
 package org.meveo.api.billing;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.persistence.EntityNotFoundException;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.Hibernate;
@@ -190,6 +177,25 @@ import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.order.OrderService;
 import org.meveo.service.payments.impl.PaymentMethodService;
+
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.interceptor.Interceptors;
+import javax.persistence.EntityNotFoundException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.meveo.commons.utils.StringUtils.isNotBlank;
 
@@ -2460,6 +2466,13 @@ public class SubscriptionApi extends BaseApi {
             renewalInfo.setInitialyActiveForUnit(renewalInfoDto.getInitialyActiveForUnit());
             renewalInfo.setRenewFor(renewalInfoDto.getRenewFor());
             renewalInfo.setRenewForUnit(renewalInfoDto.getRenewForUnit());
+			if(renewalInfoDto.getCalendarInitialyActiveFor() != null && StringUtils.isNotBlank(renewalInfoDto.getCalendarInitialyActiveFor().getCode())) {
+				org.meveo.model.catalog.Calendar calendar = calendarService.findByCode(renewalInfoDto.getCalendarInitialyActiveFor().getCode());
+				if(calendar == null) {
+					throw new EntityDoesNotExistsException(org.meveo.model.catalog.Calendar.class, renewalInfoDto.getCalendarInitialyActiveFor().getCode());
+				}
+				renewalInfo.setCalendarInitialyActiveFor(calendar);
+	        }
         }
         if (!StringUtils.isBlank(renewalInfoDto.getInitialTermType())) {
             renewalInfo.setInitialTermType(renewalInfoDto.getInitialTermType());
@@ -3315,7 +3328,7 @@ public class SubscriptionApi extends BaseApi {
     @Inject
     private ProductService productService;
 
-    private void processProduct(Subscription subscription,  ProductToInstantiateDto productDto) {
+    public void processProduct(Subscription subscription,  ProductToInstantiateDto productDto) {
         if (StringUtils.isBlank(productDto.getProductCode())) {
             missingParameters.add("productCode");
         }

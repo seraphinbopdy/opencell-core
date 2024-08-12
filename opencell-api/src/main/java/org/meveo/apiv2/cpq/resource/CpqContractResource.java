@@ -16,7 +16,7 @@ import org.meveo.apiv2.cpq.contracts.BillingRuleDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/cpq/contracts")
+@Path("/v2/cpq/contracts")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface CpqContractResource {

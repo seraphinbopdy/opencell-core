@@ -24,13 +24,10 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -122,13 +119,6 @@ public class CounterInstance extends BusinessEntity {
      */
     @OneToMany(mappedBy = "counter", fetch = FetchType.LAZY)
     private List<UsageChargeInstance> usageChargeInstances = new ArrayList<>();
-    
-    /**
-     * charge instances related as accumulator counters
-     */
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "billing_chrg_inst_counter", joinColumns = @JoinColumn(name = "counter_instance_id"), inverseJoinColumns = @JoinColumn(name = "chrg_instance_id"))
-    private List<ChargeInstance> chargeInstances = new ArrayList<>();
 
     public CounterTemplate getCounterTemplate() {
         return counterTemplate;
@@ -254,14 +244,4 @@ public class CounterInstance extends BusinessEntity {
 	public void setUsageChargeInstances(List<UsageChargeInstance> usageChargeInstances) {
 		this.usageChargeInstances = usageChargeInstances;
 	}
-
-	public List<ChargeInstance> getChargeInstances() {
-		return chargeInstances;
-	}
-
-	public void setChargeInstances(List<ChargeInstance> chargeInstances) {
-		this.chargeInstances = chargeInstances;
-	}
-    
-    
 }

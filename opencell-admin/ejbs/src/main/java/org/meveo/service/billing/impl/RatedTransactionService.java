@@ -2361,5 +2361,36 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
 		return evaluateExpression(expression, contextMap, String.class);
 }
 
+    /**
+     * Detach rated transactions
+     *
+     * @param invoiceLinesIds the invoice lines Ids
+     */
+    public void detachRatedTransactions(Collection<Long> invoiceLinesIds) {
+        if (invoiceLinesIds == null || invoiceLinesIds.isEmpty()) {
+            return;
+        }
+        getEntityManager().createNamedQuery("RatedTransaction.detachFromInvoiceLines")
+                .setParameter("ids", invoiceLinesIds)
+                .executeUpdate();
+    }
+
+    /**
+     * Reopen rated transactions
+     *
+     * @param billingRunId       the billingRun Id
+     * @param billingAccountsIds the billing accounts Ids
+     */
+    public void reopenRTs(Long billingRunId, Collection<Long> billingAccountsIds) {
+        if (billingRunId == null || billingAccountsIds == null || billingAccountsIds.isEmpty()) {
+            return;
+        }
+        getEntityManager().createNamedQuery("RatedTransaction.reopenRTs")
+                .setParameter("now", new Date())
+                .setParameter("billingRunId", billingRunId)
+                .setParameter("baIds", billingAccountsIds)
+                .executeUpdate();
+    }
+
 }
 

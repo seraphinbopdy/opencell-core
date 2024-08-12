@@ -30,42 +30,52 @@ public enum InvoicePaymentStatusEnum {
 	/**
 	 * AO created, due date is still in the future
 	 */
-	PENDING(1, "invoicePaymentStatusEnum.pending"),
+	PENDING(2, "invoicePaymentStatusEnum.pending"),
 
 	/**
 	 * PaymentPlan created for DEBUT AO
 	 */
-	PENDING_PLAN(1, "invoicePaymentStatusEnum.pending_plan"),
+	PENDING_PLAN(3, "invoicePaymentStatusEnum.pending_plan"),
 
 	/**
-	 * invoice has no payment status, no AO created.
+	 * invoice fully paid
 	 */
-	PAID(1, "invoicePaymentStatusEnum.paid"),
+	PAID(4, "invoicePaymentStatusEnum.paid"),
 
 	/**
-	 * invoice has no payment status, no AO created.
+	 * invoice partially paid
 	 */
-	PPAID(1, "invoicePaymentStatusEnum.pPaid"),
+	PPAID(5, "invoicePaymentStatusEnum.pPaid"),
 
 	/**
-	 * invoice has no payment status, no AO created.
+	 * invoice has not yet paid, due date is in the past
 	 */
-	UNPAID(1, "invoicePaymentStatusEnum.unPaid"),
+	UNPAID(6, "invoicePaymentStatusEnum.unPaid"),
 
 	/**
-	 * invoice has no payment status, no AO created.
+	 * invoice abandoned
 	 */
-	ABANDONED(1, "invoicePaymentStatusEnum.abandoned"),
+	ABANDONED(7, "invoicePaymentStatusEnum.abandoned"),
 
 	/**
-	 * invoice has no payment status, no AO created.
+	 * invoice disputed, litigation case
 	 */
-	REFUNDED(1, "invoicePaymentStatusEnum.refunded"),
+	DISPUTED(8, "invoicePaymentStatusEnum.disputed"),
+	
+	/**
+	 * credit note partially completely refunded.
+	 */
+	REFUNDED(9, "invoicePaymentStatusEnum.refunded"),
+	
+	/**
+	 * credit note partially refunded.
+	 */
+	PREFUNDED(10, "invoicePaymentStatusEnum.prefunded"),
 
 	/**
-	 * invoice has no payment status, no AO created.
+	 * credit note not yet refunded. due date is still in the future.
 	 */
-	DISPUTED(1, "invoicePaymentStatusEnum.disputed");
+	UNREFUNDED(11, "invoicePaymentStatusEnum.unrefunded");
 
 	private Integer id;
 	private String label;

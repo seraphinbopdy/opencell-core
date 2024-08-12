@@ -20,9 +20,9 @@ package org.meveo.admin.job;
 
 import static java.util.Comparator.comparingInt;
 import static java.util.Optional.of;
+import static org.meveo.model.catalog.OneShotChargeTemplateTypeEnum.OTHER;
 import static org.meveo.model.payments.PaymentRejectionActionStatus.CANCELED;
 import static org.meveo.model.payments.PaymentRejectionActionStatus.FAILED;
-import static org.meveo.model.payments.PaymentRejectionActionStatus.PENDING;
 import static org.meveo.model.payments.PaymentRejectionActionStatus.RUNNING;
 import static org.meveo.model.payments.RejectionActionStatus.COMPLETED;
 
@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -40,6 +41,10 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections.MapUtils;
 import org.meveo.admin.async.SynchronizedIterator;
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.model.BusinessEntity;
+import org.meveo.model.catalog.ChargeTemplate;
+import org.meveo.model.catalog.OneShotChargeTemplate;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.payments.PaymentRejectionAction;
@@ -48,6 +53,7 @@ import org.meveo.model.payments.PaymentRejectionActionStatus;
 import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.model.scripts.ScriptInstance;
+import org.meveo.service.catalog.impl.ChargeTemplateService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
@@ -67,6 +73,9 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
     
     @Inject
     private ScriptInstanceService scriptInstanceService;
+
+	@Inject
+	private ChargeTemplateService<ChargeTemplate> chargeTemplateService;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -95,14 +104,11 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
     	boolean processNextAction = true;
     	rejectedPayment.setRejectionActionsStatus(RejectionActionStatus.RUNNING);
     	List<PaymentRejectionActionReport> rejectionActionsReport = rejectedPayment.getPaymentRejectionActionReports();
-    	rejectionActionsReport.sort(comparingInt(a -> a.getAction().getSequence()));
+    	rejectionActionsReport = rejectionActionsReport.stream()
+    			.filter(rp -> rp.getAction() != null)
+    			.sorted(comparingInt(rp -> rp.getAction().getSequence()))
+    			.collect(Collectors.toList());
     	for (PaymentRejectionActionReport actionReport : rejectionActionsReport) {
-			if(actionReport.getAction() == null
-					&& (PENDING == actionReport.getStatus() || RUNNING == actionReport.getStatus())) {
-				actionReport.setStatus(CANCELED);
-				jobExecutionResult.addReport("Action has been deleted from payment rejection settings");
-				return;
-			}
     		if (processNextAction) {
     			processPaymentRejectionActionReport(actionReport);
 				processNextAction = !(FAILED.equals(actionReport.getStatus()));
@@ -128,7 +134,13 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
 		actionReport.setStartDate(new Date());
 		actionReport.setStatus(RUNNING);
 		try {
+			if(actionReport.getAction() != null
+					&& actionReport.getAction().getScriptParameters() != null
+					&& !actionReport.getAction().getScriptParameters().isEmpty()) {
+				validateScriptParams(actionReport.getAction().getScriptParameters(), actionReport);
+			}
 			ScriptInterface rejectionPaymentActionScript = injectScriptParams(methodContext, actionReport.getAction());
+			methodContext.put("rejectedPayment", actionReport.getRejectedPayment().getId());
 			rejectionPaymentActionScript.execute(methodContext);
 			actionReport.setStatus((Boolean) methodContext.get(Script.REJECTION_ACTION_RESULT) ? PaymentRejectionActionStatus.COMPLETED	: FAILED);
 			actionReport.setReport((String) methodContext.get(Script.REJECTION_ACTION_REPORT));
@@ -155,4 +167,44 @@ public class RejectionPaymentActionJobBean extends IteratorBasedJobBean<Rejected
 		return scriptInstanceService.getScriptInstance(scriptInstance.getCode());
 	}
 
+	private void validateScriptParams(Map<String, String> scriptParams, PaymentRejectionActionReport actionReport) {
+		if (scriptParams != null && !scriptParams.isEmpty()) {
+			String chargeCode = scriptParams.get("chargeTemplate");
+			if (chargeCode != null) {
+				BusinessEntity chargeTemplate = chargeTemplateService.findByCode(chargeCode);
+				if (chargeTemplate == null) {
+					throw new BusinessException("One-shot other charge " + chargeCode
+							+ " does’t exist for payment rejection action "
+							+ actionReport.getAction().getId() + " [gateway=" + actionReport.getRejectedPayment().getPaymentGateway().getCode()
+							+ ", rejection code=" + actionReport.getCode() + "]");
+				}
+				if (!(chargeTemplate instanceof OneShotChargeTemplate)) {
+					throw new BusinessException("Charge [code=" + chargeTemplate.getCode()
+							+ "] is not a one-shot charge "
+							+ "for payment rejection action " + actionReport.getAction().getId()
+							+ " [gateway=" + actionReport.getRejectedPayment().getPaymentGateway().getCode()
+							+ ", rejection code=" + actionReport.getCode() + "]");
+				}
+				OneShotChargeTemplate oneShotChargeTemplate = getOneShotChargeTemplate(actionReport, chargeTemplate);
+				if (scriptParams.get("amountOverride") != null && !oneShotChargeTemplate.getAmountEditable()) {
+					throw new BusinessException("Charge [code=" + oneShotChargeTemplate.getCode()
+							+ "] does’t allow amount override for payment rejection action " + actionReport.getAction().getId()
+							+ " [gateway=" + actionReport.getRejectedPayment().getPaymentGateway().getCode()
+							+ ", rejection code=" + actionReport.getCode() + "]");
+				}
+			}
+		}
+	}
+
+	private static OneShotChargeTemplate getOneShotChargeTemplate(PaymentRejectionActionReport actionReport, BusinessEntity chargeTemplate) {
+		OneShotChargeTemplate oneShotChargeTemplate = (OneShotChargeTemplate) chargeTemplate;
+		if (oneShotChargeTemplate.getOneShotChargeTemplateType() != OTHER) {
+			throw new BusinessException("Charge [code=" + chargeTemplate.getCode()
+					+ "] is not a one-shot charge of type ‘other' "
+					+ "for payment rejection action " + actionReport.getId()
+					+ " [gateway=" + actionReport.getRejectedPayment().getPaymentGateway().getCode()
+					+ ", rejection code=" + actionReport.getRejectedPayment().getCode() + "]");
+		}
+		return oneShotChargeTemplate;
+	}
 }

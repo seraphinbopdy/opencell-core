@@ -123,15 +123,14 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "Invoice.nullifyInvoicePDFFileNames", query = "update Invoice inv set inv.pdfFilename = null where inv.billingRun = :billingRun"),
         @NamedQuery(name = "Invoice.portInvoiceReport", query = "select inv.amountWithTax, inv.amountWithoutTax, inv.amountTax, inv.paymentMethodType, pm.yearExpiration, pm.monthExpiration, ba.electronicBilling from Invoice inv inner join inv.billingAccount ba left join inv.paymentMethod pm where inv.billingRun.id=:billingRunId"),
         @NamedQuery(name = "Invoice.deleteByBR", query = "delete from Invoice inv where inv.billingRun.id=:billingRunId AND inv.status <> 'VALIDATED'"),
-        @NamedQuery(name = "Invoice.moveToBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.DRAFT where inv.id in (:invoiceIds)"),
+        @NamedQuery(name = "Invoice.moveToBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.SUSPECT where inv.id in (:invoiceIds)"),
         @NamedQuery(name = "Invoice.moveToRejectedBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.REJECTED where inv.id in (:invoiceIds)"),
         @NamedQuery(name = "Invoice.moveToBR", query = "update Invoice inv set inv.billingRun=:nextBR where inv.billingRun.id=:billingRunId and inv.status in(:statusList)"),
         @NamedQuery(name = "Invoice.deleteByStatusAndBR", query = "delete from Invoice inv where inv.status in(:statusList) and inv.billingRun.id=:billingRunId"),
         @NamedQuery(name = "Invoice.findByStatusAndBR", query = "from Invoice inv where inv.status in (:statusList) and inv.billingRun.id=:billingRunId"),
         @NamedQuery(name = "Invoice.listUnpaidInvoicesIds", query = "SELECT inv.id FROM Invoice inv "
                                 + " WHERE inv.dueDate <= NOW() AND inv.status = org.meveo.model.billing.InvoiceStatusEnum.VALIDATED "
-                                + " AND inv.paymentStatus not in (org.meveo.model.billing.InvoicePaymentStatusEnum.PAID,"
-                                + " org.meveo.model.billing.InvoicePaymentStatusEnum.PPAID, org.meveo.model.billing.InvoicePaymentStatusEnum.DISPUTED)"),
+                                + " AND inv.paymentStatus = org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING"),
         @NamedQuery(name = "Invoice.detachAOFromInvoice", query = "UPDATE Invoice set recordedInvoice = null where recordedInvoice = :ri"),
         @NamedQuery(name = "Invoice.sumInvoiceableAmountByBR", query =
         "select sum(inv.amountWithoutTax), sum(inv.amountWithTax), inv.subscription.id, inv.commercialOrder.id , inv.id, inv.billingAccount.id, inv.billingAccount.customerAccount.id, inv.billingAccount.customerAccount.customer.id "
@@ -139,7 +138,7 @@ import org.meveo.model.shared.DateUtils;
 
         @NamedQuery(name = "Invoice.sumAmountsByBR", query = "select sum(inv.amountTax),sum(inv.amountWithoutTax), sum(inv.amountWithTax) FROM Invoice inv where inv.billingRun.id=:billingRunId and inv.status <> 'CANCELED'"),
         @NamedQuery(name = "Invoice.billingAccountsByBr", query = "select distinct inv.billingAccount from Invoice inv where inv.billingRun.id=:billingRunId"),
-		@NamedQuery(name = "Invoice.cancelInvoiceById", query = "update Invoice inv set inv.status='CANCELED', inv.rejectedByRule = null, inv.rejectReason = null, inv.auditable.updated=:now WHERE inv.id=:invoiceId AND inv.status <> 'VALIDATED'"),
+        @NamedQuery(name = "Invoice.cancelInvoiceById", query = "update Invoice inv set inv.status='CANCELED', inv.rejectedByRule = null, inv.rejectReason = null, inv.auditable.updated=:now, inv.auditable.updater=:username WHERE inv.id=:invoiceId AND inv.status <> 'VALIDATED'"),
 
         @NamedQuery(name = "Invoice.deleteByIds", query = "delete from Invoice inv where inv.id IN (:invoicesIds)"),
         @NamedQuery(name = "Invoice.excludePrpaidInvoices", query = "select inv.id from Invoice inv where inv.id IN (:invoicesIds) and inv.prepaid=false"),
@@ -150,16 +149,19 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "Invoice.loadByBillingRunNotValidatedInvoices", query = "SELECT inv.id FROM Invoice inv WHERE inv.billingRun.id = :billingRunId AND inv.status <> org.meveo.model.billing.InvoiceStatusEnum.VALIDATED "),
         @NamedQuery(name = "Invoice.loadByBillingRun", query = "SELECT inv.id FROM Invoice inv WHERE inv.billingRun.id = :billingRunId"),
         @NamedQuery(name = "Invoice.findLinkedInvoicesByIdAndType", query = "SELECT inv.invoiceNumber, inv.invoiceDate, linkedinv.amount FROM Invoice inv inner join LinkedInvoice linkedinv on inv.id = linkedinv.linkedInvoiceValue.id where linkedinv.id.id = :invoiceId and inv.invoiceType.code =: invoiceTypeCode"),
-        @NamedQuery(name = "Invoice.findInvoiceEligibleAdv", query = "select bi, adv from Invoice bi inner join  BillingAccount bba on bi.billingAccount.id = bba.id inner join Invoice adv on adv.billingAccount.id = bba.id inner join InvoiceType  it on it.id = adv.invoiceType.id inner join Subscription sub on sub.id = bi.subscription.id"
-                + " where bi.billingRun.id = :billingRunId and it.code = 'ADV' and adv.status = 'VALIDATED' and adv.invoiceBalance > 0 and bi.status in ('DRAFT', 'REJECTED', 'SUSPECT') and adv.tradingCurrency.id = bi.tradingCurrency.id  order by bi.id, adv.auditable.created, adv.invoiceBalance"),
-        @NamedQuery(name = "Invoice.findValidatedInvoiceAdvOrder", query = "select inv from Invoice inv  where  (inv.commercialOrder is null or inv.commercialOrder=:commercialOrder) and  (inv.subscription is null or inv.subscription.id =:subscriptionId) and inv.status='VALIDATED' and inv.invoiceType.code = 'ADV' and inv.invoiceBalance > 0 and inv.billingAccount.id =:billingAccountId and inv.tradingCurrency.id =:tradingCurrencyId order by inv.commercialOrder, inv.subscription, inv.auditable.created ASC"),
+        @NamedQuery(name = "Invoice.findInvoiceEligibleAdv", query = "select bi, adv from Invoice bi inner join  BillingAccount bba on bi.billingAccount.id = bba.id inner join Invoice adv on adv.billingAccount.id = bba.id inner join InvoiceType  it on it.id = adv.invoiceType.id left  join Subscription sub on sub.id = bi.subscription.id"
+                + " where bi.billingRun.id = :billingRunId and it.code = 'ADV' and adv.status = 'VALIDATED' and  bi.status in ('DRAFT', 'REJECTED', 'SUSPECT') and adv.tradingCurrency.id = bi.tradingCurrency.id  order by bi.id, adv.auditable.created, adv.invoiceBalance"),
+        @NamedQuery(name = "Invoice.findValidatedInvoiceAdvOrder", query = "select inv from Invoice inv  where  (inv.commercialOrder is null or inv.commercialOrder=:commercialOrder) and  (inv.subscription is null or inv.subscription.id =:subscriptionId) and inv.status='VALIDATED' and inv.invoiceType.code = 'ADV' and  inv.billingAccount.id =:billingAccountId and inv.tradingCurrency.id =:tradingCurrencyId order by inv.commercialOrder, inv.subscription, inv.auditable.created ASC"),
         @NamedQuery(name = "Invoice.findValidatedInvoiceAdvWithoutOrder", query = "select inv from Invoice inv  where  inv.commercialOrder is null  and inv.status='VALIDATED' and inv.invoiceType.code = 'ADV' and inv.invoiceBalance > 0 and inv.billingAccount.id =:billingAccountId"),
         @NamedQuery(name = "Invoice.findValidatedInvoiceAdvWithOrder", query = "select inv from Invoice inv  where  inv.commercialOrder=:commercialOrder and inv.status='VALIDATED' and inv.invoiceType.code = 'ADV' and inv.invoiceBalance > 0 and inv.billingAccount.id =:billingAccountId"),
         @NamedQuery(name = "Invoice.findWithFuntionalCurrencyDifferentFromOne", query = "SELECT i FROM Invoice i JOIN Provider p ON p.currency.id = i.tradingCurrency.currency.id WHERE i.lastAppliedRate <> :EXPECTED_RATE"),
         @NamedQuery(name = "Invoice.countByValidationRule", query = "SELECT count(id) FROM Invoice WHERE rejectedByRule.id = :ruleId"),
 		@NamedQuery(name = "Invoice.xmlWithStatusForUBL", query = "select inv.id from Invoice inv where inv.status in(:statusList) and inv.ublReference = false"),
         @NamedQuery(name = "Invoice.SUM_VALIDATED_LINKED_INVOICES", query = "SELECT SUM(i.amountWithTax) FROM Invoice i" +
-                " WHERE i.id in (SELECT li.linkedInvoiceValue.id FROM LinkedInvoice li WHERE li.id.id = :SRC_INVOICE_ID) AND i.status = 'VALIDATED'")
+                " WHERE i.id in (SELECT li.linkedInvoiceValue.id FROM LinkedInvoice li WHERE li.id.id = :SRC_INVOICE_ID) AND i.status = 'VALIDATED'"),
+		@NamedQuery(name = "Invoice.findByBillingCycle", query = "SELECT i FROM Invoice i LEFT JOIN BillingAccount ba on ba.id = i.billingAccount.id WHERE ba.billingCycle.type = :billingCycleType and i.id !=:currentInvoiceId order by i.auditable.created DESC "),
+		@NamedQuery(name = "Invoice.sendToLitigation", query = "UPDATE Invoice inv SET inv.paymentStatus = 'DISPUTED' WHERE inv.id in (:ids)"),
+		@NamedQuery(name = "Invoice.abandoneInvoices", query = "UPDATE Invoice inv SET inv.paymentStatus = 'ABANDONED' WHERE inv.id in (:ids)"),
 })
 @NamedNativeQueries({
 	@NamedNativeQuery(name = "Invoice.rollbackAdvance", query = "update billing_invoice set invoice_balance = invoice_balance + li.amount from (select bli.linked_invoice_id, bli.amount from billing_linked_invoices bli join billing_invoice i on i.id = bli.id where i.billing_run_id = :billingRunId and bli.type = 'ADVANCEMENT_PAYMENT') li where li.linked_invoice_id = id"),

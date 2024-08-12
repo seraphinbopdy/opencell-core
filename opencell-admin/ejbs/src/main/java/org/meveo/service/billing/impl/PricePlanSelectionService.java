@@ -382,7 +382,7 @@ public class PricePlanSelectionService implements Serializable {
      */
     public PricePlanMatrixVersion getPublishedVersionValidForDate(Long pricePlanId, ServiceInstance serviceInstance, Date operationDate) throws RatingException {
         Date operationDateParam = new Date();
-        if (serviceInstance == null || PriceVersionDateSettingEnum.EVENT.equals(serviceInstance.getPriceVersionDateSetting())) {
+        if (serviceInstance == null || serviceInstance.getPriceVersionDateSetting() == null || PriceVersionDateSettingEnum.EVENT.equals(serviceInstance.getPriceVersionDateSetting())) {
             operationDateParam = operationDate;
         } else if (PriceVersionDateSettingEnum.DELIVERY.equals(serviceInstance.getPriceVersionDateSetting()) || PriceVersionDateSettingEnum.RENEWAL.equals(serviceInstance.getPriceVersionDateSetting())
                 || PriceVersionDateSettingEnum.QUOTE.equals(serviceInstance.getPriceVersionDateSetting())) {

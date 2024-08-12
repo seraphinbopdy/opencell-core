@@ -38,7 +38,6 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 
 	private static final long serialVersionUID = 8799763764569695857L;
 
-	private static final String viewName = "main_rerate_tree";
 
 	@Inject
 	@MeveoJpa
@@ -100,7 +99,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		
 		final long nrPerTx = (nrOfInitialWOs / nbThreads) < configuredNrPerTx ? nrOfInitialWOs / nbThreads : configuredNrPerTx;
 		int fetchSize = ((Long) nrPerTx).intValue() * nbThreads.intValue();
-		NativeQuery nativeQuery = statelessSession.createNativeQuery("SELECT CAST(unnest(string_to_array(wo_id, ',')) AS bigint) as id FROM " + viewName + " WHERE billed_il is null order by ba_id");
+		NativeQuery nativeQuery = statelessSession.createNativeQuery("SELECT CAST(unnest(string_to_array(wo_id, ',')) AS bigint) as id FROM " + RatingCancellationJobBean.MAIN_VIEW_NAME + " WHERE billed_il is null order by ba_id");
 		scrollableResults = nativeQuery.setReadOnly(true).setCacheable(false).setFetchSize(fetchSize).scroll(ScrollMode.FORWARD_ONLY);
 
         return Optional.of(new SynchronizedMultiItemIterator<Object[]>(scrollableResults, nrOfInitialWOs.intValue(), true, null) {
@@ -180,10 +179,10 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 			public void execute(Connection connection) throws SQLException {
 
 				try (Statement statement = connection.createStatement()) {
-					log.info("Dropping materialized view {}", viewName);
-					statement.execute("drop materialized view if exists " + viewName +" cascade");
+					log.info("Dropping materialized view {}", RatingCancellationJobBean.MAIN_VIEW_NAME);
+					statement.execute("drop materialized view if exists " + RatingCancellationJobBean.MAIN_VIEW_NAME +" cascade");
 				} catch (Exception e) {
-					log.error("Failed to drop/create the materialized view " + viewName, e.getMessage());
+					log.error("Failed to drop/create the materialized view " + RatingCancellationJobBean.MAIN_VIEW_NAME, e.getMessage());
 					throw new BusinessException(e);
 				}
 			}
@@ -191,7 +190,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	}
 
 	private void getProcessingSummary() {
-		Object[] count = (Object[]) entityManager.createNativeQuery("select sum(count_wo), count(id) from " + viewName).getSingleResult();
+		Object[] count = (Object[]) entityManager.createNativeQuery("select sum(count_wo), count(rr.id) from " + RatingCancellationJobBean.MAIN_VIEW_NAME +" rr LEFT JOIN "+RatingCancellationJobBean.BILLED_VIEW_NAME+" bil ON rr.id = bil.id WHERE bil.id IS NULL").getSingleResult();
 		nrOfInitialWOs = count[0] != null ? ((Number) count[0]).longValue() : 0;
 	}
 	

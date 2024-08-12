@@ -199,8 +199,8 @@ public class UpdateHugeEntityJob extends Job {
                 CustomFieldTemplateUtils.buildCF(CF_NB_RUNS, resourceMessages.getString("jobExecution.nbRuns"),
                         CustomFieldTypeEnum.LONG, "tab:Configuration:0;fieldGroup:Execution configuration:1;field:0", "-1", APPLIES_TO));
 
-        result.put(Job.CF_WAITING_MILLIS,
-                CustomFieldTemplateUtils.buildCF(Job.CF_WAITING_MILLIS,
+        result.put(CF_WAITING_MILLIS,
+                CustomFieldTemplateUtils.buildCF(CF_WAITING_MILLIS,
                         resourceMessages.getString("jobExecution.waitingMillis"), CustomFieldTypeEnum.LONG,
                         "tab:Configuration:0;fieldGroup:Execution configuration:1;field:1", "0", APPLIES_TO));
 

@@ -222,7 +222,7 @@ public class PaymentJobBean extends IteratorBasedJobBean<PaymentItem> {
             methodContext.put(AccountOperationFilterScript.FROM_DUE_DATE, fromDueDate);
             methodContext.put(AccountOperationFilterScript.TO_DUE_DATE, toDueDate);
             methodContext.put(AccountOperationFilterScript.PAYMENT_METHOD, paymentMethodType);
-            methodContext.put(AccountOperationFilterScript.CAT_TO_PROCESS, paymentOrRefundEnum.getOperationCategoryToProcess());
+            methodContext.put(AccountOperationFilterScript.CAT_TO_PROCESS, operationCategory);
 
             aos = aoFilterScript.filterAoToPay(methodContext);
         }

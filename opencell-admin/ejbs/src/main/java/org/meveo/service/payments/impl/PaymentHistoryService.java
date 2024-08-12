@@ -6,6 +6,7 @@ package org.meveo.service.payments.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -28,6 +29,12 @@ import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.Refund;
 import org.meveo.service.base.PersistenceService;
+
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static org.meveo.model.payments.PaymentStatusEnum.PENDING;
+import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
 
 /**
  * @author anasseh
@@ -91,7 +98,7 @@ public class PaymentHistoryService extends PersistenceService<PaymentHistory> {
 		paymentHistory.setErrorType(errorType);
 		paymentHistory.setExternalPaymentId(externalPaymentId);
 		paymentHistory.setOperationCategory(payment != null ? OperationCategoryEnum.CREDIT : OperationCategoryEnum.DEBIT );
-		paymentHistory.setSyncStatus(status);
+		paymentHistory.setSyncStatus(ofNullable(status).orElse(PENDING));
 		paymentHistory.setPaymentGatewayCode(paymentGatewayCode);
 		paymentHistory.setLastUpdateDate(paymentHistory.getOperationDate());
 		if (payment != null) {
@@ -143,4 +150,43 @@ public class PaymentHistoryService extends PersistenceService<PaymentHistory> {
             return null;
         }
     }
+
+	public PaymentHistory rejectPaymentHistory(String paymentReference, String rejectionCode, String rejectionComment) {
+		PaymentHistory paymentHistory = findHistoryByPaymentId(paymentReference);
+		if (paymentHistory != null) {
+			paymentHistory.setAsyncStatus(REJECTED);
+			paymentHistory.setLastUpdateDate(new Date());
+			paymentHistory.setErrorCode(rejectionCode);
+			paymentHistory.setErrorMessage(rejectionComment);
+			update(paymentHistory);
+		}
+		return paymentHistory;
+	}
+
+	/**
+	 * @param paymentId Payment id
+	 * @param paymentStatus Payment status
+	 * @return PaymentHistory
+	 */
+	public PaymentHistory findPaymentHistoryByPaymentIdAndPaymentStatus(Long paymentId, PaymentStatusEnum paymentStatus) {
+		try {
+			QueryBuilder qb = new QueryBuilder(PaymentHistory.class, "a");
+			qb.addCriterion("payment.id", "=", paymentId, false);
+			qb.addCriterion("status", "=", paymentStatus, false);
+			List<PaymentHistory> paymentHistories = (List<PaymentHistory>) qb.getQuery(getEntityManager()).getResultList();
+			return paymentHistories != null && !paymentHistories.isEmpty() ? paymentHistories.get(0) : null;
+		} catch (NoResultException ne) {
+			return null;
+		}
+	}
+
+	public Optional<PaymentHistory> findByPaymentId(Long paymentId) {
+		try {
+			return of((PaymentHistory) getEntityManager().createNamedQuery("PaymentHistory.findByPaymentId")
+					.setParameter("paymentId", paymentId)
+					.getSingleResult());
+		} catch (NoResultException exception) {
+			return empty();
+		}
+	}
 }

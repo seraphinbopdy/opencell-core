@@ -79,6 +79,12 @@ public class RecordedInvoice extends AccountOperation {
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
 
+    /**
+     * The number of times a payment request has been issue
+     */
+    @Column(name = "payment_requests")
+    private Long paymentRequests;
+
     public Date getProductionDate() {
         return productionDate;
     }
@@ -196,4 +202,20 @@ public class RecordedInvoice extends AccountOperation {
         }
     }
 
+    public Long getPaymentRequests() {
+        return paymentRequests;
+    }
+
+    public void setPaymentRequests(Long paymentRequests) {
+        this.paymentRequests = paymentRequests;
+    }
+
+    @Override
+    public void setUnMatchingAmount(BigDecimal unMatchingAmount) {
+        if (unMatchingAmount != null && getUnMatchingAmount() != null
+                && unMatchingAmount.compareTo(getUnMatchingAmount()) < 0) {
+            paymentRequests = paymentRequests + 1;
+        }
+        super.setUnMatchingAmount(unMatchingAmount);
+    }
 }

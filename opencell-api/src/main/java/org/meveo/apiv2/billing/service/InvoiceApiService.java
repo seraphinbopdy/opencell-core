@@ -19,7 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
@@ -28,16 +31,14 @@ import javax.ws.rs.NotFoundException;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.exception.ImportInvoiceException;
-import org.meveo.admin.exception.InvoiceExistException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.BaseApi;
-import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.FilterDto;
 import org.meveo.api.dto.billing.QuarantineBillingRunDto;
 import org.meveo.api.dto.invoice.GenerateInvoiceRequestDto;
 import org.meveo.api.exception.BusinessApiException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.invoice.InvoiceApi;
@@ -254,7 +255,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 			invoice.getInvoiceLines().add(invoiceLine);
 			result.addInvoiceLines(invoiceLineResource);
 		}
-		invoiceService.calculateInvoice(invoice);
+		invoiceService.calculateInvoice(invoice, false);
 		invoiceService.updateBillingRunStatistics(invoice);
 		result.skipValidation(invoiceLinesInput.getSkipValidation());
 		return result.build();
@@ -289,7 +290,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
         // Update Invoice Line
 		invoiceLinesService.updateInvoiceLine(invoiceLine, invoiceLineInput.getInvoiceLine(), discountPlan);
 		invoiceService.getEntityManager().flush();
-		invoiceService.calculateInvoice(invoice);
+		invoiceService.calculateInvoice(invoice, false);
 		BigDecimal lastApliedRate = invoiceService.getCurrentRate(invoice,invoice.getInvoiceDate());
 		invoiceService.refreshAdvanceInvoicesConvertedAmount(invoice,lastApliedRate);
 		invoiceService.updateBillingRunStatistics(invoice);
@@ -301,7 +302,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	 */
 	public void removeLine(Invoice invoice, Long lineId) {
 		invoiceLinesService.remove(invoice, lineId);
-		invoiceService.calculateInvoice(invoice);
+		invoiceService.calculateInvoice(invoice, false);
         invoiceService.updateBillingRunStatistics(invoice);
 	}
 
@@ -340,20 +341,21 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	}
 	
 	public Invoice update(Invoice invoice, Invoice input, org.meveo.apiv2.billing.Invoice invoiceResource) {
-		if(invoiceResource.getCustomFields() != null) {
-			populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), input, true);
-		}
         Invoice updateInvoice = invoiceService.update(invoice, input, invoiceResource);
-        invoiceService.calculateInvoice(updateInvoice);
+        if (invoiceResource.getCustomFields() != null) {
+			populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), updateInvoice, true);
+			invoiceService.update(updateInvoice);
+		}
+		invoiceService.calculateInvoice(updateInvoice, false);
 
-        return updateInvoice;
+		return updateInvoice;
     }
 
 	/**
 	 * @param invoice
 	 */
 	public void calculateInvoice(Invoice invoice) {
-		invoiceService.calculateInvoice(invoice);
+		invoiceService.calculateInvoice(invoice, true);
         invoiceService.updateBillingRunStatistics(invoice);
 	}
 	
@@ -486,13 +488,15 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	    invoice = invoiceService.findById(invoice.getId(), asList("invoiceLines", "invoiceType", "invoiceType.occTemplate", "linkedInvoices"));
 
 	    if (invoice.getStatus() != InvoiceStatusEnum.VALIDATED) {
-            throw new ForbiddenException("Invoice should be Validated");
+            throw new BadRequestException("Invoice should be Validated");
         }
 
 		if(invoice.getLinkedInvoices() != null && !invoice.getLinkedInvoices().isEmpty()) {
 			invoice.getLinkedInvoices().forEach(relatedInvoice -> {
-				if(VALIDATED == relatedInvoice.getLinkedInvoiceValue().getStatus()) {
-					throw new ForbiddenException("You cannot create ADJ on invoice with an already validated ADJ");
+				if(relatedInvoice.getLinkedInvoiceValue().getInvoiceType() != null
+						&& !ADV.equals(invoiceTypeService.refreshOrRetrieve(relatedInvoice.getLinkedInvoiceValue().getInvoiceType()).getCode())
+						&& VALIDATED == relatedInvoice.getLinkedInvoiceValue().getStatus()) {
+					throw new BadRequestException("You cannot create ADJ on invoice with an already validated ADJ");
 				}
 			});
 		}
@@ -500,11 +504,11 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 		String invoiceType = invoice.getInvoiceType() != null ? invoice.getInvoiceType().getCode() : "";
 		boolean invoiceTypeForbidden = invoiceTypeService.getListAdjustementCode().contains(invoiceType);
 		if(invoiceTypeForbidden) {
-			throw new ForbiddenException("You cannot create ADJ from another ADJ invoice");
+			throw new BadRequestException("You cannot create ADJ from another ADJ invoice");
 		}
 	    
-	    if (invoice.getInvoiceType().getOccTemplate().getOccCategory() != OperationCategoryEnum.DEBIT) {
-	        throw new ForbiddenException("You cannot make a credit note over another");
+	    if (!OperationCategoryEnum.DEBIT.equals(invoice.getInvoiceType().getOccTemplate().getOccCategory())) {
+	        throw new BadRequestException("You cannot make a credit note over another");
         }
 	    
 	    if (invoiceLinesToReplicate.getGlobalAdjustment() == null) {
@@ -561,11 +565,24 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	 * @param invoiceResource {@link InvoicePatchInput}
 	 * @return {@link Invoice}
 	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public Invoice updateValidatedInvoice(Invoice invoice, org.meveo.apiv2.billing.InvoicePatchInput invoiceResource) {      
-    	ICustomFieldEntity customFieldEntity = new Invoice();
-		customFieldEntity = invoiceBaseApi.populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), invoice, false);
+    	ICustomFieldEntity customFieldEntity = invoiceBaseApi.populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), invoice, true);
         return invoiceService.updateValidatedInvoice(invoice, invoiceResource.getComment(), customFieldEntity.getCfValues(), invoiceResource.getPurchaseOrder());
     }
+
+	@Transactional
+	public Invoice updateValidatedInvoice(Long invoiceId, InvoicePatchInput invoiceResource) {
+		Invoice invoice = invoiceService.findById(invoiceId, asList("invoiceType"));
+		if(invoice == null) {
+			throw new EntityDoesNotExistsException(Invoice.class, invoiceId);
+		}
+		if(invoice.getStatus() != InvoiceStatusEnum.VALIDATED) {
+			throw new ForbiddenException("Invoice should be Validated");
+		}
+		
+		return updateValidatedInvoice(invoice, invoiceResource);
+	}
 	
 	/**
 	 * @param invoice
@@ -630,7 +647,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 	private Invoice validateInvoice(boolean ignoreValidationRules, Invoice invoice, boolean generateAO) throws Exception {
 		if (ignoreValidationRules) {
-			invoiceService.validateInvoice(invoice);
+			invoiceService.validateInvoice(invoice.getId());
 			if (generateAO) {
 				invoiceService.generateRecordedInvoiceAO(invoice.getId());
 			}

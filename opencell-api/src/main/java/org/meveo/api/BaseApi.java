@@ -35,7 +35,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -61,6 +60,7 @@ import org.meveo.api.dto.CustomEntityInstanceDto;
 import org.meveo.api.dto.CustomFieldDto;
 import org.meveo.api.dto.CustomFieldValueDto;
 import org.meveo.api.dto.CustomFieldsDto;
+import org.meveo.api.dto.EntityReferenceDto;
 import org.meveo.api.dto.LanguageDescriptionDto;
 import org.meveo.api.dto.audit.AuditableFieldDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
@@ -370,6 +370,7 @@ public abstract class BaseApi {
                         // check the if the referenced entity exists
                         EntityReferenceWrapper entityRefWrapper = (EntityReferenceWrapper) valueConverted;
                         BusinessEntity referencedEntity =  null;
+                        BaseEntity referencedBaseEntity =  null;
                         boolean recordExist = false;
                         try {
                             CustomEntityTemplate cet = null;
@@ -380,13 +381,25 @@ public abstract class BaseApi {
                                 recordExist = !customTableService.findById(cet.getDbTablename(), Long.parseLong(entityRefWrapper.getCode())).isEmpty();
                             }else{
                                     Class entityRefClass = Class.forName(entityRefWrapper.getClassname());
-                                    referencedEntity = businessEntityService.findByEntityClassAndCode(entityRefClass, entityRefWrapper.getCode());
+                                    if(BusinessEntity.class.isAssignableFrom(entityRefClass)) {
+                                        referencedEntity = businessEntityService.findByEntityClassAndCode(entityRefClass, entityRefWrapper.getCode());
+                                    } else {
+                                        referencedBaseEntity = businessEntityService.findByEntityClassAndId(entityRefClass, entityRefWrapper.getId());
+                                    }
                             }
                         } catch (ClassNotFoundException e) {
                             throw new InvalidParameterException("Class " + entityRefWrapper.getClassname() + " not found" );
                         }
-                        if (referencedEntity == null && !recordExist) {
+                        if ((referencedEntity == null && referencedBaseEntity == null) && !recordExist) {
                             throw new InvalidReferenceException(entityRefWrapper.getClassname(), entityRefWrapper.getCode());
+                        }
+                        if (referencedEntity != null) {
+                            entityRefWrapper.setId(referencedEntity.getId());
+                            entityRefWrapper.setCode(referencedEntity.getCode());
+                        }
+                        if(referencedBaseEntity != null) {
+                            entityRefWrapper.setId(referencedBaseEntity.getId());
+                            entityRefWrapper.setCode(entityRefWrapper.getCode());
                         }
                     }
 
@@ -399,7 +412,7 @@ public abstract class BaseApi {
 
                         for (CustomEntityInstanceDto ceiDto : ((List<CustomEntityInstanceDto>) valueConverted)) {
                             customEntityInstanceApi.createOrUpdate(ceiDto);
-                            childEntityReferences.add(new EntityReferenceWrapper(CustomEntityInstance.class.getName(), ceiDto.getCetCode(), ceiDto.getCode()));
+                            childEntityReferences.add(new EntityReferenceWrapper(CustomEntityInstance.class.getName(), ceiDto.getCetCode(), ceiDto.getCode(), ceiDto.getId()));
                         }
 
                         customFieldInstanceService.setCFValue(entity, cfDto.getCode(), childEntityReferences);
@@ -778,7 +791,16 @@ public abstract class BaseApi {
         if (cfDto.getMapValue() != null && !cfDto.getMapValue().isEmpty()) {
             return CustomFieldValueDto.fromDTO(cfDto.getMapValue());
         } else if (cfDto.getListValue() != null && !cfDto.getListValue().isEmpty()) {
-            return CustomFieldValueDto.fromDTO(cfDto.getListValue());
+			cfDto.getListValue().forEach(cfdto -> {
+				if(cfdto.getValue() instanceof EntityReferenceDto) {
+					EntityReferenceDto entityReferenceDto = (EntityReferenceDto) cfdto.getValue();
+					if(Strings.isBlank(entityReferenceDto.getClassname())) {
+						entityReferenceDto.setClassname(cft.getEntityClazz());
+					}
+				}
+			});
+			return CustomFieldValueDto.fromDTO(cfDto.getListValue());
+        
         } else if (!StringUtils.isBlank(cfDto.getFileValue())) {
             return fromDTO(cft, cfDto);
         } else if (cfDto.getStringValue() != null) {
@@ -792,6 +814,9 @@ public abstract class BaseApi {
         } else if (cfDto.getLongValue() != null) {
             return cfDto.getLongValue();
         } else if (cfDto.getEntityReferenceValue() != null) {
+			if(Strings.isBlank(cfDto.getEntityReferenceValue().getClassname())) {
+				cfDto.getEntityReferenceValue().setClassname(cft.getEntityClazz());
+			}
             return cfDto.getEntityReferenceValue().fromDTO();
             // } else {
             // Other type values that are of some other DTO type (e.g.

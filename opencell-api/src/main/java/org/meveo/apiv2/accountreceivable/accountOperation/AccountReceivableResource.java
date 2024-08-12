@@ -1,5 +1,6 @@
 package org.meveo.apiv2.accountreceivable.accountOperation;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,7 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.meveo.apiv2.AcountReceivable.*;
 import org.meveo.apiv2.accountreceivable.ChangeStatusDto;
 
-@Path("/accountReceivable/accountOperation")
+@Path("/v2/accountReceivable/accountOperation")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface AccountReceivableResource {
@@ -149,4 +150,14 @@ public interface AccountReceivableResource {
 					@ApiResponse(responseCode = "400", description = "Sum of dispatched amounts must be lower or equal to source account operation’s unmatched amount")})
 	Response transferAmounts(@PathParam("accountOperationId") Long accountOperationId,
 							 @Parameter(description = "Amounts to transfer", required = true) AmountsTransferDto amountsTransferDto);
+	
+	@PUT
+	@Path("/closeOperations")
+	@Operation(summary = "Close account operations",
+			description = "Close account operations that have INT_ADV and its matching status are OPEN or PARTIAL",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "Account operations successfully closed"),
+					@ApiResponse(responseCode = "404", description = "Account operations don't exist"),
+					@ApiResponse(responseCode = "409", description = "Account operations are already closed")})
+	Response closeOperations(AccountOperationClose accountOperations);
 }

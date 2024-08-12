@@ -43,7 +43,7 @@ public class EntityCustomizationUtils {
             appliesToPrefix = CustomEntityTemplate.getAppliesTo(code);
 
         } else {
-            appliesToPrefix = ((CustomFieldEntity) clazz.getAnnotation(CustomFieldEntity.class)).cftCodePrefix();
+            appliesToPrefix = clazz.getAnnotation(CustomFieldEntity.class) != null ? ((CustomFieldEntity) clazz.getAnnotation(CustomFieldEntity.class)).cftCodePrefix() : null;
         }
 
         return appliesToPrefix;

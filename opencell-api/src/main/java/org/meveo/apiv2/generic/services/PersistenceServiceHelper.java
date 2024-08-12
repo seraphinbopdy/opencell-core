@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -12,6 +13,7 @@ import org.meveo.apiv2.generic.core.GenericHelper;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.service.base.BaseEntityService;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.service.billing.impl.EdrService;
 import org.reflections.Reflections;
 
 /**
@@ -47,14 +49,25 @@ public final class PersistenceServiceHelper {
 	        	}
 			}
         }
-		String entityName = entityClass.getSimpleName().replace("Impl", "").replace("MediationSetting", "Mediationsetting");
-		PersistenceService serviceInterface = (PersistenceService) EjbUtils.getServiceInterface( entityName+ "Service");
+		String entityName = entityClass.getSimpleName();
+		PersistenceService serviceInterface = (PersistenceService) EjbUtils.getServiceInterface( sanityzeEntityName(entityName+ "Service"));
         if(serviceInterface == null){
             serviceInterface = (PersistenceService) EjbUtils.getServiceInterface("BaseEntityService");
             ((BaseEntityService) serviceInterface).setEntityClass(entityClass);
         }
         return serviceInterface;
     }
+
+	/**
+	 * As some entity names are not the same as their service names, this method sanitize the entity name to get the right service.
+	 * @param entityName
+	 * @return
+	 */
+	private static String sanityzeEntityName(String entityName) {
+		Map<String, String> entityNameMap = Map.of("EDRService", EdrService.class.getSimpleName(),
+				"MediationSettingService", "MediationsettingService");
+		return entityNameMap.getOrDefault(entityName, entityName).replace("Impl", "");
+	}
     
     /**
 	 * @param subclass

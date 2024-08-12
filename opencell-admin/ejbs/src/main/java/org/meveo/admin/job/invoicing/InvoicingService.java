@@ -147,7 +147,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
         currentUserProvider.reestablishAuthentication(lastCurrentUser);
         List<List<Invoice>> invoicesByBA = generateInvoices(billingRun, invoicingItemsList, jobInstanceId, isFullAutomatic, billingCycle, result);
         if(!CollectionUtils.isEmpty(invoicesByBA)) {
-        	validateInvoices(invoicesByBA);
             writeInvoicingData(billingRun, isFullAutomatic, invoicesByBA, billingCycle);
         }
         return new AsyncResult<>("OK");
@@ -184,7 +183,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
 	        evalDueDate(invoice, billingCycle, null, billingAccountDetailsItem.getCaDueDateDelayEL(), billingRun.isExceptionalBR());
 	        invoiceService.setInitialCollectionDate(invoice, billingCycle, billingRun);
 	        invoice.setSubCategoryInvoiceAgregate(invoiceSCAs);
-	        InvoicingJobV3Bean.addNewAmounts(invoice.getAmountTax(), invoice.getAmountWithoutTax(), invoice.getAmountWithTax());
 	        invoices.add(invoice);
     	}
     }
@@ -195,18 +193,24 @@ public class InvoicingService extends PersistenceService<Invoice> {
         getEntityManager().flush();//to be able to update ILs
         getEntityManager().clear();
         log.info("======== UPDATING ILs ========");
-        invoicesbyBA.stream().forEach(invoices->invoices.stream().forEach(i ->i.getSubCategoryInvoiceAgregate().stream().forEach(sca->updateInvoiceLines(i,billingRun,sca))));
+        invoicesbyBA.forEach(invoices -> invoices.forEach(invoice
+                -> invoice.getSubCategoryInvoiceAgregate().forEach(sca
+                -> updateInvoiceLines(invoice, billingRun, sca))));
+        validateInvoices(invoicesbyBA);
     }
     private void assignNumberAndCreate(BillingRun billingRun, boolean isFullAutomatic, List<Invoice> invoices, BillingCycle billingCycle) {
         if(!isFullAutomatic) {
             invoices.stream().forEach(invoice->invoice.setTemporaryInvoiceNumber(serviceSingleton.getTempInvoiceNumber(billingRun.getId())));
         } else {
-        	invoices.stream().forEach(invoice->serviceSingleton.assignInvoiceNumberVirtual(invoice));
+        	invoices.stream().forEach(invoice-> {
+				serviceSingleton.assignInvoiceNumberVirtual(invoice);
+	        });
         	invoiceService.incrementBAInvoiceDate(billingRun, invoices.get(0).getBillingAccount());
         }
 		invoices.stream().forEach(invoice -> {
 			invoiceService.create(invoice);
 			invoiceService.postCreate(invoice);
+			invoiceService.setInvoicingPeriod(billingRun, invoice.getId());
 		});
     }
     

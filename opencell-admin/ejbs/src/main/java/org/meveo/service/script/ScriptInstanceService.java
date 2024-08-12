@@ -821,6 +821,9 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
      */
     public <T> T parseObjectFromString(String value, String clazzName) {
         try {
+            if(StringUtils.isBlank(value)) {
+                return null;
+            }
             Class<T> clazz = (Class<T>) Class.forName(clazzName);
 			if(clazzName.startsWith("org.meveo.model")){
 				if(value.matches("\\d+")){

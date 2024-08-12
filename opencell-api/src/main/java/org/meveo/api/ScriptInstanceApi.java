@@ -79,7 +79,7 @@ public class ScriptInstanceApi extends BaseCrudApi<ScriptInstance, ScriptInstanc
      */
     public List<ScriptInstanceErrorDto> createWithCompile(ScriptInstanceDto scriptInstanceDto) throws MeveoApiException, BusinessException {
 
-        List<ScriptInstanceErrorDto> result = new ArrayList<ScriptInstanceErrorDto>();
+        List<ScriptInstanceErrorDto> result = new ArrayList<>();
 
         ScriptInstance scriptInstance = create(scriptInstanceDto);
 
@@ -204,7 +204,7 @@ public class ScriptInstanceApi extends BaseCrudApi<ScriptInstance, ScriptInstanc
      */
     public List<ScriptInstanceErrorDto> createOrUpdateWithCompile(ScriptInstanceDto scriptInstanceDto) throws MeveoApiException, BusinessException {
 
-        List<ScriptInstanceErrorDto> result = new ArrayList<ScriptInstanceErrorDto>();
+        List<ScriptInstanceErrorDto> result = new ArrayList<>();
 
         ScriptInstance scriptInstance = createOrUpdate(scriptInstanceDto);
 

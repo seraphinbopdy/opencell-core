@@ -18,6 +18,8 @@
 
 package org.meveo.api.dto;
 
+import org.meveo.commons.utils.StringUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -81,7 +83,7 @@ public class CustomFieldValueDto implements Serializable {
      * @param listValue the list value
      * @return the list
      */
-    public static List<Object> fromDTO(List<CustomFieldValueDto> listValue) {
+    public static List<Object> fromDTO(List<CustomFieldValueDto> listValue){
         List<Object> values = new ArrayList<Object>();
         for (CustomFieldValueDto valueDto : listValue) {
             values.add(valueDto.fromDTO());

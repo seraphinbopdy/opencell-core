@@ -64,6 +64,10 @@ public class ScriptParameter extends BaseEntity {
     @Type(type = "numeric_boolean")
 	@Column(name = "collection")
 	private boolean collection = Boolean.FALSE;
+
+	@Type(type = "json")
+	@Column(name = "filters", columnDefinition = "jsonb")
+	private Map<String, Object> filters;
     
 	public String getCode() {
 		return code;
@@ -135,6 +139,14 @@ public class ScriptParameter extends BaseEntity {
 
 	public void setCollection(boolean collection) {
 		this.collection = collection;
+	}
+
+	public Map<String, Object> getFilters() {
+		return filters;
+	}
+
+	public void setFilters(Map<String, Object> filters) {
+		this.filters = filters;
 	}
 
 	@Override

@@ -31,6 +31,7 @@ import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.apiv2.GenericOpencellRestful;
 import org.meveo.apiv2.generic.GenericFieldDetails;
 import org.meveo.apiv2.generic.ImmutableGenericPaginatedResource;
+import org.meveo.apiv2.generic.common.ExcelExportConfiguration;
 import org.meveo.apiv2.generic.core.mapper.JsonGenericMapper;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.IEntity;
@@ -90,7 +91,7 @@ public class GenericApiLoadService {
         	// get specific custom fields with meta data
         	SearchResult searchResult = persistenceDelegate.list(entityClass, searchConfig);
             searchConfig.setFetchFields(new ArrayList<>(genericFields));
-            List<List<Object>> list = (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, id)
+            List<List<Object>> list = (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, id, Boolean.FALSE)
                     .find(nativePersistenceService.getEntityManager()).stream()
                     .map(ObjectArrays -> Arrays.asList(ObjectArrays))
                     .collect(toList());
@@ -203,36 +204,24 @@ public class GenericApiLoadService {
                         .toJson(genericFields, entityClass, Collections.singletonMap("data", entity), excludedFields));
     }
 
+    public String export(Class entityClass, PaginationConfiguration searchConfig, Set<String> genericFields,
+                         List<GenericFieldDetails> genericFieldDetails, String fileFormat, String entityName, String locale,
+                         String fieldsSeparator, String decimalSeparator, String fileNameExtension) {
+        return export(entityClass, searchConfig, genericFields, genericFieldDetails, fileFormat, entityName, locale, fieldsSeparator, decimalSeparator, fileNameExtension, null);
+    }
+
 	public String export(Class entityClass, PaginationConfiguration searchConfig, Set<String> genericFields,
-			List<GenericFieldDetails> genericFieldDetails, String fileFormat, String entityName, String locale,
-			String fieldsSeparator, String decimalSeparator, String fileNameExtension) throws ClassNotFoundException {
+                         List<GenericFieldDetails> genericFieldDetails, String fileFormat, String entityName, String locale,
+                         String fieldsSeparator, String decimalSeparator, String fileNameExtension, ExcelExportConfiguration excelExportConfiguration) {
 
-		// SearchResult searchResult = persistenceDelegate.list(entityClass, searchConfig);
-		Map<String, GenericFieldDetails> fieldDetails = new HashMap<>();
-		if (CollectionUtils.isNotEmpty(genericFields)) {
-			searchConfig.setFetchFields(new ArrayList<>(genericFields));
-		} else if (CollectionUtils.isNotEmpty(genericFieldDetails)) {
-			searchConfig.setFetchFields(genericFieldDetails.stream()
-                    .filter(x -> StringUtils.isEmpty(x.getFormula()))
-                    .map(x -> nameOrHeader(x))
-                    .collect(toList()));
-            searchConfig.getFetchFields()
-                    .addAll(genericFieldDetails.stream()
-                    .filter(x -> !StringUtils.isEmpty(x.getFormulaInputs()))
-                    .map(x -> Arrays.asList(x.getFormulaInputs().split(",")))
-                    .flatMap(List::stream)
-                    .map(String::trim)
-                    .collect(Collectors.toList()));
-			fieldDetails = genericFieldDetails.stream()
-                    .collect(toMap(x -> nameOrHeader(x), Function.identity()));
-		}
+        List<List<Object>> list = extractDataForExport(entityClass, searchConfig, genericFields, genericFieldDetails);
 
-		List<List<Object>> list = (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, null)
-				.find(nativePersistenceService.getEntityManager()).stream()
-                .map(ObjectArrays -> Arrays.asList(ObjectArrays))
-                .collect(toList());
-
-		List<GenericFieldDetails> formulaFields = fieldDetails.values().stream()
+        Map<String, GenericFieldDetails> fieldDetails = new HashMap<>();
+        if(CollectionUtils.isNotEmpty(genericFieldDetails)) {
+            fieldDetails = genericFieldDetails.stream().collect(toMap(this::nameOrHeader, Function.identity()));
+        }
+        
+        List<GenericFieldDetails> formulaFields = fieldDetails.values().stream()
                 .filter(x -> !StringUtils.isEmpty(x.getFormula()))
                 .collect(toList());
 
@@ -250,10 +239,34 @@ public class GenericApiLoadService {
 		};
 
 		return genericExportManager.export(entityName, list.stream().map(originalLine).collect(toList()), fileFormat, fieldDetails,
-                genericFieldDetails.stream().map(GenericFieldDetails::getName).collect(Collectors.toList()), locale, fieldsSeparator, decimalSeparator, fileNameExtension);
+                genericFieldDetails.stream().map(GenericFieldDetails::getName).collect(Collectors.toList()), locale, fieldsSeparator, decimalSeparator, fileNameExtension, excelExportConfiguration);
 	}
 
-	private String nameOrHeader(GenericFieldDetails x) {
+    public List<List<Object>> extractDataForExport(Class entityClass, PaginationConfiguration searchConfig, Set<String> genericFields, List<GenericFieldDetails> genericFieldDetails) {
+        if (CollectionUtils.isNotEmpty(genericFields)) {
+            searchConfig.setFetchFields(new ArrayList<>(genericFields));
+        } else if (CollectionUtils.isNotEmpty(genericFieldDetails)) {
+            searchConfig.setFetchFields(genericFieldDetails.stream()
+                                                           .filter(x -> StringUtils.isEmpty(x.getFormula()))
+                                                           .map(this::nameOrHeader)
+                                                           .collect(toList()));
+            searchConfig.getFetchFields()
+                        .addAll(genericFieldDetails.stream()
+                                                   .filter(x -> !StringUtils.isEmpty(x.getFormulaInputs()))
+                                                   .map(x -> Arrays.asList(x.getFormulaInputs().split(",")))
+                                                   .flatMap(List::stream)
+                                                   .map(String::trim)
+                                                   .collect(Collectors.toList()));
+        }
+        
+        return (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, null, Boolean.TRUE)
+                                                                               .find(nativePersistenceService.getEntityManager())
+                                                                               .stream()
+                                                                               .map(ObjectArrays -> Arrays.asList(ObjectArrays))
+                                                                               .collect(toList());
+    }
+
+    private String nameOrHeader(GenericFieldDetails x) {
 		return Optional.ofNullable(x.getName()).orElse(x.getHeader());
 	}
 

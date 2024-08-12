@@ -26,7 +26,7 @@ public class FinanceSettings extends BusinessEntity {
 
     @Type(type = "numeric_boolean")
     @Column(name = "use_security_deposit")
-    private boolean useSecurityDeposit = true;
+    private boolean useSecurityDeposit = false;
 
     @Column(name = "max_amount_security_deposit", precision = NB_PRECISION, scale = NB_DECIMALS)
     @Digits(integer = NB_PRECISION, fraction = NB_DECIMALS)
@@ -92,19 +92,27 @@ public class FinanceSettings extends BusinessEntity {
 
     @Type(type = "numeric_boolean")
     @Column(name = "handle_framework_agreement")
-    private boolean handleFrameworkAgreement = true;
+    private boolean handleFrameworkAgreement = false;
 
     @Type(type = "numeric_boolean")
     @Column(name = "handle_invoice_plan")
-    private boolean handleInvoicingPlans = true;
+    private boolean handleInvoicingPlans = false;
 
     @Type(type = "numeric_boolean")
     @Column(name = "handle_accounting_periods")
-    private boolean handleAccountingPeriods = true;
+    private boolean handleAccountingPeriods = false;
 
     @Type(type = "numeric_boolean")
     @Column(name = "enable_empty_subscription_activation")
     private boolean enableEmptySubscriptionActivation;
+    
+    @Type(type = "numeric_boolean")
+    @Column(name = "enable_quotes_feature")
+    private boolean enableQuotesFeature = false;
+    
+    @Type(type = "numeric_boolean")
+    @Column(name = "display_counters")
+    private boolean displayCounters = false;
 
     public FinanceSettings() {
         super();
@@ -293,4 +301,21 @@ public class FinanceSettings extends BusinessEntity {
     public void setEnableEmptySubscriptionActivation(boolean enableEmptySubscriptionActivation) {
         this.enableEmptySubscriptionActivation = enableEmptySubscriptionActivation;
     }
+
+	public boolean isEnableQuotesFeature() {
+		return enableQuotesFeature;
+	}
+
+	public void setEnableQuotesFeature(boolean enableQuotesFeature) {
+		this.enableQuotesFeature = enableQuotesFeature;
+	}
+
+	public boolean isDisplayCounters() {
+		return displayCounters;
+	}
+
+	public void setDisplayCounters(boolean displayCounters) {
+		this.displayCounters = displayCounters;
+	}
+    
 }

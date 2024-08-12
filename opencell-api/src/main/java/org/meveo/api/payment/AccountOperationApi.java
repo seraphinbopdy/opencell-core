@@ -22,34 +22,48 @@ import static java.util.Optional.ofNullable;
 import static org.meveo.commons.utils.ReflectionUtils.getSubclassObjectByDiscriminatorValue;
 import static org.meveo.model.payments.AccountOperationStatus.EXPORTED;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
+import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.assertj.core.util.Arrays;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.RegionUtil;
+import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.BaseApi;
-import org.meveo.api.dto.ActionStatus;
-import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.account.CustomerToTransfertOperationDto;
 import org.meveo.api.dto.account.TransferAccountOperationDto;
 import org.meveo.api.dto.account.TransferCustomerAccountDto;
 import org.meveo.api.dto.account.TransferOperationsDto;
 import org.meveo.api.dto.payment.AccountOperationDto;
+import org.meveo.api.dto.payment.CustomerBalanceExportDto;
 import org.meveo.api.dto.payment.LitigationRequestDto;
 import org.meveo.api.dto.payment.MatchOperationRequestDto;
 import org.meveo.api.dto.payment.MatchingAmountDto;
@@ -71,7 +85,19 @@ import org.meveo.api.security.config.annotation.SecureMethodParameter;
 import org.meveo.api.security.config.annotation.SecuredBusinessEntityMethod;
 import org.meveo.api.security.filter.ListFilter;
 import org.meveo.api.security.filter.ObjectFilter;
+import org.meveo.apiv2.generic.GenericFieldDetails;
+import org.meveo.apiv2.generic.GenericPagingAndFiltering;
+import org.meveo.apiv2.generic.ImmutableGenericFieldDetails;
+import org.meveo.apiv2.generic.ImmutableGenericPagingAndFiltering;
+import org.meveo.apiv2.generic.common.ExcelExportConfiguration;
+import org.meveo.apiv2.generic.core.GenericRequestMapper;
 import org.meveo.apiv2.generic.exception.ConflictException;
+import org.meveo.apiv2.generic.services.GenericApiLoadService;
+import org.meveo.apiv2.generic.services.GenericApiPersistenceDelegate;
+import org.meveo.apiv2.generic.services.PersistenceServiceHelper;
+import org.meveo.apiv2.generic.services.SearchResult;
+import org.meveo.apiv2.payments.AccountOperationsResult;
+import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.Currency;
@@ -83,6 +109,7 @@ import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.AccountOperationRejectionReason;
 import org.meveo.model.payments.AccountOperationStatus;
 import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.CustomerBalance;
 import org.meveo.model.payments.Journal;
 import org.meveo.model.payments.MatchingAmount;
 import org.meveo.model.payments.MatchingCode;
@@ -96,10 +123,14 @@ import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.Refund;
 import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.WriteOff;
+import org.meveo.model.settings.AdvancedSettings;
+import org.meveo.model.shared.Address;
+import org.meveo.model.shared.Name;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.billing.impl.AccountingCodeService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
+import org.meveo.service.payments.impl.CustomerBalanceService;
 import org.meveo.service.payments.impl.JournalReportService;
 import org.meveo.service.payments.impl.MatchingAmountService;
 import org.meveo.service.payments.impl.MatchingCodeService;
@@ -109,8 +140,6 @@ import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.AccountOperationService.AccountOperationActionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
 
 /**
  * The Class AccountOperationApi.
@@ -160,6 +189,15 @@ public class AccountOperationApi extends BaseApi {
     
     @Inject
     private PaymentService paymentService;
+
+    @Inject
+    private GenericApiLoadService loadService;
+
+    @Inject
+    private AdvancedSettingsApiService advancedSettingsApiService;
+
+    @Inject
+    private CustomerBalanceService customerBalanceService;
 	
     /**
      * Create account operation.
@@ -369,7 +407,7 @@ public class AccountOperationApi extends BaseApi {
         }
         accountOperation.setOrderNumber(postData.getOrderNumber());
 
-        accountOperation.setCollectionDate(Optional.ofNullable(postData.getCollectionDate()).orElse(Optional.ofNullable(postData.getDueDate()).orElse(postData.getBankCollectionDate())));
+        accountOperation.setCollectionDate(ofNullable(postData.getCollectionDate()).orElse(ofNullable(postData.getDueDate()).orElse(postData.getBankCollectionDate())));
         
         if (!StringUtils.isBlank(postData.getJournalCode())) {
         	Journal journal = journalService.findByCode(postData.getJournalCode());
@@ -693,7 +731,7 @@ public class AccountOperationApi extends BaseApi {
     }
 
     private List<Long> getUmatchedPPLAosId(MatchingCode matchingCode) {
-        return Optional.ofNullable(matchingCode.getMatchingAmounts()).orElse(Collections.emptyList())
+        return ofNullable(matchingCode.getMatchingAmounts()).orElse(Collections.emptyList())
                 .stream().filter(ma -> PPL_INSTALLMENT.equals(ma.getAccountOperation().getCode()))
                 .map(matchingAmount -> matchingAmount.getAccountOperation().getId())
                 .collect(Collectors.toList());
@@ -874,7 +912,7 @@ public class AccountOperationApi extends BaseApi {
 		AccountOperationStatus statusEnum = AccountOperationStatus.valueOf(newStatus);
         AccountOperation accountOperation = ofNullable(accountOperationService.findById(id))
                 .orElseThrow(() -> new EntityDoesNotExistsException(AccountOperation.class, id));
-        if(AccountOperationStatus.POSTED.equals(accountOperation.getStatus()) && AccountOperationStatus.EXPORTED.equals(statusEnum)) {
+        if(AccountOperationStatus.POSTED.equals(accountOperation.getStatus()) && EXPORTED.equals(statusEnum)) {
         	accountOperation.setStatus(statusEnum);
         	accountOperationService.update(accountOperation);
         } else {
@@ -931,5 +969,220 @@ public class AccountOperationApi extends BaseApi {
 
         }
 
+    }
+
+    public String exportCustomerBalance(String fileFormat, CustomerBalanceExportDto exportConfig) {
+
+        String locale = "EN"; // default value EN
+        String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).orElse(null);
+        String decimalSeparator = advancedSettingsApiService.findByCode("standardExports.decimalSeparator").map(AdvancedSettings::getValue).orElse(null);
+        String fileNameExtension = advancedSettingsApiService.findByCode("standardExports.fileNameExtension").map(AdvancedSettings::getValue).orElse(null);
+
+        Class<?> entityClass = AccountOperation.class;
+        GenericRequestMapper genericRequestMapper = new GenericRequestMapper(entityClass, PersistenceServiceHelper.getPersistenceService());
+        
+        // Get account operation to export and the amounts summary
+        AccountOperationsResult summary = customerBalanceService.getAccountOperations(exportConfig);
+        Map<String, Object> filters = new HashMap<>();
+
+        if (summary.accountOperationIds() != null && !Objects.requireNonNull(summary.accountOperationIds()).isEmpty()) {
+            filters.put("inList id", Objects.requireNonNullElse(summary.accountOperationIds(), Collections.emptyList()));
+        }
+
+        if(exportConfig.transactionalCurrency() != null) {
+            filters.put("transactionalCurrency.id", exportConfig.transactionalCurrency().getId());
+        }
+
+        ImmutableGenericPagingAndFiltering searchConfig = ImmutableGenericPagingAndFiltering.builder()
+                                                                                            .filters(filters)
+                                                                                            .genericFieldDetails(exportConfig.getGenericFieldDetails())
+                                                                                            .sortBy("id")
+                                                                                            .sortOrder(PagingAndFiltering.SortOrder.ASCENDING.toString())
+                                                                                            .build();
+
+        CustomerAccount customerAccount;
+        if (exportConfig.customerAccount() != null) {
+            if (exportConfig.customerAccount().getId() != null) {
+                customerAccount= ofNullable(customerAccountService.findById(exportConfig.customerAccount().getId()))
+                        .orElseThrow(() -> new BadRequestException("Customer Account does not exist"));
+            } else if (!org.apache.commons.lang3.StringUtils.isBlank(exportConfig.customerAccount().getCode())) {
+                customerAccount = ofNullable(customerAccountService.findByCode(exportConfig.customerAccount().getCode()))
+                        .orElseThrow(() -> new BadRequestException("Customer Account does not exist"));
+            } else {
+                throw new BadRequestException("Customer Account id or code is required");
+            }
+        } else {
+            throw new BadRequestException("Customer Account id or code is required");
+        }
+
+        TradingCurrency tradingCurrency = null;
+        if(exportConfig.transactionalCurrency() != null) {
+            tradingCurrency = tradingCurrencyService.findById(-1L);
+        }
+        if(tradingCurrency == null) {
+            tradingCurrency = customerAccount.getTradingCurrency();
+        }
+
+
+        // build the fields list to hack and update transformation with the right symbol
+        TradingCurrency finalTradingCurrency = tradingCurrency;
+        List<GenericFieldDetails> fields = exportConfig.getGenericFieldDetails()
+                                                       .stream()
+                                                       .map(e -> {
+                                                           ImmutableGenericFieldDetails.Builder from = ImmutableGenericFieldDetails.builder()
+                                                                                                                                   .from(e);
+                                                           if (StringUtils.isNotBlank(e.getTransformation()) && finalTradingCurrency != null) {
+                                                               from.transformation(e.getTransformation()
+                                                                                    .replace("¤", finalTradingCurrency.getSymbol()));
+                                                           }
+                                                           return from.build();
+                                                       })
+                                                       .collect(Collectors.toList());
+
+        ExcelExportConfiguration excelExportConfiguration = setupExcelExportHeaderAndFooter(customerAccount, summary.totalCredit(), summary.totalDebit(), summary.balance(), ofNullable(finalTradingCurrency).map(TradingCurrency::getSymbol).orElse(""));
+        return loadService.export(entityClass, genericRequestMapper.mapTo(searchConfig), null, fields, fileFormat, entityClass.getSimpleName(), locale, fieldsSeparator, decimalSeparator, fileNameExtension, excelExportConfiguration);
+    }
+    
+    @Inject
+    private GenericApiPersistenceDelegate genericApi;
+    
+
+    private static ExcelExportConfiguration setupExcelExportHeaderAndFooter(final CustomerAccount customerAccount, BigDecimal credit, BigDecimal debit, BigDecimal balance, String currencySymbol) {
+        
+        DecimalFormat decimalFormat = new DecimalFormat(String.format("%s #,##0.00", currencySymbol));
+        decimalFormat.setGroupingUsed(false);
+        
+        return new ExcelExportConfiguration().setBorderStyle(BorderStyle.THIN).setHeader((SXSSFSheet sheet) -> {
+            int i = 0;
+            SXSSFRow headerRow = sheet.createRow(i);
+            CellStyle headerStyle = sheet.getWorkbook()
+                                         .createCellStyle();
+            headerStyle.setWrapText(true);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+            headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+            headerStyle.setBorderBottom(BorderStyle.MEDIUM);
+            headerStyle.setBorderTop(BorderStyle.MEDIUM);
+            headerStyle.setBorderLeft(BorderStyle.MEDIUM);
+            headerStyle.setBorderRight(BorderStyle.MEDIUM);
+
+            Font font = sheet.getWorkbook()
+                             .createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
+
+            Cell headerCell = headerRow.createCell(3);
+            headerCell.setCellValue("Extrait compte client");
+            headerCell.setCellStyle(headerStyle);
+            sheet.addMergedRegion(new CellRangeAddress(0, 1, 3, 6));
+            // apply border on the merged cell
+            RegionUtil.setBorderBottom(BorderStyle.MEDIUM, new CellRangeAddress(0, 1, 3, 6), sheet);
+            RegionUtil.setBorderTop(BorderStyle.MEDIUM, new CellRangeAddress(0, 1, 3, 6), sheet);
+            RegionUtil.setBorderLeft(BorderStyle.MEDIUM, new CellRangeAddress(0, 1, 3, 6), sheet);
+            RegionUtil.setBorderRight(BorderStyle.MEDIUM, new CellRangeAddress(0, 1, 3, 6), sheet);
+            
+            i += 2;
+
+            headerRow = sheet.createRow(i);
+            headerCell = headerRow.createCell(0);
+            String customerAccountDetails = "";
+            if(customerAccount != null){
+                customerAccountDetails = String.format("%s %s%n%s", ofNullable(customerAccount.getName()).map(Name::getFirstName).orElse(""), ofNullable(customerAccount.getName()).map(Name::getLastName).orElse(""), ofNullable(customerAccount.getAddress()).map(Address::getAddress1).orElse(""));
+            }
+            headerCell.setCellValue(customerAccountDetails);
+            headerCell.setCellStyle(headerStyle);
+            sheet.addMergedRegion(new CellRangeAddress(2, 3, 0, 2));
+            // apply border all 4 sides on the merged cell
+            RegionUtil.setBorderBottom(BorderStyle.MEDIUM, new CellRangeAddress(2, 3, 0, 2), sheet);
+            RegionUtil.setBorderTop(BorderStyle.MEDIUM, new CellRangeAddress(2, 3, 0, 2), sheet);
+            RegionUtil.setBorderLeft(BorderStyle.MEDIUM, new CellRangeAddress(2, 3, 0, 2), sheet);
+            RegionUtil.setBorderRight(BorderStyle.MEDIUM, new CellRangeAddress(2, 3, 0, 2), sheet);
+
+            headerCell = headerRow.createCell(7);
+            CellStyle dateHeaderStyle = sheet.getWorkbook()
+                                             .createCellStyle();
+            dateHeaderStyle.cloneStyleFrom(headerStyle);
+            dateHeaderStyle.setDataFormat((short) 14);
+            headerCell.setCellValue(new Date());
+            headerCell.setCellStyle(dateHeaderStyle);
+            sheet.addMergedRegion(new CellRangeAddress(2, 3, 7, 9));
+            // apply border on the merged cell
+            RegionUtil.setBorderBottom(BorderStyle.MEDIUM, new CellRangeAddress(2, 3, 7, 9), sheet);
+            RegionUtil.setBorderTop(BorderStyle.MEDIUM, new CellRangeAddress(2, 3, 7, 9), sheet);
+            RegionUtil.setBorderLeft(BorderStyle.MEDIUM, new CellRangeAddress(2, 3, 7, 9), sheet);
+            RegionUtil.setBorderRight(BorderStyle.MEDIUM, new CellRangeAddress(2, 3, 7, 9), sheet);
+            
+            
+            i += 3;
+            return i;
+        }).setFooter((SXSSFSheet sheet, Integer rowIndex) -> {
+            
+            rowIndex += 2;
+            Font font = sheet.getWorkbook()
+                             .createFont();
+            font.setBold(true);
+            CellStyle cellStyle = sheet.getWorkbook().createCellStyle();
+            
+            cellStyle.setBorderBottom(BorderStyle.MEDIUM);
+            cellStyle.setBorderTop(BorderStyle.MEDIUM);
+            cellStyle.setBorderLeft(BorderStyle.MEDIUM);
+            cellStyle.setBorderRight(BorderStyle.MEDIUM);
+
+            cellStyle.setFont(font);
+
+            cellStyle.setAlignment(HorizontalAlignment.RIGHT);
+            
+            SXSSFRow footerRow = sheet.createRow(rowIndex++);
+            SXSSFCell cell = footerRow.createCell(4);
+            cell.setCellValue("Balance Debit:");
+            cell.setCellStyle(cellStyle);
+            cell = footerRow.createCell(5);
+            cell.setCellValue(decimalFormat.format(debit));
+            cell.setCellStyle(cellStyle);
+            cell = footerRow.createCell(6);
+            cell.setCellValue("");
+            cell.setCellStyle(cellStyle);
+            cell = footerRow.createCell(8);
+            cell.setCellValue("");
+            cell.setCellStyle(cellStyle);
+
+            footerRow = sheet.createRow(rowIndex++);
+            cell = footerRow.createCell(4);
+            cell.setCellValue("Balance Credit:");
+            cell.setCellStyle(cellStyle);
+            cell = footerRow.createCell(5);
+            cell.setCellValue("");
+            cell.setCellStyle(cellStyle);
+            cell = footerRow.createCell(6);
+            cell.setCellValue(decimalFormat.format(credit));
+            cell.setCellStyle(cellStyle);
+            cell = footerRow.createCell(8);
+            cell.setCellValue("");
+            cell.setCellStyle(cellStyle);
+
+            footerRow = sheet.createRow(rowIndex++);
+            cell = footerRow.createCell(4);
+            cell.setCellValue("Balance:");
+            cell.setCellStyle(cellStyle);
+            cell = footerRow.createCell(5);
+            cell.setCellValue("");
+            cell.setCellStyle(cellStyle);
+            cell = footerRow.createCell(6);
+            cell.setCellValue("");
+            cell.setCellStyle(cellStyle);
+            cell = footerRow.createCell(8);
+            cell.setCellValue(decimalFormat.format(balance));
+            cell.setCellStyle(cellStyle);
+            
+            sheet.trackAllColumnsForAutoSizing();
+
+            
+            // Autosize columns
+            for(int i=0; i < sheet.getRow(6).getLastCellNum(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            return rowIndex;
+        });
     }
 }

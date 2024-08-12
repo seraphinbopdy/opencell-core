@@ -1,6 +1,7 @@
 package org.meveo.service.billing.impl;
 
 import static java.util.Collections.emptyList;
+import static org.meveo.commons.utils.ParamBean.getInstance;
 import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
@@ -703,6 +704,10 @@ public class MinAmountService extends PersistenceService<BusinessEntity> {
         boolean uaMin = false;
         boolean caMin = false;
         boolean custMin = false;
+        Boolean minEnabled = getInstance().getBooleanValue("billing.minimumRating.global.enabled");
+        if(minEnabled != null) {
+            return new boolean[] { minEnabled, minEnabled, minEnabled, minEnabled, minEnabled, minEnabled };
+        }
         try {
             getEntityManager()
                     .createNamedQuery("BillingAccount.getMinimumAmountUsed")

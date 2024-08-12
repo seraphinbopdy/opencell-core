@@ -1316,20 +1316,8 @@ public class CpqQuoteApi extends BaseApi {
             newQuoteProducts.add(quoteProduct);
             i++;
         }
-        if (!hasExistingQuotes) {
-            quoteOffer.getQuoteProduct().addAll(newQuoteProducts);
-        } else {
-            existencQuoteProducts.retainAll(newQuoteProducts);
-            for (QuoteProduct qpNew : newQuoteProducts) {
-                int index = existencQuoteProducts.indexOf(qpNew);
-                if (index >= 0) {
-                    QuoteProduct old = existencQuoteProducts.get(index);
-                    old.update(qpNew);
-                } else {
-                    existencQuoteProducts.add(qpNew);
-                }
-            }
-        }
+	    quoteOffer.getQuoteProduct().clear();
+		quoteOffer.getQuoteProduct().addAll(newQuoteProducts);
     }
 
     private void processQuoteAttribute(QuoteOfferDTO quoteOfferDTO, QuoteOffer quoteOffer) {
@@ -1378,7 +1366,9 @@ public class CpqQuoteApi extends BaseApi {
 		boolean isNew = false;
 		QuoteProduct q = null;
 		if (quoteProductDTO.getProductCode() != null) {
-			q = quoteProductService.findByQuoteAndOfferAndProduct(quoteOffer.getQuoteVersion().getId(), quoteOffer.getCode(), quoteProductDTO.getProductCode());
+			if(quoteProductDTO.getQuoteProductId() != null) {
+				q = quoteProductService.findById(quoteProductDTO.getQuoteProductId());
+			}
 			isNew = false;
 		}
         if (q == null) {
@@ -1440,6 +1430,7 @@ public class CpqQuoteApi extends BaseApi {
                 newQuoteProducts.add(quoteAttribute);
             }
             if(!hasExistingQuotes) {
+				q.getQuoteAttributes().clear();
                 q.getQuoteAttributes().addAll(newQuoteProducts);
             }else {
                 existencQuoteProducts.retainAll(newQuoteProducts);
@@ -1471,7 +1462,7 @@ public class CpqQuoteApi extends BaseApi {
             isNew = true;
             quoteAttribute = new QuoteAttribute();
         }else{
-            if(quoteProduct.getId() != quoteAttribute.getQuoteProduct().getId())
+            if(quoteProduct.getId() != quoteAttribute.getQuoteProduct().getId() && quoteProduct.getQuantity() == quoteAttribute.getQuoteProduct().getQuantity())
                 throw new MeveoApiException("Quote Attribute is Already attached to : " + quoteAttribute.getQuoteProduct().getId());
         }
         quoteAttribute.setAttribute(attribute);

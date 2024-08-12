@@ -986,13 +986,13 @@
             <column name="id" valueNumeric="-42" />
             <column name="version" valueNumeric="0" />
             <column name="created" valueDate="${db.current.time}" />
-            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '654100000')" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
             <column name="account_code_client_side" value="411000000" />
             <column name="code" value="EXP_WRT" />
             <column name="description" value="Expense - bad debt write-off" />
             <column name="occ_category" value="CREDIT" />
             <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
-            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '654100000')" />
             <column name="contra_accounting_code2_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '445710000')" />
             <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Invoice and Writeoff')" />
         </insert>
@@ -2350,6 +2350,22 @@
             <column name="value_required" value="0"/>
             <column name="creator" value="applicationInitializer"/>
             <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:7"/>
+        </insert>
+    </changeSet>
+    
+  	<changeSet id="#INTRD-18352_20230915_data_build" author="TarikFA.">
+        <insert tableName="electronic_invoice_settings">
+            <column name="id" valueSequenceNext="electronic_invoice_settings_seq"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="OPENCELL.ADMIN" />
+            <column name="force_xml_generation" valueNumeric="1" />
+            <column name="force_pdf_generation" valueNumeric="1" />
+            <column name="force_ubl_generation" valueNumeric="1" />
+            <column name="invoicing_job" value="Invoicing_Job_V2"/>
+            <column name="xml_generation_job" value="XMLInvoiceGenerationJobV2"/>
+            <column name="pdf_generation_job" value="PDF_Job"/>
+            <column name="ubl_generation_job" value="EInvoice_job"/>
         </insert>
     </changeSet>
 
@@ -4707,6 +4723,7 @@
             <column name="vat_payment_option_id" value="1" />
             <column name="invoice_code_type_id" value="19" />
             <column name="invoice_subject_code" valueComputed="(SELECT id FROM untdid_4451_invoice_subject_code where code = 'IND')"></column>
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')" />
 		</insert>
 		
 		<insert tableName="billing_invoice_type">
@@ -4725,6 +4742,7 @@
             <column name="vat_payment_option_id" value="1" />
             <column name="invoice_code_type_id" value="19" />
             <column name="invoice_subject_code" valueComputed="(SELECT id FROM untdid_4451_invoice_subject_code where code = 'IND')"></column>
+            <column name="occ_templ_negative_id" valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_STD')" />
 		</insert>
 		
 		<insert tableName="billing_invoice_type_applies_to">
@@ -6824,6 +6842,143 @@
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD-23293_20240524_build" author="TarikFA.">
+        <insert tableName="payment_term">
+            <column name="id" valueSequenceNext="payment_term_seq" />
+            <column name="code" value="Default" />
+            <column name="description" value="Payment conditions No early payment discount. Any amounts owned that are not paid will due shall bear interest, from the time the payment was due until the time paid, at a rate of 10% per annum compounded annually" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Tout incident de paiement est passible de pénalités de retard ainsi que de l'indemnité forfaitaire pour frais de recouvrement de 40 euros prévue par la loi n°2012-387 du 22 mars 2012 et le décret du 2 octobre 2012. Le montant des pénalités résulte de l'application aux sommes restant dues d'un taux égal au taux d'intérêt appliqué par la Banque centrale européenne à son opération de refinancement la plus récente majoré de 10 points de pourcentage","ENG":"Payment conditions No early payment discount. Any amounts owned that are not paid will due shall bear interest, from the time the payment was due until the time paid, at a rate of 10% per annum compounded annually"}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="version" valueNumeric="0" />
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-22810_20240514_build" author="TarikFA.">
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="PPL_CREATION" />
+            <column name="description" value="PPL_CREATION" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <column name="account_code_client_side" value="null" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '416000000')" />
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-23038_20240515_build" author="TarikFA." >
+        <insert tableName="ar_occ_template" >
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="PPL_INSTALLMENT" />
+            <column name="description" value="Payment plan Installment" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <column name="manual_creation_enabled" valueNumeric="0" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="#INTRD-23734_20240715_build" author="TarikFA.">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="callForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="allowUsingUnpaidAdvance"/>
+            <column name="description" value="If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."/>
+            <column name="description_i18n" value='{"FRA":"Si ce paramètre est activé, alors Opencell n’attendra pas qu’un appel acompte validé soit effectivement payé pour l’utiliser sur une facture.
+Habituellement, ce comportement n’est souhaitable que si vous ne gérez pas la balance client dans Opencell.","ENG":"If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."}'/>
+        </insert>
+
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="CallForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="autoCloseAdvanceAfterInvoiceValidation"/>
+            <column name="description" value="Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.
+Meaning that advances won’t be available for further invoices."/>
+            <column name="description_i18n">
+                <![CDATA[{
+	"FRA": "Les appels d’acompte liés à la facture seront automatiquement closes quand la facture est validée.Cela signifie que les acomptes ne seront pas disponibles pour de futures factures.",
+	"ENG": "Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.Meaning that advances won’t be available for further invoices."
+}]]>
+            </column>
+        </insert>
+    </changeSet>
+    <changeSet id="INTRD-23733_rebuild" author="TarikFA.">
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="PAY_ADV" />
+            <column name="description" value="Payment account operation to match a call for advance payment. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="CREDIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="CLOSED_ADV" />
+            <column name="description" value="Payment account operation to match a call for advance payment that has been closed while still having unmatched amount. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="CREDIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="REJ_ADV" />
+            <column name="description" value="Dummy payment rejection account operation to match and negate the payment account operation (PAY_ADV) for call for advance payment. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="DEBIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+    </changeSet>
+    <changeSet id="#INTRD-24686_20240807_build" author="TarikFa.">
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'CLOSED_ADV')"/>
+        </insert>
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'PAY_ADV')"/>
+        </insert>
+    </changeSet>
+
+	<changeSet id="#INTRD-22516_20240503" author="aeljaouhari" />
+    <changeSet id="#INTRD-23734_20240715" author="TarikFA." />
+    <changeSet id="INTRD-23733" author="TarikFA." />
+    <changeSet id="#INTRD-23038_20240515" author="TarikFA." />
 
 
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->

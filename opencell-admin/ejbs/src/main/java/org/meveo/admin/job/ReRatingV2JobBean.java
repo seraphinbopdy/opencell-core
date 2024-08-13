@@ -151,7 +151,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		boolean useLimitDate = !operationDateConfig.equals(ReRatingV2Job.NO_DATE_LIMITE)
 				&& CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate("edr"));
 		return useLimitDate ? 
-				(operationDateConfig == ReRatingV2Job.USE_LAST_PARTITION ? tablesPartitioningService.getLastPartitionStartingDateAsString("edr") : operationDateConfig)
+				(ReRatingV2Job.USE_LAST_PARTITION.equals(operationDateConfig) ? tablesPartitioningService.getLastPartitionStartingDateAsString("edr") : operationDateConfig)
 				: null;
 	}
 

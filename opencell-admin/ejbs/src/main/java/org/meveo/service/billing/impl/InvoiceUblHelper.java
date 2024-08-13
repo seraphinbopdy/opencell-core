@@ -103,6 +103,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -136,6 +137,7 @@ public class InvoiceUblHelper {
 	private static final String UNCL_3035 = "UNCL 3035";
 	
 	private Map<String, String> descriptionMap = new HashMap<>();
+	private static int rounding = 2;
 	
 	static {
 		objectFactorycommonBasic = new oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ObjectFactory();
@@ -145,6 +147,10 @@ public class InvoiceUblHelper {
 		paymentTermService = (PaymentTermService) EjbUtils.getServiceInterface(PaymentTermService.class.getSimpleName());
 		einvoiceSettingService = (EinvoiceSettingService) EjbUtils.getServiceInterface(EinvoiceSettingService.class.getSimpleName());
 		providerService = (ProviderService) EjbUtils.getServiceInterface(ProviderService.class.getSimpleName());
+		Provider provider = providerService.getProvider();
+		if(provider != null) {
+			rounding = provider.getInvoiceRounding();
+		}
 	}
 	
 	private InvoiceUblHelper(){}
@@ -198,7 +204,9 @@ public class InvoiceUblHelper {
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
 			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
-			setBillingReferenceForInvoice(invoice, invoiceXml);
+			if(invoice.getCommercialOrder() != null){
+				setBillingReferenceForInvoice(invoice.getCommercialOrder(), invoiceXml);
+			}
 		}
 		
 		
@@ -340,7 +348,7 @@ public class InvoiceUblHelper {
 		var taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
 		final String currencyId = source.getTradingCurrency() != null ? source.getTradingCurrency().getCurrencyCode() : null;
 		taxInclusiveAmount.setCurrencyID(currencyId);
-		taxInclusiveAmount.setValue(source.getAmountWithTax());
+		taxInclusiveAmount.setValue(source.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP));
 		monetaryTotalType.setTaxInclusiveAmount(taxInclusiveAmount);
 		var allowanceTotalAmount = objectFactorycommonBasic.createAllowanceTotalAmount();
 		allowanceTotalAmount.setCurrencyID(currencyId);
@@ -396,7 +404,7 @@ public class InvoiceUblHelper {
 		var taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
 		final String currencyId = source.getTradingCurrency() != null ? source.getTradingCurrency().getCurrencyCode() : null;
 		taxInclusiveAmount.setCurrencyID(currencyId);
-		taxInclusiveAmount.setValue(source.getAmountWithTax());
+		taxInclusiveAmount.setValue(source.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP));
 		monetaryTotalType.setTaxInclusiveAmount(taxInclusiveAmount);
 		var allowanceTotalAmount = objectFactorycommonBasic.createAllowanceTotalAmount();
 		allowanceTotalAmount.setCurrencyID(currencyId);
@@ -584,7 +592,7 @@ public class InvoiceUblHelper {
 			ItemType itemType = getItemTyp(invoiceLine, invoiceLanguageCode);
 			// InvoiceLine/ InvoicedQuantity
 			InvoicedQuantity invoicedQuantity = objectFactorycommonBasic.createInvoicedQuantity();
-			invoicedQuantity.setValue(invoiceLine.getQuantity());
+			invoicedQuantity.setValue(invoiceLine.getQuantity().setScale(rounding, RoundingMode.HALF_UP));
 			invoicedQuantity.setUnitCode(XUN);
 			invoiceLineType.setInvoicedQuantity(invoicedQuantity);
 			setPriceAndCreditLine(invoiceLine, invoiceLineType, itemType);
@@ -600,7 +608,7 @@ public class InvoiceUblHelper {
 			// InvoiceLine/ InvoicedQuantity
 			CreditedQuantity invoicedQuantity = objectFactorycommonBasic.createCreditedQuantity();
 			invoicedQuantity.setUnitCode(XUN);
-			invoicedQuantity.setValue(invoiceLine.getQuantity());
+			invoicedQuantity.setValue(invoiceLine.getQuantity().setScale(rounding, RoundingMode.HALF_UP));
 			invoiceLineType.setCreditedQuantity(invoicedQuantity);
 			setPriceAndCreditLine(invoiceLine, invoiceLineType, itemType);
 			invoiceLineType.getInvoicePeriods().add(setPeriodTypeInvoiceLine(invoiceLine.getInvoice(), invoiceLine));
@@ -638,7 +646,7 @@ public class InvoiceUblHelper {
 	private static LineExtensionAmount getLineExtensionAmount(InvoiceLine invoiceLine) {
 		LineExtensionAmount lineExtensionAmount = objectFactorycommonBasic.createLineExtensionAmount();
 		lineExtensionAmount.setCurrencyID(invoiceLine.getInvoice().getTradingCurrency().getCurrencyCode());
-		lineExtensionAmount.setValue(invoiceLine.getAmountWithTax());
+		lineExtensionAmount.setValue(invoiceLine.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP));
 		return lineExtensionAmount;
 	}
 	
@@ -656,7 +664,7 @@ public class InvoiceUblHelper {
 			taxCategoryType.setID(id);
 		}
 		Percent percent = objectFactorycommonBasic.createPercent();
-		percent.setValue(invoiceLine.getTaxRate());
+		percent.setValue(invoiceLine.getTaxRate().setScale(rounding, RoundingMode.HALF_UP));
 		taxCategoryType.setPercent(percent);
 		// InvoiceLine/ Item/ ClassifiedTaxCategory/TaxScheme/TaxTypeCode
 		TaxScheme taxScheme = objectFactoryCommonAggrement.createTaxScheme();
@@ -688,7 +696,7 @@ public class InvoiceUblHelper {
 		// InvoiceLine/ Price/ PriceAmount
 		PriceAmount priceAmount = objectFactorycommonBasic.createPriceAmount();
 		priceAmount.setCurrencyID(currencyCode);
-		priceAmount.setValue(invoiceLine.getUnitPrice());
+		priceAmount.setValue(invoiceLine.getUnitPrice().setScale(rounding, RoundingMode.HALF_UP));
 		priceType.setPriceAmount(priceAmount);
 		return priceType;
 	}
@@ -1046,7 +1054,7 @@ public class InvoiceUblHelper {
 			TaxTotalType taxTotalType = objectFactoryCommonAggrement.createTaxTotalType();
 			TaxAmount taxAmount = objectFactorycommonBasic.createTaxAmount();
 			taxAmount.setCurrencyID(currency);
-			taxAmount.setValue(amountTax);
+			taxAmount.setValue(amountTax.setScale(rounding, RoundingMode.HALF_UP));
 			taxTotalType.setTaxAmount(taxAmount);
 			taxInvoiceAgregates.forEach(taxInvoiceAgregate -> {
 				TaxSubtotal taxSubtotal = objectFactoryCommonAggrement.createTaxSubtotal();
@@ -1060,15 +1068,15 @@ public class InvoiceUblHelper {
 				TaxableAmount taxableAmount = objectFactorycommonBasic.createTaxableAmount();
 				final String currencyCode = taxInvoiceAgregate.getTradingCurrency() != null ? taxInvoiceAgregate.getTradingCurrency().getCurrencyCode() : currency;
 				taxableAmount.setCurrencyID(currencyCode);
-				taxableAmount.setValue(taxInvoiceAgregate.getAmountWithoutTax());
+				taxableAmount.setValue(taxInvoiceAgregate.getAmountWithoutTax().setScale(rounding, RoundingMode.HALF_UP));
 				taxSubtotal.setTaxableAmount(taxableAmount);
 				// TaxTotal/ TaxSubtotal / Percent
 				Percent percent = objectFactorycommonBasic.createPercent();
-				percent.setValue(taxInvoiceAgregate.getTaxPercent());
+				percent.setValue(taxInvoiceAgregate.getTaxPercent().setScale(rounding, RoundingMode.HALF_UP));
 				taxSubtotal.setPercent(percent);
 				// TaxTotal/ TaxSubtotal / TaxAmount
 				TaxAmount taxAmountSubTotal = objectFactorycommonBasic.createTaxAmount();
-				taxAmountSubTotal.setValue(taxInvoiceAgregate.getAmountTax());
+				taxAmountSubTotal.setValue(taxInvoiceAgregate.getAmountTax().setScale(rounding, RoundingMode.HALF_UP));
 				taxAmountSubTotal.setCurrencyID(currencyCode);
 				taxSubtotal.setTaxAmount(taxAmountSubTotal);
 				taxTotalType.getTaxSubtotals().add(taxSubtotal);
@@ -1108,12 +1116,12 @@ public class InvoiceUblHelper {
 					allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
 				}
 				Amount amount = objectFactorycommonBasic.createAmount();
-				amount.setValue(subCategoryInvoiceAgregate.getAmountWithTax().abs());
+				amount.setValue(subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs());
 				allowanceCharge.setAmount(amount);
 				
 				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
 				baseAmount.setCurrencyID(invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null);
-				baseAmount.setValue(subCategoryInvoiceAgregate.getAmountWithoutTax().abs());
+				baseAmount.setValue(subCategoryInvoiceAgregate.getAmountWithoutTax().setScale(rounding, RoundingMode.HALF_UP).abs());
 				allowanceCharge.setBaseAmount(baseAmount);
 				if(creditNote != null)
 					creditNote.getAllowanceCharges().add(allowanceCharge);
@@ -1134,7 +1142,7 @@ public class InvoiceUblHelper {
 	private OrderReference getOrderReference(CommercialOrder commercialOrder, Date invoiceDate) {
 		if(commercialOrder == null) return null;
 		OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
-		SalesOrderID salesOrderID = orderReference.getSalesOrderID();
+		SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
 		salesOrderID.setValue(commercialOrder != null ? commercialOrder.getOrderNumber() : StringUtils.EMPTY);
 		orderReference.setSalesOrderID(salesOrderID);
 		orderReference.setIssueDate(getIssueDate(invoiceDate));
@@ -1220,7 +1228,7 @@ public class InvoiceUblHelper {
 		}
 		
 		Percent percent = objectFactorycommonBasic.createPercent();
-		percent.setValue(taxInvoiceAgregate.getTaxPercent());
+		percent.setValue(taxInvoiceAgregate.getTaxPercent().setScale(rounding, RoundingMode.HALF_UP));
 		taxCategoryType.setPercent(percent);
 		
 		if(tax.getUntdidTaxationCategory() != null) {
@@ -1263,12 +1271,12 @@ public class InvoiceUblHelper {
 		MonetaryTotalType moneyTotalType = objectFactoryCommonAggrement.createMonetaryTotalType();
 		TaxInclusiveAmount taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
 		taxInclusiveAmount.setCurrencyID(currency);
-		taxInclusiveAmount.setValue(amountWithTax);
+		taxInclusiveAmount.setValue(amountWithTax.setScale(rounding, RoundingMode.HALF_UP));
 		moneyTotalType.setTaxInclusiveAmount(taxInclusiveAmount);
 
 		TaxExclusiveAmount taxExclusiveAmount = objectFactorycommonBasic.createTaxExclusiveAmount();
 		taxExclusiveAmount.setCurrencyID(currency);
-		taxExclusiveAmount.setValue(amountWithoutTax);
+		taxExclusiveAmount.setValue(amountWithoutTax.setScale(rounding, RoundingMode.HALF_UP));
 		moneyTotalType.setTaxExclusiveAmount(taxExclusiveAmount);
 		
 		LineExtensionAmount lineExtensionAmountType = objectFactorycommonBasic.createLineExtensionAmount();
@@ -1291,6 +1299,22 @@ public class InvoiceUblHelper {
 
 		return moneyTotalType;
 
+	}
+	
+	private BillingReference setBillingReferenceForInvoice(CommercialOrder commercialOrder, Invoice target) {
+		BillingReference billingReference = objectFactoryCommonAggrement.createBillingReference();
+		DocumentReferenceType documentReferenceType = objectFactoryCommonAggrement.createDocumentReferenceType();
+		ID id = objectFactorycommonBasic.createID();
+		id.setValue(commercialOrder.getOrderNumber());
+		documentReferenceType.setID(id);
+		billingReference.setInvoiceDocumentReference(documentReferenceType);
+		
+		IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
+		dueDate.setValue(toXmlDate(commercialOrder.getOrderDate()));
+		documentReferenceType.setIssueDate(dueDate);
+		
+		target.getBillingReferences().add(billingReference);
+		return billingReference;
 	}
 	
 	private String translateAccountingArticle(AccountingArticle accountingArticle, String invoiceLanguageCode){

@@ -83,7 +83,7 @@ public class RatedTransactionDiscountJob extends Job {
 		String namedQuery = "RatedTransaction.massUpdateWithDiscountedRTStep"+(useLimitDate?"ForDate":"");
 		if(useLimitDate) {
 			Date operationDate = null;
-			if(usePartitionConfig==USE_LAST_PARTITION) {
+			if(USE_LAST_PARTITION.equals(usePartitionConfig)) {
 				operationDate = tablesPartitioningService.getLastPartitionDate("rt")[0];
 			} else {
 				operationDate = tablesPartitioningService.parseDate(usePartitionConfig);

@@ -351,13 +351,25 @@ public class EntityToDtoConverter {
     private String getFormattedValue(CustomFieldTemplate cft, Object value) {
         String formattedValue = null;
         if (cft.getFieldType() == CustomFieldTypeEnum.LONG) {
-            formattedValue = getFormattedDecimalValue((Long) value, cft.getDisplayFormat());
+        	if (value instanceof Long) {
+        		formattedValue = getFormattedDecimalValue((Long) value, cft.getDisplayFormat());
+        	} else {
+                logger.warn("Expected value to be of type Long but got " + value.getClass().getSimpleName());
+            }
         }
         if (cft.getFieldType() == CustomFieldTypeEnum.DOUBLE) {
-            formattedValue = getFormattedDecimalValue((Double) value, cft.getDisplayFormat());
+        	if (value instanceof Double) {
+                formattedValue = getFormattedDecimalValue((Double) value, cft.getDisplayFormat());
+            } else {
+                logger.warn("Expected value to be of type Double but got " + value.getClass().getSimpleName());
+            }
         }
         if (cft.getFieldType() == CustomFieldTypeEnum.DATE) {
-            formattedValue = getFormattedDateValue((Date) value, cft.getDisplayFormat());
+        	if (value instanceof Date) {
+                formattedValue = getFormattedDateValue((Date) value, cft.getDisplayFormat());
+        	} else {
+                logger.warn("Expected value to be of type Date but got " + value.getClass().getSimpleName());
+            }
         }
         return formattedValue;
     }

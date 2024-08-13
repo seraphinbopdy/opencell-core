@@ -1962,7 +1962,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @return jasper file
      */
     private File getJasperTemplateFile(String resDir, String billingTemplate, PaymentMethodEnum paymentMethod, boolean isInvoiceAdjustment) {
-        String pdfDirName = new StringBuilder(resDir).append(File.separator).append(billingTemplate).append(File.separator).append(isInvoiceAdjustment ? ADJUSTEMENT_DIR_NAME : PDF_DIR_NAME).toString();
+        String pdfDirName = new StringBuilder(resDir).append(File.separator).append(billingTemplate).toString();
 
         File pdfDir = new File(pdfDirName);
         String paymentMethodFileName = new StringBuilder("invoice_").append(paymentMethod).append(".jasper").toString();

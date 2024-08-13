@@ -17,7 +17,10 @@
  */
 package org.meveo.admin.job;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
@@ -25,6 +28,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.jpa.EntityManagerProvider;
@@ -34,7 +38,9 @@ import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
+import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.job.Job;
+import org.meveo.service.job.TablesPartitioningService;
 
 /**
  * Job definition to link Open RatedTransaction to the
@@ -49,8 +55,16 @@ public class RatedTransactionDiscountJob extends Job {
 
 	public static final String CF_MASS_UPDATE_CHUNK = "CF_MASS_UPDATE_CHUNK";
 
+	private static final String CF_OPERATIONS_STARTING_DATE="CF_OPERATIONS_STARTING_DATE";
+	
+	private static final String USE_LAST_PARTITION="LAST PARTITION DATE";
+	private static final String NO_DATE_LIMITE="NO DATE LIMITE";
+
 	@Inject
 	private UpdateStepExecutor updateStepExecutor;
+	
+	@Inject
+	private TablesPartitioningService tablesPartitioningService; 
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.NEVER)
@@ -64,10 +78,20 @@ public class RatedTransactionDiscountJob extends Job {
 	private void initUpdateStepParams(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
 		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_CHUNK_SIZE,
 				(Long) getParamOrCFValue(jobInstance, RatedTransactionDiscountJob.CF_MASS_UPDATE_CHUNK, 100000L));
-		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_NAMED_QUERY,
-				("RatedTransaction.massUpdateWithDiscountedRTStep" + (EntityManagerProvider.isDBOracle() ? "Oracle" : "")));
-		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_READ_INTERVAL_QUERY,
-				("select min(id), max(id) from RatedTransaction where status ='OPEN' and discountedRatedTransaction is null"));
+		String usePartitionConfig =  (String)this.getParamOrCFValue(jobInstance, RatedTransactionDiscountJob.CF_OPERATIONS_STARTING_DATE, NO_DATE_LIMITE);
+		boolean useLimitDate = !usePartitionConfig.equals(NO_DATE_LIMITE) && CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate("rt"));
+		String namedQuery = "RatedTransaction.massUpdateWithDiscountedRTStep"+(useLimitDate?"ForDate":"");
+		if(useLimitDate) {
+			Date operationDate = null;
+			if(USE_LAST_PARTITION.equals(usePartitionConfig)) {
+				operationDate = tablesPartitioningService.getLastPartitionDate("rt")[0];
+			} else {
+				operationDate = tablesPartitioningService.parseDate(usePartitionConfig);
+			}
+			jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_QUERY_PARAMS, (Map.of("operationDate", operationDate)));
+		}
+		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_NAMED_QUERY, (namedQuery + (EntityManagerProvider.isDBOracle() ? "Oracle" : "")));
+		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_READ_INTERVAL_QUERY, ("select min(id), max(id) from RatedTransaction where status ='OPEN' and discountedRatedTransaction is null"));
 		jobExecutionResult.addJobParam(UpdateStepExecutor.PARAM_NATIVE_QUERY, (false));
 	}
 
@@ -87,7 +111,24 @@ public class RatedTransactionDiscountJob extends Job {
 				"tab:Configuration:0;fieldGroup:Configuration:0;field:1", "0", JOB_INSTANCE_RATED_TRANSACTION_DISCOUNT_JOB));
 		result.put(CF_MASS_UPDATE_CHUNK, CustomFieldTemplateUtils.buildCF(CF_MASS_UPDATE_CHUNK, resourceMessages.getString("jobExecution.massUpdate.Size"), CustomFieldTypeEnum.LONG,
 				"tab:Configuration:0;fieldGroup:Configuration:0;field:3", "100000", JOB_INSTANCE_RATED_TRANSACTION_DISCOUNT_JOB));
+		CustomFieldTemplate cft = CustomFieldTemplateUtils.buildCF(CF_OPERATIONS_STARTING_DATE,
+                resourceMessages.getString("jobExecution.operation.starting.date","rt"), CustomFieldTypeEnum.LIST,
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:4", NO_DATE_LIMITE, false,
+                JOB_INSTANCE_RATED_TRANSACTION_DISCOUNT_JOB);
+		List<String> values=tablesPartitioningService.listPartitionsStartDate("rt");
+		Map<String, String> options = new LinkedHashMap<>(Map.of(
+                NO_DATE_LIMITE, NO_DATE_LIMITE,
+                USE_LAST_PARTITION, USE_LAST_PARTITION));
+		if(CollectionUtils.isNotEmpty(values)) {
+			values.stream().forEach(item->options.put(item, item));
+		}
+		cft.setListValues(options);
+		cft.setTags(CustomFieldTemplateService.UPDATE_EXISTING);
+        result.put(CF_OPERATIONS_STARTING_DATE, cft);
+		
 
 		return result;
 	}
+	
+	
 }

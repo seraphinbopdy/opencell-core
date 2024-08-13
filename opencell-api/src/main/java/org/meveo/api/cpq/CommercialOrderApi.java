@@ -1406,6 +1406,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
         orderAttribute.setStringValue(orderAttributeDTO.getStringValue());
         orderAttribute.setDoubleValue(orderAttributeDTO.getDoubleValue());
         orderAttribute.setDateValue(orderAttributeDTO.getDateValue());
+		orderAttribute.setBooleanValue(orderAttributeDTO.getBooleanValue());
 		orderAttributeDTO.setAttributeType(attribute.getAttributeType());
         orderAttribute.updateAudit(currentUser);
         if(orderProduct != null) {

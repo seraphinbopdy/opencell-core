@@ -813,20 +813,21 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
          */
         private void writeExcelFile(File file, Set<LinkedHashMap<String, Object>> csvLineRecords, boolean isMatrix) throws IOException {
 
-            var workbook = new XSSFWorkbook();
-            XSSFSheet sheet = workbook.createSheet();
+            try (XSSFWorkbook workbook = new XSSFWorkbook(); 
+                 FileOutputStream fileOut = new FileOutputStream(file)) {
 
-            if (isMatrix) {
-                buildPriceGridExcel(csvLineRecords, sheet);
-            } else {
-                buildPricePlanExcel(csvLineRecords, sheet);
+                XSSFSheet sheet = workbook.createSheet();
+
+                if (isMatrix) {
+                    buildPriceGridExcel(csvLineRecords, sheet);
+                } else {
+                    buildPricePlanExcel(csvLineRecords, sheet);
+                }
+
+                workbook.write(fileOut);
             }
-
-            FileOutputStream fileOut = new FileOutputStream(file);
-            workbook.write(fileOut);
-            fileOut.close();
-            workbook.close();
         }
+
 
         private void buildPriceGridExcel(Set<LinkedHashMap<String, Object>> csvLineRecords, XSSFSheet sheet) {
         	List<String> attributeNames = (csvLineRecords.stream().map(LinkedHashMap::keySet).flatMap(Collection::stream).collect(Collectors.toList())).stream().distinct().collect(Collectors.toList());

@@ -658,59 +658,57 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
         jmsProducer.setDisableMessageID(true);
         jmsProducer.setDisableMessageTimestamp(true);
 
-//        Message eofMessage = jmsContextForPublishing.createMessage();
-//        eofMessage.setStringProperty(ItertatorJobMessageListener.EOF_MESSAGE, ItertatorJobMessageListener.EOF_MESSAGE);
-
         Runnable task = () -> {
-            Thread.currentThread().setName(jobInstanceCode + "-PublishToCluster-" + threadNr);
+            try {
+                Thread.currentThread().setName(jobInstanceCode + "-PublishToCluster-" + threadNr);
 
-            currentUserProvider.reestablishAuthentication(lastCurrentUser);
+                currentUserProvider.reestablishAuthentication(lastCurrentUser);
 
-            log.debug("Thread {} will publish data for cluster-wide data processing", Thread.currentThread().getName());
+                log.debug("Thread {} will publish data for cluster-wide data processing", Thread.currentThread().getName());
 
-            int nrOfItemsProcessedByThread = 0;
-            int nrMessages = 0;
+                int nrOfItemsProcessedByThread = 0;
+                int nrMessages = 0;
 
-            jmsContext.start();
+                jmsContext.start();
 
-            while (true) {
-                // Retrieve next batchSize of items
-                List<T> itemsToProcess = iterator instanceof SynchronizedIterator ? ((SynchronizedIterator<T>) iterator).next(batchSize.intValue()) : new ArrayList<T>();
-                if (!(iterator instanceof SynchronizedIterator)) {
-                    for (int k = 0; k < batchSize; k++) {
-                        T item = iterator.next();
-                        if (item == null) {
-                            break;
+                while (true) {
+                    // Retrieve next batchSize of items
+                    List<T> itemsToProcess = iterator instanceof SynchronizedIterator ? ((SynchronizedIterator<T>) iterator).next(batchSize.intValue()) : new ArrayList<T>();
+                    if (!(iterator instanceof SynchronizedIterator)) {
+                        for (int k = 0; k < batchSize; k++) {
+                            T item = iterator.next();
+                            if (item == null) {
+                                break;
+                            }
+                            itemsToProcess.add(item);
                         }
-                        itemsToProcess.add(item);
                     }
+
+                    if (itemsToProcess == null || itemsToProcess.isEmpty()) {
+                        break;
+                    }
+
+                    int nrOfItemsInBatch = itemsToProcess.size();
+
+                    // Check if job is not stopped yet
+                    if (isJobRequestedToStop(jobInstanceId)) {
+                        log.info("Thread {} published {} data items in {} messages for cluster-wide data processing before it was canceled", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrMessages);
+                        return;
+                    }
+
+                    jmsProducer.send(jobQueue, (Serializable) itemsToProcess);
+
+                    nrOfItemsProcessedByThread += nrOfItemsInBatch;
+                    nrMessages++;
                 }
 
-                if (itemsToProcess == null || itemsToProcess.isEmpty()) {
-                    break;
+                log.info("Thread {} published {} data items in {} messages for cluster-wide data processing", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrMessages);
+
+            } finally {
+                if (jmsContext != null) {
+                    jmsContext.close();
                 }
-
-                int nrOfItemsInBatch = itemsToProcess.size();
-
-                // Check if job is not stopped yet
-                if (isJobRequestedToStop(jobInstanceId)) {
-                    log.info("Thread {} published {} data items in {} messages for cluster-wide data processing before was canceled", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrMessages);
-                    return;
-                }
-
-                jmsProducer.send(jobQueue, (Serializable) itemsToProcess);
-
-                nrOfItemsProcessedByThread = nrOfItemsProcessedByThread + nrOfItemsInBatch;
-                nrMessages++;
-
             }
-
-//            jmsProducer.send(jobQueue, eofMessage);
-
-            log.info("Thread {} published {} data items in {} messages for cluster-wide data processing", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrMessages);
-
-            jmsContext.close();
-
         };
 
         return task;
@@ -775,7 +773,6 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                 @Override
                 public void onException(JMSException e) {
                     log.error("Exception while consuming Job processing data messages", e);
-
                 }
             });
 
@@ -791,69 +788,71 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
         Runnable task = () -> {
 
-            Thread.currentThread().setName(jobInstanceCode + "-" + threadNr);
+            try {
+                Thread.currentThread().setName(jobInstanceCode + "-" + threadNr);
 
-            currentUserProvider.reestablishAuthentication(lastCurrentUser);
+                currentUserProvider.reestablishAuthentication(lastCurrentUser);
 
-            AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
-            int nrOfItemsProcessedByThread = 0;
+                AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
+                int nrOfItemsProcessedByThread = 0;
 
-            // First process data from a DB based iterator
-            if (isRunningAsJobManager) {
+                // First process data from a DB based iterator
+                if (isRunningAsJobManager) {
 
-                mainLoop: while (true) {
+                    mainLoop: while (true) {
 
-                    List<T> itemsToProcess = getNextItemsToProcess(batchSize, dataIterator, jobExecutionResult.getJobInstance().getId());
-                    if (itemsToProcess.isEmpty()) {
-                        break mainLoop;
+                        List<T> itemsToProcess = getNextItemsToProcess(batchSize, dataIterator, jobExecutionResult.getJobInstance().getId());
+                        if (itemsToProcess.isEmpty()) {
+                            break mainLoop;
+                        }
+
+                        processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
+
+                        int nrOfItemsInBatch = itemsToProcess.size();
+                        nrOfItemsProcessedByThread += nrOfItemsInBatch;
+                    }
+                }
+
+                int nrOfItemsDb = nrOfItemsProcessedByThread;
+                int nrOfItemsQueue = 0;
+                int nrofMessages = 0;
+
+                // Continue processing messages from a message queue if applicable
+                if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
+
+                    jmsContextFinal.start();
+                    try {
+                        countDown.await();
+
+                        // Now need to wait until all messages were processed, as countDown is released once the last message is received, not when all messages are processed
+                        // Polling is done
+                        String queueName = jobQueue.getQueueName();
+                        do {
+                            Thread.sleep(2000);
+                        } while (!isJobRequestedToStop(jobInstanceId) && !areAllMessagesConsumed(jobInstanceCode, queueName));
+
+                    } catch (InterruptedException e) {
+                        log.error("Job message listener was interrupted", e);
+                    } catch (JMSException e) {
+                        log.error("Failed to obtain queue name", e);
                     }
 
-//                for (T item : itemsToProcess) {
-//                    log.error("Will process #" + ((IEntity) item).getId());
-//                }
-                    processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
+                    nrOfItemsQueue = messageListenerFinal.getItemCount();
+                    nrofMessages = messageListenerFinal.getMsgCount();
+                    nrOfItemsProcessedByThread += nrOfItemsQueue;
 
-                    int nrOfItemsInBatch = itemsToProcess.size();
-                    nrOfItemsProcessedByThread = nrOfItemsProcessedByThread + nrOfItemsInBatch;
-                }
-            }
-
-            int nrOfItemsDb = nrOfItemsProcessedByThread;
-            int nrOfItemsQueue = 0;
-            int nrofMessages = 0;
-
-            // Continue processing messages from a message queue if applicable
-            if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
-
-                jmsContextFinal.start();
-                try {
-                    countDown.await();
-
-                    // Now need to wait until all messages were processed, as countDown is released once last message is received, not when all messages are processed
-                    // Polling is done
-                    String queueName = jobQueue.getQueueName();
-                    do {
-                        Thread.sleep(2000);
-                    } while (!isJobRequestedToStop(jobInstanceId) && !areAllMessagesConsumed(jobInstanceCode, queueName));
-
-                } catch (InterruptedException e) {
-                    log.error("Job message listener was interrupted");
-                } catch (JMSException e) {
-                    log.error("Failed to obtain queue name", e);
                 }
 
-                nrOfItemsQueue = messageListenerFinal.getItemCount();
-                nrofMessages = messageListenerFinal.getMsgCount();
-                nrOfItemsProcessedByThread = nrOfItemsProcessedByThread + nrOfItemsQueue;
-                jmsContextFinal.close();
+                log.info("Thread {} processed {} items: {} from db and {} from {} messages", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrOfItemsDb, nrOfItemsQueue, nrofMessages);
+
+            } finally {
+                if (jmsContextFinal != null) {
+                    jmsContextFinal.close();
+                }
             }
-
-            log.info("Thread {} processed {} items: {} from db and {} from {} messages", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrOfItemsDb, nrOfItemsQueue, nrofMessages);
-
         };
 
         return task;
-
     }
 
     /**

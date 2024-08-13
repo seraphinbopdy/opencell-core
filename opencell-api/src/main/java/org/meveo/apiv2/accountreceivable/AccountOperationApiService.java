@@ -18,18 +18,22 @@ import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.model.MatchingReturnObject;
 import org.meveo.model.PartialMatchingOccToSelect;
 import org.meveo.model.billing.AccountingCode;
+import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.AccountOperationStatus;
+import org.meveo.model.payments.MatchingAmount;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.OtherCreditAndCharge;
 import org.meveo.model.payments.RecordedInvoice;
+import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.MatchingCodeService;
 import org.meveo.service.payments.impl.OCCTemplateService;
+import org.meveo.service.payments.impl.OtherCreditAndChargeService;
 import org.meveo.service.payments.impl.PaymentPlanService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.securityDeposit.impl.SecurityDepositTransactionService;
@@ -86,7 +90,8 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 	
 	@Inject
 	private OCCTemplateService occTemplateService;
-
+	
+	
 	@Override
 	public List<AccountOperation> list(Long offset, Long limit, String sort, String orderBy, String filter) {
 		// TODO Auto-generated method stub
@@ -239,7 +244,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 					if (amountToMatch != null) {
 						if (amountToMatch.compareTo(BigDecimal.ZERO) <= 0) {
 							throw new BusinessApiException("The amount to match must be greater than 0");
-						} else if (amountToMatch.compareTo(accountOperation.getUnMatchingAmount()) == 0) {
+						} else if (amountToMatch.compareTo(accountOperation.getUnMatchingAmount()) > 0) {
 							throw new BusinessApiException("The amount to match must be less than : " + accountOperation.getUnMatchingAmount().doubleValue() + " for sequence : " + sequence);
 						}
 						accountOperation.setAmountForUnmatching(amountToMatch);
@@ -279,7 +284,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 			matchingResult.setPartialMatchingOcc(partialMatchingOcc);
 			if (CollectionUtils.isNotEmpty(aos)) {
 			    TradingCurrency theFirstTradingCurrency = aos.get(0).getTransactionalCurrency();
-				for (AccountOperation debitAO : debitAOs) {
+				var debitAOIds = debitAOs.stream().map(AccountOperation::getId).collect(Collectors.toList());
 					for (AccountOperation creditAO : creditAOs) {
 						if (!theFirstTradingCurrency.getId().equals(creditAO.getTransactionalCurrency().getId())) {
 							throw new BusinessApiException(resourceMessages.getString("accountOperation.error.sameCurrency"));
@@ -287,7 +292,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 						if (creditAO.getMatchingStatus() != MatchingStatusEnum.O && creditAO.getMatchingStatus() != MatchingStatusEnum.P) {
 							continue;
 						}
-						MatchingReturnObject unitaryResult = matchingCodeService.matchOperations(customer.getId(),	customer.getCode(), List.of(creditAO.getId(), debitAO.getId()), creditAO.getId(), creditAO.getAmountForUnmatching());
+						MatchingReturnObject unitaryResult = matchingCodeService.matchOperations(customer.getId(),	customer.getCode(), debitAOIds, creditAO.getId(), creditAO.getAmountForUnmatching());
 
 						if (matchingResult.getPartialMatchingOcc() != null) {
 							partialMatchingOcc.addAll(matchingResult.getPartialMatchingOcc());
@@ -295,7 +300,6 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 
 						matchingResult.setOk(unitaryResult.isOk());
 					}
-				}
 			}
 
 			if (partialMatchingOcc.isEmpty()) {
@@ -563,5 +567,31 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 			}
 		}
 		log.info("check if all customer have same currency : all customer have same currency");
+	}
+	
+	public void closeOperations(List<Long> aoIdToBeClosed) {
+		List<AccountOperation> accountOperations = accountOperationService.findByIds(aoIdToBeClosed, List.of("matchingAmounts", "customerAccount"));
+		if(CollectionUtils.isEmpty(accountOperations)) {
+			throw new EntityDoesNotExistsException("No entity found with ids : " + aoIdToBeClosed);
+		}
+		// check if all account has code INT_ADV
+		List<AccountOperation> accountOperationsWithCode = accountOperations.stream()
+				.filter(accountOperation -> accountOperation.getCode().contentEquals("INV_ADV"))
+				.collect(Collectors.toList());
+		if(CollectionUtils.isEmpty(accountOperationsWithCode)) {
+			throw new BusinessApiException("Only Account Operation having the code INV_ADV can be closed");
+		}
+		// check if all account operations have INT_ADV and its matching status are OPEN or PARTIAL
+		List<AccountOperation> accountOperationsToBeClosed = accountOperationsWithCode.stream()
+				.filter(accountOperation -> accountOperation.getMatchingStatus() == MatchingStatusEnum.O || accountOperation.getMatchingStatus() == MatchingStatusEnum.P)
+				.flatMap(accountOperation -> accountOperation.getMatchingAmounts().stream())
+				.map(MatchingAmount::getAccountOperation)
+				.collect(Collectors.toList());
+		if(CollectionUtils.isEmpty(accountOperationsToBeClosed)) {
+			throw new BusinessApiException("Only Account Operation having matchingStatus = Open or partially matched can be closed");
+		}
+		accountOperationService.closeAccountOperations(accountOperationsToBeClosed.stream().map(AccountOperation::getId).collect(Collectors.toList()));
+		
+		
 	}
 }

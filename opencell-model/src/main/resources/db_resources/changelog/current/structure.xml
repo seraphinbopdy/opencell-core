@@ -12592,14 +12592,29 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-23038_20240515" author="TarikFA." failOnError="false">
+        <insert tableName="ar_occ_template" >
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="PPL_INSTALLMENT" />
+            <column name="description" value="Payment plan Installment" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <column name="manual_creation_enabled" valueNumeric="0" />
+        </insert>
+    </changeSet>
 
-    <changeSet id="INTRD-23881_20240702" author="TarikFA.">
+    <changeSet id="INTRD-23881_20240702" author="TarikFA." failOnError="false">
         <addColumn tableName="advanced_settings">
             <column name="description_i18n" type="${type.json}" />
         </addColumn>
     </changeSet>
 
-    <changeSet id="INTRD-23882_20240702" author="TarikFA.">
+    <changeSet id="INTRD-23882_20240702" author="TarikFA." failOnError="false">
         <update tableName="advanced_settings">
             <column name="description" value="Activate price plan filters"/>
             <column name="description_i18n" value='{"FRA":"Activer les filtres de price plan","ENG":"Activate price plan filters"}'/>
@@ -12750,6 +12765,222 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="description" value="Allow past delivery dates on orders"/>
             <column name="description_i18n" value='{"FRA":"Autoriser les dates de livraison dans le passé pour les commandes","ENG":"Allow past delivery dates on orders"}'/>
         </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-23732_20240715" author="TarikFA." failOnError="false">
+        <addColumn tableName="ar_account_operation">
+            <column name="origin_call_for_payment_id" type="bigint" />
+            <column name="origin_payment_id" type="bigint" />
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_call_for_payment_id"
+                constraintName="origin_call_for_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_payment_id"
+                constraintName="origin_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+    </changeSet>
+
+    <changeSet id="#INTRD-23734_20240715" author="TarikFA." failOnError="false">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="CallForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="allowUsingUnpaidAdvance"/>
+            <column name="description" value="If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."/>
+            <column name="description_i18n" value='{"FRA":"Si ce paramètre est activé, alors Opencell n’attendra pas qu’un appel acompte validé soit effectivement payé pour l’utiliser sur une facture.
+Habituellement, ce comportement n’est souhaitable que si vous ne gérez pas la balance client dans Opencell.","ENG":"If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."}'/>
+        </insert>
+
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="CallForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="autoCloseAdvanceAfterInvoiceValidation"/>
+            <column name="description" value="Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.
+Meaning that advances won’t be available for further invoices."/>
+            <column name="description_i18n">
+                <![CDATA[{
+	"FRA": "Les appels d’acompte liés à la facture seront automatiquement closes quand la facture est validée.Cela signifie que les acomptes ne seront pas disponibles pour de futures factures.",
+	"ENG": "Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.Meaning that advances won’t be available for further invoices."
+}]]>
+            </column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="INTRD-23733" author="TarikFA." failOnError="false">
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="PAY_ADV" />
+            <column name="description" value="Payment account operation to match a call for advance payment. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="CREDIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="CLOSED_ADV" />
+            <column name="description" value="Payment account operation to match a call for advance payment that has been closed while still having unmatched amount. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="CREDIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="REJ_ADV" />
+            <column name="description" value="Dummy payment rejection account operation to match and negate the payment account operation (PAY_ADV) for call for advance payment. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="DEBIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+    </changeSet>
+    <changeSet id="INTRD-22963_20240720" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+                public class RetryPaymentScript extends RetryRejectionPaymentScript {}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.RetryPaymentScript'</where>
+        </update>
+    </changeSet>
+    
+    <changeSet id="#INTRD-24602_20240722" author="AndriusKarpavicius">
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl_val where customfieldtemplate_id in (select id from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob'))</sql>
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl_mcols where cft_id in (select id from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob'))</sql>
+        <sql>delete from ${db.schema.adapted}crm_custom_field_tmpl where applies_to in ('JobInstance_XMLInvoiceGenerationJob', 'JobInstance_XMLInvoiceGenerationJobV2', 'JobInstance_PDFInvoiceGenerationJob')</sql>
+    </changeSet>
+
+    <changeSet id="INTRD-24619_20240724" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"<p> This action will set up the invoices linked to the rejected payment for a new payment request.<br> Invoice’s payment request count will be increment by 1, and collection date will be set to “rejection date + retry delay“.</p><p>If the number of payment requests on the invoice is already greater that the maximum number of retries, you can choose to send the invoices to litigation, or do nothing (and wait for dunning to trigger, if you implemented it).</p>", "FRA":"<p>Cette action représentera pour paiement les factures liées au paiement rejeté.<br>Le nombre de demande de paiement des factures sera augmenté de 1, et la date de mise en paiement sera “date de rejet + délai de rejet“.</p> <p>Si le nombre de demandes de paiement sur la facture est déjà supérieur au nombre maximum de rejeux, vous pouvez décider de passer les factures en litige, ou ne rien faire (et attendre le déclenchement de la relance, si vous l’avez implémenté).</p>"}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.RetryPaymentScript'</where>
+        </update>
+        <update tableName="meveo_script_parameter">
+            <column name="default_value" value="false"/>
+            <where>code = 'litigationAfterRetry'</where>
+        </update>
+        <addDefaultValue tableName="ar_account_operation" columnName="payment_requests" defaultValue="0" />
+    </changeSet>
+
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
+
+    <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe">
+        <update tableName="advanced_settings">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"Valid from", "FRA":"Valide depuis"}]]>
+            </column>
+            <column name="description" value="Valid from" />
+            <where>code = 'pricePlanFilters.enableValidityFrom'</where>
+        </update>
+        <update tableName="advanced_settings">
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"Valid to", "FRA":"Valide jusqu'à"}]]>
+            </column>
+            <column name="description" value="Valid to" />
+            <where>code = 'pricePlanFilters.enableValidityDate'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI">
+        <dropColumn columnName="invoice_subject_code" tableName="billing_invoice_type" />
+    </changeSet>
+    
+    <changeSet id="#INTRD-21018_20240723" author="ZakariaB">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+            <column name="code" value="org.meveo.service.script.EnterLitigation"/>
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+ public class EnterLitigation extends Script {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="src_type" value="JAVA"/>
+            <column name="description" value="This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason."/>
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason.", "FRA":"Cette action passera inconditionnellement les factures liées au rejet de paiement en litige, avec le motif fourni."}]]>
+            </column>
+            <column name="script_instance_cat_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"/>
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="litigationReason"/>
+            <column name="description_i18n" value='{"FRA":"Motif de mise en litige","ENG":"Litigation reason"}'/>
+            <column name="mandatory" valueNumeric="1"/>
+            <column name="class_name" value="java.lang.String"/>
+            <column name="default_value" value=""/>
+            <column name="values_separator" value="\|"/>
+            <column name="collection" valueNumeric="0"/>
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.EnterLitigation')"/>
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-24686_20240807" author="TarikFa.">
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'CLOSED_ADV')"/>
+        </insert>
+        <insert tableName="ar_customer_balance_templates">
+            <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
+            <column name="template_id" valueComputed="(select id from ar_occ_template where code = 'PAY_ADV')"/>
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe">
+        <addColumn tableName="rating_edr">
+            <column name="zero_wo_dropped"  type="${type.boolean}" defaultValueNumeric="0" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="INTRD-21018_20240806" author="ZakariaB">
+        <update tableName="meveo_script_instance">
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+                public class EnterLitigation extends EnterLitigationScript {}]]>
+            </column>
+            <where>code = 'org.meveo.service.script.EnterLitigation'</where>
+        </update>
     </changeSet>
 
 </databaseChangeLog>

@@ -27,11 +27,6 @@
             selection="#{invoiceTypeBean.entity.untdidInvoiceCodeType}" backingBean="#{invoiceCodeTypeBean}" searchField1Label="#{messages['businessEntity.code']}" searchField1="code"
             column1Label="#{messages['businessEntity.code']}" column1="code" column2Label="#{messages['invoiceType.invoiceCodeType.codeName']}" column2="name">
         </hftl:entityPopup>     
-        <hftl:entityPopup id="searchInvoiceSubjectCodePopup" header="#{messages['invoiceType.invoiceSubjectCode']}" updateField=":formInvoiceType:invoiceSubjectCodeSelectedId :formInvoiceType:invoiceSubjectCodeSelectedId_text"
-            selection="#{invoiceTypeBean.entity.invoiceSubjectCode}" backingBean="#{invoiceSubjectCodeBean}" searchField1Label="#{messages['businessEntity.code']}" searchField1="code"
-            column1Label="#{messages['businessEntity.code']}" column1="code" column2Label="#{messages['invoiceType.invoiceSubjectCode.codeName']}" column2="codeName">
-        </hftl:entityPopup>       
-        
         <hftl:entityPopup id="invoiceTypeScriptPopup" header="#{messages['scriptInstance.popup.header']}"
             updateField=":formInvoiceType:customInvoiceXmlScriptId :formInvoiceType:customInvoiceXmlScriptId_text" selection="#{invoiceTypeBean.entity.customInvoiceXmlScriptInstance}"
             backingBean="#{scriptInstanceBean}" searchField1Label="#{messages['businessEntity.code']}" searchField1="code" column1Label="#{messages['businessEntity.code']}" column1="code"
@@ -83,9 +78,7 @@
             <hftl:formField label="#{messages['invoiceType.invoiceSequence']}" id="invoiceSequenceSelectedId" field="invoiceSequence" valueLabelField="code" popup="true" popupId="searchInvoiceSequencePopup"
                 required="true" />
             
-            <hftl:formField label="#{messages['invoiceType.invoiceSubjectCode']}" id="invoiceSubjectCodeSelectedId" field="invoiceSubjectCode" valueLabelField="codeName" popup="true" popupId="searchInvoiceSubjectCodePopup"
-                required="false" />
-			<hftl:formField label="#{messages['invoiceType.invoiceCodeType']}" id="invoiceCodeTypeSelectedId" field="untdidInvoiceCodeType" valueLabelField="name" popup="true" popupId="searchInvoiceCodeTypePopup"
+            <hftl:formField label="#{messages['invoiceType.invoiceCodeType']}" id="invoiceCodeTypeSelectedId" field="untdidInvoiceCodeType" valueLabelField="name" popup="true" popupId="searchInvoiceCodeTypePopup"
                 required="false" />  
                   
             <hftl:formField label="#{messages['invoice.mailingType']}" listenerUpdate="emailTemplateId" field="mailingType" disabled="false" noSelectionLabel="false"/>

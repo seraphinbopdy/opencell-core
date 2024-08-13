@@ -126,7 +126,7 @@ public class QuoteMapper {
         List<QuotePrice> allQuotesPrice = quoteVersion.getQuoteArticleLines().stream().flatMap(e -> e.getQuotePrices().stream()).filter(e -> PriceLevelEnum.QUOTE.equals(e.getPriceLevelEnum())).collect(toList());
         String defaultConsumer = quoteVersion.getQuote().getUserAccount() != null ? quoteVersion.getQuote().getUserAccount().getCode() : null;
         Details details = new Details(new Quote(billableAccounts, quote.getQuoteNumber(), quote.getQuoteDate(),
-                entityToDtoConverter.getCustomFieldsDTO(quoteVersion), defaultConsumer), aggregatePricesPerType(allQuotesPrice, mapTaxIndexes));
+                entityToDtoConverter.getCustomFieldsDTO(quoteVersion), defaultConsumer), aggregatePricesPerType(allQuotesPrice, mapTaxIndexes,PriceLevelEnum.QUOTE));
 
         return new QuoteXmlDto(header, details);
     }
@@ -154,7 +154,7 @@ public class QuoteMapper {
                                          .filter(e -> PriceLevelEnum.QUOTE.equals(e.getPriceLevelEnum()))
                                          .collect(toList());
 
-        return new BillableAccount(ba.getCode(), quoteLots, aggregatePricesPerType(baPrices, mapTaxIndexes));
+        return new BillableAccount(ba.getCode(), quoteLots, aggregatePricesPerType(baPrices, mapTaxIndexes,PriceLevelEnum.QUOTE));
 
     }
 
@@ -222,7 +222,7 @@ public class QuoteMapper {
                             currencies.put(quotePrice.getCurrencyCode(), currencyService.findByTradingCurrencyCode(quotePrice.getCurrencyCode()));
                         }
                     });
-                    return new QuoteLine(line,mapToOffer(line.getQuoteProduct() != null?line.getQuoteProduct().getQuoteOffer():null, mapTaxIndexes), currencies, mapTaxIndexes);
+                    return new QuoteLine(line,mapToOffer(line.getQuoteProduct(), mapTaxIndexes), currencies, mapTaxIndexes);
                 })
     			.collect(Collectors.toList()));
     	return accountingArticleDto; 
@@ -252,7 +252,7 @@ public class QuoteMapper {
                                 currencies.put(quotePrice.getCurrencyCode(), currencyService.findByTradingCurrencyCode(quotePrice.getCurrencyCode()));
                             }
                         });
-                        return new QuoteLine(line, mapToOffer(line.getQuoteProduct() != null ? line.getQuoteProduct().getQuoteOffer() : null, mapTaxIndexes), currencies, mapTaxIndexes);
+                        return new QuoteLine(line, mapToOffer(line.getQuoteProduct(), mapTaxIndexes), currencies, mapTaxIndexes);
                     })
                     .collect(Collectors.toList()));
             return accountingArticleDto;
@@ -260,15 +260,14 @@ public class QuoteMapper {
         return null;
     }
 
-    private org.meveo.api.dto.cpq.xml.Offer mapToOffer(QuoteOffer quoteOffer, Map<String, TaxDTO> mapTaxIndexes) {
+    private org.meveo.api.dto.cpq.xml.Offer mapToOffer(QuoteProduct quoteProduct, Map<String, TaxDTO> mapTaxIndexes) {
+    	QuoteOffer quoteOffer=quoteProduct!=null?quoteProduct.getQuoteOffer():null;
     	if(quoteOffer==null) {
     		return null;
     	}
     	org.meveo.api.dto.cpq.xml.Offer quoteOfferDto = new  org.meveo.api.dto.cpq.xml.Offer(quoteOffer,entityToDtoConverter.getCustomFieldsDTO(quoteOffer));
 
-    	quoteOfferDto.setProducts(quoteOffer.getQuoteProduct().stream()
-    			.map(product ->  mapToProduct(product, mapTaxIndexes))
-    			.collect(Collectors.toList()));
+    	quoteOfferDto.addProduct(mapToProduct(quoteProduct, mapTaxIndexes));
     	
     	quoteOfferDto.setAttributes(quoteOffer.getQuoteAttributes().stream()
     			.map(product ->  mapToAttribute(product))
@@ -283,10 +282,10 @@ public class QuoteMapper {
         List<QuotePrice> price = quoteProduct.getQuoteArticleLines()
                                              .stream()
                                              .flatMap(line -> line.getQuotePrices().stream())
-                                             .filter(e -> PriceLevelEnum.QUOTE.equals(e.getPriceLevelEnum()))
+                                             .filter(e -> PriceLevelEnum.PRODUCT.equals(e.getPriceLevelEnum()))
                                              .collect(toList());
         
-    	org.meveo.api.dto.cpq.xml.Product quoteProductDto = new  org.meveo.api.dto.cpq.xml.Product(quoteProduct,entityToDtoConverter.getCustomFieldsDTO(quoteProduct), aggregatePricesPerType(price, mapTaxIndexes));
+    	org.meveo.api.dto.cpq.xml.Product quoteProductDto = new  org.meveo.api.dto.cpq.xml.Product(quoteProduct,entityToDtoConverter.getCustomFieldsDTO(quoteProduct), aggregatePricesPerType(price, mapTaxIndexes,PriceLevelEnum.PRODUCT));
 
     	quoteProductDto.setAttributes(quoteProduct.getQuoteAttributes().stream()
     			.map(product ->  mapToAttribute(product))
@@ -304,14 +303,14 @@ public class QuoteMapper {
         return ba.getTradingLanguage().getLanguageCode();
     }
 
-    private List<PriceDTO> aggregatePricesPerType(List<QuotePrice> baPrices, Map<String, TaxDTO> mapTaxIndexes) {
+    private List<PriceDTO> aggregatePricesPerType(List<QuotePrice> baPrices, Map<String, TaxDTO> mapTaxIndexes,PriceLevelEnum priceLevelEnum) {
         Map<PriceTypeEnum, List<QuotePrice>> pricesPerType = baPrices.stream()
                 .collect(Collectors.groupingBy(QuotePrice::getPriceTypeEnum));
 
         return pricesPerType
                 .keySet()
                 .stream()
-                .map(key -> UtilsDto.reducePrices(key, pricesPerType, PriceLevelEnum.QUOTE, null, null))
+                .map(key -> UtilsDto.reducePrices(key, pricesPerType, priceLevelEnum, null, null))
                 .filter(Optional::isPresent)
                 .map(price -> new PriceDTO(price.get(), currencyService.findByTradingCurrencyCode(price.get().getCurrencyCode()), mapTaxIndexes)).collect(Collectors.toList());
     }

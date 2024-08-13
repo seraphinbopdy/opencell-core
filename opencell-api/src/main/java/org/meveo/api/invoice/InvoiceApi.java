@@ -609,16 +609,22 @@ public class InvoiceApi extends BaseApi {
                }
             }
         }
-        serviceSingleton.validateAndAssignInvoiceNumber(invoiceId, refreshExchangeRate);
+		List<Invoice> advList = invoice.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV")).map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
+	    invoiceService.checkIfAllAdvArePaid(invoice, advList);
+	    serviceSingleton.validateAndAssignInvoiceNumber(invoiceId, refreshExchangeRate);
         Boolean brGenerateAO = ofNullable(invoice.getBillingRun()).map(BillingRun::getGenerateAO).orElse(false);
         if(brGenerateAO || generateAO) {
-            invoiceService.generateRecordedInvoiceAO(invoiceId);
+	        if(advList.isEmpty()) {
+		        invoiceService.generateRecordedInvoiceAO(invoice.getId());
+	        }else{
+		        invoiceService.generateAoFromAdv(invoice, advList) ;
+	        }
         }
         invoiceService.recalculateDatesForValidated(invoiceId);
         //serviceSingleton.triggersJobs(); // Commented to avoid performance issues
 
         Date today = new Date();
-        invoice = invoiceService.refreshOrRetrieve(invoice);
+      //  invoice = invoiceService.findById(invoice.getId());
         
         //Create SD
         if (invoice.getInvoiceType() != null && "SECURITY_DEPOSIT".equals(invoice.getInvoiceType().getCode()) && createSD) {

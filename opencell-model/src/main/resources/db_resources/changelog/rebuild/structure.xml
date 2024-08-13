@@ -2199,7 +2199,9 @@
             <column name="source_account_operation_id" type="bigint" />
             <column name="payment_gateway_id" type="bigint" />
             <column name="rejection_actions_status" type="varchar(30)" />
-            <column name="payment_requests" type="bigint" />
+            <column name="payment_requests" type="bigint" defaultValue="0" />
+            <column name="origin_call_for_payment_id" type="bigint" />
+            <column name="origin_payment_id" type="bigint" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-146">
@@ -6141,6 +6143,7 @@
             <column name="event_version" type="int4" />
 			<column name="wallet_operation_id" type="bigint"/>
 			<column name="business_key" type="VARCHAR(255)" />
+            <column name="zero_wo_dropped"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
         <modifySql dbms="postgresql">
         	<append value=" PARTITION BY LIST(status)"/>
@@ -19366,6 +19369,24 @@
                                  referencedTableName="meveo_script_instance"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="#INTRD-23732_20240715-rebuild-fk" author="TarikFA.">
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_call_for_payment_id"
+                constraintName="origin_call_for_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+
+        <addForeignKeyConstraint
+                baseTableName="ar_account_operation"
+                baseColumnNames="origin_payment_id"
+                constraintName="origin_payment_id_fk"
+                referencedTableName="ar_account_operation" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+    </changeSet>
     
     <!-- end fk -->
 
@@ -20928,7 +20949,25 @@
     <changeSet id="INTRD-24052_ReRateV2_filter" author="a.rouaguebe" />
     <changeSet id="INTRD-23881_20240701" author="TarikFA." />
     <changeSet id="INTRD-23882_20240702" author="TarikFA." />
+    <changeSet id="#INTRD-23732_20240715" author="TarikFA." />
+    <changeSet id="INTRD-22955_20240521" author="ZBariki" />
+    <changeSet id="INTRD-22963_20240720" author="ZakariaB" />
+    <changeSet id="#INTRD-24602_20240722" author="AndriusKarpavicius" />
+    <changeSet id="INTRD-24619_20240724" author="ZakariaB" />
+    <changeSet id="INTRD-23881_20240702" author="TarikFA." />
+    <changeSet id="#INTRD-21018_20240723" author="ZakariaB" />
 
+    <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
+    <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-24686_20240807" author="TarikFa." />
+    <changeSet id="INTRD-21018_20240806" author="ZakariaB" />
+
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
+
+    <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe" />
+    
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 
 </databaseChangeLog>

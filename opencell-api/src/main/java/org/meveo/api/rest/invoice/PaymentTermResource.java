@@ -15,7 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/billing/invoicing/paymentTerms")
+@Path("/v2/billing/invoicing/paymentTerms")
 @Tag(name = "paymentTerms", description = "@%PaymentTermrs")
 @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

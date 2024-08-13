@@ -108,7 +108,7 @@ import org.meveo.model.finance.AccountingEntry;
     	@NamedQuery(name = "AccountOperation.countUnmatchedAOByCA", query = "Select count(*) from AccountOperation as ao where ao.unMatchingAmount <> 0 and ao"
                 + ".customerAccount=:customerAccount"),
         @NamedQuery(name = "AccountOperation.listByCustomerAccount", query = "select ao from AccountOperation ao inner join ao.customerAccount ca where ca=:customerAccount"),
-        @NamedQuery(name = "AccountOperation.listByInvoice", query = "select ao from AccountOperation ao inner join ao.invoices inv where inv = :invoice"),
+        @NamedQuery(name = "AccountOperation.listByInvoice", query = "select ao from AccountOperation ao where exists (select 1 from Invoice inv where inv.recordedInvoice.id = ao.id and inv = :invoice )"),
         @NamedQuery(name = "AccountOperation.findAoClosedSubPeriodByStatus", query = "SELECT ao FROM AccountOperation ao" +
                 " INNER JOIN SubAccountingPeriod sap ON sap.allUsersSubPeriodStatus = 'CLOSED' AND sap.startDate <= ao.accountingDate AND sap.endDate >= ao.accountingDate" +
                 " AND ao.status IN (:AO_STATUS)"),
@@ -521,6 +521,14 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
 	@JoinColumn( name = "source_account_operation_id" )
 	@ManyToOne(fetch = FetchType.LAZY)
 	private AccountOperation sourceAccountOperation;
+	
+	@JoinColumn( name = "origin_call_for_payment_id" )
+	@ManyToOne(fetch = FetchType.LAZY)
+	private AccountOperation originCallPayment;
+	
+	@JoinColumn( name = "origin_payment_id" )
+	@ManyToOne(fetch = FetchType.LAZY)
+	private AccountOperation originPayment;
 
     public Date getDueDate() {
         return dueDate;
@@ -1225,5 +1233,21 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
 	
 	public void setSourceAccountOperation(AccountOperation sourceAccountOperation) {
 		this.sourceAccountOperation = sourceAccountOperation;
+	}
+	
+	public AccountOperation getOriginCallPayment() {
+		return originCallPayment;
+	}
+	
+	public void setOriginCallPayment(AccountOperation originCallPayment) {
+		this.originCallPayment = originCallPayment;
+	}
+	
+	public AccountOperation getOriginPayment() {
+		return originPayment;
+	}
+	
+	public void setOriginPayment(AccountOperation originPayment) {
+		this.originPayment = originPayment;
 	}
 }

@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
  * @since 15.0
  *
  */
-@Path("/catalog/priceList")
+@Path("/v2/catalog/priceList")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface PriceListResource {

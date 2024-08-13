@@ -50,7 +50,7 @@ public class QuoteLine {
         }
         List<QuotePrice> quotePrices = line.getQuotePrices()
                                            .stream()
-                                           .filter(e -> PriceLevelEnum.QUOTE.equals(e.getPriceLevelEnum()))
+                                           .filter(e -> PriceLevelEnum.PRODUCT.equals(e.getPriceLevelEnum()))
                                            .collect(Collectors.toList());
         this.prices = aggregatePricesPerType(quotePrices, currencies, mapTaxIndexes);
         this.offer= offer;
@@ -76,7 +76,7 @@ public class QuoteLine {
         return pricesPerType.get(key).stream().reduce((a, b) -> {
             QuotePrice quotePrice = new QuotePrice();
             quotePrice.setPriceTypeEnum(key);
-            quotePrice.setPriceLevelEnum(PriceLevelEnum.OFFER);
+            quotePrice.setPriceLevelEnum(PriceLevelEnum.PRODUCT);
             quotePrice.setTaxAmount(a.getTaxAmount().add(b.getTaxAmount()));
             quotePrice.setAmountWithTax(a.getAmountWithTax().add(b.getAmountWithTax()));
             quotePrice.setAmountWithoutTax(a.getAmountWithoutTax().add(b.getAmountWithoutTax()));

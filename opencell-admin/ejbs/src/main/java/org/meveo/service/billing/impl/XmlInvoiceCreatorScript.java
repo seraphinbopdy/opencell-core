@@ -17,11 +17,6 @@
  */
 package org.meveo.service.billing.impl;
 
-import static java.util.Collections.emptyList;
-import static java.util.Optional.ofNullable;
-import static org.meveo.commons.utils.NumberUtils.toPlainString;
-import static org.meveo.commons.utils.StringUtils.getDefaultIfNull;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.storage.StorageFactory;
@@ -35,7 +30,40 @@ import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.RegistrationNumber;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.admin.Seller;
-import org.meveo.model.billing.*;
+import org.meveo.model.billing.BankCoordinates;
+import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.BillingCycle;
+import org.meveo.model.billing.BillingRun;
+import org.meveo.model.billing.BillingRunStatusEnum;
+import org.meveo.model.billing.CategoryInvoiceAgregate;
+import org.meveo.model.billing.ChargeInstance;
+import org.meveo.model.billing.CounterInstance;
+import org.meveo.model.billing.CounterPeriod;
+import org.meveo.model.billing.Country;
+import org.meveo.model.billing.Invoice;
+import org.meveo.model.billing.InvoiceAgregate;
+import org.meveo.model.billing.InvoiceCategory;
+import org.meveo.model.billing.InvoiceConfiguration;
+import org.meveo.model.billing.InvoiceLine;
+import org.meveo.model.billing.InvoicePaymentStatusEnum;
+import org.meveo.model.billing.InvoiceStatusEnum;
+import org.meveo.model.billing.InvoiceSubCategory;
+import org.meveo.model.billing.InvoiceSubTotals;
+import org.meveo.model.billing.InvoiceType;
+import org.meveo.model.billing.LinkedInvoice;
+import org.meveo.model.billing.RatedTransaction;
+import org.meveo.model.billing.ServiceInstance;
+import org.meveo.model.billing.SubCategoryInvoiceAgregate;
+import org.meveo.model.billing.SubcategoryInvoiceAgregateAmount;
+import org.meveo.model.billing.Subscription;
+import org.meveo.model.billing.Tax;
+import org.meveo.model.billing.TaxInvoiceAgregate;
+import org.meveo.model.billing.TradingCurrency;
+import org.meveo.model.billing.TradingLanguage;
+import org.meveo.model.billing.UserAccount;
+import org.meveo.model.billing.WalletInstance;
+import org.meveo.model.billing.WalletOperation;
+import org.meveo.model.billing.XMLInvoiceHeaderCategoryDTO;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.PricePlanMatrix;
@@ -54,11 +82,13 @@ import org.meveo.model.payments.CustomerAccountStatusEnum;
 import org.meveo.model.payments.DDPaymentMethod;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.PaymentTerm;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
+import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.crm.impl.AccountEntitySearchService;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.util.ApplicationProvider;
@@ -95,11 +125,16 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
+import static org.meveo.commons.utils.NumberUtils.toPlainString;
+import static org.meveo.commons.utils.StringUtils.getDefaultIfNull;
 
 /**
  * A default implementation of XML invoice creation.
@@ -191,6 +226,9 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
     protected Logger log = LoggerFactory.getLogger(getClass());
     @Inject
     protected AccountEntitySearchService accountEntitySearchService;
+	
+	@Inject
+	protected PaymentTermService paymentTermService;
 
     /**
      * Create XML invoice and store its content in a file. Note: Just creates a file - does not update invoice with file information
@@ -1675,7 +1713,6 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         invoiceTag.setAttribute("id", invoice.getId() != null ? invoice.getId().toString() : "");
         invoiceTag.setAttribute("invoiceCodeType", invoice.getInvoiceType().getUntdidInvoiceCodeType() != null ? invoice.getInvoiceType().getUntdidInvoiceCodeType().getCode() : "");
         invoiceTag.setAttribute("invoiceCodeTypeLabel", invoice.getInvoiceType().getUntdidInvoiceCodeType() != null ? invoice.getInvoiceType().getUntdidInvoiceCodeType().getInterpretation16931() : "");
-        invoiceTag.setAttribute("invoiceSubjectCode", invoice.getInvoiceType().getInvoiceSubjectCode() != null ? invoice.getInvoiceType().getInvoiceSubjectCode().getCode() : "");
         invoiceTag.setAttribute("country", invoice.getTradingCountry() != null ? invoice.getTradingCountry().getCode() : "");
         invoiceTag.setAttribute("currency", (invoice.getTradingCurrency() != null && invoice.getTradingCurrency().getCurrency() != null) ? invoice.getTradingCurrency().getCurrency().getCurrencyCode() : "");
         invoiceTag.setAttribute("customerId", invoice.getBillingAccount().getCustomerAccount().getCustomer().getCode());
@@ -2188,6 +2225,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         ofNullable(createSubTotals(doc, invoice.getInvoiceType(),
                 invoice.getInvoiceLines(), invoice.getBillingAccount().getTradingLanguage()))
                 .ifPresent(header::appendChild);
+		header.appendChild(createPaymentTerm(invoice, doc, invoice.getTradingLanguage() != null ? invoice.getTradingLanguage().getLanguageCode() : null));
         return header;
     }
 
@@ -3350,5 +3388,22 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
 			partyIdentification.appendChild(companyId);
 		});
 		return partyIdentification;
+	}
+	private Element createPaymentTerm(Invoice invoice, Document doc, String invoiceLanguageCode){
+		List<PaymentTerm> paymentTerms = paymentTermService.findAllEnabledPaymentTerm();
+		Element paymentTermNode = null;
+		if(CollectionUtils.isNotEmpty(paymentTerms)){
+			PaymentTerm paymentTerm = paymentTerms.get(0);
+			paymentTermNode = doc.createElement("paymentTerms");
+			paymentTermNode.setAttribute("code", paymentTerm.getCode());
+			Element description = doc.createElement("description");
+			if(invoiceLanguageCode != null && paymentTerm.getDescriptionI18n() != null && paymentTerm.getDescriptionI18n().get(invoiceLanguageCode) != null){
+				description.appendChild(this.createTextNode(doc,ValueExpressionWrapper.evaluateToStringMultiVariable(paymentTerm.getDescriptionI18n().get(invoiceLanguageCode), "invoice", invoice, "inv", invoice)));
+			}else{
+				description.setNodeValue(ValueExpressionWrapper.evaluateToStringMultiVariable(paymentTerm.getDescription(), "invoice", invoice, "inv", invoice));
+			}
+			paymentTermNode.appendChild(description);
+		}
+		return paymentTermNode;
 	}
 }

@@ -76,6 +76,7 @@ import org.meveo.util.ApplicationProvider;
 import org.meveo.util.MeveoParamBean;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import java.math.BigDecimal;
@@ -887,12 +888,18 @@ public class AccountHierarchyApi extends BaseApi {
         return result;
     }
 
+    @TransactionAttribute
+    public void customerHierarchyUpdate(CustomerHierarchyDto postData) throws MeveoApiException, BusinessException {
+        this.customerHierarchyUpdate(postData, Version.V1);
+    }
+
     /**
      * @param postData posted data to API
      * @throws MeveoApiException meveo api exception
      * @throws BusinessException business exception
      */
-    public void customerHierarchyUpdate(CustomerHierarchyDto postData) throws MeveoApiException, BusinessException {
+    @TransactionAttribute
+    public void customerHierarchyUpdate(CustomerHierarchyDto postData, Version version) throws MeveoApiException, BusinessException {
         if (postData.getSellers() == null || postData.getSellers().getSeller().isEmpty()) {
             missingParameters.add("sellers");
             handleMissingParameters();
@@ -908,7 +915,8 @@ public class AccountHierarchyApi extends BaseApi {
             currencyApi.findOrCreate(sellerDto.getCurrencyCode());
             languageApi.findOrCreate(sellerDto.getLanguageCode());
 
-            methodCallingUtils.callMethodInNewTx(() -> sellerApi.createOrUpdate(sellerDto));
+            sellerApi.createOrUpdate(sellerDto);
+            sellerService.getEntityManager().flush();
 
             // customers
             if (sellerDto.getCustomers() != null) {
@@ -917,12 +925,30 @@ public class AccountHierarchyApi extends BaseApi {
                         log.warn("CustomerDto's code is null={}", customerDto);
                         continue;
                     }
+
+                    if(Boolean.TRUE.equals(customerDto.getIsCompany()) && Version.V2.equals(version)) {
+                        if(customerDto.getLegalEntityType() == null || StringUtils.isBlank(customerDto.getLegalEntityType().getCode())) {
+                            missingParameters.add("customer.legalEntityType.code");
+                        }
+
+                        if(StringUtils.isBlank(customerDto.getDescription())) {
+                            missingParameters.add("customer.description");
+                        }
+
+                        if(CollectionUtils.isEmpty(customerDto.getRegistrationNumbers())) {
+                            missingParameters.add("customer.registrationNumbers");
+                        }
+
+                        handleMissingParameters();
+                    }
+                    
                     if (!StringUtils.isBlank(customerDto.getSeller()) && !customerDto.getSeller().equalsIgnoreCase(sellerDto.getCode())) {
                         throw new MeveoApiException("Customer's seller " + customerDto.getSeller() + " doesn't match with parent seller " + sellerDto.getCode());
                     } else {
                         customerDto.setSeller(sellerDto.getCode());
                     }
-                    methodCallingUtils.callMethodInNewTx(() -> customerApi.createOrUpdatePartial(customerDto));
+                    customerApi.createOrUpdatePartial(customerDto);
+                    customerService.getEntityManager().flush();
 
                     // customerAccounts
                     if (customerDto.getCustomerAccounts() != null) {
@@ -931,13 +957,31 @@ public class AccountHierarchyApi extends BaseApi {
                                 log.warn("code is null={}", customerAccountDto);
                                 continue;
                             }
+
+                            if(Boolean.TRUE.equals(customerAccountDto.getIsCompany()) && Version.V2.equals(version)) {
+                                if(customerAccountDto.getLegalEntityType() == null || StringUtils.isBlank(customerAccountDto.getLegalEntityType().getCode())) {
+                                    missingParameters.add("customerAccount.legalEntityType.code");
+                                }
+
+                                if(StringUtils.isBlank(customerAccountDto.getDescription())) {
+                                    missingParameters.add("customerAccount.description");
+                                }
+
+                                if(CollectionUtils.isEmpty(customerAccountDto.getRegistrationNumbers())) {
+                                    missingParameters.add("customerAccount.registrationNumbers");
+                                }
+
+                                handleMissingParameters();
+                            }
+                            
                             if (!StringUtils.isBlank(customerAccountDto.getCustomer()) && !customerAccountDto.getCustomer().equalsIgnoreCase(customerDto.getCode())) {
                                 throw new MeveoApiException("CustomerAccount's customer " + customerAccountDto.getCustomer() + " doesn't match with parent Customer " + customerDto.getCode());
                             } else {
                                 customerAccountDto.setCustomer(customerDto.getCode());
                             }
 
-                            methodCallingUtils.callMethodInNewTx(() -> customerAccountApi.createOrUpdatePartial(customerAccountDto));
+                            customerAccountApi.createOrUpdatePartial(customerAccountDto);
+                            customerAccountService.getEntityManager().flush();
 
                             // billing accounts
                             if (customerAccountDto.getBillingAccounts() != null) {
@@ -946,13 +990,31 @@ public class AccountHierarchyApi extends BaseApi {
                                         log.warn("code is null={}", billingAccountDto);
                                         continue;
                                     }
+
+                                    if(Boolean.TRUE.equals(billingAccountDto.getIsCompany()) && Version.V2.equals(version)) {
+                                        if(billingAccountDto.getLegalEntityType() == null || StringUtils.isBlank(billingAccountDto.getLegalEntityType().getCode())) {
+                                            missingParameters.add("billingAccount.legalEntityType.code");
+                                        }
+
+                                        if(StringUtils.isBlank(billingAccountDto.getDescription())) {
+                                            missingParameters.add("billingAccount.description");
+                                        }
+                                        
+                                        if(CollectionUtils.isEmpty(billingAccountDto.getRegistrationNumbers())) {
+                                            missingParameters.add("billingAccount.registrationNumbers");
+                                        }
+
+                                        handleMissingParameters();
+                                    }
+                                    
                                     if (!StringUtils.isBlank(billingAccountDto.getCustomerAccount()) && !billingAccountDto.getCustomerAccount().equalsIgnoreCase(customerAccountDto.getCode())) {
                                         throw new MeveoApiException(
                                             "BillingAccount's customerAccount " + billingAccountDto.getCustomerAccount() + " doesn't match with parent customerAccount " + customerAccountDto.getCode());
                                     } else {
                                         billingAccountDto.setCustomerAccount(customerAccountDto.getCode());
                                     }
-                                    methodCallingUtils.callMethodInNewTx(() -> billingAccountApi.createOrUpdatePartial(billingAccountDto));
+                                    billingAccountApi.createOrUpdatePartial(billingAccountDto);
+                                    billingAccountService.getEntityManager().flush();
 
                                     // user accounts
                                     if (billingAccountDto.getUserAccounts() != null) {
@@ -961,13 +1023,31 @@ public class AccountHierarchyApi extends BaseApi {
                                                 log.warn("code is null={}", userAccountDto);
                                                 continue;
                                             }
+
+                                            if(Boolean.TRUE.equals(userAccountDto.getIsCompany()) && Version.V2.equals(version)) {
+                                                if(userAccountDto.getLegalEntityType() == null || StringUtils.isBlank(userAccountDto.getLegalEntityType().getCode())) {
+                                                    missingParameters.add("userAccount.legalEntityType.code");
+                                                }
+
+                                                if(StringUtils.isBlank(userAccountDto.getDescription())) {
+                                                    missingParameters.add("userAccount.description");
+                                                }
+
+                                                if(CollectionUtils.isEmpty(userAccountDto.getRegistrationNumbers())) {
+                                                    missingParameters.add("userAccount.registrationNumbers");
+                                                }
+
+                                                handleMissingParameters();
+                                            }
+                                            
                                             if (!StringUtils.isBlank(userAccountDto.getBillingAccount()) && !userAccountDto.getBillingAccount().equalsIgnoreCase(billingAccountDto.getCode())) {
                                                 throw new MeveoApiException(
                                                     "UserAccount's billingAccount " + userAccountDto.getBillingAccount() + " doesn't match with parent billingAccount " + billingAccountDto.getCode());
                                             } else {
                                                 userAccountDto.setBillingAccount(billingAccountDto.getCode());
                                             }
-                                            methodCallingUtils.callMethodInNewTx(() -> userAccountApi.createOrUpdatePartial(userAccountDto));
+                                            userAccountApi.createOrUpdatePartial(userAccountDto);
+                                            userAccountService.getEntityManager().flush();
 
                                             // subscriptions
                                             if (userAccountDto.getSubscriptions() != null) {
@@ -2306,4 +2386,8 @@ public class AccountHierarchyApi extends BaseApi {
 			throw new BusinessApiException(errorMsg);
 		}
 	}
+
+    public enum Version {
+        V1, V2
+    }
 }

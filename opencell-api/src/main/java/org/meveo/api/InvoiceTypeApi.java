@@ -18,16 +18,6 @@
 
 package org.meveo.api;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.function.BiFunction;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityNotFoundException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.CustomFieldsDto;
@@ -43,8 +33,6 @@ import org.meveo.model.billing.InvoiceSequence;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.InvoiceTypeSellerSequence;
 import org.meveo.model.billing.UntdidInvoiceCodeType;
-import org.meveo.model.billing.UntdidInvoiceSubjectCode;
-import org.meveo.model.billing.UntdidTaxationCategory;
 import org.meveo.model.billing.UntdidVatPaymentOption;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.communication.email.MailingTypeEnum;
@@ -56,12 +44,19 @@ import org.meveo.service.api.EntityToDtoConverter;
 import org.meveo.service.billing.impl.InvoiceSequenceService;
 import org.meveo.service.billing.impl.InvoiceTypeService;
 import org.meveo.service.billing.impl.UntdidInvoiceCodeTypeService;
-import org.meveo.service.billing.impl.UntdidInvoiceSubjectCodeService;
-import org.meveo.service.billing.impl.UntdidTaxationCategoryService;
 import org.meveo.service.billing.impl.UntdidVatPaymentOptionService;
 import org.meveo.service.communication.impl.EmailTemplateService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.script.ScriptInstanceService;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 /**
  * The CRUD Api for InvoiceType Entity.
@@ -97,9 +92,6 @@ public class InvoiceTypeApi extends BaseCrudApi<InvoiceType, InvoiceTypeDto> {
 
     @Inject
     private EmailTemplateService emailTemplateService;
-
-    @Inject
-    private UntdidInvoiceSubjectCodeService untdidInvoiceSubjectCodeService;
     
     @Inject
     private UntdidInvoiceCodeTypeService untdidInvoiceCodeTypeService;
@@ -384,15 +376,6 @@ public class InvoiceTypeApi extends BaseCrudApi<InvoiceType, InvoiceTypeDto> {
         if(dto.getExcludeFromAgedTrialBalance() != null) {
         	entity.setExcludeFromAgedTrialBalance(dto.getExcludeFromAgedTrialBalance());
         }
-        
-        if(dto.getUntdidInvoiceSubjectCode() != null) {
-            UntdidInvoiceSubjectCode invoiceSubjectCode = untdidInvoiceSubjectCodeService.getByCode(dto.getUntdidInvoiceSubjectCode());
-            if (invoiceSubjectCode == null) {
-                throw new EntityDoesNotExistsException(UntdidInvoiceSubjectCode.class, dto.getUntdidInvoiceSubjectCode());
-            }
-            entity.setInvoiceSubjectCode(invoiceSubjectCode);
-        }
-        
         if (!StringUtils.isBlank(dto.getInvoiceCodeType())) {
             UntdidInvoiceCodeType untdidInvoiceCodeType = untdidInvoiceCodeTypeService.getByCode(dto.getInvoiceCodeType());
             if (untdidInvoiceCodeType == null) {

@@ -268,10 +268,6 @@ public class DiscountPlanItemService extends PersistenceService<DiscountPlanItem
             return  applicableDiscountPlanItems;
      	}
     	
-    	if(discountPlan.getSequence()==null){
-    		discountPlanService.setDiscountPlanSequence(discountPlan);
-    		discountPlanService.update(discountPlan);
-    	} 
         if(accountingArticle==null && walletOperation!=null) {
         	accountingArticle=accountingArticleService.getAccountingArticleByChargeInstance(walletOperation.getChargeInstance(), walletOperation);
         }
@@ -320,11 +316,6 @@ public class DiscountPlanItemService extends PersistenceService<DiscountPlanItem
 					        isDiscountPlanItemApplicable(billingAccount, discountPlanItem, entities)) {
 				        lowPriority=lowPriority!=null?lowPriority:discountPlanItem.getPriority();
         				
-
-        				if(discountPlanItem.getSequence()==null) {
-        					setDisountPlanItemSequence(discountPlanItem);
-        					super.update(discountPlanItem);
-        				}
         				applicableDiscountPlanItems.add(discountPlanItem);
 
         			}
@@ -350,10 +341,6 @@ public class DiscountPlanItemService extends PersistenceService<DiscountPlanItem
                                                                  Date applicationDate) throws BusinessException {
         List<DiscountPlanItem> applicableDiscountPlanItems = new ArrayList<DiscountPlanItem>();
 
-        if (discountPlan.getSequence() == null) {
-            discountPlanService.setDiscountPlanSequence(discountPlan);
-            discountPlanService.update(discountPlan);
-        }
         boolean isDiscountApplicable = discountPlanService.isDiscountPlanApplicable(billingAccount, discountPlan, applicationDate, null, null);
 
         if (isDiscountApplicable) {
@@ -364,10 +351,6 @@ public class DiscountPlanItemService extends PersistenceService<DiscountPlanItem
                         && isDiscountPlanItemApplicable(billingAccount, discountPlanItem, accountingArticle, null, null)) {
                     lowPriority = lowPriority != null ? lowPriority : discountPlanItem.getPriority();
 
-                    if (discountPlanItem.getSequence() == null) {
-                        setDisountPlanItemSequence(discountPlanItem);
-                        super.update(discountPlanItem);
-                    }
                     applicableDiscountPlanItems.add(discountPlanItem);
                 }
             }

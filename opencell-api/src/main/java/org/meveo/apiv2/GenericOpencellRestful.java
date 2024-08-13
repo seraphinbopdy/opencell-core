@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,16 +16,28 @@ import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.meveo.api.rest.JacksonProvider;
+import org.meveo.api.rest.JaxRsActivator;
+import org.meveo.api.rest.JaxRsExceptionMapper;
+import org.meveo.api.rest.filter.RESTCorsRequestFilter;
+import org.meveo.api.rest.filter.RESTCorsResponseFilter;
+import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.api.rest.invoice.impl.PaymentTermResourceImpl;
 import org.meveo.apiv2.accounting.resource.impl.AccountingPeriodResourceImpl;
 import org.meveo.apiv2.accounting.resource.impl.AccountingResourceImpl;
 import org.meveo.apiv2.accountreceivable.accountOperation.AccountReceivableResourceImpl;
 import org.meveo.apiv2.accountreceivable.deferralPayments.AccountReceivableDeferralPaymentsResourceImpl;
+import org.meveo.apiv2.accounts.impl.AccountHierarchyV2ResourceImpl;
 import org.meveo.apiv2.accounts.impl.AccountsManagementResourceImpl;
+import org.meveo.apiv2.accounts.impl.BillingAccountV2ResourceImpl;
+import org.meveo.apiv2.accounts.impl.CustomerAccountV2ResourceImpl;
+import org.meveo.apiv2.accounts.impl.CustomerV2ResourceImpl;
 import org.meveo.apiv2.accounts.impl.UserAccountsResourceImpl;
+import org.meveo.apiv2.accounts.impl.UserAccountsV2ResourceImpl;
 import org.meveo.apiv2.admin.impl.FilesResourceImpl;
 import org.meveo.apiv2.admin.impl.SellerResourceImpl;
 import org.meveo.apiv2.admin.providers.ProviderResourceImpl;
@@ -57,6 +70,7 @@ import org.meveo.apiv2.cpq.impl.CommercialOrderResourceImpl;
 import org.meveo.apiv2.cpq.impl.CpqContractResourceImpl;
 import org.meveo.apiv2.cpq.impl.CpqQuoteResourceImpl;
 import org.meveo.apiv2.crm.impl.ContactCategoryResourceImpl;
+import org.meveo.apiv2.customaction.CustomActionResourceImpl;
 import org.meveo.apiv2.customtable.CustomTableResourceImpl;
 import org.meveo.apiv2.document.DocumentResourceImpl;
 import org.meveo.apiv2.documentCategory.impl.DocumentCategoryResourceImpl;
@@ -114,9 +128,11 @@ import org.meveo.apiv2.settings.globalSettings.impl.GlobalSettingsResourceImpl;
 import org.meveo.apiv2.settings.openOrderSetting.impl.OpenOrderSettingResourceImpl;
 import org.meveo.apiv2.standardReport.impl.StandardReportResourceImpl;
 import org.meveo.commons.utils.ParamBeanFactory;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@ApplicationPath("/api/rest/v2")
+@ApplicationPath("/api/rest")
 public class GenericOpencellRestful extends Application {
     private static final String GENERIC_API_REQUEST_LOGGING_CONFIG_KEY = "generic.api.request.logging";
     private static final String GENERIC_API_REQUEST_EXTRACT_LIST_CONFIG_KEY = "generic.api.extract.list";
@@ -143,17 +159,33 @@ public class GenericOpencellRestful extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        Set<Class<?>> resources = Stream.of(VersionImpl.class, GenericResourceImpl.class,
-                NotYetImplementedResource.class, NotFoundExceptionMapper.class, BadRequestExceptionMapper.class,
+
+        Reflections reflections = new Reflections("org.meveo.api.rest");
+        Set<Class<? extends BaseRs>> allClasses = reflections.getSubTypesOf(BaseRs.class);
+
+        log.debug("Documenting {} rest services for path /api/rest/", allClasses.size());
+
+        Set<Class<?>> resources = new HashSet();
+        resources.addAll(allClasses);
+
+        resources.add(RESTCorsRequestFilter.class);
+        resources.add(RESTCorsResponseFilter.class);
+        resources.add(JaxRsExceptionMapper.class);
+        resources.add(JacksonProvider.class);
+        resources.add(OpenApiResource.class);
+        
+        resources.addAll(Set.of(
+                VersionImpl.class, GenericResourceImpl.class, NotYetImplementedResource.class, NotFoundExceptionMapper.class,
+                BadRequestExceptionMapper.class,
                 MeveoExceptionMapper.class, IllegalArgumentExceptionMapper.class,
                 EJBTransactionRolledbackExceptionMapper.class, ForbiddenExceptionMapper.class,
                 EntityDoesNotExistsExceptionMapper.class,
                 DocumentResourceImpl.class,
-                GenericJacksonProvider.class, ProductResourceImpl.class, OrderItemResourceImpl.class,
+                ProductResourceImpl.class, OrderItemResourceImpl.class,
                 OrderResourceImpl.class, AccountingArticleResourceImpl.class, ArticleMappingLineResourceImpl.class, ReportingResourceImpl.class,
                 ArticleMappingResourceImpl.class, InvoiceResourceImpl.class, DiscountPlanResourceImpl.class, AccountingPeriodResourceImpl.class,
                 DiscountPlanInstanceResourceImpl.class, RatedTransactionResourceImpl.class, RefundResourceImpl.class, ValidationExceptionMapper.class,
-                BusinessExceptionMapper.class, InvoicingResourceImpl.class, ReportQueryResourceImpl.class, AccountsManagementResourceImpl.class,
+                BusinessExceptionMapper.class, InvoicingResourceImpl.class, ReportQueryResourceImpl.class, AccountsManagementResourceImpl.class ,
                 DunningSettingsResourceImpl.class, DunningLevelResourceImpl.class ,DunningActionImpl.class,
                 QuoteOfferResourceImpl.class, ConflictExceptionMapper.class, UnprocessableEntityExceptionMapper.class, AccountReceivableResourceImpl.class,
                 DunningAgentResourceImpl.class, CollectionPlanStatusResourceImpl.class,
@@ -167,11 +199,15 @@ public class GenericOpencellRestful extends Application {
                 OpenOrderQuoteResourceImpl.class, CpqQuoteResourceImpl.class, CommercialOrderResourceImpl.class,
                 InvoiceLinesResourceImpl.class, CpqContractResourceImpl.class, OpenOrderResourceImpl.class,
                 ContactCategoryResourceImpl.class, InvoiceValidationRulesResourceImpl.class, InternationalSettingsResourceImpl.class,
-                CustomTableResourceImpl.class, AdvancedSettingsResourceImpl.class, CustomerBalanceResourceImpl.class, FileTypeResourceImpl.class, DocumentCategoryResourceImpl.class, 
+                CustomTableResourceImpl.class, AdvancedSettingsResourceImpl.class, CustomerBalanceResourceImpl.class, FileTypeResourceImpl.class, DocumentCategoryResourceImpl.class,
                 ElectronicInvoicingResourceImpl.class,PaymentResourceImpl.class, PriceListResourceImpl.class, SellerResourceImpl.class, PriceListLineResourceImpl.class, CatalogPriceListResourceImpl.class,
-				SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
-                ProductManagementRsImpl.class, HugeEntityResourceImpl.class, PaymentTermResourceImpl.class)
-                .collect(Collectors.toSet());
+                SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
+                ProductManagementRsImpl.class, HugeEntityResourceImpl.class, PaymentTermResourceImpl.class, CustomActionResourceImpl.class,
+                BillingAccountV2ResourceImpl.class, AccountHierarchyV2ResourceImpl.class, CustomerV2ResourceImpl.class, CustomerAccountV2ResourceImpl.class, UserAccountsV2ResourceImpl.class
+        ));
+
+        resources.add(GenericJacksonProvider.class);
+
         if (GENERIC_API_REQUEST_LOGGING_CONFIG.equalsIgnoreCase("true")) {
             resources.add(GenericApiLoggingFilter.class);
             log.info(

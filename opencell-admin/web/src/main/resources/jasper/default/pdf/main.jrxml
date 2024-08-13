@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Invoice" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryNewPage="true" uuid="801855a9-548e-443b-81d5-d27d42b5df88">
+<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="main" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryNewPage="true" uuid="801855a9-548e-443b-81d5-d27d42b5df88">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="pdf\DataAdapter.jrdax"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="dev.xml"/>
 	<style name="table">
 		<box>
 			<pen lineWidth="1.0" lineColor="#000000"/>
@@ -400,7 +400,7 @@
 							<property name="ShowOutOfBoundContent" value="true"/>
 						</reportElement>
 						<rectangle radius="10">
-							<reportElement x="16" y="3" width="216" height="217" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ab33f039-d780-4304-9a78-c8a1b32b72e4"/>
+							<reportElement isPrintRepeatedValues="false" x="16" y="3" width="216" height="217" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ab33f039-d780-4304-9a78-c8a1b32b72e4"/>
 							<graphicElement>
 								<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 							</graphicElement>
@@ -424,7 +424,7 @@
 							<text><![CDATA[Customer]]></text>
 						</staticText>
 						<rectangle radius="0">
-							<reportElement x="16" y="206" width="216" height="104" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="62eca460-82c3-42a2-8462-a8e3a4f60aee"/>
+							<reportElement isPrintRepeatedValues="false" x="16" y="206" width="216" height="104" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="62eca460-82c3-42a2-8462-a8e3a4f60aee"/>
 							<graphicElement>
 								<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 							</graphicElement>
@@ -558,9 +558,9 @@
 	</group>
 	<group name="3">
 		<groupHeader>
-			<band height="260" splitType="Immediate">
+			<band height="70" splitType="Immediate">
 				<subreport isUsingCache="true" runToBottom="false">
-					<reportElement x="0" y="-20" width="594" height="272" uuid="3c6dcd4b-38d1-4096-b8cd-54f56b3ae9f7">
+					<reportElement positionType="Float" x="0" y="-20" width="594" height="90" uuid="3c6dcd4b-38d1-4096-b8cd-54f56b3ae9f7">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					</reportElement>
 					<subreportParameter name="xmlDateFormat">
@@ -577,9 +577,9 @@
 	</group>
 	<group name="4" isStartNewPage="true">
 		<groupHeader>
-			<band height="70" splitType="Immediate">
+			<band height="37" splitType="Immediate">
 				<subreport>
-					<reportElement x="0" y="-242" width="594" height="298" uuid="47798d30-7f84-4a23-90aa-1f1e129f231b"/>
+					<reportElement positionType="Float" x="0" y="1" width="594" height="36" uuid="47798d30-7f84-4a23-90aa-1f1e129f231b"/>
 					<subreportParameter name="logoPath">
 						<subreportParameterExpression><![CDATA[$P{logoPath}]]></subreportParameterExpression>
 					</subreportParameter>

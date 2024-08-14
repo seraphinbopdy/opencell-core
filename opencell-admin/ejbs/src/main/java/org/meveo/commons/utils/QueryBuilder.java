@@ -127,6 +127,8 @@ public class QueryBuilder {
     private FilterOperatorEnum filterOperator = FilterOperatorEnum.AND;
 
     private boolean prependSelect = Boolean.TRUE;
+    
+    private Random random = new Random();
 
 
 	public JoinType getJoinType() {
@@ -1709,7 +1711,7 @@ public class QueryBuilder {
         fieldname = fieldname.replace(".", "_").replace("(", "_").replace(")", "_").replace(",", "_").replace(" ", "");
         StringBuilder newField = new StringBuilder(fieldname);
         while (params.containsKey(newField.toString())) {
-            newField = new StringBuilder(fieldname).append("_" + String.valueOf(new Random().nextInt(100)));
+            newField = new StringBuilder(fieldname).append("_" + String.valueOf(random.nextInt(100)));
         }
         return newField.toString();
     }

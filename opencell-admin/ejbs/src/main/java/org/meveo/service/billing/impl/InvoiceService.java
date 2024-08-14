@@ -5520,9 +5520,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
     /**
      * @param toCancel
      */
-    public BillingRun cancelInvoicesByStatus(BillingRun billingRun, List<InvoiceStatusEnum> toCancel) {
+    public BillingRun cancelInvoicesByStatus(BillingRun billingRun,
+                                             List<InvoiceStatusEnum> toCancel, RatedTransactionAction rtAction) {
         List<Invoice> invoices = findInvoicesByStatusAndBR(billingRun.getId(), toCancel);
-        invoices.stream().forEach(invoice -> cancelInvoiceWithoutDelete(invoice));
+        invoices.forEach(invoice -> cancelInvoice(invoice, false, rtAction));
         billingRun = billingRunService.updateBillingRunStatistics(billingRun);
         return billingRun;
     }

@@ -653,13 +653,12 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
             throws JMSException {
 
         Long jobInstanceId = jobExecutionResult.getJobInstance().getId();
+
+        // Use try-with-resources to ensure JMSContext is closed
         JMSContext jmsContext = jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE);
-        JMSProducer jmsProducer = jmsContext.createProducer();
-        jmsProducer.setDisableMessageID(true);
-        jmsProducer.setDisableMessageTimestamp(true);
 
         Runnable task = () -> {
-            try {
+            try (JMSContext context = jmsContext) { // Using try-with-resources to ensure closing of JMSContext
                 Thread.currentThread().setName(jobInstanceCode + "-PublishToCluster-" + threadNr);
 
                 currentUserProvider.reestablishAuthentication(lastCurrentUser);
@@ -669,11 +668,11 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                 int nrOfItemsProcessedByThread = 0;
                 int nrMessages = 0;
 
-                jmsContext.start();
+                context.start();
 
                 while (true) {
                     // Retrieve next batchSize of items
-                    List<T> itemsToProcess = iterator instanceof SynchronizedIterator ? ((SynchronizedIterator<T>) iterator).next(batchSize.intValue()) : new ArrayList<T>();
+                    List<T> itemsToProcess = iterator instanceof SynchronizedIterator ? ((SynchronizedIterator<T>) iterator).next(batchSize.intValue()) : new ArrayList<>();
                     if (!(iterator instanceof SynchronizedIterator)) {
                         for (int k = 0; k < batchSize; k++) {
                             T item = iterator.next();
@@ -696,6 +695,9 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                         return;
                     }
 
+                    JMSProducer jmsProducer = context.createProducer();
+                    jmsProducer.setDisableMessageID(true);
+                    jmsProducer.setDisableMessageTimestamp(true);
                     jmsProducer.send(jobQueue, (Serializable) itemsToProcess);
 
                     nrOfItemsProcessedByThread += nrOfItemsInBatch;
@@ -704,10 +706,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
                 log.info("Thread {} published {} data items in {} messages for cluster-wide data processing", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrMessages);
 
-            } finally {
-                if (jmsContext != null) {
-                    jmsContext.close();
-                }
+            } catch (Exception e) {
+                log.error("Exception occurred while publishing data to queue", e);
             }
         };
 
@@ -768,13 +768,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
         ItertatorJobMessageListener messageListener = null;
         if (spreadOverCluster) {
             jmsContext = jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE);
-            jmsContext.setExceptionListener(new ExceptionListener() {
-
-                @Override
-                public void onException(JMSException e) {
-                    log.error("Exception while consuming Job processing data messages", e);
-                }
-            });
+            jmsContext.setExceptionListener(e -> log.error("Exception while consuming Job processing data messages", e));
 
             JMSConsumer jmsConsumer = jmsContext.createConsumer(jobQueue);
             jmsContext.stop(); // Context is autostarted when consumer is created
@@ -788,7 +782,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
         Runnable task = () -> {
 
-            try {
+            try (JMSContext context = jmsContextFinal) { // Try-with-resources to ensure JMSContext is closed
                 Thread.currentThread().setName(jobInstanceCode + "-" + threadNr);
 
                 currentUserProvider.reestablishAuthentication(lastCurrentUser);
@@ -820,7 +814,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                 // Continue processing messages from a message queue if applicable
                 if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
 
-                    jmsContextFinal.start();
+                    context.start();
                     try {
                         countDown.await();
 
@@ -845,10 +839,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
                 log.info("Thread {} processed {} items: {} from db and {} from {} messages", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrOfItemsDb, nrOfItemsQueue, nrofMessages);
 
-            } finally {
-                if (jmsContextFinal != null) {
-                    jmsContextFinal.close();
-                }
+            } catch (Exception e) {
+                log.error("An error occurred during data processing", e);
             }
         };
 

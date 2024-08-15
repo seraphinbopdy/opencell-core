@@ -12989,4 +12989,9 @@ Meaning that advances won’t be available for further invoices."/>
         </addColumn>
     </changeSet>
 
+    <changeSet author="zakariab" id="INTRD-24538_20240815">
+        <renameColumn tableName="cat_charge_template" newColumnName="quantity_attribute_id"
+                      oldColumnName="attribute_id" columnDataType="bigint"/>
+    </changeSet>
+
 </databaseChangeLog>

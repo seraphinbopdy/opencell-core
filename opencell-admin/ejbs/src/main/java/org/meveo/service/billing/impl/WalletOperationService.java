@@ -358,10 +358,13 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
         if (chargeInstanceId == null) {
             op.setWallet(userAccount.getWallet());
             result.add(op);
-            
-            // Balance and reserved balance deals with prepaid wallets.
-            // With wallet cache at all
-        } else if (!chargeInstance.getPrepaid()) {
+        } else if (op.getChargeInstance().getChargeTemplate().isDropZeroWo() && BigDecimal.ZERO.compareTo(op.getAmountWithTax()) == 0 && BigDecimal.ZERO.compareTo(op.getAmountWithoutTax()) == 0) { // Drop zero amount wallet operation
+            log.debug("WO will not be created as it is a zero amount WO and dropZeroWo is set to true for chargeTemplate {}", op.getChargeInstance().getChargeTemplate().getCode());
+            if(op.getEdr() != null) {
+                op.getEdr().setZeroWoDropped(true);
+                op.getEdr().setWalletOperation(null);
+            }
+        } else if (!Boolean.TRUE.equals(chargeInstance.getPrepaid())) {
             op.setWallet(userAccount.getWallet());
             result.add(op);
             create(op);

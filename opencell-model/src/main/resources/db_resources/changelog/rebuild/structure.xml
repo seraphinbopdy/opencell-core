@@ -20966,10 +20966,8 @@
     <changeSet id="INTRD-21018_20240806" author="ZakariaB" />
     <changeSet id="#INTRD-21018_20240723" author="ZakariaB" />
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
-    <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI" />
-    <changeSet id="#INTRD-24686_20240807" author="TarikFa." />
-    <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe" />
     
+    <changeSet id="#INTRD-24639_20240814" author="Mohammed_ElAzzouzi"/>
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

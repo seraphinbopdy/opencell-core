@@ -42,6 +42,7 @@ import org.meveo.cache.JobCacheContainerProvider;
 import org.meveo.cache.JobExecutionStatus;
 import org.meveo.cache.JobRunningStatusEnum;
 import org.meveo.commons.utils.EnumBuilder;
+import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IEntity;
@@ -387,7 +388,8 @@ public class JobInstanceBean extends CustomFieldBean<JobInstance> {
             filters.put("jobInstance", entity);
             filters.put("parentJobExecutionResult", PersistenceService.SEARCH_IS_NULL);
 
-            PaginationConfiguration paginationFilter = new PaginationConfiguration(filters, "id", SortOrder.DESCENDING, 500);
+            int paginationSize = ParamBeanFactory.getAppScopeInstance().getPropertyAsInteger("job.execution.history.paginationSize", 500);
+            PaginationConfiguration paginationFilter = new PaginationConfiguration(filters, "id", SortOrder.DESCENDING, paginationSize);
             List<JobExecutionResultImpl> jobExecutions = jobExecutionResultService.list(paginationFilter);
 
             for (JobExecutionResultImpl jobExecutionResultParent : jobExecutions) {

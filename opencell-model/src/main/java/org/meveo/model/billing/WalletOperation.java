@@ -637,7 +637,8 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
     @Column(name = "sequence")
    	private Integer sequence;
 
-    @Transient
+    @Column(name = "overrode_price")
+    @Type(type = "numeric_boolean")
     private boolean overrodePrice;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -1276,6 +1277,7 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
         result.setReratingBatch(reratingBatch);
         result.setOrderInfo(orderInfo);
         result.setAccountingArticle(accountingArticle);
+        result.setOverrodePrice(overrodePrice);
         return result;
     }
 

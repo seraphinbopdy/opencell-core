@@ -4176,6 +4176,7 @@
 			<column name="price_list_line_id" type="bigint" />
 			<column name="business_key" type="VARCHAR(255)" />
 			<column name="batch_entity_id" type="bigint"/>
+			<column name="overrode_price"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
         <modifySql dbms="postgresql">
         	<append value=" PARTITION BY LIST(status)"/>
@@ -20965,6 +20966,8 @@
     <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
         <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
     </changeSet>
+    
+    <changeSet id="#INTRD-24639_20240814" author="Mohammed_ElAzzouzi"/>
 
     <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe" />
     

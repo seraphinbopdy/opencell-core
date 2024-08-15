@@ -12982,5 +12982,11 @@ Meaning that advances won’t be available for further invoices."/>
             <where>code = 'org.meveo.service.script.EnterLitigation'</where>
         </update>
     </changeSet>
+    
+    <changeSet id="#INTRD-24639_20240814" author="Mohammed_ElAzzouzi">
+        <addColumn tableName="billing_wallet_operation">
+            <column name="overrode_price"  type="${type.boolean}" defaultValueNumeric="0" />
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

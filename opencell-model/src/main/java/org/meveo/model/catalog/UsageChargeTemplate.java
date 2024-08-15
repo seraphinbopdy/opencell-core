@@ -115,8 +115,8 @@ public class UsageChargeTemplate extends ChargeTemplate {
     @Size(max = 2000)
     private String triggerNextChargeEL;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attribute_id")
+    @Deprecated
+    @Transient
     private Attribute usageQuantityAttribute;
 
     public String getFilterParam1() {
@@ -211,13 +211,13 @@ public class UsageChargeTemplate extends ChargeTemplate {
 	 * @return the usageQuantityAttribute
 	 */
 	public Attribute getUsageQuantityAttribute() {
-		return usageQuantityAttribute;
+		return getQuantityAttribute();
 	}
 
 	/**
 	 * @param usageQuantityAttribute the usageQuantityAttribute to set
 	 */
 	public void setUsageQuantityAttribute(Attribute usageQuantityAttribute) {
-		this.usageQuantityAttribute = usageQuantityAttribute;
+		setQuantityAttribute(usageQuantityAttribute);
 	}
 }

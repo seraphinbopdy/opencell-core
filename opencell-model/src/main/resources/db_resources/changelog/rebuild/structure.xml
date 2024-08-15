@@ -4366,7 +4366,7 @@
             <column name="dim3_matrix" type="varchar(50)"/>
             <column name="dim3_matrix_bystep" type="${type.boolean}" defaultValueNumeric="0"/>
             <column name="dim3_matrix_service" type="bigint" />
-            <column name="attribute_id" type="bigint"/>
+            <column name="quantity_attribute_id" type="bigint"/>
             <column name="attribute_duration_id" type="bigint"/>
             <column name="attribute_calendar_id" type="bigint"/>
             <column name="internal_note" type="${type.longtext}" />
@@ -17362,7 +17362,7 @@
                                  referencedTableName="cpq_product_version" referencedColumnNames="id"/>
     </changeSet>
     <changeSet author="NabilOuachi" id="rebuild-str-fk-1545">
-        <addForeignKeyConstraint baseTableName="cat_charge_template" baseColumnNames="attribute_id"
+        <addForeignKeyConstraint baseTableName="cat_charge_template" baseColumnNames="quantity_attribute_id"
                                  constraintName="fk_cat_charge_template_attribute_id"
                                  referencedTableName="cpq_attribute" referencedColumnNames="id"/>
     </changeSet>
@@ -20968,7 +20968,8 @@
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
     
     <changeSet id="#INTRD-24639_20240814" author="Mohammed_ElAzzouzi"/>
-    
+    <changeSet author="zakariab" id="INTRD-24538_20240815" />
+
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 
 

@@ -20127,6 +20127,10 @@
         <sql>create index cpq_attribute_instance__service_instance_index on ${db.schema.adapted}cpq_attribute_instance using btree (service_instance_id)</sql>
         <sql>create index idx_subscription_id_charge_type on ${db.schema.adapted}billing_charge_instance using btree (subscription_id, charge_type)</sql>
     </changeSet>
+    
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
 
     <changeSet id="USAGE_RERATE_RT_JOB" author="Mohammed_ElAzzouzi"/>
 
@@ -20960,19 +20964,10 @@
     <changeSet id="#INTRD-24686_20240807" author="TarikFa." />
     <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe" />
     <changeSet id="INTRD-21018_20240806" author="ZakariaB" />
-
-    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
-        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
-    </changeSet>
     <changeSet id="#INTRD-21018_20240723" author="ZakariaB" />
-
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
-    <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI" />
-    <changeSet id="#INTRD-24686_20240807" author="TarikFa." />
     
     <changeSet id="#INTRD-24639_20240814" author="Mohammed_ElAzzouzi"/>
-
-    <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

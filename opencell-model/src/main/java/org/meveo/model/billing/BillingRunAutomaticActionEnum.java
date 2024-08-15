@@ -5,8 +5,9 @@ public enum BillingRunAutomaticActionEnum {
     CANCEL(1, "BillingRunAutomaticActionsEnum.cancel"), // automatically cancels invoices rejected by the validation script. Suspect invoices are considered valid
     MOVE(2, "BillingRunAutomaticActionsEnum.move"), // automatically moves rejected and suspect invoices to a new billing run
     MANUAL_ACTION(3, "BillingRunAutomaticActionsEnum.manualAction"), // default Action on REJECTED
-    AUTOMATIC_VALIDATION(4, "BillingRunAutomaticActionsEnum.automaticValidation"); // default Action on SUSPECT
-	
+    AUTOMATIC_VALIDATION(4, "BillingRunAutomaticActionsEnum.automaticValidation"), // default Action on SUSPECT
+    CANCEL_RT(5, "BillingRunAutomaticActionsEnum.automaticCancellation"); // automatically cancels invoice and its rated transactions
+
 
     private Integer id;
     private String label;

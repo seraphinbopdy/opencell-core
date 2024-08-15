@@ -388,7 +388,9 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             walletOperation.setInvoiceSubCategory(chargeTemplate.getInvoiceSubCategory());
         }
 
-    	applyDiscount(ratedEDRResult, walletOperation, isVirtual);
+        if(BigDecimal.ZERO.compareTo(walletOperation.getAmountWithTax()) < 0 || BigDecimal.ZERO.compareTo(walletOperation.getAmountWithoutTax()) < 0) {
+            applyDiscount(ratedEDRResult, walletOperation, isVirtual);
+        }
         
         return ratedEDRResult;
 

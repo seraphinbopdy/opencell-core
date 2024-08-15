@@ -2887,7 +2887,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
     
     public void updateBillingRunStatistics(Invoice invoice) {
-        invoice = refreshOrRetrieve(invoice);
+        invoice = retrieveIfNotManaged(invoice);
         if(invoice != null) {
             if (invoice.getBillingRun() != null) {
                 billingRunService.updateBillingRunStatistics(invoice.getBillingRun());
@@ -5522,9 +5522,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
     /**
      * @param toCancel
      */
-    public BillingRun cancelInvoicesByStatus(BillingRun billingRun, List<InvoiceStatusEnum> toCancel) {
+    public BillingRun cancelInvoicesByStatus(BillingRun billingRun,
+                                             List<InvoiceStatusEnum> toCancel, RatedTransactionAction rtAction) {
         List<Invoice> invoices = findInvoicesByStatusAndBR(billingRun.getId(), toCancel);
-        invoices.stream().forEach(invoice -> cancelInvoiceWithoutDelete(invoice));
+        invoices.forEach(invoice -> cancelInvoice(invoice, false, rtAction));
         billingRun = billingRunService.updateBillingRunStatistics(billingRun);
         return billingRun;
     }
@@ -7286,8 +7287,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         return duplicateInvoice;
     }
 
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+   
     public Invoice createAdjustment(Invoice invoice, List<Long> invoiceLinesIds, InvoiceType type) {
         
         invoice = findById(invoice.getId());
@@ -7339,7 +7339,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         duplicatedInvoice.setOpenOrderNumber(StringUtils.EMPTY);
         // Update ADJ Invoice PaymentMethod from original Invoice
         duplicatedInvoice.setPaymentMethod(srcInvoice.getPaymentMethod());
-        getEntityManager().flush();
+        //getEntityManager().flush();
     }
 
     private void addLinkedInvoice(Invoice invoice, Invoice duplicatedInvoice) {

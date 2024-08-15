@@ -1,0 +1,1 @@
+update rating_edr e set zero_wo_dropped = 1 where not exists (select 1 from billing_wallet_operation where edr_id = e.id) and status = 'RATED' and zero_wo_dropped = 0;

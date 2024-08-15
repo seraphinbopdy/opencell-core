@@ -4176,6 +4176,7 @@
 			<column name="price_list_line_id" type="bigint" />
 			<column name="business_key" type="VARCHAR(255)" />
 			<column name="batch_entity_id" type="bigint"/>
+			<column name="overrode_price"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
         <modifySql dbms="postgresql">
         	<append value=" PARTITION BY LIST(status)"/>

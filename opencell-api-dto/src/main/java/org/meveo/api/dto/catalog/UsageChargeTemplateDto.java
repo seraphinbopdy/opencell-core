@@ -81,6 +81,11 @@ public class UsageChargeTemplateDto extends ChargeTemplateDto {
     @Schema(description = "Overrides the triggerNextCharge switch")
     protected String triggerNextChargeEL;
 
+    /**
+    * usageQuantityAttributeCode field is deprecated chargeTemplateDTO.quantityAttribute should be used
+     * @deprecated since 14.0.16
+     **/
+    @Deprecated(since = "14.0.16", forRemoval = true)
     @Schema(description = "code of usage attribute quantity")
     private String usageQuantityAttributeCode;
 

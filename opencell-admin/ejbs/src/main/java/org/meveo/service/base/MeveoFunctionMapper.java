@@ -59,8 +59,10 @@ import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.offer.QuoteOffer;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.quote.QuoteProduct;
+import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.billing.impl.CounterPeriodService;
+import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.cpq.AttributeService;
 import org.meveo.service.cpq.QuoteProductService;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
@@ -313,6 +315,8 @@ public class MeveoFunctionMapper extends FunctionMapper {
             addFunction("mv", "getProductElAttributeValue", MeveoFunctionMapper.class.getMethod("getProductElAttributeValue", ServiceInstance.class,String.class, WalletOperation.class));
             
             addFunction("mv", "parseJSON", MeveoFunctionMapper.class.getMethod("parseJSON", String.class, String.class));
+            
+            addFunction("mv", "validateAndCancelDerivedWosEdrsAndRts", MeveoFunctionMapper.class.getMethod("validateAndCancelDerivedWosEdrsAndRts", EDR.class));
 
             //adding all Math methods with 'math' as prefix
             for (Method method : Math.class.getMethods()) {
@@ -2223,8 +2227,33 @@ public class MeveoFunctionMapper extends FunctionMapper {
     	Object result = JsonPath.using(conf).parse(textJson).read(jsonPath);
     	return result != null ? result.toString() : null;
     }
-      
+ 
+    private static ReratingService reratingService;
     
-    
-    
+    public static boolean validateAndCancelDerivedWosEdrsAndRts(EDR edr) {
+        
+        if(edr == null) {
+            throw new IllegalArgumentException("EDR cannot be null");
+        }
+
+        if(reratingService == null) {
+            try {
+                InitialContext initialContext = new InitialContext();
+                BeanManager beanManager = (BeanManager) initialContext.lookup("java:comp/BeanManager");
+                Bean<ReratingService> bean = (Bean<ReratingService>) beanManager.resolve(beanManager.getBeans(ReratingService.class));
+                reratingService = (ReratingService) beanManager.getReference(bean, bean.getBeanClass(), beanManager.createCreationalContext(bean));
+            } catch (NamingException e) {
+                Logger log = LoggerFactory.getLogger(MeveoFunctionMapper.class);
+                log.error("Unable to access QuoteOffertService", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+         return reratingService.validateAndCancelDerivedWosEdrsAndRts(edr);
+
+    }
+
+    public static void setReratingService(ReratingService reratingService) {
+        MeveoFunctionMapper.reratingService = reratingService;
+    }
 }

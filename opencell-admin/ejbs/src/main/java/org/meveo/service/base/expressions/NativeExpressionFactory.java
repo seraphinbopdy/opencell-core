@@ -3,6 +3,8 @@ package org.meveo.service.base.expressions;
 import static org.meveo.service.base.PersistenceService.SEARCH_WILDCARD_OR;
 import static org.meveo.service.base.PersistenceService.SEARCH_WILDCARD_OR_IGNORE_CAS;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,6 +16,8 @@ import java.util.stream.Stream;
 import javax.persistence.criteria.JoinType;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.FilterOperatorEnum;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.BaseEntity;
@@ -37,6 +41,15 @@ public class NativeExpressionFactory {
         	Object ids = (value instanceof Collection)? ((Collection)value).stream().map(x->Long.parseLong(x.toString())).collect(Collectors.toList()):Long.parseLong(value.toString());
             checkOnCondition(key, ids, new ExpressionParser(key.split(" ")));
     	} else {
+
+            if(StringUtils.containsIgnoreCase(key, "date") && !(value instanceof Date)) {
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    value = formatter.parse((String) value);
+                } catch (ParseException e) {
+                    throw new BusinessException(e);
+                }
+            }
     		checkOnCondition(key, value, new ExpressionParser(key.split(" ")));
     	}
     }

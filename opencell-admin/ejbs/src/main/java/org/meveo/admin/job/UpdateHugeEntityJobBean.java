@@ -18,8 +18,6 @@
 package org.meveo.admin.job;
 
 import org.meveo.admin.async.SynchronizedIterator;
-import org.meveo.admin.exception.InvalidELException;
-import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.model.IEntity;
 import org.meveo.model.billing.BatchEntity;
 import org.meveo.model.jobs.JobExecutionResultImpl;
@@ -59,7 +57,7 @@ public class UpdateHugeEntityJobBean extends IteratorBasedScopedJobBean<Map.Entr
         if(paramOrCFValue != null) {
             super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, this::updateWithCheck, null, null, this::finalizeProcess);
         } else {
-            batchEntityService.updateHugeEntity(jobExecutionResult);
+            batchEntityService.checkAndUpdateHugeEntity(jobExecutionResult);
         }
     }
 
@@ -74,12 +72,7 @@ public class UpdateHugeEntityJobBean extends IteratorBasedScopedJobBean<Map.Entr
     private void updateWithCheck(Map.Entry<BatchEntity, IEntity> entry, JobExecutionResultImpl jobExecutionResult) {
         try {
             IEntity iEntity = entry.getValue();
-            String preUpdateEL = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_PRE_UPDATE_EL);
-            var context = ValueExpressionWrapper.completeContext(preUpdateEL, new HashMap<>(), iEntity);
-            boolean shouldUpdate = ValueExpressionWrapper.evaluateToBoolean(preUpdateEL, context);
-            if(shouldUpdate) {
-                batchEntityService.updateHugeEntity(iEntity, jobExecutionResult);
-            } else {
+            if(!batchEntityService.checkAndUpdateHugeEntity(iEntity, jobExecutionResult)) {
                 jobExecutionResult.unRegisterSucces();
                 jobExecutionResult.registerError(iEntity.getId(), "Entity " + iEntity.getId() + " was not updated because the pre update EL returned false");
             }

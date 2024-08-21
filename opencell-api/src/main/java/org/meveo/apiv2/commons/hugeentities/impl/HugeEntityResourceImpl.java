@@ -101,6 +101,8 @@ public class HugeEntityResourceImpl implements HugeEntityResource {
 
             StringBuilder updateQuery = new StringBuilder("UPDATE ").append(hugeEntityClassName).append(" SET ")
                     .append("updated=").append(QueryBuilder.paramToString(new Date()));
+            
+            
 
             String fieldsToUpdate = (String) customFieldInstanceService.getCFValue(jobInstance, UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE);
             if (StringUtils.isBlank(hugeEntityClassName)) {

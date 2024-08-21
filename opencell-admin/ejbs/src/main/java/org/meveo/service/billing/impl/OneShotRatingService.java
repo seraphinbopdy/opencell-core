@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.ejb.Stateless;
@@ -18,15 +19,22 @@ import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ChargeApplicationModeEnum;
 import org.meveo.model.billing.InstanceStatusEnum;
 import org.meveo.model.billing.OneShotChargeInstance;
+import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplate;
 import org.meveo.model.cpq.commercial.CommercialOrder;
+import org.meveo.model.cpq.AttributeValue;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
 import org.meveo.service.tax.TaxClassService;
+
+import static java.math.BigDecimal.ZERO;
+import static java.math.BigDecimal.valueOf;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @Stateless
 public class OneShotRatingService extends RatingService implements Serializable {
@@ -78,6 +86,14 @@ public class OneShotRatingService extends RatingService implements Serializable 
         if (!RatingService.isORChargeMatch(chargeInstance)) {
             log.debug("Not rating oneshot chargeInstance {}/{}, filter expression or service attributes evaluated to FALSE", chargeInstance.getId(), chargeInstance.getCode());
             return new RatingResult();
+        }
+        if (chargeInstance.getChargeTemplate() != null
+                && chargeInstance.getChargeTemplate().getQuantityAttribute() != null) {
+            BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
+                    chargeInstance.getChargeTemplate().getQuantityAttribute().getCode());
+            if (quantityAttribute.compareTo(ZERO) > 0) {
+                inputQuantity = chargeInstance.getQuantity().multiply(quantityAttribute);
+            }
         }
 
         Subscription subscription = chargeInstance.getSubscription();
@@ -182,6 +198,29 @@ public class OneShotRatingService extends RatingService implements Serializable 
                 throw e;
             }
         }
+    }
+
+    private BigDecimal getQuantityAttribute(ServiceInstance serviceInstance, String quantityAttribute) {
+        Map<String, Object> attributeValues = fromAttributeValue(
+                fromAttributeInstances(serviceInstance));
+        return valueOf((Double) attributeValues.get(quantityAttribute));
+    }
+
+    private List<AttributeValue> fromAttributeInstances(ServiceInstance serviceInstance) {
+        if (serviceInstance == null) {
+            return Collections.emptyList();
+        }
+        return serviceInstance.getAttributeInstances().stream()
+                .map(attributeInstance -> (AttributeValue) attributeInstance)
+                .collect(toList());
+    }
+
+    private Map<String, Object> fromAttributeValue(List<AttributeValue> attributeValues) {
+        return attributeValues
+                .stream()
+                .filter(attributeValue -> attributeValue.getAttribute().getAttributeType().getValue(attributeValue) != null)
+                .collect(toMap(key -> key.getAttribute().getCode(),
+                        value -> value.getAttribute().getAttributeType().getValue(value)));
     }
 
 }

@@ -2235,15 +2235,6 @@ public class MeveoFunctionMapper extends FunctionMapper {
         if(edr == null) {
             throw new IllegalArgumentException("EDR cannot be null");
         }
-        
-        if(edr.getId() < 4 && edr.getId() > 1) {
-            return false;
-        }
-        
-        if(edr.getId() % 2 == 0) {
-            throw new BusinessException("EDR id is even");
-        }
-
         if(reratingService == null) {
             try {
                 InitialContext initialContext = new InitialContext();

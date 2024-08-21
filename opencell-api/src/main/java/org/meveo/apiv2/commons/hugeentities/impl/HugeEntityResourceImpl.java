@@ -40,6 +40,7 @@ import javax.interceptor.Interceptors;
 import javax.ws.rs.core.Response;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Optional.ofNullable;
 
@@ -102,16 +103,25 @@ public class HugeEntityResourceImpl implements HugeEntityResource {
             StringBuilder updateQuery = new StringBuilder("UPDATE ").append(hugeEntityClassName).append(" SET ")
                     .append("updated=").append(QueryBuilder.paramToString(new Date()));
             
-            
-
             String fieldsToUpdate = (String) customFieldInstanceService.getCFValue(jobInstance, UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE);
             if (StringUtils.isBlank(hugeEntityClassName)) {
                 throw new MissingParameterException("Fields to update are missing on the job : " + targetJob);
             }
             updateQuery.append(", ").append(fieldsToUpdate);
 
-            int updated = batchEntityService.update(updateQuery, ids);
-            if (updated > 0) {
+            String preUpdateFunction = (String) customFieldInstanceService.getCFValue(jobInstance, UpdateHugeEntityJob.CF_PRE_UPDATE_EL);
+            AtomicInteger updated = new AtomicInteger();
+            if(preUpdateFunction != null){
+                batchEntityService.getEntities(hugeEntityClass, ids).forEach(entity -> {
+                    if(batchEntityService.checkAndUpdateEntity(entity, preUpdateFunction, updateQuery.toString())){
+                        updated.getAndIncrement();
+                    }
+                });
+            } else {
+                updated.set(batchEntityService.update(updateQuery, ids));
+            }
+
+            if (updated.get() > 0) {
                 result.setMessage(updated + " elements updated");
             } else {
                 result.setMessage("No element found to update");

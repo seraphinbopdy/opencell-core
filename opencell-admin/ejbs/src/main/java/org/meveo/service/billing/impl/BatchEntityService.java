@@ -45,6 +45,7 @@ import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
 import org.meveo.service.admin.impl.UserService;
 import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.communication.impl.EmailSender;
 import org.meveo.service.communication.impl.EmailTemplateService;
 import org.meveo.service.communication.impl.InternationalSettingsService;
@@ -61,7 +62,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
@@ -160,7 +160,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      *
      * @param jobExecutionResult Job execution result
      */
-    public void updateHugeEntity(JobExecutionResultImpl jobExecutionResult) {
+    public void checkAndUpdateHugeEntity(JobExecutionResultImpl jobExecutionResult) {
         Class hugeEntityClass = getHugeEntityClass(jobExecutionResult);
         String targetJob = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_TARGET_JOB);
         if (StringUtils.isBlank(targetJob)) {
@@ -185,7 +185,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     private void processBatchEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, Long batchEntityId, Class hugeEntityClass) {
         BatchEntity batchEntity = findById(batchEntityId);
         try {
-            updateHugeEntity(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
+            checkAndUpdateHugeEntity(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
         } catch (Exception e) {
             log.error("Failed to process the entity batch id : {}", batchEntity.getId(), e);
             jobExecutionResult.registerError(e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
@@ -278,7 +278,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @param batchEntity        batch entity
      * @param hugeEntityClass    huge entity class
      */
-    private void updateHugeEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
+    private void checkAndUpdateHugeEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
         executeMassUpdaterJob(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
         if (isRunningAsJobManager(jobExecutionResult)) {
             update(jobExecutionResult, jobInstance, batchEntity);
@@ -510,19 +510,33 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         if(ids.isEmpty()) {
             return Collections.emptyList();
         }
-        
+
+        return getEntities(hugeEntityClass, ids);
+    }
+
+    public List<IEntity> getEntities(Class hugeEntityClass, List<Long> ids) {
         return getEntityManager().createQuery("FROM " + hugeEntityClass.getSimpleName() + " WHERE id IN :ids", IEntity.class)
                                  .setParameter("ids", ids)
                                  .getResultList();
     }
 
-    public void updateHugeEntity(IEntity entity, JobExecutionResultImpl jobExecutionResult) {
-        String updateQuery = getUpdateQuery(jobExecutionResult, null, entity.getClass()
-                                                                            .getSimpleName());
+    public boolean checkAndUpdateHugeEntity(IEntity entity, JobExecutionResultImpl jobExecutionResult) {
+        
+        String updateQuery = getUpdateQuery(jobExecutionResult, null, entity.getClass().getSimpleName());
+        return checkAndUpdateEntity(entity, (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_PRE_UPDATE_EL), updateQuery);
+    }
 
-        getEntityManager().createQuery(updateQuery + " WHERE id=:id")
-                          .setParameter("id", entity.getId())
-                          .executeUpdate();
+    public boolean checkAndUpdateEntity(IEntity entity, String preUpdateEL, String updateQuery) {
+
+        var context = ValueExpressionWrapper.completeContext(preUpdateEL, new HashMap<>(), entity);
+        boolean shouldUpdate = ValueExpressionWrapper.evaluateToBoolean(preUpdateEL, context);
+        
+        if(shouldUpdate) {
+            update(new StringBuilder(updateQuery), List.of((Long) entity.getId()));
+            return true;
+        }
+        
+        return false;
     }
 
     /**

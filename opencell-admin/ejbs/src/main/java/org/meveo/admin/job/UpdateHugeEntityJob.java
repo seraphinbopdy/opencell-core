@@ -118,6 +118,11 @@ public class UpdateHugeEntityJob extends Job {
      */
     public static final String CF_IS_CASE_SENSITIVE = "isCaseSensitive";
 
+    /**
+     * Custom field containing action and check to be performed before updating the entity
+     */
+    public static final String CF_PRE_UPDATE_EL = "UpdateHugeEntityJob_preUpdateEl";
+
 
     /**
      * Job bean
@@ -238,6 +243,12 @@ public class UpdateHugeEntityJob extends Job {
                 CustomFieldTemplateUtils.buildCF(CF_IS_CASE_SENSITIVE,
                         resourceMessages.getString("jobExecution.updateHugeEntity.isCaseSensitive"), CustomFieldTypeEnum.BOOLEAN,
                         "tab:Configuration:0;fieldGroup:Execution configuration:0;field:8", "false", APPLIES_TO));
+        
+        result.put(CF_PRE_UPDATE_EL,
+                CustomFieldTemplateUtils.buildCF(CF_PRE_UPDATE_EL,
+                        resourceMessages.getString("jobExecution.updateHugeEntity.preUpdateEl"), CustomFieldTypeEnum.STRING,
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:9", APPLIES_TO, 1000L));
+        
         return result;
     }
 }

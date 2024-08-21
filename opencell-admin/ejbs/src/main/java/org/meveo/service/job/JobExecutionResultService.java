@@ -231,7 +231,9 @@ public class JobExecutionResultService extends PersistenceService<JobExecutionRe
 
         EntityManager em = getEntityManager();
         List<JobExecutionResultImpl> jobInstances = em.createNamedQuery("JobExecutionResult.listUnfinishedJobs", JobExecutionResultImpl.class).getResultList();
-        em.detach(jobInstances);
+        if(!jobInstances.isEmpty()) {
+            em.detach(jobInstances);
+        }
 
         em.createNamedQuery("JobExecutionResult.cancelUnfinishedJobsByNode").setParameter("nodeName", nodeName).executeUpdate();
 

@@ -30,6 +30,7 @@ import org.meveo.apiv2.common.HugeEntity;
 import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.IEntity;
 import org.meveo.model.admin.CustomGenericEntityCode;
 import org.meveo.model.admin.User;
 import org.meveo.model.billing.BatchEntity;
@@ -53,12 +54,14 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
@@ -349,8 +352,11 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      */
     public String getUpdateQuery(JobExecutionResultImpl jobExecutionResult, BatchEntity batchEntity, String entityClassName) {
         StringBuilder updateQuery = new StringBuilder("UPDATE ").append(entityClassName).append(" SET ")
-                .append("updated=").append(QueryBuilder.paramToString(new Date()))
-                .append(", reratingBatch.id=").append(batchEntity.getId());
+                .append("updated=").append(QueryBuilder.paramToString(new Date()));
+        
+        if(batchEntity != null) {
+            updateQuery.append(", reratingBatch.id=").append(batchEntity.getId());
+        }
 
         String fieldsToUpdate = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE);
         if (!StringUtils.isBlank(fieldsToUpdate)) {
@@ -485,5 +491,48 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     protected boolean isCaseSensitive(JobExecutionResultImpl jobExecutionResult) {
         return jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE) != null ?
                 (boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE) : false;
+    }
+
+    public List<BatchEntity> getBatchEntitiesToProcess(JobExecutionResultImpl jobExecutionResult) {
+        List<BatchEntity> batchsToProcess = getEntityManager().createQuery("FROM BatchEntity be WHERE be.status=:status AND be.targetJob=:targetJob", BatchEntity.class)
+                                                              .setParameter("status", BatchEntityStatusEnum.OPEN)
+                                                              .setParameter("targetJob", jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_TARGET_JOB))
+                                                              .getResultList();
+        return batchsToProcess;
+    }
+
+    public List<IEntity> getDataToProcessByBatchEntity(BatchEntity batchEntity, Class hugeEntityClass, String defaultFilter, boolean isCaseSensitive) {
+        String selectQuery = getSelectQuery(hugeEntityClass, batchEntity.getFilters(), defaultFilter, isCaseSensitive);
+
+        List<Long> ids = getEntityManager().createQuery(selectQuery, Long.class)
+                                           .getResultList();
+        
+        if(ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        return getEntityManager().createQuery("FROM " + hugeEntityClass.getSimpleName() + " WHERE id IN :ids", IEntity.class)
+                                 .setParameter("ids", ids)
+                                 .getResultList();
+    }
+
+    public void updateHugeEntity(IEntity entity, JobExecutionResultImpl jobExecutionResult) {
+        String updateQuery = getUpdateQuery(jobExecutionResult, null, entity.getClass()
+                                                                            .getSimpleName());
+
+        getEntityManager().createQuery(updateQuery + " WHERE id=:id")
+                          .setParameter("id", entity.getId())
+                          .executeUpdate();
+    }
+
+    /**
+     * Finalize Batch processing - (main usage from UpdateHugeEntityJobBean)
+     * @param jobExecutionResult the job execution result
+     * @param batchEntity the batch entity
+     */
+    public void finalizeProcess(JobExecutionResultImpl jobExecutionResult, BatchEntity batchEntity) {
+        log.info("finalizeProcess for batchEntity {} for the jobInstance {}", batchEntity.getId(), jobExecutionResult.getJobInstance().getId());
+        sendEmail(batchEntity, jobExecutionResult);
+        update(jobExecutionResult, jobExecutionResult.getJobInstance(), batchEntity);
     }
 }

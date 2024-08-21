@@ -654,11 +654,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
         Long jobInstanceId = jobExecutionResult.getJobInstance().getId();
 
-        // Use try-with-resources to ensure JMSContext is closed
-        JMSContext jmsContext = jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE);
-
         Runnable task = () -> {
-            try (JMSContext context = jmsContext) { // Using try-with-resources to ensure closing of JMSContext
+            try (JMSContext context = jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE)) {
                 Thread.currentThread().setName(jobInstanceCode + "-PublishToCluster-" + threadNr);
 
                 currentUserProvider.reestablishAuthentication(lastCurrentUser);
@@ -762,90 +759,99 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
             int batchSize, JobExecutionResultImpl jobExecutionResult, boolean isNewTx, boolean useMultipleItemProcessing, BiConsumer<T, JobExecutionResultImpl> processSingleItemFunction,
             BiConsumer<List<T>, JobExecutionResultImpl> processMultipleItemFunction, CountDownLatch countDown) {
 
-        String auditOriginName = jobExecutionResult.getJobInstance().getJobTemplate() + "/" + jobInstanceCode;
+    	String auditOriginName = jobExecutionResult.getJobInstance().getJobTemplate() + "/" + jobInstanceCode;
 
-        JMSContext jmsContext = null;
-        ItertatorJobMessageListener messageListener = null;
-        if (spreadOverCluster) {
-            jmsContext = jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE);
-            jmsContext.setExceptionListener(e -> log.error("Exception while consuming Job processing data messages", e));
+    	JMSContext jmsContext = null;
+    	JMSConsumer jmsConsumer = null;
+    	ItertatorJobMessageListener messageListener = null;
+    	if (spreadOverCluster) {
+    		jmsContext = jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE);
+    		jmsContext.setExceptionListener(e -> log.error("Exception while consuming Job processing data messages", e));
 
-            JMSConsumer jmsConsumer = jmsContext.createConsumer(jobQueue);
-            jmsContext.stop(); // Context is autostarted when consumer is created
-            messageListener = new ItertatorJobMessageListener(countDown, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
-            jmsConsumer.setMessageListener(messageListener);
-        }
-        final JMSContext jmsContextFinal = jmsContext;
-        final ItertatorJobMessageListener messageListenerFinal = messageListener;
+    		jmsConsumer = jmsContext.createConsumer(jobQueue);
+    		jmsContext.stop(); // Context is autostarted when consumer is created
+    		messageListener = new ItertatorJobMessageListener(countDown, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
+    		jmsConsumer.setMessageListener(messageListener);
+    	}
 
-        Long jobInstanceId = jobExecutionResult.getJobInstance().getId();
+    	final JMSContext jmsContextFinal = jmsContext;
+    	final JMSConsumer jmsConsumerFinal = jmsConsumer;
+    	final ItertatorJobMessageListener messageListenerFinal = messageListener;
 
-        Runnable task = () -> {
+    	Long jobInstanceId = jobExecutionResult.getJobInstance().getId();
 
-            try (JMSContext context = jmsContextFinal) { // Try-with-resources to ensure JMSContext is closed
-                Thread.currentThread().setName(jobInstanceCode + "-" + threadNr);
+    	Runnable task = () -> {
 
-                currentUserProvider.reestablishAuthentication(lastCurrentUser);
+    		try (JMSContext context = jmsContextFinal) { // Try-with-resources to ensure JMSContext is closed
+    			Thread.currentThread().setName(jobInstanceCode + "-" + threadNr);
 
-                AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
-                int nrOfItemsProcessedByThread = 0;
+    			currentUserProvider.reestablishAuthentication(lastCurrentUser);
 
-                // First process data from a DB based iterator
-                if (isRunningAsJobManager) {
+    			AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
+    			int nrOfItemsProcessedByThread = 0;
 
-                    mainLoop: while (true) {
+    			// First process data from a DB based iterator
+    			if (isRunningAsJobManager) {
 
-                        List<T> itemsToProcess = getNextItemsToProcess(batchSize, dataIterator, jobExecutionResult.getJobInstance().getId());
-                        if (itemsToProcess.isEmpty()) {
-                            break mainLoop;
-                        }
+    				mainLoop: while (true) {
 
-                        processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
+    					List<T> itemsToProcess = getNextItemsToProcess(batchSize, dataIterator, jobExecutionResult.getJobInstance().getId());
+    					if (itemsToProcess.isEmpty()) {
+    						break mainLoop;
+    					}
 
-                        int nrOfItemsInBatch = itemsToProcess.size();
-                        nrOfItemsProcessedByThread += nrOfItemsInBatch;
-                    }
-                }
+    					processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
 
-                int nrOfItemsDb = nrOfItemsProcessedByThread;
-                int nrOfItemsQueue = 0;
-                int nrofMessages = 0;
+    					int nrOfItemsInBatch = itemsToProcess.size();
+    					nrOfItemsProcessedByThread += nrOfItemsInBatch;
+    				}
+    			}
 
-                // Continue processing messages from a message queue if applicable
-                if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
+    			int nrOfItemsDb = nrOfItemsProcessedByThread;
+    			int nrOfItemsQueue = 0;
+    			int nrofMessages = 0;
 
-                    context.start();
-                    try {
-                        countDown.await();
+    			// Continue processing messages from a message queue if applicable
+    			if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
 
-                        // Now need to wait until all messages were processed, as countDown is released once the last message is received, not when all messages are processed
-                        // Polling is done
-                        String queueName = jobQueue.getQueueName();
-                        do {
-                            Thread.sleep(2000);
-                        } while (!isJobRequestedToStop(jobInstanceId) && !areAllMessagesConsumed(jobInstanceCode, queueName));
+    				context.start();
+    				try {
+    					countDown.await();
 
-                    } catch (InterruptedException e) {
-                        log.error("Job message listener was interrupted", e);
-                    } catch (JMSException e) {
-                        log.error("Failed to obtain queue name", e);
-                    }
+    					// Now need to wait until all messages were processed, as countDown is released once the last message is received, not when all messages are processed
+    					// Polling is done
+    					String queueName = jobQueue.getQueueName();
+    					do {
+    						Thread.sleep(2000);
+    					} while (!isJobRequestedToStop(jobInstanceId) && !areAllMessagesConsumed(jobInstanceCode, queueName));
 
-                    nrOfItemsQueue = messageListenerFinal.getItemCount();
-                    nrofMessages = messageListenerFinal.getMsgCount();
-                    nrOfItemsProcessedByThread += nrOfItemsQueue;
+    				} catch (InterruptedException e) {
+    					log.error("Job message listener was interrupted", e);
+    				} catch (JMSException e) {
+    					log.error("Failed to obtain queue name", e);
+    				}
 
-                }
+    				nrOfItemsQueue = messageListenerFinal.getItemCount();
+    				nrofMessages = messageListenerFinal.getMsgCount();
+    				nrOfItemsProcessedByThread += nrOfItemsQueue;
 
-                log.info("Thread {} processed {} items: {} from db and {} from {} messages", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrOfItemsDb, nrOfItemsQueue, nrofMessages);
+    			}
 
-            } catch (Exception e) {
-                log.error("An error occurred during data processing", e);
-            }
-        };
+    			log.info("Thread {} processed {} items: {} from db and {} from {} messages", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrOfItemsDb, nrOfItemsQueue, nrofMessages);
 
-        return task;
+    		} catch (Exception e) {
+    			log.error("An error occurred during data processing", e);
+    		} finally {
+    			// Ensure JMSConsumer is closed if it was created
+    			if (jmsConsumerFinal != null) {
+    				jmsConsumerFinal.close();
+    			}
+    		}
+    	};
+
+    	return task;
     }
+
 
     /**
      * Process items

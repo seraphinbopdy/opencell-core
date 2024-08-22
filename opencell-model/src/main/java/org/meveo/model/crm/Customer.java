@@ -50,6 +50,7 @@ import org.meveo.model.AccountEntity;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IWFEntity;
@@ -73,6 +74,7 @@ import org.meveo.model.payments.CustomerAccount;
  * @lastModifiedVersion 10.0
  */
 @Entity
+@HugeEntity
 @WorkflowedEntity
 @CustomFieldEntity(cftCodePrefix = "Customer", inheritCFValuesFrom = "seller")
 @ExportIdentifier({ "code" })

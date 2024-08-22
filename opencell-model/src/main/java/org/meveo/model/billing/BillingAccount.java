@@ -56,6 +56,7 @@ import org.hibernate.annotations.Type;
 import org.meveo.model.AccountEntity;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.IBillableEntity;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.ICustomFieldEntity;
@@ -84,6 +85,7 @@ import org.meveo.model.tax.TaxCategory;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @Cacheable
 @WorkflowedEntity
 @CustomFieldEntity(cftCodePrefix = "BillingAccount", inheritCFValuesFrom = "customerAccount")

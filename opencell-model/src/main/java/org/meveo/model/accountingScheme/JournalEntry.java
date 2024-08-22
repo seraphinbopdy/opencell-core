@@ -19,6 +19,7 @@ package org.meveo.model.accountingScheme;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.meveo.model.AuditableEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.ChartOfAccountTypeEnum;
@@ -31,6 +32,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
+@HugeEntity
 @Table(name = "accounting_journal_entry")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
         @org.hibernate.annotations.Parameter(name = "sequence_name", value = "accounting_journal_entry_seq")})

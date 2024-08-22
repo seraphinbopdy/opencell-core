@@ -21,7 +21,7 @@ package org.meveo.service.billing.impl;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -63,6 +63,7 @@ import org.meveo.model.billing.WalletOperationStatusEnum;
 import org.meveo.model.catalog.Calendar;
 import org.meveo.model.catalog.RecurringChargeTemplate;
 import org.meveo.model.catalog.ServiceTemplate;
+import org.meveo.model.cpq.AttributeValue;
 import org.meveo.model.cpq.CpqQuote;
 import org.meveo.model.quote.QuoteVersion;
 import org.meveo.model.rating.EDR;
@@ -71,7 +72,10 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.catalog.impl.CalendarService;
 import org.meveo.service.catalog.impl.PricePlanMatrixService;
 
-import static java.util.Arrays.asList;
+import static java.math.BigDecimal.ZERO;
+import static java.math.BigDecimal.valueOf;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @Stateless
 public class RecurringRatingService extends RatingService implements Serializable {
@@ -292,15 +296,23 @@ public class RecurringRatingService extends RatingService implements Serializabl
                 // The counter will be decremented by charge quantity
                 CounterInstance counterInstance = chargeInstance.getCounter();
                 if (!isVirtual && counterInstance != null) {
-                	
-                	CounterValueChangeInfo counterValueChangeInfo = counterInstanceService.deduceCounterValue_noLock(counterInstance, chargeInstance.getChargeDate(), chargeInstance.getServiceInstance().getSubscriptionDate(),
-                				chargeInstance, chargeInstance.getQuantity(), isVirtual);
+                    BigDecimal inputQuantity = chargeInstance.getQuantity();
+                    if (recurringChargeTemplate.getQuantityAttribute() != null) {
+                        BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
+                                recurringChargeTemplate.getQuantityAttribute().getCode());
+                        if(quantityAttribute.compareTo(ZERO) > 0) {
+                            inputQuantity = inputQuantity.multiply(quantityAttribute);
+                        }
+                    }
+                	CounterValueChangeInfo counterValueChangeInfo =
+                            counterInstanceService.deduceCounterValue_noLock(counterInstance, chargeInstance.getChargeDate(),
+                                    chargeInstance.getServiceInstance().getSubscriptionDate(), chargeInstance, inputQuantity, isVirtual);
                 	
 
                     boolean isApplyInAdvance = isApplyInAdvance(chargeInstance);
 
                     // If the counter was not deducted, then the charge is not applied (but next activation date is updated).
-                    if (counterValueChangeInfo.getDeltaValue().equals(BigDecimal.ZERO)) {
+                    if (counterValueChangeInfo.getDeltaValue().equals(ZERO)) {
                         chargeInstance.advanceChargeDates(applyChargeFromDate, applyChargeToDate, isApplyInAdvance ? applyChargeToDate : applyChargeFromDate);
                         return new RatingResult();
                     }
@@ -408,6 +420,15 @@ public class RecurringRatingService extends RatingService implements Serializabl
 
                     boolean alreadyInvoiced = false;
                     BigDecimal inputQuantity = chargeMode.isReimbursement() ? chargeInstance.getQuantity().negate() : chargeInstance.getQuantity();
+                    if(recurringChargeTemplate.getQuantityAttribute() != null) {
+                        BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
+                                recurringChargeTemplate.getQuantityAttribute().getCode());
+                        if(quantityAttribute.compareTo(ZERO) > 0) {
+                            inputQuantity = inputQuantity.multiply(quantityAttribute);
+                        } else {
+                            log.info("Quantity attribute is set to zero it will be ignored");
+                        }
+                    }
 
                     if (chargeInstance != null && chargeInstance.getSubscription() != null
                             && chargeInstance.getSubscription().getSubscribedTillDate() != null
@@ -602,6 +623,29 @@ public class RecurringRatingService extends RatingService implements Serializabl
                 && walletOperation.getRatedTransaction().getStatus().equals(RatedTransactionStatusEnum.BILLED)
                 && (walletOperation.getRatedTransaction().getInvoiceLine() != null
                 && walletOperation.getRatedTransaction().getInvoiceLine().getStatus().equals(InvoiceLineStatusEnum.BILLED));
+    }
+
+    private BigDecimal getQuantityAttribute(ServiceInstance serviceInstance, String quantityAttribute) {
+        Map<String, Object> attributeValues = fromAttributeValue(
+                fromAttributeInstances(serviceInstance));
+        return valueOf((Double) attributeValues.get(quantityAttribute));
+    }
+
+    private List<AttributeValue> fromAttributeInstances(ServiceInstance serviceInstance) {
+        if (serviceInstance == null) {
+            return Collections.emptyList();
+        }
+        return serviceInstance.getAttributeInstances().stream()
+                .map(attributeInstance -> (AttributeValue) attributeInstance)
+                .collect(toList());
+    }
+
+    private Map<String, Object> fromAttributeValue(List<AttributeValue> attributeValues) {
+        return attributeValues
+                .stream()
+                .filter(attributeValue -> attributeValue.getAttribute().getAttributeType().getValue(attributeValue) != null)
+                .collect(toMap(key -> key.getAttribute().getCode(),
+                        value -> value.getAttribute().getAttributeType().getValue(value)));
     }
 
     /**

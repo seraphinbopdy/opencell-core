@@ -13249,15 +13249,15 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="cf_values"><![CDATA[{
                 "nbRuns":[{"long":-1}],
                 "waitingMillis":[{"long":0}],
-                "UpdateHugeEntityJob_targetJob":[{"string":"reopenEDRZeroJob"}],
-                "UpdateHugeEntityJob_entityClassName":[{"string": "org.meveo.model.rating.EDR"}],
-                "UpdateHugeEntityJob_fieldsToUpdate":[{"string": "status='OPEN', zeroWoDropped=false"}],
-                "UpdateHugeEntityJob_defaultFilter":[{"string": "{ \"filters\": { \"zeroWoDropped\":false}}"}],
-                "UpdateHugeEntityJob_selectFetchSize":[{"long":1000000}],
-                "UpdateHugeEntityJob_isUsingView":[{"boolean":false}],
-                "UpdateHugeEntityJob_isOpenCursor":[{"boolean":false}],
-                "UpdateHugeEntityJob_emailTemplate": [{"entity": {"code": "MASS_REOPEN_EDR_ZERO", "classname": "org.meveo.model.communication.email.EmailTemplate"}}],
-                "UpdateHugeEntityJob_preUpdateEl": [{"string": "#{mv:validateAndCancelDerivedWosEdrsAndRts(edr)}"}]
+                "targetJob":[{"string":"reopenEDRZeroJob"}],
+                "entityClassName":[{"string": "org.meveo.model.rating.EDR"}],
+                "fieldsToUpdate":[{"string": "status='OPEN', zeroWoDropped=false"}],
+                "defaultFilter":[{"string": "{ \"filters\": { \"zeroWoDropped\":false}}"}],
+                "selectFetchSize":[{"long":1000000}],
+                "isUsingView":[{"boolean":false}],
+                "isOpenCursor":[{"boolean":false}],
+                "emailTemplate": [{"entity": {"code": "MASS_REOPEN_EDR_ZERO", "classname": "org.meveo.model.communication.email.EmailTemplate"}}],
+                "preUpdateEl": [{"string": "#{mv:validateAndCancelDerivedWosEdrsAndRts(edr)}"}]
                 }]]>
 			</column>
 		</insert>

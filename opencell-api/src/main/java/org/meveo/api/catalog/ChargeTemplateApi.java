@@ -20,10 +20,8 @@ package org.meveo.api.catalog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,8 +31,6 @@ import javax.xml.bind.ValidationException;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.BaseCrudApi;
-import org.meveo.api.dto.LanguageDescriptionDto;
-import org.meveo.api.dto.LanguageDto;
 import org.meveo.api.dto.catalog.ChargeTemplateDto;
 import org.meveo.api.dto.catalog.TriggeredEdrTemplateDto;
 import org.meveo.api.exception.BusinessApiException;
@@ -45,7 +41,6 @@ import org.meveo.api.exception.MissingParameterException;
 import org.meveo.commons.utils.ListUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.InvoiceSubCategory;
-import org.meveo.model.billing.TradingLanguage;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.ChargeTemplateStatusEnum;
 import org.meveo.model.catalog.PricePlanMatrix;
@@ -66,6 +61,8 @@ import org.meveo.service.cpq.AttributeService;
 import org.meveo.service.finance.RevenueRecognitionRuleService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.tax.TaxClassService;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Edward P. Legaspi
@@ -204,13 +201,13 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
 
         if (!ListUtils.isEmtyCollection(postData.getPricePlanCodes())) {
             Set<PricePlanMatrix> pricePlans = postData.getPricePlanCodes()
-                                                        .stream()
-                                                        .map(c -> Optional.ofNullable(pricePlanMatrixService.findByCode(c))
-                                                                            .orElseThrow(() -> new EntityDoesNotExistsException(PricePlanMatrix.class, c)))
-                                                        .collect(Collectors.toSet());
+                    .stream()
+                    .map(c -> Optional.ofNullable(pricePlanMatrixService.findByCode(c))
+                            .orElseThrow(() -> new EntityDoesNotExistsException(PricePlanMatrix.class, c)))
+                    .collect(Collectors.toSet());
 
             pricePlans.forEach(pp -> {
-                if(pp.getChargeTemplates() == null) {
+                if (pp.getChargeTemplates() == null) {
                     pp.setChargeTemplates(new HashSet<>());
                 }
                 pp.getChargeTemplates().add(chargeTemplate);
@@ -224,7 +221,7 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
         if (postData.getSortIndexEl() != null) {
             chargeTemplate.setSortIndexEl(postData.getSortIndexEl());
         }
-        if(postData.getLinkedAttributes() != null){
+        if (postData.getLinkedAttributes() != null) {
             chargeTemplate.getAttributes()
                     .forEach(
                             attribute -> attribute.getChargeTemplates().remove(chargeTemplate)
@@ -241,7 +238,7 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
                     .collect(Collectors.toSet());
             chargeTemplate.getAttributes().addAll(linkedAttributes);
         }
-        if(postData.getStatus() != null){
+        if (postData.getStatus() != null) {
             try {
                 chargeTemplate.setStatus(postData.getStatus());
             } catch (ValidationException e) {
@@ -249,8 +246,8 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
             }
         }
 
-        if(postData.getInternalNote() != null) {
-        	chargeTemplate.setInternalNote(StringUtils.isBlank(postData.getInternalNote()) ? null : postData.getInternalNote());
+        if (postData.getInternalNote() != null) {
+            chargeTemplate.setInternalNote(StringUtils.isBlank(postData.getInternalNote()) ? null : postData.getInternalNote());
         }
 
         if (postData.getParameter1Description() != null) {
@@ -271,7 +268,7 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
         if (postData.getParameter1IsHidden() != null) {
             chargeTemplate.setParameter1IsHidden(postData.getParameter1IsHidden());
         }
-        
+
         if (postData.getParameter2Description() != null) {
             chargeTemplate.setParameter2Description(postData.getParameter2Description());
         }
@@ -290,7 +287,7 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
         if (postData.getParameter2IsHidden() != null) {
             chargeTemplate.setParameter2IsHidden(postData.getParameter2IsHidden());
         }
-        
+
         if (postData.getParameter3Description() != null) {
             chargeTemplate.setParameter3Description(postData.getParameter3Description());
         }
@@ -309,7 +306,7 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
         if (postData.getParameter3IsHidden() != null) {
             chargeTemplate.setParameter3IsHidden(postData.getParameter3IsHidden());
         }
-        
+
         if (postData.getParameterExtraDescription() != null) {
             chargeTemplate.setParameterExtraDescription(postData.getParameterExtraDescription());
         }
@@ -328,7 +325,7 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
         if (postData.getParameterExtraIsHidden() != null) {
             chargeTemplate.setParameterExtraIsHidden(postData.getParameterExtraIsHidden());
         }
-        
+
         if (postData.getBusinessKeyEl() != null) {
             chargeTemplate.setBusinessKeyEl(postData.getBusinessKeyEl());
         }
@@ -349,17 +346,22 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
         }
         if (postData.getBusinessKeyIsHidden() != null) {
             chargeTemplate.setBusinessKeyIsHidden(postData.getBusinessKeyIsHidden());
-        }
+            if (postData.getQuantityAttribute() != null) {
+                Attribute quantityAttribute = ofNullable(attributeService.findByCode(postData.getQuantityAttribute()))
+                        .orElseThrow(() -> new EntityDoesNotExistsException(Attribute.class, postData.getQuantityAttribute()));
+                chargeTemplate.setQuantityAttribute(quantityAttribute);
+            }
 
-        // populate customFields
-        try {
-            populateCustomFields(postData.getCustomFields(), chargeTemplate, isNew);
-        } catch (MissingParameterException | InvalidParameterException e) {
-            log.error("Failed to associate custom field instance to an entity: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("Failed to associate custom field instance to an entity", e);
-            throw e;
+            // populate customFields
+            try {
+                populateCustomFields(postData.getCustomFields(), chargeTemplate, isNew);
+            } catch (MissingParameterException | InvalidParameterException e) {
+                log.error("Failed to associate custom field instance to an entity: {}", e.getMessage());
+                throw e;
+            } catch (Exception e) {
+                log.error("Failed to associate custom field instance to an entity", e);
+                throw e;
+            }
         }
     }
     

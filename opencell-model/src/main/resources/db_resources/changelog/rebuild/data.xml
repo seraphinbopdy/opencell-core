@@ -12999,6 +12999,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="version" value="0" />
             <column name="created" valueDate="${db.current.time}" />
             <column name="code" value="MASS_REOPEN_EDR_ZERO" />
+			<column name="description" value="Email template for notifying batch re-opening of EDRs with drop zero wallet operations" />
             <column name="tag_start" value="#{" />
             <column name="tag_end" value="}" />
             <column name="subject">
@@ -13244,6 +13245,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="job_category" value="UTILS"/>
 			<column name="job_template" value="UpdateHugeEntityJob"/>
 			<column name="code" value="reopenEDRZeroJob"/>
+			<column name="description" value='Reopens EDRs whose wallet operations have been dropped by the "drop zero wallet operations" charge template rule' />
 			<column name="creator" value="applicationInitializer"/>
 			<column name="uuid" value="reopenEDRZeroJob"/>
 			<column name="cf_values"><![CDATA[{

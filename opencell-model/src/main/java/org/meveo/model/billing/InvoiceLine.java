@@ -44,6 +44,7 @@ import org.meveo.commons.utils.NumberUtils;
 import org.meveo.model.AuditableCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.DatePeriod;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.catalog.DiscountPlan;
@@ -67,6 +68,7 @@ import org.meveo.model.cpq.offer.QuoteOffer;
  *
  */
 @Entity
+@HugeEntity
 @ObservableEntity
 @CustomFieldEntity(cftCodePrefix = "InvoiceLine")
 @Table(name = "billing_invoice_line")

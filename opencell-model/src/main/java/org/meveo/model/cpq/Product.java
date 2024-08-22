@@ -38,6 +38,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.article.ArticleMappingLine;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.DiscountPlan;
@@ -67,6 +68,7 @@ import org.meveo.model.crm.CustomerBrand;
  *
  */
 @Entity
+@HugeEntity
 @CustomFieldEntity(cftCodePrefix = "Product")
 @Table(name = "cpq_product", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {

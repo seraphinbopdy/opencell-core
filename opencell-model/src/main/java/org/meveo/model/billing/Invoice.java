@@ -64,6 +64,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.ObservableEntity;
@@ -93,6 +94,7 @@ import org.meveo.model.shared.DateUtils;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @ObservableEntity
 @Table(name = "billing_invoice", uniqueConstraints = @UniqueConstraint(columnNames = { "invoice_number", "invoice_type_id" }))
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_seq"), })

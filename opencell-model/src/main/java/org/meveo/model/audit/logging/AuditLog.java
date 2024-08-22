@@ -32,6 +32,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.meveo.model.BaseEntity;
+import org.meveo.model.HugeEntity;
 
 /**
  * Audit log of user performed actions
@@ -39,6 +40,7 @@ import org.meveo.model.BaseEntity;
  * @author Edward P. Legaspi
  **/
 @Entity
+@HugeEntity
 @Table(name = "audit_log")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
         @Parameter(name = "sequence_name", value = "audit_log_seq"), })

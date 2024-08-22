@@ -34,6 +34,7 @@ import org.hibernate.annotations.Parameter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.ObservableEntity;
 import org.hibernate.annotations.Type;
@@ -48,6 +49,7 @@ import org.meveo.model.billing.UntdidAllowanceCode;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @ObservableEntity
 @Cacheable
 @ExportIdentifier({ "code" })

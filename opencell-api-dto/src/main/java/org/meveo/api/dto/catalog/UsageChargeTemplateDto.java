@@ -85,7 +85,7 @@ public class UsageChargeTemplateDto extends ChargeTemplateDto {
      * usageQuantityAttributeCode field is deprecated chargeTemplateDTO.quantityAttribute should be used
      * @deprecated since 14.0.16
      **/
-    @Deprecated
+    @Deprecated(since = "14.0.16", forRemoval = true)
     @Schema(description = "code of usage attribute quantity")
     private String usageQuantityAttributeCode;
 

@@ -1898,31 +1898,31 @@ public class AccountHierarchyApi extends BaseApi {
         }
 
         if (accountDto.getAddress() != null) {
-            if (!StringUtils.isBlank(accountDto.getAddress().getAddress1())) {
+            if (accountDto.getAddress().getAddress1() != null) {
                 accountEntity.getAddress().setAddress1(accountDto.getAddress().getAddress1());
             }
-            if (!StringUtils.isBlank(accountDto.getAddress().getAddress2())) {
+            if (accountDto.getAddress().getAddress2() != null) {
                 accountEntity.getAddress().setAddress2(accountDto.getAddress().getAddress2());
             }
-            if (!StringUtils.isBlank(accountDto.getAddress().getAddress3())) {
+            if (accountDto.getAddress().getAddress3() != null) {
                 accountEntity.getAddress().setAddress3(accountDto.getAddress().getAddress3());
             }
-            if (!StringUtils.isBlank(accountDto.getAddress().getAddress4())) {
+            if (accountDto.getAddress().getAddress4() != null) {
                 accountEntity.getAddress().setAddress4(accountDto.getAddress().getAddress4());
             }
-            if (!StringUtils.isBlank(accountDto.getAddress().getAddress5())) {
+            if (accountDto.getAddress().getAddress5() != null) {
                 accountEntity.getAddress().setAddress5(accountDto.getAddress().getAddress5());
             }
-            if (!StringUtils.isBlank(accountDto.getAddress().getZipCode())) {
+            if (accountDto.getAddress().getZipCode() != null) {
                 accountEntity.getAddress().setZipCode(accountDto.getAddress().getZipCode());
             }
-            if (!StringUtils.isBlank(accountDto.getAddress().getCity())) {
+            if (accountDto.getAddress().getCity() != null) {
                 accountEntity.getAddress().setCity(accountDto.getAddress().getCity());
             }
-            if (!StringUtils.isBlank(accountDto.getAddress().getState())) {
+            if (accountDto.getAddress().getState() != null) {
                 accountEntity.getAddress().setState(accountDto.getAddress().getState());
             }
-            if (!StringUtils.isBlank(accountDto.getAddress().getCountry())) {
+            if (accountDto.getAddress().getCountry() != null) {
                 accountEntity.getAddress().setCountry(accountDto.getAddress().getCountry());
             }
         }

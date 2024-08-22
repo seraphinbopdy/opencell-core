@@ -13054,4 +13054,15 @@ Meaning that advances won’t be available for further invoices."/>
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD-25073_fix_description_reopen_zero_wo" author="a.rouaguebe">
+        <update tableName="meveo_job_instance">
+            <column name="description" value='Reopens EDRs whose wallet operations have been dropped by the "drop zero wallet operations" charge template rule' />
+            <where>code = 'reopenEDRZeroJob'</where>
+        </update>
+        <update tableName="com_message_template">
+            <column name="description" value="Email template for notifying batch re-opening of EDRs with drop zero wallet operations" />
+            <where>code = 'MASS_REOPEN_EDR_ZERO'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

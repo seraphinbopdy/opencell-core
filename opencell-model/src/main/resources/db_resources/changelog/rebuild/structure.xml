@@ -20972,6 +20972,7 @@
     <changeSet author="zakariab" id="INTRD-24538_20240815" />
 
     <changeSet id="#INTRD-24543_reopenEdrZeroJob" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25073_fix_description_reopen_zero_wo" author="a.rouaguebe">
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

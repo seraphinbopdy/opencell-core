@@ -19,7 +19,9 @@ package org.meveo.admin.job;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
+import org.meveo.model.billing.BillingRun;
 import org.meveo.model.crm.CustomFieldTemplate;
+import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
@@ -46,6 +48,7 @@ public class InvoicingThresholdJob extends Job {
      */
 
     public static final String APPLIES_TO = "JobInstance_InvoicingThresholdJob";
+    public static final String BILLING_RUNS = "JobInstance_InvoicingThresholdJob";
 
     /**
      * Job bean
@@ -81,7 +84,11 @@ public class InvoicingThresholdJob extends Job {
                 CustomFieldTemplateUtils.buildCF(CF_WAITING_MILLIS,
                         resourceMessages.getString("jobExecution.waitingMillis"), CustomFieldTypeEnum.LONG,
                         "tab:Configuration:0;fieldGroup:Job configuration:0;field:1", "0", APPLIES_TO));
+        result.put(BILLING_RUNS, CustomFieldTemplateUtils.buildCF(BILLING_RUNS, resourceMessages.getString("jobExecution.ilJob.billingRuns"), CustomFieldTypeEnum.ENTITY,
+                "tab:Configuration:0;fieldGroup:Job configuration:0;field:2", null, false, CustomFieldStorageTypeEnum.LIST, BillingRun.class.getName(),APPLIES_TO, null));
 
         return result;
     }
+    
+    
 }

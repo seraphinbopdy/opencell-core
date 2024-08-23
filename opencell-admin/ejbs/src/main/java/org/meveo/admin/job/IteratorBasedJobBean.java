@@ -756,33 +756,29 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
      * @return A task definition
      */
     private Runnable getDataProcessingTask(String jobInstanceCode, Iterator<T> dataIterator, int threadNr, MeveoUser lastCurrentUser, boolean isRunningAsJobManager, boolean spreadOverCluster, Queue jobQueue,
-            int batchSize, JobExecutionResultImpl jobExecutionResult, boolean isNewTx, boolean useMultipleItemProcessing, BiConsumer<T, JobExecutionResultImpl> processSingleItemFunction,
-            BiConsumer<List<T>, JobExecutionResultImpl> processMultipleItemFunction, CountDownLatch countDown) {
+    		int batchSize, JobExecutionResultImpl jobExecutionResult, boolean isNewTx, boolean useMultipleItemProcessing, BiConsumer<T, JobExecutionResultImpl> processSingleItemFunction,
+    		BiConsumer<List<T>, JobExecutionResultImpl> processMultipleItemFunction, CountDownLatch countDown) {
 
     	String auditOriginName = jobExecutionResult.getJobInstance().getJobTemplate() + "/" + jobInstanceCode;
-
-    	JMSContext jmsContext = null;
-    	JMSConsumer jmsConsumer = null;
-    	ItertatorJobMessageListener messageListener = null;
-    	if (spreadOverCluster) {
-    		jmsContext = jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE);
-    		jmsContext.setExceptionListener(e -> log.error("Exception while consuming Job processing data messages", e));
-
-    		jmsConsumer = jmsContext.createConsumer(jobQueue);
-    		jmsContext.stop(); // Context is autostarted when consumer is created
-    		messageListener = new ItertatorJobMessageListener(countDown, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
-    		jmsConsumer.setMessageListener(messageListener);
-    	}
-
-    	final JMSContext jmsContextFinal = jmsContext;
-    	final JMSConsumer jmsConsumerFinal = jmsConsumer;
-    	final ItertatorJobMessageListener messageListenerFinal = messageListener;
-
     	Long jobInstanceId = jobExecutionResult.getJobInstance().getId();
-
+    	
     	Runnable task = () -> {
+    		
+    		ItertatorJobMessageListener messageListener = null;
+        	if (spreadOverCluster) {
+        		messageListener = new ItertatorJobMessageListener(countDown, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
+        	}
+    		
+    		try (JMSContext jmsContext = spreadOverCluster ?
+    				jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE) : null) {
 
-    		try (JMSContext context = jmsContextFinal) { // Try-with-resources to ensure JMSContext is closed
+    			if (spreadOverCluster) {
+    				jmsContext.setExceptionListener(e -> log.error("Exception while consuming Job processing data messages", e));
+    				JMSConsumer jmsConsumer = jmsContext.createConsumer(jobQueue);
+    				jmsContext.stop(); // Context is autostarted when consumer is created
+    				jmsConsumer.setMessageListener(messageListener);
+    			}
+
     			Thread.currentThread().setName(jobInstanceCode + "-" + threadNr);
 
     			currentUserProvider.reestablishAuthentication(lastCurrentUser);
@@ -793,18 +789,19 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
     			// First process data from a DB based iterator
     			if (isRunningAsJobManager) {
 
-    				mainLoop: while (true) {
+    				mainLoop:
+    					while (true) {
 
-    					List<T> itemsToProcess = getNextItemsToProcess(batchSize, dataIterator, jobExecutionResult.getJobInstance().getId());
-    					if (itemsToProcess.isEmpty()) {
-    						break mainLoop;
+    						List<T> itemsToProcess = getNextItemsToProcess(batchSize, dataIterator, jobExecutionResult.getJobInstance().getId());
+    						if (itemsToProcess.isEmpty()) {
+    							break mainLoop;
+    						}
+
+    						processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
+
+    						int nrOfItemsInBatch = itemsToProcess.size();
+    						nrOfItemsProcessedByThread += nrOfItemsInBatch;
     					}
-
-    					processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
-
-    					int nrOfItemsInBatch = itemsToProcess.size();
-    					nrOfItemsProcessedByThread += nrOfItemsInBatch;
-    				}
     			}
 
     			int nrOfItemsDb = nrOfItemsProcessedByThread;
@@ -814,7 +811,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
     			// Continue processing messages from a message queue if applicable
     			if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
 
-    				context.start();
+    				jmsContext.start();
     				try {
     					countDown.await();
 
@@ -831,8 +828,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
     					log.error("Failed to obtain queue name", e);
     				}
 
-    				nrOfItemsQueue = messageListenerFinal.getItemCount();
-    				nrofMessages = messageListenerFinal.getMsgCount();
+    				nrOfItemsQueue = messageListener.getItemCount();
+    				nrofMessages = messageListener.getMsgCount();
     				nrOfItemsProcessedByThread += nrOfItemsQueue;
 
     			}
@@ -841,16 +838,12 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
     		} catch (Exception e) {
     			log.error("An error occurred during data processing", e);
-    		} finally {
-    			// Ensure JMSConsumer is closed if it was created
-    			if (jmsConsumerFinal != null) {
-    				jmsConsumerFinal.close();
-    			}
     		}
     	};
 
     	return task;
     }
+
 
 
     /**

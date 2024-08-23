@@ -47,6 +47,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Type;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.IWFEntity;
 import org.meveo.model.WorkflowedEntity;
@@ -66,6 +67,7 @@ import org.meveo.model.document.Document;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @WorkflowedEntity
 @CustomFieldEntity(cftCodePrefix = "OfferTemplate")
 @DiscriminatorValue("OFFER")

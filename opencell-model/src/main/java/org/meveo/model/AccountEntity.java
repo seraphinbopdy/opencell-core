@@ -56,6 +56,7 @@ import java.util.List;
  * @lastModifiedVersion 5.2
  */
 @Entity
+@HugeEntity
 @ObservableEntity
 @Table(name = "account_entity", uniqueConstraints = @UniqueConstraint(columnNames = { "code"}))
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {

@@ -48,6 +48,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.ObservableEntity;
@@ -79,6 +80,7 @@ import org.meveo.model.tax.TaxClass;
  * @lastModifiedVersion 7.1
  */
 @Entity
+@HugeEntity
 @ObservableEntity
 @CustomFieldEntity(cftCodePrefix = "RatedTransaction")
 @Table(name = "billing_rated_transaction")

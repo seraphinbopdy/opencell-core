@@ -42,6 +42,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.meveo.model.BaseEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 
@@ -52,6 +53,7 @@ import org.meveo.model.billing.WalletOperation;
  * @lastModifiedVersion 5.1
  */
 @Entity
+@HugeEntity
 @Table(name = "rating_edr")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "rating_edr_seq"), @Parameter(name = "increment_size", value = "5000") })
 @NamedQueries({

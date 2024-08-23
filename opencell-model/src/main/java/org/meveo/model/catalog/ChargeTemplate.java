@@ -57,6 +57,7 @@ import org.meveo.model.BaseEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ModuleItem;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.billing.InvoiceSubCategory;
@@ -74,6 +75,7 @@ import org.meveo.model.tax.TaxClass;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @ModuleItem
 @ObservableEntity
 @Cacheable

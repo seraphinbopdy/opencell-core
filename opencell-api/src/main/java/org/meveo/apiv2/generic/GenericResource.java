@@ -152,7 +152,9 @@ public interface GenericResource {
     Response getFullListEntities(@Parameter(description = "onlyBusinessEntities to be able to get only entities extending BusinessEntity.")
                                  @QueryParam("onlyBusinessEntities") boolean onlyBusinessEntities,
                                  @Parameter(description = "withFullName to be able to get the canonical names")
-                                 @QueryParam("withFullName") boolean withFullName);
+                                 @QueryParam("withFullName") boolean withFullName,
+                                 @Parameter(description = "onlyHugeEntities to fetch only huge entities")
+                                 @QueryParam("onlyHugeEntities") boolean onlyHugeEntities);
 
     @GET
     @Path("/entities/{entityName}")

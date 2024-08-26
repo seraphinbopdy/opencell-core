@@ -189,7 +189,7 @@ import org.meveo.model.tax.TaxClass;
         @NamedQuery(name = "RatedTransaction.BillingAccountByRTIds", query = "SELECT distinct rt.billingAccount FROM RatedTransaction rt WHERE rt.id in (:ids)"),
         @NamedQuery(name = "RatedTransaction.linkRTWithInvoiceLine", query = "UPDATE RatedTransaction rt set rt.status='BILLED', rt.invoiceLine.id = :il, rt.billingRun.id = :billingRunId WHERE rt.id in :ids"),
         @NamedQuery(name = "RatedTransaction.linkRTWithInvoice", query = "UPDATE RatedTransaction rt set rt.invoice = :invoice, rt.billingRun = :billingRun, rt.status = 'BILLED', rt.updated = :now WHERE rt.invoiceLine.id in :ids"),
-        @NamedQuery(name = "RatedTransaction.detachFromInvoiceLines", query = "UPDATE RatedTransaction rt set rt.invoiceLine = null, rt.status = 'OPEN' WHERE rt.invoiceLine.id in :ids"),
+        @NamedQuery(name = "RatedTransaction.detachFromInvoiceLines", query = "UPDATE RatedTransaction rt set rt.invoiceLine = null, rt.status = 'OPEN', rt.billingRun = null WHERE rt.invoiceLine.id in :ids"),
         @NamedQuery(name = "RatedTransaction.detachFromInvoices", query = "UPDATE RatedTransaction r SET r.status='OPEN', r.updated = :now, r.billingRun= null, r.invoice=null, r.invoiceLine=null, r.invoiceAgregateF=null WHERE r.invoiceLine.id in (select il.id from InvoiceLine il where il.invoice.id IN (:ids)) "),
         @NamedQuery(name = "RatedTransaction.reopenRatedTransactions", query = "update RatedTransaction r set r.status='OPEN', r.updated = :now, r.billingRun= null, r.invoice=null, r.invoiceAgregateF=null, r.invoiceLine=null where r.id IN (:rtIds)"),
         @NamedQuery(name = "RatedTransaction.cancelRatedTransactionsByBR", query = "update RatedTransaction rt set rt.status = 'CANCELED', rt.updated = CURRENT_TIMESTAMP ,rt.invoiceLine = null, rt.invoice = null where rt.billingRun.id = :billingRunId"),
@@ -211,7 +211,7 @@ import org.meveo.model.tax.TaxClass;
         @NamedQuery(name = "RatedTransaction.findAmountsPerProductBilledDetails", query = "SELECT rt.serviceInstance.productVersion.product.id, SUM(rt.amountWithoutTax) AS product_amount, COUNT(rt.id) FROM RatedTransaction rt WHERE rt.id in (:ids) GROUP BY rt.serviceInstance.productVersion.product.id ORDER BY product_amount DESC"),
         @NamedQuery(name = "RatedTransaction.findReportInitialDataDetails", query = "SELECT COUNT(DISTINCT rt), COUNT(DISTINCT rt.billingAccount), COUNT(DISTINCT rt.subscription), COUNT(DISTINCT rt.chargeInstance) FROM RatedTransaction rt WHERE rt.id in (:ids)"),
         @NamedQuery(name = "RatedTransaction.cancelRTs", query = "UPDATE RatedTransaction set status='CANCELED', rejectReason=:rejectReason, updated=:updatedDate where id in :ids"),
-        @NamedQuery(name = "RatedTransaction.reopenRTs", query = "UPDATE RatedTransaction set status=org.meveo.model.billing.RatedTransactionStatusEnum.OPEN, updated=:now where status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and billingRun.id=:billingRunId and billingAccount.id in :baIds")
+        @NamedQuery(name = "RatedTransaction.reopenRTs", query = "UPDATE RatedTransaction set status=org.meveo.model.billing.RatedTransactionStatusEnum.OPEN, updated=:now, billingRun = null where status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and billingRun.id=:billingRunId and billingAccount.id in :baIds")
 })
 
 @NamedNativeQueries({

@@ -1845,173 +1845,53 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
     }
 
     /**
-     * Check B2B threshold by invoice
+     * Check threshold by invoice
      *
      * @param billingRunId       the billingRun Id
      * @param invoicingThreshold the invoicing threshold
      * @param checkThreshold     check threshold
+     * @param isEntreprise
      * @return list of array of billing accounts Ids and invoice lines Ids
      */
-    public List<Object[]> checkThresholdB2B(Long billingRunId, BigDecimal invoicingThreshold, ThresholdOptionsEnum checkThreshold) {
+    public List<Object[]> checkThreshold(Long billingRunId, BigDecimal invoicingThreshold, ThresholdOptionsEnum checkThreshold, boolean isEntreprise) {
         if (StringUtils.isBlank(billingRunId) || invoicingThreshold == null || checkThreshold == null) {
             return Collections.emptyList();
         }
+        String businessType = isEntreprise?"B2B":"B2C";
         try {
-            return getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2B")
+            return getEntityManager().createNamedQuery("InvoiceLine.checkThreshold"+businessType)
                     .setParameter("billingRunId", billingRunId)
                     .setParameter("invoicingThreshold", invoicingThreshold)
                     .setParameter("checkThreshold", checkThreshold.toString())
                     .getResultList();
         } catch (NoResultException e) {
-            log.warn("checkThresholdB2B : no result found for the provided billingRun = " + billingRunId);
+            log.warn("checkThreshold"+businessType+" : no result found for the provided billingRun = " + billingRunId);
             return emptyList();
         }
     }
 
     /**
-     * Check B2C threshold by invoice
-     *
-     * @param billingRunId       the billingRun Id
-     * @param invoicingThreshold the invoicing threshold
-     * @param checkThreshold     check threshold
-     * @return list of array of billing accounts Ids and invoice lines Ids
-     */
-    public List<Object[]> checkThresholdB2C(Long billingRunId, BigDecimal invoicingThreshold, ThresholdOptionsEnum checkThreshold) {
-        if (StringUtils.isBlank(billingRunId) || invoicingThreshold == null || checkThreshold == null) {
-            return Collections.emptyList();
-        }
-        try {
-            return getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2C")
-                    .setParameter("billingRunId", billingRunId)
-                    .setParameter("invoicingThreshold", invoicingThreshold)
-                    .setParameter("checkThreshold", checkThreshold.toString())
-                    .getResultList();
-        } catch (NoResultException e) {
-            log.warn("checkThresholdB2C : no result found for the provided billingRun = " + billingRunId);
-            return emptyList();
-        }
-    }
-
-    /**
-     * Check B2B threshold by billing account
+     * Check threshold 
      *
      * @param billingRunId the billingRun Id
+     * @param isEntreprise
+     * @param checkLevel ('ByCA','ByCA', 'ByBA')
      * @return billing accounts Ids
      */
-    public List<Long> checkThresholdB2BByBA(Long billingRunId) {
+    public List<Object> checkThreshold(Long billingRunId, boolean isEntreprise, String checkLevel) {
         if (StringUtils.isBlank(billingRunId)) {
             return Collections.emptyList();
         }
+        String businessType = isEntreprise?"B2B":"B2C";
         try {
-            return getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByBA")
+            return getEntityManager().createNamedQuery("InvoiceLine.checkThreshold"+businessType+checkLevel)
                     .setParameter("billingRunId", billingRunId)
                     .getResultList();
         } catch (NoResultException e) {
-            log.warn("checkThresholdB2BByBA : no billing account found for the provided billingRun = " + billingRunId);
+            log.warn("checkThreshold"+businessType+checkLevel+" : no billing account found for the provided billingRun = " + billingRunId);
             return emptyList();
         }
     }
-
-    /**
-     * Check B2C threshold by billing account
-     *
-     * @param billingRunId the billingRun Id
-     * @return billing accounts Ids
-     */
-    public List<Long> checkThresholdB2CByBA(Long billingRunId) {
-        if (StringUtils.isBlank(billingRunId)) {
-            return Collections.emptyList();
-        }
-        try {
-            return getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2CByBA")
-                    .setParameter("billingRunId", billingRunId)
-                    .getResultList();
-        } catch (NoResultException e) {
-            log.warn("checkThresholdB2CByBA : no billing account found for the provided billingRun = " + billingRunId);
-            return emptyList();
-        }
-    }
-
-    /**
-     * Check B2B threshold by customer account
-     *
-     * @param billingRunId the billingRun Id
-     * @return billing accounts Ids concatenated and separated by ","
-     */
-    public String checkThresholdB2BByCA(Long billingRunId) {
-        if (StringUtils.isBlank(billingRunId)) {
-            return null;
-        }
-        try {
-            return (String) getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByCA")
-                    .setParameter("billingRunId", billingRunId)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            log.warn("checkThresholdB2BByCA : no billing account found for the provided billingRun = " + billingRunId);
-            return null;
-        }
-    }
-
-    /**
-     * Check B2C threshold by customer account
-     *
-     * @param billingRunId the billingRun Id
-     * @return billing accounts Ids concatenated and separated by ","
-     */
-    public String checkThresholdB2CByCA(Long billingRunId) {
-        if (StringUtils.isBlank(billingRunId)) {
-            return null;
-        }
-        try {
-            return (String) getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByCA")
-                    .setParameter("billingRunId", billingRunId)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            log.warn("checkThresholdB2CByCA : no billing account found for the provided billingRun = " + billingRunId);
-            return null;
-        }
-    }
-
-    /**
-     * Check B2B threshold by customer
-     *
-     * @param billingRunId the billingRun Id
-     * @return billing accounts Ids concatenated and separated by ","
-     */
-    public String checkThresholdB2BByC(Long billingRunId) {
-        if (StringUtils.isBlank(billingRunId)) {
-            return null;
-        }
-        try {
-            return (String) getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByC")
-                    .setParameter("billingRunId", billingRunId)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            log.warn("checkThresholdB2BByC : no billing account found for the provided billingRun = " + billingRunId);
-            return null;
-        }
-    }
-
-    /**
-     * Check B2C threshold by customer
-     *
-     * @param billingRunId the billingRun Id
-     * @return billing accounts Ids concatenated and separated by ","
-     */
-    public String checkThresholdB2CByC(Long billingRunId) {
-        if (StringUtils.isBlank(billingRunId)) {
-            return null;
-        }
-        try {
-            return (String) getEntityManager().createNamedQuery("InvoiceLine.checkThresholdB2BByC")
-                    .setParameter("billingRunId", billingRunId)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            log.warn("checkThresholdB2CByC : no billing account found for the provided billingRun = " + billingRunId);
-            return null;
-        }
-    }
-
 
     /**
      * Cancel the provided invoice lines

@@ -1173,7 +1173,10 @@ public interface PaymentRs extends IBaseRs {
                                                                  @DefaultValue("") @QueryParam("advancedOptions") String advancedOptions,
                                                                  @DefaultValue("false") @QueryParam("isOneShotPayment") Boolean isOneShotPayment,
                                                                  @QueryParam("cancelUrl") String cancelUrl,
-                                                                 @DefaultValue("CARD")@QueryParam("paymentMethodType")PaymentMethodEnum paymentMethodType
+                                                                 @DefaultValue("CARD")@QueryParam("paymentMethodType")PaymentMethodEnum paymentMethodType,
+                                                                 @DefaultValue("") @QueryParam("customerIpAddress") String customerIpAddress,
+                                                                 @DefaultValue("") @QueryParam("browserScreenHeight") String browserScreenHeight,
+                                                                 @DefaultValue("") @QueryParam("browserScreenWidth") String browserScreenWidth
     );
     
     /**

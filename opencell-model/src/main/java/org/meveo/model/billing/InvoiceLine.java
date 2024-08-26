@@ -184,28 +184,28 @@ import org.meveo.model.cpq.offer.QuoteOffer;
 				"having sum(case when (ba.checkThreshold='POSITIVE_IL') then (case when il.amountWithoutTax>0 then il.amountWithoutTax end) " +
 				"else (case when (ba.checkThreshold='BEFORE_DISCOUNT') then (case when il.discountPlanItem is null then il.amountWithoutTax end) else il.amountWithoutTax end) " +
 				"end) < ba.invoicingThreshold"),
-		@NamedQuery(name = "InvoiceLine.checkThresholdB2BByCA", query = "select string_agg(concat(il.billingAccount.id, ''), ',') from InvoiceLine il " +
+		@NamedQuery(name = "InvoiceLine.checkThresholdB2BByCA", query = "select string_agg_distinct(il.billingAccount.id) from InvoiceLine il " +
 				"join il.billingAccount.customerAccount ca " +
 				"where il.status='OPEN' and il.billingRun.id=:billingRunId and ca.thresholdPerEntity=1 and ca.invoicingThreshold  is not null " +
 				"group by ca.id " +
 				"having sum(case when (ca.checkThreshold='POSITIVE_IL') then (case when il.amountWithoutTax>0 then il.amountWithoutTax end) " +
 					"else (case when (ca.checkThreshold='BEFORE_DISCOUNT') then (case when il.discountPlanItem is null then il.amountWithoutTax end) else il.amountWithoutTax end) " +
 					"end)<ca.invoicingThreshold"),
-		@NamedQuery(name = "InvoiceLine.checkThresholdB2CByCA", query = "select string_agg(concat(il.billingAccount.id, ''), ',') from InvoiceLine il " +
+		@NamedQuery(name = "InvoiceLine.checkThresholdB2CByCA", query = "select string_agg_distinct(il.billingAccount.id) from InvoiceLine il " +
 				"join il.billingAccount.customerAccount ca " +
 				"where il.status='OPEN' and il.billingRun.id=:billingRunId and ca.thresholdPerEntity =1 and ca.invoicingThreshold  is not null " +
 				"group by ca.id " +
 				"having sum(case when (ca.checkThreshold='POSITIVE_IL') then (case when il.amountWithTax>0 then il.amountWithTax end) " +
 					"else (case when (ca.checkThreshold='BEFORE_DISCOUNT') then (case when il.discountPlanItem is null then il.amountWithTax end) else il.amountWithTax end) " +
 					"end)<ca.invoicingThreshold"),
-		@NamedQuery(name = "InvoiceLine.checkThresholdB2BByC", query = "select string_agg(concat(il.billingAccount.id, ''), ',') from InvoiceLine il " +
+		@NamedQuery(name = "InvoiceLine.checkThresholdB2BByC", query = "select string_agg_distinct(il.billingAccount.id) from InvoiceLine il " +
 				"join il.billingAccount.customerAccount.customer c " +
 				"where il.status='OPEN' and il.billingRun.id=:billingRunId and c.thresholdPerEntity =1 and c.invoicingThreshold is not null " +
 				"group by c.id " +
 				"having sum(case when (c.checkThreshold='POSITIVE_IL') then (case when il.amountWithoutTax>0 then il.amountWithoutTax end) " +
 					"else (case when (c.checkThreshold='BEFORE_DISCOUNT') then (case when il.discountPlanItem is null then il.amountWithoutTax end) else il.amountWithoutTax end) " +
 					"end)<c.invoicingThreshold"),
-		@NamedQuery(name = "InvoiceLine.checkThresholdB2CByC", query = "select string_agg(concat(il.billingAccount.id, ''), ',') from InvoiceLine il " +
+		@NamedQuery(name = "InvoiceLine.checkThresholdB2CByC", query = "select string_agg_distinct(il.billingAccount.id) from InvoiceLine il " +
 				"join il.billingAccount.customerAccount.customer c " +
 				"where il.status='OPEN' and il.billingRun.id=:billingRunId and c.thresholdPerEntity =1 and c.invoicingThreshold is not null " +
 				"group by c.id " +
@@ -219,11 +219,11 @@ import org.meveo.model.cpq.offer.QuoteOffer;
     @NamedNativeQuery(name = "InvoiceLine.massUpdateWithDiscountedILOracle", query = "UPDATE (SELECT il.discounted_invoice_line, il.discount_plan_type, il.updated FROM {h-schema}billing_invoice_line il, {h-schema}billing_rated_transaction discountRT, {h-schema}billing_rated_transaction discountedRT where discountRT.id=discountedRT.discounted_ratedtransaction_id and il.id=discountedRT.invoice_line_id and discountedRT.status='BILLED' and il.status='OPEN' and il.billing_run_id=:brId and discountedRT.discounted_ratedtransaction_id is not null and discounted_invoice_line is null and discount_plan_type is not null and discountedRT.id>=:minId and discountedRT.id<=:maxId) SET il.discounted_invoice_line=discountRT.invoice_line_id , updated=now()"),
 	@NamedNativeQuery(name = "InvoiceLine.checkThresholdB2B",
 			query = "select billingAccountId, invoiceLineIds from ( " +
-						"select b.id as billingAccountId, string_agg(concat(il.id, ''), ',') as invoiceLineIds, " +
+						"select b.id as billingAccountId, string_agg(distinct concat(il.id, ''), ',') as invoiceLineIds, " +
 							"sum(case when il.discount_plan_item_id is null then il.amount_without_tax end) as BEFORE_DISCOUNT, " +
 							"sum(case when il.amount_without_tax>0 then il.amount_without_tax end) as POSITIVE_IL, " +
 							"sum(il.amount_without_tax) as AFTER_DISCOUNT, il.invoice_key, " +
-							"(case when (b.threshold_per_entity =0 and b.invoicing_threshold  is not null) then b.invoicing_threshold else (case when (ca.threshold_per_entity=0 and ca.invoicing_threshold is not null) then ca.invoicing_threshold else (case when c.threshold_per_entity=0 then c.invoicing_threshold else :invoicingThreshold end) end) end) as IT, " +
+							"(case when (b.threshold_per_entity =0 and b.invoicing_threshold  is not null) then b.invoicing_threshold else (case when (ca.threshold_per_entity=0 and ca.invoicing_threshold is not null) then ca.invoicing_threshold else (case when (c.threshold_per_entity=0 and c.invoicing_threshold is not null) then c.invoicing_threshold else :invoicingThreshold end) end) end) as IT, " +
 							"(case when (b.threshold_per_entity=0 and b.invoicing_threshold is not null) then b.check_threshold  else (case when (ca.threshold_per_entity=0 and ca.invoicing_threshold is not null) then ca.check_threshold else (case when (c.threshold_per_entity=0 and c.invoicing_threshold is not null) then c.check_threshold else :checkThreshold end) end) end) as CT " +
 						"from billing_invoice_line il inner join billing_billing_account  b on b.id=il.billing_account_id inner join ar_customer_account ca on b.customer_account_id=ca.id  inner join crm_customer c on c.id=ca.customer_id " +
 						"where il.status='OPEN' and il.billing_run_id=:billingRunId " +
@@ -232,11 +232,11 @@ import org.meveo.model.cpq.offer.QuoteOffer;
 					"where (CT='BEFORE_DISCOUNT' and BEFORE_DISCOUNT<IT) OR (CT='POSITIVE_IL' and POSITIVE_IL<IT) OR ((CT is null OR CT='AFTER_DISCOUNT') and AFTER_DISCOUNT<IT)"),
 	@NamedNativeQuery(name = "InvoiceLine.checkThresholdB2C",
 			query = "select billingAccountId, invoiceLineIds from ( " +
-						"select b.id as billingAccountId, string_agg(concat(il.id, ''), ',') as invoiceLineIds, " +
+						"select b.id as billingAccountId, string_agg(distinct concat(il.id, ''), ',') as invoiceLineIds, " +
 							"sum(case when il.discount_plan_item_id is null then il.amount_with_tax end) as BEFORE_DISCOUNT, " +
 							"sum(case when il.amount_with_tax>0 then il.amount_with_tax end) as POSITIVE_IL, " +
 							"sum(il.amount_with_tax) as AFTER_DISCOUNT, il.invoice_key, " +
-							"(case when (b.threshold_per_entity =0 and b.invoicing_threshold  is not null) then b.invoicing_threshold else (case when (ca.threshold_per_entity=0 and ca.invoicing_threshold is not null) then ca.invoicing_threshold else (case when c.threshold_per_entity=0 then c.invoicing_threshold else :invoicingThreshold end) end) end) as IT, " +
+							"(case when (b.threshold_per_entity =0 and b.invoicing_threshold  is not null) then b.invoicing_threshold else (case when (ca.threshold_per_entity=0 and ca.invoicing_threshold is not null) then ca.invoicing_threshold else (case when (c.threshold_per_entity=0 and c.invoicing_threshold is not null) then c.invoicing_threshold else :invoicingThreshold end) end) end) as IT, " +
 							"(case when (b.threshold_per_entity=0 and b.invoicing_threshold is not null) then b.check_threshold  else (case when (ca.threshold_per_entity=0 and ca.invoicing_threshold is not null) then ca.check_threshold else (case when (c.threshold_per_entity=0 and c.invoicing_threshold is not null) then c.check_threshold else :checkThreshold end) end) end) as CT " +
 						"from billing_invoice_line il inner join billing_billing_account  b on b.id=il.billing_account_id inner join ar_customer_account ca on b.customer_account_id=ca.id  inner join crm_customer c on c.id=ca.customer_id " +
 						"where il.status='OPEN' and il.billing_run_id=:billingRunId " +

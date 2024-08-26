@@ -48,6 +48,7 @@ public class MeveoPostgreSQLDialect extends PostgreSQL94Dialect {
         registerFunction("concat", new StandardSQLFunction("concat", StringType.INSTANCE));
         registerFunction("string_agg", new StandardSQLFunction("string_agg", StringType.INSTANCE));
         registerFunction("string_agg_long", new PostgreSQLStringAggLongFunction());
+        registerFunction("string_agg_distinct", new PostgreSQLStringAggDistinctFunction());
         registerFunction("numericFromJson", new DoublePostgreSQLJsonSearchFunction());
         registerFunction("varcharFromJson", new PostgreSQLJsonSearchFunction());
         registerFunction("bigIntFromJson", new LongPostgreSQLJsonSearchFunction());

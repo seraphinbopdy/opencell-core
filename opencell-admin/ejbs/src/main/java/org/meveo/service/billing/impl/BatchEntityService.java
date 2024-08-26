@@ -515,7 +515,10 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     }
 
     public List<IEntity> getEntities(Class hugeEntityClass, List<Long> ids) {
-        return getEntityManager().createQuery("FROM " + hugeEntityClass.getSimpleName() + " WHERE id IN :ids", IEntity.class)
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return getEntityManager().createQuery("FROM " + hugeEntityClass.getSimpleName() + " WHERE id IN (:ids)", IEntity.class)
                                  .setParameter("ids", ids)
                                  .getResultList();
     }

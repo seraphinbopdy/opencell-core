@@ -7883,7 +7883,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 					.setParameter("invoiceNumber", invoiceNumber).setMaxResults(1)
 					.getResultList();
 	}
-	
+
 	public void setInvoicingPeriod(BillingRun billingRun, Long invoiceId) {
 		Invoice invoice = findById(invoiceId);
 		if (invoice == null) {
@@ -8165,6 +8165,62 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			});
 		}
 	}
+
+    public void applyAutomaticCheck(Invoice invoice) {
+        InvoiceType invoiceType = invoiceTypeService.findById(invoice.getInvoiceType().getId(), List.of("invoiceValidationRules"));
+        if (invoiceType != null && (invoiceType.getInvoiceValidationScript() != null || invoiceType.getInvoiceValidationRules() != null)) {
+            if (invoiceType.getInvoiceValidationScript() != null) {
+                ScriptInstance scriptInstance = invoiceType.getInvoiceValidationScript();
+                if (scriptInstance != null) {
+                    executeValidationScript(invoice, scriptInstance);
+                }
+            } else if (invoiceType.getInvoiceValidationRules() != null
+                    && !invoiceType.getInvoiceValidationRules().isEmpty()) {
+                executeValidationRules(invoice, invoiceType);
+            }
+            update(invoice);
+        }
+    }
+
+    private void executeValidationScript(Invoice invoice, ScriptInstance scriptInstance) {
+        ScriptInterface script = scriptInstanceService.getScriptInstance(scriptInstance.getCode());
+        if (script != null) {
+            Map<String, Object> methodContext = initContext(invoice);
+            scriptInstanceService.execute(scriptInstance.getCode(), methodContext);
+            Object status = methodContext.get(Script.INVOICE_VALIDATION_STATUS);
+            if (status instanceof InvoiceValidationStatusEnum) {
+                if (InvoiceValidationStatusEnum.REJECTED.equals(status)) {
+                    invoice.setStatus(InvoiceStatusEnum.REJECTED);
+                    invoice.setRejectReason((String) methodContext.get(Script.INVOICE_VALIDATION_REASON));
+
+                } else if (InvoiceValidationStatusEnum.SUSPECT.equals(status)) {
+                    invoice.setStatus(InvoiceStatusEnum.SUSPECT);
+                    invoice.setRejectReason((String) methodContext.get(Script.INVOICE_VALIDATION_REASON));
+                }
+            }
+        }
+    }
+
+    private void executeValidationRules(Invoice invoice, InvoiceType invoiceType) {
+        List<InvoiceValidationRule> invoiceValidationRules = invoiceType.getInvoiceValidationRules()
+                .stream()
+                .filter(rule -> Objects.isNull(rule.getParentRule()))
+                .sorted(comparingInt(InvoiceValidationRule::getPriority))
+                .collect(toList());
+        Iterator<InvoiceValidationRule> validationRuleIterator = invoiceValidationRules.iterator();
+        RuleValidationEnum currentRuleValidation = RuleValidationEnum.RULE_TRUE;
+        Map<String, Object> methodContext = initContext(invoice);
+        while (validationRuleIterator.hasNext() && (currentRuleValidation != RuleValidationEnum.RULE_FALSE)) {
+            InvoiceValidationRule validationRule = validationRuleIterator.next();
+            if (DateUtils.isWithinDateWithoutTime(invoice.getInvoiceDate(), validationRule.getValidFrom(), validationRule.getValidTo())) {
+                currentRuleValidation = evaluateRule(invoice, methodContext, validationRule);
+                if (currentRuleValidation == RuleValidationEnum.RULE_FALSE) {
+                    rejectInvoiceRule(invoice, validationRule);
+                }
+            }
+        }
+    }
+
 }
 
 

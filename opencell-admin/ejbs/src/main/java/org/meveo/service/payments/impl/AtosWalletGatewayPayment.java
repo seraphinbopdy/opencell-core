@@ -283,8 +283,10 @@ public class AtosWalletGatewayPayment implements GatewayPaymentInterface {
 	@Override
 	public PaymentHostedCheckoutResponseDto getHostedCheckoutUrl(HostedCheckoutInput hostedCheckoutInput)
 			throws BusinessException {
+		
 		String returnUrl = hostedCheckoutInput.getReturnUrl();
 		String walletUrl = paramBean().getProperty(WALLET_HOSTED_CHECK_OUT_URL_PROPERTY, "changeIt");
+		
 
 		PaymentHostedCheckoutResponseDto response = new PaymentHostedCheckoutResponseDto();
 		PaymentHostedCheckoutResponseDto.Result result = response.getResult();
@@ -294,6 +296,34 @@ public class AtosWalletGatewayPayment implements GatewayPaymentInterface {
 		result.setReturnUrl(returnUrl);
 
 		CustomerAccount ca = customerAccountService().findById(hostedCheckoutInput.getCustomerAccountId());
+		String firstName = null;
+		String lastName = null;
+		if(ca.getName() != null) {
+			firstName = ca.getName().getFirstName();
+			lastName = ca.getName().getLastName();
+		}
+		
+		if(StringUtils.isBlank(firstName)) {
+			throw new BusinessException("Missing firstName");
+		}
+		if(StringUtils.isBlank(lastName)) {
+			throw new BusinessException("Missing lastName");
+		}
+		
+		String phone=ca.getContactInformationNullSafe().getMobile();
+		String email=ca.getContactInformationNullSafe().getEmail();
+		
+		if(StringUtils.isBlank(phone)) {
+			throw new BusinessException("Missing Phone");
+		}else {
+			if(phone.length() == 10) {
+				phone = phone.replaceFirst("0", "+33");
+			}
+		}
+		if(StringUtils.isBlank(email)) {
+			throw new BusinessException("Missing Email");
+		}
+		
 
 		String merchantWalletId = ca.getId() + "_" + (ca.getCardPaymentMethods(false).size() + 1);
 
@@ -320,6 +350,15 @@ public class AtosWalletGatewayPayment implements GatewayPaymentInterface {
                 "|merchantWalletId=" + merchantWalletId +
                 "|keyVersion=" + paymentGateway.getWebhooksKeyId()+
                 "|sealAlgorithm="+paramBean().getProperty(SEAL_ALGORITHM_PROPERTY,"HMAC-SHA-256");
+		if(!StringUtils.isBlank(hostedCheckoutInput.getCustomerIpAddress())) {
+			data  +=  "|customerIpAddress="+hostedCheckoutInput.getCustomerIpAddress();
+		}
+		        		        
+		data  += "|holderContact.email="+email+
+		        "|holderContact.mobile="+phone+
+		        "|holderContact.firstName="+firstName+
+		        "|holderContact.lastName="+lastName;
+				
 
 		if (!StringUtils.isBlank(hostedCheckoutInput.getVariant())) {
 			data += "|templateName=" + hostedCheckoutInput.getVariant();

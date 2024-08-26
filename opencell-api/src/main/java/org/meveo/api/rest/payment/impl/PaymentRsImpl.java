@@ -647,7 +647,9 @@ public class PaymentRsImpl extends BaseRs implements PaymentRs {
     public PaymentHostedCheckoutResponseDto getHostedCheckoutUrl(String customerAccountCode, String returnUrl,
             String locale, String amount, String currencyCode, String authorizationMode, String countryCode,
             Boolean skipAuthentication, String gatewayPaymentName, String variant, String sellerCode,
-            String automaticReturnUrl, String allowedActions, String returnContext, String authenticationAmount, String advancedOptions,Boolean isOneShotPayment,String cancelUrl,PaymentMethodEnum paymentMethodType) {
+            String automaticReturnUrl, String allowedActions, String returnContext, String authenticationAmount, String advancedOptions,Boolean isOneShotPayment,String cancelUrl,PaymentMethodEnum paymentMethodType,
+            String customerIpAddress,
+            String browserScreenHeight, String browserScreenWidth) {
         HostedCheckoutInput hostedCheckoutInput = new HostedCheckoutInput();
         hostedCheckoutInput.setCustomerAccountCode(customerAccountCode);
         hostedCheckoutInput.setReturnUrl(returnUrl);
@@ -668,6 +670,9 @@ public class PaymentRsImpl extends BaseRs implements PaymentRs {
         hostedCheckoutInput.setOneShotPayment(isOneShotPayment);
         hostedCheckoutInput.setCancelUrl(cancelUrl);
         hostedCheckoutInput.setPaymentMethodType(paymentMethodType);
+        hostedCheckoutInput.setCustomerIpAddress(customerIpAddress); 
+        hostedCheckoutInput.setBrowserScreenHeight(browserScreenHeight);     
+        hostedCheckoutInput.setBrowserScreenWidth(browserScreenWidth); 
 
         PaymentHostedCheckoutResponseDto result = new PaymentHostedCheckoutResponseDto();
         try {

@@ -13084,4 +13084,24 @@ Meaning that advances won’t be available for further invoices."/>
         </update>
     </changeSet>
 
+    <changeSet id="#INTRD-25105_fix_default_filter" author="a.rouaguebe">
+        <update tableName="meveo_job_instance">
+            <column name="cf_values"><![CDATA[{
+                "nbRuns":[{"long":-1}],
+                "waitingMillis":[{"long":0}],
+                "UpdateHugeEntityJob_targetJob":[{"string":"reopenEDRZeroJob"}],
+                "UpdateHugeEntityJob_entityClassName":[{"string": "org.meveo.model.rating.EDR"}],
+                "UpdateHugeEntityJob_fieldsToUpdate":[{"string": "status='OPEN', zeroWoDropped=false"}],
+                "UpdateHugeEntityJob_defaultFilter":[{"string": "{ \"filters\": { \"zeroWoDropped\":true}}"}],
+                "UpdateHugeEntityJob_selectFetchSize":[{"long":1000000}],
+                "UpdateHugeEntityJob_isUsingView":[{"boolean":false}],
+                "UpdateHugeEntityJob_isOpenCursor":[{"boolean":false}],
+                "UpdateHugeEntityJob_emailTemplate": [{"entity": {"code": "MASS_REOPEN_EDR_ZERO", "classname": "org.meveo.model.communication.email.EmailTemplate"}}],
+                "UpdateHugeEntityJob_preUpdateEl": [{"string": "#{mv:validateAndCancelDerivedWosEdrsAndRts(edr)}"}]
+                }]]>
+            </column>
+            <where>code = 'reopenEDRZeroJob'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

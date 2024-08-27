@@ -13254,7 +13254,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
                 "targetJob":[{"string":"reopenEDRZeroJob"}],
                 "entityClassName":[{"string": "org.meveo.model.rating.EDR"}],
                 "fieldsToUpdate":[{"string": "status='OPEN', zeroWoDropped=false"}],
-                "defaultFilter":[{"string": "{ \"filters\": { \"zeroWoDropped\":false}}"}],
+                "defaultFilter":[{"string": "{ \"filters\": { \"zeroWoDropped\":true}}"}],
                 "selectFetchSize":[{"long":1000000}],
                 "isUsingView":[{"boolean":false}],
                 "isOpenCursor":[{"boolean":false}],

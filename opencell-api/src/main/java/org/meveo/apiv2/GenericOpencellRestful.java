@@ -31,9 +31,13 @@ import org.meveo.apiv2.accounting.resource.impl.AccountingPeriodResourceImpl;
 import org.meveo.apiv2.accounting.resource.impl.AccountingResourceImpl;
 import org.meveo.apiv2.accountreceivable.accountOperation.AccountReceivableResourceImpl;
 import org.meveo.apiv2.accountreceivable.deferralPayments.AccountReceivableDeferralPaymentsResourceImpl;
+import org.meveo.apiv2.accounts.impl.AccountHierarchyV2ResourceImpl;
 import org.meveo.apiv2.accounts.impl.AccountsManagementResourceImpl;
 import org.meveo.apiv2.accounts.impl.BillingAccountV2ResourceImpl;
+import org.meveo.apiv2.accounts.impl.CustomerAccountV2ResourceImpl;
+import org.meveo.apiv2.accounts.impl.CustomerV2ResourceImpl;
 import org.meveo.apiv2.accounts.impl.UserAccountsResourceImpl;
+import org.meveo.apiv2.accounts.impl.UserAccountsV2ResourceImpl;
 import org.meveo.apiv2.admin.impl.FilesResourceImpl;
 import org.meveo.apiv2.admin.impl.SellerResourceImpl;
 import org.meveo.apiv2.admin.providers.ProviderResourceImpl;
@@ -159,7 +163,6 @@ public class GenericOpencellRestful extends Application {
         Reflections reflections = new Reflections("org.meveo.api.rest");
         Set<Class<? extends BaseRs>> allClasses = reflections.getSubTypesOf(BaseRs.class);
 
-        Logger log = LoggerFactory.getLogger(JaxRsActivator.class);
         log.debug("Documenting {} rest services for path /api/rest/", allClasses.size());
 
         Set<Class<?>> resources = new HashSet();
@@ -200,7 +203,7 @@ public class GenericOpencellRestful extends Application {
                 ElectronicInvoicingResourceImpl.class,PaymentResourceImpl.class, PriceListResourceImpl.class, SellerResourceImpl.class, PriceListLineResourceImpl.class, CatalogPriceListResourceImpl.class,
                 SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
                 ProductManagementRsImpl.class, HugeEntityResourceImpl.class, PaymentTermResourceImpl.class, CustomActionResourceImpl.class,
-                BillingAccountV2ResourceImpl.class
+                BillingAccountV2ResourceImpl.class, AccountHierarchyV2ResourceImpl.class, CustomerV2ResourceImpl.class, CustomerAccountV2ResourceImpl.class, UserAccountsV2ResourceImpl.class
         ));
 
         resources.add(GenericJacksonProvider.class);

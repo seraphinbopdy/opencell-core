@@ -57,6 +57,7 @@ import org.meveo.model.BaseEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ModuleItem;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.billing.InvoiceSubCategory;
@@ -74,6 +75,7 @@ import org.meveo.model.tax.TaxClass;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @ModuleItem
 @ObservableEntity
 @Cacheable
@@ -430,6 +432,10 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     @Type(type = "numeric_boolean")
     @Column(name = "business_key_is_hidden")
     private boolean businessKeyIsHidden = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quantity_attribute_id")
+    private Attribute quantityAttribute;
     
     public String getInputUnitEL() {
         return inputUnitEL;
@@ -1044,8 +1050,16 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
 	public void setBusinessKeyIsHidden(boolean businessKeyIsHidden) {
 		this.businessKeyIsHidden = businessKeyIsHidden;
 	}
-     
- 	private Map<String, String> initParameterTranslatedDescriptions(String parameterNumber) {
+
+    public Attribute getQuantityAttribute() {
+        return quantityAttribute;
+    }
+
+    public void setQuantityAttribute(Attribute quantityAttribute) {
+        this.quantityAttribute = quantityAttribute;
+    }
+
+    private Map<String, String> initParameterTranslatedDescriptions(String parameterNumber) {
         Map<String, String> tradingLanguageMap = new HashMap<>();
         tradingLanguageMap.put("ENG", "Parameter " + parameterNumber);
         tradingLanguageMap.put("FRA", "Paramètre " + parameterNumber);

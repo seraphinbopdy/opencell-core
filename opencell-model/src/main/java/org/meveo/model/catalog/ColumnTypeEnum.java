@@ -90,7 +90,8 @@ public enum ColumnTypeEnum {
         @Override
         public boolean valueMatch(PricePlanMatrixValueForRating pricePlanMatrixValue, AttributeValue attributeValue) {
             String multiValuesAttributeSeparator = ";"; //ParamBean.getInstance().getProperty("attribute.multivalues.separator", ";");
-            if (pricePlanMatrixValue.getDoubleValue() == null && pricePlanMatrixValue.getLongValue() == null) {
+            // INTRD-24925 : Add the check of stringValue to take into account the LIST_MULTIPLE_NUMERIC which the pricePlanMatrixValue is expected as string value.
+            if (pricePlanMatrixValue.getDoubleValue() == null && pricePlanMatrixValue.getLongValue() == null && StringUtils.isEmpty(pricePlanMatrixValue.getStringValue())) {
                 return true;
             }
             Object passedAttributeValue = attributeValue.getAttribute().getAttributeType().getValue(attributeValue);

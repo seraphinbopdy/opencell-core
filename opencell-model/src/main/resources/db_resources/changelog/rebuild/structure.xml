@@ -4176,6 +4176,7 @@
 			<column name="price_list_line_id" type="bigint" />
 			<column name="business_key" type="VARCHAR(255)" />
 			<column name="batch_entity_id" type="bigint"/>
+			<column name="overrode_price"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
         <modifySql dbms="postgresql">
         	<append value=" PARTITION BY LIST(status)"/>
@@ -4366,7 +4367,7 @@
             <column name="dim3_matrix" type="varchar(50)"/>
             <column name="dim3_matrix_bystep" type="${type.boolean}" defaultValueNumeric="0"/>
             <column name="dim3_matrix_service" type="bigint" />
-            <column name="attribute_id" type="bigint"/>
+            <column name="quantity_attribute_id" type="bigint"/>
             <column name="attribute_duration_id" type="bigint"/>
             <column name="attribute_calendar_id" type="bigint"/>
             <column name="internal_note" type="${type.longtext}" />
@@ -6143,6 +6144,7 @@
             <column name="event_version" type="int4" />
 			<column name="wallet_operation_id" type="bigint"/>
 			<column name="business_key" type="VARCHAR(255)" />
+            <column name="zero_wo_dropped"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
         <modifySql dbms="postgresql">
         	<append value=" PARTITION BY LIST(status)"/>
@@ -17355,7 +17357,7 @@
                                  referencedTableName="cpq_product_version" referencedColumnNames="id"/>
     </changeSet>
     <changeSet author="NabilOuachi" id="rebuild-str-fk-1545">
-        <addForeignKeyConstraint baseTableName="cat_charge_template" baseColumnNames="attribute_id"
+        <addForeignKeyConstraint baseTableName="cat_charge_template" baseColumnNames="quantity_attribute_id"
                                  constraintName="fk_cat_charge_template_attribute_id"
                                  referencedTableName="cpq_attribute" referencedColumnNames="id"/>
     </changeSet>
@@ -20130,6 +20132,10 @@
         <sql>create index idx_subscription_id_charge_type on ${db.schema.adapted}billing_charge_instance using btree (subscription_id, charge_type)</sql>
     </changeSet>
 
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    </changeSet>
+
     <changeSet id="USAGE_RERATE_RT_JOB" author="Mohammed_ElAzzouzi"/>
 
     <changeSet id="#INTRD-4798_20220303" author="MohamedSTITANE"/>     
@@ -20965,12 +20971,22 @@
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
     <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI" />
     <changeSet id="#INTRD-22371_20240812" author="zelmeliani" />
-    
-    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
-        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
-    </changeSet>
+    <changeSet id="#INTRD-24686_20240807" author="TarikFa." />
+    <changeSet id="#INTRD-24542_add_zeroWoDropped" author="a.rouaguebe" />
+    <changeSet id="INTRD-21018_20240806" author="ZakariaB" />
     <changeSet id="#INTRD-21018_20240723" author="ZakariaB" />
+    <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
+
+    <changeSet id="#INTRD-24639_20240814" author="Mohammed_ElAzzouzi"/>
+    <changeSet author="zakariab" id="INTRD-24538_20240815" />
+
+    <changeSet id="#INTRD-24543_reopenEdrZeroJob" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25073_fix_description_reopen_zero_wo" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25068_fix_reopenEDRZeroJob" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25073_fix_description_reopen_zero_wo" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25105_fix_default_filter" author="a.rouaguebe" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
+
 
 </databaseChangeLog>

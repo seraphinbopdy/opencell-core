@@ -104,6 +104,12 @@ public class HostedCheckoutInput {
     
     
     PaymentMethodEnum paymentMethodType = PaymentMethodEnum.CARD;
+    
+    String customerIpAddress;
+    
+    String browserScreenHeight;
+    
+    String browserScreenWidth;
 
     /**
      * Gets the gateway payment name.
@@ -423,6 +429,30 @@ public class HostedCheckoutInput {
 
 	public void setPaymentMethodType(PaymentMethodEnum paymentMethodType) {
 		this.paymentMethodType = paymentMethodType;
+	}
+
+	public String getCustomerIpAddress() {
+		return customerIpAddress;
+	}
+
+	public void setCustomerIpAddress(String customerIpAddress) {
+		this.customerIpAddress = customerIpAddress;
+	}
+
+	public String getBrowserScreenHeight() {
+		return browserScreenHeight;
+	}
+
+	public void setBrowserScreenHeight(String browserScreenHeight) {
+		this.browserScreenHeight = browserScreenHeight;
+	}
+
+	public String getBrowserScreenWidth() {
+		return browserScreenWidth;
+	}
+
+	public void setBrowserScreenWidth(String browserScreenWidth) {
+		this.browserScreenWidth = browserScreenWidth;
 	}
 	
 	

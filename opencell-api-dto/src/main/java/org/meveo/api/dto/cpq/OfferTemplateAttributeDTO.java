@@ -340,10 +340,9 @@ public class OfferTemplateAttributeDTO {
 	}
 	public void setSelectable(boolean selectable) {
 		this.selectable = selectable;
-	}
-	
+	}	
 	public String getCode() {
-		return attributeCode;
+		return code;
 	}
 	public Long getId() {
 		return id;

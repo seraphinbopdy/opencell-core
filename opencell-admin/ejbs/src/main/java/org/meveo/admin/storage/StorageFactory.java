@@ -787,7 +787,7 @@ public class StorageFactory {
             }
         }
         else if (storageType.equals(S3)) {
-            OutputStream outStream;
+            OutputStream outStream = null;
             String fullObjectKey = formatFullObjectKey(path.toString());
 
             Path bucketPath = getObjectPath(fullObjectKey);
@@ -796,11 +796,19 @@ public class StorageFactory {
                 outStream = Files.newOutputStream(bucketPath);
 
                 outStream.write(bytes);
-
+                
                 outStream.close();
             }
             catch (IOException e) {
                 log.error("IOException message in write : {}", e.getMessage());
+            } finally {
+            	if(outStream != null) {
+            		try {
+                        outStream.close();
+                    } catch (IOException e) {
+                        log.error("Failed to close OutputStream: {}", e.getMessage());
+                    }
+            	}
             }
 
         }

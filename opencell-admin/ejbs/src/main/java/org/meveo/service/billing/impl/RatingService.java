@@ -388,7 +388,9 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             walletOperation.setInvoiceSubCategory(chargeTemplate.getInvoiceSubCategory());
         }
 
-    	applyDiscount(ratedEDRResult, walletOperation, isVirtual);
+        if(BigDecimal.ZERO.compareTo(walletOperation.getAmountWithTax()) < 0 || BigDecimal.ZERO.compareTo(walletOperation.getAmountWithoutTax()) < 0) {
+            applyDiscount(ratedEDRResult, walletOperation, isVirtual);
+        }
         
         return ratedEDRResult;
 
@@ -1461,8 +1463,9 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             operation.setUnitAmountWithTax(null);
             operation.setUnitAmountTax(null);
             operation.setChargeMode(ChargeApplicationModeEnum.RERATING);
-
-            ratingResult=rateBareWalletOperation(operation, null, null, priceplan == null || priceplan.getTradingCountry() == null ? null : priceplan.getTradingCountry().getId(),
+            
+            ChargeInstance chargeInstance = operation.getChargeInstance();
+			ratingResult=rateBareWalletOperation(operation, chargeInstance.getAmountWithoutTax(), chargeInstance.getAmountWithTax(), priceplan == null || priceplan.getTradingCountry() == null ? null : priceplan.getTradingCountry().getId(),
                 priceplan != null ? priceplan.getTradingCurrency() : null, false);
 	        applyDiscount(ratingResult, operation, false);
         }

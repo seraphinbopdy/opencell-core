@@ -3,6 +3,7 @@ package org.meveo.admin.job;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -39,6 +40,7 @@ public class UpdateStepExecutor extends IteratorBasedJobBean<Long[]> {
     public static final String PARAM_READ_INTERVAL_QUERY = "readQuery";
     public static final String PARAM_NAMED_QUERY = "namedQuery";
     public static final String PARAM_TABLE_ALIAS = "tableAlias";
+    public static final String PARAM_QUERY_PARAMS = "queryParams";
 
     /**
      * Initializes intervals for updating based on the specified chunk size.
@@ -51,11 +53,16 @@ public class UpdateStepExecutor extends IteratorBasedJobBean<Long[]> {
         String readQuery = (String) jobExecutionResult.getJobParam(PARAM_READ_INTERVAL_QUERY);
         isNativeQuery = jobExecutionResult.getJobParam(PARAM_NATIVE_QUERY)!=null?(boolean) jobExecutionResult.getJobParam(PARAM_NATIVE_QUERY):true;
         Object[] result=null;
+        Long minId=null;
+        Long maxId=null;
         if(!StringUtils.isEmpty(readQuery)){
             result= isNativeQuery? (Object[]) emWrapper.getEntityManager().createNativeQuery(readQuery).getSingleResult() : (Object[]) emWrapper.getEntityManager().createQuery(readQuery).getSingleResult();
+            minId = result != null && result[0] !=null ? ((Number)result[0]).longValue() : 0L;
+            maxId = result != null && result[0] !=null ? ((Number)result[1]).longValue() : 0L;
         }
-        Long minId = result != null ? ((Number)result[0]).longValue() :  (Long)jobExecutionResult.getJobParam(PARAM_MIN_ID);
-        Long maxId = result != null ? ((Number)result[1]).longValue() :  (Long)jobExecutionResult.getJobParam(PARAM_MAX_ID);
+        
+        minId = minId==null ? (Long)jobExecutionResult.getJobParam(PARAM_MIN_ID) : minId;
+        maxId = maxId==null ? (Long)jobExecutionResult.getJobParam(PARAM_MAX_ID) : maxId;
         Long chunkSize = (Long) jobExecutionResult.getJobParam(PARAM_CHUNK_SIZE);
 
         if (minId == null || maxId == null || chunkSize == null) {
@@ -89,6 +96,7 @@ public class UpdateStepExecutor extends IteratorBasedJobBean<Long[]> {
         String namedQuery = (String) jobExecutionResult.getJobParam(PARAM_NAMED_QUERY);
         String updateQuery = (String) jobExecutionResult.getJobParam(PARAM_UPDATE_QUERY);
         String tableAlias = (String) jobExecutionResult.getJobParam(PARAM_TABLE_ALIAS);
+        Map<String,Object> queryParams = (Map<String,Object>) jobExecutionResult.getJobParam(PARAM_QUERY_PARAMS);
 
 
         if (namedQuery == null && (tableAlias == null || updateQuery == null)) {
@@ -99,7 +107,9 @@ public class UpdateStepExecutor extends IteratorBasedJobBean<Long[]> {
         String sqlString = namedQuery!=null ? null : updateQuery + (updateQuery.toUpperCase().contains("WHERE") ? " AND " : " WHERE ") + tableAlias + ".id BETWEEN :minId AND :maxId";
         Query query = namedQuery != null ? emWrapper.getEntityManager().createNamedQuery(namedQuery)
                 : (isNativeQuery ? emWrapper.getEntityManager().createNativeQuery(sqlString):emWrapper.getEntityManager().createQuery(sqlString));
-
+        if(queryParams!=null) {
+        	queryParams.entrySet().stream().forEach(e->query.setParameter(e.getKey(), e.getValue()));
+        }
         int result = query.setParameter("minId", interval[0]).setParameter("maxId", interval[1]).executeUpdate();
     }
 

@@ -42,6 +42,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.communication.CommunicationPolicy;
 import org.meveo.model.communication.Message;
@@ -59,6 +60,7 @@ import org.meveo.model.shared.Title;
  * @author Andrius Karpavicius
  */
 @Entity
+@HugeEntity
 @ExportIdentifier({ "code" })
 @Table(name = "com_contact")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "com_contact_seq"), })

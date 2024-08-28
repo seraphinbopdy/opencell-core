@@ -77,9 +77,6 @@ public class RatedTransactionsAggregatedJobBean extends IteratorBasedJobBean<Agg
             return Optional.empty();
         }
 
-        log.info("Remove wallet operations rated to 0");
-        walletOperationService.removeZeroWalletOperation();
-
         invoicingDate = new Date();
         List<AggregatedWalletOperation> aggregatedWo = walletOperationService.listToInvoiceIdsWithGrouping(invoicingDate, aggregationSettings);
 

@@ -56,6 +56,7 @@ import org.meveo.commons.utils.NumberUtils;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.DatePeriod;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.admin.Seller;
@@ -88,6 +89,7 @@ import org.meveo.model.tax.TaxClass;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @CustomFieldEntity(cftCodePrefix = "WalletOperation")
 @Table(name = "billing_wallet_operation")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "billing_wallet_operation_seq"),
@@ -637,7 +639,8 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
     @Column(name = "sequence")
    	private Integer sequence;
 
-    @Transient
+    @Column(name = "overrode_price")
+    @Type(type = "numeric_boolean")
     private boolean overrodePrice;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -1276,6 +1279,7 @@ public class WalletOperation extends BaseEntity implements ICustomFieldEntity {
         result.setReratingBatch(reratingBatch);
         result.setOrderInfo(orderInfo);
         result.setAccountingArticle(accountingArticle);
+        result.setOverrodePrice(overrodePrice);
         return result;
     }
 

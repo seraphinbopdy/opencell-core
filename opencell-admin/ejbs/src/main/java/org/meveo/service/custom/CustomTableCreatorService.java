@@ -618,7 +618,21 @@ public class CustomTableCreatorService implements Serializable {
             database.setDefaultSchemaName(EntityManagerProvider.convertToSchemaName(currentproviderCode));
         }
 
-        Liquibase liquibase = new liquibase.Liquibase(dbLog, new ClassLoaderResourceAccessor(), database);
-        liquibase.update(new Contexts(), new LabelExpression());
+        Liquibase liquibase = null;
+        try {
+            liquibase = new Liquibase(dbLog, new ClassLoaderResourceAccessor(), database);
+            liquibase.update(new Contexts(), new LabelExpression());
+        } catch (LiquibaseException e) {
+            log.error("Error during Liquibase update", e);
+            throw e;
+        } finally {
+            if (liquibase != null) {
+                try {
+                    liquibase.close();
+                } catch (LiquibaseException e) {
+                    log.error("Failed to close Liquibase instance", e);
+                }
+            }
+        }
     }
 }

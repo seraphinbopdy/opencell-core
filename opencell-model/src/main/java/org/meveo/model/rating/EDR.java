@@ -42,6 +42,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.meveo.model.BaseEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 
@@ -52,6 +53,7 @@ import org.meveo.model.billing.WalletOperation;
  * @lastModifiedVersion 5.1
  */
 @Entity
+@HugeEntity
 @Table(name = "rating_edr")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "rating_edr_seq"), @Parameter(name = "increment_size", value = "5000") })
 @NamedQueries({
@@ -345,6 +347,13 @@ public class EDR extends BaseEntity {
     
     @Column(name = "business_key")
     private String businessKey;
+
+    /**
+     * If true, the WalletOperation will be deleted if rated to 0
+     */
+    @Type(type = "numeric_boolean")
+    @Column(name = "zero_wo_dropped")
+    private Boolean zeroWoDropped = false;
 
     public Subscription getSubscription() {
         return subscription;
@@ -733,4 +742,11 @@ public class EDR extends BaseEntity {
 		this.businessKey = businessKey;
 	}
 
+    public Boolean getZeroWoDropped() {
+        return zeroWoDropped;
+    }
+
+    public void setZeroWoDropped(Boolean zeroWoDropped) {
+        this.zeroWoDropped = zeroWoDropped;
+    }
 }

@@ -26,6 +26,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.DatePeriod;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.IBillableEntity;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.WorkflowedEntity;
@@ -41,6 +42,7 @@ import org.meveo.model.quote.QuoteStatusEnum;
 
 
 @Entity
+@HugeEntity
 @ObservableEntity
 @WorkflowedEntity
 @Table(name = "cpq_quote", uniqueConstraints = @UniqueConstraint(columnNames = { "code"}))

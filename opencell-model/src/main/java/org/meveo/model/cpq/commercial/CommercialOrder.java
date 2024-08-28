@@ -27,6 +27,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.IBillableEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.ObservableEntity;
@@ -51,6 +52,7 @@ import org.meveo.model.quote.QuoteVersion;
 @ObservableEntity
 @WorkflowedEntity
 @Entity
+@HugeEntity
 @Table(name = "cpq_commercial_order")
 @CustomFieldEntity(cftCodePrefix = "CommercialOrder",inheritCFValuesFrom = {"quoteVersion"})
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {

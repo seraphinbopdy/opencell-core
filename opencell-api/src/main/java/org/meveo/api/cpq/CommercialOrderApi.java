@@ -1250,6 +1250,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 
 		OrderProduct orderProduct = orderProductDTO.getOrderProductId()!= null  ?
 					orderProductService.findById(orderProductDTO.getOrderProductId()) : null;
+	    checkDeliveryDate(orderProductDTO.getDeliveryDate());
         if (orderProduct == null) {  
         	orderProduct= populateOrderProduct(orderProductDTO, orderOffer,orderProduct);
         	orderProductService.create(orderProduct);
@@ -1344,6 +1345,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		for (OrderProductDto orderProductDto : orderProductDtos) {  
 		    if(orderProductDto.getQuantity() == null || orderProductDto.getQuantity().equals(BigDecimal.ZERO) )
 		        throw new BusinessApiException("The quantity for product code " + orderProductDto.getProductCode() + " must be great than 0" );
+			checkDeliveryDate(orderProductDto.getDeliveryDate());
 			OrderProduct orderProduct=populateOrderProduct(orderProductDto,orderOffer,null);  
 			orderProductService.create(orderProduct);
 			//create order attributes linked to orderProduct
@@ -1406,6 +1408,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
         orderAttribute.setStringValue(orderAttributeDTO.getStringValue());
         orderAttribute.setDoubleValue(orderAttributeDTO.getDoubleValue());
         orderAttribute.setDateValue(orderAttributeDTO.getDateValue());
+		orderAttribute.setBooleanValue(orderAttributeDTO.getBooleanValue());
 		orderAttributeDTO.setAttributeType(attribute.getAttributeType());
         orderAttribute.updateAudit(currentUser);
         if(orderProduct != null) {
@@ -1465,7 +1468,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		Boolean allowPastDeliveryDate = (Boolean) advancedSettingsService.getParameter("order.allowPastDeliveryDate");
 		if(deliveryDate != null && ( allowPastDeliveryDate == null && deliveryDate.before(new Date()))) {
 			throw new MeveoApiException("Delivery date should be in the future");
-		}else if(deliveryDate != null && !allowPastDeliveryDate && deliveryDate.before(new Date())) {
+		}else if(deliveryDate != null &&  Boolean.FALSE.equals(allowPastDeliveryDate) && (!org.apache.commons.lang3.time.DateUtils.isSameDay(deliveryDate, new Date()) && deliveryDate.before(new Date()))) {
 			throw new MeveoApiException(resourceMessages.getString("order.allowPastDeliveryDate.false"));
 		}
 	}

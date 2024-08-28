@@ -17,6 +17,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.admin.Seller;
 
 /**
@@ -27,6 +28,7 @@ import org.meveo.model.admin.Seller;
  *
  */
 @Entity
+@HugeEntity
 @CustomFieldEntity(cftCodePrefix = "ProductLine")
 @Table(name = "cpq_product_line", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {

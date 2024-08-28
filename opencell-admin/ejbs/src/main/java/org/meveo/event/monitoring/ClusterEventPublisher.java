@@ -138,21 +138,21 @@ public class ClusterEventPublisher implements Serializable {
 
             // Wait for response
             if (expectResponse) {
-
                 String selector = "JMSCorrelationID = '" + message.getJMSCorrelationID() + "'";
-                JMSConsumer consumer = context.createConsumer(replyQueue, selector);
-                ObjectMessage responseMessage = (ObjectMessage) consumer.receive(MQ_RESPONSE_WAIT);
-                if (responseMessage != null) {
-                    Object responseObj = responseMessage.getObject();
 
-                    log.debug("Received a reply to data synchronization message {}", responseObj);
+                // Use try-with-resources to ensure JMSConsumer is closed
+                try (JMSConsumer consumer = context.createConsumer(replyQueue, selector)) {
+                    ObjectMessage responseMessage = (ObjectMessage) consumer.receive(MQ_RESPONSE_WAIT);
+                    if (responseMessage != null) {
+                        Object responseObj = responseMessage.getObject();
 
-                    return responseObj;
+                        log.debug("Received a reply to data synchronization message {}", responseObj);
 
-                } else {
-                    log.warn("Failed to receive a reply message to a data synchronization message send within a time out of {}", MQ_RESPONSE_WAIT);
+                        return responseObj;
+                    } else {
+                        log.warn("Failed to receive a reply message to a data synchronization message sent within a time out of {}", MQ_RESPONSE_WAIT);
+                    }
                 }
-
             }
 
         } catch (Exception e) {

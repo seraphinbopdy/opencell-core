@@ -16,6 +16,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
@@ -28,6 +29,7 @@ import org.meveo.model.payments.CustomerAccount;
  * @version 10.0
  */
 @Entity
+@HugeEntity
 @WorkflowedEntity
 @CustomFieldEntity(cftCodePrefix = "Contract")
 @Table(name = "cpq_contract", uniqueConstraints = { @UniqueConstraint(columnNames = {"code"})})

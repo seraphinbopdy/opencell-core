@@ -89,6 +89,9 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
     @Inject
     private CustomerAccountService customerAccountService;
 
+    @Inject
+    private AuditLogService auditLogService;
+
     private static final String STOP_REASON = "Changement de politique de recouvrement";
 
     public DunningCollectionPlan findByPolicy(DunningPolicy dunningPolicy) {
@@ -196,6 +199,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         newCollectionPlan.setLastAction(oldCollectionPlan.getLastAction());
         newCollectionPlan.setLastActionDate(oldCollectionPlan.getLastActionDate());
         newCollectionPlan.setDaysOpen(abs((int) daysBetween(new Date(), newCollectionPlan.getStartDate())) + 1);
+        newCollectionPlan.setCustomerAccount(oldCollectionPlan.getCustomerAccount());
         create(newCollectionPlan);
         return newCollectionPlan;
     }
@@ -212,9 +216,8 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
      * @param invoice : invoice
      * @param policy : dunningPolicy
      * @param collectionPlanStatus collection plan status object
-     * @return created DunningCollectionPlan
      */
-    public DunningCollectionPlan createCollectionPlanFrom(Invoice invoice, DunningPolicy policy, DunningCollectionPlanStatus collectionPlanStatus) {
+    public void createCollectionPlanFrom(Invoice invoice, DunningPolicy policy, DunningCollectionPlanStatus collectionPlanStatus) {
         invoice = invoiceService.refreshOrRetrieve(invoice);
         DunningCollectionPlan collectionPlan = new DunningCollectionPlan();
         collectionPlan.setRelatedPolicy(policy);
@@ -226,7 +229,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         collectionPlan.setStatus(collectionPlanStatus);
         collectionPlan.setDaysOpen(abs((int) daysBetween(new Date(), collectionPlan.getStartDate())) + 1);
         Optional.ofNullable(invoice.getRecordedInvoice())
-                .ifPresent(recordedInvoice -> collectionPlan.setBalance(recordedInvoice.getTransactionalUnMatchingAmount()));
+                                .ifPresent(recordedInvoice -> collectionPlan.setBalance(recordedInvoice.getTransactionalUnMatchingAmount()));
 
         // Create the collection plan
         create(collectionPlan);
@@ -263,35 +266,39 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                     .findFirst();
 
             // Update the collection plan with the first action and next action date
-            if (firstDunningLevelInstance.isPresent()) {
-                if (firstDunningLevelInstance.get().getLevelStatus().equals(DONE)) {
-                    collectionPlan.setLastActionDate(addDaysToDate(collectionPlan.getStartDate(), firstDunningLevelInstance.get().getDaysOverdue()));
-                    collectionPlan.setLastAction(firstDunningLevelInstance.get().getActions().get(0).getCode());
-                    collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getCurrentDunningLevelSequence() + 1);
-
-                    if (nextDunningLevelInstance.isPresent()) {
-                        collectionPlan.setNextAction(nextDunningLevelInstance.get().getActions().get(0).getDunningAction().getCode());
-                        collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), nextDunningLevelInstance.get().getDaysOverdue()));
-                    }
-                } else if (firstDunningLevelInstance.get().getLevelStatus().equals(IGNORED)) {
-                    collectionPlan.setLastActionDate(null);
-                    collectionPlan.setLastAction(null);
-                    collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getCurrentDunningLevelSequence() + 1);
-
-                    if (nextDunningLevelInstance.isPresent()) {
-                        collectionPlan.setNextAction(nextDunningLevelInstance.get().getActions().get(0).getDunningAction().getCode());
-                        collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), nextDunningLevelInstance.get().getDaysOverdue()));
-                    }
-                }
-            }
+            updateCollectionPlanWhenFirstLevelIsDoneOrIgnored(collectionPlan, firstDunningLevelInstance, nextDunningLevelInstance);
         }
 
         auditLogService.trackOperation("CREATE DunningCollectionPlan", new Date(), collectionPlan, collectionPlan.getCollectionPlanNumber());
-        return update(collectionPlan);
+        update(collectionPlan);
     }
 
-    @Inject
-    private AuditLogService auditLogService;
+    /**
+     * Update collection plan when first level is done
+     * @param collectionPlan DunningCollectionPlan
+     * @param firstDunningLevelInstance First DunningLevelInstance
+     * @param nextDunningLevelInstance Next DunningLevelInstance
+     */
+    public void updateCollectionPlanWhenFirstLevelIsDoneOrIgnored(DunningCollectionPlan collectionPlan,
+                                                         Optional<DunningLevelInstance> firstDunningLevelInstance,
+                                                         Optional<DunningLevelInstance> nextDunningLevelInstance) {
+        if(firstDunningLevelInstance.isPresent()) {
+            if (firstDunningLevelInstance.get().getLevelStatus().equals(DONE)) {
+                collectionPlan.setLastActionDate(addDaysToDate(collectionPlan.getStartDate(), firstDunningLevelInstance.get().getDaysOverdue()));
+                collectionPlan.setLastAction(firstDunningLevelInstance.get().getActions().get(0).getCode());
+                collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getCurrentDunningLevelSequence() + 1);
+            } else if (firstDunningLevelInstance.get().getLevelStatus().equals(IGNORED)) {
+                collectionPlan.setLastActionDate(null);
+                collectionPlan.setLastAction(null);
+                collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getCurrentDunningLevelSequence() + 1);
+            }
+
+            if (nextDunningLevelInstance.isPresent()) {
+                collectionPlan.setNextAction(nextDunningLevelInstance.get().getActions().get(0).getDunningAction().getCode());
+                collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), nextDunningLevelInstance.get().getDaysOverdue()));
+            }
+        }
+    }
 
     /**
      * Update dunning level instance
@@ -494,9 +501,15 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		return dunningCollectionPlan;
 	}
 
-	public List<Long> getActiveCollectionPlansIds() {
+	public List<Long> getActiveInvoiceLevelCollectionPlansIds() {
         return getEntityManager()
-                .createNamedQuery("DunningCollectionPlan.activeCollectionPlansIds", Long.class)
+                .createNamedQuery("DunningCollectionPlan.activeInvoiceLevelCollectionPlansIds", Long.class)
+                .getResultList();
+    }
+
+    public List<Long> getActiveCustomerLevelCollectionPlansIds() {
+        return getEntityManager()
+                .createNamedQuery("DunningCollectionPlan.activeCustomerLevelCollectionPlansIds", Long.class)
                 .getResultList();
     }
 
@@ -602,5 +615,61 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                 throw new BusinessException("Error occurred during payment process for customer " + customerAccount.getCode(), exception);
             }
         }
+    }
+
+    /**
+     * Create collection plan for customer level
+     * @param customerAccount Customer account
+     * @param policy Policy
+     * @param collectionPlanStatus Collection plan status
+     */
+    public void createCollectionPlanForCustomerLevel(CustomerAccount customerAccount, BigDecimal balance, DunningPolicy policy, DunningCollectionPlanStatus collectionPlanStatus) {
+        customerAccount = customerAccountService.refreshOrRetrieve(customerAccount);
+        DunningCollectionPlan collectionPlan = new DunningCollectionPlan();
+        collectionPlan.setRelatedPolicy(policy);
+        collectionPlan.setCustomerAccount(customerAccount);
+        collectionPlan.setCurrentDunningLevelSequence(0);
+        collectionPlan.setTotalDunningLevels(policy.getTotalDunningLevels());
+        collectionPlan.setStartDate(new Date());
+        collectionPlan.setStatus(collectionPlanStatus);
+        collectionPlan.setDaysOpen(abs((int) daysBetween(new Date(), collectionPlan.getStartDate())) + 1);
+        collectionPlan.setBalance(balance);
+        create(collectionPlan);
+
+        collectionPlan.setCollectionPlanNumber("C" + collectionPlan.getId());
+
+        // Check if there's already a dunning level instances already created => In the case of launching the reminder without creating a collection plan
+        List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByCustomerAccountAndEmptyCollectionPlan(customerAccount);
+        if (dunningLevelInstances != null && !dunningLevelInstances.isEmpty()) {
+            dunningLevelInstances.forEach(dunningLevelInstance -> {
+                dunningLevelInstance.setCollectionPlan(collectionPlan);
+                dunningLevelInstance.setCollectionPlanStatus(collectionPlanStatus);
+                dunningLevelInstanceService.update(dunningLevelInstance);
+            });
+        }
+
+        // Create the dunning level instances
+        if(policy.getDunningLevels() != null && !policy.getDunningLevels().isEmpty()) {
+            // Create dunning level instances
+            List<DunningLevelInstance> createdDunningLevelInstance = dunningLevelInstanceService.createDunningLevelInstancesWithCollectionPlanForCustomerLevel(customerAccount, policy, collectionPlan, collectionPlanStatus);
+            collectionPlan.setDunningLevelInstances(createdDunningLevelInstance);
+
+            // Update the collection plan with the first dunning level instance
+            Optional<DunningLevelInstance> firstDunningLevelInstance = createdDunningLevelInstance.stream()
+                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == 0)
+                    .findFirst();
+
+            // Update the collection plan with the next action and next action date
+            Optional<DunningLevelInstance> nextDunningLevelInstance = createdDunningLevelInstance.stream()
+                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == 1)
+                    .filter(dunningLevelInstance -> dunningLevelInstance.getLevelStatus().equals(TO_BE_DONE))
+                    .findFirst();
+
+            // Update the collection plan with the first action and next action date
+            updateCollectionPlanWhenFirstLevelIsDoneOrIgnored(collectionPlan, firstDunningLevelInstance, nextDunningLevelInstance);
+        }
+
+        auditLogService.trackOperation("CREATE DunningCollectionPlan", new Date(), collectionPlan, collectionPlan.getCollectionPlanNumber());
+        update(collectionPlan);
     }
 }

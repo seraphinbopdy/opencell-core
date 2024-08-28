@@ -41,7 +41,8 @@ import static org.meveo.model.shared.DateUtils.daysBetween;
 		@NamedQuery(name = "DunningCollectionPlan.DCPtoResume", query = "SELECT dcp FROM DunningCollectionPlan dcp where dcp.status.status='PAUSED' and dcp.pausedUntilDate <= :resumeDate"),
 		@NamedQuery(name = "DunningCollectionPlan.findByInvoiceId", query = "SELECT dcp FROM DunningCollectionPlan dcp where dcp.relatedInvoice.id = :invoiceID"),
 		@NamedQuery(name = "DunningCollectionPlan.findByPolicy", query = "SELECT dcp FROM DunningCollectionPlan dcp where dcp.relatedPolicy = :dunningPolicy"),
-		@NamedQuery(name = "DunningCollectionPlan.activeCollectionPlansIds", query = "SELECT dcp.id FROM DunningCollectionPlan dcp where dcp.status.status = 'ACTIVE'"),
+		@NamedQuery(name = "DunningCollectionPlan.activeInvoiceLevelCollectionPlansIds", query = "SELECT dcp.id FROM DunningCollectionPlan dcp where dcp.status.status = 'ACTIVE' and dcp.relatedInvoice is not null"),
+		@NamedQuery(name = "DunningCollectionPlan.activeCustomerLevelCollectionPlansIds", query = "SELECT dcp.id FROM DunningCollectionPlan dcp where dcp.status.status = 'ACTIVE' and dcp.customerAccount is not null"),
 		@NamedQuery(name = "DunningCollectionPlan.findActive", query = "SELECT dcp FROM DunningCollectionPlan dcp where dcp.status.status in('ACTIVE') and dcp.status.dunningSettings.id = :id"),
 		@NamedQuery(name = "DunningCollectionPlan.findPaused", query = "SELECT dcp FROM DunningCollectionPlan dcp where dcp.status.status in('PAUSED') and dcp.status.dunningSettings.id = :id")
 })

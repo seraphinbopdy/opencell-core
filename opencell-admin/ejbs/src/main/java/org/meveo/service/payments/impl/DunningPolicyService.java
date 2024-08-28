@@ -3,8 +3,6 @@ package org.meveo.service.payments.impl;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.*;
-import static org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING;
-import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
 import static org.meveo.model.dunning.PolicyConditionTargetEnum.valueOf;
 
 import java.math.BigDecimal;
@@ -24,12 +22,10 @@ import javax.persistence.NoResultException;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.model.admin.Currency;
-import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.dunning.*;
-import org.meveo.model.jobs.JobExecutionResultImpl;
-import org.meveo.model.payments.AccountOperation;
+import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.service.admin.impl.CurrencyService;
@@ -308,7 +304,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         }
     }
 
-    public void processEligibleInvoice(Map<DunningPolicy, List<Invoice>> eligibleInvoice, JobExecutionResultImpl jobExecutionResult) {
+    public int processEligibleInvoice(Map<DunningPolicy, List<Invoice>> eligibleInvoice) {
         DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
         AtomicInteger dunningCollectionPlanNumber = new AtomicInteger(0);
         for (Map.Entry<DunningPolicy, List<Invoice>> entry : eligibleInvoice.entrySet()) {
@@ -332,9 +328,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                 log.error("No level configured do meet the conditions for policy" + policy.getPolicyName());
             }
         }
-        if (dunningCollectionPlanNumber.get() != 0) {
-            jobExecutionResult.addReport(resourceMessages.getString("jobExecution.dunning.collection.plan.lines.number", dunningCollectionPlanNumber.get()));
-        }
+        return dunningCollectionPlanNumber.get();
     }
 
     private boolean doesPolicyContainReminder(List<DunningPolicyLevel> dunningLevels) {
@@ -395,9 +389,15 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                         .anyMatch(inv -> inv.getId() == invoice.getId());
     }
 
+    /**
+     * Get active policies
+     * @param active Active
+     * @return List of {@link DunningPolicy}
+     */
     public List<DunningPolicy> getPolicies(boolean active) {
         try {
-            return getEntityManager().createNamedQuery("DunningPolicy.listPoliciesByIsActive", DunningPolicy.class)
+            return getEntityManager()
+                    .createNamedQuery("DunningPolicy.listPoliciesByIsActive", DunningPolicy.class)
                     .setParameter("active", active)
                     .getResultList();
         } catch (Exception exception) {
@@ -493,5 +493,37 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                 super.update(dunningPolicy);
             }
         }));
+    }
+
+    /**
+     * Process eligible customer accounts
+     * @param eligibleCustomerAccountsByPolicy Customer account by policy
+     * @return Number of collection plans
+     */
+    public int processEligibleCustomerAccounts(Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy) {
+        DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
+        AtomicInteger dunningCollectionPlanNumber = new AtomicInteger(0);
+        for (Map.Entry<DunningPolicy, Map<CustomerAccount, BigDecimal>> entry : eligibleCustomerAccountsByPolicy.entrySet()) {
+            // Refresh dunning policy
+            DunningPolicy policy = refreshOrRetrieve(entry.getKey());
+            // Check if policy contains reminder
+            boolean policyIsReminderExists = policy.getDunningLevels().stream().anyMatch(policyLevel -> policyLevel.getDunningLevel().isReminder());
+            // Get the first level
+            Optional<DunningPolicyLevel> firstLevel = policy.getDunningLevels()
+                    .stream()
+                    .filter(policyLevel -> ((policyIsReminderExists && policyLevel.getSequence() == 1) || ( policyLevel.getSequence() == 0)) && !policyLevel.getDunningLevel().isReminder())
+                    .findFirst();
+            if(firstLevel.isPresent()) {
+                entry.getValue().forEach((customerAccount, minBalance) -> {
+                    if(minBalance.compareTo(BigDecimal.valueOf(policy.getMinBalanceTrigger())) > 0) {
+                        dunningCollectionPlanNumber.incrementAndGet();
+                        collectionPlanService.createCollectionPlanForCustomerLevel(customerAccount, minBalance, policy, collectionPlanStatus);
+                    }
+                });
+            } else {
+                log.error("No level configured do meet the conditions for policy {}", policy.getPolicyName());
+            }
+        }
+        return dunningCollectionPlanNumber.get();
     }
 }

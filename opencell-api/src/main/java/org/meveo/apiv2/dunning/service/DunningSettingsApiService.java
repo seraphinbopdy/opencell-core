@@ -123,7 +123,7 @@ public class DunningSettingsApiService implements ApiService<DunningSettings> {
 		List<DunningCollectionPlan> pausedDunningCollectionPlans = dunningCollectionPlanService.getPausedDunningCollectionPlan(dunningSettingsUpdate.getId());
 		
 		//Check if active and paused dunning collection are not empty
-		if((activeDunningCollectionPlans != null && activeDunningCollectionPlans.size() > 0) || (pausedDunningCollectionPlans != null && pausedDunningCollectionPlans.size() > 0)) {
+		if((activeDunningCollectionPlans != null && !activeDunningCollectionPlans.isEmpty()) || (pausedDunningCollectionPlans != null && !pausedDunningCollectionPlans.isEmpty())) {
 			throw new ForbiddenException(ACTIVE_OR_PAUSED_DUNNING_COLLECTION_PLAN_FOUND);
 		}
 

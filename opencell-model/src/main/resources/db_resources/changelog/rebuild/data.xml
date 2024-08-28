@@ -10747,7 +10747,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Hello, </p>
-                    <p>We are reaching out to you in regards of your current balance that you have with our company. It seems you have debit of #{customerAccount balance} #{currencySymbol}.</p>
+                    <p>We are reaching out to you in regards of your current balance that you have with our company. It seems you have debit of #{customerAccountBalance} #{currencySymbol}.</p>
                     <p>
                         Please take necessary steps to insure payments of your last(s) invoice(s). <br>
                         You
@@ -10775,7 +10775,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Hello, </p>
-                    <p>We are following up on our previous email regarding your negative balance (that is currently of#{customerAccount balance} #{currencySymbol}).</p>
+                    <p>We are following up on our previous email regarding your negative balance (that is currently of#{customerAccountBalance} #{currencySymbol}).</p>
                     <p>
                         Please take contact with us to clear the situation.<br>
                         If you have already done a payment, you can discard this email.
@@ -10803,7 +10803,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Hello, </p>
-                    <p>It has now been 10 days since our first email regarding your current negative balance. Your current balance is #{customerAccount balance} #{currencySymbol}).</p>
+                    <p>It has now been 10 days since our first email regarding your current negative balance. Your current balance is #{customerAccountBalance} #{currencySymbol}).</p>
                     <p>
                         Please take contact with us to clear the situation.<br>
                         If you have already done a payment, you can discard this email.
@@ -10831,7 +10831,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Hello, </p>
-                    <p>It seems our previous emails did not allow the expected outcome. Today, your current balance is of#{customerAccount balance} #{currencySymbol}).</p>
+                    <p>It seems our previous emails did not allow the expected outcome. Today, your current balance is of#{customerAccountBalance} #{currencySymbol}).</p>
                     <p>As it seems we were not able to clear the situation, the services you have with us have been suspended.</p>
                     <p>If you have already done a payment, please contact us so that we can re-activate your services.</p>
                     <p>If you have any additional question, please contact our services.</p>
@@ -10857,7 +10857,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Hello #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
-                    <p>We are reaching out to you in regards of your current balance that you have with our company. It seems you have debit of #{customerAccount balance} #{currencySymbol}.</p>
+                    <p>We are reaching out to you in regards of your current balance that you have with our company. It seems you have debit of #{customerAccountBalance} #{currencySymbol}.</p>
                     <p>
                         Please take necessary steps to insure payments of your last(s) invoice(s). <br>
                         You
@@ -10885,7 +10885,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Hello #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
-                    <p>We are following up on our previous email regarding your negative balance (that is currently of#{customerAccount balance} #{currencySymbol}).</p>
+                    <p>We are following up on our previous email regarding your negative balance (that is currently of#{customerAccountBalance} #{currencySymbol}).</p>
                     <p>
                         Please take contact with us to clear the situation.<br>
                         If you have already done a payment, you can discard this email.
@@ -10913,7 +10913,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Hello #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
-                    <p>It has now been 10 days since our first email regarding your current negative balance. Your current balance is #{customerAccount balance} #{currencySymbol}).</p>
+                    <p>It has now been 10 days since our first email regarding your current negative balance. Your current balance is #{customerAccountBalance} #{currencySymbol}).</p>
                     <p>
                         Please take contact with us to clear the situation.<br>
                         If you have already done a payment, you can discard this email.
@@ -10941,7 +10941,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Hello #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
-                    <p>It seems our previous emails did not allow the expected outcome. Today, your current balance is of#{customerAccount balance} #{currencySymbol}).</p>
+                    <p>It seems our previous emails did not allow the expected outcome. Today, your current balance is of#{customerAccountBalance} #{currencySymbol}).</p>
                     <p>As it seems we were not able to clear the situation, the services you have with us have been suspended.</p>
                     <p>If you have already done a payment, please contact us so that we can re-activate your services.</p>
                     <p>If you have any additional question, please contact our services.</p>
@@ -10967,7 +10967,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Bonjour,</p>
-                    <p>Nous vous contactons au sujet de votre solde actuel auprèss de notre société. Il semble que vous ayez une position débitrice d’un montant de #{customerAccount balance} #{currencySymbol}.</p>
+                    <p>Nous vous contactons au sujet de votre solde actuel auprèss de notre société. Il semble que vous ayez une position débitrice d’un montant de #{customerAccountBalance} #{currencySymbol}.</p>
                     <p>Nous vous invitons a faire le nécessaires pour assurer le paiement de votre (vos) dernière(s) facture(s).</p>
                     <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
                     <p>Meilleures salutations,</p>
@@ -10992,7 +10992,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Bonjour,</p>
-                    <p>Nous donnons suite à notre précédent e-mail concernant votre solde négatif (actuellement de #{customerAccount balance} #{currencySymbol}).</p>
+                    <p>Nous donnons suite à notre précédent e-mail concernant votre solde négatif (actuellement de #{customerAccountBalance} #{currencySymbol}).</p>
                     <p>Merci de prendre contact avec nous pour échanger sur la situation.</p>
                     <p>Si vous avez déjà effectué un paiement, veuillez ne pas prendre cet e-mail en considération.</p>
                     <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
@@ -11018,7 +11018,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Bonjour,</p>
-                    <p>Cela fait maintenant 10 jours depuis notre premier e-mail concernant votre solde négatif. Votre solde actuel est de #{customerAccount balance} #{currencySymbol}).</p>
+                    <p>Cela fait maintenant 10 jours depuis notre premier e-mail concernant votre solde négatif. Votre solde actuel est de #{customerAccountBalance} #{currencySymbol}).</p>
                     <p>Merci de prendre contact avec nous pour éclaircir la situation.</p>
                     <p>Si vous avez déjà effectué un paiement, vous pouvez ne pas prendre compte de cet e-mail.</p>
                     <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
@@ -11044,7 +11044,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Bonjour,</p>
-                    <p>Il semble que nos e-mails précédents n'aient pas permis d’arriver au résultat escompté. Aujourd'hui, votre solde est de #{customerAccount balance} #{currencySymbol}).</p>
+                    <p>Il semble que nos e-mails précédents n'aient pas permis d’arriver au résultat escompté. Aujourd'hui, votre solde est de #{customerAccountBalance} #{currencySymbol}).</p>
                     <p>La situation ne s’étant pas régler à l’amiable, l’ensemble des services que vous avez avec nous ont été suspendus.</p>
                     <p>Si vous avez déjà effectué un paiement, veuillez nous contacter afin que nous puissions réactiver vos services.</p>
                     <p>Si vous avez des questions supplémentaires, veuillez contacter nos services.</p>
@@ -11070,7 +11070,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Bonjour#{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
-                    <p>Nous vous contactons au sujet de votre solde actuel auprèss de notre société. Il semble que vous ayez une position débitrice d’un montant de #{customerAccount balance} #{currencySymbol}.</p>
+                    <p>Nous vous contactons au sujet de votre solde actuel auprèss de notre société. Il semble que vous ayez une position débitrice d’un montant de #{customerAccountBalance} #{currencySymbol}.</p>
                     <p>Nous vous invitons a faire le nécessaires pour assurer le paiement de votre (vos) dernière(s) facture(s).</p>
                     <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
                     <p>Meilleures salutations,</p>
@@ -11095,7 +11095,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Bonjour#{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
-                    <p>Nous donnons suite à notre précédent e-mail concernant votre solde négatif (actuellement de #{customerAccount balance} #{currencySymbol}).</p>
+                    <p>Nous donnons suite à notre précédent e-mail concernant votre solde négatif (actuellement de #{customerAccountBalance} #{currencySymbol}).</p>
                     <p>Merci de prendre contact avec nous pour échanger sur la situation.</p>
                     <p>Si vous avez déjà effectué un paiement, veuillez ne pas prendre cet e-mail en considération.</p>
                     <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
@@ -11121,7 +11121,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Bonjour#{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
-                    <p>Cela fait maintenant 10 jours depuis notre premier e-mail concernant votre solde négatif. Votre solde actuel est de #{customerAccount balance} #{currencySymbol}).</p>
+                    <p>Cela fait maintenant 10 jours depuis notre premier e-mail concernant votre solde négatif. Votre solde actuel est de #{customerAccountBalance} #{currencySymbol}).</p>
                     <p>Merci de prendre contact avec nous pour éclaircir la situation.</p>
                     <p>Si vous avez déjà effectué un paiement, vous pouvez ne pas prendre compte de cet e-mail.</p>
                     <p>Si vous avez des questions supplémentaires, n'hésitez pas à contacter nos services ou votre point de contact habituel.</p>
@@ -11147,7 +11147,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="htmlcontent">
                 <![CDATA[
                     <p>Bonjour #{customerAccountLegalEntityTypeCode} #{customerAccountLastName},</p>
-                    <p>Il semble que nos e-mails précédents n'aient pas permis d’arriver au résultat escompté. Aujourd'hui, votre solde est de #{customerAccount balance} #{currencySymbol}).</p>
+                    <p>Il semble que nos e-mails précédents n'aient pas permis d’arriver au résultat escompté. Aujourd'hui, votre solde est de #{customerAccountBalance} #{currencySymbol}).</p>
                     <p>La situation ne s’étant pas régler à l’amiable, l’ensemble des services que vous avez avec nous ont été suspendus.</p>
                     <p>Si vous avez déjà effectué un paiement, veuillez nous contacter afin que nous puissions réactiver vos services.</p>
                     <p>Si vous avez des questions supplémentaires, veuillez contacter nos services.</p>

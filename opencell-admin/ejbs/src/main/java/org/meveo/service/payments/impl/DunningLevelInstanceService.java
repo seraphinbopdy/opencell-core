@@ -2,6 +2,7 @@ package org.meveo.service.payments.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -200,11 +201,12 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
         }
 
         // Check the related customer account and set it to the level instance
-        if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
+        if (collectionPlan.getCustomerAccount() != null) {
+            levelInstance.setCustomerAccount(collectionPlan.getCustomerAccount());
+        } else if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
             levelInstance.setCustomerAccount(collectionPlan.getBillingAccount().getCustomerAccount());
         }
 
-        levelInstance.setCustomerAccount(collectionPlan.getBillingAccount().getCustomerAccount());
         this.create(levelInstance);
 
         if (policyLevel.getDunningLevel().getDunningActions() != null
@@ -291,5 +293,137 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
         }
 
         return levelInstances;
+    }
+
+    /**
+     * Find dunning level instance by customer account when collection plan is null.
+     * @param pCustomerAccount the customer account
+     * @return the list of DunningLevelInstance
+     */
+    public List<DunningLevelInstance> findByCustomerAccountAndEmptyCollectionPlan(CustomerAccount pCustomerAccount) {
+        try {
+            return getEntityManager()
+                    .createNamedQuery("DunningLevelInstance.findByCustomerAccountAndEmptyCollectionPlan", entityClass)
+                    .setParameter("customerAccount", pCustomerAccount)
+                    .getResultList();
+        } catch (Exception exception) {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Create dunning level instances
+     * @param policy The Dunning Policy
+     * @param collectionPlan The Collection Plan
+     * @param collectionPlanStatus The Collection Plan Status
+     * @return List of DunningLevelInstance
+     */
+    public List<DunningLevelInstance> createDunningLevelInstancesWithCollectionPlanForCustomerLevel(CustomerAccount customerAccount, DunningPolicy policy,
+                                                                                    DunningCollectionPlan collectionPlan, DunningCollectionPlanStatus collectionPlanStatus) {
+        Date today = new Date();
+        List<DunningLevelInstance> levelInstances = new ArrayList<>();
+
+        for (DunningPolicyLevel policyLevel : policy.getDunningLevels()) {
+            // Check if a dunning level instance already exists for this invoice - Case when Reminder is already triggered
+            List<DunningLevelInstance> dunningLevelInstances = this.findByCustomerAccount(customerAccount);
+            Optional<DunningLevelInstance> foundDunningLevelInstance = dunningLevelInstances.stream()
+                    .filter(dunningLevelInstance -> dunningLevelInstance.getDunningLevel().getId().equals(policyLevel.getDunningLevel().getId()))
+                    .findFirst();
+
+            // If the level is not already triggered, we create a new level instance
+            if (foundDunningLevelInstance.isEmpty()) {
+                // Check if the current dunning level is reminder level
+                DunningLevel reminderLevel = dunningLevelService.findById(policyLevel.getDunningLevel().getId(), List.of("dunningActions"));
+
+                if (reminderLevel != null && reminderLevel.isReminder()) {
+                    // If the current level is reminder level, we check if the due date of the invoice is equal to the reminder level days overdue
+                    Date dateToCompare = addDaysToDate(collectionPlan.getStartDate(), reminderLevel.getDaysOverdue());
+
+                    if (simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today))) {
+                        DunningLevelInstance levelInstance = createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, TO_BE_DONE);
+                        levelInstances.add(levelInstance);
+                    } else {
+                        DunningLevelInstance ignoredDunningLevelInstance = this.createIgnoredDunningLevelInstance(customerAccount, policyLevel);
+                        ignoredDunningLevelInstance.setCollectionPlan(collectionPlan);
+                        levelInstances.add(ignoredDunningLevelInstance);
+                    }
+                } else {
+                    DunningLevelInstance dunningLevelInstanceWithCollectionPlan = this.createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, TO_BE_DONE);
+                    levelInstances.add(dunningLevelInstanceWithCollectionPlan);
+                }
+            } else {
+                levelInstances.add(foundDunningLevelInstance.get());
+            }
+        }
+
+        return levelInstances;
+    }
+
+    /**
+     * Create a level instance
+     *
+     * @param pCustomerAccount   Customer account
+     * @param pDunningPolicyLevel Policy level
+     * @return A new level instance
+     */
+    public DunningLevelInstance createIgnoredDunningLevelInstance(CustomerAccount pCustomerAccount, DunningPolicyLevel pDunningPolicyLevel) {
+        // Check if a dunning level instance already exists for the invoice
+        List<DunningLevelInstance> dunningLevelInstances = this.findByCustomerAccount(pCustomerAccount);
+        if (dunningLevelInstances != null && !dunningLevelInstances.isEmpty()) {
+            // Check if we have already processed the invoice for the current level
+            for (DunningLevelInstance dunningLevelInstance : dunningLevelInstances) {
+                if (dunningLevelInstance.getDunningLevel().getId().equals(pDunningPolicyLevel.getDunningLevel().getId())) {
+                    return dunningLevelInstance;
+                }
+            }
+        }
+
+        // Create a new level instance
+        DunningLevelInstance dunningLevelInstanceWithoutCollectionPlan = createDunningLevelInstanceWithoutCollectionPlanForCustomerLevel(pCustomerAccount, pDunningPolicyLevel, DunningLevelInstanceStatusEnum.IGNORED);
+        dunningLevelInstanceWithoutCollectionPlan.getActions().forEach(action -> {
+            action.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
+            dunningActionInstanceService.update(action);
+        });
+        return dunningLevelInstanceWithoutCollectionPlan;
+    }
+
+    /**
+     * Create dunning level instances
+     * @param pCustomerAccount The Customer Account
+     * @return List of DunningLevelInstance
+     */
+    public List<DunningLevelInstance> findByCustomerAccount(CustomerAccount pCustomerAccount) {
+        try {
+            return getEntityManager()
+                    .createNamedQuery("DunningLevelInstance.findByCustomerAccount", entityClass)
+                    .setParameter("customerAccount", pCustomerAccount)
+                    .getResultList();
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+
+    /**
+     * Create a level instance
+     *
+     * @param pCustomerAccount   Customer account
+     * @param pDunningPolicyLevel Policy level
+     * @return A new level instance
+     */
+    public DunningLevelInstance createDunningLevelInstanceWithoutCollectionPlanForCustomerLevel(CustomerAccount pCustomerAccount, DunningPolicyLevel pDunningPolicyLevel, DunningLevelInstanceStatusEnum status) {
+        DunningLevelInstance levelInstance = new DunningLevelInstance();
+        levelInstance.setLevelStatus(status);
+        levelInstance.setSequence(pDunningPolicyLevel.getSequence());
+        levelInstance.setDunningLevel(pDunningPolicyLevel.getDunningLevel());
+        levelInstance.setDaysOverdue(pDunningPolicyLevel.getDunningLevel().getDaysOverdue());
+        levelInstance.setCustomerAccount(pCustomerAccount);
+        this.create(levelInstance);
+
+        if (pDunningPolicyLevel.getDunningLevel().getDunningActions() != null && !pDunningPolicyLevel.getDunningLevel().getDunningActions().isEmpty()) {
+            levelInstance.setActions(dunningActionInstanceService.createDunningActionInstances(null, pDunningPolicyLevel, levelInstance));
+            this.update(levelInstance);
+        }
+
+        return levelInstance;
     }
 }

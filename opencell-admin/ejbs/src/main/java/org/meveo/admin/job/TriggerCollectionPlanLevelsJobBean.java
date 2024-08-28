@@ -39,9 +39,11 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import java.io.File;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Stateless
 public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
@@ -78,54 +80,92 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
     private final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
+    private static Date getDateOverdue(DunningLevelInstance levelInstance, DunningCollectionPlan collectionPlan) {
+        return DateUtils.addDaysToDate(collectionPlan.getStartDate(), ofNullable(collectionPlan.getPauseDuration()).orElse(0) + levelInstance.getDaysOverdue());
+    }
+
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
+        // Get the last dunning setting configuration
+        DunningSettings dunningSettings = dunningSettingsService.findLastOne();
         // Get collection plans to process
-        List<Long> collectionPlanToProcess = collectionPlanService.getActiveCollectionPlansIds();
+        List<Long> collectionPlanToProcess = getCollectionPlansToProcess(dunningSettings);
         // Set number of items to process
         jobExecutionResult.setNbItemsToProcess(collectionPlanToProcess.size());
         // Process collection plans
         collectionPlanToProcess.forEach(collectionPlanId -> {
             try {
-                jobBean.process(collectionPlanId, jobExecutionResult);
+                if(dunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {
+                    jobBean.process(collectionPlanId, jobExecutionResult);
+                } else if(dunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL)) {
+                    jobBean.processCustomerLevel(collectionPlanId, jobExecutionResult);
+                }
             } catch (Exception exception) {
                 jobExecutionResult.addErrorReport(exception.getMessage());
             }
         });
 
         // Check all processed collection plan to verify if the invoice is paid
-        getAndUpdateProcessedCollectionPlans(collectionPlanToProcess);
+        getAndUpdateProcessedCollectionPlans(collectionPlanToProcess, dunningSettings);
         // Update job execution result
         jobExecutionResult.setNbItemsCorrectlyProcessed(collectionPlanToProcess.size() - jobExecutionResult.getNbItemsProcessedWithError());
     }
 
     /**
+     * Get collection plans to process
+     *
+     * @param dunningSettings Dunning settings
+     * @return Collection plans to process
+     */
+    private List<Long> getCollectionPlansToProcess(DunningSettings dunningSettings) {
+        List<Long> activeInvoiceLevelCollectionPlansIds = collectionPlanService.getActiveInvoiceLevelCollectionPlansIds();
+        List<Long> activeCustomerLevelCollectionPlansIds = collectionPlanService.getActiveCustomerLevelCollectionPlansIds();
+        List<Long> collectionPlanToProcess = new ArrayList<>();
+
+        if(dunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {
+            collectionPlanToProcess = activeInvoiceLevelCollectionPlansIds;
+            stopCollectionPlan(activeCustomerLevelCollectionPlansIds);
+        } else if(dunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL)) {
+            collectionPlanToProcess = activeCustomerLevelCollectionPlansIds;
+            stopCollectionPlan(activeInvoiceLevelCollectionPlansIds);
+        }
+
+        return collectionPlanToProcess;
+    }
+
+    /**
      * Get and update processed collection plans
+     *
      * @param collectionPlanToProcess Collection plan to process
      */
-    private void getAndUpdateProcessedCollectionPlans(List<Long> collectionPlanToProcess) {
+    private void getAndUpdateProcessedCollectionPlans(List<Long> collectionPlanToProcess, DunningSettings pDunningSettings) {
         // Transform to foreach
         collectionPlanToProcess.forEach(collectionPlanId -> {
             DunningCollectionPlan processedCollectionPlan = collectionPlanService.findById(collectionPlanId);
-            checkAndUpdateCollectionPlanWhenPaidInvoice(processedCollectionPlan);
+            checkAndUpdateCollectionPlanWhenPaidInvoice(processedCollectionPlan, pDunningSettings);
         });
     }
 
     /**
      * Check and update collection plan when invoice is paid
+     *
      * @param processedCollectionPlan Processed collection plan
      */
-    private void checkAndUpdateCollectionPlanWhenPaidInvoice(DunningCollectionPlan processedCollectionPlan) {
-        if(processedCollectionPlan.getStatus().getStatus() == ACTIVE && processedCollectionPlan.getRelatedInvoice().getPaymentStatus() == PAID) {
-            // Ignore levels and actions after paying invoice
-            collectionPlanService.ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(processedCollectionPlan);
-            // Update collection plan status to success
-            processedCollectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
-            processedCollectionPlan.setNextActionDate(null);
-            processedCollectionPlan.setNextAction(null);
-            processedCollectionPlan.setCloseDate(new Date());
-            processedCollectionPlan.setDaysOpen((int) daysBetween(processedCollectionPlan.getCloseDate(), new Date()) + 1);
-            collectionPlanService.update(processedCollectionPlan);
+    private void checkAndUpdateCollectionPlanWhenPaidInvoice(DunningCollectionPlan processedCollectionPlan, DunningSettings pDunningSettings) {
+        if (pDunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {
+            if(processedCollectionPlan.getStatus().getStatus() == ACTIVE && processedCollectionPlan.getRelatedInvoice().getPaymentStatus() == PAID) {
+                finalizeCollectionPlan(processedCollectionPlan);
+            }
+        } else if (pDunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL)) {
+            CustomerBalance customerBalance = pDunningSettings.getCustomerBalance();
+            CustomerAccount customerAccount = processedCollectionPlan.getCustomerAccount();
+            List<String> linkedOccTemplates = getOccTemplateCodesToUse(customerBalance);
+            BigDecimal balance = customerAccountService.getCustomerAccountBalance(customerAccount, linkedOccTemplates);
+
+            if (processedCollectionPlan.getRelatedPolicy().getMinBalanceTrigger() != null &&
+                    balance.compareTo(BigDecimal.valueOf(processedCollectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {
+                finalizeCollectionPlan(processedCollectionPlan);
+            }
         }
     }
 
@@ -302,10 +342,198 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         }
     }
 
-    private static Date getDateOverdue(DunningLevelInstance levelInstance, DunningCollectionPlan collectionPlan) {
-        return DateUtils.addDaysToDate(collectionPlan.getStartDate(), ofNullable(collectionPlan.getPauseDuration()).orElse(0) + levelInstance.getDaysOverdue());
+    /**
+     * Process collection plans
+     *
+     * @param collectionPlanId   Collection plan id to process
+     * @param jobExecutionResult Job execution result
+     */
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void processCustomerLevel(Long collectionPlanId, JobExecutionResultImpl jobExecutionResult) {
+        DunningSettings dunningSettings = dunningSettingsService.findLastOne();
+        // Get collection plan
+        DunningCollectionPlan collectionPlan = collectionPlanService.findById(collectionPlanId);
+        Date dateToCompare;
+        Date today = new Date();
+        int index = 0;
+        int nextLevel = 0;
+        boolean updateCollectionPlan = false;
+
+        // Check if collection plan has levels
+        if (collectionPlan.getDunningLevelInstances() == null || collectionPlan.getDunningLevelInstances().isEmpty()) {
+            throw new BusinessException("Collection plan ID : " + collectionPlan.getId() + " has no levelInstances associated");
+        }
+
+        CustomerBalance customerBalance = dunningSettings.getCustomerBalance();
+        List<String> linkedOccTemplates = getOccTemplateCodesToUse(customerBalance);
+        BigDecimal balance = customerAccountService.getCustomerAccountBalance(collectionPlan.getCustomerAccount(), linkedOccTemplates);
+
+        // Check if collection plan is active and invoice is paid
+        if(collectionPlan.getStatus().getStatus() == ACTIVE && balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {
+            finalizeCollectionPlan(collectionPlan);
+        } else {
+            collectionPlan.getDunningLevelInstances().sort(Comparator.comparing(DunningLevelInstance::getSequence));
+            int nbLevelDone = 0;
+            DunningLevelInstance levelInstance= null;
+            List<DunningLevelInstance> levelInstances = collectionPlan.getDunningLevelInstances();
+
+            for (int levelsIndex = 0 ; levelsIndex < levelInstances.size(); levelsIndex++) {
+                levelInstance = levelInstances.get(levelsIndex);
+                dateToCompare = getDateOverdue(levelInstance, collectionPlan);
+                DunningLevelInstance previousLevelInstance = null;
+
+                if (levelsIndex > 0) {
+                    previousLevelInstance = levelInstances.get(levelsIndex - 1);
+                }
+
+                if(levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE) {
+                    nbLevelDone++;
+                }
+
+                if (levelInstance.getLevelStatus().equals(DunningLevelInstanceStatusEnum.TO_BE_DONE) && balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) > 0) {
+                    if ((dateToCompare.before(today)
+                            && collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_AND_BALANCE_THRESHOLD)
+                            && balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0)
+                            || (collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE) && dateToCompare.before(today))) {
+                        nextLevel = index + 1;
+                        boolean registerKO = false;
+                        for (int i = 0; i < levelInstance.getActions().size(); i++) {
+                            DunningActionInstance actionInstance = levelInstance.getActions().get(i);
+                            if (actionInstance.getActionMode().equals(AUTOMATIC) && actionInstance.getActionStatus().equals(TO_BE_DONE)) {
+                                try {
+                                    if (previousLevelInstance != null && (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED)) {
+                                        triggerAction(actionInstance, collectionPlan);
+                                        collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
+                                        actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
+                                        if (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
+                                            levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+                                            levelInstanceService.update(levelInstance);
+                                        }
+                                        collectionPlan.setLastActionDate(new Date());
+                                        collectionPlan.setLastAction(actionInstance.getDunningAction().getCode());
+                                    }
+                                } catch (Exception exception) {
+                                    registerKO = true;
+                                    jobExecutionResult.addReport("Collection plan ID : "
+                                            + collectionPlan.getId() + "/Level instance ID : "
+                                            + levelInstance.getId() + "/Action instance ID : " + actionInstance.getId()
+                                            + " : " + exception.getMessage());
+                                }
+                            }
+                            actionInstanceService.update(actionInstance);
+                        }
+                        if (!registerKO) {
+                            if (levelsIndex + 1 < levelInstances.size()) {
+                                DunningLevelInstance currentLevel = levelInstances.get(levelsIndex);
+                                for (int i = levelsIndex + 1; i < levelInstances.size(); i++) {
+                                    if(levelInstances.get(i).getActions() != null && !levelInstances.get(i).getActions().isEmpty()) {
+                                        collectionPlan.setNextAction(levelInstances.get(i).getActions().get(0).getDunningAction().getCode());
+                                        collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), levelInstances.get(i).getDaysOverdue()));
+                                        break;
+                                    }
+                                }
+                            } else {
+                                if(levelsIndex == levelInstances.size()) {
+                                    collectionPlan.setNextAction(null);
+                                    collectionPlan.setNextActionDate(null);
+                                }
+                            }
+                            collectionPlanService.update(collectionPlan);
+                            collectionPlanService.getEntityManager().flush();
+                        }
+                        updateCollectionPlan = true;
+                        if(registerKO) {
+                            jobExecutionResult.addNbItemsProcessedWithError(1L);
+                        }
+                        levelInstance = levelInstanceService.refreshOrRetrieve(levelInstance);
+
+                        // Set current dunning level sequence
+                        if (nextLevel < collectionPlan.getDunningLevelInstances().size()) {
+                            collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getDunningLevelInstances().get(nextLevel).getSequence());
+                        }
+
+                        // Update collection plan status to FAILED if is end of dunning and invoice is unpaid
+                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0) {
+                            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(FAILED));
+                            collectionPlan.setNextAction(null);
+                            collectionPlan.setNextActionDate(null);
+                        }
+
+                        // Update collection plan status to SUCCESS if is end of dunning and invoice is paid
+                        if (balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0) {
+                            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+                            collectionPlan.setNextAction(null);
+                            collectionPlan.setNextActionDate(null);
+                        }
+                        long countActions = levelInstance.getActions().stream().filter(action -> action.getActionStatus() == DONE).count();
+                        if (countActions > 0 && countActions < levelInstance.getActions().size()) {
+                            levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+                        }
+                        if (countActions == levelInstance.getActions().size()) {
+                            levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
+                        }
+                    }
+
+                    if (collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_AND_BALANCE_THRESHOLD)
+                            && balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0
+                            && levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
+                        levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IGNORED);
+                        levelInstanceService.update(levelInstance);
+                        levelInstance.getActions().stream()
+                                .filter(action -> action.getActionStatus() == TO_BE_DONE)
+                                .forEach(action -> {
+                                    action.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
+                                    actionInstanceService.update(action);
+                                });
+                    }
+                }
+                if (levelInstance.getDunningLevel() == null) {
+                    throw new BusinessException("No dunning level associated to level instance id " + levelInstance.getId());
+                } else {
+                    levelInstanceService.update(levelInstance);
+                }
+                index++;
+            }
+            if(nbLevelDone == collectionPlan.getDunningLevelInstances().size()) {
+                collectionPlan.setNextActionDate(null);
+                collectionPlan.setNextAction(null);
+                if (balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) > 0) {
+                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(FAILED));
+                    updateCollectionPlan = true;
+                }
+                if (balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {
+                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+                    updateCollectionPlan = true;
+                }
+            }
+        }
+        if (updateCollectionPlan) {
+            collectionPlanService.update(collectionPlan);
+        }
     }
 
+    /**
+     * Stop collection plans
+     *
+     * @param collectionPlanIds Collection plan ids
+     */
+    private void stopCollectionPlan(List<Long> collectionPlanIds) {
+        collectionPlanIds.forEach(collectionPlanId -> {
+            DunningCollectionPlan collectionPlan = collectionPlanService.findById(collectionPlanId);
+            if(collectionPlan.getStatus().getStatus() == ACTIVE || collectionPlan.getStatus().getStatus() == PAUSED) {
+                collectionPlan.setStatus(collectionPlanStatusService.findByStatus(STOPPED));
+                collectionPlanService.update(collectionPlan);
+            }
+        });
+    }
+
+    /**
+     * Trigger action
+     *
+     * @param actionInstance Action instance
+     * @param collectionPlan Collection plan
+     */
     private void triggerAction(DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
         DunningSettings dunningSettings = dunningSettingsService.findLastOne();
 
@@ -321,11 +549,9 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         }
 
         // Send notification
-        if (actionInstance.getActionType().equals(SEND_NOTIFICATION)
-                && (actionInstance.getDunningAction().getActionChannel().equals(EMAIL)
-                || actionInstance.getDunningAction().getActionChannel().equals(LETTER))) {
-                sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(),
-                        collectionPlan.getRelatedInvoice(), collectionPlan.getLastActionDate());
+        if (actionInstance.getActionType().equals(SEND_NOTIFICATION) &&
+                (actionInstance.getDunningAction().getActionChannel().equals(EMAIL) || actionInstance.getDunningAction().getActionChannel().equals(LETTER))) {
+                sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), collectionPlan.getRelatedInvoice(), collectionPlan.getLastActionDate());
         }
 
         // Retry payment
@@ -334,65 +560,60 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         }
     }
 
+    /**
+     * Send email
+     *
+     * @param emailTemplate Email template
+     * @param invoice Invoice
+     * @param lastActionDate Last action date
+     */
     private void sendEmail(EmailTemplate emailTemplate, Invoice invoice, Date lastActionDate) {
         if (invoice.getSeller() != null && invoice.getSeller().getContactInformation() != null
                 && invoice.getSeller().getContactInformation().getEmail() != null
                 && !invoice.getSeller().getContactInformation().getEmail().isBlank()) {
             Seller seller = invoice.getSeller();
             Map<Object, Object> params = new HashMap<>();
-            BillingAccount billingAccount =
-                    billingAccountService.findById(invoice.getBillingAccount().getId(), asList("customerAccount"));
+            BillingAccount billingAccount = billingAccountService.findById(invoice.getBillingAccount().getId(), asList("customerAccount"));
             params.put("billingAccountDescription", billingAccount.getDescription());
-            params.put("billingAccountAddressAddress1", billingAccount.getAddress() != null ?
-                    billingAccount.getAddress().getAddress1() : "");
-            params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ?
-                    billingAccount.getAddress().getZipCode() : "");
-            params.put("billingAccountAddressCity", billingAccount.getAddress() != null ?
-                    billingAccount.getAddress().getCity() : "");
-            params.put("billingAccountContactInformationPhone", billingAccount.getContactInformation() != null ?
-                    billingAccount.getContactInformation().getPhone() : "");
+            params.put("billingAccountAddressAddress1", billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
+            params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
+            params.put("billingAccountAddressCity", billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
+            params.put("billingAccountContactInformationPhone", billingAccount.getContactInformation() != null ? billingAccount.getContactInformation().getPhone() : "");
 
             CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
-            if (billingAccount.getIsCompany()) {
-                params.put("customerAccountLegalEntityTypeCode",
-                        ofNullable(billingAccount.getLegalEntityType()).map(Title::getCode).orElse(""));
+            if (Boolean.TRUE.equals(billingAccount.getIsCompany())) {
+                params.put("customerAccountLegalEntityTypeCode", ofNullable(billingAccount.getLegalEntityType()).map(Title::getCode).orElse(""));
             } else {
                 Name name = ofNullable(billingAccount.getName()).orElse(null);
                 Title title = ofNullable(name).map(Name::getTitle).orElse(null);
-                params.put("customerAccountLegalEntityTypeCode",
-                        ofNullable(title).map(Title::getDescription).orElse(""));
+                params.put("customerAccountLegalEntityTypeCode", ofNullable(title).map(Title::getDescription).orElse(""));
             }
-            params.put("customerAccountAddressAddress1", customerAccount.getAddress() != null ?
-                    customerAccount.getAddress().getAddress1() : "");
-            params.put("customerAccountAddressZipCode", customerAccount.getAddress() != null ?
-                    customerAccount.getAddress().getZipCode() : "");
-            params.put("customerAccountAddressCity", customerAccount.getAddress() != null ?
-                    customerAccount.getAddress().getCity() : "");
-            params.put("customerAccountDescription", customerAccount.getDescription());
-            params.put("customerAccountLastName", customerAccount.getName() != null ?
-                    customerAccount.getName().getLastName() : "");
-            params.put("customerAccountFirstName", customerAccount.getName() != null ?
-                    customerAccount.getName().getFirstName() : "");
 
+            params.put("customerAccountAddressAddress1", customerAccount.getAddress() != null ? customerAccount.getAddress().getAddress1() : "");
+            params.put("customerAccountAddressZipCode", customerAccount.getAddress() != null ? customerAccount.getAddress().getZipCode() : "");
+            params.put("customerAccountAddressCity", customerAccount.getAddress() != null ? customerAccount.getAddress().getCity() : "");
+            params.put("customerAccountDescription", customerAccount.getDescription());
+            params.put("customerAccountLastName", customerAccount.getName() != null ? customerAccount.getName().getLastName() : "");
+            params.put("customerAccountFirstName", customerAccount.getName() != null ? customerAccount.getName().getFirstName() : "");
             params.put("invoiceInvoiceNumber", invoice.getInvoiceNumber());
             params.put("invoiceTotal", invoice.getAmountWithTax());
             params.put("invoiceDueDate", formatter.format(invoice.getDueDate()));
             params.put("dayDate", formatter.format(new Date()));
-
             params.put("dunningCollectionPlanLastActionDate", lastActionDate != null ? formatter.format(lastActionDate) : "");
+
             List<File> attachments = new ArrayList<>();
             String invoiceFileName = invoiceService.getFullPdfFilePath(invoice, false);
             File attachment = new File(invoiceFileName);
+
             if (attachment.exists()) {
                 attachments.add(attachment);
             } else {
-                log.warn("No Pdf file exists for the invoice : {}",
-                        invoice.getInvoiceNumber() != null ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber());
+                log.warn("No Pdf file exists for the invoice : {}", invoice.getInvoiceNumber() != null ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber());
             }
+
             if (billingAccount.getContactInformation() != null && billingAccount.getContactInformation().getEmail() != null) {
                 try {
-                    collectionPlanService.sendNotification(seller.getContactInformation().getEmail(),
-                            billingAccount, emailTemplate, params, attachments);
+                    collectionPlanService.sendNotification(seller.getContactInformation().getEmail(), billingAccount, emailTemplate, params, attachments);
                 } catch (Exception exception) {
                     throw new BusinessException(exception.getMessage());
                 }
@@ -402,5 +623,40 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         } else {
             throw new BusinessException("The email sending skipped because the from email is missing for the seller : " + invoice.getSeller().getCode());
         }
+    }
+
+    /**
+     * Retrieves the OCC template codes to use based on the provided {@link CustomerBalance}.
+     *
+     * @param customerBalance The {@link CustomerBalance} from which to retrieve OCC template codes.
+     * @return A {@link List} of OCC template codes.
+     */
+    private List<String> getOccTemplateCodesToUse(CustomerBalance customerBalance) {
+        List<String> listOccTemplateCodes = Collections.emptyList();
+
+        if (customerBalance.getOccTemplates() != null && !customerBalance.getOccTemplates().isEmpty()) {
+            listOccTemplateCodes = customerBalance.getOccTemplates().stream()
+                    .map(OCCTemplate::getCode)
+                    .collect(Collectors.toList());
+        }
+
+        return listOccTemplateCodes;
+    }
+
+    /**
+     * Finalize collection plan
+     *
+     * @param collectionPlan Collection plan
+     */
+    private void finalizeCollectionPlan(DunningCollectionPlan collectionPlan) {
+        // Ignore levels and actions after balance is less than min balance trigger
+        collectionPlanService.ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(collectionPlan);
+        // Update collection plan status to success
+        collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+        collectionPlan.setNextActionDate(null);
+        collectionPlan.setNextAction(null);
+        collectionPlan.setCloseDate(new Date());
+        collectionPlan.setDaysOpen((int) daysBetween(collectionPlan.getCloseDate(), new Date()) + 1);
+        collectionPlanService.update(collectionPlan);
     }
 }

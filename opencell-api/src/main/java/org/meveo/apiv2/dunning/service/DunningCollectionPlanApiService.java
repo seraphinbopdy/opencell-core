@@ -564,7 +564,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 }
 
                 // Check the related customer account and set it to the level instance
-                if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
+                if (collectionPlan.getCustomerAccount() != null) {
+                    newDunningLevelInstance.setCustomerAccount(collectionPlan.getCustomerAccount());
+                } else if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
                     newDunningLevelInstance.setCustomerAccount(collectionPlan.getBillingAccount().getCustomerAccount());
                 }
             }
@@ -645,7 +647,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 }
 
                 // Check the related customer account and set it to the level instance
-                if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
+                if (collectionPlan.getCustomerAccount() != null) {
+                    levelInstanceToUpdate.setCustomerAccount(collectionPlan.getCustomerAccount());
+                } else if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null) {
                     levelInstanceToUpdate.setCustomerAccount(collectionPlan.getBillingAccount().getCustomerAccount());
                 }
             }

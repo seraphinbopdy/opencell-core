@@ -13104,4 +13104,33 @@ Meaning that advances won’t be available for further invoices."/>
         </update>
     </changeSet>
 
+    <changeSet id="#INTRD-24962_duplicated_order_number" author="a.rouaguebe">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="Customer care"/>
+            <column name="property_group" value="Orders"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="uniqueCodeOrder"/>
+            <column name="description" value="Enforce order code unicity"/>
+        </insert>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="Customer care"/>
+            <column name="property_group" value="Orders"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="uniqueCodeNumber"/>
+            <column name="description" value="Enforce order number unicity"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

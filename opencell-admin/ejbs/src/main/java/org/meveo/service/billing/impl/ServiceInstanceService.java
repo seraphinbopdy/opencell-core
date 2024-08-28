@@ -585,7 +585,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         for (RecurringChargeInstance recurringChargeInstance : serviceInstance.getRecurringChargeInstances()) {
 
             // application of subscription prorata
-            recurringChargeInstance.setSubscriptionDate(serviceInstance.getDeliveryDate());
+            recurringChargeInstance.setSubscriptionDate(serviceInstance.getDeliveryDate() != null ? serviceInstance.getDeliveryDate() : serviceInstance.getSubscriptionDate());
             recurringChargeInstance.setQuantity(serviceInstance.getQuantity());
             recurringChargeInstance.setStatus(InstanceStatusEnum.ACTIVE);
             recurringChargeInstance = recurringChargeInstanceService.update(recurringChargeInstance);

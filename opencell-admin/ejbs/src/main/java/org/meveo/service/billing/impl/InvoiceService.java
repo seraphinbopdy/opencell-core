@@ -2872,7 +2872,15 @@ public class InvoiceService extends PersistenceService<Invoice> {
             super.remove(invoice);
         } else {
             invoiceLinesService.cancelIlByInvoices(invoicesIds);
-            cancelInvoiceById(invoice.getId(), currentUser.getUserName());
+            // Update status of invoice to CANCELED
+            if(invoice.getStatus() != InvoiceStatusEnum.VALIDATED) {
+                invoice.setStatus(InvoiceStatusEnum.CANCELED);
+                invoice.setRejectedByRule(null);
+                invoice.setRejectReason(null);
+                invoice.getAuditable().setUpdated(new Date());
+                invoice.getAuditable().setUpdater(currentUser.getUserName());
+                super.update(invoice);
+            }
         }
         updateBillingRunStatistics(invoice);
         log.debug("Invoice canceled {}", invoice.getTemporaryInvoiceNumber());

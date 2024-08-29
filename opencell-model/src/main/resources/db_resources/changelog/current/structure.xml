@@ -13115,8 +13115,14 @@ Meaning that advances won’t be available for further invoices."/>
             <column name="property_type" value="java.lang.Boolean"/>
             <column name="property_value" value="false"/>
             <column name="creator" value="applicationInitializer"/>
-            <column name="code" value="uniqueCodeOrder"/>
+            <column name="code" value="uniqueOrderCode"/>
             <column name="description" value="Enforce order code unicity"/>
+            <column name="description_i18n">
+                <![CDATA[{
+					"FRA":"Forcer l'unicit\u00e9 du code de commande",
+					"ENG":"Enforce order code unicity"
+				}]]>
+            </column>
         </insert>
         <insert tableName="advanced_settings">
             <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -13128,8 +13134,14 @@ Meaning that advances won’t be available for further invoices."/>
             <column name="property_type" value="java.lang.Boolean"/>
             <column name="property_value" value="false"/>
             <column name="creator" value="applicationInitializer"/>
-            <column name="code" value="uniqueCodeNumber"/>
+            <column name="code" value="uniqueOrderNumber"/>
             <column name="description" value="Enforce order number unicity"/>
+            <column name="description_i18n">
+                <![CDATA[{
+					"FRA":"Forcer l'unicit\u00e9 du num\u00e9ro de commande",
+					"ENG":"Enforce order number unicity"
+				}]]>
+            </column>
         </insert>
     </changeSet>
 

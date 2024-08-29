@@ -79,6 +79,7 @@ import com.google.common.collect.Lists;
 
 @Stateless
 public class InvoicingService extends PersistenceService<Invoice> {
+
     private final static BigDecimal HUNDRED = new BigDecimal("100");
     @Inject
     private BillingAccountService billingAccountService;
@@ -189,7 +190,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 
     private void writeInvoicingData(BillingRun billingRun, boolean isFullAutomatic, List<List<Invoice>> invoicesbyBA, BillingCycle billingCycle) {
         log.info("======== CREATING {} INVOICES ========", invoicesbyBA.size());
-        invoicesbyBA.stream().forEach(invoices->assignNumberAndCreate(billingRun, isFullAutomatic, invoices, billingCycle));
+        invoicesbyBA.forEach(invoices -> assignNumberAndCreate(billingRun, isFullAutomatic, invoices, billingCycle));
         getEntityManager().flush();//to be able to update ILs
         getEntityManager().clear();
         log.info("======== UPDATING ILs ========");
@@ -200,18 +201,16 @@ public class InvoicingService extends PersistenceService<Invoice> {
     }
     private void assignNumberAndCreate(BillingRun billingRun, boolean isFullAutomatic, List<Invoice> invoices, BillingCycle billingCycle) {
         if(!isFullAutomatic) {
-            invoices.stream().forEach(invoice->invoice.setTemporaryInvoiceNumber(serviceSingleton.getTempInvoiceNumber(billingRun.getId())));
+            invoices.forEach(invoice->invoice.setTemporaryInvoiceNumber(serviceSingleton.getTempInvoiceNumber(billingRun.getId())));
         } else {
-        	invoices.stream().forEach(invoice-> {
-				serviceSingleton.assignInvoiceNumberVirtual(invoice);
-	        });
+        	invoices.forEach(invoice->serviceSingleton.assignInvoiceNumberVirtual(invoice));
         	invoiceService.incrementBAInvoiceDate(billingRun, invoices.get(0).getBillingAccount());
         }
-		invoices.stream().forEach(invoice -> {
-			invoiceService.create(invoice);
-			invoiceService.postCreate(invoice);
-			invoiceService.setInvoicingPeriod(billingRun, invoice.getId());
-		});
+		invoices.forEach(invoice -> {
+            invoiceService.create(invoice);
+            invoiceService.postCreate(invoice);
+        });
+        invoices.forEach(invoice -> invoiceService.applyAutomaticCheck(invoice));
     }
     
     private void updateInvoiceLines(Invoice invoice, BillingRun billingRun, SubCategoryInvoiceAgregate sca) {

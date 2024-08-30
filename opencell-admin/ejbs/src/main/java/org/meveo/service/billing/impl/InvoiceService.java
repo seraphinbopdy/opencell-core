@@ -2860,8 +2860,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
         cancelInvoice(invoice, false, rtAction);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     private void cancelInvoice(Invoice invoice, boolean remove, RatedTransactionAction rtAction) {
     	invoice = refreshOrRetrieve(invoice);
+    	// checking invoice status
         checkNonValidateInvoice(invoice);
         cancelInvoiceAndRts(invoice, rtAction);
         cancelInvoiceAdvances(invoice, null, true);
@@ -2873,14 +2875,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
         } else {
             invoiceLinesService.cancelIlByInvoices(invoicesIds);
             // Update status of invoice to CANCELED
-            if(invoice.getStatus() != InvoiceStatusEnum.VALIDATED) {
-                invoice.setStatus(InvoiceStatusEnum.CANCELED);
-                invoice.setRejectedByRule(null);
-                invoice.setRejectReason(null);
-                invoice.getAuditable().setUpdated(new Date());
-                invoice.getAuditable().setUpdater(currentUser.getUserName());
-                super.update(invoice);
-            }
+            invoice.setStatus(InvoiceStatusEnum.CANCELED);
+            invoice.setRejectedByRule(null);
+            invoice.setRejectReason(null);
+            invoice.getAuditable().setUpdated(new Date());
+            invoice.getAuditable().setUpdater(currentUser.getUserName());
+            super.update(invoice);
         }
         updateBillingRunStatistics(invoice);
         log.debug("Invoice canceled {}", invoice.getTemporaryInvoiceNumber());

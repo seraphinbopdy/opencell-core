@@ -70,10 +70,12 @@ import org.meveo.model.payments.CreditCategory;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.shared.Title;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.billing.impl.AccountingCodeService;
 import org.meveo.service.billing.impl.TradingLanguageService;
+import org.meveo.service.catalog.impl.TitleService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.intcrm.impl.AddressBookService;
@@ -109,6 +111,9 @@ public class CustomerAccountApi extends AccountEntityApi {
 
     @Inject
     private PaymentMethodApi paymentMethodApi;
+
+    @Inject
+    private TitleService titleService;
 
     @EJB
     private AccountHierarchyApi accountHierarchyApi;
@@ -324,6 +329,18 @@ public class CustomerAccountApi extends AccountEntityApi {
                 throw new EntityDoesNotExistsException(TradingLanguage.class, postData.getLanguage());
             }
             customerAccount.setTradingLanguage(tradingLanguage);
+        }
+
+        if(postData.getLegalEntityType() != null && postData.getLegalEntityType().getCode() != null) {
+            if(StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                customerAccount.setLegalEntityType(null);
+            } else {
+                Title title = titleService.findByCode(postData.getLegalEntityType().getCode());
+                if(title == null) {
+                    throw new EntityDoesNotExistsException(Title.class, postData.getLegalEntityType().getCode());
+                }
+                customerAccount.setLegalEntityType(title);
+            }
         }
 
         updateAccount(customerAccount, postData, checkCustomFields);
@@ -759,6 +776,9 @@ public class CustomerAccountApi extends AccountEntityApi {
             }
             if (customerAccountDto.getPaymentMethods() != null && !customerAccountDto.getPaymentMethods().isEmpty()) {
             	existedCustomerAccountDto.setPaymentMethods(customerAccountDto.getPaymentMethods());
+            }
+            if(customerAccountDto.getLegalEntityType() != null) {
+                existedCustomerAccountDto.setLegalEntityType(customerAccountDto.getLegalEntityType());
             }
             update(existedCustomerAccountDto);
         }

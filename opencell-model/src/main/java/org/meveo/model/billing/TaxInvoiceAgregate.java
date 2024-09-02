@@ -86,6 +86,30 @@ public class TaxInvoiceAgregate extends InvoiceAgregate {
         this.setBillingAccount(taxInvoiceAgregate.getBillingAccount());
         this.setBillingRun(taxInvoiceAgregate.getBillingRun());
     }
+    
+
+    /**
+     * Copies tax aggregate and override tax with amounts
+     * 
+     * @param taxInvoiceAgregate
+     * @param tax
+     * @param taxPercent
+     * @param amountTax
+     * @param amountWithTax
+     */
+    public TaxInvoiceAgregate(TaxInvoiceAgregate taxInvoiceAgregate, Tax tax, BigDecimal taxPercent, BigDecimal amountTax) {
+        this.setItemNumber(taxInvoiceAgregate.getItemNumber());
+        this.setBillingAccount(taxInvoiceAgregate.getBillingAccount());
+        this.setBillingRun(taxInvoiceAgregate.getBillingRun());
+        this.setInvoice(taxInvoiceAgregate.getInvoice());
+        this.setAmountWithoutTax(taxInvoiceAgregate.getAmountWithoutTax());
+        
+        this.setAmountWithTax(this.amountWithoutTax.add(amountTax));
+        this.setAmountTax(amountTax);
+        this.setTaxPercent(taxPercent);
+        this.setTax(tax);
+
+    }
 
     public Tax getTax() {
         return tax;

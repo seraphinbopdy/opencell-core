@@ -297,7 +297,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @return all filters (new + default)
      */
     public Map<String, Object> addFilters(String defaultFilter, Map<String, Object> filters) {
-        Map<String, Object> mergedFilters = new HashMap<>(filters);
+        Map<String, Object> mergedFilters = new HashMap<>(ofNullable(filters).orElse(Collections.emptyMap()));
         if (!StringUtils.isBlank(defaultFilter)) {
             try {
                 Map<String, Object> result = new ObjectMapper().readValue(defaultFilter, HashMap.class);

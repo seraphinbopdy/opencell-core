@@ -189,8 +189,8 @@ public class InvoicingService extends PersistenceService<Invoice> {
     }
 
     private void writeInvoicingData(BillingRun billingRun, boolean isFullAutomatic, List<List<Invoice>> invoicesbyBA, BillingCycle billingCycle) {
-        log.info("======== CREATING {} INVOICES ========", invoicesbyBA.size());
-        invoicesbyBA.forEach(invoices -> assignNumberAndCreate(billingRun, isFullAutomatic, invoices, billingCycle));
+        log.info("======== CREATING INVOICES FOR {} BAs========", invoicesbyBA.size());
+        invoicesbyBA.forEach(invoices->assignNumberAndCreate(billingRun, isFullAutomatic, invoices, billingCycle));
         getEntityManager().flush();//to be able to update ILs
         getEntityManager().clear();
         log.info("======== UPDATING ILs ========");
@@ -268,7 +268,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		SubCategoryInvoiceAgregate scAggregate = new SubCategoryInvoiceAgregate(getEntityManager().getReference(InvoiceSubCategory.class, invoicingItem.getInvoiceSubCategoryId()), invoice.getBillingAccount(), userAccount, null, invoice, invoiceSubCategory.getAccountingCode());
         scAggregate.updateAudit(currentUser);
         addTranslatedDescription(getTradingLanguageCode(invoicingItem.getBillingAccountId()), invoiceSubCategory, scAggregate,"");
-        setAggregationAmounts(items, scAggregate, invoicingItem);
+        addAggregationAmounts(items, scAggregate, invoicingItem.getTaxId());
         addInvoiceAggregateWithAmounts(invoice, scAggregate);
         itemsBySubCategory.put(scAggregate,items);
     }
@@ -309,6 +309,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         }
         aggregate.setDescription(descTranslated);
     }
+    
     private void initTaxAggregations(BillingAccountDetailsItem BillingAccountDetailsItem, Invoice invoice, boolean calculateTaxOnSubCategoryLevel, BillingAccount billingAccount, String languageCode, List<InvoicingItem> invoicingItems) {
         Boolean isExonerated = billingAccountService.isExonerated(billingAccount, BillingAccountDetailsItem.getExoneratedFromTaxes(), BillingAccountDetailsItem.getExonerationTaxEl());
         if (isExonerated) {
@@ -317,17 +318,15 @@ public class InvoicingService extends PersistenceService<Invoice> {
         if (calculateTaxOnSubCategoryLevel) {
             Map<Long, List<InvoicingItem>> itemsByTax = invoicingItems.stream().collect(Collectors.groupingBy(InvoicingItem::getTaxId));
             //tax aggregations will be used to override amounts
+            Map<Long, TaxInvoiceAgregate> taxAggByMap = new TreeMap<Long, TaxInvoiceAgregate>(); 
             invoice.initAmounts();
             for(List<InvoicingItem> items: itemsByTax.values()) {
                 if(!items.isEmpty() && items.get(0).getTaxId() != null) {
-                    final Long taxId = items.get(0).getTaxId();
-                    final Tax tax = getTax(taxId);
-                    TaxInvoiceAgregate taxAggregate = new TaxInvoiceAgregate(billingAccount, tax, tax.getPercent(), invoice);
-                    taxAggregate.updateAudit(currentUser);
-                    addTranslatedDescription(languageCode, getTax(taxId), taxAggregate, "T");
-                    setAggregationAmounts(items, taxAggregate, items.get(0));
-                    addInvoiceAggregateWithAmounts(invoice, taxAggregate);
+                    createOrMergeTaxAggregate(invoice, billingAccount, languageCode, taxAggByMap, items, null, items.get(0).getTaxId());
                 }
+            }
+            for(TaxInvoiceAgregate compositeTaxAgregate : taxAggByMap.values().stream().filter(x->x.getTax().isComposite()).collect(Collectors.toList())) {
+            	createOrMergeSubTaxes(invoice, billingAccount, languageCode, taxAggByMap, compositeTaxAgregate);
             }
         } else {
              // If tax calculation is not done at subcategory level, then call a global script to do calculation for the whole invoice
@@ -342,6 +341,49 @@ public class InvoicingService extends PersistenceService<Invoice> {
             }
         }
     }
+
+	private void createOrMergeSubTaxes(Invoice invoice, BillingAccount billingAccount, String languageCode,
+			Map<Long, TaxInvoiceAgregate> taxAggByMap, TaxInvoiceAgregate compositeTaxAgregate) {
+		Tax compositeTax = compositeTaxAgregate.getTax();
+		BigDecimal compositePercent = compositeTax.getPercent();
+		List<Tax> subTaxes = compositeTax.getSubTaxes();
+		BigDecimal composteTaxAmount=compositeTaxAgregate.getAmountTax();
+		BigDecimal subTaxTotalAmount=BigDecimal.ZERO;
+		for(int i=0; i<subTaxes.size(); i++) {
+		    Tax subTax = subTaxes.get(i);
+		    BigDecimal amountTax = BigDecimal.ZERO.equals(compositePercent)? BigDecimal.ZERO
+		            : (i==subTaxes.size()-1)? composteTaxAmount.subtract(subTaxTotalAmount)
+		                    : composteTaxAmount.multiply(subTax.getPercent()).divide(compositePercent,appProvider.getInvoiceRounding(),RoundingMode.HALF_UP);
+		    subTaxTotalAmount=subTaxTotalAmount.add(amountTax);
+		    TaxInvoiceAgregate subTaxAgg = new TaxInvoiceAgregate(compositeTaxAgregate, subTax, subTax.getPercent(), amountTax);
+		    createOrMergeTaxAggregate(invoice, billingAccount, languageCode, taxAggByMap, null, subTaxAgg, subTax.getId());
+		}
+	}
+
+	private void createOrMergeTaxAggregate(Invoice invoice, BillingAccount billingAccount, String languageCode, Map<Long, TaxInvoiceAgregate> taxAggByMap, List<InvoicingItem> items, TaxInvoiceAgregate subTax, Long taxId) {
+		final Tax tax = getTax(taxId);
+		boolean aggAlreadyCreated = taxAggByMap.get(taxId)!=null;
+		TaxInvoiceAgregate taxAggregate = aggAlreadyCreated ? taxAggByMap.get(taxId) : new TaxInvoiceAgregate(billingAccount, tax, tax.getPercent(), null);
+
+		if(subTax==null) {
+			addAggregationAmounts(items, taxAggregate, taxId);
+			addInvoiceAggregateWithAmounts(invoice, taxAggregate, tax.isComposite());
+		} else {
+			addAggregationAmounts(subTax, taxAggregate);
+			if(!aggAlreadyCreated) {
+				taxAggregate.setInvoice(invoice);
+				taxAggregate.setBillingRun(invoice.getBillingRun());
+				invoice.addInvoiceAggregate(taxAggregate);
+			}
+		}
+		if(!aggAlreadyCreated) {
+			addTranslatedDescription(languageCode, getTax(taxId), taxAggregate, "T");
+			taxAggregate.updateAudit(currentUser);
+			taxAggByMap.put(taxId, taxAggregate);
+		}
+		
+	}
+	
     private Tax getTax(Long taxId) {
         if(taxes.isEmpty()) {
             taxes =  getEntityManager().createNamedQuery("Tax.getAllTaxes",Tax.class).getResultList().stream().collect(Collectors.toMap(Tax::getId, Function.identity()));
@@ -363,17 +405,24 @@ public class InvoicingService extends PersistenceService<Invoice> {
         }
         return tradingLanguages.get(tradingLanguageId)!=null?tradingLanguages.get(tradingLanguageId).getLanguageCode():"";
     }
-    private void setAggregationAmounts(List<InvoicingItem> items, InvoiceAgregate invoiceAggregate, InvoicingItem invoicingItem) {
+    private void addAggregationAmounts(List<InvoicingItem> items, InvoiceAgregate invoiceAggregate, Long taxId) {
         InvoicingItem summuryItem = new InvoicingItem(items);
-        invoiceAggregate.setItemNumber(summuryItem.getCount());
-        Tax tax = getTax(invoicingItem.getTaxId());
+        Tax tax = getTax(taxId);
         BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(summuryItem.getAmountWithoutTax(), summuryItem.getAmountWithTax(), tax.getPercent(), isEntreprise() , getInvoiceRounding(), getRoundingMode());
-        invoiceAggregate.setAmountWithoutTax(amounts[0]);
-        invoiceAggregate.setAmountWithTax(amounts[1]);
-        invoiceAggregate.setAmountTax(amounts[2]);
+        invoiceAggregate.addAmountWithoutTax(amounts[0]);
+        invoiceAggregate.addAmountWithTax(amounts[1]);
+        invoiceAggregate.addAmountTax(amounts[2]);
+        invoiceAggregate.addItemNumber(summuryItem.getCount());
         if(invoiceAggregate instanceof SubCategoryInvoiceAgregate) {
             ((SubCategoryInvoiceAgregate)invoiceAggregate).addILs(summuryItem.getilIDs());
         }
+    }
+    
+    private void addAggregationAmounts(InvoiceAgregate subTaxAggregate, InvoiceAgregate invoiceAggregate) {
+        invoiceAggregate.addAmountWithoutTax(subTaxAggregate.getAmountWithoutTax());
+        invoiceAggregate.addAmountWithTax(subTaxAggregate.getAmountWithTax());
+        invoiceAggregate.addAmountTax(subTaxAggregate.getAmountTax());
+        invoiceAggregate.addItemNumber(subTaxAggregate.getItemNumber());
     }
     
     private List<DiscountPlanItem> getApplicableDiscounts(BillingAccountDetailsItem billingAccountDetailsItem, Invoice invoice) {
@@ -455,12 +504,20 @@ public class InvoicingService extends PersistenceService<Invoice> {
         addInvoiceAggregateWithAmounts(invoice, discountAggregate);
         return discountAggregate;
     }
-    public void addInvoiceAggregateWithAmounts(Invoice invoice, InvoiceAgregate invoiceAgg) {
-        invoice.addInvoiceAggregate(invoiceAgg);
+    
+    public void addInvoiceAggregateWithAmounts(Invoice invoice, InvoiceAgregate invoiceAgg, boolean compositeTax) {
+    	if(!compositeTax) {
+    		invoice.addInvoiceAggregate(invoiceAgg);
+    	}
         invoice.addAmountTax(invoiceAgg.getAmountTax());
         invoice.addAmountWithTax(invoiceAgg.getAmountWithTax());
         invoice.addAmountWithoutTax(invoiceAgg.getAmountWithoutTax());
     }
+    
+    public void addInvoiceAggregateWithAmounts(Invoice invoice, InvoiceAgregate invoiceAgg) {
+    	addInvoiceAggregateWithAmounts(invoice, invoiceAgg, false);
+    }
+    
     private BigDecimal applyDiscount(BigDecimal amountToApplyDiscountOn, BigDecimal discountValue) {
         return amountToApplyDiscountOn.multiply(BigDecimal.ONE.subtract(discountValue.abs())).setScale(getInvoiceRounding(), getRoundingMode());
     }

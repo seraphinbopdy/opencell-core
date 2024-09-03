@@ -6284,6 +6284,7 @@
             <column name="cluster_behavior" type="varchar(25)" defaultValue="LIMIT_TO_SINGLE_NODE"/>
             <column name="status_report_freq" type="int" defaultValueNumeric="60" />
             <column name="limit_to_nr_of_nodes" type="int" />
+            <column name="description_i18n" type="${type.json}" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-278">
@@ -20977,6 +20978,7 @@
     <changeSet id="#INTRD-25073_fix_description_reopen_zero_wo" author="a.rouaguebe" />
     <changeSet id="#INTRD-25105_fix_default_filter" author="a.rouaguebe" />
     <changeSet id="#INTRD-24962_duplicated_order_number" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25091_ji_desc_i18n" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

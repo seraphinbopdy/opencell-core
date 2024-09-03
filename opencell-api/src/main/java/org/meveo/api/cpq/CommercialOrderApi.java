@@ -235,7 +235,7 @@ public class CommercialOrderApi extends BaseApi {
 		if(!Strings.isEmpty(orderDto.getOrderNumber())) {
 			AdvancedSettings uniqueOrderNumber = advancedSettingsService.findByCode("uniqueOrderNumber");
 			if (uniqueOrderNumber != null && "true".equalsIgnoreCase(uniqueOrderNumber.getValue()) && commercialOrderService.findByOrderNumer(orderDto.getOrderNumber())!= null) {
-				throw new BusinessException(String.format("Order with number:%s already exists. Order number duplication is forbidden by configuration.", code));
+				throw new BusinessException(String.format("Order with number:%s already exists. Order number duplication is forbidden by configuration.", orderDto.getOrderNumber()));
 			}
 			order.setOrderNumber(orderDto.getOrderNumber());
 		}

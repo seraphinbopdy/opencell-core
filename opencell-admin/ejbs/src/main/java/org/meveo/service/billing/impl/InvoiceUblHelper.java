@@ -204,8 +204,9 @@ public class InvoiceUblHelper {
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
 			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
-			if(invoice.getCommercialOrder() != null){
-			setBillingReferenceForInvoice(invoice.getCommercialOrder(), invoiceXml);
+			if(invoice.getCommercialOrder() != null || invoice.getInvoiceLines().stream().anyMatch(invoiceLine -> invoiceLine.getCommercialOrder() != null)) {
+				CommercialOrder commercialOrder = invoice.getCommercialOrder() != null ? invoice.getCommercialOrder() : invoice.getInvoiceLines().stream().filter(invoiceLine -> invoiceLine.getCommercialOrder() != null).findFirst().get().getCommercialOrder();
+				setBillingReferenceForInvoice(commercialOrder, invoiceXml);
 			}
 		}
 		

@@ -953,6 +953,10 @@ public class BillingAccountApi extends AccountEntityApi {
                 if(postData.isThresholdPerEntity() != null) {
                 	existedBillingAccountDto.setThresholdPerEntity(postData.isThresholdPerEntity());
                 }
+                if(postData.getLegalEntityType() != null) {
+                	existedBillingAccountDto.setLegalEntityType(postData.getLegalEntityType());
+                }
+                
                 accountHierarchyApi.populateNameAddress(existedBillingAccountDto, postData);
                 existedBillingAccountDto.setIsCompany(postData.getIsCompany());
                 if (postData.getCustomFields() != null && !postData.getCustomFields().isEmpty()) {

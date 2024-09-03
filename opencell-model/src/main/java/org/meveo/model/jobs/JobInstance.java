@@ -164,6 +164,13 @@ public class JobInstance extends EnableBusinessCFEntity {
     @Column(name = "status_report_freq", nullable = false)
     @NotNull
     private int jobStatusReportFrequency = 60;
+    
+    /**
+     * Description of the job in different languages
+     */
+    @Type(type = "json")
+    @Column(name = "description_i18n", columnDefinition = "jsonb")
+    private Map<String, String> descriptionI18n;
 
     /** Code of provider, that job belongs to. */
     @Transient
@@ -564,5 +571,13 @@ public class JobInstance extends EnableBusinessCFEntity {
      */
     public void setRunTimeCfValues(CustomFieldValues runTimeCfValues) {
         this.runTimeCfValues = runTimeCfValues;
+    }
+
+    public Map<String, String> getDescriptionI18n() {
+        return descriptionI18n;
+    }
+
+    public void setDescriptionI18n(Map<String, String> descriptionI18n) {
+        this.descriptionI18n = descriptionI18n;
     }
 }

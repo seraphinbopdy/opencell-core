@@ -106,6 +106,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -7059,7 +7060,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		    seller.setCode(invoiceResource.getSellerCode());
 		    toUpdate.setSeller(tryToFindByCodeOrId(seller));
 	    }
-
         return update(toUpdate);
     }
 
@@ -7673,7 +7673,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		invoice.getLinkedInvoices().add(advanceMapping);
 	}
     
-	private void cancelInvoiceAdvances(Invoice invoice, List<Invoice> advInvoices, boolean delete) {
+	public void cancelInvoiceAdvances(Invoice invoice, List<Invoice> advInvoices, boolean delete) {
 		invoice.setInvoiceBalance(null);
         invoice.setTransactionalInvoiceBalance(null);
 		if (invoice.getLinkedInvoices() != null) {
@@ -7681,7 +7681,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			if (delete) {
 				invoice.getLinkedInvoices().stream().filter(advFilter).forEach(li -> li.getLinkedInvoiceValue().setInvoiceBalance(li.getLinkedInvoiceValue().getInvoiceBalance().add(li.getAmount())));
 				linkedInvoiceService.deleteByInvoiceIdAndType(invoice.getId(), InvoiceTypeEnum.ADVANCEMENT_PAYMENT);
-				invoice.getLinkedInvoices().removeIf(advFilter);
+				//invoice.getLinkedInvoices().removeIf(advFilter);
 			} else {
 				for (Invoice advInvoice : advInvoices) {
 					invoice.getLinkedInvoices().stream().filter(advFilter).filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getId() == advInvoice.getId()).findAny().ifPresent(li -> {
@@ -7965,7 +7965,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 				return false;
 			});
 		}
-		this.updateNoCheck(invoice);
+		//this.updateNoCheck(invoice);
 	}
 	@JpaAmpNewTx
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -8089,11 +8089,16 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	
 	public void checkIfAllAdvArePaid(Invoice invoice, List<Invoice> advs){
 		// check if advs has one adv with payment status is UNPAID
+		Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance");
+		if(allowUsingUnpaidAdvance) {
+			return;
+		}
 		List<Invoice> unpaidAdvs = advs.stream().filter(adv -> adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID).collect(Collectors.toList());
 		if(CollectionUtils.isNotEmpty(unpaidAdvs)) {
 			methodCallingUtils.callMethodInNewTx(() -> cancelInvoiceAdvances(invoice, unpaidAdvs, true));
 			String advsNumber = unpaidAdvs.stream().map(Invoice::getInvoiceNumber).collect(Collectors.joining(","));
-			throw new BusinessApiException("validation fails “Unpaid/closed advance {{"+advsNumber+"}} cannot be used. It will be removed from the invoice.“");
+			throw new BusinessApiException("validation fails “Unpaid/closed advance {{" + advsNumber + "}} cannot be used. It will be removed from the invoice.“");
+			
 		}
 	}
 	
@@ -8123,10 +8128,22 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			return;
 		}
 		// extract all ADV related to the invoice COM
+		
 		List<Invoice> advInvoices = recordedInvoices.stream().map(RecordedInvoice::getInvoice)
 															.flatMap(inv -> inv.getLinkedInvoices().stream())
 															.filter(li -> li.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV"))
 															.map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
+		if(CollectionUtils.isEmpty(advInvoices)) {
+			for (RecordedInvoice recordedInvoice: recordedInvoices) {
+				Invoice invoice = (Invoice) Hibernate.unproxy(recordedInvoice.getInvoice());
+				List<LinkedInvoice> linkedInvoices = linkedInvoiceService.findLinkedInvoiceAndType(invoice.getId(), InvoiceTypeEnum.ADVANCEMENT_PAYMENT);
+				for (LinkedInvoice linkedInvoice : linkedInvoices) {
+					if(linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV")) {
+						advInvoices.add(linkedInvoice.getLinkedInvoiceValue());
+					}
+				}
+			}
+		}
 		if(CollectionUtils.isNotEmpty(advInvoices)) {
 			Long customerId = accountOperation.getCustomerAccount().getId();
 			String customerCode = accountOperation.getCustomerAccount().getCode();
@@ -8228,6 +8245,22 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
         }
     }
+	
+	
+	public void cancelUnpaidAdv(Invoice inv){
+		inv = findById(inv.getId(), List.of("linkedInvoices", "invoiceType"));
+		if(inv.getStatus() == InvoiceStatusEnum.DRAFT &&
+				!(Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance") &&
+				inv.getInvoiceType() != null && !inv.getInvoiceType().getCode().equals("ADV")) {
+			List<Invoice> advList = inv.getLinkedInvoices().stream()
+					.filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV"))
+					.filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID)
+					.map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
+			if(CollectionUtils.isNotEmpty(advList)) {
+				cancelInvoiceAdvances(inv, advList, true);
+			}
+		}
+	}
 
 }
 

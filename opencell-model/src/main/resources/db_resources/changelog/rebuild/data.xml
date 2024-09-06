@@ -12098,6 +12098,925 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="dunning_policy_id" valueNumeric="-20" />
 		</insert>
 
+        <!-- Dunning CUSTOMER LEVEL MODE - BEGIN -->
+        <!-- Dunning Level B2B 1 -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-81" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+5" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-11" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-81" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 1" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="5" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+5')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 1')" />
+        </insert>
+
+        <!-- Dunning Level B2B 2 -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-82" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+10" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-12" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-82" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 2" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="10" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+10')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 2')" />
+        </insert>
+
+        <!-- Dunning Level B2B 3 -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-83" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+20" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-13" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-83" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 3" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="20" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+20')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 3')" />
+        </insert>
+
+        <!-- Dunning Level B2B 4 -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-84" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+30" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-14" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-84" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 4" />
+            <column name="end_dunning_level" valueNumeric="1" />
+            <column name="days_overdue" valueNumeric="30" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+30')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 4')" />
+        </insert>
+
+        <!-- Dunning Level B2C 1 -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-85" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+1" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-15" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-85" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 1" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="1" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+1')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 1')" />
+        </insert>
+
+        <!-- Dunning Level B2C 2 -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-86" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+5" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-16" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-86" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 2" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="5" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+5')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 2')" />
+        </insert>
+
+        <!-- Dunning Level B2C 3 -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-87" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+10" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-17" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-87" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 3" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="10" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+10')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 3')" />
+        </insert>
+
+        <!-- Dunning Level B2C 4 -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-88" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+15" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-18" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-88" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 4" />
+            <column name="end_dunning_level" valueNumeric="1" />
+            <column name="days_overdue" valueNumeric="15" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+15')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 4')" />
+        </insert>
+
+        <!-- Dunning Level B2B 1 FR -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-89" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+5 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-19" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-89" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 1 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="5" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+5 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 1 FR')" />
+        </insert>
+
+        <!-- Dunning Level B2B 2 FR -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-90" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+10 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-20" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-90" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 2 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="10" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+10 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 2 FR')" />
+        </insert>
+
+        <!-- Dunning Level B2B 3 FR -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-91" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+20 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-21" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-91" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 3 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="20" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+20 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 3 FR')" />
+        </insert>
+
+        <!-- Dunning Level B2B 4 FR -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-92" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B+30 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-22" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-92" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2B 4 FR" />
+            <column name="end_dunning_level" valueNumeric="1" />
+            <column name="days_overdue" valueNumeric="30" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2B+30 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 4 FR')" />
+        </insert>
+
+        <!-- Dunning Level B2C 1 FR -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-93" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+1 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-23" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-93" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 1 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="1" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+1 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 1 FR')" />
+        </insert>
+
+        <!-- Dunning Level B2C 2 FR -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-94" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+5 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-24" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-94" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 2 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="5" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+5 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 2 FR')" />
+        </insert>
+
+        <!-- Dunning Level B2C 3 FR -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-95" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+10 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-25" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-95" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 3 FR" />
+            <column name="end_dunning_level" valueNumeric="0" />
+            <column name="days_overdue" valueNumeric="10" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+10 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 3 FR')" />
+        </insert>
+
+        <!-- Dunning Level B2C 4 FR -->
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-96" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C+15 fr" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SEND_NOTIFICATION" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="EMAIL" />
+            <column name="action_notification_template_id" valueNumeric="-26" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level">
+            <column name="id" valueNumeric="-96" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2C 4 FR" />
+            <column name="end_dunning_level" valueNumeric="1" />
+            <column name="days_overdue" valueNumeric="15" />
+            <column name="description" value="N/A" />
+            <column name="reminder" valueNumeric="0" />
+            <column name="active" valueNumeric="0" />
+            <column name="min_balance" valueNumeric="0" />
+            <column name="charge_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="soft_decline" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="dunning_level_dunning_action">
+            <column name="dunning_action_id" valueComputed="(SELECT id from ar_dunning_action where code = 'B2C+15 fr')" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 4 FR')" />
+        </insert>
+
+        <!-- B2CSuspend and B2BSuspend -->
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="org.meveo.service.script.DunningSuspendSubscriptionScript" />
+            <column name="src_type" value="JAVA_CLASS" />
+            <column name="description" value="Suspend all subscriptions linked to customer and link it to B2CSuspend and B2BSuspend"/>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+                        public class DunningSuspendSubscription extends DunningSuspendSubscriptionScript {}
+                ]]>
+            </column>
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-97" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2CSuspend" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SCRIPT" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="SCRIPT" />
+            <column name="script_instance_id" valueComputed="(SELECT id from meveo_script_instance where code = 'org.meveo.service.script.DunningSuspendSubscriptionScript')" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <insert tableName="ar_dunning_action">
+            <column name="id" valueNumeric="-98" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="B2BSuspend" />
+            <column name="description" value="N/A" />
+            <column name="is_action_active" valueNumeric="1" />
+            <column name="action_type" value="SCRIPT" />
+            <column name="action_mode" value="AUTOMATIC" />
+            <column name="action_channel" value="SCRIPT" />
+            <column name="script_instance_id" valueComputed="(SELECT id from meveo_script_instance where code = 'org.meveo.service.script.DunningSuspendSubscriptionScript')" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+
+        <!-- Default Policies For Customer level mode -->
+        <!-- BEGIN Dunning Policy B2B -->
+        <insert tableName="dunning_policy">
+            <column name="id" valueNumeric="-30" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="policy_name" value="B2B" />
+            <column name="policy_description" value="B2B policy" />
+            <column name="min_balance_trigger" valueNumeric="1" />
+            <column name="min_balance_trigger_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="determine_level_by" value="DAYS_OVERDUE" />
+            <column name="attach_invoices_to_emails" valueNumeric="0" />
+            <column name="is_active_policy" valueNumeric="0" />
+            <column name="include_due_invoices_in_threshold" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <!-- Add policy rules -->
+        <insert tableName="dunning_policy_rule">
+            <column name="id" valueNumeric="-30" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="rule_joint" value="null" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2B')" />
+        </insert>
+        <!-- Add policy rule lines -->
+        <insert tableName="dunning_policy_rule_line">
+            <column name="id" valueNumeric="-30" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="policy_condition_operator" value="EQUALS" />
+            <column name="policy_condition_target" value="isCompany" />
+            <column name="policy_condition_target_value" value="TRUE" />
+            <column name="dunning_policy_rule_id" value="-30" />
+        </insert>
+        <!-- Add related dunning levels -->
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="1" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 1')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2B')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="2" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 2')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2B')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="3" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 3')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2B')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="4" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 4')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2B')" />
+        </insert>
+        <!-- END Dunning Policy B2B -->
+        <!-- BEGIN Dunning Policy B2B FR -->
+        <insert tableName="dunning_policy">
+            <column name="id" valueNumeric="-40" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="policy_name" value="B2B FR" />
+            <column name="policy_description" value="B2B policy FR" />
+            <column name="min_balance_trigger" valueNumeric="1" />
+            <column name="min_balance_trigger_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="determine_level_by" value="DAYS_OVERDUE" />
+            <column name="attach_invoices_to_emails" valueNumeric="0" />
+            <column name="is_active_policy" valueNumeric="0" />
+            <column name="include_due_invoices_in_threshold" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <!-- Add policy rules -->
+        <insert tableName="dunning_policy_rule">
+            <column name="id" valueNumeric="-40" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="rule_joint" value="null" />
+            <column name="dunning_policy_id" value="-40" />
+        </insert>
+        <!-- Add policy rule lines -->
+        <insert tableName="dunning_policy_rule_line">
+            <column name="id" valueNumeric="-40" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="policy_condition_operator" value="EQUALS" />
+            <column name="policy_condition_target" value="isCompany" />
+            <column name="policy_condition_target_value" value="TRUE" />
+            <column name="dunning_policy_rule_id" value="-40" />
+        </insert>
+        <!-- Add related dunning levels -->
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="1" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 1 FR')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2B FR')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="2" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 2 FR')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2B FR')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="3" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 3 FR')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2B FR')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="4" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2B 4 FR')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2B FR')" />
+        </insert>
+        <!-- END Dunning Policy B2B FR -->
+        <!-- BEGIN Dunning Policy B2C -->
+        <insert tableName="dunning_policy">
+            <column name="id" valueNumeric="-50" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="policy_name" value="B2C" />
+            <column name="policy_description" value="B2C policy" />
+            <column name="min_balance_trigger" valueNumeric="1" />
+            <column name="min_balance_trigger_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="determine_level_by" value="DAYS_OVERDUE" />
+            <column name="attach_invoices_to_emails" valueNumeric="0" />
+            <column name="is_active_policy" valueNumeric="0" />
+            <column name="include_due_invoices_in_threshold" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <!-- Add policy rules -->
+        <insert tableName="dunning_policy_rule">
+            <column name="id" valueNumeric="-50" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="rule_joint" value="null" />
+            <column name="dunning_policy_id" value="-50" />
+        </insert>
+        <!-- Add policy rule lines -->
+        <insert tableName="dunning_policy_rule_line">
+            <column name="id" valueNumeric="-50" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="policy_condition_operator" value="EQUALS" />
+            <column name="policy_condition_target" value="isCompany" />
+            <column name="policy_condition_target_value" value="FALSE" />
+            <column name="dunning_policy_rule_id" value="-50" />
+        </insert>
+        <!-- Add related dunning levels -->
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="1" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 1')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2C')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="2" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 2')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2C')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="3" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 3')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2C')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="4" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 4')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2C')" />
+        </insert>
+        <!-- END Dunning Policy B2B -->
+        <!-- BEGIN Dunning Policy B2C FR -->
+        <insert tableName="dunning_policy">
+            <column name="id" valueNumeric="-60" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="policy_name" value="B2C FR" />
+            <column name="policy_description" value="B2C policy FR" />
+            <column name="min_balance_trigger" valueNumeric="1" />
+            <column name="min_balance_trigger_currency_id" valueComputed="(SELECT id from adm_currency where currency_code = 'EUR')" />
+            <column name="determine_level_by" value="DAYS_OVERDUE" />
+            <column name="attach_invoices_to_emails" valueNumeric="0" />
+            <column name="is_active_policy" valueNumeric="0" />
+            <column name="include_due_invoices_in_threshold" valueNumeric="0" />
+            <column name="type" value="CUSTOMER_LEVEL" />
+        </insert>
+        <!-- Add policy rules -->
+        <insert tableName="dunning_policy_rule">
+            <column name="id" valueNumeric="-60" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="rule_joint" value="null" />
+            <column name="dunning_policy_id" value="-60" />
+        </insert>
+        <!-- Add policy rule lines -->
+        <insert tableName="dunning_policy_rule_line">
+            <column name="id" valueNumeric="-60" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="policy_condition_operator" value="EQUALS" />
+            <column name="policy_condition_target" value="isCompany" />
+            <column name="policy_condition_target_value" value="FALSE" />
+            <column name="dunning_policy_rule_id" value="-60" />
+        </insert>
+        <!-- Add related dunning levels -->
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="1" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 1 FR')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2C FR')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="2" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 2 FR')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2C FR')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="3" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 3 FR')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2C FR')" />
+        </insert>
+        <insert tableName="dunning_policy_level">
+            <column name="id" valueSequenceNext="dunning_policy_level_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="sequence" valueNumeric="4" />
+            <column name="dunning_level_id" valueComputed="(SELECT id from dunning_level where code = 'B2C 4 FR')" />
+            <column name="dunning_policy_id" valueComputed="(SELECT id from dunning_policy where policy_name = 'B2C FR')" />
+        </insert>
+        <!-- END Dunning Policy B2B -->
+        <!-- Dunning CUSTOMER LEVEL MODE - END -->
+
 		<insert tableName="dunning_stop_reasons">
 			<column name="id" valueSequenceNext="dunning_stop_reasons_seq" />
 			<column name="created" valueDate="${db.current.time}" />

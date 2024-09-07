@@ -20977,6 +20977,8 @@
     <changeSet id="#INTRD-25073_fix_description_reopen_zero_wo" author="a.rouaguebe" />
     <changeSet id="#INTRD-25105_fix_default_filter" author="a.rouaguebe" />
     <changeSet id="#INTRD-24962_duplicated_order_number" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25259_fix_repoen_template" author="a.rouaguebe" />
+    <changeSet id="#INTRD-24779_MASS_REOPEN_EDR_ZERO" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

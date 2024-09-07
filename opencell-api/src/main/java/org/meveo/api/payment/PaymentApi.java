@@ -98,6 +98,7 @@ import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.payments.resource.RejectionActionMapper;
 import org.meveo.apiv2.payments.resource.RejectionCodeMapper;
 import org.meveo.apiv2.payments.resource.RejectionGroupMapper;
+import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.ExchangeRate;
 import org.meveo.model.billing.TradingCurrency;
@@ -105,6 +106,7 @@ import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.payments.*;
 import org.meveo.model.scripts.ScriptInstance;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.payments.impl.AccountOperationService;
@@ -182,6 +184,9 @@ public class PaymentApi extends BaseApi {
 	private RejectedPaymentService rejectedPaymentService;
 	@Inject
 	private InvoiceService invoiceService;
+	
+	@Inject
+	private AdvancedSettingsApiService advancedSettingsApiService;
 
 	private static final String PAYMENT_GATEWAY_NOT_FOUND_ERROR_MESSAGE = "Payment gateway not found";
 	private static final String PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE = "Payment rejection code not found";
@@ -910,10 +915,16 @@ public class PaymentApi extends BaseApi {
 		if (isBlank(importRejectionCodeInput.getBase64csv())) {
 			throw new BusinessApiException("Encoded file should not be null or empty");
 		}
+
+		String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator")
+										 .map(AdvancedSettings::getValue).filter(value -> !value.isEmpty())
+										 .orElse(";");
+
 		ImportRejectionCodeConfig config =
 				new ImportRejectionCodeConfig(importRejectionCodeInput.getBase64csv(),
 						importRejectionCodeInput.getIgnoreLanguageErrors(),
-						importRejectionCodeInput.getMode());
+						importRejectionCodeInput.getMode(),
+						fieldsSeparator);
 		return rejectionCodeService.importRejectionCodes(config);
 	}
 

@@ -13004,22 +13004,22 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="tag_end" value="}" />
             <column name="subject">
                 <![CDATA[
-                    #{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} "#{batchEntityDescription ENG}"
+                    #{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} "#{batchEntityDescription}"
                 ]]>
             </column>
             <column name="subject_i18n">
                 <![CDATA[
-                    {"FRA":"#{batchEntityStatus} Rouvrir les EDRs du lot #{batchEntityId} \"#{batchEntityDescription FRA}\"","ENG":"#{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} \"#{batchEntityDescription ENG}\""}
+                    {"FRA":"#{batchEntityStatus} Rouvrir les EDRs du lot #{batchEntityId} \"#{batchEntityDescription}\"","ENG":"#{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} \"#{batchEntityDescription}\""}
                 ]]>
             </column>
             <column name="htmlcontent">
                 <![CDATA[
-                    Batch "#{batchEntityDescription ENG}" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecution processed}<br>More information available on job execution report (id:#{jobExecutionId}) on the wallet operation screen in Portal.
+                    Batch "#{batchEntityDescription}" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the wallet operation screen in Portal.
                 ]]>
             </column>
             <column name="htmlcontent_i18n">
                 <![CDATA[
-                    {"FRA":"Le lot \"#{batchEntityDescription FRA}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecution items processed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des wallet operations du Portail.","ENG":"Batch \"#{batchEntityDescription ENG}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecution processed}<br>More information available on job execution report (id:#{jobExecutionId}) on the wallet operation screen in Portal."}
+                    {"FRA":"Le lot \"#{batchEntityDescription}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecutionNbItemsProcessed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des wallet operations du Portail.","ENG":"Batch \"#{batchEntityDescription}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the wallet operation screen in Portal."}
                 ]]>
             </column>
         </insert>

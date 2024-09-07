@@ -430,6 +430,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
                 params.put("batchEntityDescription", StringUtils.isNotBlank(batchEntity.getDescription()) ? batchEntity.getDescription() : "");
                 params.put("jobExecutionId", jobExecutionResult.getId() != null ? jobExecutionResult.getId() : "");
                 params.put("jobInstanceCode", batchEntity.getJobInstance() != null ? batchEntity.getJobInstance().getCode() : "");
+                params.put("jobExecutionNbItemsProcessed", jobExecutionResult.getNbItemsProcessed());
 
                 String subject = StringUtils.isNotBlank(emailTemplate.getSubject()) ? evaluateExpression(emailSubject, params, String.class) : "";
                 String content = StringUtils.isNotBlank(emailTemplate.getTextContent()) ? evaluateExpression(emailContent, params, String.class) : "";
@@ -549,7 +550,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      */
     public void finalizeProcess(JobExecutionResultImpl jobExecutionResult, BatchEntity batchEntity) {
         log.info("finalizeProcess for batchEntity {} for the jobInstance {}", batchEntity.getId(), jobExecutionResult.getJobInstance().getId());
-        sendEmail(batchEntity, jobExecutionResult);
         update(jobExecutionResult, jobExecutionResult.getJobInstance(), batchEntity);
+        sendEmail(batchEntity, jobExecutionResult);
     }
 }

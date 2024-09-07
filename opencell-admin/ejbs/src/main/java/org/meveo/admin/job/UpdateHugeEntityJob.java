@@ -121,7 +121,7 @@ public class UpdateHugeEntityJob extends Job {
     /**
      * Custom field containing action and check to be performed before updating the entity
      */
-    public static final String CF_PRE_UPDATE_EL = "UpdateHugeEntityJob_preUpdateEl";
+    public static final String CF_PRE_UPDATE_EL = "preUpdateEl";
 
 
     /**

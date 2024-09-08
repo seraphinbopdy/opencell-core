@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -32,9 +34,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -46,6 +51,10 @@ import javax.inject.Inject;
 import javax.persistence.FlushModeType;
 import javax.persistence.NoResultException;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -55,7 +64,6 @@ import org.meveo.api.dto.response.catalog.PricePlanMatrixLinesDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.apiv2.catalog.ImportPricePlanVersionsItem;
-import org.meveo.commons.utils.ListUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.DatePeriod;
@@ -73,11 +81,13 @@ import org.meveo.model.catalog.TradingPricePlanMatrixLine;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.enums.PriceVersionTypeEnum;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.cpq.ProductService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,6 +134,9 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
 
 	@Inject
 	private ChargeTemplateService<ChargeTemplate> chargeTemplateService;
+
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
     
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -194,6 +207,11 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             throw new BusinessApiException("There are several PricePlanMatrix related to this charge");
         }
 
+        String fieldSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator"))
+                                        .map(AdvancedSettings::getValue)
+                                        .filter(StringUtils::isNotBlank)
+                                        .orElse(",");
+
         Integer lastCurrentVersion = null;
         PricePlanMatrix pricePlanMatrix = pricePlanMatrixs.get(0);
 
@@ -250,9 +268,9 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             newPv.setValidity(new DatePeriod(newFrom, newTo));
             newPv.setCurrentVersion(lastCurrentVersion != null ? ++lastCurrentVersion : getLastVersion(pricePlanMatrix) + 1);
 
-            if ("label;amount".equals(header.substring(0, 12))) {
+            if (header.startsWith(String.join(fieldSeparator, "label", "amount"))) {
                 String firstLine = lnr.readLine();
-                String[] split = firstLine.split(";");
+                String[] split = firstLine.split(Pattern.quote(fieldSeparator));
                 newPv.setMatrix(false);
                 newPv.setLabel(split[0]);
                 newPv.setAmountWithoutTax(new BigDecimal(convertToDecimalFormat(split[1])));
@@ -657,9 +675,17 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
 
         public String export(Set<PricePlanMatrixVersion> pricePlanMatrixVersions, String fileType){
             List<Long> ppmvIds = pricePlanMatrixVersions.stream().map(PricePlanMatrixVersion::getId).collect(toList());            
-            List<Map<String, Object>> ppmvMaps = tradingPricePlanVersionService.getPPVWithCPPVByPpmvId(ppmvIds);            
+            List<Map<String, Object>> ppmvMaps = tradingPricePlanVersionService.getPPVWithCPPVByPpmvId(ppmvIds);
+            String decimalSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.decimalSeparator"))
+                                              .map(AdvancedSettings::getValue)
+                                              .filter(StringUtils::isNotBlank)
+                                              .orElse(";");
+            String fieldSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator"))
+                                            .map(AdvancedSettings::getValue)
+                                            .filter(StringUtils::isNotBlank)
+                                            .orElse(",");
             if (pricePlanMatrixVersions != null && !pricePlanMatrixVersions.isEmpty()) {
-                Set<Path> filePaths = pricePlanMatrixVersions.stream().map(ppv -> saveAsRecord(buildFileName(ppv), ppv, fileType, ppmvMaps)).collect(Collectors.toSet());
+                Set<Path> filePaths = pricePlanMatrixVersions.stream().map(ppv -> saveAsRecord(buildFileName(ppv), ppv, fileType, ppmvMaps, decimalSeparator, fieldSeparator)).collect(Collectors.toSet());
                 if (filePaths.size() > 1) {
                     return archiveFiles(filePaths);
                 }
@@ -807,7 +833,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
 
         /**
          * @param file
-         * @param CSVLineRecords
+         * @param csvLineRecords
          * @param isMatrix
          * @throws IOException
          */
@@ -897,15 +923,35 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
          * @param fileName
          * @param ppv
          * @param fileType
+         * @param decimalSeparator
+         * @param fieldSeparator
          * @return
          */
-        private Path saveAsRecord(String fileName, PricePlanMatrixVersion ppv, String fileType, List<Map<String, Object>> ppmvMaps) {
+        private Path saveAsRecord(String fileName, PricePlanMatrixVersion ppv, String fileType, List<Map<String, Object>> ppmvMaps, String decimalSeparator, String fieldSeparator) {
             Set<LinkedHashMap<String, Object>> records = ppv.isMatrix() ? toCSVLineGridRecords(ppv, fileType.equals("CSV")) : Collections.singleton(toCSVLineRecords(ppv, ppmvMaps));
             String extensionFile = ".csv";
             try {
                 if(fileType.equals("CSV")) {
+
+                    SimpleModule module = new SimpleModule();
+                    if(decimalSeparator != null) {
+                        StdSerializer<Number> c = new StdSerializer<>(Number.class) {
+                            @Override
+                            public void serialize(Number bigDecimal, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+                                DecimalFormatSymbols symbols = ",".equals(decimalSeparator) ? new DecimalFormatSymbols(Locale.FRENCH) : new DecimalFormatSymbols(Locale.ENGLISH);
+                                DecimalFormat formatter = new DecimalFormat("0.00", symbols);
+                                formatter.setGroupingUsed(false);
+                                jsonGenerator.writeString(formatter.format(bigDecimal));
+                            }
+                        };
+                        module.addSerializer(BigDecimal.class, c);
+                        module.addSerializer(Double.class, c);
+                        module.addSerializer(Float.class, c);
+                    }
+                    
                     CsvMapper csvMapper = new CsvMapper();
-                    CsvSchema invoiceCsvSchema = ppv.isMatrix() ? buildGridPricePlanVersionCsvSchema(records) : buildPricePlanVersionCsvSchema(records);
+                    // csvMapper.registerModule(module);
+                    CsvSchema invoiceCsvSchema = ppv.isMatrix() ? buildGridPricePlanVersionCsvSchema(records, fieldSeparator) : buildPricePlanVersionCsvSchema(records, fieldSeparator);
                     csvMapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
                     if(!Files.exists(Path.of(saveDirectory))){
                         Files.createDirectories(Path.of(saveDirectory));
@@ -956,7 +1002,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             return CSVLineRecords;
         }
 
-        private CsvSchema buildPricePlanVersionCsvSchema(Set<LinkedHashMap<String, Object>> records) {
+        private CsvSchema buildPricePlanVersionCsvSchema(Set<LinkedHashMap<String, Object>> records, String fieldSeparator) {
             List<String> dynamicColumns = new ArrayList();
             if (!records.isEmpty()) {
                 dynamicColumns = records.stream().map(record -> record.keySet()).flatMap(Collection::stream).collect(Collectors.toList());
@@ -965,10 +1011,10 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             //Build default columns
             CsvSchema.Builder columns = CsvSchema.builder().addColumns(dynamicColumns, CsvSchema.ColumnType.NUMBER_OR_STRING);
 
-            return columns.build().withColumnSeparator(';').withLineSeparator("\n").withoutQuoteChar().withHeader();
+            return columns.build().withColumnSeparator(Optional.ofNullable(fieldSeparator).map(f -> f.charAt(0)).orElse(';')).withLineSeparator("\n").withoutQuoteChar().withHeader();
         }
 
-        private CsvSchema buildGridPricePlanVersionCsvSchema(Set<LinkedHashMap<String, Object>> records) {
+        private CsvSchema buildGridPricePlanVersionCsvSchema(Set<LinkedHashMap<String, Object>> records, String fieldSeparator) {
 
             List<String> dynamicColumns = new ArrayList();
             if (!records.isEmpty()) {
@@ -982,7 +1028,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                 .addColumn("description[text]", CsvSchema.ColumnType.STRING)
                 .addColumn("priceWithoutTax[number]", CsvSchema.ColumnType.NUMBER_OR_STRING);
 
-            return columns.build().withColumnSeparator(';').withLineSeparator("\n").withoutQuoteChar().withHeader();
+            return columns.build().withColumnSeparator(Optional.ofNullable(fieldSeparator).map(f -> f.charAt(0)).orElse(';')).withLineSeparator("\n").withoutQuoteChar().withHeader();
         }
 
         private String archiveFiles(Set<Path> filesPath) {

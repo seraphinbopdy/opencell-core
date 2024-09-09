@@ -13083,6 +13083,34 @@ Meaning that advances won’t be available for further invoices."/>
             <where>code = 'MASS_REOPEN_EDR_ZERO'</where>
         </update>
     </changeSet>
+    <changeSet id="#INTRD-25224_20240909" author="Mohammed_ElAzzouzi">
+        <addColumn tableName="billing_invoice_line">
+            <column name="seller_id"  type="bigint" />
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="seller_id"
+        						 baseTableName="billing_invoice_line"
+        						 constraintName="fk_Invoice_line_seller_id"
+        						 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+            					 onUpdate="NO ACTION" referencedColumnNames="id"
+            					 referencedTableName="crm_seller" />
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="INVOICING"/>
+            <column name="job_template" value="InvoiceTaxCalculationJob"/>
+            <column name="code" value="InvoiceTaxCalculation"/>
+            <column name="uuid" value="InvoiceTaxCalculation"/>
+            <column name="description" value="Calculate tax and amounts on invoiceLine level"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}],"batchSize": [{"long": 10000}],"waitingMillis": [{"long": 0}]}
+                ]]>
+            </column>
+        </insert>
+    </changeSet>
 
     <changeSet id="#INTRD-25105_fix_default_filter" author="a.rouaguebe">
         <update tableName="meveo_job_instance">

@@ -72,7 +72,6 @@ import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.ExtraMinAmount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceLine;
-import org.meveo.model.billing.InvoiceLineStatusEnum;
 import org.meveo.model.billing.InvoiceLineTaxModeEnum;
 import org.meveo.model.billing.InvoiceLinesGroup;
 import org.meveo.model.billing.InvoiceSubCategory;
@@ -110,6 +109,7 @@ import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.securityDeposit.SecurityDeposit;
 import org.meveo.model.settings.OpenOrderSetting;
+import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
@@ -183,7 +183,6 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
     private OpenOrderService openOrderService;
 
     @Inject
-
     private UserAccountService userAccountService;
 
     @Inject
@@ -197,6 +196,12 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
     
     @Inject
     private InvoiceTypeService invoiceTypeService;
+    
+    @Inject
+    private BillingRunService billingRunService;
+    
+    @Inject
+    private SellerService sellerService;
 
     @PostConstruct
     private void init() {
@@ -239,24 +244,18 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         TaxInfo recalculatedTaxInfo = taxMappingService.determineTax(accountingArticle.getTaxClass(), 
             securityDepositInput.getSeller(),
             securityDepositInput.getBillingAccount(), null, new Date(), null, isExonerated, false, invoiceLine.getTax());
-        BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(securityDepositInput.getAmount(), securityDepositInput.getAmount(), 
-            recalculatedTaxInfo.tax.getPercent(), appProvider.isEntreprise(), appProvider.getInvoiceRounding(),
-            appProvider.getInvoiceRoundingMode().getRoundingMode());
-        invoiceLine.setAmountWithoutTax(amounts[0]);
-        invoiceLine.setAmountWithTax(amounts[1]);
-        invoiceLine.setAmountTax(amounts[2]);
-        invoiceLine.setTax(recalculatedTaxInfo.tax);
-        invoiceLine.setTaxRate(recalculatedTaxInfo.tax.getPercent());          
+        BigDecimal amount = securityDepositInput.getAmount();
+		calculateTaxAmounts(invoiceLine, recalculatedTaxInfo.tax, amount);          
         invoiceLine.setTaxMode(InvoiceLineTaxModeEnum.ARTICLE);          
         invoiceLine.setAccountingArticle(accountingArticle);
         invoiceLine.setDiscountPlan(null);
-        invoiceLine.setUnitPrice(securityDepositInput.getAmount());
+        invoiceLine.setUnitPrice(amount);
         invoiceLine.setInvoice(invoice);        
         invoiceLine.setQuantity(new BigDecimal("1"));
         invoiceLine.setLabel("");
         return createInvoiceLineWithInvoice(invoiceLine, invoice, false);
     }
-    
+
     public InvoiceLine createInvoiceLineWithInvoice(InvoiceLine entity, Invoice invoice, boolean isDuplicated) throws BusinessException {
     	AccountingArticle accountingArticle=entity.getAccountingArticle();
         Date date=new Date();
@@ -1401,7 +1400,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         StringJoiner invoiceKey =  new StringJoiner(UNDERSCORE_SEPARATOR);
         
         invoiceKey.add(formatEntityId(invoiceLine.getBillingAccount()));
-        invoiceKey.add(formatId(invoiceLine.getSellerId()));
+        invoiceKey.add(formatId(invoiceLine.getSeller().getId()));
         invoiceKey.add(formatId(invoiceLine.getInvoiceTypeId()));
         invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));
         if(billingRun != null && billingRun.getBillingCycle() != null) {
@@ -1924,5 +1923,40 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 .setParameter("baIds", billingAccountsIds)
                 .executeUpdate();
     }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void calculateTax(List<Long> invoiceLineIds, JobExecutionResultImpl jobExecutionResult) {
+        List<InvoiceLine> invoiceLines = getEntityManager().createQuery("SELECT il FROM InvoiceLine il WHERE il.id IN :ids", InvoiceLine.class).setParameter("ids", invoiceLineIds).getResultList();
+		Map<String, List<Long>> errorsMap = new HashMap<>();
+		int toProcess=invoiceLineIds.size();
+		invoiceLines.stream().forEach(invoiceLine -> {
+		    try {
+				TaxInfo taxInfo = taxMappingService.determineTax(invoiceLine.getAccountingArticle().getTaxClass(), invoiceLine.getSeller(),
+						invoiceLine.getBillingAccount(), invoiceLine.getUserAccount(), invoiceLine.getBillingRun().getInvoiceDate(), null, Boolean.TRUE.equals(invoiceLine.getBillingAccount().isExoneratedFromtaxes()), false, invoiceLine.getTax());
+				calculateTaxAmounts(invoiceLine, taxService.findById(taxInfo.tax.getId()), invoiceLine.getAmountWithoutTax());
+		    } catch (Exception e) {
+		        errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(invoiceLine.getId());
+		    }
+		});
+		errorsMap.forEach((key, value) ->reportErrors(jobExecutionResult, key, value, toProcess));
+	}
+
+    public void calculateTaxAmounts(InvoiceLine invoiceLine, Tax tax, BigDecimal amount) {
+		BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(amount, amount, 
+            tax.getPercent(), appProvider.isEntreprise(), appProvider.getInvoiceRounding(),
+            appProvider.getInvoiceRoundingMode().getRoundingMode());
+        invoiceLine.setAmountWithoutTax(amounts[0]);
+        invoiceLine.setAmountWithTax(amounts[1]);
+        invoiceLine.setAmountTax(amounts[2]);
+        invoiceLine.setTax(tax);
+        invoiceLine.setTaxRate(tax.getPercent());
+	}
+    
+	private void reportErrors(JobExecutionResultImpl jobExecutionResult, String key, List<Long> value, int toProcess) {
+		int errorsToCompute = value.size();
+		errorsToCompute = errorsToCompute == toProcess || errorsToCompute == 0 ? 0 : errorsToCompute;
+		jobExecutionResult.registerError("" + value.size() + " errors of: " + key + ", IDs: " + value.stream().map(String::valueOf).collect(Collectors.joining(", ")), errorsToCompute);
+		jobExecutionResult.addNbItemsCorrectlyProcessed(-errorsToCompute);
+	}
 
 }

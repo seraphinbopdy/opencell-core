@@ -17,25 +17,6 @@
  */
 package org.meveo.admin.job;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -49,6 +30,23 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.ReratingService;
+
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A job implementation to cancel duplicated EDRs and keep only the newest version.
@@ -166,25 +164,21 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Ob
         hibernateSession.doWork(new org.hibernate.jdbc.Work() {
             @Override
             public void execute(Connection connection) throws SQLException {
-            	log.info("Creating materialized view DUPLICATED_EDRS_SUMMARY...");
-                String dateCondition = daysToProcess > 0 ? " AND CREATED>CURRENT_DATE-?" : "";
-                String viewQuery = "CREATE MATERIALIZED VIEW DUPLICATED_EDRS_SUMMARY AS SELECT COUNT(ID)-1 AS TO_PROCESS,"
-                        + "	STRING_AGG(CAST(ID AS text),',') AS IDS,"
-                        + "	EVENT_KEY AS EVENT_KEY"
-                        + " FROM RATING_EDR "
-                        + " WHERE STATUS <> 'CANCELLED'"
-                        + dateCondition
-                        + "	AND ORIGIN_BATCH <>'EDR_TABLE'"
-                        + "	AND (EVENT_KEY IS NOT NULL)"
-                        + " GROUP BY EVENT_KEY"
-                        + " HAVING COUNT(ID) > 1";
-            	try (PreparedStatement statement = connection.prepareStatement(viewQuery)) {
-            		if (daysToProcess > 0) {
-                        statement.setLong(1, daysToProcess);
-                    }
+                try (Statement statement = connection.createStatement()) {
                     log.info("Creating materialized view DUPLICATED_EDRS_SUMMARY...");
-                    log.info(statement.toString());
-                    statement.execute();
+                    String dateCondition = daysToProcess > 0 ? " AND CREATED>CURRENT_DATE-" + daysToProcess : "";
+                    String viewQuery = "CREATE MATERIALIZED VIEW DUPLICATED_EDRS_SUMMARY AS SELECT COUNT(ID)-1 AS TO_PROCESS,"
+                            + "	STRING_AGG(CAST(ID AS text),',') AS IDS,"
+                            + "	EVENT_KEY AS EVENT_KEY"
+                            + " FROM RATING_EDR "
+                            + " WHERE STATUS <> 'CANCELLED'"
+                            + dateCondition
+                            + "	AND ORIGIN_BATCH <>'EDR_TABLE'"
+                            + "	AND (EVENT_KEY IS NOT NULL)"
+                            + " GROUP BY EVENT_KEY"
+                            + " HAVING COUNT(ID) > 1";
+                    log.info(viewQuery);
+                    statement.execute(viewQuery);
                 } catch (Exception e) {
                     log.error("Failed to create the materialized view DUPLICATED_EDRS_SUMMARY", e.getMessage());
                     throw new BusinessException(e);

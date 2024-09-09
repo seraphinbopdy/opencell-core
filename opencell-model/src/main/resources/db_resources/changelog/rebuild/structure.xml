@@ -11046,6 +11046,7 @@
 			<column name="linked_invoice_line_id" type="bigint"/>
             <column name="additional_agg_fields" type="${type.json}" />
             <column name="invoice_key" type="varchar(255)" />
+            <column name="seller_id"  type="bigint" />
         </createTable>
     </changeSet>
     <changeSet id="rebuild-str-tbl-488" author="NabilOUACHI">
@@ -17158,6 +17159,14 @@
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_invoice" />
     </changeSet>
+    <changeSet id="#INTRD-25224_20240909" author="Mohammed_ElAzzouzi">
+        <addForeignKeyConstraint baseColumnNames="seller_id"
+        						 baseTableName="billing_invoice_line"
+        						 constraintName="fk_Invoice_line_seller_id"
+        						 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+            					 onUpdate="NO ACTION" referencedColumnNames="id"
+            					 referencedTableName="crm_seller" />
+    </changeSet>
     <changeSet author="NabilOuachi" id="rebuild-str-fk-1494">
         <addForeignKeyConstraint baseColumnNames="accounting_article_id" baseTableName="billing_invoice_line" constraintName="fk_billing_invoice_line_accounting_article_id" deferrable="false" initiallyDeferred="false"
                                  onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="billing_accounting_article" />
@@ -20130,6 +20139,7 @@
     </changeSet>
 
     <changeSet id="USAGE_RERATE_RT_JOB" author="Mohammed_ElAzzouzi"/>
+    
 
     <changeSet id="#INTRD-4798_20220303" author="MohamedSTITANE"/>     
     <changeSet id="#INTRD-7954_20220616" author="AbdelmounaimAkadid"/>

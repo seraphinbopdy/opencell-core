@@ -13160,12 +13160,12 @@ Meaning that advances won’t be available for further invoices."/>
             </column>
             <column name="htmlcontent">
                 <![CDATA[
-                    Batch "#{batchEntityDescription}" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the wallet operation screen in Portal.
+                    Batch "#{batchEntityDescription}" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the EDRs screen in Portal.
                 ]]>
             </column>
             <column name="htmlcontent_i18n">
                 <![CDATA[
-                    {"FRA":"Le lot \"#{batchEntityDescription}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecutionNbItemsProcessed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des wallet operations du Portail.","ENG":"Batch \"#{batchEntityDescription}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the wallet operation screen in Portal."}
+                    {"FRA":"Le lot \"#{batchEntityDescription}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecutionNbItemsProcessed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des ERDs du Portail.","ENG":"Batch \"#{batchEntityDescription}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the EDRs screen in Portal."}
                 ]]>
             </column>
         </update>

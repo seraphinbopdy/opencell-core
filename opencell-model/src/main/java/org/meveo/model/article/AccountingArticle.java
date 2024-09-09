@@ -1,6 +1,5 @@
 package org.meveo.model.article;
 
-import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 import java.math.BigDecimal;

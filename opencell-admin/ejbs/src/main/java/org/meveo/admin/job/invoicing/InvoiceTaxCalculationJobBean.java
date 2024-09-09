@@ -151,7 +151,7 @@ public class InvoiceTaxCalculationJobBean extends IteratorBasedJobBean<Long> {
             excludedBRs.forEach(br -> jobExecutionResult.registerWarning(format("BillingRun[id={%d}] has been ignored as it neither NEW nor OPEN status", br.getId())));
             billingRuns.removeAll(excludedBRs);
             if (billingRuns.isEmpty()) {
-                jobExecutionResult.registerError("No valid billing run with status = NEW or OPEN found");
+                jobExecutionResult.registerError("No valid billing run with status = INVOICE_LINES_CREATED found");
             }
         }
         return billingRuns;

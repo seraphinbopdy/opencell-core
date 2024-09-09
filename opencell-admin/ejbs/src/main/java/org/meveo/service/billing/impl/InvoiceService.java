@@ -4338,7 +4338,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if(invoice.getInvoiceLines() != null && !invoice.getInvoiceLines().isEmpty()) {
             BigDecimal amountDiscount = invoice.getInvoiceLines()
                     .stream()
-                    .map(InvoiceLine::getDiscountAmount)
+		            .filter(invoiceLine -> invoiceLine.getAmountWithTax().compareTo(BigDecimal.ZERO) > 0)
+                    .map(InvoiceLine::getDiscountAmount).map(BigDecimal::abs)
                     .reduce(BigDecimal::add)
                     .orElse(BigDecimal.ZERO);
             amountDiscount = amountDiscount.add(otherDiscount);

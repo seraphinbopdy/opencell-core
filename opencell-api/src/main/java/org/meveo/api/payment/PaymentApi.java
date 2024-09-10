@@ -228,6 +228,9 @@ public class PaymentApi extends BaseApi {
         if (!occTemplate.isManualCreationEnabled()) {
             throw new BusinessException(format("Creation is prohibited; occTemplate %s is not allowed for manual creation", paymentDto.getOccTemplateCode()));
         }
+		if(ZERO.compareTo(paymentDto.getAmount()) > 0) {
+			throw new InvalidParameterException("The operation amount should not be a negative value");
+		}
 
         Payment payment = new Payment();
 		paymentService.calculateAmountsByTransactionCurrency(payment, customerAccount,

@@ -240,127 +240,161 @@ public class OpenOrderTemplateApiService extends PersistenceService<OpenOrderTem
 
     public List<OpenOrderArticle> updateArticles(List<String> articlesCodes, OpenOrderTemplate openOrderTemplate) {
         List<OpenOrderArticle> articles = new ArrayList<>();
-        
-        //Removed Articles
-        List<String> existingAOs = openOrderTemplate.getArticles().stream().map(a -> a.getAccountingArticle().getCode()).collect(Collectors.toList());
-        List<String> removedAOs = existingAOs.stream().filter(a -> !articlesCodes.contains(a)).collect(Collectors.toList());
-        
-        for(String articleCode : removedAOs) {
-        	//Remove unused Articles from templates
-	        getEntityManager()
-	        .createNativeQuery("delete from open_order_template_articles where open_order_template_id = "+openOrderTemplate.getId()+" and open_article_id in "
-	        		+ " (select open_article_id from open_order_quote_articles ooqs "
-	                + " join open_order_quote ooq   on ooq.id = ooqs.open_order_quote_id"
-	                + " join open_order_article ooa on ooa.id = ooqs.open_article_id"
-	                + " join billing_accounting_article a on a.id = ooa.id"
-	                + " where (ooq.status = 'DRAFT' or ooq.status = 'Cancelled') and ooq.open_order_template_id = "+openOrderTemplate.getId()+" and a.code = '"+articleCode+"')")
-	        .executeUpdate(); 
-	        //Remove unused Articles from quotes
-	        getEntityManager()
-	        .createNativeQuery("delete from open_order_quote_articles where open_article_id in (select open_article_id from open_order_quote_articles ooqs "
-	        		+ " join open_order_quote ooq   on ooq.id = ooqs.open_order_quote_id"
-	        		+ " join open_order_article ooa on ooa.id = ooqs.open_article_id"
-	        		+ " join billing_accounting_article a on a.id = ooa.id"
-	        		+ " where (ooq.status = 'DRAFT' or ooq.status = 'Cancelled') and ooq.open_order_template_id = "+openOrderTemplate.getId()+" and a.code = '"+articleCode+"')"
-	        		+ " and open_order_quote_id in (select id from open_order_quote ooq join open_order_quote_articles ooqa on ooq.id = ooqa.open_order_quote_id where ooq.open_order_template_id = "+openOrderTemplate.getId()+");")
-	        .executeUpdate(); 
-	        
-	        //Disable used
-	        getEntityManager()
-	        .createNativeQuery("update open_order_article set active = '0' where open_order_template_id = "+openOrderTemplate.getId()+" and accounting_article_id in"
-	        		+ " (select open_article_id from open_order_quote_articles ooqs"
-	        		+ " join open_order_quote ooq   on ooq.id = ooqs.open_order_quote_id"
-	        		+ " join open_order_article ooa on ooa.id = ooqs.open_article_id"
-	        		+ " join billing_accounting_article a on a.id = ooa.id"
-	        		+ " where (ooq.status <> 'DRAFT' and ooq.status <> 'Cancelled') and ooq.open_order_template_id = "+openOrderTemplate.getId()+" and a.code = '"+articleCode+"')")
-	        .executeUpdate(); 
+
+        // Removed Articles
+        List<String> existingAOs = openOrderTemplate.getArticles().stream()
+            .map(a -> a.getAccountingArticle().getCode())
+            .collect(Collectors.toList());
+        List<String> removedAOs = existingAOs.stream()
+            .filter(a -> !articlesCodes.contains(a))
+            .collect(Collectors.toList());
+
+        for (String articleCode : removedAOs) {
+            // Remove unused Articles from templates
+            getEntityManager()
+                .createNativeQuery("DELETE FROM open_order_template_articles WHERE open_order_template_id = :templateId "
+                    + "AND open_article_id IN ("
+                    + "SELECT open_article_id FROM open_order_quote_articles ooqs "
+                    + "JOIN open_order_quote ooq ON ooq.id = ooqs.open_order_quote_id "
+                    + "JOIN open_order_article ooa ON ooa.id = ooqs.open_article_id "
+                    + "JOIN billing_accounting_article a ON a.id = ooa.id "
+                    + "WHERE (ooq.status = 'DRAFT' OR ooq.status = 'Cancelled') AND ooq.open_order_template_id = :templateId AND a.code = :articleCode)")
+                .setParameter("templateId", openOrderTemplate.getId())
+                .setParameter("articleCode", articleCode)
+                .executeUpdate();
+
+            // Remove unused Articles from quotes
+            getEntityManager()
+                .createNativeQuery("DELETE FROM open_order_quote_articles WHERE open_article_id IN ("
+                    + "SELECT open_article_id FROM open_order_quote_articles ooqs "
+                    + "JOIN open_order_quote ooq ON ooq.id = ooqs.open_order_quote_id "
+                    + "JOIN open_order_article ooa ON ooa.id = ooqs.open_article_id "
+                    + "JOIN billing_accounting_article a ON a.id = ooa.id "
+                    + "WHERE (ooq.status = 'DRAFT' OR ooq.status = 'Cancelled') AND ooq.open_order_template_id = :templateId AND a.code = :articleCode) "
+                    + "AND open_order_quote_id IN ("
+                    + "SELECT id FROM open_order_quote ooq "
+                    + "JOIN open_order_quote_articles ooqa ON ooq.id = ooqa.open_order_quote_id "
+                    + "WHERE ooq.open_order_template_id = :templateId)")
+                .setParameter("templateId", openOrderTemplate.getId())
+                .setParameter("articleCode", articleCode)
+                .executeUpdate();
+
+            // Disable used Articles
+            getEntityManager()
+                .createNativeQuery("UPDATE open_order_article SET active = '0' WHERE open_order_template_id = :templateId "
+                    + "AND accounting_article_id IN ("
+                    + "SELECT open_article_id FROM open_order_quote_articles ooqs "
+                    + "JOIN open_order_quote ooq ON ooq.id = ooqs.open_order_quote_id "
+                    + "JOIN open_order_article ooa ON ooa.id = ooqs.open_article_id "
+                    + "JOIN billing_accounting_article a ON a.id = ooa.id "
+                    + "WHERE (ooq.status <> 'DRAFT' AND ooq.status <> 'Cancelled') AND ooq.open_order_template_id = :templateId AND a.code = :articleCode)")
+                .setParameter("templateId", openOrderTemplate.getId())
+                .setParameter("articleCode", articleCode)
+                .executeUpdate();
         }
-        
-        
-        //Added Articles
-        List <String> addedArticles = new LinkedList<>(articlesCodes);
+
+        // Added Articles
+        List<String> addedArticles = new LinkedList<>(articlesCodes);
         openOrderTemplate.getArticles().stream().forEach(a -> {
-        	if(articlesCodes.contains(a.getAccountingArticle().getCode())) {
-        		a.setActive(true);
-        		articles.add(a);
-        		addedArticles.remove(a.getAccountingArticle().getCode());
-        	}
-        });      
-    	for (String articleCode : addedArticles) {
+            if (articlesCodes.contains(a.getAccountingArticle().getCode())) {
+                a.setActive(true);
+                articles.add(a);
+                addedArticles.remove(a.getAccountingArticle().getCode());
+            }
+        });
+
+        for (String articleCode : addedArticles) {
             AccountingArticle article = accountingArticleService.findByCode(articleCode);
-            if (null == article) {
+            if (article == null) {
                 throw new BusinessApiException(String.format("Article with code %s doesn't exist", articleCode));
+            }
+            OpenOrderArticle ooa = new OpenOrderArticle();
+            ooa.setActive(true);
+            ooa.setAccountingArticle(article);
+            ooa.setOpenOrderTemplate(openOrderTemplate);
+            ooa.updateAudit(currentUser);
+            articles.add(ooa);
         }
-	        OpenOrderArticle ooa = new OpenOrderArticle();
-	        ooa.setActive(true);
-	        ooa.setAccountingArticle(article);
-	        ooa.setOpenOrderTemplate(openOrderTemplate);
-	        ooa.updateAudit(currentUser);
-	        articles.add(ooa);
-    	}
+
         return articles;
     }
     
     public List<OpenOrderProduct> updateProducts(List<String> productsCodes, OpenOrderTemplate openOrderTemplate) {
         List<OpenOrderProduct> products = new ArrayList<>();
-        
-        //Removed Products
-        List<String> existingProducts = openOrderTemplate.getProducts().stream().map(p -> p.getProduct().getCode()).collect(Collectors.toList());
-        List<String> removedProducts = existingProducts.stream().filter(a -> !productsCodes.contains(a)).collect(Collectors.toList());
-        
-        for(String productCode : removedProducts) {
-        	//Remove unused Products from templates
-	        getEntityManager()
-	        .createNativeQuery("delete from open_order_template_products where open_order_template_id = "+openOrderTemplate.getId()+" and open_product_id in "
-	        		+ " (select open_product_id from open_order_quote_products ooqs "
-	                + " join open_order_quote ooq   on ooq.id = ooqs.open_order_quote_id"
-	                + " join open_order_product oop on oop.id = ooqs.open_product_id"
-	                + " join cpq_product p on p.id = oop.id"
-	                + " where (ooq.status = 'DRAFT' or ooq.status = 'Cancelled') and ooq.open_order_template_id = "+openOrderTemplate.getId()+" and p.code = '"+productCode+"')")
-	        .executeUpdate(); 
-	        //Remove unused Products from quotes
-	        getEntityManager()
-	        .createNativeQuery("delete from open_order_quote_products where open_product_id in (select open_product_id from open_order_quote_products ooqs "
-	        		+ " join open_order_quote ooq   on ooq.id = ooqs.open_order_quote_id"
-	        		+ " join open_order_product oop on oop.id = ooqs.open_product_id"
-	        		+ " join cpq_product p on p.id = oop.id"
-	        		+ " where (ooq.status = 'DRAFT' or ooq.status = 'Cancelled') and ooq.open_order_template_id = "+openOrderTemplate.getId()+" and p.code = '"+productCode+"')"
-	        		+ " and open_order_quote_id in (select id from open_order_quote ooq join open_order_quote_products ooqp on ooq.id = ooqp.open_order_quote_id where ooq.open_order_template_id = "+openOrderTemplate.getId()+")")
-	        .executeUpdate(); 
-	        
-	        //Disable used
-	        getEntityManager()
-	        .createNativeQuery("update open_order_product set active = '0' where open_order_template_id = "+openOrderTemplate.getId()+" and product_id in"
-	        		+ " (select open_product_id from open_order_quote_products ooqs"
-	        		+ " join open_order_quote ooq   on ooq.id = ooqs.open_order_quote_id"
-	        		+ " join open_order_product oop on oop.id = ooqs.open_product_id"
-	        		+ " join cpq_product p on p.id = oop.id"
-	        		+ " where (ooq.status <> 'DRAFT' and ooq.status <> 'Cancelled') and ooq.open_order_template_id = "+openOrderTemplate.getId()+" and p.code = '"+productCode+"')")
-	        .executeUpdate();
+
+        List<String> existingProducts = openOrderTemplate.getProducts().stream()
+            .map(p -> p.getProduct().getCode())
+            .collect(Collectors.toList());
+        List<String> removedProducts = existingProducts.stream()
+            .filter(a -> !productsCodes.contains(a))
+            .collect(Collectors.toList());
+
+        for (String productCode : removedProducts) {
+            // Remove unused Products from templates
+            getEntityManager()
+                .createNativeQuery("DELETE FROM open_order_template_products WHERE open_order_template_id = :templateId "
+                    + "AND open_product_id IN ("
+                    + "SELECT open_product_id FROM open_order_quote_products ooqs "
+                    + "JOIN open_order_quote ooq ON ooq.id = ooqs.open_order_quote_id "
+                    + "JOIN open_order_product oop ON oop.id = ooqs.open_product_id "
+                    + "JOIN cpq_product p ON p.id = oop.id "
+                    + "WHERE (ooq.status = 'DRAFT' OR ooq.status = 'Cancelled') AND ooq.open_order_template_id = :templateId AND p.code = :productCode)")
+                .setParameter("templateId", openOrderTemplate.getId())
+                .setParameter("productCode", productCode)
+                .executeUpdate();
+
+            // Remove unused Products from quotes
+            getEntityManager()
+                .createNativeQuery("DELETE FROM open_order_quote_products WHERE open_product_id IN ("
+                    + "SELECT open_product_id FROM open_order_quote_products ooqs "
+                    + "JOIN open_order_quote ooq ON ooq.id = ooqs.open_order_quote_id "
+                    + "JOIN open_order_product oop ON oop.id = ooqs.open_product_id "
+                    + "JOIN cpq_product p ON p.id = oop.id "
+                    + "WHERE (ooq.status = 'DRAFT' OR ooq.status = 'Cancelled') AND ooq.open_order_template_id = :templateId AND p.code = :productCode) "
+                    + "AND open_order_quote_id IN ("
+                    + "SELECT id FROM open_order_quote ooq "
+                    + "JOIN open_order_quote_products ooqp ON ooq.id = ooqp.open_order_quote_id "
+                    + "WHERE ooq.open_order_template_id = :templateId)")
+                .setParameter("templateId", openOrderTemplate.getId())
+                .setParameter("productCode", productCode)
+                .executeUpdate();
+
+            // Disable used products
+            getEntityManager()
+                .createNativeQuery("UPDATE open_order_product SET active = '0' WHERE open_order_template_id = :templateId AND product_id IN ("
+                    + "SELECT open_product_id FROM open_order_quote_products ooqs "
+                    + "JOIN open_order_quote ooq ON ooq.id = ooqs.open_order_quote_id "
+                    + "JOIN open_order_product oop ON oop.id = ooqs.open_product_id "
+                    + "JOIN cpq_product p ON p.id = oop.id "
+                    + "WHERE (ooq.status <> 'DRAFT' AND ooq.status <> 'Cancelled') AND ooq.open_order_template_id = :templateId AND p.code = :productCode)")
+                .setParameter("templateId", openOrderTemplate.getId())
+                .setParameter("productCode", productCode)
+                .executeUpdate();
         }
-        
-        
-        //Added Products
-        List <String> addedProducts = new LinkedList<>(productsCodes);
+
+        // Added Products
+        List<String> addedProducts = new LinkedList<>(productsCodes);
         openOrderTemplate.getProducts().stream().forEach(p -> {
-        	if(productsCodes.contains(p.getProduct().getCode())) {
-        		p.setActive(true);
-        		products.add(p);
-        		addedProducts.remove(p.getProduct().getCode());
-        	}
-        });      
-    	for (String productCode : addedProducts) {
+            if (productsCodes.contains(p.getProduct().getCode())) {
+                p.setActive(true);
+                products.add(p);
+                addedProducts.remove(p.getProduct().getCode());
+            }
+        });
+
+        for (String productCode : addedProducts) {
             Product product = productService.findByCode(productCode);
-            if (null == product) {
+            if (product == null) {
                 throw new BusinessApiException(String.format("Product with code %s doesn't exist", productCode));
+            }
+            OpenOrderProduct oop = new OpenOrderProduct();
+            oop.setActive(true);
+            oop.setProduct(product);
+            oop.setOpenOrderTemplate(openOrderTemplate);
+            oop.updateAudit(currentUser);
+            products.add(oop);
         }
-	        OpenOrderProduct oop = new OpenOrderProduct();
-	        oop.setActive(true);
-	        oop.setProduct(product);
-	        oop.setOpenOrderTemplate(openOrderTemplate);
-	        oop.updateAudit(currentUser);
-	        products.add(oop);
-    	}
+
         return products;
     }
 

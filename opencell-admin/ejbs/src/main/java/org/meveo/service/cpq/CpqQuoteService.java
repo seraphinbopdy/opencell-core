@@ -296,7 +296,7 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	                FileUtils.copyDirectory(sourceFile, destDir);
 	            }   
 	            InvoiceType quoteType=invoiceTypeService.getDefaultQuote();
-	            String jasperFilename="main";
+	            String jasperFilename="quote";
 	            if(quoteType!=null && quoteType.getBillingTemplateNameEL()!=null) {
 	            	jasperFilename=evaluateQuoteTemplateName(quoteType.getBillingTemplateNameEL(), quote);
 	            }

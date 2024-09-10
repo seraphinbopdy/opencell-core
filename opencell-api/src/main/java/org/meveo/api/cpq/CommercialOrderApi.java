@@ -1010,7 +1010,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		createOrderProduct(orderOfferDto.getOrderProducts(),orderOffer);
 		Optional.ofNullable(orderOffer.getProducts()).orElse(Collections.emptyList())
 				.forEach(orderProduct -> attributeService.validateAttributes(
-						orderOffer.getProducts().get(0).getProductVersion().getAttributes(),
+						orderProduct.getProductVersion().getAttributes(),
 						orderProduct.getOrderAttributes()));
 		createOrderAttribute(orderOfferDto.getOrderAttributes(),null,orderOffer);
 		if (isQuickOrder && orderOfferDto.getOrderLineType() == OfferLineTypeEnum.APPLY_ONE_SHOT){

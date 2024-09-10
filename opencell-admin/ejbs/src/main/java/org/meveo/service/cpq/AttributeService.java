@@ -109,7 +109,7 @@ public class AttributeService extends BusinessService<Attribute>{
         Set<Long> checkedAttributs = new HashSet<>();
 
         attributeInstances.forEach(attributeInstance -> {
-            Optional<ProductVersionAttribute> productVersionAttribute = productVersionAttributes.stream().filter(pva -> pva.getAttribute().getId().equals(attributeInstance.getAttribute().getId()))
+            Optional<ProductVersionAttribute> productVersionAttribute = productVersionAttributes.stream().filter(pva -> pva.getAttribute().getCode().equals(attributeInstance.getAttribute().getCode()))
                     .findFirst();
             if (productVersionAttribute.isEmpty()) {
                 throw new BusinessApiException("No ProductVersionAttribute found for Attribute '" + attributeInstance.getAttribute().getCode() + "'");

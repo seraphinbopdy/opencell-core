@@ -210,6 +210,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
             invoiceService.create(invoice);
             invoiceService.postCreate(invoice);
         });
+        invoiceService.getEntityManager().flush();
         invoices.forEach(invoice -> invoiceService.applyAutomaticCheck(invoice));
     }
     

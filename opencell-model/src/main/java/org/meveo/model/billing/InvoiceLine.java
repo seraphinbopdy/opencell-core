@@ -532,7 +532,7 @@ public class InvoiceLine extends AuditableCFEntity {
 	private String invoiceKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false)
+    @JoinColumn(name = "seller_id")
     private Seller seller;
 
 	@Transient

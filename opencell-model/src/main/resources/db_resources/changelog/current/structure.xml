@@ -13205,5 +13205,64 @@ Meaning that advances won’t be available for further invoices."/>
             </column>
         </update>
     </changeSet>
+    
+    <changeSet id="#INTRD-24675_add_business_attribute" author="a.rouaguebe">
+        <modifyDataType tableName="cpq_attribute" columnName="el_value" newDataType="varchar(1000)" />
+        <insert tableName="cpq_attribute">
+            <column name="id" valueSequenceNext="cpq_attribute_seq" />
+            <column name="code" value="trading_currency_code" />
+            <column name="uuid" value="trading_currency_code" />
+            <column name="description" value="Billing currency code" />
+            <column name="attribute_type" value="TEXT" />
+            <column name="version" value="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="attribute_category" value="BUSINESS" />
+            <column name="el_value" value="#{ba.tradingCurrency.currencyCode}" />
+        </insert>
+
+        <insert tableName="cpq_attribute">
+            <column name="id" valueSequenceNext="cpq_attribute_seq" />
+            <column name="code" value="trading_country_code" />
+            <column name="uuid" value="trading_country_code" />
+            <column name="description" value="Billing country code" />
+            <column name="attribute_type" value="TEXT" />
+            <column name="version" value="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="attribute_category" value="BUSINESS" />
+            <column name="el_value" value="#{ba.tradingCountry.countryCode}" />
+        </insert>
+
+        <insert tableName="cpq_attribute">
+            <column name="id" valueSequenceNext="cpq_attribute_seq" />
+            <column name="code" value="offer_code" />
+            <column name="uuid" value="offer_code" />
+            <column name="description" value="Offer code" />
+            <column name="attribute_type" value="TEXT" />
+            <column name="version" value="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="attribute_category" value="BUSINESS" />
+            <column name="el_value" value="#{op.offerCode}" />
+        </insert>
+
+        <insert tableName="cpq_attribute">
+            <column name="id" valueSequenceNext="cpq_attribute_seq" />
+            <column name="code" value="is_termed_subscription" />
+            <column name="uuid" value="is_termed_subscription" />
+            <column name="description" value="Subscription is termed?" />
+            <column name="attribute_type" value="BOOLEAN" />
+            <column name="version" value="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="attribute_category" value="BUSINESS" />
+            <column name="el_value" value="#{sub.subscriptionRenewal.autoRenew == false &amp;&amp; ((sub.subscriptionRenewal.initialyActiveFor != null &amp;&amp; sub.subscriptionRenewal.initialTermType == 'RECURRING') || (sub.subscriptionRenewal.initialTermType == 'CALENDAR' &amp;&amp; sub.subscriptionRenewal.calendarInitialyActiveFor != null) ||(sub.subscriptionRenewal.initialTermType == 'FIXED' &amp;&amp;  sub.subscribedTillDate != null ))}" />
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

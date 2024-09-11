@@ -10049,7 +10049,7 @@
             <column name="attribute_category" type="varchar(255)">
             	<constraints nullable="false"/>
             </column>
-            <column name="el_value" type="varchar(255)"/>
+            <column name="el_value" type="varchar(1000)"/>
         </createTable>
     </changeSet>
     <changeSet id="rebuild-str-tbl-458" author="NabilOUACHI">
@@ -20991,6 +20991,7 @@
     <changeSet id="#INTRD-25091_ji_desc_i18n" author="a.rouaguebe" />
     <changeSet id="#INTRD-25259_fix_repoen_template" author="a.rouaguebe" />
     <changeSet id="#INTRD-24779_MASS_REOPEN_EDR_ZERO" author="a.rouaguebe" />
+    <changeSet id="#INTRD-24675_add_business_attribute" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

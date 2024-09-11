@@ -64,7 +64,7 @@ public class InvoiceLinesFactory {
     private OrderLotService orderLotService = (OrderLotService) getServiceInterface(OrderLotService.class.getSimpleName());
     private UserAccountService userAccountService = (UserAccountService) getServiceInterface(UserAccountService.class.getSimpleName());
     private TaxService taxService = (TaxService) getServiceInterface(TaxService.class.getSimpleName());
-    private SellerService sellerService = (SellerService) getServiceInterface(Seller.class.getSimpleName());
+    private SellerService sellerService = (SellerService) getServiceInterface(SellerService.class.getSimpleName());
     private BillingRunService billingRunService = (BillingRunService) getServiceInterface(BillingRunService.class.getSimpleName());
     
 

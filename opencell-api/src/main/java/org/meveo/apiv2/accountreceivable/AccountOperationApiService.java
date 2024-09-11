@@ -455,13 +455,13 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 			// create a OCC of type  DEB_TRS on source Customer Account and match it with the OCC of type CREDIT
 			// create a OCC of type  CRD_TRS on target Customer Account and match it with the OCC of type DEBIT
 			if (OperationCategoryEnum.CREDIT == accountOperation.getTransactionCategory()) {
-				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.DEBIT, occTemplateDebTrs, amountToTransferDto.getAmount());
+				createAccountOperation(accountOperation, accountOperation.getCustomerAccount(), OperationCategoryEnum.DEBIT, occTemplateDebTrs, amountToTransferDto.getAmount());
 				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.CREDIT, occTemplateCrdTrs, amountToTransferDto.getAmount());
 			} else {
 				// if account operation is DEBIT
 				// create a OCC of type  CRD_TRS on source Customer Account and match it with the OCC of type DEBIT
 				// create a OCC of type  DEB_TRS on target Customer Account and match it with the OCC of type CREDIT
-				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.CREDIT, occTemplateCrdTrs, amountToTransferDto.getAmount());
+				createAccountOperation(accountOperation, accountOperation.getCustomerAccount(), OperationCategoryEnum.CREDIT, occTemplateCrdTrs, amountToTransferDto.getAmount());
 				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.DEBIT, occTemplateDebTrs, amountToTransferDto.getAmount());
 			}
 		});
@@ -489,7 +489,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		accountOperationToTransfer.setTransactionCategory(operationCategoryEnum);
 		accountOperationToTransfer.setTransactionDate(currentDate);
 		accountOperationToTransfer.setUnMatchingAmount(amountToTransfer);
-		accountOperationToTransfer.setReference(operationCategoryEnum.toString().substring(0, 1) + "_" + accountOperation.getId() + "_" + accountOperation.getReference()) ;
+		accountOperationToTransfer.setReference(operationCategoryEnum.toString().charAt(0) + "_" + accountOperation.getId() + "_" + accountOperation.getReference()) ;
 		accountOperationToTransfer.setSourceAccountOperation(accountOperation);
 		accountOperationToTransfer.setUuid(UUID.randomUUID().toString());
 		accountOperationToTransfer.setSeller(accountOperation.getSeller());
@@ -539,7 +539,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 					org.meveo.model.payments.CustomerAccount customerAccountToTransfer = getCustomerAccount(amountToTransferDto.getCustomerAccount());
 					if (customerAccountToTransfer == null) {
 						log.error("check if all customer exist : rollback ");
-						throw new EntityDoesNotExistsException(CustomerAccount.class, amountToTransferDto.getCustomerAccount().getId());
+						throw new EntityDoesNotExistsException(CustomerAccount.class, amountToTransferDto.getCustomerAccount().getCode());
 					}
 				}else {
 					throw new BadRequestException("Customer account is required");

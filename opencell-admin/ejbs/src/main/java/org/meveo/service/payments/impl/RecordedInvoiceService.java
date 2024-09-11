@@ -158,7 +158,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
     public RecordedInvoice getRecordedInvoice(String invoiceNumber, InvoiceType invoiceType){
         RecordedInvoice recordedInvoice = null;
         try {
-            String qlString = "from " + RecordedInvoice.class.getSimpleName() + " where reference =:reference  and invoice.invoiceType=:invoiceType";
+            String qlString = "from RecordedInvoice where reference =:reference  and invoice.invoiceType=:invoiceType";
 			Query query = getEntityManager().createQuery(qlString).setParameter("reference", invoiceNumber).setParameter("invoiceType", invoiceType);
 			recordedInvoice = (RecordedInvoice) query.getSingleResult();
         } catch (Exception e) {
@@ -173,7 +173,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 	public List<RecordedInvoice> getRecordedInvoice(String invoiceNumber) {
     	List<RecordedInvoice> recordedInvoices = null;
         try {
-            String qlString = "from " + RecordedInvoice.class.getSimpleName() + " where reference =:reference";
+            String qlString = "from RecordedInvoice where reference =:reference";
             recordedInvoices = (List<RecordedInvoice>)getEntityManager().createQuery(qlString).setParameter("reference", invoiceNumber).getResultList();
         } catch (Exception e) {
         	log.warn("exception trying to get recordedInvoice for reference "+invoiceNumber+": "+e.getMessage());
@@ -183,31 +183,30 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 
     /**
      * @param customerAccount customer account
-     * @param o matching status
+     * @param matchingStatus matching status
      * @param dunningExclusion dunning exclusion
      * @return list of recored invoice.
      */
-    @SuppressWarnings("unchecked")
-    public List<RecordedInvoice> getRecordedInvoices(CustomerAccount customerAccount, MatchingStatusEnum o, boolean dunningExclusion) {
+	@SuppressWarnings("unchecked")
+    public List<RecordedInvoice> getRecordedInvoices(CustomerAccount customerAccount, MatchingStatusEnum matchingStatus, boolean dunningExclusion) {
         List<RecordedInvoice> invoices = new ArrayList<>();
         try {
+            String queryStr = "from RecordedInvoice where customerAccount.id = :customerAccountId and matchingStatus = :matchingStatus order by dueDate";
+            Query query = getEntityManager().createQuery(queryStr);
 
-            if (dunningExclusion) {
-                invoices = (List<RecordedInvoice>) getEntityManager().createQuery("from " + RecordedInvoice.class.getSimpleName()
-                        + " where customerAccount.id=:customerAccountId and matchingStatus= " + I + " order by dueDate")
-                    .setParameter("customerAccountId", customerAccount.getId()).getResultList();
-            } else {
-                invoices = (List<RecordedInvoice>) getEntityManager()
-                    .createQuery(
-                        "from " + RecordedInvoice.class.getSimpleName() + " where customerAccount.id=:customerAccountId and matchingStatus=:matchingStatus order by dueDate")
-                    .setParameter("customerAccountId", customerAccount.getId()).setParameter("matchingStatus", o).getResultList();
-            }
+            query.setParameter("customerAccountId", customerAccount.getId());
+            // Use the appropriate matching status depending on the 'dunningExclusion' flag
+            query.setParameter("matchingStatus", dunningExclusion ? I : matchingStatus);
+
+            invoices = (List<RecordedInvoice>) query.getResultList();
 
         } catch (Exception e) {
-
+            // Log the exception (optional)
+           	log.error("Error: ", e);
         }
         return invoices;
     }
+
 
     /**
      * @param expression EL expression

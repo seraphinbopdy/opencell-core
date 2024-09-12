@@ -2033,6 +2033,11 @@ public class MeveoFunctionMapper extends FunctionMapper {
 				if(NumberUtils.isCreatable(attributInstance.get().toString().trim())) {
 					return Double.valueOf(attributInstance.get().toString().trim());
 				}
+				
+				if(NumberUtils.isCreatable(attributInstance.get().getStringValue().trim())) {
+					return Double.valueOf(attributInstance.get().getStringValue().trim());
+				}
+				
 				// from attribute product version attribute loop from attribute product attribute
 				if (defaultValue != null) return defaultValue;
 				break;

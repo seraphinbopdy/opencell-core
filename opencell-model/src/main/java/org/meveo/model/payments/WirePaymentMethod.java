@@ -18,8 +18,16 @@
 
 package org.meveo.model.payments;
 
+import org.meveo.model.billing.BankCoordinates;
+
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.constraints.Size;
+import java.util.Date;
 
 /**
  * Payment by wire transfer method
@@ -31,6 +39,26 @@ import javax.persistence.Entity;
 public class WirePaymentMethod extends PaymentMethod {
 
     private static final long serialVersionUID = 8726571628074346184L;
+
+    /**
+     * Bank information
+     */
+    @Embedded
+    private BankCoordinates bankCoordinates = new BankCoordinates();
+
+    /**
+     * Order identification
+     */
+    @Column(name = "mandate_identification", length = 255)
+    @Size(max = 255)
+    private String mandateIdentification = "";
+
+    /**
+     * Order date
+     */
+    @Column(name = "mandate_date")
+    @Temporal(TemporalType.DATE)
+    private Date mandateDate;
 
     public WirePaymentMethod() {
         this.paymentType = PaymentMethodEnum.WIRETRANSFER;
@@ -51,6 +79,13 @@ public class WirePaymentMethod extends PaymentMethod {
         this.preferred = preferred;
     }
 
+    public WirePaymentMethod(CustomerAccount customerAccount, boolean isDisabled, String alias, boolean preferred, Date mandateDate, String mandateIdentification, BankCoordinates bankCoordinates) {
+        this(isDisabled, alias, preferred, customerAccount);
+        this.mandateDate = mandateDate;
+        this.mandateIdentification = mandateIdentification;
+        setBankCoordinates(bankCoordinates);
+    }
+
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
@@ -66,5 +101,29 @@ public class WirePaymentMethod extends PaymentMethod {
     @Override
     public String toString() {
         return "WirePaymentMethod [alias= " + getAlias() + ", preferred=" + isPreferred() + "]";
+    }
+
+    public BankCoordinates getBankCoordinates() {
+        return bankCoordinates;
+    }
+
+    public void setBankCoordinates(BankCoordinates bankCoordinates) {
+        this.bankCoordinates = bankCoordinates;
+    }
+
+    public @Size(max = 255) String getMandateIdentification() {
+        return mandateIdentification;
+    }
+
+    public void setMandateIdentification(@Size(max = 255) String mandateIdentification) {
+        this.mandateIdentification = mandateIdentification;
+    }
+
+    public Date getMandateDate() {
+        return mandateDate;
+    }
+
+    public void setMandateDate(Date mandateDate) {
+        this.mandateDate = mandateDate;
     }
 }

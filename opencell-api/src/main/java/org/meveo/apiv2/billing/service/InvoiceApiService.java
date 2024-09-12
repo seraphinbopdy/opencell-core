@@ -100,7 +100,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 	@Inject
 	private InvoiceTypeService invoiceTypeService;
-	
+
 	@Inject
 	private AdvancedSettingsService advancedSettingsService;
 
@@ -346,6 +346,8 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 		return invoiceService.createInvoiceV11(input.getInvoice(), input.getSkipValidation(), input.getIsDraft(),
 				input.getIsVirtual(), input.getIsIncludeBalance(), input.getIsAutoValidation(), invoice);
 	}
+
+	@Transactional
 	public Invoice update(Invoice invoice, Invoice input, org.meveo.apiv2.billing.Invoice invoiceResource) {
         Invoice updateInvoice = invoiceService.update(invoice, input, invoiceResource);
         if (invoiceResource.getCustomFields() != null) {

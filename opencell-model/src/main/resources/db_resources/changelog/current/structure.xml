@@ -13264,5 +13264,9 @@ Meaning that advances won’t be available for further invoices."/>
             <column name="el_value" value="#{sub.subscriptionRenewal.autoRenew == false &amp;&amp; ((sub.subscriptionRenewal.initialyActiveFor != null &amp;&amp; sub.subscriptionRenewal.initialTermType == 'RECURRING') || (sub.subscriptionRenewal.initialTermType == 'CALENDAR' &amp;&amp; sub.subscriptionRenewal.calendarInitialyActiveFor != null) ||(sub.subscriptionRenewal.initialTermType == 'FIXED' &amp;&amp;  sub.subscribedTillDate != null ))}" />
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-25308_rating_unit_desc" author="a.rouaguebe">
+        <modifyDataType tableName="cat_charge_template" columnName="rating_unit_description" newDataType="varchar(255)" />
+    </changeSet>
 
 </databaseChangeLog>

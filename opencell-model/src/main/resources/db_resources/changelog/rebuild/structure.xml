@@ -4293,7 +4293,7 @@
             <column name="invoice_sub_category" type="bigint">
             </column>
             <column name="input_unit_description" type="varchar(20)" />
-            <column name="rating_unit_description" type="varchar(20)" />
+            <column name="rating_unit_description" type="varchar(255)" />
             <column name="unit_multiplicator" type="numeric(23, 12)" />
             <column name="unit_nb_decimal" type="int4" />
             <column name="uuid" type="varchar(60)" defaultValueComputed="${uuid_function}">
@@ -20992,6 +20992,7 @@
     <changeSet id="#INTRD-25259_fix_repoen_template" author="a.rouaguebe" />
     <changeSet id="#INTRD-24779_MASS_REOPEN_EDR_ZERO" author="a.rouaguebe" />
     <changeSet id="#INTRD-24675_add_business_attribute" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25308_rating_unit_desc" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

@@ -192,7 +192,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
         log.info("======== CREATING INVOICES FOR {} BAs========", invoicesbyBA.size());
         invoicesbyBA.forEach(invoices->assignNumberAndCreate(billingRun, isFullAutomatic, invoices, billingCycle));
         getEntityManager().flush();//to be able to update ILs
-        getEntityManager().clear();
         log.info("======== UPDATING ILs ========");
         invoicesbyBA.forEach(invoices -> invoices.forEach(invoice
                 -> invoice.getSubCategoryInvoiceAgregate().forEach(sca
@@ -210,8 +209,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
             invoiceService.create(invoice);
             invoiceService.postCreate(invoice);
         });
-        invoiceService.getEntityManager().flush();
-        invoices.forEach(invoice -> invoiceService.applyAutomaticCheck(invoice));
     }
     
     private void updateInvoiceLines(Invoice invoice, BillingRun billingRun, SubCategoryInvoiceAgregate sca) {

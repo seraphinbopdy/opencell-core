@@ -231,7 +231,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             DunningActionInstance actionInstance = levelInstance.getActions().get(i);
                             if (actionInstance.getActionMode().equals(AUTOMATIC) && actionInstance.getActionStatus().equals(TO_BE_DONE)) {
                                 try {
-                                    if (previousLevelInstance != null && (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED)) {
+                                    if (previousLevelInstance == null || (previousLevelInstance != null && (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED))) {
                                         triggerAction(actionInstance, collectionPlan);
                                         collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
                                         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);

@@ -1400,7 +1400,9 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         StringJoiner invoiceKey =  new StringJoiner(UNDERSCORE_SEPARATOR);
         
         invoiceKey.add(formatEntityId(invoiceLine.getBillingAccount()));
-        invoiceKey.add(formatId(invoiceLine.getSeller().getId()));
+        if (invoiceLine.getSeller() != null) {
+            invoiceKey.add(formatId(invoiceLine.getSeller().getId()));
+        }
         invoiceKey.add(formatId(invoiceLine.getInvoiceTypeId()));
         invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));
         if(billingRun != null && billingRun.getBillingCycle() != null) {

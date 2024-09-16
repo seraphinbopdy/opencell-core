@@ -13265,6 +13265,17 @@ Meaning that advances won’t be available for further invoices."/>
         </insert>
     </changeSet>
     
+    <changeSet id="#INTRD-25028_20240916" author="TarikFA.">
+        <update tableName="advanced_settings">
+            <column name="description" value="If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you don’t manage customer balance in Opencell."/>
+            <column name="description_i18n" value='{"FRA":"Si ce paramètre est activé, alors Opencell n’attendra pas qu’un appel acompte validé soit effectivement payé pour l’utiliser sur une facture.
+Habituellement, ce comportement n’est souhaitable que si vous ne gérez pas la balance client dans Opencell.","ENG":"If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you don’t manage customer balance in Opencell."}'/>
+            <where>code = 'allowUsingUnpaidAdvance'</where>
+        </update>
+    </changeSet>
+    
     <changeSet id="#INTRD-25308_rating_unit_desc" author="a.rouaguebe">
         <modifyDataType tableName="cat_charge_template" columnName="rating_unit_description" newDataType="varchar(255)" />
     </changeSet>

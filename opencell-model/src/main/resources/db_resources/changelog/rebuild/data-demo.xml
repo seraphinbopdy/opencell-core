@@ -6902,10 +6902,10 @@
             <column name="creator" value="applicationInitializer"/>
             <column name="code" value="allowUsingUnpaidAdvance"/>
             <column name="description" value="If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
-Usually, you’ll want that only if you donc manage customer balance in Opencell."/>
+Usually, you’ll want that only if you don’t manage customer balance in Opencell."/>
             <column name="description_i18n" value='{"FRA":"Si ce paramètre est activé, alors Opencell n’attendra pas qu’un appel acompte validé soit effectivement payé pour l’utiliser sur une facture.
 Habituellement, ce comportement n’est souhaitable que si vous ne gérez pas la balance client dans Opencell.","ENG":"If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
-Usually, you’ll want that only if you donc manage customer balance in Opencell."}'/>
+Usually, you’ll want that only if you don’t manage customer balance in Opencell."}'/>
         </insert>
 
         <insert tableName="advanced_settings">

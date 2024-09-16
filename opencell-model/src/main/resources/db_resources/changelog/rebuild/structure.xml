@@ -20993,6 +20993,7 @@
     <changeSet id="#INTRD-24779_MASS_REOPEN_EDR_ZERO" author="a.rouaguebe" />
     <changeSet id="#INTRD-24675_add_business_attribute" author="a.rouaguebe" />
     <changeSet id="#INTRD-25308_rating_unit_desc" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25028_20240916" author="TarikFA." />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

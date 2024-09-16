@@ -2021,21 +2021,22 @@ public class MeveoFunctionMapper extends FunctionMapper {
     	
     	if(attribute.getAttributeType()!=null && attributInstance.isPresent()) {
 			Object defaultValue = getDefaultValue(attributeCode, attribute, attribute.getAttributeType());
-    		switch (attribute.getAttributeType()) {
+            AttributeValue attributeValue = attributInstance.get();
+            switch (attribute.getAttributeType()) {
 			case TOTAL :
 			case COUNT :
 			case NUMERIC :
 			case INTEGER:
 			case LIST_NUMERIC:
-				if(attributInstance.get().getDoubleValue()!=null) {
-					return attributInstance.get().getDoubleValue(); 
+				if(attributeValue.getDoubleValue()!=null) {
+					return attributeValue.getDoubleValue(); 
 				}
-				if(NumberUtils.isCreatable(attributInstance.get().toString().trim())) {
-					return Double.valueOf(attributInstance.get().toString().trim());
+				if(NumberUtils.isCreatable(attributeValue.toString().trim())) {
+					return Double.valueOf(attributeValue.toString().trim());
 				}
 				
-				if(NumberUtils.isCreatable(attributInstance.get().getStringValue().trim())) {
-					return Double.valueOf(attributInstance.get().getStringValue().trim());
+				if(attributeValue.getStringValue() != null && NumberUtils.isCreatable(attributeValue.getStringValue().trim())) {
+					return Double.valueOf(attributeValue.getStringValue().trim());
 				}
 				
 				// from attribute product version attribute loop from attribute product attribute
@@ -2045,8 +2046,8 @@ public class MeveoFunctionMapper extends FunctionMapper {
 			case LIST_MULTIPLE_TEXT:
 			case LIST_TEXT:
 			case TEXT:	
-				if(!StringUtils.isBlank(attributInstance.get().getStringValue())) {
-					return attributInstance.get().getStringValue();  
+				if(!StringUtils.isBlank(attributeValue.getStringValue())) {
+					return attributeValue.getStringValue();  
 				}
 				if (defaultValue != null) return defaultValue;
 				break;
@@ -2054,9 +2055,9 @@ public class MeveoFunctionMapper extends FunctionMapper {
 			case EXPRESSION_LANGUAGE :
 				String value=null;
 				if(walletOperation!=null) {
-					 value = ValueExpressionWrapper.evaluateExpression(attributInstance.get().getStringValue(), String.class, serviceInstance,walletOperation);
+					 value = ValueExpressionWrapper.evaluateExpression(attributeValue.getStringValue(), String.class, serviceInstance,walletOperation);
 				}else {
-					 value  = ValueExpressionWrapper.evaluateExpression(attributInstance.get().getStringValue(), String.class, serviceInstance);
+					 value  = ValueExpressionWrapper.evaluateExpression(attributeValue.getStringValue(), String.class, serviceInstance);
 				}
 				if(NumberUtils.isCreatable(value.toString().trim())) {
 					return Double.valueOf(value.toString().trim());
@@ -2066,14 +2067,14 @@ public class MeveoFunctionMapper extends FunctionMapper {
 				 
 				
 			case DATE:
-				if(attributInstance.get().getDateValue()!=null) {
-					return attributInstance.get().getDateValue();  
+				if(attributeValue.getDateValue()!=null) {
+					return attributeValue.getDateValue();  
 				}
 				if (defaultValue != null) return defaultValue;
 				break;
 			case BOOLEAN:
-				if(attributInstance.get().getBooleanValue()!=null) {
-					return attributInstance.get().getBooleanValue();  
+				if(attributeValue.getBooleanValue()!=null) {
+					return attributeValue.getBooleanValue();  
 				}
 				if (defaultValue != null) return defaultValue;
 				break;

@@ -6,6 +6,7 @@ import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
+import org.meveo.model.billing.Invoice;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.RecordedInvoice;
@@ -17,6 +18,7 @@ import org.meveo.service.payments.impl.RejectedPaymentService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EnterLitigationScript extends Script {
 
@@ -50,7 +52,13 @@ public class EnterLitigationScript extends Script {
         log.info("{} invoice will be sent to litigation", recordedInvoices.size());
         recordedInvoices.forEach(recordedInvoice -> sendToLitigation(recordedInvoice, litigationReason));
 
+        String invoiceNumbers = recordedInvoices.stream()
+                                         .map(RecordedInvoice::getInvoice)
+                                         .map(Invoice::getInvoiceNumber)
+                                         .collect(Collectors.joining(", "));
+
         context.put(REJECTION_ACTION_RESULT, true);
+        context.put(REJECTION_ACTION_REPORT, "Invoices [" + invoiceNumbers + "] have entered litigation.");
         log.info("Enter litigation script successfully executed");
     }
 

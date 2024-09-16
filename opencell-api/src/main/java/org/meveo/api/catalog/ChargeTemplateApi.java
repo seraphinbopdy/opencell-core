@@ -126,6 +126,12 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
         if (postData.getUnitMultiplicator() != null) {
             chargeTemplate.setUnitMultiplicator(postData.getUnitMultiplicator());
         }
+        if (postData.getOutputUnitEL() != null) {
+            chargeTemplate.setOutputUnitEL(postData.getOutputUnitEL());
+        }
+        if (postData.getInputUnitEL() != null) {
+            chargeTemplate.setInputUnitEL(postData.getInputUnitEL());
+        }
         if (postData.getRatingUnitDescription() != null) {
             chargeTemplate.setRatingUnitDescription(StringUtils.getDefaultIfEmpty(postData.getRatingUnitDescription(), null));
         }

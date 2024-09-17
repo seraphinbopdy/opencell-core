@@ -212,7 +212,8 @@ public class FlatFileProcessingJobBean extends BaseJobBean {
                 try {
                     Thread.sleep(waitingMillis.longValue());
                 } catch (InterruptedException e) {
-                    log.error("", e);
+                    Thread.currentThread().interrupt();
+                    log.error("Thread was interrupted", e);
                 }
             }
 
@@ -228,6 +229,7 @@ public class FlatFileProcessingJobBean extends BaseJobBean {
 
                 } catch (InterruptedException | CancellationException e) {
                     wasKilled = true;
+                    Thread.currentThread().interrupt();
                     log.error("Thread/future for job {} was canceled", jobInstance);
 
                 } catch (ExecutionException e) {

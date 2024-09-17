@@ -13280,4 +13280,39 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <modifyDataType tableName="cat_charge_template" columnName="rating_unit_description" newDataType="varchar(255)" />
     </changeSet>
 
+    <changeSet id="#INTRD-25370_" author="a.rouaguebe">
+        <delete tableName="crm_custom_field_tmpl_val">
+            <where>customfieldtemplate_id in (select id from crm_custom_field_tmpl where code = 'SepaJob_paymentOrRefund' and applies_to = 'JobInstance_SepaDirectDebitJob')</where>
+        </delete>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_paymentOrRefund' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="PAYMENT" />
+            <column name="listvalues_key" value="PAYMENT" />
+        </insert>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_paymentOrRefund' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="REFUND" />
+            <column name="listvalues_key" value="REFUND" />
+        </insert>
+
+        <delete tableName="crm_custom_field_tmpl_val">
+            <where>customfieldtemplate_id in (select id from crm_custom_field_tmpl where code = 'SepaJob_ddRequestStateOp' and applies_to = 'JobInstance_SepaDirectDebitJob')</where>
+        </delete>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_ddRequestStateOp' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="PAYMENT" />
+            <column name="listvalues_key" value="PAYMENT" />
+        </insert>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_ddRequestStateOp' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="CREATE" />
+            <column name="listvalues_key" value="CREATE" />
+        </insert>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_ddRequestStateOp' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="FILE" />
+            <column name="listvalues_key" value="FILE" />
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

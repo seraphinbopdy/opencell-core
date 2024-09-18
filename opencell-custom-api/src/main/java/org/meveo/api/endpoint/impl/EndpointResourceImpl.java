@@ -18,14 +18,6 @@ package org.meveo.api.endpoint.impl;
 
 import java.net.URI;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.endpoint.EndpointDto;
 import org.meveo.api.dto.response.GenericSearchResponse;
@@ -36,6 +28,14 @@ import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.model.endpoint.Endpoint;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 /**
  * Rest endpoint for managing service endpoints

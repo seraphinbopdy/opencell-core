@@ -25,10 +25,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.inject.Inject;
-
 import org.infinispan.Cache;
 import org.meveo.cache.CacheContainerProvider;
 import org.meveo.cache.endpoint.EndpointResult;
@@ -36,6 +32,10 @@ import org.meveo.cache.endpoint.PendingResult;
 import org.meveo.model.endpoint.Endpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.inject.Inject;
 
 /**
  * Provides cache related services (storing, loading, update) for endpoint related operations

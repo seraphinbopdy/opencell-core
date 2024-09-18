@@ -31,10 +31,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.endpoint.service.EndpointExecution;
 import org.meveo.cache.endpoint.EndpointResult;
@@ -61,6 +57,9 @@ import org.meveo.service.script.ScriptInstanceService;
 
 import com.api.jsonata4java.Expression;
 
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 
 /**
  * EJB for managing technical services endpoints
@@ -196,7 +195,7 @@ public class EndpointService extends BusinessService<Endpoint> {
                 }
             }
 
-            if (endpoint.getPathParameters().size() > i) {
+            if (endpoint.getPathParameters() != null && endpoint.getPathParameters().size() > i) {
                 throw new BusinessException(endpoint.getCode() + " endpoint is invalid. Missing param " + endpoint.getPathParameters().get(i));
             }
         }

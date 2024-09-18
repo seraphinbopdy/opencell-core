@@ -19,11 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.Response;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.BaseCrudApi;
 import org.meveo.api.dto.CustomFieldsDto;
@@ -43,6 +38,10 @@ import org.meveo.service.endpoint.EndpointService;
 import org.meveo.service.script.ScriptInstanceService;
 
 import io.swagger.v3.core.util.Json;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.Response;
 
 /**
  * API for managing technical services endpoints

@@ -22,8 +22,6 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -32,6 +30,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ws.rs.core.UriBuilder;
 
 public class ApiExecutor {
 	

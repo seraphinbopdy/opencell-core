@@ -1,14 +1,7 @@
 package org.meveo.api.swagger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import org.apache.http.HttpStatus;
 import org.meveo.commons.utils.ReflectionUtils;
@@ -23,16 +16,22 @@ import org.meveo.service.custom.CustomEntityTemplateService;
 import org.meveo.service.script.ScriptUtils;
 import org.meveo.util.Version;
 
-import io.swagger.models.Info;
-import io.swagger.models.Model;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Scheme;
-import io.swagger.models.Swagger;
-import io.swagger.models.parameters.BodyParameter;
-import io.swagger.models.parameters.Parameter;
-import io.swagger.models.parameters.PathParameter;
-import io.swagger.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.PathParameter;
+import io.swagger.v3.oas.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import jakarta.inject.Inject;
 
 /**
  * Service class for generating swagger documentation on the fly.
@@ -41,7 +40,7 @@ import io.swagger.models.parameters.QueryParameter;
  * @since 6.8.0
  * @version 6.10
  */
-@Stateless
+
 public class SwaggerDocService {
 
     @Inject
@@ -50,15 +49,35 @@ public class SwaggerDocService {
     @Inject
     private SwaggerHelperService swaggerHelperService;
 
-    public Swagger generateOpenApiJson(String baseUrl, Endpoint endpoint) {
+    /**
+     * Generate a OpenAPI v3 JSON schema for a single Endpoint
+     * 
+     * @param baseUrl Base Endpoint URL
+     * @param endpoint Endpoint to generate schema for
+     * @return OpenApi v3 JSON schema definition
+     */
+    @SuppressWarnings("rawtypes")
+    public OpenAPI generateOpenApiJson(String baseUrl, Endpoint endpoint) {
+
+        OpenAPI openApi = new OpenAPI();
+
+        // openApi.setBasePath(baseUrl);
+        // openApi.setSchemes(Arrays.asList(Scheme.HTTPS));
+        // openApi.setProduces(Collections.singletonList(endpoint.getContentType().getValue()));
+        if (endpoint.getMethod() == EndpointHttpMethod.POST) {
+            // openApi.setConsumes(Arrays.asList("application/json", "application/xml"));
+        }
 
         Info info = new Info();
+        openApi.setInfo(info);
         info.setTitle(endpoint.getCode());
         info.setDescription(endpoint.getDescription());
         info.setVersion(Version.appVersion);
 
-        Map<String, Path> paths = new HashMap<>();
-        Path path = new Path();
+        Paths paths = new Paths();
+        openApi.setPaths(paths);
+        PathItem path = new PathItem();
+        paths.addPathItem(endpoint.getEndpointUrl(), path);
 
         Operation operation = new Operation();
         boolean isHeadMethod = false;
@@ -89,120 +108,128 @@ public class SwaggerDocService {
             for (EndpointPathParameter endpointPathParameter : endpoint.getPathParameters()) {
                 Parameter parameter = new PathParameter();
                 parameter.setName(endpointPathParameter.getScriptParameter());
-                path.addParameter(parameter);
+                path.addParametersItem(parameter);
             }
         }
 
-        paths.put(endpoint.getEndpointUrl(), path);
-
         if (endpoint.getParametersMapping() != null) {
-            List<Parameter> operationParameter = new ArrayList<>();
+            List<Parameter> operationParameters = new ArrayList<>();
+            operation.setParameters(operationParameters);
 
             for (EndpointParameterMapping parameterMapping : endpoint.getParametersMapping()) {
 
                 if (endpoint.getMethod().equals(EndpointHttpMethod.GET)) {
                     QueryParameter queryParameter = new QueryParameter();
                     queryParameter.setName(parameterMapping.getParameterName());
-                    queryParameter.setDefaultValue(parameterMapping.getDefaultValue());
                     queryParameter.setDescription(parameterMapping.getDescription());
-                    queryParameter.setFormat(ScriptUtils.findScriptVariableType(endpoint.getService(), parameterMapping.getScriptParameter()));
 
                     if (parameterMapping.getExample() != null) {
                         queryParameter.setExample(parameterMapping.getExample());
                     }
 
-                    operationParameter.add(queryParameter);
+                    Schema parameterSchema = new Schema();
+                    parameterSchema.setDefault(parameterMapping.getDefaultValue());
+                    parameterSchema.setFormat(ScriptUtils.findScriptVariableType(endpoint.getService(), parameterMapping.getScriptParameter()));
+                    queryParameter.setSchema(parameterSchema);
 
-                } else if (endpoint.getMethod().equals(EndpointHttpMethod.POST)) {
-                    BodyParameter bodyParameter = new BodyParameter();
-                    bodyParameter.setName(parameterMapping.getParameterName() != null ? parameterMapping.getParameterName() : parameterMapping.getScriptParameter());
-                    bodyParameter.setSchema(buildBodyParameterSchema(endpoint.getService(), parameterMapping));
+                    operationParameters.add(queryParameter);
+
+                } else if (endpoint.getMethod().equals(EndpointHttpMethod.POST) || endpoint.getMethod().equals(EndpointHttpMethod.PUT)) {
+                    RequestBody requestBody = new RequestBody();
+                    Content bodyContent = new Content();
+                    MediaType mediaType = new MediaType();
+
+                    bodyContent.addMediaType(parameterMapping.getParameterName() != null ? parameterMapping.getParameterName() : parameterMapping.getScriptParameter(), mediaType);
+                    requestBody.setContent(bodyContent);
+                    Schema requestSchema = buildBodyParameterSchema(endpoint.getService(), parameterMapping);
+                    mediaType.setSchema(requestSchema);
 
                     if (parameterMapping.getExample() != null) {
-                        bodyParameter.addExample(endpoint.getContentType().getValue(), parameterMapping.getExample());
+                        Example example = new Example();
+                        example.setValue(parameterMapping.getExample());
+                        mediaType.addExamples(endpoint.getContentType().getValue(), example);
                     }
-                    operationParameter.add(bodyParameter);
+                    operation.setRequestBody(requestBody);
                 }
             }
 
-            operation.setParameters(operationParameter);
         }
 
-        Map<String, io.swagger.models.Response> responses = new HashMap<>();
-        io.swagger.models.Response response = new io.swagger.models.Response();
+        ApiResponse operationResponse = new ApiResponse();
+        ApiResponses operationResponses = new ApiResponses();
+        operation.setResponses(operationResponses);
+        operationResponses.addApiResponse("" + HttpStatus.SC_OK, operationResponse);
+
+        Content content = new Content();
+        operationResponse.setContent(content);
+        MediaType responseMediaType = new MediaType();
+        content.addMediaType("", responseMediaType);
 
         if (!isHeadMethod && !StringUtils.isBlank(endpoint.getReturnedValueExample())) {
             String mediaType = endpoint.getContentType().getValue();
-            response.example(mediaType, endpoint.getReturnedValueExample());
+            Example example = new Example();
+            example.setValue(endpoint.getReturnedValueExample());
+            responseMediaType.addExamples(mediaType, example);
         }
 
         if (!isHeadMethod) {
-            buildResponseSchema(endpoint, response);
+            Schema responseSchema = buildResponseSchema(endpoint);
+            if (responseSchema != null) {
+                responseMediaType.setSchema(responseSchema);
+            }
         }
 
-        responses.put("" + HttpStatus.SC_OK, response);
-
-        Swagger swagger = new Swagger();
-        swagger.setInfo(info);
-        swagger.setBasePath(baseUrl);
-        swagger.setSchemes(Arrays.asList(Scheme.HTTPS));
-        swagger.setProduces(Collections.singletonList(endpoint.getContentType().getValue()));
-        if (endpoint.getMethod() == EndpointHttpMethod.POST) {
-            swagger.setConsumes(Arrays.asList("application/json", "application/xml"));
-        }
-        swagger.setPaths(paths);
-        swagger.setResponses(responses);
-
-        return swagger;
+        return openApi;
     }
 
-    private Model buildBodyParameterSchema(ScriptInstance service, EndpointParameterMapping parameterMapping) {
+    @SuppressWarnings("rawtypes")
+    private Schema buildBodyParameterSchema(ScriptInstance service, EndpointParameterMapping parameterMapping) {
 
-        Model returnModelSchema;
+        Schema returnModelSchema ;
         String scriptParameter = parameterMapping.getScriptParameter();
         String parameterDataType = ScriptUtils.findScriptVariableType(service, parameterMapping.getScriptParameter());
 
         if (ReflectionUtils.isPrimitiveOrWrapperType(parameterDataType)) {
-            returnModelSchema = swaggerHelperService.buildPrimitiveResponse(parameterMapping.getParameterName(), parameterDataType, parameterMapping.isValueRequiredAsBoolean(), parameterMapping.getDefaultValue());
-            returnModelSchema.setReference("primitive");
+            returnModelSchema = swaggerHelperService.buildSchemaForPrimitiveTypeValue(parameterMapping.getParameterName(), parameterDataType, parameterMapping.isValueRequiredAsBoolean(), parameterMapping.getDefaultValue());
 
         } else {
 
             CustomEntityTemplate returnedCet = customEntityTemplateService.findByDbTablename(scriptParameter);
             if (returnedCet != null) {
-                returnModelSchema = swaggerHelperService.cetToModel(returnedCet);
+                returnModelSchema = swaggerHelperService.buildSchemaForCetTypeValue(returnedCet);
 
             } else {
-                returnModelSchema = swaggerHelperService.buildObjectResponse(parameterMapping.getParameterName());
+                returnModelSchema = swaggerHelperService.buildSchemaForObjectTypeValue(parameterMapping.getParameterName());
             }
         }
 
         return returnModelSchema;
     }
 
-    private void buildResponseSchema(Endpoint endpoint, io.swagger.models.Response response) {
+    @SuppressWarnings("rawtypes")
+    private Schema buildResponseSchema(Endpoint endpoint) {
 
         if (!StringUtils.isBlank(endpoint.getReturnedVariableName())) {
 
-            Model returnModelSchema;
+            Schema returnModelSchema ;
             String returnedVariableType = ScriptUtils.findScriptVariableType(endpoint.getService(), endpoint.getReturnedVariableName());
 
             if (ReflectionUtils.isPrimitiveOrWrapperType(returnedVariableType)) {
-                returnModelSchema = swaggerHelperService.buildPrimitiveResponse(endpoint.getReturnedVariableName(), returnedVariableType, false, null);
-                returnModelSchema.setReference("primitive");
+                returnModelSchema = swaggerHelperService.buildSchemaForPrimitiveTypeValue(endpoint.getReturnedVariableName(), returnedVariableType, false, null);
 
             } else {
 
                 CustomEntityTemplate returnedCet = customEntityTemplateService.findByDbTablename(returnedVariableType);
                 if (returnedCet != null) {
-                    returnModelSchema = swaggerHelperService.cetToModel(returnedCet);
+                    returnModelSchema = swaggerHelperService.buildSchemaForCetTypeValue(returnedCet);
 
                 } else {
-                    returnModelSchema = swaggerHelperService.buildObjectResponse(endpoint.getReturnedVariableName());
+                    returnModelSchema = swaggerHelperService.buildSchemaForObjectTypeValue(endpoint.getReturnedVariableName());
                 }
             }
 
-            response.setResponseSchema(returnModelSchema);
+            return returnModelSchema;
         }
+        return null;
     }
 }

@@ -19,8 +19,8 @@ package org.meveo.model.endpoint;
 
 import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 /**
  * Endpoint request path parameter mapping to script variables.

@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Class representing the response of the call of an endpoint.
@@ -153,7 +153,7 @@ public class EndpointResponse {
     }
 
 	/**
-	 * @see javax.servlet.http.HttpServletResponse#sendRedirect(java.lang.String)
+	 * @see jakarta.servlet.http.HttpServletResponse#sendRedirect(java.lang.String)
 	 */
 	public void sendRedirect(String location) throws IOException {
 		httpServletResponse.sendRedirect(location);

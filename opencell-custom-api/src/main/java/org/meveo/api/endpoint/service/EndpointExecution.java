@@ -19,11 +19,11 @@ package org.meveo.api.endpoint.service;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.meveo.cache.endpoint.PendingResult;
 import org.meveo.model.endpoint.Endpoint;
 import org.meveo.model.endpoint.EndpointHttpMethod;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 public class EndpointExecution {
     private final Map<String, Object> parameters;

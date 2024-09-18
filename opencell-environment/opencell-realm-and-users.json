@@ -1683,6 +1683,7 @@
         {
           "id": "05112905-653f-42b0-a92f-ddfd03654da6",
           "name": "apiIntegration",
+          "description": "Required to load portal application.",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",

@@ -21,31 +21,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Cacheable;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.EnableBusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.validation.constraint.nointersection.NoIntersectionBetween;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Configuration of a REST endpoint implemented as a script
@@ -56,7 +58,7 @@ import org.meveo.validation.constraint.nointersection.NoIntersectionBetween;
 @Entity
 @Cacheable
 @Table(name = "adm_endpoint")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "increment")
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "adm_endpoint_seq"), @Parameter(name = "increment_size", value = "1") })
 @NoIntersectionBetween(firstCollection = "pathParameters.scriptParameter", secondCollection = "parametersMapping.scriptParameter")
 @ExportIdentifier({ "code" })
 @ObservableEntity
@@ -69,8 +71,8 @@ public class Endpoint extends EnableBusinessEntity {
     /**
      * Whether endpoint is accessible without authorization
      */
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "secured", nullable = false)
-    @Type(type = "numeric_boolean")
     private boolean isSecured = true;
 
     /**
@@ -83,7 +85,7 @@ public class Endpoint extends EnableBusinessEntity {
     /**
      * Whether the execution of the service will be synchronous. If asynchronous, and id of execution will be returned to the user.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "synchronous", nullable = false)
     private boolean synchronous = true;
 
@@ -139,7 +141,7 @@ public class Endpoint extends EnableBusinessEntity {
     /**
      * Context variable to be returned by the endpoint
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "serialize_result", nullable = false)
     private boolean serializeResult;
 

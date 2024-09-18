@@ -21,11 +21,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.model.endpoint.EndpointHttpMethod;
 import org.meveo.validation.constraint.nointersection.NoIntersectionBetween;
@@ -33,8 +28,12 @@ import org.meveo.validation.constraint.nointersection.NoIntersectionBetween;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
+import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Configuration of an endpoint allowing to use a technical service.
@@ -47,14 +46,13 @@ import io.swagger.annotations.ApiModelProperty;
 @XmlRootElement(name = "Endpoint")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("EndpointDto")
 @NoIntersectionBetween(firstCollection = "parameterMappings.scriptParameter", secondCollection = "pathParameters")
 public class EndpointDto extends BusinessEntityDto implements Serializable {
 
     private static final long serialVersionUID = 3419481525817374645L;
 
     /** Whether endpoint is accessible without logging */
-    @ApiModelProperty("Whether endpoint is accessible without logging")
+    @Schema(description = "Whether endpoint is accessible without logging")
     @JsonProperty(defaultValue = "true")
     private Boolean secured;
 
@@ -62,46 +60,46 @@ public class EndpointDto extends BusinessEntityDto implements Serializable {
      * Code of the script, that implements endpoint functionality
      */
     @JsonProperty(required = true)
-    @ApiModelProperty(required = true, value = "Code of the script, that implements the endpoint functionality")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "Code of the script, that implements the endpoint functionality")
     private String serviceCode;
 
     /**
      * Whether the endpoint should be synchronous
      */
     @JsonProperty(required = true)
-    @ApiModelProperty(required = true, value = "synchronous")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "synchronous")
     private Boolean synchronous;
 
     /**
      * Method to use to access the endpoint
      */
     @JsonProperty(required = true)
-    @ApiModelProperty(required = true, value = "Http method of the endpoint")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "Http method of the endpoint")
     private EndpointHttpMethod method;
 
     /**
      * Ordered list of parameters that will construct endpoint path
      */
     @JsonProperty
-    @ApiModelProperty("List of endpoint path parameters")
+    @Schema(description = "List of endpoint path parameters")
     private List<String> pathParameters = new ArrayList<>();
 
     @JsonProperty
-    @ApiModelProperty("Roles")
+    @Schema(description = "Roles")
     private List<String> roles = new ArrayList<>();
 
     /**
      * JSONata query used to transform the result
      */
     @JsonProperty
-    @ApiModelProperty("JSONata query to transform the serialized result")
+    @Schema(description = "JSONata query to transform the serialized result")
     private String jsonataTransformer;
 
     /**
      * Context variable to be returned by the endpoint
      */
     @JsonProperty
-    @ApiModelProperty("Name of the returned context variable")
+    @Schema(description = "Name of the returned context variable")
     private String returnedVariableName;
 
     /**
@@ -109,42 +107,42 @@ public class EndpointDto extends BusinessEntityDto implements Serializable {
      */
     @JsonProperty
     @Size(max = 500)
-    @ApiModelProperty("An example of returned data")
+    @Schema(description = "An example of returned data")
     private String returnedValueExample;
 
     /**
      * Whether to serialize the result of the endpoint if a returned variable has been specified
      */
     @JsonProperty
-    @ApiModelProperty("Whether to serialize the result of the endpoint")
+    @Schema(description = "Whether to serialize the result of the endpoint")
     private Boolean serializeResult;
 
     /**
      * Content type of the response
      */
     @JsonProperty
-    @ApiModelProperty("Content type of the response")
+    @Schema(description = "Content type of the response")
     private String contentType;
 
     /**
      * Content type of the response
      */
     @JsonProperty
-    @ApiModelProperty("endpoint base path, built from service code if not set")
+    @Schema(description = "endpoint base path, built from service code if not set")
     private String basePath;
 
     /**
      * Content type of the response
      */
     @JsonProperty
-    @ApiModelProperty("endpoint path , built from path parameters if not set")
+    @Schema(description = "endpoint path , built from path parameters if not set")
     private String path;
 
     /**
      * Mapping for the technical service parameters that are not defined as path parameter
      */
     @JsonProperty(required = true)
-    @ApiModelProperty(required = true, value = "Parameter mappings information")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "Parameter mappings information")
     private List<EndpointParameterMappingDto> parameterMappings;
 
     public EndpointDto() {

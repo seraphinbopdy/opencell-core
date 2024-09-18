@@ -4,12 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
@@ -17,21 +12,14 @@ import org.meveo.model.customEntities.CustomEntityTemplate;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CustomEntityTemplateService;
 
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.parameters.Parameter;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.DateProperty;
-import io.swagger.models.properties.DoubleProperty;
-import io.swagger.models.properties.LongProperty;
-import io.swagger.models.properties.MapProperty;
-import io.swagger.models.properties.ObjectProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.PropertyBuilder;
-import io.swagger.models.properties.PropertyBuilder.PropertyId;
-import io.swagger.models.properties.StringProperty;
+import io.swagger.v3.oas.models.media.BooleanSchema;
+import io.swagger.v3.oas.models.media.DateSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.NumberSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
+import jakarta.inject.Inject;
 
 /**
  * Utility class for Swagger documentation.
@@ -40,7 +28,6 @@ import io.swagger.models.properties.StringProperty;
  * @since 6.8.0
  * @version 6.9.0
  */
-@Stateless
 public class SwaggerHelperService {
 
     @Inject
@@ -49,122 +36,92 @@ public class SwaggerHelperService {
     @Inject
     private CustomFieldTemplateService customFieldTemplateService;
 
-    public Map<String, Property> convertCftsToProperties(Map<String, CustomFieldTemplate> cfts) {
+    /**
+     * Build a OpenAPI v3 schema definition for a Custom field template type variable
+     * 
+     * @param cft Custom field template
+     * @return OpenAPI v3 schema definition
+     */
+    @SuppressWarnings("rawtypes")
+    private Schema convertCftToSchema(CustomFieldTemplate cft) {
 
-        Map<String, Property> result = new HashMap<>();
-
-        if (!cfts.isEmpty()) {
-            for (Entry<String, CustomFieldTemplate> entry : cfts.entrySet()) {
-                Property property = convertToProperty(entry.getValue());
-                result.put(entry.getKey(), property);
-            }
-        }
-
-        return result;
-    }
-
-    public Property convertToProperty(CustomFieldTemplate cft) {
-
-        Property result = new ObjectProperty();
+        Schema schema = new Schema();
 
         switch (cft.getFieldType()) {
 
         case STRING:
-            result = new StringProperty();
+            schema = new StringSchema();
             break;
+
         case DATE:
-            result = new DateProperty();
+            schema = new DateSchema();
             break;
+
         case LONG:
-            result = new LongProperty();
+            schema = new IntegerSchema();
             break;
+
         case DOUBLE:
-            result = new DoubleProperty();
+            schema = new NumberSchema();
             break;
+
         case LIST:
-            result.setName(CustomFieldTypeEnum.LIST.name());
+            schema.setName(CustomFieldTypeEnum.LIST.name());
             break;
+
         case ENTITY:
-            result = buildTypeOfEntity(cft);
-            result.setName(CustomFieldTypeEnum.ENTITY.name());
+            CustomEntityTemplate cet = customEntityTemplateService.findByCode(cft.getEntityClazzCetCode());
+            if (cet != null) {
+                schema = buildSchemaForCetTypeValue(cet);
+            }
+            schema.setName(CustomFieldTypeEnum.ENTITY.name());
             break;
+
         case TEXT_AREA:
-            result.setName(CustomFieldTypeEnum.TEXT_AREA.name());
+            schema.setName(CustomFieldTypeEnum.TEXT_AREA.name());
             break;
+
         case CHILD_ENTITY:
-            result.setName(CustomFieldTypeEnum.CHILD_ENTITY.name());
+            schema.setName(CustomFieldTypeEnum.CHILD_ENTITY.name());
             break;
+
         case MULTI_VALUE:
-            result.setName(CustomFieldTypeEnum.MULTI_VALUE.name());
+            schema.setName(CustomFieldTypeEnum.MULTI_VALUE.name());
             break;
+
         case BOOLEAN:
-            result = new BooleanProperty();
+            schema = new BooleanSchema();
             break;
+
         case CUSTOM_TABLE_WRAPPER:
-            result = buildTypeOfEntity(cft);
-            result.setName(CustomFieldTypeEnum.CUSTOM_TABLE_WRAPPER.name());
+            cet = customEntityTemplateService.findByCode(cft.getEntityClazzCetCode());
+            if (cet != null) {
+                schema = buildSchemaForCetTypeValue(cet);
+            }
+            schema.setName(CustomFieldTypeEnum.CUSTOM_TABLE_WRAPPER.name());
+            break;
+        default:
+            schema.setType(cft.getFieldType().toString().toLowerCase());
             break;
         }
 
-        result.setName(cft.getCode());
-        result.setTitle(cft.getDescription());
-
-        return result;
-    }
-
-    public ModelImpl cetToModel(CustomEntityTemplate cet) {
-
-        Map<String, CustomFieldTemplate> cfts = customFieldTemplateService.findByAppliesTo(cet.getAppliesTo());
-
-        ModelImpl result = new ModelImpl();
-        result.setType("object");
-        result.setDescription(cet.getDescription());
-
-        MapProperty mapProperty = new MapProperty();
-        mapProperty.setType("cet");
-        mapProperty.setFormat(cet.getCode());
-        mapProperty.setDescription(cet.getDescription());
-        Map<String, Property> properties = convertCftsToProperties(cfts);
-        properties.put("_additionalProperties", mapProperty);
-
-        result.setProperties(properties);
-        result.setRequired(getRequiredFields(cfts));
-
-        return result;
-    }
-
-    public Property buildTypeOfEntity(CustomFieldTemplate cft) {
-
-        CustomEntityTemplate cet = customEntityTemplateService.findByCode(cft.getEntityClazzCetCode());
-        if (cet == null) {
-            return null;
+        schema.setName(cft.getCode());
+        schema.setTitle(cft.getDescription());
+        if (cft.getDefaultValue() != null) {
+            schema.setDefault(schema);
         }
 
-        Map<String, CustomFieldTemplate> cfts = customFieldTemplateService.findByAppliesTo(cet.getAppliesTo());
-
-        ObjectProperty result = new ObjectProperty();
-
-        MapProperty mapProperty = new MapProperty();
-        mapProperty.setType("cet");
-        mapProperty.setFormat(cet.getCode());
-        mapProperty.setDescription(cet.getDescription());
-        Map<String, Property> properties = convertCftsToProperties(cfts);
-        properties.put("_additionalProperties", mapProperty);
-
-        result.setProperties(properties);
-        result.setRequiredProperties(getRequiredFields(cfts));
-
-        return result;
+        return schema;
     }
 
     /**
-     * Retrieves a list of required {@link CustomFieldTemplate}.
+     * Retrieves a list of required {@link CustomFieldTemplate} names
      * 
      * @param cfts list of custom fields
-     * @return required custom fields
+     * @return A list of required custom field names
      * @see CustomFieldTemplate
      */
-    public List<String> getRequiredFields(Map<String, CustomFieldTemplate> cfts) {
+    private List<String> getRequiredFieldNames(Map<String, CustomFieldTemplate> cfts) {
 
         List<String> result = new ArrayList<>();
         if (!cfts.isEmpty()) {
@@ -174,58 +131,85 @@ public class SwaggerHelperService {
         return result;
     }
 
-    public Model buildPrimitiveResponse(String variableName, String variableType, boolean isRequired, String defaultValue) {
+    /**
+     * Build a OpenAPI v3 schema definition for a Custom entity template type variable
+     * 
+     * @param cet Custom entity template
+     * @return OpenAPI v3 schema definition
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public Schema buildSchemaForCetTypeValue(CustomEntityTemplate cet) {
+
+        Map<String, CustomFieldTemplate> cfts = customFieldTemplateService.findByAppliesTo(cet.getAppliesTo());
+
+        Schema schema = new Schema();
+        schema.setType("object");
+        schema.setDescription(cet.getDescription());
+        schema.setFormat("cet-" + cet.getCode());
+
+        Map<String, Schema> properties = new HashMap<>();
+
+        if (!cfts.isEmpty()) {
+            for (CustomFieldTemplate cft : cfts.values()) {
+                Schema cftSchema = convertCftToSchema(cft);
+                properties.put(cft.getCode(), cftSchema);
+            }
+        }
+
+        schema.setProperties(properties);
+        schema.setRequired(getRequiredFieldNames(cfts));
+
+        return schema;
+    }
+
+    /**
+     * Build a OpenAPI v3 schema definition for a primitive type variable
+     * 
+     * @param variableName Variable name
+     * @param variableType Variable type
+     * @param isRequired Is value required
+     * @param defaultValue A default value
+     * @return OpenAPI v3 schema definition
+     */
+    @SuppressWarnings("rawtypes")
+    public Schema buildSchemaForPrimitiveTypeValue(String variableName, String variableType, boolean isRequired, String defaultValue) {
 
         variableType = variableType.toLowerCase();
-        Map<PropertyId, Object> props = new HashMap<>();
-        props.put(PropertyId.TITLE, variableName);
 
         String format = null;
         if (variableType.equals("long")) {
             variableType = "integer";
             format = "int64";
-            
+
         } else if (variableType.equals("double")) {
             variableType = "number";
             format = "double";
         }
 
-        Property prop = PropertyBuilder.build(variableType, format, props);
-        prop.setDescription(variableName);
-        prop.setRequired(isRequired);
-        prop.setDefault(defaultValue);
-        return PropertyBuilder.toModel(prop);
+        Schema schema = new Schema();
+
+        schema.setDescription(variableName);
+        schema.setTitle(variableName);
+        schema.setNullable(!isRequired);
+        schema.setDefault(defaultValue);
+        schema.setFormat(format);
+        schema.setType(variableType);
+        return schema;
     }
 
-    public Model buildObjectResponse(String variableName) {
+    /**
+     * Build a OpenAPI v3 schema definition for an Object type variable
+     * 
+     * @param variableName Variable name
+     * @return OpenAPI v3 schema definition
+     */
+    public ObjectSchema buildSchemaForObjectTypeValue(String variableName) {
 
-        Map<PropertyId, Object> props = new HashMap<>();
-        props.put(PropertyId.TITLE, variableName);
-        Property prop = PropertyBuilder.build("object", null, props);
-        prop.setDescription(variableName);
-        return PropertyBuilder.toModel(prop);
+        ObjectSchema schema = new ObjectSchema();
+
+        schema.setDescription(variableName);
+        schema.setTitle(variableName);
+
+        return schema;
     }
-
-    public List<Parameter> getGetPathParamaters(Map<String, Path> map) {
-
-        Optional<Entry<String, Path>> getPath = map.entrySet().stream().filter(e -> e.getValue().getGet() != null).findAny();
-        if (getPath.isPresent()) {
-            Operation getOperation = getPath.get().getValue().getGet();
-            return getOperation.getParameters();
-        }
-
-        return new ArrayList<>();
-    }
-
-    public List<Parameter> getPostPathParamaters(Map<String, Path> map) {
-
-        Optional<Entry<String, Path>> postPath = map.entrySet().stream().filter(e -> e.getValue().getPost() != null).findAny();
-        if (postPath.isPresent()) {
-            Operation postOperation = postPath.get().getValue().getPost();
-            return postOperation.getParameters();
-        }
-
-        return new ArrayList<>();
-    }
-
 }

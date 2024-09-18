@@ -20,11 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.meveo.cache.endpoint.PendingResult;
 import org.meveo.model.endpoint.Endpoint;
 import org.meveo.model.endpoint.EndpointHttpMethod;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 public class EndpointExecutionBuilder {
     private Map<String, Object> parameters = new HashMap<>();

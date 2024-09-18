@@ -16,7 +16,7 @@
 
 package org.meveo.api.endpoint.resource;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public enum Headers {
 

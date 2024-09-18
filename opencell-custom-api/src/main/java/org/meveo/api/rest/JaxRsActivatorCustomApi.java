@@ -21,17 +21,15 @@ package org.meveo.api.rest;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import org.meveo.api.endpoint.impl.EndpointResourceImpl;
 import org.meveo.api.rest.filter.RESTCorsRequestFilter;
 import org.meveo.api.rest.filter.RESTCorsResponseFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 /**
  * @author Edward P. Legaspi
@@ -54,7 +52,7 @@ public class JaxRsActivatorCustomApi extends Application {
         resources.add(RESTCorsResponseFilter.class);
         resources.add(JaxRsExceptionMapper.class);
         resources.add(JacksonProvider.class);
-        resources.add(OpenApiResource.class);
+//        resources.add(OpenApiResource.class); // Akk migrate me - should be another class to list all the custom api endpoints
 
         return resources;
     }

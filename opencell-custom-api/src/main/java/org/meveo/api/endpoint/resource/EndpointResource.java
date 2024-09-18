@@ -3,48 +3,44 @@
  */
 package org.meveo.api.endpoint.resource;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.endpoint.EndpointDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.model.endpoint.Endpoint;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HEAD;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/endpoint")
-@Api("EndpointRs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface EndpointResource {
 
     @POST
-    @ApiOperation(value = "Create a new endpoint")
+    @Operation(summary = "Create a new endpoint")
     Response create(@Valid @NotNull EndpointDto endpointDto) throws BusinessException;
 
     @PUT
-    @ApiOperation(value = "Update an existing endpoint")
+    @Operation(summary = "Update an existing endpoint")
     Response update(@Valid @NotNull EndpointDto endpointDto) throws BusinessException;
 
     @PUT
     @Path("/createOrUpdate")
-    @ApiOperation(value = "Create a new or update an existing endpoint")
+    @Operation(summary = "Create a new or update an existing endpoint")
     Response createOrUpdate(@Valid @NotNull EndpointDto endpointDto) throws BusinessException;
 
     /**
@@ -54,8 +50,8 @@ public interface EndpointResource {
      */
     @DELETE
     @Path("/{code}")
-    @ApiOperation(value = "Delete endpoint")
-    Response remove(@PathParam("code") @NotNull @ApiParam("Code of the endpoint") String code) throws BusinessException, EntityDoesNotExistsException;
+    @Operation(summary = "Delete endpoint")
+    Response remove(@PathParam("code") @NotNull @Parameter(description = "Code of the endpoint") String code) throws BusinessException, EntityDoesNotExistsException;
 
     /**
      * Find a {@link Endpoint} by code
@@ -66,8 +62,8 @@ public interface EndpointResource {
     @GET
     @Path("/{code}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Find endpoint by code")
-    Response find(@PathParam("code") @NotNull @ApiParam("Code of the endpoint") String code);
+    @Operation(summary = "Find endpoint by code")
+    Response find(@PathParam("code") @NotNull @Parameter(description = "Code of the endpoint") String code);
 
     /**
      * Check exist a {@link Endpoint}
@@ -76,8 +72,8 @@ public interface EndpointResource {
      */
     @HEAD
     @Path("/{code}")
-    @ApiOperation(value = "Check exist an endpoint")
-    Response exists(@PathParam("code") @NotNull @ApiParam("Code of the endpoint") String code);
+    @Operation(summary = "Check exist an endpoint")
+    Response exists(@PathParam("code") @NotNull @Parameter(description = "Code of the endpoint") String code);
 
     /**
      * List endpoints matching a given criteria
@@ -97,6 +93,6 @@ public interface EndpointResource {
      */
     @GET
     @Path("/openApi/{code}")
-    @ApiOperation(value = "Generate open api json of the endpoint")
-    Response generateOpenApiJson(@PathParam("code") @NotNull @ApiParam("Code of the endpoint") String code);
+    @Operation(summary = "Generate open api json of the endpoint")
+    Response generateOpenApiJson(@PathParam("code") @NotNull @Parameter(description = "Code of the endpoint") String code);
 }

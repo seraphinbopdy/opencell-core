@@ -9,11 +9,11 @@ import org.meveo.apiv2.payments.CustomerBalance;
 import org.meveo.apiv2.report.ImmutableSuccessResponse;
 import org.meveo.service.payments.impl.CustomerBalanceService;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class CustomerBalanceResourceImpl implements CustomerBalanceResource {

@@ -18,18 +18,20 @@
 
 package org.meveo.api.metrics.conf;
 
+import static jakarta.ws.rs.HttpMethod.DELETE;
+import static jakarta.ws.rs.HttpMethod.GET;
+import static jakarta.ws.rs.HttpMethod.HEAD;
+import static jakarta.ws.rs.HttpMethod.OPTIONS;
+import static jakarta.ws.rs.HttpMethod.PATCH;
+import static jakarta.ws.rs.HttpMethod.POST;
+import static jakarta.ws.rs.HttpMethod.PUT;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
 import org.meveo.api.BaseCrudApi;
 import org.meveo.api.dto.metrics.configuration.MetricsConfigurationDto;
 import org.meveo.api.exception.EntityAlreadyExistsException;
@@ -40,13 +42,8 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.metrics.configuration.MetricsConfiguration;
 import org.meveo.service.metrics.configuration.MetricsConfigurationService;
 
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.HEAD;
-import static javax.ws.rs.HttpMethod.OPTIONS;
-import static javax.ws.rs.HttpMethod.PATCH;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  *
@@ -60,9 +57,9 @@ public class MetricsConfigurationApi extends BaseCrudApi<MetricsConfiguration, M
     @Inject
     MetricsConfigurationCacheContainerProvider metricsConfigurationCacheContainerProvider;
 
-    @Inject
-    @RegistryType(type = MetricRegistry.Type.APPLICATION)
-    MetricRegistry registry;
+//    @Inject
+//    @RegistryScope(scope = MetricRegistry.APPLICATION_SCOPE)
+//    MetricRegistry registry; // AKK migrate me
 
     @Override
     public MetricsConfiguration create(MetricsConfigurationDto dataDto) {
@@ -117,11 +114,11 @@ public class MetricsConfigurationApi extends BaseCrudApi<MetricsConfiguration, M
         // remove metric history
         String name = oldMetricsConfiguration.getFullPath().replace("/", "_");
         log.debug("Removed metrics {}", name);
-        if ("*.jsf".equals(name)) {
-            registry.removeMatching((metricsID, metrics) -> metricsID.getName().endsWith("jsf"));
-        } else {
-            registry.removeMatching((metricsID, metrics) -> metricsID.getName().contains(name));
-        }
+//        if ("*.jsf".equals(name)) { // AKK migrate me
+//            registry.removeMatching((metricsID, metrics) -> metricsID.getName().endsWith("jsf"));
+//        } else {
+//            registry.removeMatching((metricsID, metrics) -> metricsID.getName().contains(name));
+//        }
     }
 
     private void validate(MetricsConfigurationDto dataDto) {
@@ -145,16 +142,17 @@ public class MetricsConfigurationApi extends BaseCrudApi<MetricsConfiguration, M
         if (!methods.contains(dataDto.getMethod())) {
             throw new InvalidParameterException(" Invalid request method " + dataDto.getMethod() + ", allowed methods values : " + methods + " ");
         }
-        if ("timer".equals(dataDto.getMetricsType())) {
-            // validate metrics unit when metrics type is timer
-            List<String> fields = Stream.of(MetricUnits.class.getDeclaredFields())
-                    .map(Field::getName)
-                    .map(String::toLowerCase)
-                    .collect(Collectors.toList());
-            if (!fields.contains(dataDto.getMetricsUnit())) {
-                throw new InvalidParameterException(" Invalid metrics unit " + dataDto.getMetricsUnit() + ", allowed metrics unit values : " + fields + " ");
-            }
-        }
+//        if ("timer".equals(dataDto.getMetricsType())) {
+//            // validate metrics unit when metrics type is timer
+//            List<String> fields = Stream.of(MetricUnits.class.getDeclaredFields())
+//                    .map(Field::getName)
+//                    .map(String::toLowerCase)
+//                    .collect(Collectors.toList());
+//            if (!fields.contains(dataDto.getMetricsUnit())) {
+//                throw new InvalidParameterException(" Invalid metrics unit " + dataDto.getMetricsUnit() + ", allowed metrics unit values : " + fields + " ");
+//            }
+//        }
+        // Akk migrate me
 
         handleMissingParametersAndValidate(dataDto);
     }

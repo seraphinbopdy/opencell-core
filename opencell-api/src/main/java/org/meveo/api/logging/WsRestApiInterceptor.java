@@ -18,9 +18,9 @@
 
 package org.meveo.api.logging;
 
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
 
 import org.meveo.model.audit.ChangeOriginEnum;
 import org.meveo.security.CurrentUser;

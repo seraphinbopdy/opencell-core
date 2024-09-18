@@ -37,11 +37,11 @@ import org.meveo.util.Inflector;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Application;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Application;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -66,8 +66,8 @@ import java.util.stream.Stream;
  * @author Thang Nguyen
  */
 
-@ApplicationPath(GenericOpencellRestfulAPIv1.REST_PATH)
-public class GenericOpencellRestfulAPIv1 extends Application {
+@ApplicationPath(JaxRsActivatorGenericApiV1.REST_PATH)
+public class JaxRsActivatorGenericApiV1 extends Application {
     public static Map<Object,String> MAP_RESTFUL_PATH_AND_IBASE_RS_PATH = new HashMap<>();
     public static RegExHashMap<Object,String> MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH = new RegExHashMap<>();
     public static Map<String,Class> MAP_SPECIAL_IBASE_RS_PATH_AND_DTO_CLASS = new HashMap<>();

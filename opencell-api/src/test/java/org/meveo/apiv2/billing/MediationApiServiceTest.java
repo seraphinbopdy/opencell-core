@@ -2,7 +2,6 @@ package org.meveo.apiv2.billing;
 
 import static org.junit.Assert.assertEquals;
 import static org.meveo.apiv2.billing.ImmutableCdrListInput.builder;
-import static org.meveo.model.billing.BillingRunStatusEnum.POSTVALIDATED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -13,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
-import javax.ws.rs.BadRequestException;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,11 +29,10 @@ import org.meveo.service.medina.impl.AccessService;
 import org.meveo.service.medina.impl.CDRService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import liquibase.pro.packaged.E;
+import jakarta.ws.rs.BadRequestException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MediationApiServiceTest {

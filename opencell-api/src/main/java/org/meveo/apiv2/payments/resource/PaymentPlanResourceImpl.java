@@ -8,9 +8,9 @@ import org.meveo.apiv2.ordering.common.LinkGenerator;
 import org.meveo.apiv2.payments.PaymentPlanDto;
 import org.meveo.apiv2.payments.service.PaymentPlanApi;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class PaymentPlanResourceImpl implements PaymentPlanResource {

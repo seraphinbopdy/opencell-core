@@ -25,8 +25,8 @@ import org.meveo.model.esignature.NatureDocument;
 import org.meveo.model.esignature.Operator;
 import org.meveo.model.esignature.SigantureAuthentificationMode;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

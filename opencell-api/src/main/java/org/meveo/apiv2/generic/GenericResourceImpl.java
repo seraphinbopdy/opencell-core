@@ -10,19 +10,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Link;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.logging.WsRestApiInterceptor;
-import org.meveo.apiv2.GenericOpencellRestful;
+import org.meveo.apiv2.JaxRsActivatorApiV2;
 import org.meveo.apiv2.generic.common.LinkGenerator;
 import org.meveo.apiv2.generic.core.GenericHelper;
 import org.meveo.apiv2.generic.core.GenericRequestMapper;
@@ -148,7 +148,7 @@ public class GenericResourceImpl implements GenericResource {
     @Override
     public Response getFullListEntities(boolean onlyBusinessEntities, boolean withFullName) {
 
-        List<String> entities = GenericOpencellRestful.ENTITIES_LIST.stream().filter(aClass ->
+        List<String> entities = JaxRsActivatorApiV2.ENTITIES_LIST.stream().filter(aClass ->
                 (!onlyBusinessEntities || BusinessEntity.class.isAssignableFrom(aClass)))
                 . map(aClass -> withFullName ? aClass.getCanonicalName(): aClass.getSimpleName()).collect(Collectors.toList());
 
@@ -183,7 +183,7 @@ public class GenericResourceImpl implements GenericResource {
 
     @Override
     public Response getVersions() {
-        return Response.ok().entity(GenericOpencellRestful.VERSION_INFO).type(MediaType.APPLICATION_JSON_TYPE).build();
+        return Response.ok().entity(JaxRsActivatorApiV2.VERSION_INFO).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
     private Link buildPaginatedResourceLink(String entityName) {

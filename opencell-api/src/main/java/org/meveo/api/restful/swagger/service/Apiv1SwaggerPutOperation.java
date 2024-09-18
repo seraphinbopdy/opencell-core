@@ -3,7 +3,7 @@ package org.meveo.api.restful.swagger.service;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import org.meveo.api.restful.GenericOpencellRestfulAPIv1;
+import org.meveo.api.restful.JaxRsActivatorGenericApiV1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ public class Apiv1SwaggerPutOperation {
         // In case of retrieving a particular entity, transform a queryParam to a pathParam. For this, do the following :
         // - Add a pathParam
         // - Remove the queryParam
-        if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( updateAnEntityRFPath ) ) {
+        if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( updateAnEntityRFPath ) ) {
             List<Parameter> parameters = putOp.getParameters() != null ? putOp.getParameters() : new ArrayList<>();
 
             // create a new path parameter and add it to put operation in case of updating an entity

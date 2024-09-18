@@ -13,11 +13,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
+import jakarta.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.apiv2.billing.DiscountPlanInstanciateDto;
@@ -42,7 +40,10 @@ import org.meveo.service.catalog.impl.DiscountPlanService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import liquibase.repackaged.org.apache.commons.lang3.StringUtils;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
 
 @Stateless
 public class DiscountPlanApiService {

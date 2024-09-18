@@ -4,10 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -19,6 +15,10 @@ import org.meveo.model.mediation.EdrVersioningRule;
 import org.meveo.model.mediation.MediationSetting;
 import org.meveo.service.mediation.EdrVersioningRuleService;
 import org.meveo.service.mediation.MediationSettingService;
+
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 
 public class MediationSettingApiService implements ApiService<MediationSetting>{
 

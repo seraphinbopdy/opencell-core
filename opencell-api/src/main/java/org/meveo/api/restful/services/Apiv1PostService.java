@@ -7,14 +7,14 @@ import org.meveo.api.dto.*;
 import org.meveo.api.dto.account.AccessDto;
 import org.meveo.api.dto.account.AccountHierarchyDto;
 import org.meveo.api.dto.catalog.DiscountPlanItemDto;
-import org.meveo.api.restful.GenericOpencellRestfulAPIv1;
+import org.meveo.api.restful.JaxRsActivatorGenericApiV1;
 import org.meveo.api.restful.filter.AuthenticationFilter;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.apiv2.generic.core.GenericHelper;
 import org.meveo.util.Inflector;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.*;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -52,7 +52,7 @@ public class Apiv1PostService {
     public Response createEntity(UriInfo uriInfo, String postPath, String jsonDto) throws JsonProcessingException, URISyntaxException {
         URI redirectURI;
 
-        pathIBaseRS = GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get( postPath );
+        pathIBaseRS = JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get( postPath );
 
         if ( pathIBaseRS.equals( "/jobInstance" ) || pathIBaseRS.equals( "/job" ) )
             redirectURI = new URI( uriInfo.getBaseUri().toString().substring(0, uriInfo.getBaseUri().toString().length() - 4 )
@@ -91,7 +91,7 @@ public class Apiv1PostService {
                     + PAIR_QUERY_PARAM_SEPARATOR );
         }
 
-        pathIBaseRS = GenericOpencellRestfulAPIv1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.get( postPath );
+        pathIBaseRS = JaxRsActivatorGenericApiV1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.get( postPath );
 
         // Handle the generic special endpoint: enable a service
         if ( segmentsOfPathAPIv1.get( segmentsOfPathAPIv1.size() - 1 ).getPath().equals(ENABLE_SERVICE) ) {
@@ -138,7 +138,7 @@ public class Apiv1PostService {
      */
     public Response postCreationOrUpdate(UriInfo uriInfo, String jsonDto) throws URISyntaxException, JsonProcessingException {
         URI redirectURI;
-        StringBuilder aPathBd = new StringBuilder(GenericOpencellRestfulAPIv1.REST_PATH);
+        StringBuilder aPathBd = new StringBuilder(JaxRsActivatorGenericApiV1.REST_PATH);
         segmentsOfPathAPIv1 = uriInfo.getPathSegments();
 
         String entityCode = segmentsOfPathAPIv1.get(segmentsOfPathAPIv1.size() - 2).toString();
@@ -148,8 +148,8 @@ public class Apiv1PostService {
                 aPathBd.append( FORWARD_SLASH + segmentsOfPathAPIv1.get(i) );
             String aPath = aPathBd.toString();
 
-            if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey(aPath) ) {
-                pathIBaseRS = GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get(aPath);
+            if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey(aPath) ) {
+                pathIBaseRS = JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get(aPath);
                 String entityClassName = Inflector.getInstance().singularize(segmentsOfPathAPIv1.get(segmentsOfPathAPIv1.size() - 3));
 
                 if ( pathIBaseRS.equals( Apiv1ConstantDictionary.TRIGGERED_EDR ) )

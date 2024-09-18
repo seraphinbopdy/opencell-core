@@ -3,14 +3,14 @@ package org.meveo.api;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ApplicationPath("/api/rest/v0")
-public class LegacyOpencellAPIConfig extends Application {
+//@ApplicationPath("/api/rest/v0")
+public class JaxRsActivatorLegacyAPIConfig extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {

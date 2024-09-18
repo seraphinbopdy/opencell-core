@@ -11,8 +11,8 @@ import org.meveo.apiv2.generic.services.PersistenceServiceHelper;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.util.*;
 
 /**

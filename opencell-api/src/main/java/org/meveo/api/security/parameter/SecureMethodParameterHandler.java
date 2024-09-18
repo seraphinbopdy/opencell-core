@@ -22,16 +22,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.meveo.api.exception.MeveoApiException;
+import org.meveo.api.security.config.SecureMethodParameterConfig;
 import org.meveo.api.security.config.annotation.SecureMethodParameter;
 import org.meveo.api.security.config.annotation.SecuredBusinessEntityMethod;
-import org.meveo.api.security.config.SecureMethodParameterConfig;
 import org.slf4j.Logger;
+
+import jakarta.ejb.Singleton;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 /**
  * This is a singleton object that takes an annotation and the method parameters

@@ -4,7 +4,7 @@ package org.meveo.apiv2.accounting.service;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.apiv2.generic.exception.ConflictException;

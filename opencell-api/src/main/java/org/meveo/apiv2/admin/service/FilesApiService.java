@@ -27,7 +27,7 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.expressions.ExpressionParser;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

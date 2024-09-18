@@ -10,9 +10,9 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.EinvoiceSettingService;
 import org.meveo.service.job.JobInstanceService;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 @Interceptors({ WsRestApiInterceptor.class })
 public class EinvoiceResourceImpl implements EinvoiceResource {
 	

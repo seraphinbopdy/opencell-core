@@ -1,5 +1,12 @@
 package org.meveo.apiv2.generic.core.mapper;
 
+import static com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter.filterOutAllExcept;
+
+import java.util.Arrays;
+import java.util.Set;
+
+import org.hibernate.collection.spi.PersistentBag;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
@@ -7,14 +14,7 @@ import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
-import java.util.Arrays;
-import java.util.Set;
-
-import javax.persistence.Persistence;
-
-import org.hibernate.collection.internal.PersistentBag;
-
-import static com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter.*;
+import jakarta.persistence.Persistence;
 
 class GenericSimpleFilterProvider extends SimpleFilterProvider {
     private static final String[] forbiddenFieldNames = {

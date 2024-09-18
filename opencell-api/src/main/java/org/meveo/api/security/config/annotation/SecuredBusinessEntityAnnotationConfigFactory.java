@@ -18,16 +18,16 @@
 
 package org.meveo.api.security.config.annotation;
 
-import javax.enterprise.inject.Default;
-import javax.inject.Singleton;
-import javax.interceptor.InvocationContext;
-
 import org.meveo.api.security.config.FilterPropertyConfig;
 import org.meveo.api.security.config.FilterResultsConfig;
 import org.meveo.api.security.config.SecureMethodParameterConfig;
 import org.meveo.api.security.config.SecuredBusinessEntityConfig;
 import org.meveo.api.security.config.SecuredBusinessEntityConfigFactory;
 import org.meveo.api.security.config.SecuredMethodConfig;
+
+import jakarta.ejb.Singleton;
+import jakarta.enterprise.inject.Default;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * the default secured entities configuration factory that is based on annotations

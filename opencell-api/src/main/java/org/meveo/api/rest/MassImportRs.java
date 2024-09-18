@@ -9,8 +9,8 @@ import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.meveo.api.dto.ImportFileTypeDto;
 import org.meveo.api.rest.admin.impl.FileImportForm;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 /**

@@ -20,21 +20,14 @@ package org.meveo.api.catalog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.xml.bind.ValidationException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.BaseCrudApi;
-import org.meveo.api.dto.LanguageDescriptionDto;
-import org.meveo.api.dto.LanguageDto;
 import org.meveo.api.dto.catalog.ChargeTemplateDto;
 import org.meveo.api.dto.catalog.TriggeredEdrTemplateDto;
 import org.meveo.api.exception.BusinessApiException;
@@ -45,7 +38,6 @@ import org.meveo.api.exception.MissingParameterException;
 import org.meveo.commons.utils.ListUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.InvoiceSubCategory;
-import org.meveo.model.billing.TradingLanguage;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.ChargeTemplateStatusEnum;
 import org.meveo.model.catalog.PricePlanMatrix;
@@ -66,6 +58,9 @@ import org.meveo.service.cpq.AttributeService;
 import org.meveo.service.finance.RevenueRecognitionRuleService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.tax.TaxClassService;
+
+import jakarta.inject.Inject;
+import jakarta.validation.ValidationException;
 
 /**
  * @author Edward P. Legaspi

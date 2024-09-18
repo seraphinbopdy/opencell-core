@@ -21,9 +21,9 @@ import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.catalog.impl.CustomerSequenceService;
 import org.meveo.service.validation.ValidationByNumberCountryService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

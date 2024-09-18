@@ -8,10 +8,10 @@ import org.meveo.api.rest.invoice.PaymentTermResource;
 import org.meveo.apiv2.billing.PaymentTermMapper;
 import org.meveo.model.payments.PaymentTerm;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 
 @Stateless
 @Interceptors({ WsRestApiInterceptor.class })

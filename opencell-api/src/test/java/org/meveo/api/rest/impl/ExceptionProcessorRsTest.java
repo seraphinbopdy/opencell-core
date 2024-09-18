@@ -2,9 +2,8 @@ package org.meveo.api.rest.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashSet;
 import java.util.Set;
-
-import javax.validation.ConstraintViolation;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +11,8 @@ import org.junit.runner.RunWith;
 import org.meveo.admin.util.ResourceBundle;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import jakarta.validation.ConstraintViolation;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExceptionProcessorRsTest {
@@ -36,7 +37,11 @@ public class ExceptionProcessorRsTest {
 
     @Test
     public void can_process_many_constraints_violation_exception_with_one_cause() {
-        String message = exceptionProcessorRs.buildErrorMessage(Set.of(constraintViolation1, constraintViolation2));
+        
+        Set<ConstraintViolation<?>> constraintViolations = new HashSet<>();
+        constraintViolations.add(constraintViolation1);
+        constraintViolations.add(constraintViolation2);
+        String message = exceptionProcessorRs.buildErrorMessage(constraintViolations);
         assertThat(message).isEqualTo("Invalid values passed:     ConstraintViolationMock.path1: value 'invalid value 1' - a message 1;    ConstraintViolationMock.path2: value 'invalid value 2' - a message 2;");
     }
 }

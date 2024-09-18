@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -289,7 +289,7 @@ public class OrderItemApiService implements ApiService<OrderItem> {
                 oldOrderItem.setUserAccount(orderItem.getUserAccount());
                 oldOrderItem.setProductInstances(orderItem.getProductInstances());
                 oldOrderItem.setSubscription(orderItem.getSubscription());
-                oldOrderItem.setCfValues(orderItem.getCfValues());
+                oldOrderItem.setCfValuesAsJson(orderItem.getCfValuesAsJson());
 
                 orderItemService.update(oldOrderItem);
                 refreshOrRetrieveOrderItemProductInstanceProduct(oldOrderItem);
@@ -317,7 +317,7 @@ public class OrderItemApiService implements ApiService<OrderItem> {
                     oldOrderItem.setAction(orderItem.getAction());
                 }
                 if(orderItem.getCfValues() != null){
-                    oldOrderItem.setCfValues(orderItem.getCfValues());
+                    oldOrderItem.setCfValuesAsJson(orderItem.getCfValuesAsJson());
                 }
                 populateOrderItemFields(orderItem);
                 if(orderItem.getUserAccount() != null){

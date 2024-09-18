@@ -2,7 +2,7 @@ package org.meveo.api.billing;
 
 import static java.util.Optional.ofNullable;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;

@@ -33,8 +33,8 @@ import org.meveo.model.tax.TaxCategory;
 import org.meveo.service.billing.impl.UntdidTaxationCategoryService;
 import org.meveo.service.tax.TaxCategoryService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.function.BiFunction;
 

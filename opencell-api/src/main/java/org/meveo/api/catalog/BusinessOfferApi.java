@@ -19,11 +19,12 @@
 package org.meveo.api.catalog;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,24 +33,47 @@ import org.meveo.api.BaseApi;
 import org.meveo.api.billing.SubscriptionApi;
 import org.meveo.api.dto.CustomFieldDto;
 import org.meveo.api.dto.CustomFieldsDto;
-import org.meveo.api.dto.account.CustomerCategoryDto;
-import org.meveo.api.dto.catalog.*;
+import org.meveo.api.dto.catalog.BSMConfigurationDto;
+import org.meveo.api.dto.catalog.BomOfferDto;
+import org.meveo.api.dto.catalog.BpmProductDto;
+import org.meveo.api.dto.catalog.BsmServiceDto;
+import org.meveo.api.dto.catalog.OfferTemplateCategoryDto;
+import org.meveo.api.dto.catalog.ServiceConfigurationDto;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidImageData;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.model.DatePeriod;
 import org.meveo.model.admin.Seller;
-import org.meveo.model.catalog.*;
+import org.meveo.model.catalog.BusinessOfferModel;
+import org.meveo.model.catalog.BusinessProductModel;
+import org.meveo.model.catalog.BusinessServiceModel;
+import org.meveo.model.catalog.Channel;
+import org.meveo.model.catalog.OfferProductTemplate;
+import org.meveo.model.catalog.OfferServiceTemplate;
+import org.meveo.model.catalog.OfferTemplate;
+import org.meveo.model.catalog.OfferTemplateCategory;
+import org.meveo.model.catalog.ProductTemplate;
+import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.crm.CustomerCategory;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.crm.custom.CustomFieldValue;
 import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.service.admin.impl.SellerService;
-import org.meveo.service.catalog.impl.*;
+import org.meveo.service.catalog.impl.BOMInstantiationParameters;
+import org.meveo.service.catalog.impl.BusinessOfferModelService;
+import org.meveo.service.catalog.impl.BusinessProductModelService;
+import org.meveo.service.catalog.impl.BusinessServiceModelService;
+import org.meveo.service.catalog.impl.ChannelService;
+import org.meveo.service.catalog.impl.OfferTemplateCategoryService;
+import org.meveo.service.catalog.impl.OfferTemplateService;
+import org.meveo.service.catalog.impl.ProductTemplateService;
+import org.meveo.service.catalog.impl.ServiceTemplateService;
 import org.meveo.service.crm.impl.CustomerCategoryService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Said Ramli
@@ -481,11 +505,11 @@ public class BusinessOfferApi extends BaseApi {
             ServiceTemplate temp = (ServiceTemplate) BeanUtils.cloneBean(entity);
             temp.setCfValues(null);
             temp.setUuid(UUID.randomUUID().toString());
-            temp.setCfAccumulatedValues(null);
+//            temp.setCfAccumulatedValues(null);
 
             populateCustomFields(customFieldsDto, temp, isNewEntity);
             entity.setCfValues(temp.getCfValues());
-            entity.setCfAccumulatedValues(temp.getCfValues());
+//            entity.setCfAccumulatedValues(temp.getCfValues());
         } catch (Exception e) {
             log.error("Error when cloning object:" + entity, e);
         }
@@ -507,11 +531,11 @@ public class BusinessOfferApi extends BaseApi {
             OfferTemplate temp = (OfferTemplate) BeanUtils.cloneBean(entity);
             temp.setUuid(UUID.randomUUID().toString());
             temp.setCfValues(null);
-            temp.setCfAccumulatedValues(null);
+//            temp.setCfAccumulatedValues(null);
 
             populateCustomFields(customFieldsDto, temp, true);
             entity.setCfValues(temp.getCfValues());
-            entity.setCfAccumulatedValues(temp.getCfValues());
+//            entity.setCfAccumulatedValues(temp.getCfValues());
         } catch (Exception e) {
             log.error("Error setting CF values to the cloning object:" + entity, e);
         }
@@ -532,11 +556,11 @@ public class BusinessOfferApi extends BaseApi {
             ProductTemplate temp = (ProductTemplate) BeanUtils.cloneBean(entity);
             temp.setUuid(UUID.randomUUID().toString());
             temp.setCfValues(null);
-            temp.setCfAccumulatedValues(null);
+//            temp.setCfAccumulatedValues(null);
 
             populateCustomFields(customFieldsDto, temp, true);
             entity.setCfValues(temp.getCfValues());
-            entity.setCfAccumulatedValues(temp.getCfValues());
+//            entity.setCfAccumulatedValues(temp.getCfValues());
         } catch (Exception e) {
             log.error("Error when cloning object" + entity, e);
         }

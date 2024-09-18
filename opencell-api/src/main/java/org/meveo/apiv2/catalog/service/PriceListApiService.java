@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.inject.Inject;
 
 import org.hibernate.collection.spi.PersistentCollection;
 import org.meveo.admin.exception.BusinessException;
@@ -734,13 +734,13 @@ public class PriceListApiService extends BaseApi {
                 if(line.getPricePlan() != null) {
                     duplicatedLine.setPricePlan(duplicatePricePlan(line.getPricePlan()));
                 }
-                duplicatedLine.setCfValues(line.getCFValuesCopy());
+                duplicatedLine.setCfValuesAsJson(line.getCfValuesAsJson());
                 priceListLineService.create(duplicatedLine);
                 duplicatedPriceList.getLines().add(duplicatedLine);
             }
         }
 
-        duplicatedPriceList.setCfValues(priceList.getCFValuesCopy());
+        duplicatedPriceList.setCfValuesAsJson(priceList.getCfValuesAsJson());
 
         priceListService.create(duplicatedPriceList);
         return duplicatedPriceList;

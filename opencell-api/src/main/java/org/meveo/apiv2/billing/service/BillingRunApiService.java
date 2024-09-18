@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -163,10 +163,7 @@ public class BillingRunApiService implements ApiService<BillingRun> {
                             ? jobInstanceService.refreshOrRetrieve(invoiceLineJob.getFollowingJob())
                             : jobInstanceService.findByCode(INVOICING_JOB_CODE);
                     if (invoicingJob != null) {
-                        if (invoicingJob.getCfValues() == null) {
-                            invoicingJob.setCfValues(new CustomFieldValues());
-                        }
-                        invoicingJob.getCfValues().setValue(INVOICING_JOB_PARAMETERS,
+                        invoicingJob.setCfValue(INVOICING_JOB_PARAMETERS,
                                 asList(new EntityReferenceWrapper(BillingRun.class.getName(),
                                         null, billingRun.getReferenceCode())));
                         invoiceLineJob.setFollowingJob(invoicingJob);

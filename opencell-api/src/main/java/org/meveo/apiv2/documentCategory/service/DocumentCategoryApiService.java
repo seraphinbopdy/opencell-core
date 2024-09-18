@@ -1,7 +1,7 @@
 package org.meveo.apiv2.documentCategory.service;
 
-import javax.ejb.TransactionAttribute;
-import javax.inject.Inject;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.inject.Inject;
 
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;

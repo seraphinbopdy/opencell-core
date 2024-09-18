@@ -11,9 +11,9 @@ import org.meveo.apiv2.catalog.SimpleRecurrentProductDto;
 import org.meveo.apiv2.catalog.SimpleUsageProductDto;
 import org.meveo.apiv2.catalog.service.ProductManagementApiService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 @Stateless
 @Interceptors({ WsRestApiInterceptor.class })

@@ -4,29 +4,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.transaction.Transactional;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
-import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
-import org.meveo.apiv2.article.*;
+import org.meveo.apiv2.article.AccountingArticles;
+import org.meveo.apiv2.article.AccountingCodeMappingInput;
+import org.meveo.apiv2.article.ImmutableAccountingArticle;
+import org.meveo.apiv2.article.ImmutableAccountingArticles;
 import org.meveo.apiv2.article.resource.AccountingArticleResource;
 import org.meveo.apiv2.article.service.AccountingArticleApiService;
 import org.meveo.apiv2.article.service.AccountingArticleBaseApi;
 import org.meveo.apiv2.ordering.common.LinkGenerator;
 import org.meveo.model.article.AccountingArticle;
-import org.meveo.model.billing.UntdidAllowanceCode;
 import org.meveo.service.billing.impl.UntdidAllowanceCodeService;
+
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class AccountingArticleResourceImpl implements AccountingArticleResource {

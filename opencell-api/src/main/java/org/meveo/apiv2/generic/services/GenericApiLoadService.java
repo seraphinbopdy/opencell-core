@@ -20,15 +20,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
-import org.meveo.apiv2.GenericOpencellRestful;
+import org.meveo.apiv2.JaxRsActivatorApiV2;
 import org.meveo.apiv2.generic.GenericFieldDetails;
 import org.meveo.apiv2.generic.ImmutableGenericPaginatedResource;
 import org.meveo.apiv2.generic.common.ExcelExportConfiguration;
@@ -41,11 +37,15 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
 @Stateless
 public class GenericApiLoadService {
 
     @Inject
-    GenericOpencellRestful genericOpencellRestful;
+    JaxRsActivatorApiV2 genericOpencellRestful;
 
     @Inject
     @Named

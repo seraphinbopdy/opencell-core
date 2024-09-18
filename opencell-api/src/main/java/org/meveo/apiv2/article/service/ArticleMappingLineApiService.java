@@ -6,12 +6,12 @@ import static java.util.Optional.ofNullable;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
 import org.meveo.model.article.ArticleMappingLine;
 import org.meveo.service.billing.impl.article.ArticleMappingLineService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @Stateless
 public class ArticleMappingLineApiService{

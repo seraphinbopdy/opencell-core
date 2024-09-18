@@ -18,29 +18,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.Entity;
-import javax.persistence.criteria.JoinType;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.hibernate.collection.internal.PersistentBag;
-import org.hibernate.collection.internal.PersistentSet;
-import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.hibernate.collection.spi.PersistentBag;
+import org.hibernate.collection.spi.PersistentSet;
 import org.meveo.api.BaseApi;
 import org.meveo.api.TaxApi;
 import org.meveo.api.dto.CustomFieldDto;
 import org.meveo.api.dto.CustomFieldValueDto;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.EntityReferenceDto;
-import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.apiv2.generic.core.GenericHelper;
 import org.meveo.apiv2.generic.core.mapper.JsonGenericMapper;
 import org.meveo.commons.utils.EjbUtils;
-import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.ICustomFieldEntity;
@@ -52,6 +41,13 @@ import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.NotFoundException;
 
 @Stateless
 public class GenericApiAlteringService {

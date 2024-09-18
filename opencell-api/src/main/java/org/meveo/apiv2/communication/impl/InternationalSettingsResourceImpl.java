@@ -9,9 +9,9 @@ import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.communication.InternationalSettingsResource;
 import org.meveo.apiv2.communication.service.InternationalSettingsApiService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 
 @Stateless

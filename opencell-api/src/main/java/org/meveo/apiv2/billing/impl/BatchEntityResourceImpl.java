@@ -7,11 +7,11 @@ import org.meveo.apiv2.billing.service.BatchEntityApiService;
 import org.meveo.apiv2.ordering.common.LinkGenerator;
 import org.meveo.model.billing.BatchEntity;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
 
 /**
  * An implementation of batch entity resource.

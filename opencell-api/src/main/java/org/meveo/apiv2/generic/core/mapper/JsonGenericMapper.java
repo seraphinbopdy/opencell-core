@@ -1,5 +1,19 @@
 package org.meveo.apiv2.generic.core.mapper;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.meveo.apiv2.generic.GenericPaginatedResource;
+import org.meveo.apiv2.generic.core.mapper.module.GenericModule;
+import org.meveo.model.IEntity;
+import org.meveo.model.crm.custom.CustomFieldValue;
+import org.meveo.model.crm.custom.CustomFieldValues;
+
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,18 +28,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import org.hibernate.collection.internal.AbstractPersistentCollection;
-import org.hibernate.collection.internal.PersistentBag;
-import org.hibernate.collection.internal.PersistentSet;
-import org.meveo.apiv2.generic.GenericPaginatedResource;
-import org.meveo.apiv2.generic.core.mapper.module.GenericModule;
-import org.meveo.model.IEntity;
-import org.meveo.model.crm.custom.CustomFieldValue;
-import org.meveo.model.crm.custom.CustomFieldValues;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class JsonGenericMapper extends ObjectMapper{
     private SimpleFilterProvider simpleFilterProvider;

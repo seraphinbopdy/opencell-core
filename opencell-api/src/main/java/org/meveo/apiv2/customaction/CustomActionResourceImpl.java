@@ -18,11 +18,9 @@
 
 package org.meveo.apiv2.customaction;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.meveo.admin.exception.ConflictCustomActionException;
 import org.meveo.admin.exception.ElementNotFoundException;
@@ -31,6 +29,9 @@ import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.models.Resource;
+
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class CustomActionResourceImpl implements CustomActionResource {

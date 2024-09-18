@@ -26,8 +26,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ConflictCustomActionException;

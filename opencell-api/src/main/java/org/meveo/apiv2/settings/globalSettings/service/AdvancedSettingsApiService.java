@@ -3,15 +3,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
-
+import org.apache.commons.lang3.StringUtils;
+import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
 
-import liquibase.repackaged.org.apache.commons.lang3.StringUtils;
+import jakarta.inject.Inject;
 
 public class AdvancedSettingsApiService implements ApiService<AdvancedSettings> {
 
@@ -45,7 +44,7 @@ public class AdvancedSettingsApiService implements ApiService<AdvancedSettings> 
     }
 
 	private AdvancedSettings updateEntity(Long id, AdvancedSettings baseEntity) {
-		AdvancedSettings entityToUpdate = findById(id).orElseThrow(() -> new NotFoundException("The AdvancedsettingSettings does not exist"));
+		AdvancedSettings entityToUpdate = findById(id).orElseThrow(() -> new ElementNotFoundException(id.toString(), "AdvancedSettings"));
 
         if(!StringUtils.equals(entityToUpdate.getCode(),baseEntity.getCode())){
         	throw new InvalidParameterException("the property code cannot be modified ");

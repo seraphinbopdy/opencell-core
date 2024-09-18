@@ -4,7 +4,7 @@ import org.meveo.api.dto.communication.sms.SMSTemplateDto;
 import org.meveo.model.communication.sms.SMSTemplate;
 import org.meveo.service.communication.impl.TranslationsUtils;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class SMSTemplateMapper {
 

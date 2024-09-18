@@ -7,10 +7,10 @@ import org.meveo.apiv2.dunning.resource.DunningPaymentRetryResource;
 import org.meveo.apiv2.dunning.service.DunningPaymentRetryApiService;
 import org.meveo.apiv2.generic.common.LinkGenerator;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class DunningPaymentRetryResourceImpl implements DunningPaymentRetryResource {

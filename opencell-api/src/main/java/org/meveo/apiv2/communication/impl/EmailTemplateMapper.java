@@ -5,7 +5,7 @@ import org.meveo.api.dto.communication.EmailTemplatePatchDto;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.service.communication.impl.TranslationsUtils;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class EmailTemplateMapper {
 

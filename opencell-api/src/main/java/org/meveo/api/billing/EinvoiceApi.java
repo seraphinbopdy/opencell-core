@@ -5,8 +5,8 @@ import org.meveo.api.dto.billing.PdpStatusDto;
 import org.meveo.model.billing.PDPStatusEntity;
 import org.meveo.service.billing.impl.EinvoiceService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class EinvoiceApi extends BaseApi {

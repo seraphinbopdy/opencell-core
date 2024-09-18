@@ -9,7 +9,6 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -18,15 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,8 +32,20 @@ import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.invoice.InvoiceApi;
-import org.meveo.apiv2.billing.*;
+import org.meveo.apiv2.billing.BasicInvoice;
+import org.meveo.apiv2.billing.GenerateInvoiceResult;
+import org.meveo.apiv2.billing.ImmutableInvoiceLine;
+import org.meveo.apiv2.billing.ImmutableInvoiceLinesInput;
+import org.meveo.apiv2.billing.InvoiceLine;
+import org.meveo.apiv2.billing.InvoiceLineInput;
+import org.meveo.apiv2.billing.InvoiceLinesInput;
+import org.meveo.apiv2.billing.InvoiceLinesToReplicate;
+import org.meveo.apiv2.billing.InvoiceNotValidated;
+import org.meveo.apiv2.billing.InvoicePatchInput;
 import org.meveo.apiv2.billing.ProcessCdrListResult.Statistics;
+import org.meveo.apiv2.billing.ProcessingModeEnum;
+import org.meveo.apiv2.billing.RejectReasonInput;
+import org.meveo.apiv2.billing.ValidateInvoiceResult;
 import org.meveo.apiv2.billing.impl.InvoiceMapper;
 import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.commons.utils.StringUtils;
@@ -57,9 +59,22 @@ import org.meveo.model.billing.RatedTransactionAction;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.filter.Filter;
 import org.meveo.model.payments.OperationCategoryEnum;
-import org.meveo.service.billing.impl.*;
+import org.meveo.service.billing.impl.InvoiceLineService;
+import org.meveo.service.billing.impl.InvoiceService;
+import org.meveo.service.billing.impl.InvoiceTypeService;
+import org.meveo.service.billing.impl.LinkedInvoiceService;
+import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.filter.FilterService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
+
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 
 public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	
@@ -527,7 +542,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
     	    invoiceService.update(invoice);
 	    }
 	    catch (Exception e) {
-	        throw new BusinessApiException(e.getMessage());
+	        throw new BusinessApiException(e);
         }
 	    
 	    adjInvoice = invoiceService.findById(adjInvoice.getId(), asList("invoiceLines", "invoiceType", "invoiceType.occTemplate", "linkedInvoices"));

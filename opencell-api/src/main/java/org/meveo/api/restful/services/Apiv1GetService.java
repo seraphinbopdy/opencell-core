@@ -2,7 +2,7 @@ package org.meveo.api.restful.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.meveo.api.restful.GenericOpencellRestfulAPIv1;
+import org.meveo.api.restful.JaxRsActivatorGenericApiV1;
 import org.meveo.api.restful.filter.AuthenticationFilter;
 import org.meveo.api.restful.pagingFiltering.PagingAndFilteringRest;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
@@ -10,10 +10,10 @@ import org.meveo.apiv2.generic.core.GenericHelper;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.util.Inflector;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.PathSegment;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -51,7 +51,7 @@ public class Apiv1GetService {
     public Response getAllEntities(PagingAndFilteringRest pagingAndFiltering, UriInfo uriInfo, String aGetPath) throws IOException, URISyntaxException {
         URI redirectURI;
 
-        pathIBaseRS = GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get( aGetPath );
+        pathIBaseRS = JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get( aGetPath );
         if ( pathIBaseRS.equals( Apiv1ConstantDictionary.WALLET_OPERATION ) )
             entityClassName = "WalletOperation";
         else if ( pathIBaseRS.equals( Apiv1ConstantDictionary.PRICE_PLAN ) )
@@ -118,7 +118,7 @@ public class Apiv1GetService {
         URI redirectURI;
 
         segmentsOfPathAPIv1 = uriInfo.getPathSegments();
-        pathIBaseRS = GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get( getAnEntityPath );
+        pathIBaseRS = JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get( getAnEntityPath );
         entityCode = segmentsOfPathAPIv1.get( segmentsOfPathAPIv1.size() - 1 ).getPath();
 
         if ( pathIBaseRS.equals(Apiv1ConstantDictionary.USER) ) {
@@ -189,25 +189,25 @@ public class Apiv1GetService {
     public Response getWithRegex(UriInfo uriInfo, String aGetPath) throws IOException, URISyntaxException {
         URI redirectURI;
 
-        pathIBaseRS = GenericOpencellRestfulAPIv1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.get( aGetPath );
+        pathIBaseRS = JaxRsActivatorGenericApiV1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.get( aGetPath );
         queryParams = new StringBuilder( QUERY_PARAM_SEPARATOR );
 
-        String originalPattern = GenericOpencellRestfulAPIv1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.getPattern().toString();
-        int indexCodeRegex = originalPattern.indexOf( GenericOpencellRestfulAPIv1.CODE_REGEX );
+        String originalPattern = JaxRsActivatorGenericApiV1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.getPattern().toString();
+        int indexCodeRegex = originalPattern.indexOf( JaxRsActivatorGenericApiV1.CODE_REGEX );
         String aSmallPattern;
         String smallString = null;
 
         if ( indexCodeRegex >= 0 ) {
             while ( indexCodeRegex >= 0 ) {
                 aSmallPattern = originalPattern.substring( 0,
-                        indexCodeRegex + GenericOpencellRestfulAPIv1.CODE_REGEX.length() );
+                        indexCodeRegex + JaxRsActivatorGenericApiV1.CODE_REGEX.length() );
 
                 Matcher matcher = Pattern.compile( aSmallPattern ).matcher( aGetPath );
                 // get the first occurrence matching smallStringPattern
                 if ( matcher.find() ) {
                     smallString = matcher.group(0);
 
-                    String[] matches = Pattern.compile( GenericOpencellRestfulAPIv1.CODE_REGEX )
+                    String[] matches = Pattern.compile( JaxRsActivatorGenericApiV1.CODE_REGEX )
                             .matcher( smallString )
                             .results()
                             .map(MatchResult::group)
@@ -220,7 +220,7 @@ public class Apiv1GetService {
                                 + matches[matches.length - 1] + PAIR_QUERY_PARAM_SEPARATOR );
                 }
 
-                indexCodeRegex = originalPattern.indexOf( GenericOpencellRestfulAPIv1.CODE_REGEX, indexCodeRegex + 1 );
+                indexCodeRegex = originalPattern.indexOf( JaxRsActivatorGenericApiV1.CODE_REGEX, indexCodeRegex + 1 );
             }
 
             // If smallString differs from the string aGetPath, the request is to retrieve all entities, so we add paging and filtering
@@ -260,13 +260,13 @@ public class Apiv1GetService {
         URI redirectURI;
         segmentsOfPathAPIv1 = uriInfo.getPathSegments();
 
-        if ( aGetPath.matches( "/api/rest/v1/invoices/pdfInvoices/" + GenericOpencellRestfulAPIv1.CODE_REGEX ) ) {
+        if ( aGetPath.matches( "/api/rest/v1/invoices/pdfInvoices/" + JaxRsActivatorGenericApiV1.CODE_REGEX ) ) {
             entityCode = segmentsOfPathAPIv1.get( segmentsOfPathAPIv1.size() - 1 ).getPath();
             redirectURI = new URI( uriInfo.getBaseUri().toString().substring(0, uriInfo.getBaseUri().toString().length() - 4 )
                     + "/invoice/getPdfInvoice" + QUERY_PARAM_SEPARATOR + "invoiceNumber=" + entityCode );
             return Response.temporaryRedirect( redirectURI ).build();
         }
-        else if ( aGetPath.matches( "/api/rest/v1/invoices/xmlInvoices/" + GenericOpencellRestfulAPIv1.CODE_REGEX ) ) {
+        else if ( aGetPath.matches( "/api/rest/v1/invoices/xmlInvoices/" + JaxRsActivatorGenericApiV1.CODE_REGEX ) ) {
             entityCode = segmentsOfPathAPIv1.get( segmentsOfPathAPIv1.size() - 1 ).getPath();
             redirectURI = new URI( uriInfo.getBaseUri().toString().substring(0, uriInfo.getBaseUri().toString().length() - 4 )
                     + "/invoice/getXMLInvoice" + QUERY_PARAM_SEPARATOR + "invoiceNumber=" + entityCode );

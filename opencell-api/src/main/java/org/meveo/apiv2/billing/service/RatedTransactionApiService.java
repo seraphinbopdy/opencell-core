@@ -35,8 +35,8 @@ import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.AbstractMap.SimpleEntry;

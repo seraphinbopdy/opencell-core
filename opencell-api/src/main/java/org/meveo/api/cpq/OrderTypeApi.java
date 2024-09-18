@@ -3,8 +3,8 @@ package org.meveo.api.cpq;
 import static java.util.UUID.randomUUID;
 import static org.meveo.commons.utils.StringUtils.isBlank;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
 import org.meveo.admin.util.pagination.PaginationConfiguration;

@@ -1,13 +1,13 @@
 package org.meveo.apiv2.generic.core;
 
 import org.meveo.api.dto.IEntityDto;
-import org.meveo.apiv2.GenericOpencellRestful;
+import org.meveo.apiv2.JaxRsActivatorApiV2;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.catalog.OfferServiceTemplate;
 import org.reflections.Reflections;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

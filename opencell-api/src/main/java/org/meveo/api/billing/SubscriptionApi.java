@@ -18,6 +18,20 @@
 
 package org.meveo.api.billing;
 
+import static org.meveo.commons.utils.StringUtils.isNotBlank;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.Hibernate;
@@ -178,26 +192,13 @@ import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.order.OrderService;
 import org.meveo.service.payments.impl.PaymentMethodService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.persistence.EntityNotFoundException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static org.meveo.commons.utils.StringUtils.isNotBlank;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * @author Edward P. Legaspi
@@ -830,7 +831,7 @@ public class SubscriptionApi extends BaseApi {
                     }
                 }
 
-                ServiceCharge serviceCharge = serviceTemplate != null ? serviceTemplate : productVersion.get().getProduct();
+                ServiceCharge serviceCharge = serviceTemplate != null ? serviceTemplate : productVersion.get().getProduct(); 
 
                 log.debug("Will instantiate as part of activation service {} for subscription {} quantity {}", serviceCharge.getCode(), subscription.getCode(), serviceToActivateDto.getQuantity());
 
@@ -1153,8 +1154,8 @@ public class SubscriptionApi extends BaseApi {
             }
 
             serviceToInstantiateDto.setServiceTemplate(serviceTemplate);
-            if(productVersion!=null) {
-            serviceToInstantiateDto.setProductVersion(productVersion.get());
+            if(productVersion.isPresent()) {
+                serviceToInstantiateDto.setProductVersion(productVersion.get());
             }
             serviceToInstantiateDtos.add(serviceToInstantiateDto);
         }

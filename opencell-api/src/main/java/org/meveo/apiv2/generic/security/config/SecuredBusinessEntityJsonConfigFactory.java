@@ -1,19 +1,26 @@
 package org.meveo.apiv2.generic.security.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.meveo.api.security.config.*;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import jakarta.annotation.PostConstruct;
+
+import org.meveo.api.security.config.FilterResultsConfig;
+import org.meveo.api.security.config.SecureMethodParameterConfig;
+import org.meveo.api.security.config.SecuredBusinessEntityConfig;
+import org.meveo.api.security.config.SecuredBusinessEntityConfigFactory;
+import org.meveo.api.security.config.SecuredMethodConfig;
 import org.meveo.apiv2.generic.security.parser.IdParser;
 import org.meveo.commons.utils.StringUtils;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.interceptor.InvocationContext;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import jakarta.ejb.Singleton;
+import jakarta.inject.Inject;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * Class factory responsible to build and get secured entities configurations based on Json definition (see config file secured-entities-config.json)

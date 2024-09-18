@@ -21,15 +21,15 @@ package org.meveo.api.rest;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import org.meveo.api.rest.filter.RESTCorsRequestFilter;
 import org.meveo.api.rest.filter.RESTCorsResponseFilter;
 import org.meveo.api.rest.impl.BaseRs;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 /**
  * Application config for public api rest paths, in order to get access to not protected resources. Required for some use cases needs , like Yousign webhook calbacks :
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Said Ramli
  **/
 @ApplicationPath("/api/pub")
-public class JaxRsPubActivator extends Application {
+public class JaxRsActivatorPub extends Application {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override

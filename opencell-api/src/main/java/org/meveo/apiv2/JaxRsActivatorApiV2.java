@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -118,7 +118,7 @@ import org.meveo.commons.utils.ParamBeanFactory;
 import org.slf4j.Logger;
 
 @ApplicationPath("/api/rest/v2")
-public class GenericOpencellRestful extends Application {
+public class JaxRsActivatorApiV2 extends Application {
     private static final String GENERIC_API_REQUEST_LOGGING_CONFIG_KEY = "generic.api.request.logging";
     private static final String GENERIC_API_REQUEST_EXTRACT_LIST_CONFIG_KEY = "generic.api.extract.list";
     private static final String API_LIST_DEFAULT_LIMIT_KEY = "api.list.defaultLimit";

@@ -20,8 +20,8 @@ package org.meveo.api.logging;
 
 import java.lang.reflect.Method;
 
-import javax.interceptor.InvocationContext;
-import javax.ws.rs.Path;
+import jakarta.interceptor.InvocationContext;
+import jakarta.ws.rs.Path;
 
 import org.meveo.commons.utils.ReflectionUtils;
 

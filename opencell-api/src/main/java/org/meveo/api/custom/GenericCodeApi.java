@@ -19,9 +19,9 @@ import org.meveo.model.sequence.SequenceTypeEnum;
 import org.meveo.service.admin.impl.SequenceService;
 import org.meveo.service.billing.impl.ServiceSingleton;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import java.util.Optional;
 

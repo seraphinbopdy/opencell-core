@@ -1,16 +1,14 @@
 package org.meveo.service.job;
 
-import org.eclipse.microprofile.metrics.*;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
+import java.util.List;
+import java.util.concurrent.Future;
+
 import org.meveo.model.jobs.JobInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
-import java.util.List;
-import java.util.concurrent.Future;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * Interceptor to update the Jobs number of threads in realtime
@@ -25,10 +23,11 @@ public class JobExecutionInterceptor {
      */
     private static final Logger log = LoggerFactory.getLogger(JobExecutionInterceptor.class);
 
-    @Inject
-    @RegistryType(type = MetricRegistry.Type.APPLICATION)
-    MetricRegistry registry;
-
+//    @Inject
+//    @RegistryScope(scope = MetricRegistry.APPLICATION_SCOPE)
+//    MetricRegistry registry;
+ // Akk migrate me
+    
     /**
      * Update metrics for Prometheus a method on an entity
      *
@@ -70,14 +69,14 @@ public class JobExecutionInterceptor {
      * @param name the name of metric
      */
     private void counterInc(JobInstance jobInstance, String name, Long value) {
-        Metadata metadata = new MetadataBuilder().withName(name + "_" + jobInstance.getJobTemplate() + "_" + jobInstance.getCode()).build();
-        Tag tgName = new Tag("name", jobInstance.getCode());
-        Counter counter = registry.counter(metadata, tgName);
-        if (value != null) {
-            counter.inc(value - counter.getCount());
-        } else {
-            counter.inc();
-        }
+//        Metadata metadata = new MetadataBuilder().withName(name + "_" + jobInstance.getJobTemplate() + "_" + jobInstance.getCode()).build();
+//        Tag tgName = new Tag("name", jobInstance.getCode());
+//        Counter counter = registry.counter(metadata, tgName);
+//        if (value != null) {
+//            counter.inc(value - counter.getCount());
+//        } else {
+//            counter.inc();
+//        }
+        // Akk migrate me
     }
-
 }

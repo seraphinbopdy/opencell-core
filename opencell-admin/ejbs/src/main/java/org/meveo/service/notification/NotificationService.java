@@ -20,15 +20,15 @@ package org.meveo.service.notification;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.NotificationCacheContainerProvider;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.notification.Notification;
 import org.meveo.model.notification.ScriptNotification;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author akadid abdelmounaim

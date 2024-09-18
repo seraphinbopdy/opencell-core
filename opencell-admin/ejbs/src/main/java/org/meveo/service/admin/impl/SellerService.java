@@ -17,12 +17,12 @@
  */
 package org.meveo.service.admin.impl;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.admin.Seller;
 import org.meveo.service.base.AccountService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class SellerService extends AccountService<Seller> {

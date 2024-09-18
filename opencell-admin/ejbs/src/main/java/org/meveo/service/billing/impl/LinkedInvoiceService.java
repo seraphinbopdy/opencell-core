@@ -19,12 +19,12 @@ package org.meveo.service.billing.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.model.billing.InvoiceTypeEnum;
 import org.meveo.model.billing.LinkedInvoice;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * The Class InvoiceService.

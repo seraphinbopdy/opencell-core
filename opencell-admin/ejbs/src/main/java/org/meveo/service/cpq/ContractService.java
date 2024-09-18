@@ -11,10 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -37,6 +33,10 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.catalog.impl.PricePlanMatrixVersionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * @author Tarik FAKHOURI.

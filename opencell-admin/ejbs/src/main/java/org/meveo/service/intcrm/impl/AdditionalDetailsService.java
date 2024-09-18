@@ -20,14 +20,14 @@ package org.meveo.service.intcrm.impl;
 
 import java.util.List;
 
-import javax.persistence.Query;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.intcrm.AdditionalDetails;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.crm.impl.CustomerService;
+
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 public class AdditionalDetailsService extends PersistenceService<AdditionalDetails>{
 	@Inject

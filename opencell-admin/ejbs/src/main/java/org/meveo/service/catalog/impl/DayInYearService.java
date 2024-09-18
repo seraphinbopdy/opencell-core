@@ -17,13 +17,13 @@
  */
 package org.meveo.service.catalog.impl;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.catalog.DayInYear;
 import org.meveo.model.catalog.MonthEnum;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class DayInYearService extends PersistenceService<DayInYear> {

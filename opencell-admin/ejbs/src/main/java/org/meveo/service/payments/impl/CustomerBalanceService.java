@@ -1,5 +1,19 @@
 package org.meveo.service.payments.impl;
 
+import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
@@ -10,27 +24,23 @@ import org.meveo.apiv2.payments.AccountOperationsResult;
 import org.meveo.apiv2.payments.ImmutableAccountOperationsResult;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
-import org.meveo.model.payments.*;
+import org.meveo.model.payments.AccountOperation;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.CustomerBalance;
+import org.meveo.model.payments.OCCTemplate;
+import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.api.EntityToDtoConverter;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * Service implementation to manage CustomerBalance entity.

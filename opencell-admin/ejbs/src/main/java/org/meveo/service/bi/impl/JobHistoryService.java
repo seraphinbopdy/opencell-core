@@ -17,10 +17,10 @@
  */
 package org.meveo.service.bi.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.bi.JobHistory;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Job history service implementation.

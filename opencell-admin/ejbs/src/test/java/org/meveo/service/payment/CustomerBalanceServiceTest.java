@@ -9,7 +9,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.meveo.model.payments.OperationCategoryEnum.CREDIT;
 import static org.meveo.model.payments.OperationCategoryEnum.DEBIT;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -33,14 +40,16 @@ import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.CustomerBalanceService;
 import org.meveo.service.payments.impl.OCCTemplateService;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.persistence.EntityManager;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.EntityManager;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CustomerBalanceServiceTest {

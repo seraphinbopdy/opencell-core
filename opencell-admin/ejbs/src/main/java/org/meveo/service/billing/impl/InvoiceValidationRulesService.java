@@ -1,21 +1,20 @@
 package org.meveo.service.billing.impl;
 
 
-import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.Session;
-import org.meveo.model.billing.InvoiceType;
-import org.meveo.model.billing.InvoiceValidationRule;
-import org.meveo.service.base.BusinessService;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
+import org.meveo.model.billing.InvoiceType;
+import org.meveo.model.billing.InvoiceValidationRule;
+import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class InvoiceValidationRulesService extends BusinessService<InvoiceValidationRule> {
@@ -63,8 +62,8 @@ public class InvoiceValidationRulesService extends BusinessService<InvoiceValida
 	}
 
     public Long nextSequenceId() {
-        Query query = getEntityManager().unwrap(Session.class).createSQLQuery("SELECT nextval('billing_invoice_validation_rule_seq')");
-        return ((BigInteger) query.getSingleResult()).longValue() + 1;
+        NativeQuery query = getEntityManager().unwrap(Session.class).createNativeQuery("SELECT nextval('billing_invoice_validation_rule_seq')");
+        return ((long) query.getSingleResult()) + 1L;
     }
 
 

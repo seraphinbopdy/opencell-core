@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.model.billing.AccountingCode;
@@ -26,6 +23,9 @@ import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.catalog.impl.PriceListService;
 import org.meveo.service.payments.impl.OCCTemplateService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class FinanceSettingsService extends BusinessService<FinanceSettings> {

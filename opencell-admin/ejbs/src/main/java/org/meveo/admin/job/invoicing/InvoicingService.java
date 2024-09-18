@@ -17,13 +17,6 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.ejb.AsyncResult;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.NumberUtils;
@@ -71,6 +64,13 @@ import org.meveo.service.catalog.impl.InvoiceSubCategoryService;
 import org.meveo.service.script.billing.TaxScriptService;
 
 import com.google.common.collect.Lists;
+
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * InvoicingService. this class contains services used in invoicing generation job

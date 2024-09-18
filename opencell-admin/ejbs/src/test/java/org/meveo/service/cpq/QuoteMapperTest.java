@@ -8,8 +8,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.meveo.api.dto.cpq.TaxDetailDTO;
@@ -41,6 +39,8 @@ import org.meveo.model.quote.QuoteVersion;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
+
+import jakarta.xml.bind.JAXBException;
 
 public class QuoteMapperTest {
 
@@ -388,7 +388,7 @@ public class QuoteMapperTest {
     private org.meveo.model.article.AccountingArticle createAccountingArticle(InvoiceSubCategory invoiceSubCategory) {
         org.meveo.model.article.AccountingArticle accountingArticle = new org.meveo.model.article.AccountingArticle();
         accountingArticle.setCode("ACC_CODE");
-        accountingArticle.getDescriptionI18nNotNull().put("Fr", "ART_LABEL");
+        accountingArticle.getDescriptionI18nNullSafe().put("Fr", "ART_LABEL");
         accountingArticle.setInvoiceSubCategory(invoiceSubCategory);
         return accountingArticle;
     }

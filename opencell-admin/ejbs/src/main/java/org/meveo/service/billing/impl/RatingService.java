@@ -39,11 +39,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
-import javax.inject.Inject;
-import javax.persistence.Query;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
@@ -107,8 +102,8 @@ import org.meveo.model.catalog.TradingPricePlanMatrixLine;
 import org.meveo.model.catalog.TradingPricePlanVersion;
 import org.meveo.model.catalog.TriggeredEDRTemplate;
 import org.meveo.model.communication.MeveoInstance;
-import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.commercial.CommercialOrder;
+import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.cpq.contract.ContractRateTypeEnum;
@@ -144,6 +139,11 @@ import org.meveo.service.script.catalog.TriggeredEdrScriptInterface;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.service.tax.TaxMappingService;
 import org.meveo.service.tax.TaxMappingService.TaxInfo;
+
+import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Rate charges such as {@link org.meveo.model.catalog.OneShotChargeTemplate}, {@link org.meveo.model.catalog.RecurringChargeTemplate} and {@link org.meveo.model.catalog.UsageChargeTemplate}. Generate the

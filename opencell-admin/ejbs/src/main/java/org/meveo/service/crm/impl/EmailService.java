@@ -23,26 +23,26 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.mail.Message.RecipientType;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.communication.MediaEnum;
 import org.meveo.model.communication.MessageSenderConfig;
 import org.meveo.model.crm.Email;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.activation.DataHandler;
+import jakarta.activation.FileDataSource;
+import jakarta.annotation.Resource;
+import jakarta.ejb.Stateless;
+import jakarta.mail.Message.RecipientType;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 
 /**
  * Email service implementation.

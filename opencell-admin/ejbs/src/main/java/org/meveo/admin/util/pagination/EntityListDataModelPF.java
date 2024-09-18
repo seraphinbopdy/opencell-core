@@ -21,11 +21,11 @@ package org.meveo.admin.util.pagination;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.faces.model.ListDataModel;
-import javax.inject.Inject;
-
 import org.meveo.model.IEntity;
 import org.primefaces.model.SelectableDataModel;
+
+import jakarta.faces.model.ListDataModel;
+import jakarta.inject.Inject;
 
 public class EntityListDataModelPF<T extends IEntity> extends ListDataModel<T> implements
 		SelectableDataModel<T> {
@@ -61,8 +61,8 @@ public class EntityListDataModelPF<T extends IEntity> extends ListDataModel<T> i
 	}
 
 	@Override
-	public Object getRowKey(T entity) {
-		return entity.getId();
+	public String getRowKey(T entity) {
+		return entity.getId().toString();
 	}
 
 	@SuppressWarnings("unchecked")

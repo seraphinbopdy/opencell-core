@@ -199,7 +199,7 @@ public class OrderValidationScript extends Script {
 			dpi.setDiscountPlan(discountPlan);
 			dpi.copyEffectivityDates(discountPlan);
 			dpi.setDiscountPlanInstanceStatus(discountPlan);
-			dpi.setCfValues(discountPlan.getCfValues());
+			dpi.setCfValuesAsJson(discountPlan.getCfValuesAsJson());
 			dpi.setServiceInstance(serviceInstance);
 			discountPlanInstanceService.create(dpi, discountPlan);
             serviceInstance.getDiscountPlanInstances().add(dpi);

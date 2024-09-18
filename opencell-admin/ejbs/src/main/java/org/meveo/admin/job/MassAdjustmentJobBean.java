@@ -6,12 +6,6 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.interceptor.PerformanceInterceptor;
@@ -22,6 +16,12 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.InvoiceLineService;
 import org.meveo.service.billing.impl.InvoiceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 @Stateless
 public class MassAdjustmentJobBean extends BaseJobBean {

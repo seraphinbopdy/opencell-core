@@ -1,5 +1,8 @@
 package org.meveo.service.billing.impl;
 
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -10,10 +13,8 @@ import org.meveo.model.billing.PDPStatusEnum;
 import org.meveo.model.billing.PDPStatusHistory;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.Date;
-import java.util.List;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class EinvoiceService extends PersistenceService<PDPStatusEntity> {

@@ -28,16 +28,6 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.ejb.EJB;
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.async.FlatFileProcessing;
 import org.meveo.admin.parse.csv.MEVEOCdrFlatFileReader;
@@ -63,6 +53,16 @@ import org.meveo.service.medina.impl.CDRParsingService;
 import org.meveo.service.medina.impl.CDRService;
 import org.meveo.service.medina.impl.ICdrParser;
 import org.meveo.service.medina.impl.ICdrReader;
+
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 
 /**
  * Job implementation to process CDR files converting CDRs to EDR records

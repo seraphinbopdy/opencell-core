@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import javax.ejb.Stateless;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.quote.QuoteArticleLine;
 import org.meveo.model.quote.QuoteVersion;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Rachid.AITYAAZZA

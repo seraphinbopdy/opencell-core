@@ -23,15 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.event.qualifier.RejectedCDR;
@@ -47,6 +38,15 @@ import org.meveo.service.medina.impl.CDRParsingException;
 import org.meveo.service.medina.impl.CDRParsingService;
 import org.meveo.service.medina.impl.CDRService;
 import org.meveo.service.medina.impl.DuplicateException;
+
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 
 /**
  * Job implementation to process CDR from DB converting CDRs to EDR records

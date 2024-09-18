@@ -21,10 +21,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.payment.PaymentResponseDto;
 import org.meveo.audit.logging.annotations.MeveoAudit;
@@ -38,6 +34,10 @@ import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.Refund;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * Refund service implementation.

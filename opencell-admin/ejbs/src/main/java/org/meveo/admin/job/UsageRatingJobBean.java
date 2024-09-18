@@ -23,17 +23,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.UsageRatingService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 @Stateless
 public class UsageRatingJobBean extends IteratorBasedScopedJobBean<Long> {

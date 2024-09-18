@@ -7,8 +7,8 @@ import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
 import java.util.regex.Pattern;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.cpq.AttributeValidationType;

@@ -19,14 +19,14 @@ package org.meveo.service.wf;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.wf.Workflow;
 import org.meveo.model.wf.WorkflowHistory;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
 
 @Stateless
 public class WorkflowHistoryService extends PersistenceService<WorkflowHistory> {
@@ -34,7 +34,7 @@ public class WorkflowHistoryService extends PersistenceService<WorkflowHistory> 
 	@SuppressWarnings("unchecked")
 	public List<WorkflowHistory> findByEntityCode(String entityInstanceCode, List<Workflow> workflows) {
 
-		String queryStr = "from " + WorkflowHistory.class.getSimpleName() + " where entityInstanceCode=:entityInstanceCode ";
+		String queryStr = "select * from " + WorkflowHistory.class.getSimpleName() + " where entityInstanceCode=:entityInstanceCode ";
 
 		if (workflows != null && !workflows.isEmpty()) {
 			queryStr += " and workflow in (:workflows)";

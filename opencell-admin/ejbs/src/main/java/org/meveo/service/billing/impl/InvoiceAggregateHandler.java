@@ -26,9 +26,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateful;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.NumberUtils;
 import org.meveo.model.Auditable;
@@ -49,6 +46,9 @@ import org.meveo.service.catalog.impl.InvoiceSubCategoryService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateful;
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi

@@ -1,5 +1,8 @@
 package org.meveo.service.payments.impl;
 
+import java.util.Date;
+import java.util.List;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -11,11 +14,9 @@ import org.meveo.model.payments.ActionChannelEnum;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.billing.impl.TradingLanguageService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-import java.util.Date;
-import java.util.List;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 @Stateless
 public class DunningTemplateService extends BusinessService<DunningTemplate> {

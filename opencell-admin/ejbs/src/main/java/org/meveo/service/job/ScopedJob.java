@@ -18,12 +18,6 @@
 
 package org.meveo.service.job;
 
-import org.meveo.model.jobs.JobExecutionResultImpl;
-import org.meveo.model.jobs.JobInstance;
-import org.meveo.model.shared.DateUtils;
-
-import java.util.Date;
-
 /**
  * Interface that allow to set a limit job executions by :
  * - a volume of items to process  (ex: 10M items)

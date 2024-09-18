@@ -1,9 +1,9 @@
 package org.meveo.service.base.expression;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 import org.meveo.service.base.expressions.ExpressionParser;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExpressionParserTest {
 

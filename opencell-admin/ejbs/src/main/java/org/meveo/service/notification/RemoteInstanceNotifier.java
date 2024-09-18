@@ -18,10 +18,10 @@
 
 package org.meveo.service.notification;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @SuppressWarnings("deprecation")
 @Stateless

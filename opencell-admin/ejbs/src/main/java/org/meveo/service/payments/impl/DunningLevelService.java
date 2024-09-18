@@ -1,9 +1,9 @@
 package org.meveo.service.payments.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.dunning.DunningLevel;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Service implementation to manage DunningLevel entity. It extends {@link BusinessService} class

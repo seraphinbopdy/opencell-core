@@ -23,13 +23,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * CustomEntityInstance persistence service implementation.
@@ -129,7 +129,7 @@ public class CustomEntityInstanceService extends BusinessService<CustomEntityIns
 	public List<CustomEntityInstance> listByReferencedEntity(String cetCode, String cftCode, String entityCode) {
         QueryBuilder qb = new QueryBuilder(getEntityClass(), "cei", null);
         qb.addCriterion("cei.cetCode", "=", cetCode, true);
-        qb.addCriterion("entityFromJson(cf_values,"+cftCode+",entity)","=",entityCode,true);
+        qb.addCriterion("entityFromJson('cf_values','"+cftCode+"')","=",entityCode,true);
         Query query = qb.getQuery(getEntityManager());
         return (List<CustomEntityInstance>) qb.getQuery(getEntityManager()).getResultList();
 	}

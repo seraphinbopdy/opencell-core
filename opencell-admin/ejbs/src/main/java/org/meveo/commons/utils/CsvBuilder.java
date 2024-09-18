@@ -17,18 +17,20 @@
  */
 package org.meveo.commons.utils;
 
-import org.apache.poi.util.IOUtils;
-import org.meveo.admin.storage.StorageFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+
+import org.apache.poi.util.IOUtils;
+import org.meveo.admin.storage.StorageFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 /**
@@ -203,7 +205,7 @@ public class CsvBuilder {
 		if (inputStream != null) {
 			try {
 
-				javax.faces.context.FacesContext context = javax.faces.context.FacesContext.getCurrentInstance();
+				FacesContext context = FacesContext.getCurrentInstance();
 				HttpServletResponse res = (HttpServletResponse) context.getExternalContext().getResponse();
 				res.setContentType("application/force-download");
 				res.addHeader("Content-disposition", "attachment;filename=\"" + fileName + "\"");

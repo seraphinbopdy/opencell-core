@@ -1,5 +1,8 @@
 package org.meveo.service.securityDeposit;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,9 +17,6 @@ import org.meveo.service.securityDeposit.impl.SecurityDepositTemplateService;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.math.BigDecimal;
-import java.util.Collections;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityDepositTemplateServiceTest {

@@ -17,10 +17,10 @@
  */
 package org.meveo.service.crm.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.crm.CustomerCategory;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Customer category service implementation.

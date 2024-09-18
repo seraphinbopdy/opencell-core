@@ -18,31 +18,26 @@
 
 package org.meveo.admin.job;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
-import org.meveo.commons.utils.StringUtils;
 import org.meveo.interceptor.PerformanceInterceptor;
-import org.meveo.model.billing.DiscountPlanInstanceStatusEnum;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
-import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.DiscountPlanInstanceService;
 import org.meveo.service.job.Job;
-import org.meveo.service.job.JobExecutionService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 /**
  * Handles discount plan expiration

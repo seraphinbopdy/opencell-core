@@ -21,6 +21,11 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.meveo.model.shared.DateUtils.guessDate;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.interceptor.PerformanceInterceptor;
@@ -28,15 +33,11 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.service.dataCollector.DataCollectorService;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 @Stateless
 public class DataCollectorJobBean extends BaseJobBean {

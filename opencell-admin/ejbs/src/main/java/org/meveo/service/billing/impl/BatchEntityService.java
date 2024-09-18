@@ -17,8 +17,18 @@
  */
 package org.meveo.service.billing.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
+import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.MassUpdaterJob;
 import org.meveo.admin.job.UpdateHugeEntityJob;
@@ -49,20 +59,12 @@ import org.meveo.service.communication.impl.EmailTemplateService;
 import org.meveo.service.communication.impl.InternationalSettingsService;
 import org.meveo.service.crm.impl.ProviderService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static java.util.Arrays.asList;
-import static java.util.Optional.ofNullable;
-import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * A class for Batch entity persistence services.

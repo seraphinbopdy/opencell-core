@@ -1,5 +1,17 @@
 package org.meveo.service.securityDeposit.impl;
 
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.ZERO;
+import static org.meveo.model.payments.PaymentMethodEnum.CARD;
+import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
@@ -19,8 +31,29 @@ import org.meveo.model.billing.InvoicePaymentStatusEnum;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.crm.Provider;
-import org.meveo.model.payments.*;
-import org.meveo.model.securityDeposit.*;
+import org.meveo.model.payments.AccountOperation;
+import org.meveo.model.payments.CardPaymentMethod;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.MatchingStatusEnum;
+import org.meveo.model.payments.MatchingTypeEnum;
+import org.meveo.model.payments.OCCTemplate;
+import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.payments.OtherCreditAndCharge;
+import org.meveo.model.payments.Payment;
+import org.meveo.model.payments.PaymentErrorEnum;
+import org.meveo.model.payments.PaymentGateway;
+import org.meveo.model.payments.PaymentMethod;
+import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.PaymentStatusEnum;
+import org.meveo.model.payments.RecordedInvoice;
+import org.meveo.model.payments.Refund;
+import org.meveo.model.securityDeposit.FinanceSettings;
+import org.meveo.model.securityDeposit.SecurityDeposit;
+import org.meveo.model.securityDeposit.SecurityDepositOperationEnum;
+import org.meveo.model.securityDeposit.SecurityDepositStatusEnum;
+import org.meveo.model.securityDeposit.SecurityDepositTemplate;
+import org.meveo.model.securityDeposit.SecurityDepositTransaction;
+import org.meveo.model.securityDeposit.ValidityPeriodUnit;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.base.BusinessService;
@@ -28,17 +61,18 @@ import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.ServiceInstanceService;
 import org.meveo.service.crm.impl.ProviderService;
-import org.meveo.service.payments.impl.*;
+import org.meveo.service.payments.impl.AccountOperationService;
+import org.meveo.service.payments.impl.CustomerAccountService;
+import org.meveo.service.payments.impl.MatchingCodeService;
+import org.meveo.service.payments.impl.OCCTemplateService;
+import org.meveo.service.payments.impl.PaymentGatewayService;
+import org.meveo.service.payments.impl.PaymentHistoryService;
+import org.meveo.service.payments.impl.PaymentService;
+import org.meveo.service.payments.impl.RecordedInvoiceService;
+import org.meveo.service.payments.impl.RefundService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.util.*;
-
-import static java.math.BigDecimal.ONE;
-import static java.math.BigDecimal.ZERO;
-import static org.meveo.model.payments.PaymentMethodEnum.CARD;
-import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class SecurityDepositService extends BusinessService<SecurityDeposit> {

@@ -1,5 +1,13 @@
 package org.meveo.service.billing.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,15 +27,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvoiceServiceAutoMatchingTest {

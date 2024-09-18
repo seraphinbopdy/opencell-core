@@ -1,11 +1,9 @@
 package org.meveo.service.cpq.order;
 
-import javax.ejb.Stateless;
-
-import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderType;
 import org.meveo.service.base.BusinessService;
-import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Tarik FA.

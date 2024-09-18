@@ -2,7 +2,6 @@ package org.meveo.service.billing.impl;
 
 import static java.math.RoundingMode.HALF_UP;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -26,9 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -56,6 +52,7 @@ import org.meveo.model.billing.DiscountPlanInstance;
 import org.meveo.model.billing.DiscountPlanInstanceStatusEnum;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceCategory;
+import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.InvoiceLineStatusEnum;
 import org.meveo.model.billing.InvoiceLinesGroup;
 import org.meveo.model.billing.InvoicePaymentStatusEnum;
@@ -78,7 +75,6 @@ import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
 import org.meveo.model.catalog.DiscountPlanStatusEnum;
 import org.meveo.model.catalog.DiscountPlanTypeEnum;
 import org.meveo.model.catalog.RoundingModeEnum;
-import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.filter.Filter;
@@ -101,6 +97,9 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvoiceServiceTest {

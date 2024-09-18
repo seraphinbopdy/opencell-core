@@ -17,6 +17,11 @@
  */
 package org.meveo.service.medina.impl;
 
+import static org.meveo.model.shared.DateUtils.isPeriodsOverlap;
+
+import java.util.Date;
+import java.util.List;
+
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.Subscription;
@@ -24,13 +29,9 @@ import org.meveo.model.mediation.Access;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import java.util.Date;
-import java.util.List;
-
-import static org.meveo.model.shared.DateUtils.isPeriodsOverlap;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 @Stateless
 public class AccessService extends PersistenceService<Access> {

@@ -19,14 +19,14 @@ package org.meveo.service.admin.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Named;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.Country;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Named;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * @author anasseh

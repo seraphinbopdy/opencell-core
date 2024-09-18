@@ -20,10 +20,6 @@ package org.meveo.service.billing.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.commons.utils.QueryBuilder;
@@ -42,6 +38,10 @@ import org.meveo.model.catalog.ProductTemplate;
 import org.meveo.model.catalog.WalletTemplate;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.catalog.impl.ProductTemplateService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class ProductInstanceService extends BusinessService<ProductInstance> {

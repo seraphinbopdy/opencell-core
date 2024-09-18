@@ -3,13 +3,13 @@ package org.meveo.service.cpq;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.cpq.AttributeValue;
 import org.meveo.model.cpq.QuoteAttribute;
 import org.meveo.model.quote.QuoteVersion;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 /**
  * @author Khairi
  * @version 10.0

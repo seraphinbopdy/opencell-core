@@ -51,16 +51,8 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
+import org.hibernate.query.NativeQuery;
 import org.meveo.admin.async.SubListCreator;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
@@ -94,6 +86,13 @@ import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema.ColumnType;
+
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 @SuppressWarnings("deprecation")
 @Stateless
@@ -262,7 +261,7 @@ public class CustomTableService extends NativePersistenceService {
         try {
             QueryBuilder queryBuilder = getQuery(customEntityTemplate.getDbTablename(), config, null, Boolean.FALSE);
 
-            SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
+            NativeQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
 
             int firstRow = 0;
             int nrItemsFound = 0;
@@ -1010,7 +1009,7 @@ public class CustomTableService extends NativePersistenceService {
     private Map<String, Object> findRecordByIdAndTableName(Long id, String tableName) {
         QueryBuilder queryBuilder = getQuery(tableName, null, null, Boolean.FALSE);
         queryBuilder.addCriterion("id", "=", id, true);
-        Query query = queryBuilder.getNativeQuery(getEntityManager(), true);
+        NativeQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
         return (Map<String, Object>) query.uniqueResult();
     }
 
@@ -1063,7 +1062,7 @@ public class CustomTableService extends NativePersistenceService {
         if (!StringUtils.isEmpty(wildCode)) {
             qb.addSql(" cast(" + FIELD_ID + " as varchar(100)) like :id");
         }
-        Query query = qb.getNativeQuery(getEntityManager(), true);
+        NativeQuery query = qb.getNativeQuery(getEntityManager(), true);
         if (!StringUtils.isEmpty(wildCode)) {
             query.setParameter("id", "%" + wildCode.toLowerCase() + "%");
         }
@@ -1074,7 +1073,7 @@ public class CustomTableService extends NativePersistenceService {
     public boolean containsRecordOfTableByColumn(String tableName, String columnName, Long id) {
         QueryBuilder queryBuilder = getQuery(tableName, null, null, Boolean.FALSE);
         queryBuilder.addCriterion(columnName, "=", id, true);
-        Query query = queryBuilder.getNativeQuery(getEntityManager(), true);
+        NativeQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
         return !query.list().isEmpty();
     }
 
@@ -1212,7 +1211,7 @@ public class CustomTableService extends NativePersistenceService {
     public List<Map<String, Object>> exportCustomTable(CustomEntityTemplate customEntityTemplate) throws BusinessException {
         PaginationConfiguration pagination = new PaginationConfiguration(null, 0, null, null, null, FIELD_ID, SortOrder.ASCENDING);
         QueryBuilder queryBuilder = getQuery(customEntityTemplate.getDbTablename(), pagination, null, Boolean.FALSE);
-        SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
+        NativeQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
         List<Map<String, Object>> data = query.list();
         return (data.isEmpty() ? null : data);
     }

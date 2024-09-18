@@ -5,8 +5,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.InvalidELException;
 import org.meveo.model.billing.ChargeInstance;
@@ -27,6 +25,8 @@ import org.meveo.model.rating.EDR;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.medina.impl.AccessService;
 import org.meveo.util.ApplicationProvider;
+
+import jakarta.inject.Inject;
 
 public class ELUtils implements Serializable {
 

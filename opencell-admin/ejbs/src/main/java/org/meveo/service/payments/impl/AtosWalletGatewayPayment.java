@@ -1,12 +1,9 @@
 package org.meveo.service.payments.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 import org.apache.http.HttpHeaders;
@@ -41,7 +38,6 @@ import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.worldline.sips.checkout.WalletOrderRequest;
 import org.meveo.model.worldline.sips.checkout.WalletOrderResponse;
-import org.meveo.model.worldline.sips.wallet.WalletAction;
 import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.util.PaymentGatewayClass;

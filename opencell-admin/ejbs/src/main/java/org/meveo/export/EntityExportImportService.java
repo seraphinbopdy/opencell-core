@@ -57,35 +57,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.inject.Instance;
-import javax.faces.model.DataModel;
-import javax.inject.Inject;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Query;
-import javax.persistence.Transient;
-import javax.persistence.TypedQuery;
-import javax.persistence.Version;
-import javax.transaction.Transactional;
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -153,6 +124,36 @@ import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppReader;
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Lock;
+import jakarta.ejb.LockType;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.inject.Instance;
+import jakarta.faces.model.DataModel;
+import jakarta.inject.Inject;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Query;
+import jakarta.persistence.Transient;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.Version;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.GenericEntity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * @author Andrius Karpavicius
@@ -1970,7 +1971,7 @@ public class EntityExportImportService implements Serializable {
             }
 
             if (dataModelToExport instanceof LazyDataModel) {
-                entities = (List<IEntity>) ((LazyDataModel<? extends IEntity>) dataModelToExport).load(from, pageSize, null, null, null);
+                entities = (List<IEntity>) ((LazyDataModel<? extends IEntity>) dataModelToExport).load(from, pageSize, null, null);
 
             } else {
                 List<? extends IEntity> modelData = (List<? extends IEntity>) dataModelToExport.getWrappedData();
@@ -2446,7 +2447,7 @@ public class EntityExportImportService implements Serializable {
             GenericEntity<MultipartFormDataOutput> entity = new GenericEntity<MultipartFormDataOutput>(mdo) {
             };
 
-            Response response = target.request().post(javax.ws.rs.client.Entity.entity(entity, MediaType.MULTIPART_FORM_DATA_TYPE));
+            Response response = target.request().post(jakarta.ws.rs.client.Entity.entity(entity, MediaType.MULTIPART_FORM_DATA_TYPE));
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
                 if (response.getStatus() == HttpURLConnection.HTTP_UNAUTHORIZED || response.getStatus() == HttpURLConnection.HTTP_FORBIDDEN) {
                     throw new RemoteAuthenticationException(response.getStatusInfo().getReasonPhrase());

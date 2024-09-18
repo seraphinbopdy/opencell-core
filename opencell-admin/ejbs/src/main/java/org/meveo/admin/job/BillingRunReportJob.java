@@ -2,6 +2,9 @@ package org.meveo.admin.job;
 
 import static org.meveo.model.jobs.MeveoJobCategoryEnum.INVOICING;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
@@ -11,10 +14,8 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.job.Job;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class BillingRunReportJob extends Job {

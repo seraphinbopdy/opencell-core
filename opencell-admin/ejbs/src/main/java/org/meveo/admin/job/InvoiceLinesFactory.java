@@ -189,7 +189,7 @@ public class InvoiceLinesFactory {
         if(billingRun != null && billingRun.isUseAccountingArticleLabel()
                 && invoiceLine.getAccountingArticle() != null) {
             String languageCode = getLanguageCode(invoiceLine.getBillingAccount(), appProvider);
-            Map<String, String> descriptionsI18N = invoiceLine.getAccountingArticle().getDescriptionI18nNotNull();
+            Map<String, String> descriptionsI18N = invoiceLine.getAccountingArticle().getDescriptionI18nNullSafe();
             invoiceLine.setLabel(ofNullable(descriptionsI18N.get(languageCode))
                     .orElse(invoiceLine.getAccountingArticle().getDescription()));
         } else {

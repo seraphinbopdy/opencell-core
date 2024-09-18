@@ -2,17 +2,18 @@ package org.meveo.service.billing;
 
 import static java.math.RoundingMode.HALF_UP;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.RatedTransactionStatusEnum;
 import org.meveo.service.billing.impl.FilterConverter;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FilterConverterTest {
 

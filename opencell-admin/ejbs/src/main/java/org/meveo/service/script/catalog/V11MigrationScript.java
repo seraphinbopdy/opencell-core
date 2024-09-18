@@ -1,12 +1,10 @@
 package org.meveo.service.script.catalog;
 
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
@@ -181,8 +179,8 @@ public class V11MigrationScript extends Script {
       List<ProductChargeTemplateMapping> productCharges = getProductCharges(product,serviceTemplate);
       product.setProductCharges(productCharges);
             copyCFTemplates(serviceTemplate, product);
-      product.setCfValues(serviceTemplate.getCfValues());
-      product.setCfAccumulatedValues(serviceTemplate.getCfAccumulatedValues());
+      product.setCfValuesAsJson(serviceTemplate.getCfValuesAsJson());
+//      product.setCfAccumulatedValues(serviceTemplate.getCfAccumulatedValues());
       product.setDisabled(serviceTemplate.isDisabled());
       productService.create(product);
       product.setStatus(ProductStatusEnum.ACTIVE);

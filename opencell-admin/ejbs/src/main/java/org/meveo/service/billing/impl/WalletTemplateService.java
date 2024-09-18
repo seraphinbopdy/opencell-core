@@ -20,15 +20,15 @@ package org.meveo.service.billing.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.QueryBuilder.QueryLikeStyleEnum;
 import org.meveo.model.billing.BillingWalletTypeEnum;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.catalog.WalletTemplate;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 /**
  * Service for CRUD operations and other functions of WalletTemplate entity

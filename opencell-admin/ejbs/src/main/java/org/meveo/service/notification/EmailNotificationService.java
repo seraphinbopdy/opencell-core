@@ -18,13 +18,13 @@
 
 package org.meveo.service.notification;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.notification.EmailNotification;
 import org.meveo.service.communication.impl.EmailTemplateService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * A service class to manage CRUD operations on EmailNotification entity

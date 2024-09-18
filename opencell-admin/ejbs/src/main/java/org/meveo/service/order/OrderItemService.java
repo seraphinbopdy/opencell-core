@@ -18,13 +18,14 @@
 
 package org.meveo.service.order;
 
+import java.util.List;
+
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.order.OrderItem;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import java.util.List;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 /**
  * @author phung 

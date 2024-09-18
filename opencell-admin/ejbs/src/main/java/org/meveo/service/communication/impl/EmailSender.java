@@ -23,26 +23,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.mail.BodyPart;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMessage.RecipientType;
-import javax.mail.internet.MimeMultipart;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.UnrolledbackBusinessExceptionWoutStackTrace;
 import org.meveo.commons.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
+import jakarta.annotation.Resource;
+import jakarta.ejb.Stateless;
+import jakarta.mail.BodyPart;
+import jakarta.mail.Message.RecipientType;
+import jakarta.mail.Multipart;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 
 @Stateless
 public class EmailSender {

@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 
 import org.hibernate.boot.Metadata;
 import org.hibernate.tool.schema.internal.HibernateSchemaManagementTool;
+import org.hibernate.tool.schema.spi.ContributableMatcher;
 import org.hibernate.tool.schema.spi.ExecutionOptions;
 import org.hibernate.tool.schema.spi.SchemaCreator;
 import org.hibernate.tool.schema.spi.SchemaDropper;
@@ -87,11 +88,11 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
         return new SchemaCreator() {
 
             @Override
-            public void doCreation(Metadata metadata, ExecutionOptions executionOptions, SourceDescriptor sourceDescriptor, TargetDescriptor targetDescriptor) {
+            public void doCreation(Metadata metadata, ExecutionOptions executionOptions, ContributableMatcher contributableInclusionFilter, SourceDescriptor sourceDescriptor, TargetDescriptor targetDescriptor) {
                 log.info("Will proceed to create DB schema");
 
                 try {
-                    runLiquibaseUpdateAndValidation(metadata, executionOptions, options, false);
+                    runLiquibaseUpdateAndValidation(metadata, executionOptions, contributableInclusionFilter, options, false);
 
                 } catch (Exception e) {
                     log.error("Failed to setup DB with latest changes", e);
@@ -116,7 +117,7 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
         return new SchemaMigrator() {
 
             @Override
-            public void doMigration(Metadata metadata, ExecutionOptions executionOptions, TargetDescriptor targetDescriptor) {
+            public void doMigration(Metadata metadata, ExecutionOptions executionOptions, ContributableMatcher contributableInclusionFilter, TargetDescriptor targetDescriptor) {
                 log.info("Will proceed to migrate DB schema");
 
                 try {
@@ -124,13 +125,14 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
                     String dbMigrationManual = System.getenv(ENV_FLAG_DB_MIGRATION_MANUAL);
                     boolean isDBMigrationManual = dbMigrationManual != null && Boolean.parseBoolean(dbMigrationManual);
 
-                    runLiquibaseUpdateAndValidation(metadata, executionOptions, options, isDBMigrationManual);
+                    runLiquibaseUpdateAndValidation(metadata, executionOptions, contributableInclusionFilter, options, isDBMigrationManual);
 
                 } catch (Exception e) {
                     log.error("Failed to update DB schema with latest changes", e);
                     throw new RuntimeException(e);
                 }
             }
+
         };
     }
 
@@ -141,12 +143,12 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
         return new SchemaValidator() {
 
             @Override
-            public void doValidation(Metadata metadata, ExecutionOptions executionOptions) {
+            public void doValidation(Metadata metadata, ExecutionOptions executionOptions, ContributableMatcher contributableInclusionFilter) {
 
                 log.info("Will proceed to validate DB schema");
 
                 try {
-                    runLiquibaseUpdateAndValidation(metadata, executionOptions, options, true);
+                    runLiquibaseUpdateAndValidation(metadata, executionOptions, contributableInclusionFilter, options, true);
 
                 } catch (Exception e) {
                     log.error("Failed to validate DB schema", e);
@@ -161,11 +163,13 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
      * 
      * @param metadata Metadata
      * @param executionOptions Execution options
+     * @param contributableInclusionFilter Filter for Contributable instances to use
      * @param options Options
      * @throws LiquibaseException Failed to execute Liquibase update
      */
     @SuppressWarnings("deprecation")
-    private void runLiquibaseUpdateAndValidation(Metadata metadata, ExecutionOptions executionOptions, @SuppressWarnings("rawtypes") Map options, boolean validateOnly) throws LiquibaseException {
+    private void runLiquibaseUpdateAndValidation(Metadata metadata, ExecutionOptions executionOptions, ContributableMatcher contributableInclusionFilter, @SuppressWarnings("rawtypes") Map options, boolean validateOnly)
+            throws LiquibaseException {
         try {
             InitialContext initialContext = new InitialContext();
             DataSource dataSource = (DataSource) initialContext.lookup(DB_DATA_SOURCE_NAME);
@@ -185,7 +189,7 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
 
             // Run a default schema validation
             log.info("Will proceede with a default Hibernate schema validator");
-            super.getSchemaValidator(options).doValidation(metadata, executionOptions);
+            super.getSchemaValidator(options).doValidation(metadata, executionOptions, contributableInclusionFilter);
 
             updateMigrationStatus(dataSource.getConnection(), Version.buildNumber, Version.appVersion);
 

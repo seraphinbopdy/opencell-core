@@ -1,6 +1,8 @@
 package org.meveo.service.payments.impl;
 
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,9 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.ws.rs.BadRequestException;
-
-import java.util.Arrays;
+import jakarta.ws.rs.BadRequestException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DunningActionServiceTest {

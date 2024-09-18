@@ -23,14 +23,14 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.audit.logging.dto.AnnotationAuditEvent;
 import org.meveo.audit.logging.dto.AuditEvent;
 import org.meveo.audit.logging.dto.MethodParameter;
 import org.meveo.commons.utils.ReflectionUtils;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi

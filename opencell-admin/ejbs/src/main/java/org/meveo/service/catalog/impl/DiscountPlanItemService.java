@@ -29,10 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -66,6 +62,10 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.InvoiceLineService;
 import org.meveo.service.billing.impl.PricePlanSelectionService;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
+
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi

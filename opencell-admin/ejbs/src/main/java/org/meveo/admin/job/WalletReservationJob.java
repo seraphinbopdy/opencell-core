@@ -18,10 +18,6 @@
 
 package org.meveo.admin.job;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.interceptor.PerformanceInterceptor;
@@ -31,6 +27,10 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.billing.impl.ReservationService;
 import org.meveo.service.job.Job;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 /**
  * The Class WalletReservationJob mark wallet reservation as expired when expiry date is after system date.

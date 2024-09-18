@@ -26,13 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.io.IOUtils;
 import org.meveo.commons.utils.ParamBean;
@@ -40,7 +35,9 @@ import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.bi.OutputFormatEnum;
 import org.meveo.model.bi.Report;
 import org.meveo.service.reporting.impl.DWHAccountOperationService;
-import org.slf4j.Logger;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Wassim Drira

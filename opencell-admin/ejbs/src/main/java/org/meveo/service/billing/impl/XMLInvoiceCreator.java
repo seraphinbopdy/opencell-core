@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.meveo.admin.exception.BusinessException;
@@ -35,6 +33,9 @@ import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * Handles the logic of XML invoice generation

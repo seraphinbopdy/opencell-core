@@ -20,13 +20,13 @@ package org.meveo.service.payments.impl;
 
 import java.io.Serializable;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentGatewayTypeEnum;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.payment.PaymentScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class GatewayPaymentFactory implements Serializable {

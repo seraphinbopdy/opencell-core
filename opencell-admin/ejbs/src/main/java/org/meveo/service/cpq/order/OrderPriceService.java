@@ -2,14 +2,14 @@ package org.meveo.service.cpq.order;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.cpq.CpqQuote;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderPrice;
 import org.meveo.model.cpq.commercial.PriceLevelEnum;
 import org.meveo.model.cpq.enums.PriceTypeEnum;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Tarik FAKHOURI

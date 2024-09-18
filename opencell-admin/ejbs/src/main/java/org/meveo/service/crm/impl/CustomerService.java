@@ -20,11 +20,6 @@ package org.meveo.service.crm.impl;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.Seller;
@@ -33,6 +28,11 @@ import org.meveo.model.crm.Customer;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.base.AccountService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 /**
  * Customer service implementation.
  * 

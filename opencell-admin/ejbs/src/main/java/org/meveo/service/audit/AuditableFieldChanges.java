@@ -18,11 +18,12 @@
 
 package org.meveo.service.audit;
 
-import org.meveo.model.BaseEntity;
-
-import javax.enterprise.context.RequestScoped;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.meveo.model.BaseEntity;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * keep the dirtable entities for being audited

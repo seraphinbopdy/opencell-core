@@ -24,9 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.BeanUtils;
 import org.meveo.model.dwh.MeasurableQuantity;
@@ -34,6 +31,9 @@ import org.meveo.model.dwh.MeasuredValue;
 import org.meveo.model.dwh.MeasurementPeriodEnum;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
 
 /**
  * @author Wassim Drira
@@ -187,7 +187,7 @@ public class MeasuredValueService extends PersistenceService<MeasuredValue> {
 
         Query myQuery;
         if (whereExists) {
-            sqlQuery = "FROM " + MeasuredValue.class.getName() + " m WHERE " + sqlQuery;
+            sqlQuery = "select m FROM " + MeasuredValue.class.getName() + " m WHERE " + sqlQuery;
             myQuery = getEntityManager().createQuery(sqlQuery);
             if (code != null) {
                 myQuery.setParameter("code", code.toUpperCase());
@@ -209,7 +209,7 @@ public class MeasuredValueService extends PersistenceService<MeasuredValue> {
                 sqlQuery += "ORDER BY m.date ASC";
             }
         } else {
-            sqlQuery = "FROM " + MeasuredValue.class.getName() + " m " + sqlQuery;
+            sqlQuery = "select m FROM " + MeasuredValue.class.getName() + " m " + sqlQuery;
             myQuery = getEntityManager().createQuery(sqlQuery);
         }
 

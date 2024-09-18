@@ -19,20 +19,16 @@
 package org.meveo.admin.job;
 
 import org.meveo.jpa.JpaAmpNewTx;
-import org.meveo.model.billing.DiscountPlanInstance;
 import org.meveo.model.billing.DiscountPlanInstanceStatusEnum;
-import org.meveo.model.catalog.DiscountPlan;
-import org.meveo.model.catalog.DiscountPlanStatusEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.service.billing.impl.DiscountPlanInstanceService;
-import org.meveo.service.catalog.impl.DiscountPlanService;
 import org.meveo.service.job.JobExecutionService;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * @author HORRI Khalid

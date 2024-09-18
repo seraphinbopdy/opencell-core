@@ -8,12 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.persistence.Entity;
-
 import org.meveo.api.dto.IEntityDto;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.catalog.OfferServiceTemplate;
 import org.reflections.Reflections;
+
+import jakarta.persistence.Entity;
 
 
 public class GenericHelper {

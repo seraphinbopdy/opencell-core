@@ -17,10 +17,10 @@
  */
 package org.meveo.service.crm.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.AccountEntity;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Customer search service implementation.

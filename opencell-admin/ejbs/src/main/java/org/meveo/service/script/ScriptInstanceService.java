@@ -33,11 +33,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
@@ -69,6 +64,12 @@ import org.meveo.model.scripts.ScriptSourceTypeEnum;
 import org.meveo.service.base.BusinessService;
 
 import com.fasterxml.jackson.databind.type.TypeFactory;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Script service implementation.

@@ -4,14 +4,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.persistence.Query;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.service.billing.impl.InvoiceLineService;
+
+import jakarta.persistence.Query;
 
 
 

@@ -2,15 +2,15 @@ package org.meveo.service.cpq;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.cpq.trade.CommercialRuleLine;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.catalog.impl.OfferTemplateService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * @author Tarik FAKHOURI.

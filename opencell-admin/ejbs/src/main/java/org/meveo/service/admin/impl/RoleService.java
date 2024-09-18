@@ -21,11 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-
+import org.apache.commons.lang3.BooleanUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.commons.utils.QueryBuilder;
@@ -33,7 +29,10 @@ import org.meveo.model.security.Role;
 import org.meveo.security.client.KeycloakAdminClientService;
 import org.meveo.service.base.PersistenceService;
 
-import liquibase.repackaged.org.apache.commons.lang3.BooleanUtils;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
 
 /**
  * User Role service implementation.

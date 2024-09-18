@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import liquibase.repackaged.org.apache.commons.collections4.map.HashedMap;
-
 public class AuditDataHierarchy implements Serializable {
 
     private static final long serialVersionUID = -258622566538575345L;
@@ -300,11 +298,11 @@ public class AuditDataHierarchy implements Serializable {
      */
     public Map<String, Object> convertChangedValues(String data) {
         if (data == null) {
-            return new HashedMap<String, Object>();
+            return new HashMap<String, Object>();
         }
         Map<String, Object> changedValues = JacksonUtil.fromString(data, new TypeReference<Map<String, Object>>() {
         });
-        Map<String, Object> changedValuesConverted = new HashedMap<String, Object>();
+        Map<String, Object> changedValuesConverted = new HashMap<String, Object>();
         for (Entry<String, Object> entrySet : changedValues.entrySet()) {
             String fieldName = this.dbColumnToFieldMap.get(entrySet.getKey());
             if (fieldName != null) {

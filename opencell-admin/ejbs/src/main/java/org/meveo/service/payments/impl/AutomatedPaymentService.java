@@ -17,11 +17,11 @@
  */
 package org.meveo.service.payments.impl;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.model.payments.AutomatedPayment;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * AutomatedPayment service implementation.

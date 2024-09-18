@@ -1,24 +1,20 @@
 package org.meveo.service.accounting.impl;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.api.exception.BusinessApiException;
-import org.meveo.model.accounting.*;
+import org.meveo.model.accounting.AccountingOperationAction;
+import org.meveo.model.accounting.AccountingPeriod;
+import org.meveo.model.accounting.AccountingPeriodForceEnum;
+import org.meveo.model.accounting.AccountingPeriodStatusEnum;
+import org.meveo.model.accounting.CustomLockOption;
+import org.meveo.model.accounting.RegularUserLockOption;
 import org.meveo.model.audit.logging.AuditLog;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.security.CurrentUser;
@@ -27,6 +23,10 @@ import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.crm.impl.ProviderService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class AccountingPeriodService extends PersistenceService<AccountingPeriod> {

@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.persistence.criteria.JoinType;
-
 import org.apache.commons.collections.MapUtils;
 import org.meveo.admin.util.pagination.FilterOperatorEnum;
 import org.meveo.commons.utils.QueryBuilder;
@@ -20,6 +18,8 @@ import org.meveo.model.BaseEntity;
 import org.meveo.model.IEntity;
 import org.meveo.model.UniqueEntity;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.persistence.criteria.JoinType;
 
 public class NativeExpressionFactory {
 

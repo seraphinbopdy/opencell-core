@@ -26,11 +26,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.BaseEntity;
@@ -44,6 +39,11 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.filter.FilterService;
 import org.meveo.service.generic.wf.GenericWorkflowService;
 import org.meveo.service.generic.wf.WorkflowInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job implementation to execute the transition script on each workflowed entity instance.

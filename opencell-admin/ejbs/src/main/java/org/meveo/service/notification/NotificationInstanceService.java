@@ -18,13 +18,13 @@
 
 package org.meveo.service.notification;
 
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.NotificationCacheContainerProvider;
 import org.meveo.model.notification.Notification;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.billing.impl.CounterInstanceService;
+
+import jakarta.inject.Inject;
 
 /**
  * A foundation service class to manage CRUD operations on Notification entity subclasses

@@ -17,13 +17,13 @@
  */
 package org.meveo.service.validation;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * @author Ignas Lelys

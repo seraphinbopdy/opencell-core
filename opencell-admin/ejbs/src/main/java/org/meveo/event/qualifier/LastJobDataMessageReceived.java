@@ -27,7 +27,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 
 /**
  * An event indicating that a last message, containing job processing data, was read from a QUEUE

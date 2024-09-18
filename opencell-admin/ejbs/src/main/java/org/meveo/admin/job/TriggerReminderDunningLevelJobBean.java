@@ -1,11 +1,43 @@
 package org.meveo.admin.job;
 
+import static jakarta.ejb.TransactionAttributeType.REQUIRED;
+import static java.lang.System.currentTimeMillis;
+import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
+import static org.meveo.model.dunning.DunningLevelInstanceStatusEnum.DONE;
+import static org.meveo.model.payments.ActionChannelEnum.EMAIL;
+import static org.meveo.model.payments.ActionChannelEnum.LETTER;
+import static org.meveo.model.payments.ActionModeEnum.AUTOMATIC;
+import static org.meveo.model.payments.ActionTypeEnum.SCRIPT;
+import static org.meveo.model.payments.ActionTypeEnum.SEND_NOTIFICATION;
+import static org.meveo.model.shared.DateUtils.addDaysToDate;
+
+import java.io.File;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.communication.email.EmailTemplate;
-import org.meveo.model.dunning.*;
+import org.meveo.model.dunning.DunningAction;
+import org.meveo.model.dunning.DunningActionInstance;
+import org.meveo.model.dunning.DunningActionInstanceStatusEnum;
+import org.meveo.model.dunning.DunningCollectionPlan;
+import org.meveo.model.dunning.DunningDetermineLevelBy;
+import org.meveo.model.dunning.DunningLevel;
+import org.meveo.model.dunning.DunningLevelInstance;
+import org.meveo.model.dunning.DunningLevelInstanceStatusEnum;
+import org.meveo.model.dunning.DunningModeEnum;
+import org.meveo.model.dunning.DunningPolicy;
+import org.meveo.model.dunning.DunningPolicyLevel;
+import org.meveo.model.dunning.DunningSettings;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.payments.CustomerAccount;
@@ -15,28 +47,18 @@ import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
-import org.meveo.service.payments.impl.*;
+import org.meveo.service.payments.impl.CustomerAccountService;
+import org.meveo.service.payments.impl.DunningActionInstanceService;
+import org.meveo.service.payments.impl.DunningCollectionPlanService;
+import org.meveo.service.payments.impl.DunningLevelInstanceService;
+import org.meveo.service.payments.impl.DunningLevelService;
+import org.meveo.service.payments.impl.DunningPolicyService;
+import org.meveo.service.payments.impl.DunningSettingsService;
 import org.meveo.service.script.ScriptInstanceService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.inject.Inject;
-import java.io.File;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static java.lang.System.currentTimeMillis;
-import static java.util.Arrays.asList;
-import static java.util.Optional.ofNullable;
-import static javax.ejb.TransactionAttributeType.REQUIRED;
-import static org.meveo.model.dunning.DunningLevelInstanceStatusEnum.DONE;
-import static org.meveo.model.payments.ActionChannelEnum.EMAIL;
-import static org.meveo.model.payments.ActionChannelEnum.LETTER;
-import static org.meveo.model.payments.ActionModeEnum.AUTOMATIC;
-import static org.meveo.model.payments.ActionTypeEnum.SCRIPT;
-import static org.meveo.model.payments.ActionTypeEnum.SEND_NOTIFICATION;
-import static org.meveo.model.shared.DateUtils.addDaysToDate;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.inject.Inject;
 
 @Stateless
 public class TriggerReminderDunningLevelJobBean extends BaseJobBean {

@@ -5,10 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.joda.time.DateTimeComparator;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.commons.utils.StringUtils;
@@ -16,6 +12,10 @@ import org.meveo.model.CustomTableEvent;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.custom.CustomTableService;
 import org.meveo.service.script.Script;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * Script to perform data integrity check for custom tables during record creation or update. <br/>

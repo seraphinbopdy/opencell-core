@@ -28,13 +28,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.xml.bind.JAXBException;
-
 import org.meveo.api.dto.RatedTransactionDto;
 import org.meveo.api.dto.billing.EDRDto;
 import org.meveo.api.dto.billing.WalletOperationDto;
@@ -54,6 +47,13 @@ import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.WalletOperationService;
+
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * The Class ExportMediationEntityJob bean to export EDR, WO and RTx as XML file.

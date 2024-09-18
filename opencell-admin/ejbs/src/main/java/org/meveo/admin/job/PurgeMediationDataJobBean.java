@@ -26,12 +26,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.model.billing.RatedTransactionStatusEnum;
@@ -44,6 +38,12 @@ import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.WalletOperationService;
 import org.slf4j.Logger;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 /**
  * The Class job bean to remove not open EDR, WO, RTx between two dates.

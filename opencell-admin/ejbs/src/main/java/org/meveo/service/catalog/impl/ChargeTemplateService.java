@@ -25,10 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.InvalidELException;
@@ -42,6 +38,10 @@ import org.meveo.model.catalog.TriggeredEDRTemplate;
 import org.meveo.model.catalog.UnitOfMeasure;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.ValueExpressionWrapper;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * Charge Template service implementation.

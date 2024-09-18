@@ -4,22 +4,21 @@ import static java.lang.Double.valueOf;
 import static java.lang.Enum.valueOf;
 import static java.util.Optional.ofNullable;
 
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.util.pagination.FilterOperatorEnum;
-import org.meveo.model.BusinessEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.util.pagination.FilterOperatorEnum;
+import org.meveo.model.BusinessEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FilterConverter {
 

@@ -20,16 +20,16 @@ package org.meveo.service.billing.impl;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.ProductChargeInstance;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * Product charge instance service

@@ -30,11 +30,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
@@ -55,6 +50,11 @@ import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.custom.CustomEntityTemplateService;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
 
 /**
  * Provides cache related services (loading, update) for custom field value related operations

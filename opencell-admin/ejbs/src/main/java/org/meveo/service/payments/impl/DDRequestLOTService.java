@@ -29,11 +29,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.async.SepaDirectDebitAsync;
 import org.meveo.admin.async.SubListCreator;
 import org.meveo.admin.exception.BusinessEntityException;
@@ -58,6 +53,11 @@ import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.catalog.impl.CalendarBankingService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * The Class DDRequestLOTService.

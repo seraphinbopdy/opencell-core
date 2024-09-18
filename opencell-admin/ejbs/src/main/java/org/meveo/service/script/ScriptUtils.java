@@ -29,8 +29,10 @@ import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.exception.ValidationException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.scripts.ScriptInstance;
+import org.meveo.model.scripts.ScriptSourceTypeEnum;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.JavaParser;
@@ -282,6 +284,9 @@ public abstract class ScriptUtils {
      */
     public static List<Accessor> getSetters(ScriptInstance scriptInstance) {
         CompilationUnit compilationUnit;
+        if (scriptInstance.getSourceTypeEnum() == ScriptSourceTypeEnum.JAVA_CLASS) {
+            throw new ValidationException("Currently only scripts with JAVA code are supported as custom API scripts");
+        }
         try {
             compilationUnit = new JavaParser().parse(scriptInstance.getScript()).getResult().get();
             final ClassOrInterfaceDeclaration classOrInterfaceDeclaration = compilationUnit.getChildNodes().stream().filter(e -> e instanceof ClassOrInterfaceDeclaration).map(e -> (ClassOrInterfaceDeclaration) e)

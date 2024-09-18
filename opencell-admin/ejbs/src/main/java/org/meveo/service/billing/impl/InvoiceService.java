@@ -55,7 +55,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -77,23 +76,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.enterprise.inject.New;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-import javax.ws.rs.BadRequestException;
-import javax.xml.bind.JAXBException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -235,7 +217,6 @@ import org.meveo.model.payments.MatchingAmount;
 import org.meveo.model.payments.MatchingCode;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.MatchingTypeEnum;
-import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentMethod;
@@ -273,7 +254,6 @@ import org.meveo.service.order.OrderService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.MatchingCodeService;
-import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.payments.impl.OtherCreditAndChargeService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.script.Script;
@@ -286,19 +266,28 @@ import org.meveo.service.tax.TaxClassService;
 import org.meveo.service.tax.TaxMappingService;
 import org.w3c.dom.Node;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
+import jakarta.xml.bind.JAXBException;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRPropertiesUtil;
+import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRXmlDataSource;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
-import net.sf.jasperreports.export.type.PdfaConformanceEnum;
 
 /**
  * The Class InvoiceService.
@@ -1168,7 +1157,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 }
 
                 public IInvoiceable next() {
-                    return (IInvoiceable) rtScrollResultset.get(0);
+                    return (IInvoiceable) rtScrollResultset.get();
                 }
 
             };
@@ -1820,15 +1809,17 @@ public class InvoiceService extends PersistenceService<Invoice> {
             context.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
             
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-            JRPdfExporter exporter = new JRPdfExporter();
-            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfFullFilename));
-            
-            SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
-            configuration.setPdfaConformance(PdfaConformanceEnum.PDFA_1A);
-            configuration.setIccProfilePath(resDir + File.separator + billingTemplateName +File.separator + "srgb.icc");
-            exporter.setConfiguration(configuration);
-            exporter.exportReport();
+//            JRPdfExporter exporter = new JRPdfExporter();
+//            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+//            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfFullFilename));
+//            
+//            SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+//            configuration.setPdfaConformance(PdfaConformanceEnum.PDFA_1A);
+//            configuration.setIccProfilePath(resDir + File.separator + billingTemplateName +File.separator + "srgb.icc");
+//            exporter.setConfiguration(configuration);
+//            exporter.exportReport();
+
+            JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFullFilename); // Akk migrate me
 
             if ("true".equals(paramBeanFactory.getInstance().getProperty("invoice.pdf.addWaterMark", "true"))) {
                 if (invoice.getInvoiceType().getCode().equals(paramBeanFactory.getInstance().getProperty("invoiceType.draft.code", "DRAFT")) || (invoice.isDraft() != null && invoice.isDraft())) {
@@ -3143,7 +3134,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public void rebuildInvoice(Invoice invoice, boolean save) {
         invoice = findById(invoice.getId());
         invoice.setStatus(InvoiceStatusEnum.DRAFT);
-        applyAutomaticInvoiceCheck(Arrays.asList(invoice), true);
+        applyAutomaticInvoiceCheck(Arrays.asList(invoice), true, save);
         if (save) {
             update(invoice);
         }
@@ -3767,7 +3758,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         entityCreatedEventProducer.fire((BaseEntity) invoice);
 
-        cfValueAccumulator.entityCreated(invoice);
+//        cfValueAccumulator.entityCreated(invoice);
 
         log.trace("end of post create {}. entity id={}.", invoice.getClass().getSimpleName(), invoice.getId());
     }
@@ -6621,7 +6612,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         Map<InvoiceCategory, List<InvoiceSubCategory>> subCategoryMap = new HashMap<>();
         Invoice invoice = this.initValidatedInvoice(invoiceResource, billingAccount, invoiceType, seller, isDraft);
         if(entity != null && entity.getCfValues() != null) {
-            invoice.setCfValues(entity.getCfValues());
+            invoice.setCfValuesAsJson(entity.getCfValuesAsJson());
         }
 
         if (invoiceResource.getDiscountPlan() != null) {
@@ -7005,7 +6996,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             toUpdate.setCpqQuote(cpqQuote);
         }
         if (input.getCfValues() != null) {
-            toUpdate.setCfValues(input.getCfValues());
+            toUpdate.setCfValuesAsJson(input.getCfValuesAsJson());
         }
 
         if(invoiceResource.getDiscount() == null && toUpdate.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {

@@ -25,9 +25,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.persistence.DiscriminatorValue;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
@@ -47,6 +44,9 @@ import org.meveo.model.filter.OrderCondition;
 import org.meveo.model.filter.PrimitiveFilterCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.inject.Inject;
+import jakarta.persistence.DiscriminatorValue;
 
 /**
  * @author Edward P. Legaspi

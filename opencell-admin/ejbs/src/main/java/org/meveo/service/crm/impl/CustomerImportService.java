@@ -26,11 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.StringUtils;
@@ -40,7 +35,13 @@ import org.meveo.model.billing.BankCoordinates;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.billing.TradingLanguage;
 import org.meveo.model.crm.Customer;
-import org.meveo.model.payments.*;
+import org.meveo.model.payments.CheckPaymentMethod;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.CustomerAccountStatusEnum;
+import org.meveo.model.payments.DDPaymentMethod;
+import org.meveo.model.payments.DunningLevelEnum;
+import org.meveo.model.payments.PaymentMethod;
+import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
@@ -52,6 +53,11 @@ import org.meveo.service.billing.impl.TradingLanguageService;
 import org.meveo.service.catalog.impl.TitleService;
 import org.meveo.service.payments.impl.CreditCategoryService;
 import org.meveo.service.payments.impl.CustomerAccountService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 @Stateless
 public class CustomerImportService extends ImportService {

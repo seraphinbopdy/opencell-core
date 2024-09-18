@@ -26,15 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-
 import org.meveo.admin.exception.CounterInstantiationException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.InvalidELException;
@@ -72,6 +63,15 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.catalog.impl.CalendarService;
 import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.payments.impl.CustomerAccountService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import jakarta.persistence.TemporalType;
 
 /**
  * @author Said Ramli
@@ -269,6 +269,8 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
      * @param chargeDate Charge date - to match the period validity dates
      * @param initDate Initial date, used for period start/end date calculation
      * @param chargeInstance Charge instance to associate counter with
+     * @param value Value to overwrite the value from counter template
+     * @param level Level to overwrite the level from counter template 
      * @return CounterPeriod instance or NULL if counter period can not be created because of calendar limitations
      * @throws CounterInstantiationException Failure to create a counter period
      */
@@ -358,6 +360,8 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
      * @param chargeDate Charge date
      * @param initDate Initial date, used for period start/end date calculation
      * @param chargeInstance charge instance to associate counter with
+     * @param value Value to overwrite the value from counter template
+     * @param level Level to overwrite the level from counter template 
      * @param periodEndDate USED ONLY FOR API Creation : used to create specific period by using date sent by API
      * @param isApiCreation true only for API Creation
      * @return a counter period or NULL if counter period can not be created because of calendar limitations
@@ -399,7 +403,11 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
                 if (!StringUtils.isBlank(counterTemplate.getCeilingExpressionEl()) && chargeInstance != null) {
                     initialValue = evaluateCeilingElExpression(counterTemplate.getCeilingExpressionEl(), chargeInstance);
                 }
-                counterPeriod.setValue(initialValue);
+                if (initialValue != null) {
+                    counterPeriod.setValue(initialValue);
+                } else {
+                    counterPeriod.setValue(BigDecimal.ZERO);
+                }
             }
 
             if (level != null) {
@@ -529,6 +537,8 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
      * @param date Date to match
      * @param initDate initial date.
      * @param chargeInstance Charge instance to associate counter with
+     * @param value Value to overwrite the value from counter template
+     * @param level Level to overwrite the level from counter template 
      * @param forceFlush default as true, to keep original behavior, and false only from new added API CounterInstance @since v14.0
      * @return Found or created counter period or NULL if counter period can not be created because of calendar limitations
      * @throws CounterInstantiationException Failure to create counter period

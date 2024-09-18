@@ -24,11 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.enterprise.concurrent.ManagedExecutorService;
-import javax.enterprise.concurrent.ManagedThreadFactory;
-import javax.inject.Inject;
-
 import org.meveo.model.crm.Provider;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.security.CurrentUser;
@@ -41,6 +36,11 @@ import org.meveo.service.job.JobExecutionService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Resource;
+import jakarta.enterprise.concurrent.ManagedExecutorService;
+import jakarta.enterprise.concurrent.ManagedThreadFactory;
+import jakarta.inject.Inject;
 
 /**
  * The Class BaseJobBean : Holding a common behaviors for all JoBbeans instances

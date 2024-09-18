@@ -20,13 +20,6 @@ package org.meveo.service.notification;
 
 import java.util.List;
 
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.IteratorBasedJobBean;
 import org.meveo.audit.logging.annotations.MeveoAudit;
@@ -83,6 +76,13 @@ import org.meveo.service.generic.wf.GenericWorkflowService;
 import org.meveo.service.generic.wf.WorkflowInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Lock;
+import jakarta.ejb.LockType;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 /**
  * Handles events associated with CDRUD operations on entities

@@ -27,11 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.inject.Inject;
-
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
 import org.meveo.commons.utils.ParamBean;
@@ -41,6 +36,11 @@ import org.meveo.security.MeveoUser;
 import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.crm.impl.ProviderService;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
 
 /**
  * Provides cache related services (loading, update) for CDR and EDR processing related operations

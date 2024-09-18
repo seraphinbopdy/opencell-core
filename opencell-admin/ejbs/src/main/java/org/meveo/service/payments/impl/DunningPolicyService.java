@@ -2,7 +2,7 @@ package org.meveo.service.payments.impl;
 
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Comparator.comparing;
-import static java.util.Optional.*;
+import static java.util.Optional.ofNullable;
 import static org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING;
 import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
 import static org.meveo.model.dunning.PolicyConditionTargetEnum.valueOf;
@@ -10,23 +10,31 @@ import static org.meveo.model.dunning.PolicyConditionTargetEnum.valueOf;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.TradingCurrency;
-import org.meveo.model.dunning.*;
+import org.meveo.model.dunning.DunningCollectionPlanStatus;
+import org.meveo.model.dunning.DunningDetermineLevelBy;
+import org.meveo.model.dunning.DunningModeEnum;
+import org.meveo.model.dunning.DunningPolicy;
+import org.meveo.model.dunning.DunningPolicyLevel;
+import org.meveo.model.dunning.DunningPolicyRule;
+import org.meveo.model.dunning.DunningPolicyRuleLine;
+import org.meveo.model.dunning.PolicyConditionOperatorEnum;
+import org.meveo.model.dunning.PolicyConditionTargetEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.model.payments.RecordedInvoice;
@@ -34,6 +42,12 @@ import org.meveo.service.admin.impl.CurrencyService;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.InvoiceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class DunningPolicyService extends PersistenceService<DunningPolicy> {

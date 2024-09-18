@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.meveo.audit.logging.dto.AuditEvent;
 import org.meveo.audit.logging.dto.ClassAndMethods;
 import org.meveo.audit.logging.handler.ConsoleAuditHandler;
 import org.meveo.audit.logging.handler.Handler;

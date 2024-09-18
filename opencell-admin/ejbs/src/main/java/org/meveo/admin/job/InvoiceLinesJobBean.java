@@ -17,17 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
-import org.hibernate.collection.internal.PersistentBag;
+import org.hibernate.collection.spi.PersistentBag;
 import org.meveo.admin.async.SynchronizedIteratorGrouped;
 import org.meveo.admin.async.SynchronizedMultiItemIterator;
 import org.meveo.admin.exception.BusinessException;
@@ -55,6 +49,12 @@ import org.meveo.service.billing.impl.InvoiceLineService.InvoiceLineCreationStat
 import org.meveo.service.job.Job;
 import org.meveo.service.job.JobInstanceService;
 import org.primefaces.model.SortOrder;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 @Stateless
 public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<String, Object>>> {

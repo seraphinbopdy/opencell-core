@@ -23,23 +23,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.jms.Destination;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
-import javax.jms.JMSDestinationDefinition;
-import javax.jms.JMSDestinationDefinitions;
-import javax.jms.JMSProducer;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.Topic;
-
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
@@ -49,6 +32,23 @@ import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSConsumer;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSDestinationDefinition;
+import jakarta.jms.JMSDestinationDefinitions;
+import jakarta.jms.JMSProducer;
+import jakarta.jms.Message;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.Queue;
+import jakarta.jms.Topic;
+
 /**
  * Handle data synchronization between cluster nodes. Inform about CRUD actions to certain entities. Messages are written to topic "topic/CLUSTEREVENTTOPIC".
  * 
@@ -56,8 +56,8 @@ import org.slf4j.Logger;
  * 
  * @author Andrius Karpavicius
  */
-@JMSDestinationDefinitions(value = { @JMSDestinationDefinition(name = "java:/topic/CLUSTEREVENTTOPIC", interfaceName = "javax.jms.Topic", destinationName = "ClusterEventTopic"),
-        @JMSDestinationDefinition(name = "java:/queue/CLUSTEREVENTREPLY", interfaceName = "javax.jms.Queue", destinationName = "ClusterEventReply") })
+@JMSDestinationDefinitions(value = { @JMSDestinationDefinition(name = "java:/topic/CLUSTEREVENTTOPIC", interfaceName = "jakarta.jms.Topic", destinationName = "ClusterEventTopic"),
+        @JMSDestinationDefinition(name = "java:/queue/CLUSTEREVENTREPLY", interfaceName = "jakarta.jms.Queue", destinationName = "ClusterEventReply") })
 @Stateless
 public class ClusterEventPublisher implements Serializable {
 
@@ -125,7 +125,7 @@ public class ClusterEventPublisher implements Serializable {
             String code = entity instanceof BusinessEntity ? ((BusinessEntity) entity).getCode() : null;
             ClusterEventDto eventDto = new ClusterEventDto(ReflectionUtils.getCleanClassName(entity.getClass().getSimpleName()), (Long) entity.getId(), code, action, EjbUtils.getCurrentClusterNode(),
                 currentUser.getProviderCode(), currentUser.getUserName(), additionalInformation);
-            log.debug("Publishing data synchronization between cluster nodes event {}", eventDto);
+            log.info("Publishing data synchronization between cluster nodes event {}", eventDto);
 
             JMSProducer jmsProducer = context.createProducer();
             Message message = context.createObjectMessage(eventDto);
@@ -192,7 +192,7 @@ public class ClusterEventPublisher implements Serializable {
             String code = entity instanceof BusinessEntity ? ((BusinessEntity) entity).getCode() : null;
             ClusterEventDto eventDto = new ClusterEventDto(ReflectionUtils.getCleanClassName(entity.getClass().getSimpleName()), (Long) entity.getId(), code, action, EjbUtils.getCurrentClusterNode(), providerCode,
                 username, additionalInformation);
-            log.debug("Publishing data synchronization between cluster nodes event {}", eventDto);
+            log.info("Publishing data synchronization between cluster nodes event {}", eventDto);
 
             context.createProducer().send(topic, eventDto);
 

@@ -1,9 +1,17 @@
 package org.meveo.service.script;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.api.dto.response.notification.GetEmailNotificationResponseDto;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.Invoice;
@@ -14,25 +22,12 @@ import org.meveo.model.payments.AccountOperationStatus;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.OCCTemplate;
-import org.meveo.model.payments.OperationCategoryEnum;
-import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.WriteOff;
 import org.meveo.service.billing.impl.AccountingCodeService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.MatchingCodeService;
 import org.meveo.service.payments.impl.OCCTemplateService;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class MassWrittingOffInvoices extends Script {
 	

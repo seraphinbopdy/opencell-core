@@ -19,11 +19,6 @@ package org.meveo.service.billing.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.ChargeInstance;
@@ -35,6 +30,11 @@ import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.UsageChargeInstance;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
 
 @Stateless
 public class ChargeInstanceService<P extends ChargeInstance> extends BusinessService<P> {

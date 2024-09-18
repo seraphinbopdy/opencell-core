@@ -25,13 +25,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.apache.commons.collections.MapUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.JobExecutionException;
@@ -55,9 +48,16 @@ import org.meveo.security.MeveoUser;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.base.BaseService;
 import org.meveo.service.base.ValueExpressionWrapper;
+import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.meveo.service.crm.impl.CustomFieldInstanceService;
+
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * The Class JobExecutionService.

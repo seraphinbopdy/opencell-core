@@ -20,13 +20,13 @@ package org.meveo.audit.logging.writer;
 
 import java.util.Date;
 
-import javax.ejb.Stateless;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.audit.logging.dto.AuditEvent;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.audit.logging.AuditLog;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Edward P. Legaspi

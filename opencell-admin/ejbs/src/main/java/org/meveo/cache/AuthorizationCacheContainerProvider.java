@@ -22,12 +22,12 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.inject.Inject;
-
 import org.infinispan.Cache;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.inject.Inject;
 
 /**
  * Provides cache related services (storing, loading, update) for authorization related operations

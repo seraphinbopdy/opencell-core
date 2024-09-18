@@ -26,13 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.EntityManagerWrapper;
@@ -43,6 +36,13 @@ import org.meveo.model.notification.Notification;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.notification.GenericNotificationService;
 import org.meveo.service.script.ScriptInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * Job implementation to launch notification of entities returned by a filter

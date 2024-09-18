@@ -22,12 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import javax.ejb.Asynchronous;
-import javax.xml.bind.JAXBException;
-
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ImportFileFiltre;
 import org.slf4j.Logger;
+
+import jakarta.ejb.Asynchronous;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * @author anasseh

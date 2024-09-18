@@ -24,11 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.xml.bind.ValidationException;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
@@ -38,17 +33,22 @@ import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.billing.InvoiceSubCategory;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.ChargeTemplateStatusEnum;
-import org.meveo.model.catalog.TradingPricePlanVersion;
 import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.PricePlanMatrixColumn;
 import org.meveo.model.catalog.PricePlanMatrixLine;
 import org.meveo.model.catalog.PricePlanMatrixVersion;
 import org.meveo.model.catalog.ProductChargeTemplateMapping;
+import org.meveo.model.catalog.TradingPricePlanVersion;
 import org.meveo.model.catalog.TriggeredEDRTemplate;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.cpq.AttributeService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.validation.ValidationException;
 
 /**
  * Charge Template service implementation.

@@ -9,8 +9,6 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.Collections;
 
-import javax.persistence.EntityManager;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +42,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import jakarta.persistence.EntityManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityDepositServiceTest {

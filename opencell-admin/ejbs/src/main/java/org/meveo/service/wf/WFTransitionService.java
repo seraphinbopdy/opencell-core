@@ -22,16 +22,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.wf.WFAction;
 import org.meveo.model.wf.WFDecisionRule;
 import org.meveo.model.wf.WFTransition;
 import org.meveo.model.wf.Workflow;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class WFTransitionService extends PersistenceService<WFTransition> {

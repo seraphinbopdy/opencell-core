@@ -41,11 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ImportInvoiceException;
 import org.meveo.admin.exception.InvoiceExistException;
@@ -72,6 +67,11 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.InvoiceAgregateService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoiceTypeService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * RecordedInvoice service implementation.
@@ -158,7 +158,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
     public RecordedInvoice getRecordedInvoice(String invoiceNumber, InvoiceType invoiceType){
         RecordedInvoice recordedInvoice = null;
         try {
-            String qlString = "from " + RecordedInvoice.class.getSimpleName() + " where reference =:reference  and invoice.invoiceType=:invoiceType";
+            String qlString = "select * from " + RecordedInvoice.class.getSimpleName() + " where reference =:reference  and invoice.invoiceType=:invoiceType";
 			Query query = getEntityManager().createQuery(qlString).setParameter("reference", invoiceNumber).setParameter("invoiceType", invoiceType);
 			recordedInvoice = (RecordedInvoice) query.getSingleResult();
         } catch (Exception e) {
@@ -173,7 +173,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 	public List<RecordedInvoice> getRecordedInvoice(String invoiceNumber) {
     	List<RecordedInvoice> recordedInvoices = null;
         try {
-            String qlString = "from " + RecordedInvoice.class.getSimpleName() + " where reference =:reference";
+            String qlString = "select * from " + RecordedInvoice.class.getSimpleName() + " where reference =:reference";
             recordedInvoices = (List<RecordedInvoice>)getEntityManager().createQuery(qlString).setParameter("reference", invoiceNumber).getResultList();
         } catch (Exception e) {
         	log.warn("exception trying to get recordedInvoice for reference "+invoiceNumber+": "+e.getMessage());
@@ -300,7 +300,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 			//cannot dispatch invoiceBalance between categories, if this is needed by a client, we will have to decide how to change all amounts according to invoiceBalance.
 			if (allowMultipleAOperInvoice && !useInvoiceBalance) {
 				@SuppressWarnings("unchecked")
-				List<CategoryInvoiceAgregate> cats = (List<CategoryInvoiceAgregate>) invoiceAgregateService.listByInvoiceAndType(invoice, "R");
+				List<CategoryInvoiceAgregate> cats = invoiceAgregateService.listByInvoiceAndType(invoice, CategoryInvoiceAgregate.class);
 				for (CategoryInvoiceAgregate catAgregate : cats) {
 					BigDecimal remainingAmountWithoutTaxForCat = BigDecimal.ZERO;
 					BigDecimal remainingAmountWithTaxForCat = BigDecimal.ZERO;
@@ -718,7 +718,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
     public Long getCountAgedReceivables(String customerAccountCode, String customerAccountDescription, String sellerCode, String sellerDescription, String invoiceNumber, String tradingCurrency,
     										Date startDueDate, Date endDueDate, Date startDate) {
         String select = "select count (distinct concat(concat(ao.amount, ao.due_date), ao.customer_account_id)) ";
-        String from = "from ar_account_operation ao " +
+        String from = "select * from ar_account_operation ao " +
                 "inner join billing_invoice inv on ao.invoice_id=inv.id " +
                 "inner join billing_invoice_type invt on inv.invoice_type_id=invt.id ";
         String where = " where ao.transaction_type='I' ";

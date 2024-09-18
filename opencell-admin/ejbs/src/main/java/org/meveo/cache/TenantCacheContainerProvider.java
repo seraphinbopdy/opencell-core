@@ -23,11 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.inject.Inject;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
@@ -39,6 +34,11 @@ import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.service.crm.impl.ProviderService;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
 
 /**
  * Provides cache related services (loading, update) for tenant(provider) related operations
@@ -168,7 +168,7 @@ public class TenantCacheContainerProvider implements CacheContainerProvider, Ser
         providerCopy.setOrderLineTypes(provider.getOrderLineTypes());
         providerCopy.setAllowedManualRefundMethods(provider.getAllowedManualRefundMethods());
 
-        providerCopy.setCfValues(provider.getCFValuesCopy());
+        providerCopy.setCfValuesAsJson(provider.getCfValuesAsJson());
 
         // detach(provider);
 

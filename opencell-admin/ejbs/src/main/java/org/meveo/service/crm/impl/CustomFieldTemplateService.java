@@ -33,14 +33,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -73,7 +65,7 @@ import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldValue;
 import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.model.customEntities.CustomEntityTemplate;
-import org.meveo.model.persistence.CustomFieldJsonTypeDescriptor;
+import org.meveo.model.persistence.CustomFieldJsonDataType;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.custom.CfValueAccumulator;
 import org.meveo.service.custom.CustomEntityTemplateService;
@@ -88,6 +80,14 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * @author Wassim Drira
@@ -297,12 +297,12 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
 
         clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.create);
 
-        if (CfValueAccumulator.isAccumulateCf()) {
-            boolean reaccumulateCFValues = cfValueAccumulator.refreshCfAccumulationRules(cft);
-            if (reaccumulateCFValues) {
-                cfValueAccumulator.cftCreated(cft);
-            }
-        }
+//        if (CfValueAccumulator.isAccumulateCf()) {
+//            boolean reaccumulateCFValues = cfValueAccumulator.refreshCfAccumulationRules(cft);
+//            if (reaccumulateCFValues) {
+//                cfValueAccumulator.cftCreated(cft);
+//            }
+//        }
         if (updateUniqueConstraint) {
             updateConstraintByOldColumnsAndCet(oldConstraintColumns, cet, cetFields);
         }
@@ -435,9 +435,9 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
             }
         }
 
-        if (CfValueAccumulator.isAccumulateCf()) {
-            cfValueAccumulator.refreshCfAccumulationRules(cft);
-        }
+//        if (CfValueAccumulator.isAccumulateCf()) {
+//            cfValueAccumulator.refreshCfAccumulationRules(cft);
+//        }
         clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.remove);
     }
 
@@ -819,9 +819,9 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
     public List getReferencedEntities(CustomFieldTemplate customField, String code, Class entityClass) {
 
         // Case of encrypted customfields in DB
-		if (CustomFieldJsonTypeDescriptor.TRUE_STR.equalsIgnoreCase(
-						ParamBean.getInstance().getProperty(CustomFieldJsonTypeDescriptor.ENCRYPT_CUSTOM_FIELDS_PROPERTY,
-								CustomFieldJsonTypeDescriptor.FALSE_STR)) && !StringUtils.isBlank(ParamBean.getInstance().getProperty(CustomFieldJsonTypeDescriptor.OPENCELL_SHA_KEY_PROPERTY, null))) {
+		if (CustomFieldJsonDataType.TRUE_STR.equalsIgnoreCase(
+						ParamBean.getInstance().getProperty(CustomFieldJsonDataType.ENCRYPT_CUSTOM_FIELDS_PROPERTY,
+						    CustomFieldJsonDataType.FALSE_STR)) && !StringUtils.isBlank(ParamBean.getInstance().getProperty(CustomFieldJsonDataType.OPENCELL_SHA_KEY_PROPERTY, null))) {
             QueryBuilder queryBuilder = new QueryBuilder(entityClass, "a");
             Query query = queryBuilder.getQuery(getEntityManager());
             List<BusinessCFEntity> resultList = (List<BusinessCFEntity>) query.getResultList();
@@ -838,7 +838,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
             return null;
         }
         QueryBuilder queryBuilder = new QueryBuilder(entityClass, "a");
-        queryBuilder.addCriterion("entityFromJson(cf_values," + customField.getCode() + ",entity)", "=", code, true);
+        queryBuilder.addCriterion("entityFromJson('cf_values','" + customField.getCode() + "')", "=", code, true);
         Query query = queryBuilder.getQuery(getEntityManager());
         List resultList = query.getResultList();
         return resultList;

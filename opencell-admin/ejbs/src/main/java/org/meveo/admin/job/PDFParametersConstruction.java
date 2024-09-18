@@ -26,9 +26,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.billing.BillingAccount;
@@ -45,6 +42,8 @@ import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import net.sf.jasperreports.engine.JRParameter;
 
 /**

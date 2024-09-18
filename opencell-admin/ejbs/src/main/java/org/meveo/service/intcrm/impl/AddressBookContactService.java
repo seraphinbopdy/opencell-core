@@ -1,12 +1,13 @@
 package org.meveo.service.intcrm.impl;
 
+import java.util.List;
+
 import org.meveo.model.communication.contact.Contact;
 import org.meveo.model.intcrm.AddressBook;
 import org.meveo.model.intcrm.AddressBookContact;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import java.util.List;
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class AddressBookContactService extends PersistenceService<AddressBookContact> {

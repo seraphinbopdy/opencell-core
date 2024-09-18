@@ -25,12 +25,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import org.hibernate.Session;
 import org.meveo.jpa.EntityManagerProvider;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -39,6 +33,11 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.slf4j.Logger;
 
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionManagement;
+import jakarta.ejb.TransactionManagementType;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;

@@ -4,13 +4,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.jpa.JpaAmpNewTx;
@@ -24,6 +17,13 @@ import org.meveo.service.catalog.impl.CatalogHierarchyBuilderService;
 import org.meveo.service.quote.QuoteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * @author Tarik FAKHOURI.
@@ -108,9 +108,9 @@ public class QuoteVersionService extends PersistenceService<QuoteVersion>   {
 	
 	public List<QuoteVersion>findByQuoteCode(String quoteCode, VersionStatusEnum status) throws BusinessException {
 		try {
-			String query = "from QuoteVersion where quote.code =:quoteCode";
+			String query = "select qv from QuoteVersion qv where qv.quote.code =:quoteCode";
 			if(status != null) {
-				query += " and status<>:status";
+				query += " and qv.status<>:status";
 			}
 			Query q = getEntityManager().createQuery(query);
 			q.setParameter("quoteCode", quoteCode);

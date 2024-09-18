@@ -4,18 +4,19 @@ import static java.util.List.of;
 import static org.meveo.model.ordering.OpenOrderStatusEnum.IN_USE;
 import static org.meveo.model.ordering.OpenOrderStatusEnum.NEW;
 
+import java.util.Iterator;
+import java.util.Optional;
+
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.ordering.OpenOrder;
 import org.meveo.service.order.OpenOrderService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import java.util.Iterator;
-import java.util.Optional;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 @Stateless
 public class OpenOrderStatusJobBean extends IteratorBasedJobBean<Long> {

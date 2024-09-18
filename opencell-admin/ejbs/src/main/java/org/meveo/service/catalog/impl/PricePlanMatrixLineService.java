@@ -16,17 +16,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
-import org.hibernate.criterion.MatchMode;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.api.dto.catalog.TradingPricePlanMatrixLineDto;
 import org.meveo.api.dto.catalog.PricePlanMatrixLineDto;
 import org.meveo.api.dto.catalog.PricePlanMatrixValueDto;
+import org.meveo.api.dto.catalog.TradingPricePlanMatrixLineDto;
 import org.meveo.api.dto.response.catalog.PricePlanMatrixLinesDto;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
@@ -35,16 +28,22 @@ import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.billing.TradingCurrency;
-import org.meveo.model.catalog.TradingPricePlanMatrixLine;
 import org.meveo.model.catalog.PricePlanMatrixColumn;
 import org.meveo.model.catalog.PricePlanMatrixLine;
 import org.meveo.model.catalog.PricePlanMatrixValue;
 import org.meveo.model.catalog.PricePlanMatrixVersion;
+import org.meveo.model.catalog.TradingPricePlanMatrixLine;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
 import org.meveo.model.crm.Provider;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.crm.impl.ProviderService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 @Stateless
 public class PricePlanMatrixLineService extends PersistenceService<PricePlanMatrixLine> {

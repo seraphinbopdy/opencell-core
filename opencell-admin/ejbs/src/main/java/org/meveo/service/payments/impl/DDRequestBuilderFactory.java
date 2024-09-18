@@ -21,15 +21,15 @@ package org.meveo.service.payments.impl;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.model.payments.DDRequestBuilder;
 import org.meveo.model.payments.DDRequestBuilderTypeEnum;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.payment.DDRequestBuilderScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * 

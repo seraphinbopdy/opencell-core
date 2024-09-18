@@ -18,11 +18,11 @@
 
 package org.meveo.interceptor;
 
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * @author Edward P. Legaspi

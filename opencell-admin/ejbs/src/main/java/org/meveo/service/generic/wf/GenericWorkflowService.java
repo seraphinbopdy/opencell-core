@@ -17,6 +17,8 @@
  */
 package org.meveo.service.generic.wf;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,10 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.ReflectionUtils;
@@ -44,7 +42,9 @@ import org.meveo.service.base.BusinessEntityService;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.ValueExpressionWrapper;
 
-import static java.util.Optional.ofNullable;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class GenericWorkflowService extends BusinessService<GenericWorkflow> {

@@ -35,7 +35,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,40 +51,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.persistence.CacheRetrieveMode;
-import javax.persistence.Embeddable;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.OneToMany;
-import javax.persistence.Query;
-import javax.persistence.Tuple;
-import javax.persistence.TupleElement;
-import javax.persistence.TypedQuery;
-import javax.persistence.metamodel.Attribute;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.CacheMode;
 import org.hibernate.LockMode;
-import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.jpa.QueryHints;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.query.internal.AbstractProducedQuery;
+import org.hibernate.query.sqm.internal.QuerySqmImpl;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.util.ImageUploadEventHandler;
@@ -125,10 +101,10 @@ import org.meveo.model.customEntities.CustomEntityTemplate;
 import org.meveo.model.filter.Filter;
 import org.meveo.model.notification.Notification;
 import org.meveo.model.notification.NotificationEventTypeEnum;
-import org.meveo.model.persistence.CustomFieldJsonTypeDescriptor;
+import org.meveo.model.persistence.CustomFieldJsonDataType;
 import org.meveo.model.persistence.JacksonUtil;
 import org.meveo.model.shared.DateUtils;
-import org.meveo.model.transformer.AliasToEntityOrderedMapResultTransformer;
+import org.meveo.model.transformer.TupleToMapResultTransformer;
 import org.meveo.service.base.expressions.ExpressionFactory;
 import org.meveo.service.base.expressions.ExpressionParser;
 import org.meveo.service.base.local.IPersistenceService;
@@ -140,6 +116,28 @@ import org.meveo.service.notification.GenericNotificationService;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
+
+import io.hypersistence.utils.hibernate.query.SQLExtractor;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.persistence.CacheRetrieveMode;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TupleElement;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * Generic implementation that provides the default implementation for persistence methods declared in the {@link IPersistenceService} interface.
@@ -202,7 +200,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
      * Entity list search parameter name - parameter's value contains filter parameters
      */
     public static final String SEARCH_FILTER_PARAMETERS = "$FILTER_PARAMETERS";
-    
+
     /**
      * Entity list search if any of input parameters match the given values (example: "anyMatch customer.id billingAccount.customerAccount.customer.id customerAccount.customer.id": "19 19 19")
      */
@@ -216,7 +214,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
      * Is custom field accumulation being used
      */
     protected static boolean accumulateCF = true;
-    
+
     /**
      * Is generic workflow being used
      */
@@ -280,7 +278,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
 
     @Inject
     private GenericNotificationService genericNotificationService;
-    
+
     /**
      * Constructor.
      */
@@ -447,9 +445,9 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
             }
             return e;
         } else {
-	        
-	        Map<String, Object> hints = new HashMap<>();
-            hints.put("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
+
+            Map<String, Object> hints = new HashMap<>();
+            hints.put("jakarta.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
             return getEntityManager().find(entityClass, id, hints);
         }
     }
@@ -574,7 +572,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
      * @see org.meveo.service.base.local.IPersistenceService#update(org.meveo.model.IEntity)
      */
     @Override
-    public E update(E entity)  {
+    public E update(E entity) {
         log.debug("start of update {} entity (id={}) ..", entity.getClass().getSimpleName(), entity.getId());
 
         if (entity instanceof ISearchable) {
@@ -609,7 +607,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         if (!em.contains(entity)) { // https://vladmihalcea.com/jpa-persist-and-merge/
             entity = em.merge(entity); // here could also use session.update(); see https://vladmihalcea.com/how-to-optimize-the-merge-operation-using-update-while-batching-with-jpa-and-hibernate/
         }
-    
+
         // Andrius K. Commented out for now as solution is not currently used. Please don't remove it.
         // if (dirtyCfValues != null && !dirtyCfValues.isEmpty()) {
         // // CustomFieldValues cfValues = ((ICustomFieldEntity) entity).getCfValues();
@@ -633,7 +631,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
      * @see org.meveo.service.base.local.IPersistenceService#create(org.meveo.model.IEntity)
      */
     @Override
-    public void create(E entity)  {
+    public void create(E entity) {
         log.debug("start of create {}", entity.getClass().getSimpleName());
 
         if (entity instanceof ISearchable) {
@@ -667,11 +665,10 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         log.trace("end of create {}. entity id={}.", entity.getClass().getSimpleName(), entity.getId());
     }
 
-
     /**
      * @see org.meveo.service.base.local.IPersistenceService#create(org.meveo.model.IEntity)
      */
-    public void createWithoutNotif(E entity)  {
+    public void createWithoutNotif(E entity) {
         log.debug("start of create {}", entity.getClass().getSimpleName());
 
         if (entity instanceof ISearchable) {
@@ -768,7 +765,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         queryBuilder.addCriterion("code", "like", "%" + wildcode + "%", true);
         return queryBuilder.getQuery(getEntityManager()).getResultList();
     }
-    
+
     /**
      * Find entities by code
      *
@@ -784,6 +781,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
             return null;
         }
     }
+
     /**
      * @see org.meveo.service.base.local.IPersistenceService#list(org.meveo.admin.util.pagination.PaginationConfiguration)
      */
@@ -807,7 +805,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
     }
 
     public QueryBuilder listQueryBuilder(PaginationConfiguration config) {
-    	Map<String, Object> filters = config.getFilters();
+        Map<String, Object> filters = config.getFilters();
 
         if (filters != null && filters.containsKey("$FILTER")) {
             Filter filter = (Filter) filters.get("$FILTER");
@@ -847,32 +845,32 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
                 mapStringAndType.put("fullQualifiedTypeName", att.getJavaType().toString());
                 mapStringAndType.put("shortTypeName", att.getJavaType().getSimpleName());
                 boolean isEntity = BaseEntity.class.isAssignableFrom(att.getJavaType()) || ServiceTemplate.class.isAssignableFrom(att.getJavaType());
-                boolean isEmbeddable =  att.getJavaType().isAnnotationPresent(Embeddable.class);
-                if(StringUtils.isNotBlank(filter) && (!isEntity || maxDepth == (currentDepth+1) ) && !att.getName().toLowerCase().contains(filter.toLowerCase())) {
-                	continue;
+                boolean isEmbeddable = att.getJavaType().isAnnotationPresent(Embeddable.class);
+                if (StringUtils.isNotBlank(filter) && (!isEntity || maxDepth == (currentDepth + 1)) && !att.getName().toLowerCase().contains(filter.toLowerCase())) {
+                    continue;
                 }
-				mapStringAndType.put("isEntity",  Boolean.toString(isEntity));
-                mapStringAndType.put("isEnum",  Boolean.toString(att.getJavaType().isEnum()));
+                mapStringAndType.put("isEntity", Boolean.toString(isEntity));
+                mapStringAndType.put("isEnum", Boolean.toString(att.getJavaType().isEnum()));
                 mapStringAndType.put("isEmbeddable", Boolean.toString(isEmbeddable));
-				if((isEntity || isEmbeddable) && !att.getJavaType().equals(parentEntity) && (maxDepth == 0 || currentDepth < maxDepth) && currentDepth <= MAX_DEPTH) {
-					PersistenceService<?> persistenceService = (PersistenceService<?>) EjbUtils.getServiceInterface(att.getJavaType().getSimpleName() + "Service");
-					if(persistenceService == null){
-						persistenceService = (PersistenceService) EjbUtils.getServiceInterface("BaseEntityService");
-			            ((BaseEntityService) persistenceService).setEntityClass((Class<IEntity>) att.getJavaType());
-			        }
-					Map<String, Object> relatedFields = persistenceService.mapRelatedFields(filter, maxDepth, currentDepth + 1, entityClass);
-					if(relatedFields.isEmpty()) {
-						continue;
-					}
-					mapStringAndType.put("entityDetails", relatedFields);
-				} else if (att.getJavaType().isEnum()) {
+                if ((isEntity || isEmbeddable) && !att.getJavaType().equals(parentEntity) && (maxDepth == 0 || currentDepth < maxDepth) && currentDepth <= MAX_DEPTH) {
+                    PersistenceService<?> persistenceService = (PersistenceService<?>) EjbUtils.getServiceInterface(att.getJavaType().getSimpleName() + "Service");
+                    if (persistenceService == null) {
+                        persistenceService = (PersistenceService) EjbUtils.getServiceInterface("BaseEntityService");
+                        ((BaseEntityService) persistenceService).setEntityClass((Class<IEntity>) att.getJavaType());
+                    }
+                    Map<String, Object> relatedFields = persistenceService.mapRelatedFields(filter, maxDepth, currentDepth + 1, entityClass);
+                    if (relatedFields.isEmpty()) {
+                        continue;
+                    }
+                    mapStringAndType.put("entityDetails", relatedFields);
+                } else if (att.getJavaType().isEnum()) {
                     mapStringAndType.put("enumValues", Arrays.asList(att.getJavaType().getEnumConstants()));
                 }
                 mapAttributeAndType.put(att.getName(), mapStringAndType);
             } else {
                 if (!resultsCFTmpl.isEmpty()) {
-                	if(StringUtils.isNotBlank(filter) && !att.getName().toLowerCase().contains(filter.toLowerCase())) {
-                    	continue;
+                    if (StringUtils.isNotBlank(filter) && !att.getName().toLowerCase().contains(filter.toLowerCase())) {
+                        continue;
                     }
                     Map<String, Map<String, String>> mapCFValues = new HashMap();
                     for (CustomFieldTemplate aCFTmpl : resultsCFTmpl) {
@@ -880,7 +878,8 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
                             Map<String, String> mapStringAndType = new HashMap();
                             mapStringAndType.put("fullQualifiedTypeName", aCFTmpl.getFieldType().getDataClass().toString());
                             mapStringAndType.put("shortTypeName", aCFTmpl.getFieldType().getDataClass().getSimpleName());
-                            mapStringAndType.put("isEntity",  Boolean.toString(BaseEntity.class.isAssignableFrom(aCFTmpl.getFieldType().getDataClass()) || ServiceTemplate.class.isAssignableFrom(aCFTmpl.getFieldType().getDataClass())));
+                            mapStringAndType.put("isEntity",
+                                Boolean.toString(BaseEntity.class.isAssignableFrom(aCFTmpl.getFieldType().getDataClass()) || ServiceTemplate.class.isAssignableFrom(aCFTmpl.getFieldType().getDataClass())));
                             mapCFValues.put(aCFTmpl.getCode(), mapStringAndType);
                         }
                     }
@@ -1153,15 +1152,16 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public QueryBuilder getQuery(PaginationConfiguration config) {
-    	return getQuery(config,"a", config.isDistinctQuery());
+        return getQuery(config, "a", config.isDistinctQuery());
     }
-    	
+
     public QueryBuilder getQuery(PaginationConfiguration config, String alias, boolean distinct) {
         Map<String, Object> filters = config.getFilters();
 
         adaptOrdering(config, filters);
-        
-        QueryBuilder queryBuilder = new QueryBuilder(entityClass, alias, config.getSelectFields(), config.isDoFetch(), config.getFetchFields(), config.getJoinType(), config.getFilterOperator(), distinct, !config.isQueryReportQuery());
+
+        QueryBuilder queryBuilder = new QueryBuilder(entityClass, alias, config.getSelectFields(), config.isDoFetch(), config.getFetchFields(), config.getJoinType(), config.getFilterOperator(), distinct,
+            !config.isQueryReportQuery());
         if (filters != null && !filters.isEmpty()) {
             if (filters.containsKey(SEARCH_FILTER)) {
                 Filter filter = (Filter) filters.get(SEARCH_FILTER);
@@ -1170,14 +1170,13 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
             } else {
 
                 Map<String, Object> cfFilters = extractCustomFieldsFilters(filters);
-                if(MapUtils.isNotEmpty(cfFilters)) {
+                if (MapUtils.isNotEmpty(cfFilters)) {
                     filters.putAll(cfFilters);
                 }
 
                 ExpressionFactory expressionFactory = new ExpressionFactory(queryBuilder, alias);
                 filters.keySet().stream().sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
-                						 .filter(key -> filters.get(key) != null && !"$OPERATOR".equalsIgnoreCase(key))
-                						 .forEach(key -> expressionFactory.addFilters(key, filters.get(key)));
+                    .filter(key -> filters.get(key) != null && !"$OPERATOR".equalsIgnoreCase(key)).forEach(key -> expressionFactory.addFilters(key, filters.get(key)));
                 for (String cft : cfFilters.keySet()) {
                     filters.remove(cft);
                 }
@@ -1197,78 +1196,75 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         return queryBuilder;
     }
 
-	private void adaptOrdering(PaginationConfiguration config, Map<String, Object> filters) {
-		if(config==null || config.getOrderings()==null) {
-			return;
-		}
-		List<String> orderings = new ArrayList<String>();
-		for (Object x : config.getOrderings()) {
-			String orderElement = x.toString();
-			if ((orderElement.startsWith(CF_VALUES_FIELD) || orderElement.contains("." + CF_VALUES_FIELD))
-					&& !orderElement.contains(FROM_JSON_FUNCTION)) {
-				String fieldName = ((String) x).substring(orderElement.lastIndexOf(".") + 1);
-				Class cetClass = extractCETClass(orderElement);
-				CustomFieldTemplate cft = extractCFT(filters, fieldName, cetClass);
-				String type = getJsonType(cft.getFieldType().getDataClass());
-				String nested = orderElement.startsWith(CF_VALUES_FIELD) ? ""
-						: orderElement.substring(0, orderElement.indexOf(CF_VALUES_FIELD));
-				orderElement = extractCustomFieldSyntax(type, cft.getFieldType().getDataClass(), "", fieldName, nested);
-			}
-			orderings.add(orderElement);
-		}
-		config.setOrderings(orderings.toArray());
-	}
+    private void adaptOrdering(PaginationConfiguration config, Map<String, Object> filters) {
+        if (config == null || config.getOrderings() == null) {
+            return;
+        }
+        List<String> orderings = new ArrayList<String>();
+        for (Object x : config.getOrderings()) {
+            String orderElement = x.toString();
+            if ((orderElement.startsWith(CF_VALUES_FIELD) || orderElement.contains("." + CF_VALUES_FIELD)) && !orderElement.contains(FROM_JSON_FUNCTION)) {
+                String fieldName = ((String) x).substring(orderElement.lastIndexOf(".") + 1);
+                Class cetClass = extractCETClass(orderElement);
+                CustomFieldTemplate cft = extractCFT(filters, fieldName, cetClass);
+                String type = getJsonType(cft.getFieldType().getDataClass());
+                String nested = orderElement.startsWith(CF_VALUES_FIELD) ? "" : orderElement.substring(0, orderElement.indexOf(CF_VALUES_FIELD));
+                orderElement = extractCustomFieldSyntax(type, cft.getFieldType().getDataClass(), "", fieldName, nested);
+            }
+            orderings.add(orderElement);
+        }
+        config.setOrderings(orderings.toArray());
+    }
 
-	private Class extractCETClass(String orderElement) {
-		Class currentEntity = entityClass;
-		final String[] elements = orderElement.split("\\.");
-		for (String element : elements) {
-			if (CF_VALUES_FIELD.equals(element)) {
-				break;
-			}
-			try {
-				currentEntity = currentEntity.getDeclaredField(element).getType();
-			} catch (NoSuchFieldException | SecurityException e) {
-				throw new BusinessException("error when tryin to get field " + element + " from entity "
-						+ currentEntity.getSimpleName() + " : " + e.getStackTrace());
-			}
-		}
-		return currentEntity;
-	}
+    private Class extractCETClass(String orderElement) {
+        Class currentEntity = entityClass;
+        final String[] elements = orderElement.split("\\.");
+        for (String element : elements) {
+            if (CF_VALUES_FIELD.equals(element)) {
+                break;
+            }
+            try {
+                currentEntity = currentEntity.getDeclaredField(element).getType();
+            } catch (NoSuchFieldException | SecurityException e) {
+                throw new BusinessException("error when tryin to get field " + element + " from entity " + currentEntity.getSimpleName() + " : " + e.getStackTrace());
+            }
+        }
+        return currentEntity;
+    }
 
-	private CustomFieldTemplate extractCFT(Map<String, Object> filters, String fieldName, Class currentEntity) {
-		String appliesTo = currentEntity.getSimpleName();
-		if (currentEntity == CustomEntityInstance.class) {
-			String cetCode = (String) filters.get("cetCode");
-			if (cetCode == null) {
-				throw new ValidationException("cetCode is mandatory on filter to order by custom fields values");
-			}
-			appliesTo = CustomEntityTemplate.CFT_PREFIX + "_" + cetCode;
-		}
-		CustomFieldTemplate cft = customFieldTemplateService.findByCodeAndAppliesTo(fieldName, appliesTo);
-		if (cft == null) {
-			throw new ValidationException("no CustomFieldTemplate found for fieldName=" + fieldName + " and appliesTo= " + appliesTo);
-		}
-		return cft;
-	}
+    private CustomFieldTemplate extractCFT(Map<String, Object> filters, String fieldName, Class currentEntity) {
+        String appliesTo = currentEntity.getSimpleName();
+        if (currentEntity == CustomEntityInstance.class) {
+            String cetCode = (String) filters.get("cetCode");
+            if (cetCode == null) {
+                throw new ValidationException("cetCode is mandatory on filter to order by custom fields values");
+            }
+            appliesTo = CustomEntityTemplate.CFT_PREFIX + "_" + cetCode;
+        }
+        CustomFieldTemplate cft = customFieldTemplateService.findByCodeAndAppliesTo(fieldName, appliesTo);
+        if (cft == null) {
+            throw new ValidationException("no CustomFieldTemplate found for fieldName=" + fieldName + " and appliesTo= " + appliesTo);
+        }
+        return cft;
+    }
 
     /**
-	 * @param dataClass
-	 * @return
-	 */
-	public static String getJsonType(Class dataClass) {
-		if (jsonTypes.isEmpty()) {
-			final Field[] declaredFields = CustomFieldValue.class.getDeclaredFields();
-			for (final Field field : declaredFields) {
-				if (field.isAnnotationPresent(JsonProperty.class) && field.getName().endsWith("Value")) {
-					jsonTypes.put(field.getType(), field.getAnnotation(JsonProperty.class).value());
-				}
-			}
-		}
-		return jsonTypes.get(dataClass);
-	}
+     * @param dataClass
+     * @return
+     */
+    public static String getJsonType(Class dataClass) {
+        if (jsonTypes.isEmpty()) {
+            final Field[] declaredFields = CustomFieldValue.class.getDeclaredFields();
+            for (final Field field : declaredFields) {
+                if (field.isAnnotationPresent(JsonProperty.class) && field.getName().endsWith("Value")) {
+                    jsonTypes.put(field.getType(), field.getAnnotation(JsonProperty.class).value());
+                }
+            }
+        }
+        return jsonTypes.get(dataClass);
+    }
 
-	/**
+    /**
      * @param fieldName
      * @return
      */
@@ -1312,16 +1308,17 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
                     // listVarcharFromJson(<entity>.cfValues,<custom field name>,<value to search for>)=true
                     if (SEARCH_LIST.equals(fieldInfo.getCondition())) {
                         if ("string".equals(type)) {
-                           value = "'" + value + "'";
+                            value = "'" + value + "'";
                         }
                         type = "list" + StringUtils.capitalizeFirstLetter(type);
                         String searchFunction = "list";
-                        transformedFilter = searchFunction + FROM_JSON_FUNCTION + "cfValues," + fieldInfo.getFieldName() + "," + type + ",0," + value + ")=true ";
+                        transformedFilter = searchFunction + FROM_JSON_FUNCTION + "cfValuesAsJson,'" + fieldInfo.getFieldName() + "','" + type + "','0','" + value + "')=true ";
                         cftFilters.put(PersistenceService.SEARCH_SQL + "_" + fieldInfo.getFieldName(), transformedFilter);
 
                     } else {
                         if (type.startsWith("list")) {
-                            type = type.substring(4).toLowerCase(); // A fix so inList search by a list of values would be compared against a regular field instead of a list type field e.g. listString - See BaseApi.castFilterValue logic 
+                            type = type.substring(4).toLowerCase(); // A fix so inList search by a list of values would be compared against a regular field instead of a list type field e.g. listString - See
+                                                                    // BaseApi.castFilterValue logic
                         }
 
                         String fieldNamePrefix = entry.getKey().replace("cfValues", "");
@@ -1341,23 +1338,23 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         return cftFilters;
     }
 
-    //check if search by the CF value should use or not the encrypted value
+    // check if search by the CF value should use or not the encrypted value
     static private CustomFieldValues checkCFValuesShouldBeEncrypted(CustomFieldValues customFieldValues) {
         if (!encryptCFSetting) {
             return customFieldValues;
         }
-        String encryptedCFJson = CustomFieldJsonTypeDescriptor.INSTANCE.toString(customFieldValues);
-        Map<String, List<CustomFieldValue>> cfValues = JacksonUtil.fromString(encryptedCFJson, new TypeReference<Map<String, List<CustomFieldValue>>>() {});
+        String encryptedCFJson = CustomFieldJsonDataType.INSTANCE.toString(customFieldValues);
+        Map<String, List<CustomFieldValue>> cfValues = JacksonUtil.fromString(encryptedCFJson, new TypeReference<Map<String, List<CustomFieldValue>>>() {
+        });
         return new CustomFieldValues(cfValues);
     }
 
     static private String extractCustomFieldSyntax(String type, Class clazz, String transformedFilter, String fieldName, String nestedFields) {
-		nestedFields=nestedFields==null?"":nestedFields;
-		String searchFunction = getCustomFieldSearchFunctionPrefix(clazz);
-		transformedFilter = transformedFilter + searchFunction + FROM_JSON_FUNCTION+nestedFields+"cfValues," + fieldName + "," + type + ") ";
-		return transformedFilter;
-	}
-
+        nestedFields = nestedFields == null ? "" : nestedFields;
+        String searchFunction = getCustomFieldSearchFunctionPrefix(clazz);
+        transformedFilter = transformedFilter + searchFunction + FROM_JSON_FUNCTION + nestedFields + "cfValuesAsJson,'" + fieldName + "','" + type + "') ";
+        return transformedFilter;
+    }
 
     /**
      * Update last modified information (created/updated date and username)
@@ -1401,9 +1398,9 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> executeNativeSelectQuery(String query, Map<String, Object> params) {
         Session session = getEntityManager().unwrap(Session.class);
-        SQLQuery q = session.createSQLQuery(query);
+        NativeQuery q = session.createNativeQuery(query);
 
-        q.setResultTransformer(AliasToEntityOrderedMapResultTransformer.INSTANCE);
+        q.setTupleTransformer(TupleToMapResultTransformer.INSTANCE);
 
         if (params != null) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
@@ -1426,8 +1423,8 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
     public ScrollableResults getScrollableResultNativeQuery(String query, Map<String, Object> params) {
         Session session = getEntityManager().unwrap(Session.class);
         NativeQuery q = session.createNativeQuery(query);
-        
-        q.setResultTransformer(AliasToEntityOrderedMapResultTransformer.INSTANCE);
+
+        q.setTupleTransformer(TupleToMapResultTransformer.INSTANCE);
         q.setFetchSize(10000);
         q.setReadOnly(true);
         q.setLockMode("a", LockMode.NONE);
@@ -1607,155 +1604,151 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
             return "varchar";
         }
     }
-    
+
     public Object deepCopyObject(Class<E> old) throws Exception {
-   	 	ObjectOutputStream oos = null;
+        ObjectOutputStream oos = null;
         ObjectInputStream ois = null;
         try {
-           ByteArrayOutputStream bos = new ByteArrayOutputStream();
-           oos = new ObjectOutputStream(bos);
-           oos.writeObject(old);
-           oos.flush();               
-           ByteArrayInputStream bin = new ByteArrayInputStream(bos.toByteArray()); 
-           ois = new ObjectInputStream(bin);                  
-           return ois.readObject(); 
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(old);
+            oos.flush();
+            ByteArrayInputStream bin = new ByteArrayInputStream(bos.toByteArray());
+            ois = new ObjectInputStream(bin);
+            return ois.readObject();
+        } catch (Exception e) {
+            log.error("Exception in ObjectCloner : ", e);
+            throw (e);
+        } finally {
+            oos.close();
+            ois.close();
         }
-        catch(Exception e) {
-        	log.error("Exception in ObjectCloner : ",e);
-        	throw(e);
-        }
-        finally {
-           oos.close();
-           ois.close();
-        }
-   }
-    
+    }
+
     /**
-	 * @param entity
-	 * @param id
-	 * @return
-	 */
-	public IEntity tryToFindByEntityClassAndId(Class<? extends IEntity> entity, Long id) {
-    	return tryToFindByEntityClassAndId(entity, id, null);
-	}
-	
-	/**
-	 * @param entity
-	 * @param id
-	 * @param fetchFields
-	 * @return
-	 */
-	public IEntity tryToFindByEntityClassAndId(Class<? extends IEntity> entity, Long id, List<String> fetchFields) {
-    	if(id==null) {
-    		return null;
-    	}
+     * @param entity
+     * @param id
+     * @return
+     */
+    public IEntity tryToFindByEntityClassAndId(Class<? extends IEntity> entity, Long id) {
+        return tryToFindByEntityClassAndId(entity, id, null);
+    }
+
+    /**
+     * @param entity
+     * @param id
+     * @param fetchFields
+     * @return
+     */
+    public IEntity tryToFindByEntityClassAndId(Class<? extends IEntity> entity, Long id, List<String> fetchFields) {
+        if (id == null) {
+            return null;
+        }
         QueryBuilder qb = new QueryBuilder(entity, "entity", null);
         qb.addCriterion("entity.id", "=", id, true);
         try {
-			return (IEntity) qb.getQuery(getEntityManager()).getSingleResult();
+            return (IEntity) qb.getQuery(getEntityManager()).getSingleResult();
         } catch (NoResultException e) {
-            throw new NotFoundException("No entity of type "+entity.getSimpleName()+" with id '"+id+"' found");
+            throw new NotFoundException("No entity of type " + entity.getSimpleName() + " with id '" + id + "' found");
         } catch (NonUniqueResultException e) {
-        	throw new ForbiddenException("More than one entity of type "+entity.getSimpleName()+" with id '"+id+"' found");
+            throw new ForbiddenException("More than one entity of type " + entity.getSimpleName() + " with id '" + id + "' found");
         }
-	}
-
-	public BusinessEntity tryToFindByEntityClassAndCode(Class<? extends BusinessEntity> entity, String code) {
-    	return tryToFindByEntityClassAndCode(entity, code, null);
     }
-	
-	public BusinessEntity tryToFindByEntityClassAndCode(Class<? extends BusinessEntity> entity, String code, List<String> fetchFields) {
-    	if(code==null) {
-    		return null;
-    	}
+
+    public BusinessEntity tryToFindByEntityClassAndCode(Class<? extends BusinessEntity> entity, String code) {
+        return tryToFindByEntityClassAndCode(entity, code, null);
+    }
+
+    public BusinessEntity tryToFindByEntityClassAndCode(Class<? extends BusinessEntity> entity, String code, List<String> fetchFields) {
+        if (code == null) {
+            return null;
+        }
         QueryBuilder qb = new QueryBuilder(entity, "entity", null);
         qb.addCriterion("entity.code", "=", code, true);
         try {
-			return (BusinessEntity) qb.getQuery(getEntityManager()).getSingleResult();
+            return (BusinessEntity) qb.getQuery(getEntityManager()).getSingleResult();
         } catch (NoResultException e) {
-            throw new NotFoundException("No entity of type "+entity.getSimpleName()+" with code '"+code+"' found");
+            throw new NotFoundException("No entity of type " + entity.getSimpleName() + " with code '" + code + "' found");
         } catch (NonUniqueResultException e) {
-        	throw new ForbiddenException("'code' for entity "+entity.getSimpleName()+" is not an unique identifier. Please use id instead");
+            throw new ForbiddenException("'code' for entity " + entity.getSimpleName() + " is not an unique identifier. Please use id instead");
         }
     }
-	
-	
-	
-	/**
-	 * Try to find IEntity by code, if code is null, try with id.
-	 * 
-	 * @param entity
-	 * @param code
-	 * @param id
-	 * @return
-	 */
-	public BusinessEntity tryToFindByEntityClassAndCodeOrId(Class<? extends BusinessEntity> entity, String code, Long id) {
-		return tryToFindByEntityClassAndCodeOrId(entity, code, id, null);
-	}
-	
-	/**
-	 * Try to find IEntity by code, if code is null, try with id.
-	 * 
-	 * @param entity
-	 * @param code
-	 * @param id
-	 * @return
-	 */
-	public BusinessEntity tryToFindByEntityClassAndCodeOrId(Class<? extends BusinessEntity> entity, String code, Long id, List<String> fetchFields) {
-		if (code != null && !code.isBlank()) {
-			return tryToFindByEntityClassAndCode(entity, code);
-		} else if (id != null) {
-			return (BusinessEntity) tryToFindByEntityClassAndId(entity, id);
-		}
-		return null;
-	}
-	
 
-	/**
-	 * try to find entity in database by code or id
-	 * @param instance
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-    public <B extends BusinessEntity> B tryToFindByCodeOrId(B instance) {
-		return (B) tryToFindByCodeOrId(instance, null);
-	}
+    /**
+     * Try to find IEntity by code, if code is null, try with id.
+     * 
+     * @param entity
+     * @param code
+     * @param id
+     * @return
+     */
+    public BusinessEntity tryToFindByEntityClassAndCodeOrId(Class<? extends BusinessEntity> entity, String code, Long id) {
+        return tryToFindByEntityClassAndCodeOrId(entity, code, id, null);
+    }
 
-	/**
-	 * try to find entity in database by code or id
-	 * @param instance
-	 * @return
-	 */
-	public BusinessEntity tryToFindByCodeOrId(BusinessEntity instance, List<String> fetchFields) {
-		if (instance == null) {
-			return null;
-		}
-		final String entityName = instance.getClass().getName();
-		final BusinessEntity entity = tryToFindByEntityClassAndCodeOrId(instance.getClass(), instance.getCode(),
-				instance.getId());
-		if (entity == null) {
-			throw new BadRequestException("No "+entityName+" found with Id: "+instance.getId()+" or Code :"+instance.getCode());
-		}
-		return entity;
-	}
-	
-	public BusinessEntity tryToFindByEntityClassAndMap(Class<? extends BusinessEntity> entity, Map<String, Object> criterions) {
-    	if(criterions==null) {
-    		return null;
-    	}
-    	String where = "";
-        QueryBuilder qb = new QueryBuilder(entity, "entity", null);
-        for(Entry<String, Object> e : criterions.entrySet()) {
-        	qb.addCriterion("entity."+e.getKey(), "=", e.getValue(), true);
-        	where=where +" entity."+e.getKey()+"="+ e.getValue()+",";
+    /**
+     * Try to find IEntity by code, if code is null, try with id.
+     * 
+     * @param entity
+     * @param code
+     * @param id
+     * @return
+     */
+    public BusinessEntity tryToFindByEntityClassAndCodeOrId(Class<? extends BusinessEntity> entity, String code, Long id, List<String> fetchFields) {
+        if (code != null && !code.isBlank()) {
+            return tryToFindByEntityClassAndCode(entity, code);
+        } else if (id != null) {
+            return (BusinessEntity) tryToFindByEntityClassAndId(entity, id);
         }
-        
+        return null;
+    }
+
+    /**
+     * try to find entity in database by code or id
+     * 
+     * @param instance
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public <B extends BusinessEntity> B tryToFindByCodeOrId(B instance) {
+        return (B) tryToFindByCodeOrId(instance, null);
+    }
+
+    /**
+     * try to find entity in database by code or id
+     * 
+     * @param instance
+     * @return
+     */
+    public BusinessEntity tryToFindByCodeOrId(BusinessEntity instance, List<String> fetchFields) {
+        if (instance == null) {
+            return null;
+        }
+        final String entityName = instance.getClass().getName();
+        final BusinessEntity entity = tryToFindByEntityClassAndCodeOrId(instance.getClass(), instance.getCode(), instance.getId());
+        if (entity == null) {
+            throw new BadRequestException("No " + entityName + " found with Id: " + instance.getId() + " or Code :" + instance.getCode());
+        }
+        return entity;
+    }
+
+    public BusinessEntity tryToFindByEntityClassAndMap(Class<? extends BusinessEntity> entity, Map<String, Object> criterions) {
+        if (criterions == null) {
+            return null;
+        }
+        String where = "";
+        QueryBuilder qb = new QueryBuilder(entity, "entity", null);
+        for (Entry<String, Object> e : criterions.entrySet()) {
+            qb.addCriterion("entity." + e.getKey(), "=", e.getValue(), true);
+            where = where + " entity." + e.getKey() + "=" + e.getValue() + ",";
+        }
+
         try {
-			return (BusinessEntity) qb.getQuery(getEntityManager()).getSingleResult();
+            return (BusinessEntity) qb.getQuery(getEntityManager()).getSingleResult();
         } catch (NoResultException e) {
-            throw new NotFoundException("No entity of type "+entity.getSimpleName()+"with "+where+" found");
+            throw new NotFoundException("No entity of type " + entity.getSimpleName() + "with " + where + " found");
         } catch (NonUniqueResultException e) {
-        	throw new BusinessException("More than one entity of type "+entity.getSimpleName()+" with "+where+" found");
+            throw new BusinessException("More than one entity of type " + entity.getSimpleName() + " with " + where + " found");
         }
     }
 
@@ -1775,22 +1768,21 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
      *
      * @param hqlQuery HQL query to execute
      * @param params Parameters to pass
-     * @param pageSize 
-     * @param pageIndex 
+     * @param pageSize
+     * @param pageIndex
      * @return A map of values retrieved
      */
-    public List<Map<String, Object>> getSelectQueryAsMap(String hqlQuery, Map<String, Object> params){
-    	return getSelectQueryAsMap(hqlQuery, params, null, null);
+    public List<Map<String, Object>> getSelectQueryAsMap(String hqlQuery, Map<String, Object> params) {
+        return getSelectQueryAsMap(hqlQuery, params, null, null);
     }
 
-    
     /**
      * Execute a HQL select query
      *
      * @param hqlQuery HQL query to execute
      * @param params Parameters to pass
-     * @param pageSize 
-     * @param pageIndex 
+     * @param pageSize
+     * @param pageIndex
      * @return A map of values retrieved
      */
     public List<Map<String, Object>> getSelectQueryAsMap(String hqlQuery, Map<String, Object> params, Integer pageSize, Integer pageIndex) {
@@ -1800,8 +1792,8 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
                 query.setParameter(entry.getKey(), entry.getValue());
             }
         }
-        if(pageIndex!=null && pageSize!=null) {
-        	query.setMaxResults(pageSize).setFirstResult(pageIndex * pageSize);
+        if (pageIndex != null && pageSize != null) {
+            query.setMaxResults(pageSize).setFirstResult(pageIndex * pageSize);
         }
         return query.getResultStream().map(mapTuplesAsMap()).collect(Collectors.toList());
     }
@@ -1826,8 +1818,8 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
             return map;
         };
     }
-    
-	/**
+
+    /**
      * Create Query builder from a map of filters
      * 
      * @param filters Map of filters
@@ -1835,29 +1827,26 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
      * @param fetchFields Fields to fetch (join to related tables)
      * @param distinct Is this a distinct query
      * @return QueryBuilder
-	 */
+     */
     public QueryBuilder getQueryFromFilters(Map<String, Object> filters, String selectFields, List<String> fetchFields, boolean distinct) {
-		QueryBuilder queryBuilder;
-		String filterValue = QueryBuilder.getFilterByKey(filters, "SQL");
-		if (!StringUtils.isBlank(filterValue)) {
+        QueryBuilder queryBuilder;
+        String filterValue = QueryBuilder.getFilterByKey(filters, "SQL");
+        if (!StringUtils.isBlank(filterValue)) {
             queryBuilder = new QueryBuilder(filterValue, "a", distinct);
-		} else {
+        } else {
             FilterConverter converter = new FilterConverter(getEntityClass());
-			PaginationConfiguration configuration = new PaginationConfiguration(converter.convertFilters(filters));
-			if (!CollectionUtils.isEmpty(fetchFields)) {
-				configuration.setFetchFields(fetchFields);
-			}
+            PaginationConfiguration configuration = new PaginationConfiguration(converter.convertFilters(filters));
+            if (!CollectionUtils.isEmpty(fetchFields)) {
+                configuration.setFetchFields(fetchFields);
+            }
             configuration.setSelectFields(selectFields);
             queryBuilder = getQuery(configuration, "a", distinct);
-		}
-		return queryBuilder;
-	}
+        }
+        return queryBuilder;
+    }
 
     public Long findNextSequenceId(String sequenceName) {
-        BigInteger nextSequenceValue = (BigInteger) getEntityManager().createNativeQuery(isDBOracle()
-                        ? "SELECT " + sequenceName +".nextval FROM dual"
-                        : "select nextval('"+ sequenceName + "')" )
-                .getSingleResult();
+        BigInteger nextSequenceValue = (BigInteger) getEntityManager().createNativeQuery(isDBOracle() ? "SELECT " + sequenceName + ".nextval FROM dual" : "select nextval('" + sequenceName + "')").getSingleResult();
         return (nextSequenceValue.add(ONE)).longValue();
     }
 
@@ -1871,16 +1860,12 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
     @SuppressWarnings({ "rawtypes", "deprecation" })
     public static String getNativeQueryFromJPA(Query jpaQuery, Map<String, Object> params) {
 
-        AbstractProducedQuery abstractProducedQuery = jpaQuery.unwrap(AbstractProducedQuery.class);
-        String[] sqls = abstractProducedQuery.getProducer().getFactory().getQueryPlanCache().getHQLQueryPlan(abstractProducedQuery.getQueryString(), false, Collections.emptyMap()).getSqlStrings();
-
-        if (sqls.length == 0) {
+        String nativeSql = SQLExtractor.from(jpaQuery);
+        if (nativeSql == null) {
             return null;
         }
 
-        String nativeSql = sqls[0];
-
-        String jpaQueryString = abstractProducedQuery.getQueryString();
+        String jpaQueryString = jpaQuery.unwrap(QuerySqmImpl.class).getQueryString();
 
         Pattern pattern = Pattern.compile("(:\\w*)[ |)]?");
         Matcher matcher = pattern.matcher(jpaQueryString);

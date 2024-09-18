@@ -18,10 +18,10 @@
 
 package org.meveo.service.billing.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.billing.ChargeInstance;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class GenericChargeInstanceService extends BusinessService<ChargeInstance> {

@@ -18,6 +18,23 @@
 
 package org.meveo.service.finance;
 
+import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.ScrollableResults;
@@ -42,24 +59,8 @@ import org.meveo.service.custom.CustomTableService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.finance.ReportExtractScript;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * Service for managing ReportExtract entity.
@@ -237,7 +238,7 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("reportExtract/default_html_report.html"));
             Object value = null;
             // get the header
-            Map<String, Object> firstRow = (Map<String, Object>) results.get()[0];
+            Map<String, Object> firstRow = (Map<String, Object>) results.get();
             Iterator ite = firstRow.keySet().iterator();
             tableHeader.append("<thead><tr>");
             while (ite.hasNext()) {
@@ -249,7 +250,7 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             int ctr = 1;
             tableBody.append("<tbody>");
             do {
-                row = (Map<String, Object>) results.get()[0];
+                row = (Map<String, Object>) results.get();
                 ite = firstRow.keySet().iterator();
                 tableBody.append("<tr class='" + (ctr++ % 2 == 0 ? "odd" : "even") + "'>");
                 while (ite.hasNext()) {
@@ -330,7 +331,7 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             fileNames.add(filename);
 
             // get the header
-            Map<String, Object> firstRow = (Map<String, Object>) results.get()[0];
+            Map<String, Object> firstRow = (Map<String, Object>) results.get();
             Iterator ite = firstRow.keySet().iterator();
             StringBuilder header = new StringBuilder();
             while (ite.hasNext()) {
@@ -345,7 +346,7 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             line = new StringBuilder();
             int counter = 0;
             do {
-                row = (Map<String, Object>) results.get()[0];
+                row = (Map<String, Object>) results.get();
                 ite = firstRow.keySet().iterator();
                 while (ite.hasNext()) {
                     value = row.get(ite.next());

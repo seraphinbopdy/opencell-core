@@ -18,17 +18,10 @@
 
 package org.meveo.admin.job;
 
-import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -42,6 +35,12 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.audit.logging.AuditDataLogService;
 import org.meveo.service.job.Job;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 /**
  * A job implementation to convert Open Wallet operations to Rated transactions
@@ -94,13 +93,13 @@ public class AuditDataLogAggregationJobBean extends IteratorBasedJobBean<List<Au
 
         Object[] convertSummary = (Object[]) em.createNamedQuery("AuditDataLogRecord.getConvertToAggregateSummary").getSingleResult();
 
-        nrOfRecords = ((BigInteger) convertSummary[0]).longValue();
+        nrOfRecords = (Long) convertSummary[0];
 
         if (nrOfRecords.intValue() == 0) {
             return Optional.empty();
         }
 
-        maxId = ((BigInteger) convertSummary[1]).longValue();
+        maxId = (Long) convertSummary[1];
 
         statelessSession = em.unwrap(Session.class).getSessionFactory().openStatelessSession();
 		scrollableResults = statelessSession.createNamedQuery("AuditDataLogRecord.listConvertToAggregate")

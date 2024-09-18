@@ -18,11 +18,9 @@
 
 package org.meveo.service.script.payment;
 
-import java.util.Date;
 import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.model.payments.CustomerAccount;
 import org.meveo.service.script.ScriptInterface;
 
 /**

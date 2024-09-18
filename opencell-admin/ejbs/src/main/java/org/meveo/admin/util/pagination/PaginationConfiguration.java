@@ -17,15 +17,15 @@
  */
 package org.meveo.admin.util.pagination;
 
-import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.criteria.JoinType;
+import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
+
+import jakarta.persistence.criteria.JoinType;
 
 /**
  * @author Andrius

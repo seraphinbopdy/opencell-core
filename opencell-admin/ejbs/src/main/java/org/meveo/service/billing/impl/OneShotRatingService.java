@@ -7,10 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.model.RatingResult;
@@ -27,6 +23,10 @@ import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
 import org.meveo.service.tax.TaxClassService;
+
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class OneShotRatingService extends RatingService implements Serializable {

@@ -18,6 +18,16 @@
 
 package org.meveo.service.api;
 
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import org.meveo.api.dto.CustomEntityInstanceDto;
 import org.meveo.api.dto.CustomFieldDto;
 import org.meveo.api.dto.CustomFieldFormattedValueDto;
@@ -42,18 +52,9 @@ import org.meveo.service.custom.CustomEntityInstanceService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * The Class EntityToDtoConverter.
@@ -81,12 +82,12 @@ public class EntityToDtoConverter {
     @ApplicationProvider
     protected Provider appProvider;
 
-    static boolean accumulateCF = true;
+    static boolean accumulateCF = false;
 
-    @PostConstruct
-    private void init() {
-        accumulateCF = Boolean.parseBoolean(ParamBeanFactory.getAppScopeInstance().getProperty("accumulateCF", "false"));
-    }
+//    @PostConstruct
+//    private void init() {
+//        accumulateCF = Boolean.parseBoolean(ParamBeanFactory.getAppScopeInstance().getProperty("accumulateCF", "false"));
+//    }
 
     /**
      * Gets the custom fields DTO.
@@ -148,20 +149,20 @@ public class EntityToDtoConverter {
 
         // In case of INHERIT_MERGED scenario current values are merged with inherited values
         if (accumulateCF && inheritCF == CustomFieldInheritanceEnum.INHERIT_MERGED) {
-            if (entity.getCfAccumulatedValues() != null) {
-                for (Entry<String, List<CustomFieldValue>> cfValueInfo : entity.getCfAccumulatedValues().getValuesByCode().entrySet()) {
-                    String cfCode = cfValueInfo.getKey();
-                    // Return only those values that have cft
-                    if (!cfts.containsKey(cfCode)) {
-                        continue;
-                    }
-                    for (CustomFieldValue cfValue : cfValueInfo.getValue()) {
-                        if (!cfValue.isExcessiveInSize()) {
-                            currentEntityCFs.getCustomField().add(customFieldToDTO(entity, cfCode, cfValue, cfts.get(cfCode)));
-                        }
-                    }
-                }
-            }
+//            if (entity.getCfAccumulatedValues() != null) {
+//                for (Entry<String, List<CustomFieldValue>> cfValueInfo : entity.getCfAccumulatedValues().getValuesByCode().entrySet()) {
+//                    String cfCode = cfValueInfo.getKey();
+//                    // Return only those values that have cft
+//                    if (!cfts.containsKey(cfCode)) {
+//                        continue;
+//                    }
+//                    for (CustomFieldValue cfValue : cfValueInfo.getValue()) {
+//                        if (!cfValue.isExcessiveInSize()) {
+//                            currentEntityCFs.getCustomField().add(customFieldToDTO(entity, cfCode, cfValue, cfts.get(cfCode)));
+//                        }
+//                    }
+//                }
+//            }
 
         } else {
             if (cfValues != null && !cfValues.isEmpty()) {
@@ -185,21 +186,21 @@ public class EntityToDtoConverter {
         // In case of ACCUMULATED scenario, inherited values contain merged current and inherited values
         if (inheritCF == CustomFieldInheritanceEnum.ACCUMULATED) {
 
-            if (entity.getCfAccumulatedValues() != null) {
-                for (Entry<String, List<CustomFieldValue>> cfValueInfo : entity.getCfAccumulatedValues().getValuesByCode().entrySet()) {
-                    String cfCode = cfValueInfo.getKey();
-                    // Return only those values that have cft
-                    if (!cfts.containsKey(cfCode)) {
-                        continue;
-                    }
-                    // Add only those that are really inherited values
-                    for (CustomFieldValue cfValue : cfValueInfo.getValue()) {
-                        if (!cfValue.isExcessiveInSize()) {
-                            currentEntityCFs.getInheritedCustomField().add(customFieldToDTO(entity, cfCode, cfValue, cfts.get(cfCode)));
-                        }
-                    }
-                }
-            }
+//            if (entity.getCfAccumulatedValues() != null) {
+//                for (Entry<String, List<CustomFieldValue>> cfValueInfo : entity.getCfAccumulatedValues().getValuesByCode().entrySet()) {
+//                    String cfCode = cfValueInfo.getKey();
+//                    // Return only those values that have cft
+//                    if (!cfts.containsKey(cfCode)) {
+//                        continue;
+//                    }
+//                    // Add only those that are really inherited values
+//                    for (CustomFieldValue cfValue : cfValueInfo.getValue()) {
+//                        if (!cfValue.isExcessiveInSize()) {
+//                            currentEntityCFs.getInheritedCustomField().add(customFieldToDTO(entity, cfCode, cfValue, cfts.get(cfCode)));
+//                        }
+//                    }
+//                }
+//            }
 
         } else if (inheritCF != CustomFieldInheritanceEnum.INHERIT_NONE) {
             ICustomFieldEntity[] parentEntities = entity.getParentCFEntities();
@@ -215,20 +216,20 @@ public class EntityToDtoConverter {
 
                     // Append inherited values only
                     if (accumulateCF) {
-                        if (parentEntity.getCfAccumulatedValues() != null) {
-                            for (Entry<String, List<CustomFieldValue>> cfValueInfo : parentEntity.getCfAccumulatedValues().getValuesByCode().entrySet()) {
-                                String cfCode = cfValueInfo.getKey();
-                                // Return only those values that have cft
-                                if (!cfts.containsKey(cfCode)) {
-                                    continue;
-                                }
-                                for (CustomFieldValue cfValue : cfValueInfo.getValue()) {
-                                    if (!cfValue.isExcessiveInSize()) {
-                                        currentEntityCFs.getInheritedCustomField().add(customFieldToDTO(entity, cfCode, cfValue, cfts.get(cfCode)));
-                                    }
-                                }
-                            }
-                        }
+//                        if (parentEntity.getCfAccumulatedValues() != null) {
+//                            for (Entry<String, List<CustomFieldValue>> cfValueInfo : parentEntity.getCfAccumulatedValues().getValuesByCode().entrySet()) {
+//                                String cfCode = cfValueInfo.getKey();
+//                                // Return only those values that have cft
+//                                if (!cfts.containsKey(cfCode)) {
+//                                    continue;
+//                                }
+//                                for (CustomFieldValue cfValue : cfValueInfo.getValue()) {
+//                                    if (!cfValue.isExcessiveInSize()) {
+//                                        currentEntityCFs.getInheritedCustomField().add(customFieldToDTO(entity, cfCode, cfValue, cfts.get(cfCode)));
+//                                    }
+//                                }
+//                            }
+//                        }
                     } else {
 
                         // inherit the parent entity's custom fields

@@ -1,5 +1,7 @@
 package org.meveo.admin.job;
 
+import java.util.Date;
+
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
@@ -8,10 +10,9 @@ import org.meveo.service.audit.AuditableFieldService;
 import org.meveo.service.audit.logging.AuditDataLogService;
 import org.meveo.service.audit.logging.AuditLogService;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import java.util.Date;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job definition to automatically purge audit log based on a duration.

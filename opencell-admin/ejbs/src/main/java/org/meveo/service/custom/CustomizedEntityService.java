@@ -26,8 +26,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ICustomFieldEntity;
@@ -36,8 +34,9 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.JobInstanceService;
 import org.meveo.util.EntityCustomizationUtils;
-import org.primefaces.component.log.Log;
 import org.reflections.Reflections;
+
+import jakarta.inject.Inject;
 
 public class CustomizedEntityService implements Serializable {
 

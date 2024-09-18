@@ -22,6 +22,8 @@ import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
 import static org.meveo.commons.utils.EjbUtils.getServiceInterface;
 
+import java.util.Optional;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.admin.exception.BusinessException;
@@ -31,10 +33,9 @@ import org.meveo.model.admin.CustomGenericEntityCode;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.ServiceSingleton;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import java.util.Optional;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * Represents a Service that allows to automatically generate a custom code for a given entity

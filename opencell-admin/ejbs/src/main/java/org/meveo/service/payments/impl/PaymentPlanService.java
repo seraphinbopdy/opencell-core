@@ -17,6 +17,15 @@
  */
 package org.meveo.service.payments.impl;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.apiv2.payments.PaymentPlanDto;
 import org.meveo.model.billing.Invoice;
@@ -30,16 +39,8 @@ import org.meveo.model.payments.plan.PaymentPlanStatusEnum;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.billing.impl.InvoiceService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class PaymentPlanService extends BusinessService<PaymentPlan> {

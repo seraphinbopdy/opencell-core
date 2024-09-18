@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.meveo.model.CounterValueChangeInfo;
 import org.meveo.model.billing.CounterPeriod;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * Tracks counter period updates for the time of request

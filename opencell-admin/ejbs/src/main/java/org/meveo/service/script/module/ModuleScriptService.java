@@ -22,15 +22,15 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.InvalidScriptException;
 import org.meveo.model.module.MeveoModule;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class ModuleScriptService implements Serializable {

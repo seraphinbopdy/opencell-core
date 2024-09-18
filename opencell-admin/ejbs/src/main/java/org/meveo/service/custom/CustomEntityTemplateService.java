@@ -24,10 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.apache.commons.collections.MapUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -50,6 +46,10 @@ import org.meveo.model.security.Role;
 import org.meveo.service.admin.impl.RoleService;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Wassim Drira

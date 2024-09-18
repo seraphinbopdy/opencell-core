@@ -25,12 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.TypedQuery;
-
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -50,6 +44,12 @@ import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.WalletOperationAggregationSettingsService;
 import org.meveo.service.billing.impl.WalletOperationService;
 import org.meveo.service.job.Job;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.TypedQuery;
 
 /**
  * A job implementation to convert Open Wallet operations to Rated transactions
@@ -80,7 +80,7 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
 
     private boolean hasMore = false;
     private StatelessSession statelessSession;
-    private ScrollableResults scrollableResults;
+    private ScrollableResults<WalletOperationNative> scrollableResults;
 
     private Long minId = null;
     private Long maxId = null;
@@ -246,7 +246,7 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
         }
 
         statelessSession = emWrapper.getEntityManager().unwrap(Session.class).getSessionFactory().openStatelessSession();
-        scrollableResults = statelessSession.createNamedQuery("WalletOperationNative.listConvertToRTs").setParameter("maxId", maxId).setReadOnly(true).setCacheable(false)
+        scrollableResults = statelessSession.createNamedQuery("WalletOperationNative.listConvertToRTs", WalletOperationNative.class).setParameter("maxId", maxId).setReadOnly(true).setCacheable(false)
             .setMaxResults(processNrInJobRun > jobItemsLimit && jobItemsLimit > 0 ? jobItemsLimit : processNrInJobRun).setFetchSize(fetchSize).scroll(ScrollMode.FORWARD_ONLY);
 
         hasMore = nrOfRecords >= processNrInJobRun;

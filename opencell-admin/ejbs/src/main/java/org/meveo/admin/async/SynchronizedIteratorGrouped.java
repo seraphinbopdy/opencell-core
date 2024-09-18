@@ -25,7 +25,7 @@ public abstract class SynchronizedIteratorGrouped<T> implements Iterator<List<T>
      * A number of total items
      */
     private int size;
-    
+
     /**
      * Are multiple columns returned in a resultset. Used to construct an array of values as next() result.
      */
@@ -67,7 +67,7 @@ public abstract class SynchronizedIteratorGrouped<T> implements Iterator<List<T>
     public SynchronizedIteratorGrouped(ScrollableResults scrollableResults, int size) {
         this(scrollableResults, size, false, null);
     }
-    
+
     /**
      * Constructor
      * 
@@ -133,7 +133,7 @@ public abstract class SynchronizedIteratorGrouped<T> implements Iterator<List<T>
                             // Or mapped by a fieldname
                         } else {
 
-                            Object[] data = scrollableResults.get();
+                            Object[] data = (Object[]) scrollableResults.get();
 
                             Map<String, Object> mappedData = new HashMap<>();
                             for (int i = 0; i < data.length; i++) {
@@ -145,7 +145,7 @@ public abstract class SynchronizedIteratorGrouped<T> implements Iterator<List<T>
                         }
 
                     } else {
-                        return (T) scrollableResults.get(0);
+                        return (T) scrollableResults.get();
                     }
 
                 } else {

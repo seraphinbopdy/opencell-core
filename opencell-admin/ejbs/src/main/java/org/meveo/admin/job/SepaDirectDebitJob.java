@@ -21,11 +21,6 @@ package org.meveo.admin.job;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
@@ -37,6 +32,11 @@ import org.meveo.model.payments.DDRequestBuilder;
 import org.meveo.model.payments.DDRequestOpEnum;
 import org.meveo.model.payments.PaymentOrRefundEnum;
 import org.meveo.service.job.Job;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job definition to generate sepa/paynum or custom files for available DirectDebit request operations

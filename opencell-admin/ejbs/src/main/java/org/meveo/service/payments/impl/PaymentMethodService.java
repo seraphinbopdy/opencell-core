@@ -21,18 +21,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.api.dto.payment.HostedCheckoutInput;
 import org.meveo.api.dto.payment.HostedCheckoutStatusResponseDto;
 import org.meveo.api.dto.payment.MandatInfoDto;
-import org.meveo.commons.utils.ParamBean;
 import org.meveo.api.dto.payment.PaymentHostedCheckoutResponseDto;
+import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.Seller;
@@ -49,6 +44,11 @@ import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.crm.impl.ProviderService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * PaymentMethod service implementation.

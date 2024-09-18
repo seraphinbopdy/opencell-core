@@ -1,5 +1,11 @@
 package org.meveo.service.communication.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.meveo.api.dto.communication.TranslatedHtmlContentDto;
 import org.meveo.api.dto.communication.TranslatedSubjectDto;
 import org.meveo.api.dto.communication.TranslatedTextContentDto;
@@ -7,12 +13,7 @@ import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.service.billing.impl.TradingLanguageService;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import jakarta.inject.Inject;
 
 public class TranslationsUtils {
 

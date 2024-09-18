@@ -1,5 +1,8 @@
 package org.meveo.admin.job.partitioning;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import org.hibernate.JDBCException;
 import org.meveo.admin.job.BaseJobBean;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
@@ -10,15 +13,12 @@ import org.meveo.model.jobs.JobExecutionResultStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.Query;
 
 @Stateless
 public class AutoCreateRatedTransactionPartitionBean extends BaseJobBean {

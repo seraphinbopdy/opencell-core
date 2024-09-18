@@ -33,26 +33,30 @@ import java.nio.file.Path;
 import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-
-import javax.ejb.*;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.*;
-import javax.transaction.Transactional;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Hibernate;
-import org.hibernate.collection.internal.PersistentBag;
-import org.hibernate.collection.internal.PersistentSet;
+import org.hibernate.collection.spi.PersistentBag;
+import org.hibernate.collection.spi.PersistentSet;
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -79,6 +83,19 @@ import org.meveo.service.communication.impl.EmailTemplateService;
 import org.meveo.service.communication.impl.InternationalSettingsService;
 import org.meveo.service.job.JobInstanceService;
 import org.meveo.util.ApplicationProvider;
+
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import jakarta.persistence.Transient;
+import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.UriInfo;
 
 @Stateless
 public class ReportQueryService extends BusinessService<ReportQuery> {

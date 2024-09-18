@@ -25,10 +25,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.parse.csv.MEVEOCdrParser;
 import org.meveo.admin.parse.csv.MEVEOCdrReader;
@@ -42,6 +38,10 @@ import org.meveo.model.rating.CDR;
 import org.meveo.model.rating.CDRStatusEnum;
 import org.meveo.model.rating.EDR;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * Takes care of parsing and converting CDRS to EDR records

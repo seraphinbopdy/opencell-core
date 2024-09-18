@@ -4,14 +4,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.catalog.PricePlanMatrixVersion;
 import org.meveo.model.catalog.TradingPricePlanMatrixLine;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class TradingPricePlanMatrixLineService extends PersistenceService<TradingPricePlanMatrixLine> {

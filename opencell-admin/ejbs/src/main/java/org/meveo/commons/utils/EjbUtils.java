@@ -19,13 +19,14 @@ package org.meveo.commons.utils;
 
 import java.util.Properties;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.enterprise.inject.spi.CDI;
 
 /**
  * Util class for remote ejb lookups.

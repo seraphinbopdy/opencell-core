@@ -51,10 +51,10 @@ import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.catalog.impl.TaxService;
 import org.meveo.service.script.billing.TaxScriptService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.FlushModeType;
-import javax.persistence.NoResultException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.NoResultException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;

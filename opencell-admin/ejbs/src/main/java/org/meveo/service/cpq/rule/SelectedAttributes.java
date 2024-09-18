@@ -1,10 +1,10 @@
 package org.meveo.service.cpq.rule;
 
+import java.util.LinkedHashMap;
+
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.model.cpq.trade.CommercialRuleHeader;
 import org.meveo.model.cpq.trade.CommercialRuleLine;
-
-import java.util.LinkedHashMap;
 
 public class SelectedAttributes {
 

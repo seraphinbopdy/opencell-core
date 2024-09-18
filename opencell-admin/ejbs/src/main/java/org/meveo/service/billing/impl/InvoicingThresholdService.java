@@ -29,8 +29,8 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.util.ApplicationProvider;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashSet;

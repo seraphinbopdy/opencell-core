@@ -30,13 +30,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Resource;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
 import javax.naming.InitialContext;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
@@ -55,6 +49,14 @@ import org.meveo.model.scripts.ScriptInstanceError;
 import org.meveo.model.scripts.ScriptSourceTypeEnum;
 import org.meveo.service.base.BusinessService;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Lock;
+import jakarta.ejb.LockType;
+import jakarta.ejb.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+
 
 /**
  * Compiles scripts and provides compiled script classes.
@@ -301,7 +303,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
             return null;
 
         } catch (CharSequenceCompilerException e) {
-            log.error("Failed to compile script {}. Compilation errors:", scriptCode);
+            log.error("Failed to compile script {}. ClassPath used: {}. Compilation errors:", scriptCode, classpath);
 
             List<ScriptInstanceError> scriptErrors = new ArrayList<>();
 

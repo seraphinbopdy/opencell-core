@@ -30,9 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -62,6 +59,9 @@ import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.tax.TaxMappingService;
 import org.meveo.service.tax.TaxMappingService.TaxInfo;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi
@@ -311,7 +311,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     
     public void setDiscountPlanSequence(DiscountPlan discountPlan){
     	if(discountPlan.getSequence()==null) {
-    		BigInteger sequence =(BigInteger) getEntityManager().createNativeQuery(EntityManagerProvider.isDBOracle()?"SELECT discount_plan_sequence_seq.nextval FROM dual" : "select nextval('discount_plan_sequence_seq')" ).getSingleResult();
+    		Long sequence =(Long) getEntityManager().createNativeQuery(EntityManagerProvider.isDBOracle()?"SELECT discount_plan_sequence_seq.nextval FROM dual" : "select nextval('discount_plan_sequence_seq')" ).getSingleResult();
             discountPlan.setSequence(sequence.intValue());
     	}
         

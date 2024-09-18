@@ -20,12 +20,12 @@ package org.meveo.service.catalog.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.catalog.ProductChargeTemplateMapping;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Edward P. Legaspi

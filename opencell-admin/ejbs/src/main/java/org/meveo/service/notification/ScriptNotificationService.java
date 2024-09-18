@@ -18,9 +18,9 @@
 
 package org.meveo.service.notification;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.notification.ScriptNotification;
+
+import jakarta.ejb.Stateless;
 
 /**
  * A service class to manage CRUD operations on ScriptNotification entity

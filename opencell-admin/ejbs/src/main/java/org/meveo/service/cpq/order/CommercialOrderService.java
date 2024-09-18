@@ -15,24 +15,26 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
-import org.meveo.api.dto.cpq.xml.Offer;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.qualifier.AdvancementRateIncreased;
 import org.meveo.model.RatingResult;
 import org.meveo.model.admin.Seller;
-import org.meveo.model.billing.*;
+import org.meveo.model.billing.AttributeInstance;
+import org.meveo.model.billing.BillingCycle;
+import org.meveo.model.billing.ChargeApplicationModeEnum;
+import org.meveo.model.billing.DiscountPlanInstance;
+import org.meveo.model.billing.InstanceStatusEnum;
+import org.meveo.model.billing.RecurringChargeInstance;
+import org.meveo.model.billing.ServiceInstance;
+import org.meveo.model.billing.Subscription;
+import org.meveo.model.billing.SubscriptionChargeInstance;
+import org.meveo.model.billing.SubscriptionRenewal;
+import org.meveo.model.billing.SubscriptionStatusEnum;
+import org.meveo.model.billing.UserAccount;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanStatusEnum;
@@ -57,10 +59,7 @@ import org.meveo.model.cpq.commercial.ProductActionTypeEnum;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.enums.PriceVersionDateSettingEnum;
 import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.Payment;
-import org.meveo.model.payments.PaymentMethod;
 import org.meveo.service.base.BusinessService;
-import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.DiscountPlanInstanceService;
 import org.meveo.service.billing.impl.OneShotChargeInstanceService;
 import org.meveo.service.billing.impl.ServiceInstanceService;
@@ -71,7 +70,14 @@ import org.meveo.service.catalog.impl.OfferTemplateService;
 import org.meveo.service.cpq.AttributeService;
 import org.meveo.service.cpq.ProductService;
 import org.meveo.service.payments.impl.CustomerAccountService;
-import org.meveo.service.payments.impl.PaymentMethodService;
+
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 /**
  * @author Tarik FA.
@@ -447,7 +453,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 			dpi.setDiscountPlan(discountPlan);
 			dpi.copyEffectivityDates(discountPlan);
 			dpi.setDiscountPlanInstanceStatus(discountPlan);
-			dpi.setCfValues(discountPlan.getCfValues());
+			dpi.setCfValuesAsJson(discountPlan.getCfValuesAsJson());
 			dpi.setServiceInstance(serviceInstance);
 			dpi.setSubscription(subscription);
 			discountPlanInstanceService.create(dpi, discountPlan);

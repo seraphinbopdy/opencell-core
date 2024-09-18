@@ -1,10 +1,9 @@
 package org.meveo.service.payments.impl;
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.model.dunning.DunningPaymentRetry;
-import org.meveo.model.dunning.DunningStopReason;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 /**
  * Service implementation to manage DunningPaymentRetries entity.

@@ -14,16 +14,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.commons.utils.MethodCallingUtils;
@@ -42,6 +32,16 @@ import org.meveo.model.rating.EDR;
 import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.model.shared.DateUtils;
 import org.slf4j.Logger;
+
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 /**
  * Service to handle wallet operation re-rating when service parameters or tariffs change.
@@ -763,7 +763,7 @@ public class ReratingService extends RatingService implements Serializable {
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void applyMassRerate(List<Long> ids, boolean useSamePricePlan, JobExecutionResultImpl jobExecutionResult) {
 		int toProcess=ids.size();
-		String readWOsQuery = "FROM WalletOperation wo left join fetch wo.chargeInstance ci left join fetch wo.edr edr WHERE wo.status='TO_RERATE' AND wo.id IN (:ids)";
+		String readWOsQuery = "select wo FROM WalletOperation wo left join fetch wo.chargeInstance ci left join fetch wo.edr edr WHERE wo.status='TO_RERATE' AND wo.id IN (:ids)";
 		List<WalletOperation> walletOperations = getEntityManager().createQuery(readWOsQuery, WalletOperation.class).setParameter("ids", ids).getResultList();
 		Map<String, List<Long>> errorsMap = new HashMap<>();
 		walletOperations.stream().forEach(operationToRerate -> {

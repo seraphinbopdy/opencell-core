@@ -24,10 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
@@ -39,6 +35,9 @@ import org.meveo.security.MeveoUser;
 import org.meveo.service.cpq.CommercialRuleHeaderService;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
 public class CommercialRulesContainerProvider implements CacheContainerProvider, Serializable {
 
     private static final String TIRET = "-";

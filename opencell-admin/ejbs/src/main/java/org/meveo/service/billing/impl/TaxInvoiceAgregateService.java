@@ -18,10 +18,10 @@
 
 package org.meveo.service.billing.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.billing.TaxInvoiceAgregate;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 
 @Stateless

@@ -20,14 +20,8 @@ package org.meveo.service.crm.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.meveo.admin.exception.BusinessException;
@@ -57,6 +51,11 @@ import org.meveo.service.billing.impl.UserAccountService;
 import org.meveo.service.catalog.impl.OfferTemplateService;
 import org.meveo.service.catalog.impl.ServiceTemplateService;
 import org.meveo.service.medina.impl.AccessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * @author Wassim Drira

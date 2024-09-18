@@ -4,7 +4,7 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.job.JobInstanceService;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Iterator;
 import java.util.Optional;
 

@@ -24,11 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
@@ -45,6 +40,11 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.report.QueryExecutionResultService;
 import org.meveo.service.report.QuerySchedulerService;
 import org.meveo.service.report.ReportQueryService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * @author BEN AICHA Amine

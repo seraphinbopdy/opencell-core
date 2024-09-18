@@ -1,8 +1,7 @@
 package org.meveo.service.cpq;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.meveo.api.dto.cpq.ContractDto;
 import org.meveo.api.exception.ActionForbiddenException;
@@ -12,8 +11,9 @@ import org.meveo.model.cpq.contract.Contract;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class BillingRuleService extends PersistenceService<BillingRule> {

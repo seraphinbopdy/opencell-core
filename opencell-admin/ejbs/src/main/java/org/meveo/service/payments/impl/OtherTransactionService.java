@@ -18,10 +18,10 @@
 
 package org.meveo.service.payments.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.payments.OtherTransaction;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class OtherTransactionService extends PersistenceService<OtherTransaction> {

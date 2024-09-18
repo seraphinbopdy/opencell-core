@@ -20,8 +20,6 @@ package org.meveo.service.custom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -34,9 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.persistence.EntityManager;
-
-import org.hibernate.SQLQuery;
+import org.hibernate.query.NativeQuery;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,7 +63,7 @@ public class CustomTableServiceTest {
 	private QueryBuilder queryBuilder;
 
 	@Mock
-	private SQLQuery sqlQuery;
+	private NativeQuery sqlQuery;
 
 	@Before
 	public void init() {

@@ -21,8 +21,8 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.InvoicingThresholdService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * A job implementation to apply the threshold rules for the invoice, billing account, customer account and customer.

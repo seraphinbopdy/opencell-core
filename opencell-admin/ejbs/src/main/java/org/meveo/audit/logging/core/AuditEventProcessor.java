@@ -18,11 +18,11 @@
 
 package org.meveo.audit.logging.core;
 
-import javax.ejb.Stateless;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.audit.logging.dto.AuditEvent;
 import org.meveo.audit.logging.handler.Handler;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Edward P. Legaspi

@@ -21,10 +21,6 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.Invoice;
@@ -33,6 +29,10 @@ import org.meveo.model.billing.InvoiceSubCategory;
 import org.meveo.model.billing.SubCategoryInvoiceAgregate;
 import org.meveo.model.billing.WalletInstance;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 @Stateless
 public class InvoiceAgregateService extends PersistenceService<InvoiceAgregate> {
@@ -76,15 +76,14 @@ public class InvoiceAgregateService extends PersistenceService<InvoiceAgregate> 
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	public List<? extends InvoiceAgregate> listByInvoiceAndType(Invoice invoice, String type) {
-		QueryBuilder qb = new QueryBuilder("from " + InvoiceAgregate.class.getSimpleName() + " i WHERE i.invoice=:invoice AND i.class=:clazz");
+	public <T extends InvoiceAgregate> List<T> listByInvoiceAndType(Invoice invoice, Class<T> clazz) {
+		QueryBuilder qb = new QueryBuilder("from " + clazz.getSimpleName() + " i WHERE i.invoice.id=:invoiceId");
 
 		Query query = qb.getQuery(getEntityManager());
-		query.setParameter("invoice", invoice);
-		query.setParameter("clazz", type);
+		query.setParameter("invoiceId", invoice.getId());
 
 		try {
-			return (List<InvoiceAgregate>) query.getResultList();
+			return (List<T>) query.getResultList();
 		} catch (NoResultException e) {
 			return null;
 		}

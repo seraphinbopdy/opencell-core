@@ -24,17 +24,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-
 import org.apache.oltu.oauth2.client.response.OAuthResourceResponse;
-import org.jboss.resteasy.client.jaxrs.internal.BasicAuthentication;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.internal.BasicAuthentication;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.ApiService;
 import org.meveo.api.dto.ActionStatus;
@@ -68,6 +61,13 @@ import org.meveo.service.catalog.impl.ServiceTemplateService;
 import org.meveo.service.communication.impl.MeveoInstanceService;
 import org.meveo.service.script.module.ModuleScriptInterface;
 import org.meveo.service.script.module.ModuleScriptService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.ws.rs.core.Response;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 
 @Stateless
 public class MeveoModuleService extends GenericModuleService<MeveoModule> {

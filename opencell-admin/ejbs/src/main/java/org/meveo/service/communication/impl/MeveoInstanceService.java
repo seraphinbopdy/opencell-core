@@ -20,17 +20,7 @@ package org.meveo.service.communication.impl;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
+import org.apache.http.HttpException;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.URLConnectionClient;
 import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
@@ -41,9 +31,9 @@ import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
-import org.jboss.resteasy.client.jaxrs.internal.BasicAuthentication;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.internal.BasicAuthentication;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.CommunicateToRemoteInstanceException;
 import org.meveo.api.dto.BaseEntityDto;
@@ -57,8 +47,16 @@ import org.meveo.export.RemoteAuthenticationException;
 import org.meveo.model.communication.MeveoInstance;
 import org.meveo.service.base.BusinessService;
 
-import com.slimpay.hapiclient.exception.HttpException;
-import com.slimpay.hapiclient.exception.RelNotFoundException;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
 /**
  * MeveoInstance service implementation.
@@ -135,7 +133,7 @@ public class MeveoInstanceService extends BusinessService<MeveoInstance> {
      * @throws OAuthProblemException 
      * @throws JAXBException 
      */
-    public OAuthResourceResponse publishDtoOAuth2MeveoInstance(String url, MeveoInstance meveoInstance, BaseEntityDto dto) throws BusinessException, RelNotFoundException, HttpException, OAuthSystemException, OAuthProblemException, JAXBException {
+    public OAuthResourceResponse publishDtoOAuth2MeveoInstance(String url, MeveoInstance meveoInstance, BaseEntityDto dto) throws BusinessException, HttpException, OAuthSystemException, OAuthProblemException, JAXBException {
         
     	String baseurl = meveoInstance.getUrl().endsWith("/") ? meveoInstance.getUrl() : meveoInstance.getUrl() + "/";
     	

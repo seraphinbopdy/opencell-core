@@ -20,7 +20,7 @@ package org.meveo.service.payments.impl;
 import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 import static org.meveo.model.payments.OperationCategoryEnum.CREDIT;
 
 import java.math.BigDecimal;
@@ -31,11 +31,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -68,7 +63,6 @@ import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.payments.PaymentScheduleInstanceItem;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.Refund;
-import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.UnMatchingAmount;
 import org.meveo.model.payments.UnMatchingCode;
 import org.meveo.model.payments.WriteOff;
@@ -81,6 +75,11 @@ import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.securityDeposit.impl.SecurityDepositService;
+
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * MatchingCode service implementation.

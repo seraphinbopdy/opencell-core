@@ -19,15 +19,15 @@ package org.meveo.service.catalog.impl;
 
 import java.util.Date;
 
-import javax.ejb.Stateless;
-import javax.inject.Named;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.InvalidELException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.catalog.Calendar;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Named;
+import jakarta.persistence.NoResultException;
 
 /**
  * Calendar service implementation.

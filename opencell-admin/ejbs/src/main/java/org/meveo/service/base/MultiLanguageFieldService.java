@@ -31,10 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.IEntity;
 import org.reflections.Reflections;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class MultiLanguageFieldService implements Serializable {

@@ -29,12 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.apache.commons.collections4.map.HashedMap;
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
@@ -78,6 +72,12 @@ import org.meveo.model.payments.RejectedType;
 import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * Payment service implementation.

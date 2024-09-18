@@ -25,12 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterator;
 import org.infinispan.context.Flag;
@@ -49,6 +43,12 @@ import org.meveo.security.MeveoUser;
 import org.meveo.service.billing.impl.ChargeInstanceService;
 import org.meveo.service.billing.impl.WalletService;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 
 /**
  * Provides cache related services (loading, update) for wallet related operations

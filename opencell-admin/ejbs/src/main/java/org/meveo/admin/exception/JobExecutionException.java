@@ -1,6 +1,6 @@
 package org.meveo.admin.exception;
 
-import javax.ejb.ApplicationException;
+import jakarta.ejb.ApplicationException;
 
 @ApplicationException(rollback = false)
 public class JobExecutionException extends ValidationException {

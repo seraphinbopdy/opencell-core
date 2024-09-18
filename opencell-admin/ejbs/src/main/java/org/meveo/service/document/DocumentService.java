@@ -3,11 +3,6 @@ package org.meveo.service.document;
 import java.util.Date;
 import java.util.Objects;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.ws.rs.BadRequestException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.AccountEntity;
 import org.meveo.model.admin.FileType;
@@ -16,6 +11,11 @@ import org.meveo.model.document.DocumentCategory;
 import org.meveo.service.admin.impl.FileTypeService;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.crm.impl.AccountEntitySearchService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.ws.rs.BadRequestException;
 
 @Stateless
 public class DocumentService extends BusinessService<Document> {

@@ -28,10 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.ScheduleExpression;
-import javax.ejb.Stateless;
-import javax.ejb.Timer;
-import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -44,11 +40,9 @@ import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
-import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobClusterBehaviorEnum;
-import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.TimerEntity;
 import org.meveo.model.report.query.QueryScheduler;
@@ -57,6 +51,11 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.util.EntityCustomizationUtils;
+
+import jakarta.ejb.ScheduleExpression;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.Timer;
+import jakarta.inject.Inject;
 
 @Stateless
 public class JobInstanceService extends BusinessService<JobInstance> {

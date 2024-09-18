@@ -18,7 +18,6 @@
 
 package org.meveo.admin.util;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,15 +26,16 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.Element;
-import com.lowagie.text.Image;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.pdf.BaseFont;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfGState;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfStamper;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfGState;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 
 public class PdfWaterMark {
 	
@@ -67,7 +67,7 @@ public class PdfWaterMark {
                 over.beginText();
                 over.setTextMatrix(document.top(), document.bottom());
                 over.setFontAndSize(bf, 100);
-                over.setColorFill(Color.GRAY);
+                over.setColorFill(BaseColor.GRAY);
                 over.showTextAligned(Element.ALIGN_CENTER, text, document.getPageSize().getWidth() / 2, document.getPageSize().getHeight() / 2, 45);
                 over.endText();
 

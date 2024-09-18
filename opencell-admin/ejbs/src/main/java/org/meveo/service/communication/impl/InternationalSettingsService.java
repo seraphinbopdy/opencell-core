@@ -1,11 +1,12 @@
 package org.meveo.service.communication.impl;
 
+import java.util.Map;
+
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.communication.sms.SMSTemplate;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class InternationalSettingsService {

@@ -1,9 +1,9 @@
 package org.meveo.service.payments.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.dunning.DunningStopReason;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Service implementation to manage DunningStopReasons entity. It extends {@link PersistenceService} class

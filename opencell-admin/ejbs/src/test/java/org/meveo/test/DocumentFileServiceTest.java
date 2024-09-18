@@ -1,7 +1,10 @@
 package org.meveo.test;
 
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
+
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.commons.utils.ParamBean;
@@ -12,9 +15,6 @@ import org.meveo.service.document.DocumentFileService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import java.util.Date;
-
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentFileServiceTest {

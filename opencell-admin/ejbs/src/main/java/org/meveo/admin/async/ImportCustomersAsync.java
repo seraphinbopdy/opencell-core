@@ -23,15 +23,15 @@ package org.meveo.admin.async;
 
 import java.util.concurrent.Future;
 
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.job.importexport.ImportCustomersJobBean;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.security.MeveoUser;
 import org.meveo.security.keycloak.CurrentUserProvider;
+
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author anasseh

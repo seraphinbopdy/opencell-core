@@ -19,13 +19,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import org.meveo.jpa.MeveoJpa;
-import javax.interceptor.Interceptors;
-
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.collections4.ListUtils;
 import org.meveo.admin.async.SynchronizedIterator;
@@ -59,6 +52,12 @@ import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoicesToNumberInfo;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.job.JobInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 @Stateless
 public class InvoicingJobV3Bean extends BaseJobBean {

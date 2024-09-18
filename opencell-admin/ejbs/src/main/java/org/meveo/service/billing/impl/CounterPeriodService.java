@@ -19,11 +19,6 @@ package org.meveo.service.billing.impl;
 
 import java.util.Date;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.billing.BillingAccount;
@@ -36,6 +31,11 @@ import org.meveo.model.catalog.AccumulatorCounterTypeEnum;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import jakarta.persistence.TemporalType;
 
 /**
  * The CounterPeriod service class

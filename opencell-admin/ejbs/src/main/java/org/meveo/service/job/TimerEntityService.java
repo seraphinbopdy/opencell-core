@@ -17,15 +17,15 @@
  */
 package org.meveo.service.job;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.TimerEntity;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class TimerEntityService extends BusinessService<TimerEntity> {

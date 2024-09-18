@@ -17,9 +17,15 @@
  */
 package org.meveo.admin.job;
 
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.commons.utils.ReflectionUtils;
+import org.meveo.model.IEntity;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
@@ -31,13 +37,9 @@ import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.job.Job;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Entity;
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Entity;
 
 /**
  * Job definition to update a huge entity.
@@ -147,16 +149,16 @@ public class UpdateHugeEntityJob extends Job {
      * @return all classes of the package "org.meveo.model"
      */
     private Map<String, String> getClassNames() {
-        List<Class> classes = null;
+        Set<Class<? extends IEntity>> classes = null;
         try {
-            classes = ReflectionUtils.getClasses("org.meveo.model");
+            classes = ReflectionUtils.getClasses("org.meveo.model", IEntity.class);
         } catch (Exception e) {
             log.error("Failed to get a list of classes for a model package", e);
             return null;
         }
 
         Map<String, String> classNames = new HashMap<>();
-        for (Class clazz : classes) {
+        for (Class<? extends IEntity> clazz : classes) {
             if (Proxy.isProxyClass(clazz) || clazz.getName().contains("$$")) {
                 continue;
             }

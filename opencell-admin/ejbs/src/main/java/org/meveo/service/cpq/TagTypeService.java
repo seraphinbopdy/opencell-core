@@ -1,14 +1,13 @@
 package org.meveo.service.cpq;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
-import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.model.cpq.tags.Tag;
 import org.meveo.model.cpq.tags.TagType;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Mbarek-Ay

@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.enterprise.event.Event;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +42,8 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
+import jakarta.enterprise.event.Event;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecurringChargeInstanceServiceTest {

@@ -21,14 +21,14 @@ package org.meveo.service.payments.impl;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.ejb.Stateless;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.DDRequestItem;
 import org.meveo.model.payments.DDRequestLOT;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * The Class DDRequestItemService.

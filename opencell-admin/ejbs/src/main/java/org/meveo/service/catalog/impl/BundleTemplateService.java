@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.DatePeriod;
 import org.meveo.model.admin.Seller;
@@ -37,6 +34,9 @@ import org.meveo.model.catalog.ProductChargeTemplate;
 import org.meveo.model.catalog.WalletTemplate;
 import org.meveo.model.crm.BusinessAccountModel;
 import org.meveo.model.shared.DateUtils;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
 
 /**
  * @author Edward P. Legaspi

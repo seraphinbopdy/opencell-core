@@ -1,6 +1,5 @@
 package org.meveo.service.cpq;
 
-import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
@@ -11,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.api.dto.cpq.CurrencyDetailDto;
@@ -54,6 +50,9 @@ import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.api.EntityToDtoConverter;
 import org.meveo.service.order.OpenOrderService;
 import org.meveo.util.ApplicationProvider;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class QuoteMapper {

@@ -3,16 +3,12 @@
  */
 package org.meveo.service.payments.impl;
 
+import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
@@ -30,9 +26,11 @@ import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.Refund;
 import org.meveo.service.base.PersistenceService;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * @author anasseh
@@ -180,11 +178,11 @@ public class PaymentHistoryService extends PersistenceService<PaymentHistory> {
 
 	public Optional<PaymentHistory> findByPaymentId(Long paymentId) {
 		try {
-			return of((PaymentHistory) getEntityManager().createNamedQuery("PaymentHistory.findByPaymentId")
+			return Optional.of((PaymentHistory) getEntityManager().createNamedQuery("PaymentHistory.findByPaymentId")
 					.setParameter("paymentId", paymentId)
 					.getSingleResult());
 		} catch (NoResultException exception) {
-			return empty();
+			return Optional.empty();
 		}
 	}
 }

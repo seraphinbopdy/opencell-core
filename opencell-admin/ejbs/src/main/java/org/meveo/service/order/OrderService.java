@@ -23,13 +23,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
@@ -48,6 +41,13 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.billing.impl.UserAccountService;
 import org.meveo.service.payments.impl.PaymentMethodService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 @Stateless
 public class OrderService extends BusinessService<Order> {

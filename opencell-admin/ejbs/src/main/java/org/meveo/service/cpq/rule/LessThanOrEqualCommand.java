@@ -1,10 +1,10 @@
 package org.meveo.service.cpq.rule;
 
-import org.meveo.model.cpq.trade.CommercialRuleHeader;
-import org.meveo.model.cpq.trade.CommercialRuleLine;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.meveo.model.cpq.trade.CommercialRuleHeader;
+import org.meveo.model.cpq.trade.CommercialRuleLine;
 
 public class LessThanOrEqualCommand implements CommercialRuleLineCommand {
 

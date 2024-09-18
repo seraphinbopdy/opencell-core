@@ -1,17 +1,18 @@
 package org.meveo.service.billing.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.model.billing.ElectronicInvoiceSetting;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.job.JobInstanceService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
 @Stateless
 public class EinvoiceSettingService extends PersistenceService<ElectronicInvoiceSetting> {

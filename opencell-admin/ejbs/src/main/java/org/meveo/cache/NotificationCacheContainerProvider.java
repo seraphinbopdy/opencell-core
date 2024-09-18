@@ -29,11 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.inject.Inject;
-
 import org.hibernate.proxy.HibernateProxy;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
@@ -53,6 +48,11 @@ import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.service.notification.GenericNotificationService;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
 
 /**
  * Provides cache related services (loading, update) for event notification related operations

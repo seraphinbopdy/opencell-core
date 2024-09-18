@@ -17,21 +17,21 @@
  */
 package org.meveo.service.bi.impl;
 
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.admin.FileFormat;
 import org.meveo.model.bi.FileStatusEnum;
 import org.meveo.model.bi.FlatFile;
 import org.meveo.service.base.BusinessService;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 /**
  * Flat file service

@@ -1,16 +1,16 @@
 package org.meveo.service.base.expression;
 
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.meveo.commons.utils.InnerJoin;
 import org.meveo.commons.utils.JoinWrapper;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.Invoice;
-
-import java.util.List;
-
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class QueryBuilderTest {
 

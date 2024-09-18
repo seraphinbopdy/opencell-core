@@ -28,10 +28,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.inject.Inject;
-
 import org.infinispan.Cache;
 import org.infinispan.commons.CacheException;
 import org.infinispan.context.Flag;
@@ -40,6 +36,10 @@ import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.service.metrics.configuration.MetricsConfigurationService;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.inject.Inject;
 
 /**
  * Provides cache related services (tracking running jobs) for job running related operations

@@ -1,5 +1,12 @@
 package org.meveo.admin.job;
 
+import static java.util.Optional.of;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+
 import org.apache.commons.collections.MapUtils;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.model.billing.RatedTransaction;
@@ -7,15 +14,8 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.RatedTransactionService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
-import static java.util.Optional.of;
-
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class DuplicateRatedTransactionJobBean extends IteratorBasedJobBean<RatedTransaction>{

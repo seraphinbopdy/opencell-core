@@ -25,21 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.el.ArrayELResolver;
-import javax.el.BeanELResolver;
-import javax.el.CompositeELResolver;
-import javax.el.ELContext;
-import javax.el.ELResolver;
-import javax.el.ExpressionFactory;
-import javax.el.FunctionMapper;
-import javax.el.ListELResolver;
-import javax.el.MapELResolver;
-import javax.el.ValueExpression;
-import javax.el.VariableMapper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.proxy.HibernateProxy;
-import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.InvalidELException;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ReflectionUtils;
@@ -87,6 +74,18 @@ import org.meveo.model.tax.TaxClass;
 import org.meveo.service.crm.impl.ProviderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.el.ArrayELResolver;
+import jakarta.el.BeanELResolver;
+import jakarta.el.CompositeELResolver;
+import jakarta.el.ELContext;
+import jakarta.el.ELResolver;
+import jakarta.el.ExpressionFactory;
+import jakarta.el.FunctionMapper;
+import jakarta.el.ListELResolver;
+import jakarta.el.MapELResolver;
+import jakarta.el.ValueExpression;
+import jakarta.el.VariableMapper;
 
 /**
  * EL expression resolver

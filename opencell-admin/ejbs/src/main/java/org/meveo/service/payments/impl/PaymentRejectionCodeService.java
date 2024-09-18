@@ -15,18 +15,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.meveo.apiv2.payments.RejectionCodeImportMode.UPDATE;
 import static org.meveo.commons.utils.StringUtils.EMPTY;
 
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.util.pagination.PaginationConfiguration;
-import org.meveo.api.exception.MeveoApiException;
-import org.meveo.model.payments.PaymentGateway;
-import org.meveo.model.payments.PaymentRejectionCode;
-import org.meveo.service.base.BusinessService;
-import org.meveo.service.billing.impl.TradingLanguageService;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -38,6 +26,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.meveo.model.payments.PaymentGateway;
+import org.meveo.model.payments.PaymentRejectionCode;
+import org.meveo.service.base.BusinessService;
+import org.meveo.service.billing.impl.TradingLanguageService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 @Stateless
 public class PaymentRejectionCodeService extends BusinessService<PaymentRejectionCode> {

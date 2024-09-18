@@ -18,6 +18,12 @@
  */
 package org.meveo.service.job;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.commons.utils.QueryBuilder;
@@ -30,17 +36,12 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.util.EntityCustomizationUtils;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.persistence.EntityManager;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.persistence.EntityManager;
 
 /**
  * The Class JobExecution result service.
@@ -231,7 +232,7 @@ public class JobExecutionResultService extends PersistenceService<JobExecutionRe
 
         EntityManager em = getEntityManager();
         List<JobExecutionResultImpl> jobInstances = em.createNamedQuery("JobExecutionResult.listUnfinishedJobs", JobExecutionResultImpl.class).getResultList();
-        em.detach(jobInstances);
+        // em.detach(jobInstances); No need to detach - it was retrieved in 
 
         em.createNamedQuery("JobExecutionResult.cancelUnfinishedJobsByNode").setParameter("nodeName", nodeName).executeUpdate();
 

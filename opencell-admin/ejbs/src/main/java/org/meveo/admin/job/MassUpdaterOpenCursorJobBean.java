@@ -17,27 +17,6 @@
  */
 package org.meveo.admin.job;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
-import org.hibernate.StatelessSession;
-import org.hibernate.query.NativeQuery;
-import org.hibernate.query.Query;
-import org.hibernate.type.LongType;
-import org.jgroups.JChannel;
-import org.meveo.admin.async.SynchronizedMultiItemIterator;
-import org.meveo.model.jobs.JobExecutionResultImpl;
-import org.meveo.model.jobs.JobInstance;
-import org.meveo.service.base.NativePersistenceService;
-import org.meveo.service.base.PersistenceService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,6 +26,30 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+import org.hibernate.StatelessSession;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
+import org.hibernate.type.StandardBasicTypes;
+import org.jgroups.JChannel;
+import org.meveo.admin.async.SynchronizedMultiItemIterator;
+import org.meveo.model.jobs.JobExecutionResultImpl;
+import org.meveo.model.jobs.JobInstance;
+import org.meveo.service.base.NativePersistenceService;
+import org.meveo.service.base.PersistenceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ctc.wstx.shaded.msv_core.datatype.xsd.LongType;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 
 /**
  * Job definition to do the mass update with open cursor pagination functionality.
@@ -198,7 +201,7 @@ public class MassUpdaterOpenCursorJobBean extends MassUpdaterJobBean {
             scrollableResults = query.setFetchSize(selectFetchSize.intValue())
                     .setReadOnly(true)
                     .setCacheable(false)
-                    .addScalar("id", new LongType())
+                    .addScalar("id", StandardBasicTypes.LONG)
                     .scroll(ScrollMode.FORWARD_ONLY);
         } else {
             if (isNativeQuery(jobExecutionResult)) {
@@ -209,7 +212,7 @@ public class MassUpdaterOpenCursorJobBean extends MassUpdaterJobBean {
                 scrollableResults = query.setFetchSize(selectFetchSize.intValue())
                         .setReadOnly(true)
                         .setCacheable(false)
-                        .addScalar("id", new LongType())
+                        .addScalar("id", StandardBasicTypes.LONG)
                         .scroll(ScrollMode.FORWARD_ONLY);
             } else {
                 Query query = statelessSession.createQuery(selectQuery);

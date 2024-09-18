@@ -17,7 +17,19 @@
  */
 package org.meveo.service.billing.impl;
 
-import com.google.common.collect.Lists;
+import static java.util.Collections.emptyList;
+import static org.meveo.commons.utils.NumberUtils.round;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.InsufficientBalanceException;
@@ -67,26 +79,16 @@ import org.meveo.service.catalog.impl.TaxService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.filter.FilterService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.collect.Lists;
 
-import static java.util.Collections.emptyList;
-import static org.meveo.commons.utils.NumberUtils.round;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 /**
  * Service class for WalletOperation entity
@@ -607,8 +609,7 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
         Query query = getEntityManager().createQuery(strQuery);
         query.setParameter("invoicingDate", invoicingDate);
         // get the aggregated data
-        @SuppressWarnings("rawtypes")
-        List result = query.unwrap(org.hibernate.query.Query.class).setResultTransformer(new AliasToAggregatedWalletOperationResultTransformer(AggregatedWalletOperation.class)).getResultList();
+        List<AggregatedWalletOperation> result = query.unwrap(org.hibernate.query.Query.class).setTupleTransformer(new AliasToAggregatedWalletOperationResultTransformer<AggregatedWalletOperation>(AggregatedWalletOperation.class)).getResultList();
 
         return result;
     }
@@ -1064,6 +1065,7 @@ public class WalletOperationService extends PersistenceService<WalletOperation> 
      * @param walletOperationsIds wallet operation ids list
      * @return wallet operation and their trading currency
      */
+    @SuppressWarnings("unchecked")
     public List<Object[]> getWalletOperationsTradingCurrency(List<Long> walletOperationsIds) {
         return getEntityManager()
                 .createNamedQuery("WalletOperation.findWalletOperationTradingCurrency")

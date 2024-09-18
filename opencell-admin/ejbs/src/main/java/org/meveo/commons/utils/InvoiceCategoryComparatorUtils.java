@@ -1,10 +1,10 @@
 package org.meveo.commons.utils;
 
+import java.util.Comparator;
+
 import org.meveo.model.billing.CategoryInvoiceAgregate;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.SubCategoryInvoiceAgregate;
-
-import java.util.Comparator;
 
 public class InvoiceCategoryComparatorUtils {
     /**

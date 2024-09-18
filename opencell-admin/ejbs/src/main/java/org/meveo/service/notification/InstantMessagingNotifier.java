@@ -22,12 +22,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.mail.Session;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.notification.InstantMessagingNotification;
@@ -36,6 +30,12 @@ import org.meveo.security.MeveoUser;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.mail.Session;
 
 //TODO : transform that into MDB to correctly handle retries
 /**

@@ -28,12 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.BaseJobBean;
 import org.meveo.admin.job.FlatFileProcessingJob;
@@ -57,6 +51,12 @@ import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInterface;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
+
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * FlatFile processing

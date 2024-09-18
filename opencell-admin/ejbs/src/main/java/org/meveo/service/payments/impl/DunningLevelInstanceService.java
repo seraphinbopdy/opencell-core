@@ -2,12 +2,12 @@ package org.meveo.service.payments.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.dunning.DunningCollectionPlan;
 import org.meveo.model.dunning.DunningLevelInstance;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class DunningLevelInstanceService extends PersistenceService<DunningLevelInstance> {

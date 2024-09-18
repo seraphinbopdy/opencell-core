@@ -17,12 +17,15 @@
  */
 package org.meveo.admin.job;
 
-import com.google.common.collect.Lists;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.LongType;
+import org.hibernate.type.StandardBasicTypes;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
@@ -31,12 +34,11 @@ import org.meveo.service.base.PersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import com.google.common.collect.Lists;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 
 /**
  * Job definition to do the mass update with offline pagination functionality.
@@ -154,7 +156,7 @@ public class MassUpdaterOfflineJobBean extends MassUpdaterJobBean {
     public List<Long> getResult(JobExecutionResultImpl jobExecutionResult, int page, int pageSize) {
         NativeQuery query = statelessSession.createNativeQuery((isPessimisticUpdateLock(jobExecutionResult) ? "select distinct id from " : "select id from ") + VIEW_NAME + " order by id");
         return query.setFirstResult((page - 1) * pageSize)
-                .addScalar("id", new LongType())
+                .addScalar("id", StandardBasicTypes.LONG)
                 .setMaxResults(pageSize)
                 .getResultList();
     }

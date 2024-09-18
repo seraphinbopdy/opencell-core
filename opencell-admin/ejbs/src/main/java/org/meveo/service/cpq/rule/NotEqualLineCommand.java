@@ -1,13 +1,12 @@
 package org.meveo.service.cpq.rule;
 
-import org.jfree.util.Log;
+import java.util.List;
+import java.util.Optional;
+
 import org.meveo.model.cpq.trade.CommercialRuleHeader;
 import org.meveo.model.cpq.trade.CommercialRuleLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Optional;
 
 public class NotEqualLineCommand implements CommercialRuleLineCommand {
 	

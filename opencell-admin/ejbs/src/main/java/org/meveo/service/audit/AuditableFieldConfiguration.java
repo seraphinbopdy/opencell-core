@@ -25,16 +25,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Transient;
+import java.util.Set;
 
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.AuditableEntity;
+import org.meveo.model.IEntity;
 import org.meveo.model.audit.AuditTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
 /**
  * Loads Fields audit configuration.
@@ -57,11 +59,11 @@ public class AuditableFieldConfiguration implements Serializable {
 
         Map<String, List<AuditFieldInfo>> auditableEntities = new HashMap<>();
 
-        List<Class> classes = null;
+        Set<Class<? extends IEntity>> classes = null;
         try {
-            classes = ReflectionUtils.getClasses("org.meveo.model");
+            classes = ReflectionUtils.getClasses("org.meveo.model", IEntity.class);
 
-            for (Class clazz : classes) {
+            for (Class<? extends IEntity> clazz : classes) {
                 if (Proxy.isProxyClass(clazz) || clazz.getName().contains("$$")) {
                     continue;
                 }

@@ -17,17 +17,11 @@
  */
 package org.meveo.service.admin.impl;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.NoResultException;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.meveo.model.billing.ExchangeRate;
-import org.meveo.model.billing.TradingCurrency;
-import org.meveo.service.base.PersistenceService;
-import org.meveo.service.billing.impl.ExchangeRateService;
-import org.meveo.service.billing.impl.InvoiceService;
+import static java.math.BigDecimal.ONE;
+import static java.util.Objects.isNull;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.meveo.model.shared.DateUtils.setTimeToZero;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -37,11 +31,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.math.BigDecimal.ONE;
-import static java.util.Objects.isNull;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.meveo.model.shared.DateUtils.setTimeToZero;
+import org.apache.commons.collections4.CollectionUtils;
+import org.meveo.model.billing.ExchangeRate;
+import org.meveo.model.billing.TradingCurrency;
+import org.meveo.service.base.PersistenceService;
+import org.meveo.service.billing.impl.ExchangeRateService;
+import org.meveo.service.billing.impl.InvoiceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 @Named

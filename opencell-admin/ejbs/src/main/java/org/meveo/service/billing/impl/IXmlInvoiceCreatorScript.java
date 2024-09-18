@@ -3,7 +3,6 @@ package org.meveo.service.billing.impl;
 import java.io.File;
 import java.io.IOException;
 
-import javax.ejb.Local;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.meveo.admin.exception.BusinessException;
@@ -11,6 +10,8 @@ import org.meveo.model.billing.Invoice;
 import org.meveo.service.script.ScriptInterface;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+
+import jakarta.ejb.Local;
 
 /**
  * Interface for XML invoice creation script. Must extend ScriptInterface, so XmlInvoiceCreatorScript can be customized via a script.

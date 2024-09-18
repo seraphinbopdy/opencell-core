@@ -21,8 +21,6 @@ package org.meveo.service.crm.impl;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.model.ICustomFieldEntity;
@@ -30,6 +28,8 @@ import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.jaxb.customer.CustomField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.inject.Inject;
 
 public abstract class ImportService {
 

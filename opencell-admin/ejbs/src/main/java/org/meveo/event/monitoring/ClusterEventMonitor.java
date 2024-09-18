@@ -20,16 +20,6 @@ import java.io.Serializable;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.jms.JMSContext;
-import javax.jms.JMSProducer;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
-
 import org.meveo.admin.job.IteratorBasedJobBean;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ReflectionUtils;
@@ -43,7 +33,6 @@ import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
-import org.meveo.service.custom.CfValueAccumulator;
 import org.meveo.service.custom.CustomEntityTemplateService;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.JobExecutionService;
@@ -51,6 +40,16 @@ import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.script.ScriptCompilerService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.slf4j.Logger;
+
+import jakarta.ejb.ActivationConfigProperty;
+import jakarta.ejb.MessageDriven;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSProducer;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
+import jakarta.jms.ObjectMessage;
 
 /**
  * A Message Driven Bean to handle data synchronization between cluster nodes. Messages are read from a topic "topic/CLUSTEREVENTTOPIC".
@@ -60,7 +59,7 @@ import org.slf4j.Logger;
  * @author Andrius Karpavicius
  */
 @MessageDriven(name = "ClusterEventMonitor", activationConfig = { @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "topic/CLUSTEREVENTTOPIC"),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Topic"), @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "jakarta.jms.Topic"), @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
 public class ClusterEventMonitor implements MessageListener {
 
     @Inject
@@ -81,8 +80,8 @@ public class ClusterEventMonitor implements MessageListener {
     @Inject
     private CurrentUserProvider currentUserProvider;
 
-    @Inject
-    private CfValueAccumulator cfValueAccumulator;
+//    @Inject
+//    private CfValueAccumulator cfValueAccumulator;
 
     @Inject
     private CustomFieldTemplateService customFieldTemplateService;
@@ -177,7 +176,7 @@ public class ClusterEventMonitor implements MessageListener {
 
         } else if (eventDto.getClazz().equals(CustomFieldTemplate.class.getSimpleName())) {
             CustomFieldTemplate cft = customFieldTemplateService.findById(eventDto.getId());
-            cfValueAccumulator.refreshCfAccumulationRules(cft);
+//            cfValueAccumulator.refreshCfAccumulationRules(cft);
             // Refresh native table field to data type mapping
             if (cft.getAppliesTo().startsWith(CustomEntityTemplate.CFT_PREFIX) && (eventDto.getAction() == ClusterEventActionEnum.create || eventDto.getAction() == ClusterEventActionEnum.update)) {
                 nativePersistenceService.refreshTableFieldMapping(CustomEntityTemplate.getCodeFromAppliesTo(cft.getAppliesTo()));
@@ -213,10 +212,7 @@ public class ClusterEventMonitor implements MessageListener {
             // Any CRUD action on Endpoint shall refresh the cache of endpoints by code
         } else if (eventDto.getClazz().equals("Endpoint")) {
 
-            @SuppressWarnings("rawtypes")
-            Class endpointCacheContainerProviderClass = ReflectionUtils.getClassBySimpleNameAndPackage("EndpointCacheContainerProvider", "org.meveo.service.endpoint");
-            @SuppressWarnings("unchecked")
-            Object endpointCacheContainerProviderBean = EjbUtils.getCdiBean(endpointCacheContainerProviderClass);
+            Object endpointCacheContainerProviderBean = EjbUtils.getCdiBean(Class.forName("org.meveo.service.endpoint.EndpointCacheContainerProvider"));
             ReflectionUtils.getMethodValue(endpointCacheContainerProviderBean, "refreshCache", String.class, "opencell-endpoints");
 
         }

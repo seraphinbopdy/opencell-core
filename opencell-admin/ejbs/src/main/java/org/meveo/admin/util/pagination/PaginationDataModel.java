@@ -25,18 +25,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.faces.context.FacesContext;
-import javax.faces.model.DataModel;
-
+import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
+//import org.richfaces.model.Arrangeable;
+//import org.richfaces.model.ArrangeableState;
 //import org.ajax4jsf.model.DataVisitor;
 //import org.ajax4jsf.model.ExtendedDataModel;
 //import org.ajax4jsf.model.Range;
 //import org.ajax4jsf.model.SequenceRange;
 import org.meveo.model.IEntity;
 import org.meveo.service.base.local.IPersistenceService;
-import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
-//import org.richfaces.model.Arrangeable;
-//import org.richfaces.model.ArrangeableState;
+
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.model.DataModel;
 
 /**
  * Pagination data model. This data model is used together with

@@ -2,10 +2,6 @@ package org.meveo.service.billing.impl;
 
 import java.io.Serializable;
 
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.model.RatingResult;
@@ -13,6 +9,10 @@ import org.meveo.model.billing.ProductChargeInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.UserAccount;
 import org.meveo.model.billing.WalletOperation;
+
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * Product charge related rating

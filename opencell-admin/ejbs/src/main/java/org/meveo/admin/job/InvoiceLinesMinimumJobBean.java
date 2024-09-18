@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-
 import org.apache.commons.collections.map.HashedMap;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
@@ -21,13 +17,14 @@ import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.billing.BillingRun;
-import org.meveo.model.crm.Provider;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.InvoiceLineService;
-import org.meveo.util.ApplicationProvider;
-import org.slf4j.Logger;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 @Stateless
 public class InvoiceLinesMinimumJobBean extends BaseJobBean {

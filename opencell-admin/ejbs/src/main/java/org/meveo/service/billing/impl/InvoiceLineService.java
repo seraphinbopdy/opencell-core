@@ -33,17 +33,6 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.Session;
 import org.hibernate.exception.DataException;
@@ -72,7 +61,6 @@ import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.ExtraMinAmount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceLine;
-import org.meveo.model.billing.InvoiceLineStatusEnum;
 import org.meveo.model.billing.InvoiceLineTaxModeEnum;
 import org.meveo.model.billing.InvoiceLinesGroup;
 import org.meveo.model.billing.InvoiceSubCategory;
@@ -123,6 +111,17 @@ import org.meveo.service.payments.impl.PaymentMethodService;
 import org.meveo.service.settings.impl.OpenOrderSettingService;
 import org.meveo.service.tax.TaxMappingService;
 import org.meveo.service.tax.TaxMappingService.TaxInfo;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.ws.rs.NotFoundException;
 
 @Stateless
 public class InvoiceLineService extends PersistenceService<InvoiceLine> {

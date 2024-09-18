@@ -3,17 +3,11 @@
  */
 package org.meveo.service.cpq;
 
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.model.cpq.AttributeValidationType;
 import org.meveo.model.cpq.OfferTemplateAttribute;
-import org.meveo.model.cpq.ProductVersionAttribute;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import java.util.regex.Pattern;
-
-import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 /**
  * @author Rachid.AITYAAZZA

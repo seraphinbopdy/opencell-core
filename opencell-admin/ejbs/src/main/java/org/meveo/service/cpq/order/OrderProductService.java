@@ -2,10 +2,10 @@ package org.meveo.service.cpq.order;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Tarik FAKHOURI

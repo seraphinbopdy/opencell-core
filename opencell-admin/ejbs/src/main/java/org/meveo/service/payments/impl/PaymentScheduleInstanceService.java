@@ -22,7 +22,6 @@
 package org.meveo.service.payments.impl;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,17 +30,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.Query;
-import javax.transaction.Transactional;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.catalog.Calendar;
@@ -60,6 +51,10 @@ import org.meveo.service.catalog.impl.CalendarService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * The Class PaymentScheduleInstanceService.
@@ -351,7 +346,7 @@ public class PaymentScheduleInstanceService extends BusinessService<PaymentSched
      */
 	public List<PaymentScheduleInstance> findByService(ServiceInstance serviceInstance, PaymentScheduleStatusEnum status) {
 		try {
-			String strQuery = "from " + PaymentScheduleInstance.class.getSimpleName() + " where serviceInstance.id =:serviceInstanceID";
+			String strQuery = "select * from " + PaymentScheduleInstance.class.getSimpleName() + " where serviceInstance.id =:serviceInstanceID";
 			if (status != null) {
 				strQuery += " and status =:statusIN";
 			}

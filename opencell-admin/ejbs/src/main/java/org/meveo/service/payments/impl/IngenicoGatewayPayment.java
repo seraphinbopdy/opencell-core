@@ -50,7 +50,6 @@ import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.util.PaymentGatewayClass;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,16 +112,11 @@ import com.ingenico.connect.gateway.sdk.java.domain.payout.definitions.PayoutRef
 import com.ingenico.connect.gateway.sdk.java.domain.token.ApproveTokenRequest;
 import com.ingenico.connect.gateway.sdk.java.domain.token.CreateTokenRequest;
 import com.ingenico.connect.gateway.sdk.java.domain.token.CreateTokenResponse;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.ContactDetailsToken;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.CustomerToken;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.CustomerTokenWithContactDetails;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.Debtor;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.MandateSepaDirectDebitWithoutCreditor;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.PersonalInformationToken;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.PersonalNameToken;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenCard;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenCardData;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenSepaDirectDebitWithoutCreditor;
 
 /**
  * The Class IngenicoGatewayPayment.

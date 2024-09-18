@@ -18,6 +18,10 @@
 
 package org.meveo.audit.logging.custom;
 
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.audit.logging.annotations.CustomMeveoAudit;
 import org.meveo.audit.logging.core.AuditEventProcessor;
@@ -29,11 +33,8 @@ import org.meveo.model.payments.EntityActionsEnum;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.service.payments.impl.CustomerAccountService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * A custom class to log/audit a payment method management for a customerAccount.

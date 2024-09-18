@@ -1,7 +1,9 @@
 package org.meveo.service.cpq.rule;
 
-import org.jfree.util.Log;
-import org.meveo.api.dto.cpq.ProductContextDTO;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
+
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.cpq.enums.RuleTypeEnum;
 import org.meveo.model.cpq.trade.CommercialRuleHeader;
@@ -9,10 +11,6 @@ import org.meveo.model.cpq.trade.CommercialRuleItem;
 import org.meveo.model.cpq.trade.CommercialRuleLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
 
 public class ReplacementRulesExecutor {
 	

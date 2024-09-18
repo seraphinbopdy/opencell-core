@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.ejb.Singleton;
+import jakarta.ejb.Singleton;
 
 /**
  * Singleton bean for managing job context data using maps.

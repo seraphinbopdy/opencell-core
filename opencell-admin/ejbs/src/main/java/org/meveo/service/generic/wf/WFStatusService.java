@@ -20,18 +20,16 @@ package org.meveo.service.generic.wf;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.generic.wf.GenericWorkflowDto;
 import org.meveo.api.dto.generic.wf.WFStatusDto;
-import org.meveo.api.exception.BusinessApiException;
-import org.meveo.api.exception.MeveoApiException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.generic.wf.GenericWorkflow;
 import org.meveo.model.generic.wf.WFStatus;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class WFStatusService extends BusinessService<WFStatus> {

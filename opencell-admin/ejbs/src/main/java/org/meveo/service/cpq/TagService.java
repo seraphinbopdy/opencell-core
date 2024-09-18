@@ -1,13 +1,7 @@
 package org.meveo.service.cpq;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -16,6 +10,10 @@ import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.cpq.ProductVersion;
 import org.meveo.model.cpq.tags.Tag;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * @author Mbarek-Ay

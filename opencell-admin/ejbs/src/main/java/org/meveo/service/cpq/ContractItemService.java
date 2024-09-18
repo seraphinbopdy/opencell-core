@@ -9,22 +9,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.model.billing.WalletOperation;
-import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
-import org.meveo.model.cpq.contract.ContractRateTypeEnum;
 import org.meveo.model.cpq.enums.ContractStatusEnum;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.catalog.impl.ChargeTemplateServiceAll;
@@ -32,6 +26,10 @@ import org.meveo.service.catalog.impl.OfferTemplateService;
 import org.meveo.service.catalog.impl.ServiceTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * @author Tarik FAKHOURI.

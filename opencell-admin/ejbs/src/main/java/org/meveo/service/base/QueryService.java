@@ -21,18 +21,17 @@ package org.meveo.service.base;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.meveo.jpa.EntityManagerWrapper;
+import org.meveo.jpa.MeveoJpa;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.meveo.jpa.EntityManagerWrapper;
-import org.meveo.jpa.MeveoJpa;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 /**
  * Service that allows HQL queries to be called directly.

@@ -20,8 +20,6 @@ package org.meveo.export;
 
 import java.lang.reflect.Modifier;
 
-import javax.persistence.Inheritance;
-
 import org.meveo.model.IAuditable;
 import org.meveo.model.IEntity;
 import org.meveo.security.MeveoUser;
@@ -35,6 +33,8 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
+
+import jakarta.persistence.Inheritance;
 
 /**
  * Xstream converter for IEntity classes. Append class name when serialising an abstract or inheritance class' implementation and pass it along to ReflectionConverter converters

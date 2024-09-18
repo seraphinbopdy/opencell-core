@@ -1,13 +1,14 @@
 package org.meveo.api.generics;
 
-import org.meveo.api.exception.InvalidParameterException;
-import org.meveo.commons.utils.StringUtils;
-
-import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import org.meveo.api.exception.InvalidParameterException;
+import org.meveo.commons.utils.StringUtils;
+
+import jakarta.ws.rs.NotFoundException;
 
 public class ValidationUtils {
     private static ValidationUtils INSTANCE = new ValidationUtils();

@@ -22,14 +22,14 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Entity;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.annotation.Resource;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Entity;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;

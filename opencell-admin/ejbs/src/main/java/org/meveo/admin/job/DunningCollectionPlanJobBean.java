@@ -1,5 +1,12 @@
 package org.meveo.admin.job;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.dunning.DunningPolicy;
 import org.meveo.model.jobs.JobExecutionResultImpl;
@@ -9,12 +16,10 @@ import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.DunningPolicyService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import java.util.*;
-import java.util.stream.Collectors;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 @Stateless
 public class DunningCollectionPlanJobBean extends BaseJobBean {

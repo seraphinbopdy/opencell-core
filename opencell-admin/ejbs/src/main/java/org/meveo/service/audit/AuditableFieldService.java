@@ -23,13 +23,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.AuditableField;
 import org.meveo.model.BaseEntity;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * The Fields audit service.

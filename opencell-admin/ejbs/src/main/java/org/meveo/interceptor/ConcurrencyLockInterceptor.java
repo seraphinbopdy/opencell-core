@@ -2,12 +2,12 @@ package org.meveo.interceptor;
 
 import java.io.Serializable;
 
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
-
 import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.model.IEntity;
+
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 @ConcurrencyLock
 @Interceptor

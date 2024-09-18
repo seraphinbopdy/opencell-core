@@ -18,16 +18,9 @@
 package org.meveo.service.admin.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
 
 import org.keycloak.representations.idm.UserRepresentation;
 import org.meveo.admin.exception.BusinessException;
@@ -41,6 +34,12 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.User;
 import org.meveo.security.client.KeycloakAdminClientService;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.annotation.security.DeclareRoles;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * User service implementation.

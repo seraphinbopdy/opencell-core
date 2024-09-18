@@ -21,10 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityGraph;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.WalletCacheContainerProvider;
 import org.meveo.commons.utils.QueryBuilder;
@@ -39,6 +35,9 @@ import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.catalog.ServiceChargeTemplateUsage;
 import org.meveo.model.catalog.WalletTemplate;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author khalid HORRI

@@ -20,10 +20,6 @@ package org.meveo.service.notification;
 
 import java.util.HashMap;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.jobs.JobLauncherEnum;
 import org.meveo.model.notification.JobTrigger;
@@ -33,6 +29,10 @@ import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
 import org.slf4j.Logger;
+
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * Lauch a jobInstance and create a notificationHistory

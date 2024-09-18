@@ -18,16 +18,17 @@
 
 package org.meveo.service.base;
 
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.model.IEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
-import org.meveo.model.crm.Customer;
 import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
-import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.custom.CustomEntityInstanceService;
 import org.meveo.service.custom.CustomEntityTemplateService;
 import org.mockito.ArgumentCaptor;
@@ -35,14 +36,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeletionServiceTest {

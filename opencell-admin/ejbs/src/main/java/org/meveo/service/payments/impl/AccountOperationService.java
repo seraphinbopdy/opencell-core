@@ -22,16 +22,17 @@ import java.math.BigInteger;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -49,7 +50,20 @@ import org.meveo.model.accounting.SubAccountingPeriod;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.crm.Provider;
-import org.meveo.model.payments.*;
+import org.meveo.model.payments.AccountOperation;
+import org.meveo.model.payments.AccountOperationRejectionReason;
+import org.meveo.model.payments.AccountOperationStatus;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.MatchingStatusEnum;
+import org.meveo.model.payments.OCCTemplate;
+import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.payments.OtherCreditAndCharge;
+import org.meveo.model.payments.Payment;
+import org.meveo.model.payments.PaymentActionEnum;
+import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.Refund;
+import org.meveo.model.payments.RejectedPayment;
+import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.accounting.impl.AccountingPeriodService;
 import org.meveo.service.accounting.impl.SubAccountingPeriodService;
@@ -57,6 +71,15 @@ import org.meveo.service.base.PersistenceService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 
 /**
  * AccountOperation service implementation.
@@ -290,7 +313,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
                     .append(" AND ao.customerAccount.excludedFromPayment = FALSE ")
                     .append(" AND ao.customerAccount.id = pm.customerAccount.id ")
                     .append(" AND pm.paymentType =:paymentMethodIN ")
-                    .append(" AND pm.preferred IS TRUE ")
+                    .append(" AND pm.preferred = true ")
                     .append(" AND ao.unMatchingAmount <> 0 ")
                     .append(" AND ao.collectionDate >=:fromDueDateIN ")
                     .append(" AND ao.collectionDate <:toDueDateIN ");

@@ -18,10 +18,10 @@
 
 package org.meveo.audit.logging.custom;
 
-import org.meveo.admin.exception.BusinessException;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
+
+import org.meveo.admin.exception.BusinessException;
 
 /**
  * @author Khalid HORRI

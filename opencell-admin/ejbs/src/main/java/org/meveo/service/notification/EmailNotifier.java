@@ -25,11 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.mail.MessagingException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.communication.email.EmailTemplate;
@@ -44,6 +39,11 @@ import org.meveo.service.communication.impl.InternationalSettingsService;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
+
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.mail.MessagingException;
 
 /**
  * @author phung

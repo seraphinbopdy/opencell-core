@@ -27,12 +27,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-
 import org.meveo.admin.async.AmountsToInvoice;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
@@ -69,6 +63,12 @@ import org.meveo.service.billing.impl.RejectedBillingAccountService;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 /**
  * @author HORRI Khalid

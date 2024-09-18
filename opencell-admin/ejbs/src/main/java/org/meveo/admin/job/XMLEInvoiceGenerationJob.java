@@ -18,6 +18,9 @@
 
 package org.meveo.admin.job;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceStatusEnum;
@@ -30,12 +33,10 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.job.Job;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job definition to generate invoice XML for all valid invoices that don't have it

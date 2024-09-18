@@ -20,9 +20,6 @@ package org.meveo.service.catalog.impl;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -32,6 +29,9 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.catalog.ServiceChargeTemplate;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
 
 /**
  * Counter Template service implementation.

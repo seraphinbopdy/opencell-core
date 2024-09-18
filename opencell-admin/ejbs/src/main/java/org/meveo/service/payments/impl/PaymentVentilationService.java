@@ -23,11 +23,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.commons.utils.ParamBean;
@@ -42,6 +37,11 @@ import org.meveo.model.payments.PaymentVentilation;
 import org.meveo.model.payments.VentilationActionStatusEnum;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.JournalService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * @author melyoussoufi

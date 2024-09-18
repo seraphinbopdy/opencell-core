@@ -39,13 +39,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.FlushModeType;
-import javax.persistence.NoResultException;
-
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -55,7 +48,6 @@ import org.meveo.api.dto.response.catalog.PricePlanMatrixLinesDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.apiv2.catalog.ImportPricePlanVersionsItem;
-import org.meveo.commons.utils.ListUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.DatePeriod;
@@ -63,13 +55,13 @@ import org.meveo.model.audit.logging.AuditLog;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.ColumnTypeEnum;
-import org.meveo.model.catalog.TradingPricePlanVersion;
 import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.PricePlanMatrixColumn;
 import org.meveo.model.catalog.PricePlanMatrixLine;
 import org.meveo.model.catalog.PricePlanMatrixValue;
 import org.meveo.model.catalog.PricePlanMatrixVersion;
 import org.meveo.model.catalog.TradingPricePlanMatrixLine;
+import org.meveo.model.catalog.TradingPricePlanVersion;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.enums.PriceVersionTypeEnum;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
@@ -84,6 +76,13 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.NoResultException;
 
 /**
  * @author Tarik FA.

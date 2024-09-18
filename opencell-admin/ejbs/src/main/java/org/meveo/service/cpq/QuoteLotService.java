@@ -3,11 +3,6 @@ package org.meveo.service.cpq;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.model.cpq.commercial.OfferLineTypeEnum;
 import org.meveo.model.cpq.commercial.OrderOffer;
@@ -17,6 +12,11 @@ import org.meveo.model.quote.QuoteVersion;
 import org.meveo.service.base.BusinessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * @author Tarik FA.

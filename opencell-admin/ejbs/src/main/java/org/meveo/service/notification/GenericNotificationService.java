@@ -18,6 +18,9 @@
 
 package org.meveo.service.notification;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.meveo.cache.NotificationCacheContainerProvider;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.AuditableEntity;
@@ -30,11 +33,9 @@ import org.meveo.model.notification.Notification;
 import org.meveo.model.notification.NotificationEventTypeEnum;
 import org.meveo.service.base.BusinessService;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Tyshan Shi(tyshan@manaty.net)

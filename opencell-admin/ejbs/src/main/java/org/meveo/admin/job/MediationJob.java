@@ -23,11 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.admin.storage.StorageFactory;
@@ -44,6 +39,11 @@ import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.admin.impl.FileFormatService;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.ScopedJob;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job definition to process CDR files converting CDRs to EDR records

@@ -1,9 +1,7 @@
 package org.meveo.service.billing.impl.article;
 
-import org.apache.commons.collections4.MapUtils;
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.model.article.AccountingArticle;
-import org.meveo.model.article.ArticleMappingLine;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -12,8 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toSet;
+import org.apache.commons.collections4.MapUtils;
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.model.article.AccountingArticle;
+import org.meveo.model.article.ArticleMappingLine;
 
 public class AttributeMappingLineMatch {
 

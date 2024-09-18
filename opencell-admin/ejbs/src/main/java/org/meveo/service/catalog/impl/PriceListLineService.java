@@ -1,11 +1,11 @@
 package org.meveo.service.catalog.impl;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-
 import org.meveo.model.pricelist.PriceListLine;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
 @Stateless
 public class PriceListLineService extends BusinessService<PriceListLine> {

@@ -20,9 +20,9 @@ package org.meveo.service.medina.impl;
 
 import java.io.Serializable;
 
-import javax.ejb.ApplicationException;
-
 import org.meveo.model.mediation.CDRRejectionCauseEnum;
+
+import jakarta.ejb.ApplicationException;
 
 @ApplicationException(rollback = false)
 public class CDRParsingException extends Exception {

@@ -21,12 +21,12 @@ package org.meveo.admin.util;
 import java.io.Serializable;
 import java.util.Locale;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 @RequestScoped

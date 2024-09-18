@@ -1,12 +1,12 @@
 package org.meveo.service.report;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-
 import org.meveo.model.report.query.QueryScheduler;
 import org.meveo.model.report.query.ReportQuery;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
 @Stateless
 public class QuerySchedulerService extends BusinessService<QueryScheduler> {

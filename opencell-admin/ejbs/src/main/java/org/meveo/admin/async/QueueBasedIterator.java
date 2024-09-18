@@ -3,12 +3,12 @@ package org.meveo.admin.async;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import javax.jms.JMSConsumer;
-import javax.jms.JMSException;
-import javax.jms.Message;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.jms.JMSConsumer;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 
 /**
  * Provides a one at a time access to iterator.getNext() function

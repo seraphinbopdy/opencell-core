@@ -42,8 +42,8 @@
 				field="parameters" />
 
 			<p:column style="width:150px;text-align: center">
-				<p:commandButton update=":#{p:component('auditLogDetail')}"
-					oncomplete="PF('auditLog').show()" icon="ui-icon-search"
+				<p:commandButton update="@([id$=auditLogDetail])"
+					oncomplete="PF('auditLog').show()" icon="pi pi-search"
 					title="#{messages['commons.view']}">
 					<f:setPropertyActionListener value="#{entity}"
 						target="#{auditLogBean.entity}" />
@@ -54,7 +54,7 @@
 		<h:form>
 			<p:panel>
 				<p:commandButton action="#{auditLogBean.purge()}"
-					update=":#{p:component('results_panel')}"
+					update="@([id$=results_panel])"
 					value="#{messages['action.purge']}"></p:commandButton>
 			</p:panel>
 		</h:form>

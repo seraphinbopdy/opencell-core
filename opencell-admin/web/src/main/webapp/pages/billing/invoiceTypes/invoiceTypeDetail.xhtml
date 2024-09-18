@@ -96,7 +96,7 @@
 
 
             <h:panelGroup rendered="#{not empty invoiceTypeBean.entity.id}">
-                <p:dataTable id="sellerSequenceTable" width="80px;" label="#{messages['inboundRequest.responseHeaders']}" style="width:70%;" value="#{invoiceTypeBean.entity.sellerSequence}"
+                <p:dataTable id="sellerSequenceTable" label="#{messages['inboundRequest.responseHeaders']}" value="#{invoiceTypeBean.entity.sellerSequence}"
                     var="sellerSeq" paginator="false" resizableColumns="true">
                     <f:facet name="header">#{messages['invoiceType.sellerSequences']}</f:facet>
                     <p:column headerText="#{messages['seller.title']}">

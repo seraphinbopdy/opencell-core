@@ -67,7 +67,7 @@
 						<p:column headerText="#{messages['commons.actions']}">
 							<p:commandButton value="#{messages['bundleTemplate.addProduct']}"
 								action="#{bundleTemplateBean.addProductTemplateToBundle(prodT)}"
-								update=":#{p:component('bundleTemplateList')} :#{p:component('messages')} :selectProduct"
+								update="@([id$=bundleTemplateList]) @([id$=messages]) :selectProduct"
                                 process="@this"
 								oncomplete="PF('selectProduct').hide()">
 							</p:commandButton>

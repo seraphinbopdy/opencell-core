@@ -22,7 +22,7 @@
                 </c:if>
                 <c:if test="#{validateEmail}">
                     <!-- <f:validateRegex pattern="([^.@]+)(\.[^.@]+)*@([^.@]+\.)+([^.@]+)"></f:validateRegex> -->
-                    <o:validator validatorId="javax.faces.RegularExpression" pattern="([^.@]+)(\.[^.@]+)*@([^.@]+\.)+([^.@]+)" message="#{messages['validator.email.invalid']}" />
+                    <o:validator validatorId="jakarta.faces.RegularExpression" pattern="([^.@]+)(\.[^.@]+)*@([^.@]+\.)+([^.@]+)" message="#{messages['validator.email.invalid']}" />
                 </c:if>
                 <c:if test="#{not empty validatorId}">
                     <f:validator validatorId="#{validatorId}" />
@@ -52,7 +52,7 @@
                     <o:validator validatorId="codeValidator" />
                 </c:if>
                 <c:if test="#{not empty pattern}">
-                    <o:validator validatorId="javax.faces.RegularExpression" pattern="#{pattern}" message="#{of:format2(messages['message.validation.code.pattern'], label, pattern)}" />
+                    <o:validator validatorId="jakarta.faces.RegularExpression" pattern="#{pattern}" message="#{of:format2(messages['message.validation.code.pattern'], label, pattern)}" />
                 </c:if>
             </p:inputText>
         </c:if>
@@ -72,7 +72,7 @@
                 style="width:100%;" />
         </c:if>
         <c:if test="#{isHtml and edit}">
-            <p:editor id="#{id}" disabled="#{disabled}" value="#{fieldItem}" required="#{required}"></p:editor>
+            <p:textEditor id="#{id}" disabled="#{disabled}" value="#{fieldItem}" required="#{required}" secure="false" />
         </c:if>
         <c:if test="#{listValues != null and edit}">
             <p:selectOneMenu id="#{id}" value="#{fieldItem}" required="#{required}" disabled="#{disabled}">
@@ -84,7 +84,7 @@
         <c:if test="#{popup and edit}">
             <p:inputText id="#{id}_text" value="#{fieldItem}" size="#{size}" disabled="true" />
             <p:inputText id="#{id}" type="hidden" value="#{fieldItem}" required="#{required}" size="#{size}" />
-            <p:commandButton id="#{popupId}_selectLink" onclick="PF('dlg_#{popupId}').show()" type="button" icon="ui-icon-search" />
+            <p:commandButton id="#{popupId}_selectLink" onclick="PF('dlg_#{popupId}').show()" type="button" icon="pi pi-search" />
         </c:if>
 
         <c:if test="#{!edit and not textArea}">

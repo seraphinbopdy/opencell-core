@@ -50,7 +50,7 @@
 						<h:panelGrid columns="1" id="buttons" styleClass="clearLeft">
 							<h:panelGrid columns="2">
 								<p:commandButton id="addOfferTemplateCategoryRootBtn"
-									icon="fa fa-home"
+									icon="pi pi-home"
 									action="#{offerTemplateCategoryBean.newOfferTemplateCategoryRoot()}"
 									update="messages offerTemplateCategoryDetailPanel buttons"
 									process="@this"
@@ -62,7 +62,7 @@
 							<h:panelGrid columns="2"
 								rendered="#{offerTemplateCategoryBean.selectedOfferTemplateCategory != null}">
 								<p:commandButton id="addOfferTemplateCategoryBtn"
-									icon="fa fa-plus"
+									icon="pi pi-plus"
 									action="#{offerTemplateCategoryBean.newOfferTemplateCategory()}"
 									update="messages offerTemplateCategoryDetailPanel buttons"
 								 	process="@this">
@@ -71,26 +71,26 @@
 									value="#{messages['offerTemplateCategory.addOfferTemplateCategory']}" />
 							</h:panelGrid>
 							<!--                             <h:panelGrid columns="2" rendered="#{offerTemplateCategoryBean.selectedOfferTemplateCategory != null}"> -->
-							<!--                                 <p:commandButton id="moveUpOfferTemplateCategoryBtn" icon="ui-icon-arrowthick-1-n" action="#{offerTemplateCategoryBean.moveUp()}" -->
+							<!--                                 <p:commandButton id="moveUpOfferTemplateCategoryBtn" icon="pi pi-arrow-up" action="#{offerTemplateCategoryBean.moveUp()}" -->
 							<!--                                     update="messages offerCategoryPanel buttons" ajax="true" /> -->
 							<!--                                 <p:outputLabel value="#{messages['offerTemplateCategory.moveUp']}" /> -->
 							<!--                             </h:panelGrid> -->
 							<!--                             <h:panelGrid columns="2" rendered="#{offerTemplateCategoryBean.selectedOfferTemplateCategory != null}"> -->
-							<!--                                 <p:commandButton id="moveDownOfferTemplateCategoryBtn" icon="ui-icon-arrowthick-1-s" action="#{offerTemplateCategoryBean.moveDown()}" -->
+							<!--                                 <p:commandButton id="moveDownOfferTemplateCategoryBtn" icon="pi pi-arrow-down" action="#{offerTemplateCategoryBean.moveDown()}" -->
 							<!--                                     update="messages offerCategoryPanel buttons" ajax="true" /> -->
 							<!--                                 <p:outputLabel value="#{messages['offerTemplateCategory.moveDown']}" /> -->
 							<!--                             </h:panelGrid> -->
 							<h:panelGrid columns="2"
 								rendered="#{offerTemplateCategoryBean.selectedOfferTemplateCategory != null}">
 								<p:commandButton id="deleteOfferTemplateCategory"
-									icon="ui-icon-trash"
+									icon="pi pi-trash"
 									action="#{offerTemplateCategoryBean.removeOfferTemplateCategory()}"
 									update="messages offerCategoryPanel offerTemplateCategoryDetailPanel buttons"
 									process="@this"
 									ajax="true">
 									<p:confirm header="#{messages['commons.confirmationHeader']}"
 										message="#{messages['offerTemplateCategory.confirmDelete']}"
-										icon="ui-icon-alert" />
+										icon="pi pi-exclamation-triangle" />
 								</p:commandButton>
 								<p:outputLabel
 									value="#{messages['offerTemplateCategory.deleteOfferTemplateCategory']}" />
@@ -132,12 +132,12 @@
 										<p:commandButton value="#{messages['action.export']}"
 											ajax="false"
 											onclick="PrimeFaces.monitorDownload(startExport, stopExport);"
-											icon="fa fa-arrow-down" immediate="true">
+											icon="pi pi-arrow-down" immediate="true">
 											<p:fileDownload value="#{offerTemplateCategoryBean.download()}" />
 										</p:commandButton>
 										<p:commandButton value="#{messages['action.import']}"
 											onclick="PF('importDialog').show()"
-											icon="fa fa-arrow-up" type="button">											
+											icon="pi pi-arrow-up" type="button">											
 										</p:commandButton>
 									</h:panelGroup>
 								</h:form>

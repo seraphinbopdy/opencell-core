@@ -29,11 +29,11 @@
 									<hftl:column label="CDR File Name" field="originBatch"/>
 									<hftl:column label="Creation Date" field="created"/>	
 									<p:column headerText="Back-out">
-					                    <p:commandButton id="backout" icon="ui-icon-circle-close"
+					                    <p:commandButton id="backout" icon="pi pi-stop-circle"
 											title="back-out" action="#{cdrBean.backout()}"
 											process="@form" update="datatable_results">
 											<f:setPropertyActionListener value="#{entity}" target="#{cdrBean.entity}" />
-											<p:confirm header="Back-out" message="Are you sure to back-out this CDR file?" icon="ui-icon-alert"/>																	
+											<p:confirm header="Back-out" message="Are you sure to back-out this CDR file?" icon="pi pi-exclamation-triangle"/>																	
 										</p:commandButton>
 		                    		</p:column>																
 							</hftl:dataList>

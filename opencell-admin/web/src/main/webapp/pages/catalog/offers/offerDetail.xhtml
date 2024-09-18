@@ -48,7 +48,7 @@
                                         styleClass="fa fa-plus no-text-decoration text-blue fa-2x"
                                         outcome="mm_offerTemplateDetail">
                                         <f:param name="cid"
-                                            value="#{javax.enterprise.context.conversation.id}" />
+                                            value="#{jakarta.enterprise.context.conversation.id}" />
                                         <f:param name="objectId"
                                             value="#{offerTemplateBean.entity.id}" />
                                         <f:param name="edit" value="true" />
@@ -61,7 +61,7 @@
                                         styleClass="fa fa-copy fa-2x text-blue no-text-decoration"
                                         outcome="mm_offerTemplateDetail">
                                         <f:param name="cid"
-                                            value="#{javax.enterprise.context.conversation.id}" />
+                                            value="#{jakarta.enterprise.context.conversation.id}" />
                                         <f:param name="objectId"
                                             value="#{offerTemplateBean.entity.id}" />
                                         <f:param name="edit" value="true" />
@@ -74,7 +74,7 @@
                                         outcome="mm_offerTemplateDetail"
                                         title="#{messages['action.edit']}">
                                         <f:param name="cid"
-                                            value="#{javax.enterprise.context.conversation.id}" />
+                                            value="#{jakarta.enterprise.context.conversation.id}" />
                                         <f:param name="objectId"
                                             value="#{offerTemplateBean.entity.id}"></f:param>
                                         <f:param name="edit" value="true"></f:param>
@@ -246,7 +246,7 @@
                             <p:link outcome="mm_productTemplateDetail"
                                 value="#{entity.productTemplate.name}">
                                 <f:param name="cid"
-                                    value="#{javax.enterprise.context.conversation.id}" />
+                                    value="#{jakarta.enterprise.context.conversation.id}" />
                                 <f:param name="objectId" value="#{entity.productTemplate.id}"></f:param>
                                 <f:param name="edit" value="false"></f:param>
                                 <f:param name="backView" value="mm_productTemplates"></f:param>
@@ -273,7 +273,7 @@
                                     value="#{messages['offerTemplate.action.removeProduct']}"
                                     immediate="true"
                                     action="#{offerTemplateBean.deleteOfferProductTemplate(entity)}"
-                                    update=":offerForm:messages :#{p:component('productTemplateList')}">
+                                    update=":offerForm:messages @([id$=productTemplateList])}">
                                 </p:commandButton>
                             </h:panelGroup>
                         </p:column>
@@ -454,7 +454,7 @@
                             <p:commandButton id="btnSelectProduct"
                                 value="#{messages['offerTemplate.action.addProduct']}"
                                 action="#{offerTemplateBean.addProductTemplateToOffer(entity)}"
-                                update=":offerForm:messages :#{p:component('productTemplateList')}"
+                                update=":offerForm:messages @([id$=productTemplateList])"
                                 oncomplete="PF('selectProduct').hide()">
                             </p:commandButton>
                         </p:column>

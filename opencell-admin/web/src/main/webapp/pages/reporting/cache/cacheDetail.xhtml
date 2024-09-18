@@ -10,7 +10,7 @@
     <ui:define name="body">
 
 
-    <o:importFunctions type="org.meveo.commons.utils.StringUtils" var="stringUtils" />
+        <o:importFunctions type="org.meveo.commons.utils.StringUtils" var="stringUtils" />
         <p:panel>
             <h:form id="crumbmenuForm">
                 <p:breadCrumb homeDisplay="text" id="crumbmenu">
@@ -37,30 +37,41 @@
                         <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}"
                             rendered="#{cacheItem.value.getClass().getSimpleName() eq 'ArrayList' or cacheItem.value.getClass().getSimpleName() eq 'HashSet'or cacheItem.value.getClass().getSimpleName() eq 'HashMap' or cacheItem.value.getClass().getSimpleName() eq 'TreeMap'}" />
 
-                        <p:lightBox
-                            rendered="#{cacheItem.value.getClass().getSimpleName() ne 'BigDecimal' and cacheItem.value.getClass().getSimpleName() ne 'Long' and cacheItem.value.getClass().getSimpleName() ne 'ArrayList' and cacheItem.value.getClass().getSimpleName() ne 'HashSet' and cacheItem.value.getClass().getSimpleName() ne 'HashMap' and cacheItem.value.getClass().getSimpleName() ne 'TreeMap'}">
-                            <h:outputLink value="#">
-                                <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" />
-                            </h:outputLink>
+                        <!--                         <p:lightBox -->
+                        <!--                             rendered="#{cacheItem.value.getClass().getSimpleName() ne 'BigDecimal' and cacheItem.value.getClass().getSimpleName() ne 'Long' and cacheItem.value.getClass().getSimpleName() ne 'ArrayList' and cacheItem.value.getClass().getSimpleName() ne 'HashSet' and cacheItem.value.getClass().getSimpleName() ne 'HashMap' and cacheItem.value.getClass().getSimpleName() ne 'TreeMap'}"> -->
+                        <!--                             <h:outputLink value="#"> -->
+                        <!--                                 <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" /> -->
+                        <!--                             </h:outputLink> -->
 
-                            <f:facet name="inline">
-                                <p:panel style="width: 1020px">
-                                    <p:scrollPanel mode="native" style="width:1000px">
-                                        <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" style="white-space: normal" />
-                                    </p:scrollPanel>
-                                </p:panel>
-                            </f:facet>
-                        </p:lightBox>
+                        <!--                             <f:facet name="inline"> -->
+                        <!--                                 <p:panel style="width: 1020px"> -->
+                        <!--                                     <p:scrollPanel mode="native" style="width:1000px"> -->
+                        <!--                                         <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" style="white-space: normal" /> -->
+                        <!--                                     </p:scrollPanel> -->
+                        <!--                                 </p:panel> -->
+                        <!--                             </f:facet> -->
+                        <!--                         </p:lightBox> -->
+
+                        <h:outputText id="truncatedText4" value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}"
+                            rendered="#{cacheItem.value.getClass().getSimpleName() ne 'BigDecimal' and cacheItem.value.getClass().getSimpleName() ne 'Long' and cacheItem.value.getClass().getSimpleName() ne 'ArrayList' and cacheItem.value.getClass().getSimpleName() ne 'HashSet' and cacheItem.value.getClass().getSimpleName() ne 'HashMap' and cacheItem.value.getClass().getSimpleName() ne 'TreeMap'}" />
+                        <p:overlayPanel id="truncatedTextDetails4" for="truncatedText4" hideEffect="fade" style="width: 1020px" dismissable="true" showCloseIcon="true" showEvent="mouseover"
+                            hideEvent="mousedown"
+                            rendered="#{cacheItem.value.getClass().getSimpleName() ne 'BigDecimal' and cacheItem.value.getClass().getSimpleName() ne 'Long' and cacheItem.value.getClass().getSimpleName() ne 'ArrayList' and cacheItem.value.getClass().getSimpleName() ne 'HashSet' and cacheItem.value.getClass().getSimpleName() ne 'HashMap' and cacheItem.value.getClass().getSimpleName() ne 'TreeMap'}">
+
+                            <p:scrollPanel mode="native" style="width:1000px;max-height:600px">
+                                <p:inputTextarea value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" cols="180" />
+                            </p:scrollPanel>
+                        </p:overlayPanel>
 
                     </p:column>
                     <p:column headerText="#{messages['commons.actions']}" width="10%">
 
-                        <p:commandButton icon="ui-icon-search" oncomplete="PF('listDialog').show()" update=":listDialog" rendered="#{cacheItem.value.getClass().getSimpleName() eq 'ArrayList' or cacheItem.value.getClass().getSimpleName() eq 'HashSet' }"
-                            title="#{messages['commons.view']}">
+                        <p:commandButton icon="pi pi-search" oncomplete="PF('listDialog').show()" update=":listDialog"
+                            rendered="#{cacheItem.value.getClass().getSimpleName() eq 'ArrayList' or cacheItem.value.getClass().getSimpleName() eq 'HashSet' }" title="#{messages['commons.view']}">
                             <f:setPropertyActionListener target="#{cacheBean.selectedCacheItem}" value="#{cacheItem}" />
                         </p:commandButton>
 
-                        <p:commandButton icon="ui-icon-search" oncomplete="PF('mapDialog').show()" update=":mapDialog"
+                        <p:commandButton icon="pi pi-search" oncomplete="PF('mapDialog').show()" update=":mapDialog"
                             rendered="#{cacheItem.value.getClass().getSimpleName() eq 'HashMap' or cacheItem.value.getClass().getSimpleName() eq 'TreeMap' }" title="#{messages['commons.view']}">
                             <f:setPropertyActionListener target="#{cacheBean.selectedCacheMapItem}" value="#{cacheItem}" />
                         </p:commandButton>
@@ -83,20 +94,28 @@
                     <h:outputText value="#{rowIndex+1}" />
                 </p:column>
                 <p:column headerText="#{messages['cache.value.detail.'.concat(cacheBean.cacheName)]}">
-                    <!--                     <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" /> -->
-                    <p:lightBox>
-                        <h:outputLink value="#">
-                            <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" />
-                        </h:outputLink>
+                    <!--                     <p:lightBox> -->
+                    <!--                         <h:outputLink value="#"> -->
+                    <!--                             <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" /> -->
+                    <!--                         </h:outputLink> -->
 
-                        <f:facet name="inline">
-                            <p:panel style="width: 1020px">
-                                <p:scrollPanel mode="native" style="width:1000px">
-                                    <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" style="white-space: normal" />
-                                </p:scrollPanel>
-                            </p:panel>
-                        </f:facet>
-                    </p:lightBox>
+                    <!--                         <f:facet name="inline"> -->
+                    <!--                             <p:panel style="width: 1020px"> -->
+                    <!--                                 <p:scrollPanel mode="native" style="width:1000px"> -->
+                    <!--                                     <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" style="white-space: normal" /> -->
+                    <!--                                 </p:scrollPanel> -->
+                    <!--                             </p:panel> -->
+                    <!--                         </f:facet> -->
+                    <!--                     </p:lightBox> -->
+
+                    <h:outputText id="truncatedText" value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" />
+                    <p:overlayPanel id="truncatedTextDetails" for="truncatedText" hideEffect="fade" style="width: 1020px" dismissable="true" showCloseIcon="true" showEvent="mouseover"
+                        hideEvent="mousedown">
+
+                        <p:scrollPanel mode="native" style="width:1000px;max-height:600px">
+                            <p:inputTextarea value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" cols="180" />
+                        </p:scrollPanel>
+                    </p:overlayPanel>
                 </p:column>
             </p:dataTable>
         </p:dialog>
@@ -121,23 +140,33 @@
                 </p:column>
                 <p:column headerText="#{messages['cache.map.value.'.concat(cacheBean.cacheName)]}">
                     <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" rendered="#{cacheItem.value.getClass().getSimpleName() eq 'ArrayList' }" />
-                    <p:lightBox rendered="#{cacheItem.value.getClass().getSimpleName() ne 'ArrayList' }">
-                        <h:outputLink value="#">
-                            <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" />
-                        </h:outputLink>
+                    <!--                     <p:lightBox rendered="#{cacheItem.value.getClass().getSimpleName() ne 'ArrayList' }"> -->
+                    <!--                         <h:outputLink value="#"> -->
+                    <!--                             <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" /> -->
+                    <!--                         </h:outputLink> -->
 
-                        <f:facet name="inline">
-                            <p:panel style="width: 1020px">
-                                <p:scrollPanel mode="native" style="width:1000px">
-                                    <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" style="white-space: normal" />
-                                </p:scrollPanel>
-                            </p:panel>
-                        </f:facet>
-                    </p:lightBox>
+                    <!--                         <f:facet name="inline"> -->
+                    <!--                             <p:panel style="width: 1020px"> -->
+                    <!--                                 <p:scrollPanel mode="native" style="width:1000px"> -->
+                    <!--                                     <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" style="white-space: normal" /> -->
+                    <!--                                 </p:scrollPanel> -->
+                    <!--                             </p:panel> -->
+                    <!--                         </f:facet> -->
+                    <!--                     </p:lightBox> -->
+
+                    <h:outputText id="truncatedText2" value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}"
+                        rendered="#{cacheItem.value.getClass().getSimpleName() ne 'ArrayList' }" />
+                    <p:overlayPanel id="truncatedTextDetails2" for="truncatedText2" hideEffect="fade" style="width: 1020px" dismissable="true" showCloseIcon="true" showEvent="mouseover"
+                        hideEvent="mousedown" rendered="#{cacheItem.value.getClass().getSimpleName() ne 'ArrayList' }">
+
+                        <p:scrollPanel mode="native" style="width:1000px;max-height:600px">
+                            <p:inputTextarea value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem.value, true)}" cols="180" />
+                        </p:scrollPanel>
+                    </p:overlayPanel>
 
                 </p:column>
                 <p:column style="width: 60px;" headerText="#{messages['commons.actions']}">
-                    <p:commandButton icon="ui-icon-search" update=":cacheItemValueList" title="#{messages['commons.view']}" rendered="#{cacheItem.value.getClass().getSimpleName() eq 'ArrayList' }">
+                    <p:commandButton icon="pi pi-search" update=":cacheItemValueList" title="#{messages['commons.view']}" rendered="#{cacheItem.value.getClass().getSimpleName() eq 'ArrayList' }">
                         <f:setPropertyActionListener target="#{cacheBean.selectedCacheItem}" value="#{cacheItem}" />
                     </p:commandButton>
                 </p:column>
@@ -158,19 +187,28 @@
                         <p:column headerText="#{messages['cache.map.value.detail.'.concat(cacheBean.cacheName)]}">
                             <!--                             <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" /> -->
 
-                            <p:lightBox>
-                                <h:outputLink value="#">
-                                    <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" />
-                                </h:outputLink>
+                            <!--                             <p:lightBox> -->
+                            <!--                                 <h:outputLink value="#"> -->
+                            <!--                                     <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" /> -->
+                            <!--                                 </h:outputLink> -->
 
-                                <f:facet name="inline">
-                                    <p:panel style="width: 1020px">
-                                        <p:scrollPanel mode="native" style="width:1000px">
-                                            <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" style="white-space: normal" />
-                                        </p:scrollPanel>
-                                    </p:panel>
-                                </f:facet>
-                            </p:lightBox>
+                            <!--                                 <f:facet name="inline"> -->
+                            <!--                                     <p:panel style="width: 1020px"> -->
+                            <!--                                         <p:scrollPanel mode="native" style="width:1000px"> -->
+                            <!--                                             <h:outputText value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" style="white-space: normal" /> -->
+                            <!--                                         </p:scrollPanel> -->
+                            <!--                                     </p:panel> -->
+                            <!--                                 </f:facet> -->
+                            <!--                             </p:lightBox> -->
+
+                            <h:outputText id="truncatedText3" value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" />
+                            <p:overlayPanel id="truncatedTextDetails3" for="truncatedText3" hideEffect="fade" style="width: 1020px" dismissable="true" showCloseIcon="true" showEvent="mouseover"
+                                hideEvent="mousedown">
+
+                                <p:scrollPanel mode="native" style="width:1000px;max-height:600px">
+                                    <p:inputTextarea value="#{cacheBean.getShortRepresentationOfCachedValue(cacheItem, true)}" cols="180" />
+                                </p:scrollPanel>
+                            </p:overlayPanel>
                         </p:column>
                     </p:dataTable>
                 </p:panel>

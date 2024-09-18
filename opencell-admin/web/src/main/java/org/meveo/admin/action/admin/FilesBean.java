@@ -20,13 +20,11 @@ package org.meveo.admin.action.admin;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,20 +32,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Conversation;
-import javax.faces.event.ActionEvent;
-import javax.faces.event.ValueChangeEvent;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.io.FilenameUtils;
 import org.jboss.seam.international.status.Messages;
 import org.meveo.admin.action.BaseBean;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.util.FlatFileValidator;
 import org.meveo.admin.util.DirectoriesConstants;
+import org.meveo.admin.util.FlatFileValidator;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
@@ -62,9 +54,16 @@ import org.meveo.util.view.PageAccessHandler;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.enterprise.context.Conversation;
+import jakarta.faces.event.ActionEvent;
+import jakarta.faces.event.ValueChangeEvent;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Standard backing bean for {@link User} (extends {@link BaseBean} that provides almost all common methods to handle entities filtering/sorting in datatable, their create, edit, view, delete operations). It works with
@@ -223,12 +222,14 @@ public class FilesBean implements Serializable {
 
     public StreamedContent getSelectedFile() {
         StreamedContent result = null;
-        try {
-            String folder = getFilePath() + File.separator + (this.selectedFolder == null ? "" : this.selectedFolder);
-            result = new DefaultStreamedContent(new FileInputStream(new File(folder + File.separator + selectedFileName)), null, selectedFileName);
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            log.error("error generated while getting seleceted file", e);
+
+        String folder = getFilePath() + File.separator + (this.selectedFolder == null ? "" : this.selectedFolder);
+        try (FileInputStream is = new FileInputStream(new File(folder + File.separator + selectedFileName))) {
+            result = DefaultStreamedContent.builder().name(selectedFileName).stream(() -> is).build();
+
+        } catch (IOException e) {
+            log.error("error generated while getting selected file", e);
+            return null;
         }
         return result;
     }
@@ -342,7 +343,7 @@ public class FilesBean implements Serializable {
                 filePath = getFilePath(fileName);
             }
 
-            InputStream fileInputStream = file.getInputstream();
+            InputStream fileInputStream = file.getInputStream();
             if (this.isAutoUnzipped()) {
                 if (!fileName.endsWith(ZIP_FILE_EXTENSION)) {
                     messages.info(fileName + " isn't a valid zip file!");
@@ -389,7 +390,7 @@ public class FilesBean implements Serializable {
             log.debug("upload file={}", file);
             try {
                 String filePath = getFilePath(FilenameUtils.getName(file.getFileName()));
-                copyFile(filePath, file.getInputstream());
+                copyFile(filePath, file.getInputStream());
 
                 messages.info(file.getFileName() + " is uploaded to " + ((selectedFolder != null) ? selectedFolder : "Home"));
             } catch (IOException e) {
@@ -452,7 +453,9 @@ public class FilesBean implements Serializable {
         try {
             byte[] filedata = FileUtils.createZipFile(sourceFolder);
             InputStream is = new ByteArrayInputStream(filedata);
-            return new DefaultStreamedContent(is, "application/octet-stream", filename + ".zip");
+
+            return DefaultStreamedContent.builder().name(filename + ".zip").stream(() -> is).contentType("application/octet-stream").build();
+
         } catch (Exception e) {
             log.debug("Failed to zip a file", e);
         }

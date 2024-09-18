@@ -108,7 +108,7 @@
                                     <h:outputText value="#{aSubCatInvAgregate.invoiceSubCategory.description}" />
 
                                     <span style="width: 5px;"> </span>
-                                    <p:commandButton icon="ui-icon-trash" immediate="true" action="#{creationInvoiceBean.deleteLinkedInvoiceCategoryDetaild}"
+                                    <p:commandButton icon="pi pi-trash" immediate="true" action="#{creationInvoiceBean.deleteLinkedInvoiceCategoryDetaild}"
                                         update="ratedTransactionTable :formId:tabView:detailedInvoicePanel :formId:tabView:invoiceSummary">
                                         <f:setPropertyActionListener value="#{aSubCatInvAgregate}" target="#{creationInvoiceBean.selectedSubCategoryInvoiceAgregateDetaild}" />
                                     </p:commandButton>
@@ -199,7 +199,7 @@
                                             </p:inputText>
                                         </p:column>
                                         <p:column>
-                                            <p:commandButton icon="ui-icon-trash" process=":formId:tabView:detailedInvoicePanel"
+                                            <p:commandButton icon="pi pi-trash" process=":formId:tabView:detailedInvoicePanel"
                                                 action="#{creationInvoiceBean.deleteRatedTransactionLine}"
                                                 update=":formId:tabView:detailedInvoicePanel :formId:tabView:invoiceSummary">
                                                 <f:setPropertyActionListener value="#{rated}" target="#{creationInvoiceBean.selectedRatedTransaction}" />
@@ -328,19 +328,19 @@
 
                     <p:fieldset legend="ACTIONS" style="float: left; width: 95%; margin-top: 10px;">
                         <p:outputPanel column="2" id="buttonGenerate">
-                            <p:commandButton value="#{messages['invoice.generateDraft']}" icon="ui-icon-refresh" action="#{creationInvoiceBean.generateDraftInvoice()}"
+                            <p:commandButton value="#{messages['invoice.generateDraft']}" icon="pi pi-refresh" action="#{creationInvoiceBean.generateDraftInvoice()}"
                                 update=":formId:messages :formId:tabView:attachments buttonGenerate" process="@this" />
                             <p:commandButton value="#{messages['commons.validateInvoices']}" disabled="#{!creationInvoiceBean.canValidateInvoice()}"
-		                        action="#{creationInvoiceBean.validateInvoice()}" icon="ui-icon-circle-check" >
-		                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmValidateInvoice']}" icon="ui-icon-alert" />
+		                        action="#{creationInvoiceBean.validateInvoice()}" icon="pi pi-check-circle" >
+		                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmValidateInvoice']}" icon="pi pi-exclamation-triangle" />
 		                    </p:commandButton>
 		                    <p:commandButton value="#{messages['commons.cancelInvoices']}" disabled="#{!creationInvoiceBean.canCancelInvoice()}"
-		                        action="#{creationInvoiceBean.cancelInvoice()}" icon="ui-icon-circle-close" >
-		                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmCancelInvoice']}" icon="ui-icon-alert" />
+		                        action="#{creationInvoiceBean.cancelInvoice()}" icon="pi pi-stop-circle" >
+		                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmCancelInvoice']}" icon="pi pi-exclamation-triangle" />
 		                    </p:commandButton>
 		                    <p:commandButton value="#{messages['commons.rebuildInvoices']}" disabled="#{!creationInvoiceBean.canValidateInvoice()}"
-		                        action="#{creationInvoiceBean.rebuildInvoice()}" icon="ui-icon-refresh" >
-		                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmRebuildInvoice']}" icon="ui-icon-alert" />
+		                        action="#{creationInvoiceBean.rebuildInvoice()}" icon="pi pi-refresh" >
+		                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmRebuildInvoice']}" icon="pi pi-exclamation-triangle" />
 		                    </p:commandButton>
                         </p:outputPanel>
 

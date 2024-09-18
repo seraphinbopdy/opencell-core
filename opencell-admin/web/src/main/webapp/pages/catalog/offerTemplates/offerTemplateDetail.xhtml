@@ -183,8 +183,8 @@
                                 <h:outputText value="#{messages['commons.actions']}" />
                             </f:facet>
                             <p:commandButton update=":offerForm:messages :offerForm:tabView:offerServiceMessages :offerForm:tabView:offerServiceDetails"
-                                action="#{offerTemplateBean.editOfferServiceTemplate(entity)}" icon="ui-icon-document" process="@this" />
-                            <p:commandButton action="#{offerTemplateBean.deleteOfferServiceTemplate(entity)}" rendered="#{offerTemplateBean.canUserUpdateEntity()}" icon="ui-icon-trash"
+                                action="#{offerTemplateBean.editOfferServiceTemplate(entity)}" icon="pi pi-file-edit" process="@this" />
+                            <p:commandButton action="#{offerTemplateBean.deleteOfferServiceTemplate(entity)}" rendered="#{offerTemplateBean.canUserUpdateEntity()}" icon="pi pi-trash"
                                 update=":offerForm:messages :offerForm:tabView:offerServiceMessages :offerForm:tabView:offerServices :offerForm:tabView:offerServiceDetails" process="@this" />
                         </p:column>
                         <f:facet name="footer">

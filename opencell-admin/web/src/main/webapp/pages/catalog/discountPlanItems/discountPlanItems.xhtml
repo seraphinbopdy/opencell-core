@@ -21,7 +21,7 @@
 			column1="code"
 			column2Label="#{messages['BusinessEntity.description']}"
 			column2="description"
-			updateField=":#{p:component('discountPlan_child')}">
+			updateField="@([id$=discountPlan_child])">
 		</hftl:entityPopup>
 
 		<hftl:searchPanel label="#{messages['action.search']}"

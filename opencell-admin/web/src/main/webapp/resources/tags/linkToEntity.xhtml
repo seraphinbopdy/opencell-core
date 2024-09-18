@@ -47,7 +47,7 @@
         <f:param name="edit" value="#{cc.attrs.edit}" />
         <c:if test="${cc.attrs.propagateConversation}">
             <f:param name="cid"
-                    value="#{javax.enterprise.context.conversation.id}" />
+                    value="#{jakarta.enterprise.context.conversation.id}" />
         </c:if>
         <c:if test="${not empty cc.attrs.backView}">
             <f:param name="backView" value="#{cc.attrs.backView}"/>

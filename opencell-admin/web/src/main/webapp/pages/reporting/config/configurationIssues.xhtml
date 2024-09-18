@@ -326,13 +326,13 @@
                         </h:panelGrid>
                     </h:panelGrid>
                 </p:tab>
-                <p:tab title="#{messages['menu.reporting']}">
-                    <p:panelGrid columns="1" layout="grid">
-                        <c:forEach items="#{chartBean.chartEntityModels}" var="chart" varStatus="i">
-                            <hf:chartComponent model="#{chart}" chartBean="#{chartBean}" index="#{i.index}" />
-                        </c:forEach>
-                    </p:panelGrid>
-                </p:tab>
+<!--                 <p:tab title="#{messages['menu.reporting']}"> -->
+<!--                     <p:panelGrid columns="1" layout="grid"> -->
+<!--                         <c:forEach items="#{chartBean.chartEntityModels}" var="chart" varStatus="i"> -->
+<!--                             <hf:chartComponent model="#{chart}" chartBean="#{chartBean}" index="#{i.index}" /> -->
+<!--                         </c:forEach> -->
+<!--                     </p:panelGrid> -->
+<!--                 </p:tab> -->
             </p:tabView>
         </p:panel>
 

@@ -80,7 +80,7 @@
  			<f:param name="#{cc.attrs.objectIdParamName}"
  				value="#{cc.attrs.backingBean.objectId}" />
  			<f:param name="cid"
- 				value="#{javax.enterprise.context.conversation.id}" />
+ 				value="#{jakarta.enterprise.context.conversation.id}" />
 			<c:if test="#{not empty cc.attrs.backingBean.backView}">
 				<f:param name="backView" value="#{cc.attrs.backingBean.backView}"/>
 			</c:if>
@@ -112,7 +112,7 @@
 			onclick="delayDisable(this);"
 			oncomplete="this.disabled=false;"
 			action="#{cc.attrs.backingBean.saveOrUpdate(cc.attrs.killConversationOnSave)}"
-			icon="ui-icon-check" 
+			icon="pi pi-check" 
 			ajax="false">
 			<f:param name="edit" value="#{cc.attrs.edit}" />
 			<c:if test="#{cc.attrs.submitActionListener}">
@@ -124,7 +124,7 @@
             rendered="#{cc.attrs.edit and cc.attrs.showEditButton and empty(cc.attrs.updateConfirmationMessage) and cc.attrs.ajaxSubmit and cc.attrs.backingBean.canUserUpdateEntity()}"
             value="#{messages['action.save']}"  onclick="delayDisable(this);" oncomplete="$('html,body').scrollTop(0);"
             action="#{cc.attrs.backingBean.saveOrUpdate(cc.attrs.killConversationOnSave)}"
-            icon="ui-icon-check" process="@this #{cc.attrs.submitPartialProcess!=null?cc.attrs.submitPartialProcess:'@form'}" 
+            icon="pi pi-check" process="@this #{cc.attrs.submitPartialProcess!=null?cc.attrs.submitPartialProcess:'@form'}" 
             partialSubmit="#{cc.attrs.submitPartialProcess !=null}" 
             partialSubmitFilter="#{cc.attrs.submitPartialSubmitFilter}" 
             update="#{cc.attrs.submitUpdate}">
@@ -147,7 +147,7 @@
             value="#{cc.attrs.stopLabel}" oncomplete="$('html,body').scrollTop(0);"
             action="#{cc.attrs.backingBean.stop()}" immediate="true" update="#{cc.attrs.submitUpdate}">
             <f:param name="edit" value="#{cc.attrs.edit}" />
-            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{(cc.attrs.stopConfirmationMessage eq '') ? messages['confirmationMessage.confirmStop'] : cc.attrs.stopConfirmationMessage}" icon="ui-icon-alert" />
+            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{(cc.attrs.stopConfirmationMessage eq '') ? messages['confirmationMessage.confirmStop'] : cc.attrs.stopConfirmationMessage}" icon="pi pi-exclamation-triangle" />
         </p:commandButton>            
         
         <p:commandButton id="StopByForceButtonAjax"
@@ -155,7 +155,7 @@
             value="#{cc.attrs.stopByForceLabel}" oncomplete="$('html,body').scrollTop(0);"
             action="#{cc.attrs.backingBean.stopByForce()}" immediate="true" update="#{cc.attrs.submitUpdate}">
             <f:param name="edit" value="#{cc.attrs.edit}" />
-            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{(cc.attrs.stopByForceConfirmationMessage eq '') ? messages['confirmationMessage.confirmStopByForce'] : cc.attrs.stopByForceConfirmationMessage}" icon="ui-icon-alert" />
+            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{(cc.attrs.stopByForceConfirmationMessage eq '') ? messages['confirmationMessage.confirmStopByForce'] : cc.attrs.stopByForceConfirmationMessage}" icon="pi pi-exclamation-triangle" />
         </p:commandButton>      
         
 
@@ -172,17 +172,17 @@
             
 		<p:commandButton id="saveButtonWithMessage"
 			rendered="#{cc.attrs.edit and cc.attrs.showEditButton and !empty(cc.attrs.backingBean.objectId) and !empty(cc.attrs.updateConfirmationMessage) and cc.attrs.backingBean.canUserUpdateEntity()}"
-			value="#{messages['action.save']}" icon="ui-icon-check"
+			value="#{messages['action.save']}" icon="pi pi-check"
 			oncomplete="#{cc.attrs.formId}#{cc.attrs.submitPartialProcess==null?'updateWithMessage()':'updateWithMessagePartialSubmit()'}" >
 			<c:if test="#{cc.attrs.submitActionListener}">
             	<f:actionListener binding="#{cc.attrs.backingBean.submitActionListener()}"/>
             </c:if>
-            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{(cc.attrs.updateConfirmationMessage eq '') ? messages['confirmationMessage.confirmUpdate'] : cc.attrs.updateConfirmationMessage}" icon="ui-icon-alert" />
+            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{(cc.attrs.updateConfirmationMessage eq '') ? messages['confirmationMessage.confirmUpdate'] : cc.attrs.updateConfirmationMessage}" icon="pi pi-exclamation-triangle" />
 		</p:commandButton>
         
 		<cc:insertChildren />
 
-		<hf:clearButton id="resetButtonCC" label="#{messages['action.reset']}"
+		<hf:clearButton id="resetButtonCC" label="#{messages['action.reset']}" icon="pi pi-times"
 			edit="#{cc.attrs.edit}" rendered="#{cc.attrs.showEditButton and cc.attrs.backingBean.canUserUpdateEntity()}"
 			resetAction="#{cc.attrs.backingBean.resetFormEntity()}" includeViewParams="true"/>
 
@@ -191,9 +191,9 @@
 			outcome="#{cc.attrs.backingBean.back()}" includeViewParams="true">
 
 			<c:if
-				test="#{javax.enterprise.context.conversation.id != null and not cc.attrs.killConversationOnBack}">
+				test="#{jakarta.enterprise.context.conversation.id != null and not cc.attrs.killConversationOnBack}">
 				<f:param name="cid"
-					value="#{javax.enterprise.context.conversation.id}" />
+					value="#{jakarta.enterprise.context.conversation.id}" />
 			</c:if>
 			<f:param name="tab" value="#{cc.attrs.backingBean.activeTab}"></f:param>
 		</p:button>
@@ -216,9 +216,9 @@
 					}
 				}
 		</script>	
-		<p:commandButton id="deletelink" icon="ui-icon-trash" value="#{messages['commons.delete']}" action="#{cc.attrs.backingBean.deleteWithBack}" immediate="true" update="@form"
+		<p:commandButton id="deletelink" icon="pi pi-trash" value="#{messages['commons.delete']}" action="#{cc.attrs.backingBean.deleteWithBack}" immediate="true" update="@form"
 			rendered="#{cc.attrs.showDeleteButton and cc.attrs.backingBean.entity.id!=null and cc.attrs.backingBean.canUserDeleteEntity()}" process="@this">
-            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert" />
+            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle" />
 		</p:commandButton>
 
 		<p:confirmDialog id="confirmCannotUpdateWithMessageDialog" styleClass="confirm-dialog"

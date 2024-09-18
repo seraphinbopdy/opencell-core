@@ -21,10 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.meveo.admin.action.BaseBean;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.CounterInstance;
@@ -33,8 +29,13 @@ import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.local.IPersistenceService;
 import org.meveo.service.billing.impl.CounterPeriodService;
 import org.meveo.util.view.LazyDataModelWSize;
+import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.SortOrder;
+import org.primefaces.model.SortMeta;
+
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Standard backing bean for {@link BillingCycle} (extends {@link BaseBean} that
@@ -87,7 +88,7 @@ public class CounterPeriodBean extends BaseBean<CounterPeriod> {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public List<CounterPeriod> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> loadingFilters) {
+            public List<CounterPeriod> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
                 return new ArrayList<CounterPeriod>();
             }
         };

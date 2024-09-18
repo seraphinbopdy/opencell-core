@@ -56,7 +56,7 @@
 				<p:button value="#{messages['action.back']}"
 					outcome="backToSellerFromOT" includeViewParams="true">
 					<f:param name="cid"
-						value="#{javax.enterprise.context.conversation.id}" />
+						value="#{jakarta.enterprise.context.conversation.id}" />
 				</p:button>
 			</ui:define>
 		</hftl:formPanel>
@@ -103,7 +103,7 @@
 
 					<p:confirm header="#{messages['commons.confirmationHeader']}"
 						message="#{messages['paymentVentilation.confirmUnventilate']}"
-						icon="ui-icon-alert" />
+						icon="pi pi-exclamation-triangle" />
 				</p:commandButton>
 			</p:column>
 

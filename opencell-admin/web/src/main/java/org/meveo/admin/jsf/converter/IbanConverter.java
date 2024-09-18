@@ -18,15 +18,16 @@
 
 package org.meveo.admin.jsf.converter;
 
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.convert.FacesConverter;
-import javax.inject.Inject;
-
-import org.jfree.util.Log;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.convert.Converter;
+import jakarta.faces.convert.FacesConverter;
+import jakarta.inject.Inject;
 
 /**
  * 
@@ -57,7 +58,8 @@ public class IbanConverter implements Converter {
 			String lastCaracters = iban.substring(ibanLength - 2, ibanLength);
 			return fisrtCaracters + new String(new char[ibanLength - 6]).replace("\0", "X") + lastCaracters;
 		} else {
-			Log.info("the iban masking is disabled");
+		    Logger log = LoggerFactory.getLogger(this.getClass());
+			log.info("the iban masking is disabled");
 			return iban;
 		}
 	}

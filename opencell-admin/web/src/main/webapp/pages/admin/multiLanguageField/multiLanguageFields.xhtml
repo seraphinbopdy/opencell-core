@@ -35,7 +35,7 @@
             <c:if test="#{multiLanguageFieldListBean.entityClass!=null}">
                 <h:form id="results_form" prependId="false" onkeypress="if (event.keyCode == 13) {return false;}">
                     <p:dataTable id="datatable_results" var="entity" scrollable="false" value="#{multiLanguageFieldListBean.lazyDataModel}" paginator="true" rows="20"
-                        selection="#{multiLanguageFieldListBean.selectedEntity}" selectionMode="single" sortBy="#{'sortBy'}"
+                        selection="#{multiLanguageFieldListBean.selectedEntity}" selectionMode="single"
                         sortField="#{ref:isClassHasField(multiLanguageFieldListBean.entityClass, 'code')?'code':'id'}"
                         paginatorTemplate="${prePaginatorControls} {RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                         rowsPerPageTemplate="20,50,100" lazy="true" resizableColumns="true" styleClass="custom-grid" rowKey="#{entity.id}" first="#{multiLanguageFieldListBean.dataTableFirstAttribute}"

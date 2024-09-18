@@ -24,7 +24,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.service.base.NativePersistenceService;
+import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
+import org.primefaces.model.SortMeta;
 import org.primefaces.model.SortOrder;
 
 /**
@@ -41,17 +43,17 @@ public abstract class NativeTableBasedDataModel extends LazyDataModel<Map<String
     private Integer rowIndex;
 
     @Override
-    public List<Map<String, Object>> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> loadingFilters) {
+    public List<Map<String, Object>> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
 
-        if (StringUtils.isBlank(sortField) && !StringUtils.isBlank(getDefaultSortImpl())) {
-            sortField = getDefaultSortImpl();
-        }
+//        if (StringUtils.isBlank(sortField) && !StringUtils.isBlank(getDefaultSortImpl())) {
+          String  sortField = getDefaultSortImpl();
+//        }
 
-        if ((sortOrder == null || sortOrder == SortOrder.UNSORTED) && getDefaultSortOrderImpl() != null) {
-            sortOrder = getDefaultSortOrderImpl();
-        }
+//        if ((sortOrder == null || sortOrder == SortOrder.UNSORTED) && getDefaultSortOrderImpl() != null) {
+          SortOrder  sortOrder = getDefaultSortOrderImpl();
+//        }
 
-        PaginationConfiguration paginationConfig = new PaginationConfiguration(first, pageSize, getSearchCriteria(loadingFilters), null, getListFieldsToFetchImpl(), sortField,
+        PaginationConfiguration paginationConfig = new PaginationConfiguration(first, pageSize, getSearchCriteria(ServiceBasedLazyDataModel.extractFilters(filterBy)), null, getListFieldsToFetchImpl(), sortField,
             sortOrder);
 
         setRowCount(countRecords(paginationConfig));
@@ -63,6 +65,13 @@ public abstract class NativeTableBasedDataModel extends LazyDataModel<Map<String
         return new ArrayList<>();
 
     }
+    
+    @Override
+    public int count(Map<String, FilterMeta> filterBy) {
+        PaginationConfiguration paginationConfig = new PaginationConfiguration(getSearchCriteria(ServiceBasedLazyDataModel.extractFilters(filterBy)));
+
+        return countRecords(paginationConfig);
+    }
 
     @Override
     public Map<String, Object> getRowData(String rowKey) {
@@ -70,8 +79,8 @@ public abstract class NativeTableBasedDataModel extends LazyDataModel<Map<String
     }
 
     @Override
-    public Object getRowKey(Map<String, Object> object) {
-        return object.get("id");
+    public String getRowKey(Map<String, Object> object) {
+        return object.get("id").toString();
     }
 
     @Override

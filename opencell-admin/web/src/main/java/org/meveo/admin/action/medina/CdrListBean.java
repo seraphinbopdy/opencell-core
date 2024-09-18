@@ -23,15 +23,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.ConversationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import org.apache.tools.ant.util.DateUtils;
 import org.meveo.model.rating.CDR;
+import org.meveo.model.shared.DateUtils;
 import org.meveo.service.medina.impl.CDRService;
 import org.meveo.util.view.LazyDataModelWSize;
+import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.SortOrder;
+import org.primefaces.model.SortMeta;
+
+import jakarta.enterprise.context.ConversationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 @ConversationScoped
@@ -47,7 +49,6 @@ public class CdrListBean extends CdrBean {
     @Inject
     private CDRService cdrService;
 
-    @SuppressWarnings("rawtypes")
     public LazyDataModel<CDR> getFilteredLazyDataModel() {
         if (cdrFileNames == null) {
             cdrFileNames = new LazyDataModelWSize<CDR>() {
@@ -55,15 +56,15 @@ public class CdrListBean extends CdrBean {
                 private static final long serialVersionUID = 1L;
 
                 @Override
-                public List<CDR> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map mapfilters) {
+                public List<CDR> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
                     Date fromRange = filters.get("fromRange created") != null ? (Date) filters.get("fromRange created") : null;
                     Date toRange = filters.get("toRange created") != null ? (Date) filters.get("toRange created") : null;
                     String originBatch = filters.get("originBatch") != null ? (String) filters.get("originBatch") : null;
                     List<CDR> entities = null;
                     if(filters != null && !filters.isEmpty() && 
                             (fromRange != null || toRange != null || originBatch != null)) {
-                        String fromCreationDate = fromRange != null ? DateUtils.format(fromRange, "yyyy-MM-dd") : null;
-                        String toCreationDate = toRange != null ? DateUtils.format(toRange, "yyyy-MM-dd") : null;
+                        String fromCreationDate = fromRange != null ? DateUtils.formatDateWithPattern(fromRange, "yyyy-MM-dd") : null;
+                        String toCreationDate = toRange != null ? DateUtils.formatDateWithPattern(toRange, "yyyy-MM-dd") : null;
                         entities = cdrService.getCDRFileNames(originBatch, fromCreationDate, toCreationDate);
                     } else {
                         entities = cdrService.getCDRFileNames();

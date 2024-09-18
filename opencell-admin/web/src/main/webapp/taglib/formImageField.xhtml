@@ -32,7 +32,7 @@
 			<p:fileUpload id="#{id}" disabled="#{disabled}"
 				required="#{required}" 
 				fileUploadListener="#{backingBean.hfHandleFileUpload}"
-				mode="advanced" update="#{id}_display :#{p:component('messages')}" auto="true"
+				mode="advanced" update="#{id}_display @([id$=messages])" auto="true"
 				fileLimit="10" sizeLimit="#{sizeLimit}"
 				allowTypes="/(\.|\/)(gif|jpe?g|png)$/" >
 				<f:attribute name="componentEntity" value="#{entity}"/>

@@ -25,9 +25,9 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.jboss.seam.international.status.builder.BundleKey;
 import org.meveo.admin.action.BaseBean;
@@ -43,7 +43,7 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.local.IPersistenceService;
 import org.meveocrm.services.dwh.MeasurableQuantityService;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 
 /**
  * @author Wassim Drira
@@ -132,7 +132,7 @@ public class MeasurableQuantityBean extends BaseBean<MeasurableQuantity> {
         if (file == null) {
             return;
         }
-        csvReader = new CsvReader(file.getInputstream(), ';', Charset.forName("ISO-8859-1"));
+        csvReader = new CsvReader(file.getInputStream(), ';', Charset.forName("ISO-8859-1"));
         csvReader.readHeaders();
 
         String existingEntitiesCSV = paramBeanFactory.getInstance().getProperty("existingEntities.csv.dir", "existingEntitiesCSV");

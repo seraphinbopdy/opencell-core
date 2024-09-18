@@ -39,7 +39,7 @@
                     <p:panel id="transitionRulePanel#{loopStatus.index}" styleClass="clearLeft">
                         <hftl:decorateFormField fieldId="decisionRuleOperationPanel#{loopStatus.index}" label="" componentWidth="10">
                             <p:commandButton id="decisionRuleOperationPanel#{loopStatus.index}" style="margin-top: 15px;"
-                                action="#{wfTransitionBean.deleteWfDecisionRule(loopStatus.index)}" icon="ui-icon-trash" process="decisionRuleOperationPanel#{loopStatus.index}"
+                                action="#{wfTransitionBean.deleteWfDecisionRule(loopStatus.index)}" icon="pi pi-trash" process="decisionRuleOperationPanel#{loopStatus.index}"
                                 ajaxSubmit="true" partialSubmit="true" update=":formDunningPlanTransition:decisionRulesPanel" />
 
                         </hftl:decorateFormField>
@@ -73,7 +73,7 @@
                         <hftl:decorateFormField fieldId="decisionRuleNumberValue#{loopStatus.index}" label="#{messages['decisionRuleNewValue.value']}"
                             rendered="#{rule.value.model == true and rule.value.type == 'NUMBER'}" componentWidth="20">
                             <p:inputText id="decisionRuleNumberValue#{loopStatus.index}" value="#{rule.newValue}" size="10" maxlength="10" required="true"
-                                converter="javax.faces.BigDecimal" />
+                                converter="jakarta.faces.BigDecimal" />
                         </hftl:decorateFormField>
 
                         <hftl:decorateFormField fieldId="decisionRuleFromStringValue#{loopStatus.index}" label="#{messages['DecisionRuleTypeEnum.range.string']}"
@@ -95,10 +95,10 @@
                             <h:panelGrid columns="4">
                                 <p:outputLabel for="decisionRuleFromNumberValue#{loopStatus.index}" value="#{messages['decisionRuleFromValue.value']}" style="padding-right:5px" />
                                 <p:inputText id="decisionRuleFromNumberValue#{loopStatus.index}" value="#{rule.newValue}" size="10" maxlength="10"
-                                    converter="javax.faces.BigDecimal" />
+                                    converter="jakarta.faces.BigDecimal" />
                                 <p:outputLabel for="decisionRuleFromNumberValue#{loopStatus.index}_toRange" value="#{messages['decisionRuleToValue.value']}" style="padding:5px" />
                                 <p:inputText id="decisionRuleFromNumberValue#{loopStatus.index}_toRange" value="#{rule.anotherValue}" size="10" maxlength="10"
-                                    converter="javax.faces.BigDecimal" />
+                                    converter="jakarta.faces.BigDecimal" />
                             </h:panelGrid>
                         </hftl:decorateFormField>
 
@@ -124,7 +124,7 @@
             </p:panel>
             <p:panel styleClass="clearLeft" style="border-bottom: solid">
                 <p:commandButton id="addCriteriaBtn" action="#{wfTransitionBean.addNewRule()}" process="@this,decisionRulesPanel" value="#{messages['mmTransition.addCriteria']}"
-                    ajaxSubmit="true" partialSubmit="true" icon="fa fa-plus" update=":formDunningPlanTransition:decisionRulesPanel :formDunningPlanTransition:messages" />
+                    ajaxSubmit="true" partialSubmit="true" icon="pi pi-plus" update=":formDunningPlanTransition:decisionRulesPanel :formDunningPlanTransition:messages" />
                 <p:defaultCommand target="addCriteriaBtn" />
             </p:panel>
 

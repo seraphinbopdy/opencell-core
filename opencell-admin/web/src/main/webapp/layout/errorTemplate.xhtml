@@ -13,21 +13,21 @@
 
             <ui:insert name="errorContent"></ui:insert>
 
-            <ui:fragment rendered="#{requestScope['javax.servlet.error.exception'].message==null or !requestScope['javax.servlet.error.exception'].message.contains('conversation')}">
+            <ui:fragment rendered="#{requestScope['jakarta.servlet.error.exception'].message==null or !requestScope['jakarta.servlet.error.exception'].message.contains('conversation')}">
                 <!-- development stage -->
                 <h:panelGroup layout="block" rendered="#{!paramBean.productionStage}">
                     <ul>
                         <li>Date/time: #{of:formatDate(now, 'yyyy-MM-dd HH:mm:ss')}</li>
                         <li>User agent: #{header['user-agent']}</li>
                         <li>User IP: #{empty header['x-forwarded-for'] ? request.remoteAddr : fn:split(header['x-forwarded-for'], ',')[0]}</li>
-                        <li>Request URI: <a href="#{requestScope['javax.servlet.error.request_uri']}">#{requestScope['javax.servlet.error.request_uri']}</a>
+                        <li>Request URI: <a href="#{requestScope['jakarta.servlet.error.request_uri']}">#{requestScope['jakarta.servlet.error.request_uri']}</a>
                         </li>
                         <li>Ajax request: #{FacesContext.partialViewContext.ajaxRequest ? 'Yes' : 'No'}</li>
-                        <li>Status code: #{requestScope['javax.servlet.error.status_code']}</li>
-                        <li>Exception type: #{requestScope['javax.servlet.error.exception_type']}</li>
-                        <li>Exception message: #{requestScope['javax.servlet.error.message']}</li>
+                        <li>Status code: #{requestScope['jakarta.servlet.error.status_code']}</li>
+                        <li>Exception type: #{requestScope['jakarta.servlet.error.exception_type']}</li>
+                        <li>Exception message: #{requestScope['jakarta.servlet.error.message']}</li>
                         <li>Stack trace: <pre>
-						<code>#{of:printStackTrace(requestScope['javax.servlet.error.exception'])}</code>
+						<code>#{of:printStackTrace(requestScope['jakarta.servlet.error.exception'])}</code>
 					</pre></li>
                     </ul>
                 </h:panelGroup>
@@ -35,7 +35,7 @@
                 <h:panelGroup layout="block" rendered="#{paramBean.productionStage}">
                     <ul style="font-size: 15px;">
                         <li><b>Date/time:</b> #{of:formatDate(now, 'yyyy-MM-dd HH:mm:ss')}</li>
-                        <li><b>Exception message:</b><code> #{requestScope['javax.servlet.error.message']}</code></li>
+                        <li><b>Exception message:</b><code> #{requestScope['jakarta.servlet.error.message']}</code></li>
                         <li><b>Please check the logs for more details or contact your support.</b></li>
                     </ul>
                 </h:panelGroup>

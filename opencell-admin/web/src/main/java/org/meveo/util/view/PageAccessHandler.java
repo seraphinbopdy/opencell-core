@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.ConfigurableNavigationHandler;
-import javax.faces.application.NavigationCase;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.application.ConfigurableNavigationHandler;
+import jakarta.faces.application.NavigationCase;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.meveo.cache.AuthorizationCacheContainerProvider;
 import org.meveo.security.CurrentUser;
@@ -113,7 +113,7 @@ public class PageAccessHandler implements Serializable {
     public boolean isURLAccesible(String scope, String url) {
 
         // Omit checking access for JSF resources
-        if (url.startsWith("/javax.faces.resource/")) {
+        if (url.startsWith("/jakarta.faces.resource/")) {
             return true;
         }
 

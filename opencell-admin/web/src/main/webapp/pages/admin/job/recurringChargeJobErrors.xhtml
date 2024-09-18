@@ -49,7 +49,7 @@
         <h:panelGroup id="resultsDatatable">
             <hftl:dataList backingBean="#{recurringChargeJobExecutionErrorBean}" exportButton="false" exportXlsxButton="false" checkMany="false" sortBy="id">
                 <f:facet name="header">
-                    <p:commandButton id="toggler" type="button" style="float:right" disabled="#{backingBean.lazyDataModel.size()==0?'true':'false'}" icon="ui-icon-calculator" />
+                    <p:commandButton id="toggler" type="button" style="float:right" disabled="#{backingBean.lazyDataModel.size()==0?'true':'false'}" icon="pi pi-calculator" />
                     <p:columnToggler datasource="datatable_results" trigger="toggler" />
                 </f:facet>
                 <hftl:column label="#{messages['jobInstance.error.created']}" field="created" isDate="true" width="10%" toggleable="true" toggleIndex="0" />

@@ -23,11 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.Entity;
+import java.util.Set;
 
 import org.jboss.seam.international.status.builder.BundleKey;
 import org.meveo.admin.action.BaseBean;
@@ -36,14 +32,18 @@ import org.meveo.admin.util.XmlUtil;
 import org.meveo.admin.web.interceptor.ActionMethod;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.model.NotifiableEntity;
-import org.meveo.model.ObservableEntity;
+import org.meveo.model.IEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.filter.Filter;
 import org.meveo.model.rating.CDR;
 import org.meveo.service.base.local.IPersistenceService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.filter.FilterService;
+
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.Entity;
 
 /**
  * @author Edward P. Legaspi
@@ -114,9 +114,9 @@ public class FilterBean extends BaseBean<Filter> {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public List<String> autocompleteClassNames(String query) {
 
-        List<Class> classes = null;
+        Set<Class<? extends IEntity>> classes = null;
         try {
-            classes = ReflectionUtils.getClasses("org.meveo.model");
+            classes = ReflectionUtils.getClasses("org.meveo.model", IEntity.class);
             classes.add(CDR.class);
         } catch (Exception e) {
             log.error("Failed to get a list of classes for a model package", e);

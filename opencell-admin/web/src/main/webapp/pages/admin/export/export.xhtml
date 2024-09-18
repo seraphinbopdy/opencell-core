@@ -51,7 +51,7 @@
                         <h:outputText value="#{templateInfo.value.classesToExportAsFullTxt}" />
                     </p:column>
                     <p:column style="width: 100px;" headerText="#{messages['commons.actions']}">
-                        <p:commandButton id="exportLinkDialog" icon="ui-icon-play" update=":exportParametersDialog" oncomplete="PF('exportParametersDialog').show()">
+                        <p:commandButton id="exportLinkDialog" icon="pi pi-play" update=":exportParametersDialog" oncomplete="PF('exportParametersDialog').show()">
                             <f:setPropertyActionListener target="#{entityExportImportBean.selectedExportTemplate}" value="#{templateInfo.value}" />
                         </p:commandButton>
                     </p:column>

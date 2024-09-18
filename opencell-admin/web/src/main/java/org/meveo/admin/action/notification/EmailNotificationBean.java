@@ -30,9 +30,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.seam.international.status.builder.BundleKey;
@@ -56,7 +56,7 @@ import org.meveo.service.catalog.impl.CounterTemplateService;
 import org.meveo.service.notification.EmailNotificationService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 
 /**
  * Standard backing bean for {@link EmailNotification} (extends {@link BaseBean} that provides almost all common methods to handle entities filtering/sorting in datatable, their
@@ -144,7 +144,7 @@ public class EmailNotificationBean extends BaseNotificationBean<EmailNotificatio
         if (file == null) {
             return;
         }
-        csvReader = new CsvReader(file.getInputstream(), ';', Charset.forName("ISO-8859-1"));
+        csvReader = new CsvReader(file.getInputStream(), ';', Charset.forName("ISO-8859-1"));
         csvReader.readHeaders();
         String existingEntitiesCSV = paramBeanFactory.getInstance().getProperty("existingEntities.csv.dir", "existingEntitiesCSV");
         File dir = new File(paramBeanFactory.getChrootDir() + File.separator + existingEntitiesCSV);

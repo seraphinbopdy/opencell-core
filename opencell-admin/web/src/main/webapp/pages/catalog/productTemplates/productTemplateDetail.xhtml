@@ -49,9 +49,9 @@
                                     <f:facet name="header">
                                         <h:outputText value="#{messages['commons.actions']}" />
                                     </f:facet>
-                                    <p:commandButton update=":#{p:component('formProductCharge')}" action="#{productTemplateBean.editProductChargeTemplate(entity)}" icon="ui-icon-document" />
-                                    <p:commandButton action="#{productTemplateBean.deleteProductChargeTemplate(entity.getId())}" icon="ui-icon-trash"
-                                        update=":#{p:component('productChargeTemplate_panel')} :#{p:component('formProductCharge')}" />
+                                    <p:commandButton update="@([id$=formProductCharge])" action="#{productTemplateBean.editProductChargeTemplate(entity)}" icon="pi pi-file-edit" />
+                                    <p:commandButton action="#{productTemplateBean.deleteProductChargeTemplate(entity.getId())}" icon="pi pi-trash"
+                                        update="@([id$=productChargeTemplate_panel]) @([id$=formProductCharge])" />
                                 </p:column>
                             </hftl:dataList>
                         </p:outputPanel>

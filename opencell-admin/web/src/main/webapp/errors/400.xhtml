@@ -9,12 +9,12 @@
 		<p>This was a bad request. The server couldn't understand it.
 			Please verify if the request parameters are in the right format.</p>
 		<ui:fragment
-			rendered="#{not empty requestScope['javax.servlet.error.message']}">
+			rendered="#{not empty requestScope['jakarta.servlet.error.message']}">
 			<p>
 				The specific error message is:
 				<code>
 					<h:outputText
-						value="#{requestScope['javax.servlet.error.message']}"
+						value="#{requestScope['jakarta.servlet.error.message']}"
 						escape="false" />
 				</code>
 			</p>

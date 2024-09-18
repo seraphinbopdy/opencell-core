@@ -19,39 +19,32 @@
 package org.meveo.admin.web.filter;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.google.common.base.Strings;
-
-import org.eclipse.microprofile.metrics.Histogram;
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetadataBuilder;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.Timer;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
 import org.meveo.cache.MetricsConfigurationCacheContainerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
+
+import jakarta.inject.Inject;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @WebFilter(urlPatterns = "/*")
 public class RequestMonitoringFilter extends HttpFilter {
 
     private Logger log = LoggerFactory.getLogger(RequestMonitoringFilter.class);
 
-    @Inject
-    @RegistryType(type = MetricRegistry.Type.APPLICATION)
-    MetricRegistry registry;
+//    @Inject
+//    @RegistryScope(scope = MetricRegistry.APPLICATION_SCOPE)
+//    MetricRegistry registry;
+ // Akk migrate me
 
     @Inject
     MetricsConfigurationCacheContainerProvider metricsConfigCache;
@@ -97,32 +90,32 @@ public class RequestMonitoringFilter extends HttpFilter {
     private void registerMetricsForMethod(String name, String metrics, long start, String unit) {
         name = metrics + name.replace("/", "_");
 
-        if ("counter".equalsIgnoreCase(metrics)) {
-            registry.counter(name).inc();
-        } else if ("gauge".equalsIgnoreCase(metrics)) {
-            registry.concurrentGauge(name).inc();
-        } else if ("histogram".equalsIgnoreCase(metrics)) {
-            Histogram histogram = registry.histogram(name);
-            long count = histogram.getCount();
-            histogram.update(count + 1);
-        } else if ("meter".equalsIgnoreCase(metrics)) {
-            registry.meter(name).mark();
-        } else if ("timer".equalsIgnoreCase(metrics)) {
-            createTimerMetrics(name, start, unit);
-        } else {
-            log.debug("unknown metrics {} , must from list [counter, gauge, histogram, meter, timer]", metrics);
-        }
+//        if ("counter".equalsIgnoreCase(metrics)) {
+//            registry.counter(name).inc();
+////        } else if ("gauge".equalsIgnoreCase(metrics)) { 
+////            Gauge gauge =registry.gauge(name, () -> 1);
+////            // gauge.getValue()+1;  // AKK migrate me
+//        } else if ("histogram".equalsIgnoreCase(metrics)) {
+//            Histogram histogram = registry.histogram(name);
+//            long count = histogram.getCount();
+//            histogram.update(count + 1);
+////        } else if ("meter".equalsIgnoreCase(metrics)) { // AKK migrate me
+////            registry.meter(name).mark();
+//        } else if ("timer".equalsIgnoreCase(metrics)) {
+//            createTimerMetrics(name, start, unit);
+//        } else {
+//            log.debug("unknown metrics {} , must from list [counter, gauge, histogram, meter, timer]", metrics);
+//        }
+     // Akk migrate me
     }
 
     private void createTimerMetrics(String name, long start, String unit) {
-        long end = System.currentTimeMillis();
-        long duration = end - start;
-        Metadata metadata = new MetadataBuilder()
-                .withName(name)
-                .withUnit(unit)
-                .build();
-        Timer timer = registry.timer(metadata);
-
-        timer.update(Duration.ofMillis(duration));
+//        long end = System.currentTimeMillis();
+//        long duration = end - start;
+//        Metadata metadata = new MetadataBuilder().withName(name).withUnit(unit).build();
+//        Timer timer = registry.timer(metadata);
+//
+//        timer.update(Duration.ofMillis(duration));
+     // Akk migrate me
     }
 }

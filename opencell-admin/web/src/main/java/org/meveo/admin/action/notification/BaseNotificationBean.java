@@ -23,12 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import javax.persistence.Entity;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.action.UpdateMapTypeFieldBean;
 import org.meveo.commons.utils.ReflectionUtils;
+import org.meveo.model.IEntity;
 import org.meveo.model.NotifiableEntity;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.billing.CounterPeriod;
@@ -46,6 +46,8 @@ import org.meveo.model.notification.NotificationEventTypeEnum;
 import org.meveo.model.order.Order;
 import org.meveo.model.rating.CDR;
 import org.meveo.model.rating.EDR;
+
+import jakarta.persistence.Entity;
 
 /**
  * @author Tyshan Shi(tyshan@manaty.net)
@@ -73,9 +75,9 @@ public abstract class BaseNotificationBean<T extends Notification> extends Updat
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public List<String> autocompleteClassNames(String query) {
 
-        List<Class> classes = null;
+        Set<Class<? extends IEntity>> classes = null;
         try {
-            classes = ReflectionUtils.getClasses("org.meveo.model");
+            classes = ReflectionUtils.getClasses("org.meveo.model", IEntity.class);
             classes.add(CDR.class);
         } catch (Exception e) {
             log.error("Failed to get a list of classes for a model package", e);

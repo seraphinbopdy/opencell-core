@@ -29,7 +29,7 @@
 
 			<hftl:formField id="scriptInstanceSelectId" label="#{messages['endpoint.scriptInstance']}" field="service" valueLabelField="code" required="true" popup="true"
 				popupId="scriptInstancePopup" />
-			<hftl:decorateFormField field="method" fieldId="method" label="#{messages['endpoint.method']}" newLine="true">
+			<hftl:decorateFormField fieldId="method" label="#{messages['endpoint.method']}" newLine="true">
 				<p:selectOneMenu id="method" value="#{endpointBean.entity.method}" style="width:150px;" required="true">
 					<f:selectItem itemLabel="#{messages['commons.select']}" itemValue="#{null}" noSelectionOption="true" />
 					<f:selectItem itemLabel="PATCH" itemValue="PATCH" />
@@ -53,17 +53,17 @@
 				</h:panelGroup>
 
 				<h:panelGrid id="endpointUrl" columns="1">
-					<hftl:decorateFormField field="basePath" fieldId="basePathId" label="#{messages['endpoint.basePath']}">
+					<hftl:decorateFormField fieldId="basePathId" label="#{messages['endpoint.basePath']}">
 						<p:inputText id="basePathId" value="#{endpointBean.entity.basePath}" size="50" readonly="false">
 							<p:ajax event="change" update=":endpointForm:endpointUrl" />
 						</p:inputText>
 					</hftl:decorateFormField>
-					<hftl:decorateFormField field="path" fieldId="pathId" label="#{messages['endpoint.path']}">
+					<hftl:decorateFormField fieldId="pathId" label="#{messages['endpoint.path']}">
 						<p:inputText id="pathId" value="#{endpointBean.entity.path}" size="100" readonly="false">
 							<p:ajax event="change" update=":endpointForm:endpointUrl" />
 						</p:inputText>
 					</hftl:decorateFormField>
-					<hftl:decorateFormField field="endpointUrl" fieldId="endpointUrlId" label="#{messages['endpoint.endpointUrl']}">
+					<hftl:decorateFormField fieldId="endpointUrlId" label="#{messages['endpoint.endpointUrl']}">
 						<p:inputText id="endpointUrlId" value="#{endpointBean.endpointUrl}" size="100" readonly="true" disabled="true" />
 					</hftl:decorateFormField>
 				</h:panelGrid>
@@ -98,13 +98,13 @@
 
 			<hftl:formField label="#{messages['endpoint.secured']}" field="secured" listenerUpdate=":endpointForm:roleNameDisplay"/>
 			<h:panelGroup layout="block" id="roleNameDisplay">
-				<hftl:decorateFormField field="roleName" fieldId="roleName" label="#{messages['endpoint.roleName']}" rendered="#{endpointBean.entity.secured}">
-					<h:outputText value="#{endpointBean.entity.roleName}" />
+				<hftl:decorateFormField fieldId="roleName" label="#{messages['endpoint.roleName']}" rendered="#{endpointBean.entity.secured}">
+					<h:outputText id="roleName" value="#{endpointBean.entity.roleName}" />
 				</hftl:decorateFormField>
 			</h:panelGroup>
 
 			<h:panelGroup layout="block" id="returnedValueNameId">
-				<hftl:decorateFormField field="returnedValueName" fieldId="returnedValueName" label="#{messages['endpoint.returnedValueName']}">
+				<hftl:decorateFormField fieldId="returnedValueName" label="#{messages['endpoint.returnedValueName']}">
 					<p:selectOneMenu id="returnedValueName" value="#{endpointBean.entity.returnedVariableName}" style="width:150px;">
 						<f:selectItem itemLabel="#{messages['commons.select']}" itemValue="#{null}" noSelectionOption="true" />
 						<f:selectItems value="#{endpointBean.returnedVariableNames}" var="returnedVariableName" itemValue="#{returnedVariableName}" itemLabel="#{returnedVariableName}" />
@@ -116,7 +116,7 @@
 					<hftl:formField label="#{messages['endpoint.returnedValueExample']}" field="returnedValueExample" rendered="#{endpointBean.entity.returnedVariableName != null}" />
 					<hftl:formField label="#{messages['endpoint.serializeResult']}" field="serializeResult" rendered="#{endpointBean.entity.returnedVariableName != null}" />
 
-					<hftl:decorateFormField field="jsonataTransformer" fieldId="jsonataTransformerId" label="#{messages['endpoint.jsonataTransformer']}"
+					<hftl:decorateFormField fieldId="jsonataTransformerId" label="#{messages['endpoint.jsonataTransformer']}"
 						rendered="#{endpointBean.entity.returnedVariableName != null}">
 						<p:inputText id="jsonataTransformerId" value="#{endpointBean.entity.jsonataTransformer}" size="100" />
 					</hftl:decorateFormField>

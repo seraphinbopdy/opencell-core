@@ -44,13 +44,13 @@
                     <h:outputText value="#{messages['commons.actions']}" />
                 </f:facet>
 
-                <p:commandButton id="updateEdr" icon="ui-icon-refresh" actionListener="#{edrBean.updateStatus(entity)}"
+                <p:commandButton id="updateEdr" icon="pi pi-refresh" actionListener="#{edrBean.updateStatus(entity)}"
                     rendered="#{edrBean.canUserUpdateEntity() and entity.status=='REJECTED'}" process="@form" update="datatable_results">
-                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.edr.reOpenStatus']}" icon="ui-icon-alert" />
+                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.edr.reOpenStatus']}" icon="pi pi-exclamation-triangle" />
                 </p:commandButton>
-                <p:commandButton id="reprocess" icon="ui-icon-play" title="#{messages['edr.reprocess']}" process="@form" update="datatable_results"
+                <p:commandButton id="reprocess" icon="pi pi-play" title="#{messages['edr.reprocess']}" process="@form" update="datatable_results"
                     rendered="#{edrBean.canReprocess(entity)}" action="#{edrBean.reprocess(entity)}">
-                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.edr.reprocess']}" icon="ui-icon-alert" />
+                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.edr.reprocess']}" icon="pi pi-exclamation-triangle" />
                 </p:commandButton>
             </p:column>
 
@@ -58,10 +58,10 @@
 
         <p:panel styleClass="action-buttons" rendered="#{edrBean.canUserUpdateEntity()}">
             <p:commandButton id="massUpdateEdr" value="#{messages['edr.mass.reOpenStatus']}" update=":results_form" action="#{edrBean.massUpdate()}">
-                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.edr.mass.reOpenStatus']}" icon="ui-icon-alert" />
+                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.edr.mass.reOpenStatus']}" icon="pi pi-exclamation-triangle" />
             </p:commandButton>
             <p:commandButton id="massReprocessEdr" value="#{messages['edr.mass.reprocess']}" update=":results_form" action="#{edrBean.massReprocessing()}">
-                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.edr.mass.reprocess']}" icon="ui-icon-alert" />
+                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.edr.mass.reprocess']}" icon="pi pi-exclamation-triangle" />
             </p:commandButton>
         </p:panel>
 

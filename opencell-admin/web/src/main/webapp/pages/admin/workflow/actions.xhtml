@@ -84,11 +84,11 @@
 								<f:facet name="header">
 									<h:outputText value="#{messages['commons.actions']}" />
 								</f:facet>
-								<p:commandButton id="moveUpAction" icon="ui-icon-arrowthick-1-n" action="#{actionBean.moveUpAction(entity)}"
+								<p:commandButton id="moveUpAction" icon="pi pi-arrow-up" action="#{actionBean.moveUpAction(entity)}"
 												 update=":actionsId:tabView:actionList" process="@this"/>
-								<p:commandButton id="moveDownAction" icon="ui-icon-arrowthick-1-s" action="#{actionBean.moveDownAction(entity)}"
+								<p:commandButton id="moveDownAction" icon="pi pi-arrow-down" action="#{actionBean.moveDownAction(entity)}"
 												 update=":actionsId:tabView:actionList" process="@this" />
-								<p:commandButton id="deleteAction" action="#{actionBean.deleteAction(entity)}" icon="ui-icon-trash"
+								<p:commandButton id="deleteAction" action="#{actionBean.deleteAction(entity)}" icon="pi pi-trash"
 												 update=":actionsId:tabView:actionList" process="@this"/>
 							</p:column>
 

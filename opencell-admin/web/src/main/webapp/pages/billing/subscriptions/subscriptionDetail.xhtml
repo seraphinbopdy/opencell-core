@@ -223,7 +223,7 @@
                             <h:form id="terminableServicesForm" prependId="false">
                                 <p:dataTable value="#{subscriptionBean.terminableServices}" var="entity" resizableColumns="true"
                                     selection="#{subscriptionBean.selectedTerminableService}" rowKey="#{entity.id}">
-                                    <p:ajax event="rowSelectRadio" update=":#{p:component('terminableServiceOperations')}" />
+                                    <p:ajax event="rowSelectRadio" update="@([id$=terminableServiceOperations])" />
                                     <p:column selectionMode="single" width="4%" />
                                     <hftl:column label="#{messages['serviceInstance.code']}" field="code" />
                                     <hftl:column label="#{messages['serviceInstance.status']}" field="status" showSortLinks="false" />
@@ -235,10 +235,10 @@
                                         <f:facet name="header">
                                             <h:outputText value="#{messages['commons.actions']}" />
                                         </f:facet>
-                                        <p:button id="ServiceTerminationButton" outcome="serviceInstanceDetail" icon="ui-icon-document">
+                                        <p:button id="ServiceTerminationButton" outcome="serviceInstanceDetail" icon="pi pi-file-edit">
                                             <f:param name="serviceInstanceId" value="#{entity.id}" />
                                             <f:param name="edit" value="true" />
-                                            <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                                            <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                                             <f:param name="backView" value="subscriptionDetailWithNavigation" />
                                         </p:button>
                                     </p:column>
@@ -249,7 +249,7 @@
                                         <p:commandButton action="#{subscriptionBean.cancelServiceTermination}" value="#{messages['button.cancelTerminationButton']}"
                                             update=":subscriptionTab" disabled="#{subscriptionBean.selectedTerminableService == null}">
                                             <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['confirmationMessage.cancelServiceTermination']}"
-                                                icon="ui-icon-alert" />
+                                                icon="pi pi-exclamation-triangle" />
                                         </p:commandButton>
                                     </p:panel>
                                 </h:panelGroup>
@@ -260,7 +260,7 @@
                         <h:form id="srvInstansFrm" prependId="false">
                             <p:dataTable value="#{subscriptionBean.serviceInstances}" var="entity" resizableColumns="true" selection="#{subscriptionBean.selectedServiceInstance}"
                                 rowKey="#{entity.id}">
-                                <p:ajax event="rowSelectRadio" update=":#{p:component('terminationPanel')} :#{p:component('serviceInstOperations')}" />
+                                <p:ajax event="rowSelectRadio" update="@([id$=terminationPanel]) @([id$=serviceInstOperations])" />
                                 <p:column selectionMode="single" width="4%" />
                                 <hftl:column label="#{messages['serviceInstance.code']}" field="code" />
                                 <hftl:column label="#{messages['serviceInstance.status']}" field="status" showSortLinks="false" />
@@ -274,15 +274,15 @@
                                     <f:facet name="header">
                                         <h:outputText value="#{messages['commons.actions']}" />
                                     </f:facet>
-                                    <p:button id="usagesButton" outcome="serviceInstanceDetail" icon="ui-icon-document">
+                                    <p:button id="usagesButton" outcome="serviceInstanceDetail" icon="pi pi-file-edit">
                                         <f:param name="serviceInstanceId" value="#{entity.id}" />
                                         <f:param name="edit" value="true" />
-                                        <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                                        <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                                         <f:param name="backView" value="subscriptionDetailWithNavigation" />
                                     </p:button>
                                     <p:commandButton rendered="#{entity.status eq 'INACTIVE' and subscriptionBean.canUserUpdateEntity()}"
-                                        action="#{subscriptionBean.deleteServiceInstance(entity)}" icon="ui-icon-trash" update=":subscriptionTab">
-                                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert" />
+                                        action="#{subscriptionBean.deleteServiceInstance(entity)}" icon="pi pi-trash" update=":subscriptionTab">
+                                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle" />
                                     </p:commandButton>
                                 </p:column>
                             </p:dataTable>
@@ -292,7 +292,7 @@
                                     <p:commandButton action="#{subscriptionBean.activateService}" value="#{messages['button.activateButton']}" update=":subscriptionTab"
                                         disabled="#{subscriptionBean.selectedServiceInstance==null || subscriptionBean.selectedServiceInstance.status!='INACTIVE'}">
                                         <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['confirmationMessage.confirmActivation']}"
-                                            icon="ui-icon-alert" />
+                                            icon="pi pi-exclamation-triangle" />
                                     </p:commandButton>
                                     <p:commandButton value="#{messages['button.terminateButton']}" onclick="PF('dlg_serviceTerminationPopup').show();" type="button"
                                         disabled="#{subscriptionBean.selectedServiceInstance==null || subscriptionBean.selectedServiceInstance.status=='INACTIVE' || subscriptionBean.selectedServiceInstance.status=='TERMINATED'}" />
@@ -506,7 +506,7 @@
                                                 <hftl:column label="#{messages['discountPlanItem.startDate']}" field="startDate" isDate="true" />
                                                 <hftl:column label="#{messages['discountPlanItem.endDate']}" field="endDate" isDate="true" />
                                                 <p:column style="width: 5%">
-                                                    <p:commandButton icon="ui-icon-trash" update=":#{p:component('discountPanel')}"
+                                                    <p:commandButton icon="pi pi-trash" update="@([id$=discountPanel])"
                                                         action="#{subscriptionBean.deleteDiscountPlanInstance(entity)}" process="@this"></p:commandButton>
                                                 </p:column>
                                             </p:dataTable>
@@ -558,7 +558,7 @@
                                     <p:commandButton action="#{subscriptionBean.cancelSubscriptionTermination}" value="#{messages['button.cancelTerminationButton']}"
                                         update=":subscriptionTab" rendered="#{subscriptionBean.isTerminatedSubscription()}">
                                         <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['confirmationMessage.cancelSubscriptionTermination']}"
-                                            icon="ui-icon-alert" />
+                                            icon="pi pi-exclamation-triangle" />
                                     </p:commandButton>
                                 </p:panel>
                             </ui:define>
@@ -606,7 +606,7 @@
                                             <h:outputText value="#{messages['commons.actions']}" />
                                         </f:facet>
                                         <p:commandButton id="editRecurringChgInsLink" action="#{subscriptionBean.editRecurringChargeIns(entity)}"
-                                            oncomplete="PF('dlg_recurringChgPopup').show()" update=":recurringChgPanel" icon="ui-icon-document">
+                                            oncomplete="PF('dlg_recurringChgPopup').show()" update=":recurringChgPanel" icon="pi pi-file-edit">
                                         </p:commandButton>
                                     </p:column>
                                 </p:dataTable>
@@ -644,7 +644,7 @@
                                         <h:outputText value="#{messages['commons.actions']}" />
                                     </f:facet>
                                     <p:commandButton id="editUsageChgInsLink" action="#{subscriptionBean.editUsageChargeIns(entity)}" oncomplete="PF('dlg_usageChgPopup').show()"
-                                        update=":usageChgPanel" icon="ui-icon-document">
+                                        update=":usageChgPanel" icon="pi pi-file-edit">
                                     </p:commandButton>
                                 </p:column>
                             </p:dataTable>
@@ -686,7 +686,7 @@
                                             <h:outputText value="#{messages['commons.actions']}" />
                                         </f:facet>
                                         <p:commandButton id="accessDeletelink" action="#{accessBean.delete(entity.id)}" rendered="#{accessBean.canUserUpdateEntity()}"
-                                            update=":hierarchyGroup :#{p:component('medinaAccessPanel')} :#{p:component('accessInfoForm')}" icon="ui-icon-trash">
+                                            update=":hierarchyGroup @([id$=medinaAccessPanel]) @([id$=accessInfoForm])" icon="pi pi-trash">
                                             <f:param name="subscriptionId" value="#{subscriptionBean.entity.id}" />
                                         </p:commandButton>
                                     </p:column>
@@ -727,7 +727,7 @@
                     <ui:define name="buttons">
                         <p:commandButton id="saveButton" value="#{messages['action.save']}" ajaxSubmit="true" process="@this :accessForm:accessTabView" partialSubmit="true"
                             partialSubmitFilter=":not([name*='omitFromSubmit'])"
-                            update=":#{p:component('hierarchyGroup')} :#{p:component('medinaAccessPanel')} :#{p:component('accessInfoForm')} @form" icon="ui-icon-check"
+                            update="@([id$=hierarchyGroup]) @([id$=medinaAccessPanel]) @([id$=accessInfoForm]) @form" icon="pi pi-check"
                             action="#{accessBean.saveOrUpdateInSubscription()}" oncomplete="if(args &amp;&amp; !args.validationFailed){PF('accessWidget').hide();}">
                             <f:param name="subscriptionId" value="#{subscriptionBean.entity.id}"></f:param>
                         </p:commandButton>
@@ -763,7 +763,7 @@
                     <ui:define name="buttons">
                         <p:commandButton action="#{subscriptionBean.saveUsageChargeIns}"
                             rendered="#{subscriptionBean.usageChargeInstance.status == 'INACTIVE' and subscriptionBean.canUserUpdateEntity()}" value="#{messages['action.save']}"
-                            update=":#{p:component('OS_usage_results_form')}" oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlg_usageChgPopup').hide()" />
+                            update="@([id$=OS_usage_results_form])" oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlg_usageChgPopup').hide()" />
                         <p:commandButton value="#{messages['action.cancel']}" onclick="PF('dlg_usageChgPopup').hide()" type="button" />
                     </ui:define>
                 </hftl:formPanel>
@@ -827,18 +827,20 @@
                                     <p:outputLabel value="#{messages['walletOperation.operationDate']}" />
                                     <br />
                                     <p:calendar id="from" pattern="dd/MM/yyyy" size="9" readonly="true">
-                                        <p:watermark for="from" value="#{messages['commons.from']}" />
-                                        <p:ajax event="dateSelect"
-                                            onstart="$(PrimeFaces.escapeClientId('#{p:component('filter')}'))[0].value = $(PrimeFaces.escapeClientId('#{p:component('from')}_input'))[0].value + '-' + $(PrimeFaces.escapeClientId('#{p:component('to')}_input'))[0].value"
-                                            oncomplete="PF('recurringWidget').filter()" />
+<!--                                         <p:watermark for="from" value="#{messages['commons.from']}" /> -->
+                                        <p:ajax event="dateSelect" oncomplete="PF('recurringWidget').filter()" />
+<!--                                         Akk migrate me -->
+<!--                                             onstart="$(PrimeFaces.escapeClientId('#{p:component('filter')}'))[0].value = $(PrimeFaces.escapeClientId('#{p:component('from')}_input'))[0].value + '-' + $(PrimeFaces.escapeClientId('#{p:component('to')}_input'))[0].value" -->
+                                             
                                     </p:calendar>
                                     <p:calendar id="to" pattern="dd/MM/yyyy" size="9" readonly="true">
-                                        <p:watermark for="to" value="#{messages['commons.to']}" />
-                                        <p:ajax event="dateSelect"
-                                            onstart="$(PrimeFaces.escapeClientId('#{p:component('filter')}'))[0].value = $(PrimeFaces.escapeClientId('#{p:component('from')}_input'))[0].value + '-' + $(PrimeFaces.escapeClientId('#{p:component('to')}_input'))[0].value"
-                                            oncomplete="PF('recurringWidget').filter()" />
+<!--                                         <p:watermark for="to" value="#{messages['commons.to']}" /> -->
+                                        <p:ajax event="dateSelect" oncomplete="PF('recurringWidget').filter()" />
+<!--                                         Akk migrate me -->
+<!--                                             onstart="$(PrimeFaces.escapeClientId('#{p:component('filter')}'))[0].value = $(PrimeFaces.escapeClientId('#{p:component('from')}_input'))[0].value + '-' + $(PrimeFaces.escapeClientId('#{p:component('to')}_input'))[0].value" -->
+                                          
                                     </p:calendar>
-                                    <p:commandButton process="@this" update="recurringWalletForm" action="#{subscriptionBean.resetFilters}" icon="ui-icon-close">
+                                    <p:commandButton process="@this" update="recurringWalletForm" action="#{subscriptionBean.resetFilters}" icon="pi pi-replay">
                                         <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
                                     </p:commandButton>
                                 </f:facet>
@@ -919,7 +921,7 @@
                         <hftl:formField label="#{messages['discountPlanItem.durationUnit']}" field="durationUnit" />
                         <p:panel styleClass="action-buttons">
                             <p:commandButton action="#{subscriptionBean.instantiateDiscountPlan()}" value="#{messages['button.instanciateButton']}"
-                                update=":#{p:component('discountPanel')}" oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlg_instantiateDiscountPlanDialog').hide()">
+                                update="@([id$=discountPanel])" oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlg_instantiateDiscountPlanDialog').hide()">
                                 	<f:param name="subscriptionId" value="#{subscriptionBean.objectId}" />
                             </p:commandButton>
                             <p:commandButton immediate="true" onclick="PF('dlg_instantiateDiscountPlanDialog').hide()" type="button" value="#{messages['management.close']}" />

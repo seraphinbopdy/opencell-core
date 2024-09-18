@@ -32,12 +32,6 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.Column;
-import javax.persistence.Table;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jboss.seam.international.status.builder.BundleKey;
@@ -64,7 +58,13 @@ import org.primefaces.event.CellEditEvent;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
+
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 
 @Named
 @ViewScoped
@@ -541,7 +541,7 @@ public class CustomTableBean extends BaseBean<CustomEntityTemplate> {
         }
 
         try {
-            importFuture = customTableService.importDataAsync(entity, file.getInputstream(), appendImportedData);
+            importFuture = customTableService.importDataAsync(entity, file.getInputStream(), appendImportedData);
             messages.info(new BundleKey("messages", "customTable.importFile.started"));
 
         } catch (Exception e) {

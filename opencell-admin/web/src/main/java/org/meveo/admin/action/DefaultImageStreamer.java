@@ -21,12 +21,13 @@ package org.meveo.admin.action;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.faces.context.FacesContext;
-import javax.faces.event.PhaseId;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.PhaseId;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.apache.commons.io.FilenameUtils;
 import org.meveo.admin.util.ModuleUtil;
@@ -92,16 +93,20 @@ public class DefaultImageStreamer {
 
             String imagePath = ModuleUtil.getPicturePath(currentUser.getProviderCode(), groupName) + File.separator + fileName;
             try {
-                streamedFile = new DefaultStreamedContent(new FileInputStream(imagePath));
+                FileInputStream inStream = new FileInputStream(imagePath);
+                streamedFile = DefaultStreamedContent.builder().stream(() -> inStream).build();
             } catch (FileNotFoundException | NullPointerException e) {
                 log.debug("failed loading image={}", imagePath);
                 String ext = FilenameUtils.getExtension(fileName);
                 imagePath = ModuleUtil.getPicturePath(currentUser.getProviderCode(), groupName) + File.separator + getDefaultImage(groupName);
                 try {
-                    streamedFile = new DefaultStreamedContent(new FileInputStream(imagePath), "image/" + ext);
+                    FileInputStream inStream = new FileInputStream(imagePath);
+                    streamedFile = DefaultStreamedContent.builder().contentType("image/" + ext).stream(() -> inStream).build();
                 } catch (FileNotFoundException e1) {
                     log.error("no group default image, loading no image default...");
-                    streamedFile = new DefaultStreamedContent(getClass().getClassLoader().getResourceAsStream("img/no_picture.png"), "image/png");
+                    
+                    InputStream inStream = getClass().getClassLoader().getResourceAsStream("img/no_picture.png");
+                    streamedFile = DefaultStreamedContent.builder().contentType("image/png").stream(() -> inStream).build();
                 }
             }
         }

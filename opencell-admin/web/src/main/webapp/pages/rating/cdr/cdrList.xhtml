@@ -44,7 +44,7 @@
 
         <hftl:dataList checkMany="true" noClose="false" backingBean="#{cdrBean}">
             <f:facet name="header">
-                <p:commandButton id="toggler1" type="button" style="float:right" icon="ui-icon-calculator" />
+                <p:commandButton id="toggler1" type="button" style="float:right" icon="pi pi-calculator" />
                 <p:columnToggler datasource="datatable_results" trigger="toggler1" />
             </f:facet>
 
@@ -63,13 +63,13 @@
                     <h:outputText value="#{messages['commons.actions']}" />
                 </f:facet>
                 <hftl:actionsColumn renderViewLink="true" renderEditLink="false" renderDeleteLink="false" width="60" entityView="cdrDetail" valueIdField="id" />
-                <p:commandButton id="writeOff" icon="ui-icon-circle-close" title="#{messages['cdr.writeOff']}" rendered="#{cdrBean.canWriteOff(entity)}"
+                <p:commandButton id="writeOff" icon="pi pi-stop-circle" title="#{messages['cdr.writeOff']}" rendered="#{cdrBean.canWriteOff(entity)}"
                     onclick="PF('fieldsConfirmWritingOff').show();">
                     <f:setPropertyActionListener value="#{entity}" target="#{cdrBean.entity}" />
                 </p:commandButton>
-                <p:commandButton id="reprocess" icon="ui-icon-play" title="#{messages['cdr.reprocess']}" update="datatable_results" rendered="#{cdrBean.canReprocess(entity)}"
+                <p:commandButton id="reprocess" icon="pi pi-play" title="#{messages['cdr.reprocess']}" update="datatable_results" rendered="#{cdrBean.canReprocess(entity)}"
                     action="#{cdrBean.reprocess(entity)}">
-                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.cdr.reprocess']}" icon="ui-icon-alert" />
+                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.cdr.reprocess']}" icon="pi pi-exclamation-triangle" />
                 </p:commandButton>
             </p:column>
         </hftl:dataList>
@@ -77,7 +77,7 @@
         <p:panel styleClass="action-buttons">
             <p:commandButton id="massReprocessCdr" value="#{messages['cdr.mass.reprocessing']}" update="datatable_results" action="#{cdrBean.massReprocessing()}"
                 rendered="#{currentUser.hasRole('cdrRateManager')}">
-                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.cdr.mass.reprocess']}" icon="ui-icon-alert" />
+                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.cdr.mass.reprocess']}" icon="pi pi-exclamation-triangle" />
             </p:commandButton>
             <p:commandButton id="massWriteOffCdr" value="#{messages['cdr.mass.writeOff']}" onclick="PF('fieldsConfirmMassWritingOff').show();"
                 rendered="#{currentUser.hasRole('cdrManager')}">
@@ -94,7 +94,7 @@
                 </p:panel>
             </p:confirmDialog>
             <p:commandButton id="backoutCdr" value="#{messages['cdr.backout']}" rendered="#{currentUser.hasRole('cdrManager')}" action="backoutCdrs">
-                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['cdr.backoutConfirmation']}" icon="ui-icon-alert" />
+                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['cdr.backoutConfirmation']}" icon="pi pi-exclamation-triangle" />
             </p:commandButton>
         </p:panel>
     </ui:define>

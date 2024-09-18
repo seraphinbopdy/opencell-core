@@ -18,11 +18,27 @@
 
 package org.meveo.admin.action.admin.custom;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jboss.seam.international.status.Messages;
 import org.jboss.seam.international.status.builder.BundleKey;
@@ -48,6 +64,7 @@ import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldValue;
 import org.meveo.model.crm.custom.CustomFieldValueHolder;
+import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.crm.custom.EntityCustomAction;
 import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.model.customEntities.CustomEntityTemplate;
@@ -70,38 +87,25 @@ import org.meveo.util.view.NativeTableBasedDataModel;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.CellEditEvent;
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.SortOrder;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.SortMeta;
+import org.primefaces.model.file.UploadedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Serializable;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Provides support for custom field value data entry
@@ -719,7 +723,7 @@ public class CustomFieldDataEntryBean implements Serializable {
                 // Fail validation on non empty values only if it does not have inherited value
                 if (cfValues == null || cfValues.isEmpty()) {
                     if (!customFieldInstanceService.hasInheritedOnlyCFValue(entity, cft.getCode())) {
-                        FacesMessage msg = new FacesMessage(resourceMessages.getString("javax.faces.component.UIInput.REQUIRED", cft.getDescription()));
+                        FacesMessage msg = new FacesMessage(resourceMessages.getString("jakarta.faces.component.UIInput.REQUIRED", cft.getDescription()));
                         msg.setSeverity(FacesMessage.SEVERITY_ERROR);
                         fc.addMessage(null, msg);
                         valid = false;
@@ -730,7 +734,7 @@ public class CustomFieldDataEntryBean implements Serializable {
                             if (customFieldInstanceService.hasInheritedOnlyCFValue(entity, cft.getCode())) {
                                 break;
                             }
-                            FacesMessage msg = new FacesMessage(resourceMessages.getString("javax.faces.component.UIInput.REQUIRED", cft.getDescription()));
+                            FacesMessage msg = new FacesMessage(resourceMessages.getString("jakarta.faces.component.UIInput.REQUIRED", cft.getDescription()));
                             msg.setSeverity(FacesMessage.SEVERITY_ERROR);
                             fc.addMessage(null, msg);
                             valid = false;
@@ -1136,7 +1140,7 @@ public class CustomFieldDataEntryBean implements Serializable {
             if (newValuesByCode.isEmpty()) {
                 entity.clearCfValues();
             } else {
-                entity.getCfValuesNullSafe().setValues(newValuesByCode);
+                entity.setCfValues(new CustomFieldValues(newValuesByCode));
             }
         }
 
@@ -2103,7 +2107,7 @@ public class CustomFieldDataEntryBean implements Serializable {
 
             // read from file
             ObjectReader oReader = getReader(cft);
-            try (Reader reader = new InputStreamReader(file.getInputstream())) {
+            try (Reader reader = new InputStreamReader(file.getInputStream())) {
                 MappingIterator<Map<String, Object>> mappingIterator = oReader.readValues(reader);
                 while (mappingIterator.hasNext()) {
 
@@ -2153,27 +2157,27 @@ public class CustomFieldDataEntryBean implements Serializable {
 
         if (cfv.getDatasetForGUI() == null || forceReload) {
 
-            LazyDataModel dataset = new LazyDataModelWSize() {
+            LazyDataModel<Map<String,Object>> dataset = new LazyDataModelWSize<Map<String,Object>>() {
 
                 private static final long serialVersionUID = -5796910936316457322L;
 
                 @Override
-                public List load(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
-                    List valueList = storageType == CustomFieldStorageTypeEnum.MATRIX ? cfv.getMatrixValuesForGUI() : cfv.getMapValuesForGUI();
+                public List<Map<String,Object>> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
+                    List<Map<String,Object>> valueList = storageType == CustomFieldStorageTypeEnum.MATRIX ? cfv.getMatrixValuesForGUI() : cfv.getMapValuesForGUI();
                     setRowCount(valueList.size());
 
                     if (getRowCount() > 0) {
                         int toNr = first + pageSize;
-                        return new ArrayList(valueList.subList(first, getRowCount() <= toNr ? getRowCount() : toNr));
+                        return new ArrayList<Map<String,Object>>(valueList.subList(first, getRowCount() <= toNr ? getRowCount() : toNr));
 
                     } else {
-                        return new ArrayList();
+                        return new ArrayList<Map<String,Object>>();
                     }
                 }
             };
             cfv.setDatasetForGUI(dataset);
         }
-        return (LazyDataModel) cfv.getDatasetForGUI();
+        return (LazyDataModel<Map<String,Object>>) cfv.getDatasetForGUI();
     }
 
 

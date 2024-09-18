@@ -17,9 +17,9 @@
 
         <h:outputScript name="js/jquery.cookie.js" library="layout"/>
         <h:outputScript name="js/equalHeight.js" library="layout"/>
-        <h:outputScript name="js/layout.js" library="layout"/>
+<!--         <h:outputScript name="js/layout.js" library="layout"/> -->
 
-        <h:outputStylesheet library="css" name="opencell-layout.css"></h:outputStylesheet>
+        <h:outputStylesheet library="css" name="opencell-layout.css"/>
     </h:head>
 
     <h:body styleClass="FixedTopBar OpencellMegaMenu">
@@ -54,8 +54,8 @@
             </p:ajaxStatus>
 
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" closeOnEscape="true">
-                <p:commandButton value="#{messages['commons.yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/>
-                <p:commandButton value="#{messages['commons.no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close"/>
+                <p:commandButton value="#{messages['commons.yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check"/>
+                <p:commandButton value="#{messages['commons.no']}" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times"/>
             </p:confirmDialog>
 
         </f:view>

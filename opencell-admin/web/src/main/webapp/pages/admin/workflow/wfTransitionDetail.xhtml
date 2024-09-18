@@ -73,7 +73,7 @@
                                     <p:button id="back" value="#{messages['action.back']}"
                                         outcome="#{workflowBean.back()}" includeViewParams="true">
                                         <f:param name="cid"
-                                            value="#{javax.enterprise.context.conversation.id}" />
+                                            value="#{jakarta.enterprise.context.conversation.id}" />
                                     </p:button>
                                 </ui:define>
 
@@ -102,10 +102,10 @@
                                         <p:commandButton id="editActionPlanItemsLink"
                                             update=":formActionPlanItems"
                                             action="#{wfTransitionBean.editWfAction(entity)}"
-                                            icon="ui-icon-document" />
+                                            icon="pi pi-file-edit" />
                                         <p:commandButton id="editActionPlanItemDeleteLink"
                                             action="#{wfTransitionBean.deleteWfAction(entity)}"
-                                            icon="ui-icon-trash"
+                                            icon="pi pi-trash"
                                             update=":actionPlanItems_panel,:formActionPlanItems" />
                                     </p:column>
 

@@ -50,13 +50,13 @@
                                 </f:facet>
 
                                 <p:commandButton id="editDunningPlanTransitionLink" update=":tabView:dunningPlanTransition_panel" action="#{workflowBean.editWfTransition(entity)}"
-                                    icon="ui-icon-document" />
+                                    icon="pi pi-file-edit" />
                                 <p:commandButton id="duplicateDunningPlanTransitionLink" update=":tabView:dunningPlanTransition_panel" action="#{workflowBean.duplicateWfTransition(entity)}"
-                                    icon="ui-icon-plus" />
-                                <p:commandButton id="deleteDunningPlanTransitionLink" action="#{workflowBean.deleteWfTransition(entity)}" icon="ui-icon-trash" update=":tabView:workflowForm :tabView:dunningPlanTransition_panel" />
-                                <p:commandButton id="moveUpTransitionLink" icon="ui-icon-arrowthick-1-n" action="#{workflowBean.moveUpTransition(entity)}"
+                                    icon="pi pi-plus" />
+                                <p:commandButton id="deleteDunningPlanTransitionLink" action="#{workflowBean.deleteWfTransition(entity)}" icon="pi pi-trash" update=":tabView:workflowForm :tabView:dunningPlanTransition_panel" />
+                                <p:commandButton id="moveUpTransitionLink" icon="pi pi-arrow-up" action="#{workflowBean.moveUpTransition(entity)}"
                                     update=":tabView:dunningPlanTransition_panel" />
-                                <p:commandButton id="moveDownTransitionLink" icon="ui-icon-arrowthick-1-s" action="#{workflowBean.moveDownTransition(entity)}"
+                                <p:commandButton id="moveDownTransitionLink" icon="pi pi-arrow-down" action="#{workflowBean.moveDownTransition(entity)}"
                                     update=":tabView:dunningPlanTransition_panel" />
                             </p:column>
 
@@ -89,7 +89,7 @@
                                                     <p:panel id="decisionRulePanel#{loopStatus.index}" styleClass="clearLeft">
                                                         <hftl:decorateFormField fieldId="decisionRuleOperationPanel#{loopStatus.index}" label="" componentWidth="10">
                                                             <p:commandButton id="decisionRuleOperationPanel#{loopStatus.index}" style="margin-top: 15px;"
-                                                                action="#{workflowBean.deleteWfDecisionRule(loopStatus.index)}" icon="ui-icon-trash"
+                                                                action="#{workflowBean.deleteWfDecisionRule(loopStatus.index)}" icon="pi pi-trash"
                                                                 process="decisionRuleOperationPanel#{loopStatus.index}"
                                                                 update=":tabView:formDunningPlanTransition:tabDetail:decisionRulesPanel" />
 
@@ -131,7 +131,7 @@
                                                         <hftl:decorateFormField fieldId="decisionRuleNumberValue#{loopStatus.index}"
                                                             label="#{messages['decisionRuleNewValue.value']}" rendered="#{rule.value.model == true and rule.value.type == 'NUMBER'}">
                                                             <p:inputText id="decisionRuleNumberValue#{loopStatus.index}" value="#{rule.newValue}" size="10" maxlength="10"
-                                                                required="true" converter="javax.faces.BigDecimal" />
+                                                                required="true" converter="jakarta.faces.BigDecimal" />
                                                         </hftl:decorateFormField>
 
                                                         <hftl:decorateFormField fieldId="decisionRuleFromStringValue#{loopStatus.index}"
@@ -160,11 +160,11 @@
                                                                 <p:outputLabel for="decisionRuleFromNumberValue#{loopStatus.index}"
                                                                     value="#{messages['decisionRuleFromValue.value']}" style="padding-right:5px" />
                                                                 <p:inputText id="decisionRuleFromNumberValue#{loopStatus.index}" value="#{rule.newValue}" size="10" maxlength="10"
-                                                                    converter="javax.faces.BigDecimal" />
+                                                                    converter="jakarta.faces.BigDecimal" />
                                                                 <p:outputLabel for="decisionRuleFromNumberValue#{loopStatus.index}_toRange"
                                                                     value="#{messages['decisionRuleToValue.value']}" style="padding:5px" />
                                                                 <p:inputText id="decisionRuleFromNumberValue#{loopStatus.index}_toRange" value="#{rule.anotherValue}" size="10"
-                                                                    maxlength="10" converter="javax.faces.BigDecimal" />
+                                                                    maxlength="10" converter="jakarta.faces.BigDecimal" />
                                                             </h:panelGrid>
                                                         </hftl:decorateFormField>
 
@@ -197,7 +197,7 @@
                                             </p:panel>
                                             <p:panel styleClass="clearLeft">
                                                 <p:commandButton id="addCriteriaBtn" action="#{workflowBean.addNewRule()}" process="@this,decisionRulesPanel"
-                                                    value="#{messages['decisionRule.add']}" ajaxSubmit="true" partialSubmit="true" icon="fa fa-plus"
+                                                    value="#{messages['decisionRule.add']}" ajaxSubmit="true" partialSubmit="true" icon="pi pi-plus"
                                                     update=":tabView:formDunningPlanTransition:tabDetail:decisionRulesPanel :tabView:formDunningPlanTransition:messages" />
                                             </p:panel>
                                         </p:tab>
@@ -206,14 +206,14 @@
                                                 <c:forEach items="#{workflowBean.wfActions}" var="action" varStatus="actionIndex">
                                                     <p:panel id="transitionActionPanel#{actionIndex.index}" styleClass="clearLeft">
                                                         <hftl:decorateFormField fieldId="transitionActionOperationPanel#{actionIndex.index}" label="" componentWidth="15">
-                                                            <p:commandButton id="moveUpAction#{actionIndex.index}" icon="ui-icon-arrowthick-1-n"
+                                                            <p:commandButton id="moveUpAction#{actionIndex.index}" icon="pi pi-arrow-up"
                                                                 action="#{workflowBean.moveUpAction(actionIndex.index)}"
                                                                 update=":tabView:formDunningPlanTransition:tabDetail:transitionActionsPanel" />
-                                                            <p:commandButton id="moveDownAction#{actionIndex.index}" icon="ui-icon-arrowthick-1-s"
+                                                            <p:commandButton id="moveDownAction#{actionIndex.index}" icon="pi pi-arrow-down"
                                                                 action="#{workflowBean.moveDownAction(actionIndex.index)}"
                                                                 update=":tabView:formDunningPlanTransition:tabDetail:transitionActionsPanel" />
                                                             <p:commandButton id="transitionActionOperationPanel#{actionIndex.index}" style="margin-top: 15px;"
-                                                                action="#{workflowBean.deleteWfAction(actionIndex.index)}" icon="ui-icon-trash"
+                                                                action="#{workflowBean.deleteWfAction(actionIndex.index)}" icon="pi pi-trash"
                                                                 process="transitionActionOperationPanel#{actionIndex.index}" ajaxSubmit="true" partialSubmit="true"
                                                                 update=":tabView:formDunningPlanTransition:tabDetail:transitionActionsPanel" />
 
@@ -235,7 +235,7 @@
                                             </p:panel>
                                             <p:panel styleClass="clearLeft">
                                                 <p:commandButton id="addActionBtn" action="#{workflowBean.addNewAction()}" process="@this,transitionActionsPanel"
-                                                    value="#{messages['dunningPlan.addNewActionPlanItem']}" ajaxSubmit="true" partialSubmit="true" icon="fa fa-plus"
+                                                    value="#{messages['dunningPlan.addNewActionPlanItem']}" ajaxSubmit="true" partialSubmit="true" icon="pi pi-plus"
                                                     update=":tabView:formDunningPlanTransition:tabDetail:transitionActionsPanel" />
                                             </p:panel>
                                         </p:tab>

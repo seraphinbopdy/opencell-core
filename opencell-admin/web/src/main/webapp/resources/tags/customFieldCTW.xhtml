@@ -82,15 +82,15 @@
 
                         <h:outputText id="#{cet[field.dbFieldname]}_out_double" value="#{cet[field.dbFieldname]}" styleClass="field-value"
                                       rendered="#{field.fieldType eq CustomFieldTypeEnum.DOUBLE}">
-                            <f:converter converterId="javax.faces.Double"/>
+                            <f:converter converterId="jakarta.faces.Double"/>
                         </h:outputText>
                         <h:outputText id="#{cet[field.dbFieldname]}_out_boolean" value="#{cet[field.dbFieldname]}" styleClass="field-value"
                                       rendered="#{field.fieldType eq CustomFieldTypeEnum.BOOLEAN}">
-                            <f:converter converterId="javax.faces.Boolean"/>
+                            <f:converter converterId="jakarta.faces.Boolean"/>
                         </h:outputText>
                         <h:outputText id="#{cet[field.dbFieldname]}_out_entity" value="#{cet[field.dbFieldname]}" styleClass="field-value"
                                       rendered="#{field.fieldType eq CustomFieldTypeEnum.ENTITY}">
-                            <f:converter converterId="javax.faces.Long"/>
+                            <f:converter converterId="jakarta.faces.Long"/>
                         </h:outputText>
                     </f:facet>
                     <f:facet name="input">
@@ -148,18 +148,18 @@
                             <f:selectItem itemValue="#{null}" itemLabel=""/>
                             <f:selectItem itemValue="#{true}" itemLabel="true"/>
                             <f:selectItem itemValue="#{false}" itemLabel="false"/>
-                            <f:converter converterId="javax.faces.Boolean"/>
+                            <f:converter converterId="jakarta.faces.Boolean"/>
                         </p:selectOneMenu>
 
                     </f:facet>
                 </p:cellEditor>
             </p:columns>
             <p:column headerText="#{messages['commons.actions']}" exportable="false">
-                <p:commandButton id="deletelink" icon="ui-icon-trash" action="#{customFieldDataEntryBean.delete(cet['id'],cc.attrs.entity, cc.attrs.cft)}"
+                <p:commandButton id="deletelink" icon="pi pi-trash" action="#{customFieldDataEntryBean.delete(cet['id'],cc.attrs.entity, cc.attrs.cft)}"
                                  rendered="#{cc.attrs.edit and !cc.attrs.disabled}"
                                  process="@this" immediate="true"
                                  update="@(.cf-ctw_#{cc.attrs.cftIndex})">
-                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert"/>
+                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle"/>
                 </p:commandButton>
             </p:column>
 
@@ -240,7 +240,7 @@
                                     <f:selectItem itemValue="#{null}" itemLabel=""/>
                                     <f:selectItems value="#{customFieldDataEntryBean.entityTypeColumnDatas(field)}" var="data" itemValue="#{data.id}"
                                                    itemLabel="#{data.id} (#{data.display()})"/>
-                                    <f:converter converterId="javax.faces.Long"/>
+                                    <f:converter converterId="jakarta.faces.Long"/>
                                 </p:selectOneMenu>
                             </c:if>
                         </c:forEach>
@@ -253,12 +253,12 @@
 
                     </hf:namingContainer>
                     <h:panelGroup styleClass="clearLeft" style="margin-top:20px" layout="block">
-                        <p:commandButton id="deleteMany" value="#{messages['commons.deleteMultiple']}" action="#{customFieldDataEntryBean.deleteMany()}" icon="ui-icon-trash"
+                        <p:commandButton id="deleteMany" value="#{messages['commons.deleteMultiple']}" action="#{customFieldDataEntryBean.deleteMany()}" icon="pi pi-trash"
                                          process="@this ctSearchResults_#{cc.attrs.cftIndex}"
                                          partialSubmit="true"
                                          partialSubmitFilter=":not([name*='addNewFields'])"
                                          update="@(.cf-ctw_#{cc.attrs.cftIndex})">
-                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDeleteMultiple']}" icon="ui-icon-alert"/>
+                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDeleteMultiple']}" icon="pi pi-exclamation-triangle"/>
                         </p:commandButton>
                     </h:panelGroup>
                 </f:facet>

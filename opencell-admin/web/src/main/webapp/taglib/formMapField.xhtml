@@ -20,7 +20,7 @@
                 <h:outputText value="#{mapValues['value']}" styleClass="field-value" rendered="#{not edit}" />
             </p:column>
             <p:column rendered="#{edit}" headerText="#{messages['commons.actions']}">
-                <p:commandButton icon="ui-icon-minus" partialSubmit="true" process="@this #{id}" update="#{id}"
+                <p:commandButton icon="pi pi-minus" partialSubmit="true" process="@this #{id}" update="#{id}"
                                  actionListener="#{backingBean.removeMapTypeFieldValue(field, mapValues)}" />
             </p:column>
             <f:facet name="footer">

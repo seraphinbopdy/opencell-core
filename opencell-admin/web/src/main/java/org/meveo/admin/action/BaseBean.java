@@ -20,7 +20,6 @@ package org.meveo.admin.action;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,13 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-
-import javax.enterprise.context.Conversation;
-import javax.faces.application.FacesMessage;
-import javax.faces.component.UIInput;
-import javax.faces.context.FacesContext;
-import javax.faces.event.ValueChangeEvent;
-import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -79,11 +71,16 @@ import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.data.PageEvent;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortOrder;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.lapis.jsfexporter.csv.CSVExportOptions;
+import jakarta.enterprise.context.Conversation;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIInput;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.ValueChangeEvent;
+import jakarta.inject.Inject;
 
 /**
  * Base GUI bean class. Used as a backing bean foundation for both detail and searchable list pages. Provides a brigde between xhtml pages and service level classes.
@@ -218,7 +215,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
 
     @Inject
     protected ParamBeanFactory paramBeanFactory;
-    
+
     @Inject
     SecuredBusinessEntityCheckInterceptor securedBusinessEntityCheckInterceptor;
 
@@ -231,6 +228,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     public static final String DEPRECATED_ADMIN_MESSAGE = "Use of the Legacy Admin is strongly discouraged for this feature. Page and/or feature are either incomplete or obsolete.";
 
     public static final String DEFAULT_DEPRECATED_ADMIN_MESSAGE = "Please, use of the Legacy Admin only if the feature you seek hasn't been ported to Portal yet. Legacy Admin is not maintained anymore; features can be missing, obsolete or broken.";
+
     /**
      * Constructor
      */
@@ -322,11 +320,10 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
                 throw new IllegalStateException("could not instantiate a class, constructor not accessible");
             }
         }
-        if(entity instanceof BusinessEntity) {
-            if(((BusinessEntity) entity).getCode() == null) {
+        if (entity instanceof BusinessEntity) {
+            if (((BusinessEntity) entity).getCode() == null) {
                 String entityClass = entity.getClass().getName();
-                Optional.ofNullable(generateCode(entityClass))
-                        .ifPresent(code -> ((BusinessEntity) entity).setCode(code));
+                Optional.ofNullable(generateCode(entityClass)).ifPresent(code -> ((BusinessEntity) entity).setCode(code));
             }
         }
         return entity;
@@ -334,11 +331,12 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
 
     private String generateCode(String entityClass) {
         CustomGenericEntityCode customGenericEntityCode = customGenericEntityCodeService.findByClass(entityClass);
-        if(customGenericEntityCode != null) {
+        if (customGenericEntityCode != null) {
             return serviceSingleton.getGenericCode(customGenericEntityCode);
         }
         return null;
     }
+
     /**
      * Force to initialize entity with a given ID.
      * 
@@ -468,9 +466,9 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
                 }
             }
         }
-        
+
         entity = saveOrUpdate(entity);
-		
+
         if (killConversation) {
             endConversation();
         }
@@ -500,8 +498,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Save method when used in popup (ajax). Same as {@link #saveOrUpdate(boolean)}, but does not redirect to the next view. Sets validation to failed if saveOrUpdate method
-     * called does not return a value or fails.
+     * Save method when used in popup (ajax). Same as {@link #saveOrUpdate(boolean)}, but does not redirect to the next view. Sets validation to failed if saveOrUpdate method called does not return a value or fails.
      * 
      * @throws BusinessException business exception
      */
@@ -554,8 +551,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Returns navigation view name to go to after save() operation. By default it goes back to list view. Override if need different logic (for example return to one view for save
-     * and another for update operations)
+     * Returns navigation view name to go to after save() operation. By default it goes back to list view. Override if need different logic (for example return to one view for save and another for update operations)
      * 
      * @return Next navigation view name as result of action execution
      */
@@ -601,9 +597,8 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Go back and end conversation. BeforeRedirect flag is set to true, so conversation is first ended and then redirect is proceeded, that means that after redirect new
-     * conversation will have to be created (temp or long running) so that view will have all most up to date info because it will load everything from db when starting new
-     * conversation.
+     * Go back and end conversation. BeforeRedirect flag is set to true, so conversation is first ended and then redirect is proceeded, that means that after redirect new conversation will have to be created (temp or
+     * long running) so that view will have all most up to date info because it will load everything from db when starting new conversation.
      * 
      * @return Next navigation view name as result of action execution
      */
@@ -662,7 +657,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
         if (className.endsWith("ay")) {
             sb.append("s");
         } else if (className.endsWith("y")) {
-            sb.deleteCharAt(sb.length()-1);
+            sb.deleteCharAt(sb.length() - 1);
             sb.append("ies");
         } else if (className.endsWith("s") || className.endsWith("x")) {
             sb.append("es");
@@ -689,8 +684,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Delete Entity using it's ID. A message will be displayed in GUI if successful or was not able to delete because of constraints. In the later case request will be marked with
-     * validation failed.
+     * Delete Entity using it's ID. A message will be displayed in GUI if successful or was not able to delete because of constraints. In the later case request will be marked with validation failed.
      * 
      * @param id Entity id to delete
      * @throws BusinessException business exception
@@ -702,8 +696,8 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Delete Entity using it's ID. A message will be displayed in GUI if successful or was not able to delete because of constraints. In the later case request will be marked with
-     * validation failed. Message display can be suppressed.
+     * Delete Entity using it's ID. A message will be displayed in GUI if successful or was not able to delete because of constraints. In the later case request will be marked with validation failed. Message display can
+     * be suppressed.
      * 
      * @param id Entity id to delete
      * @param code Entity's code - just for display in error messages
@@ -747,8 +741,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Delete a current entity. A message will be displayed in GUI if successful or was not able to delete because of constraints. In the later case request will be marked with
-     * validation failed.
+     * Delete a current entity. A message will be displayed in GUI if successful or was not able to delete because of constraints. In the later case request will be marked with validation failed.
      * 
      * @throws BusinessException A general business exception
      */
@@ -758,8 +751,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Delete checked entities in a list. A message will be displayed in GUI if successful or was not able to delete because of constraints. In the later case request will be
-     * marked with validation failed.
+     * Delete checked entities in a list. A message will be displayed in GUI if successful or was not able to delete because of constraints. In the later case request will be marked with validation failed.
      * 
      * @throws BusinessException A general business exception
      */
@@ -839,8 +831,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Method that returns concrete PersistenceService for an entity class backing bean is bound to. That service is then used for operations on concrete entities (eg. save, delete
-     * etc).
+     * Method that returns concrete PersistenceService for an entity class backing bean is bound to. That service is then used for operations on concrete entities (eg. save, delete etc).
      * 
      * @return Persistence service
      */
@@ -870,10 +861,10 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     @ActionMethod
     public void disable() {
         try {
-        	Long currentId = (Long) entity.getId();
+            Long currentId = (Long) entity.getId();
             log.info("Disabling entity {} with id = {}", clazz.getName(), currentId);
             setObjectId(currentId);
-			entity = getPersistenceService().disable(currentId);
+            entity = getPersistenceService().disable(currentId);
             messages.info(new BundleKey("messages", "disabled.successful"));
 
         } catch (Exception t) {
@@ -906,7 +897,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     @ActionMethod
     public void enable() {
         try {
-        	Long currentId = (Long) entity.getId();
+            Long currentId = (Long) entity.getId();
             log.info("Enabling entity {} with id = {}", clazz.getName(), currentId);
             setObjectId(currentId);
             entity = getPersistenceService().enable(currentId);
@@ -982,7 +973,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
                     if (BaseBean.this.getClass().getName().contains("ListBean")) {
                         securedBusinessEntityCheckInterceptor.secureDataModel(cleanFilters, getClazz());
                     }
-                    
+
                     return BaseBean.this.supplementSearchCriteria(cleanFilters);
                 }
 
@@ -1023,9 +1014,8 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Allows to overwrite, or add additional search criteria for filtering a list. Search criteria is a map with filter criteria name as a key and value as a value. Criteria name
-     * consist of [&lt;condition&gt;]&lt;field name&gt; (e.g. "like firstName") where &lt;condition&gt; is a condition to apply to field value comparison and &lt;name&gt; is an
-     * entity attribute name.
+     * Allows to overwrite, or add additional search criteria for filtering a list. Search criteria is a map with filter criteria name as a key and value as a value. Criteria name consist of [&lt;condition&gt;]&lt;field
+     * name&gt; (e.g. "like firstName") where &lt;condition&gt; is a condition to apply to field value comparison and &lt;name&gt; is an entity attribute name.
      * 
      * @param searchCriteria Search criteria - should be same as filters attribute
      * @return HashMap with filter criteria name as a key and value as a value
@@ -1153,7 +1143,11 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
             }
         }
 
-        return SortOrder.DESCENDING;
+        if ("code".equalsIgnoreCase(getDefaultSort())) {
+            return SortOrder.ASCENDING;
+        } else {
+            return SortOrder.DESCENDING;
+        }
     }
 
     /**
@@ -1166,8 +1160,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * Get back navigation view name as it was overridden manually or copied from an original HTTP request parameter, to be preserved later for duration over ajax calls, and failed
-     * form submissions,
+     * Get back navigation view name as it was overridden manually or copied from an original HTTP request parameter, to be preserved later for duration over ajax calls, and failed form submissions,
      * 
      * @return Navigation view name
      */
@@ -1220,29 +1213,19 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
         return facesContext.getViewRoot().getLocale();
     }
 
-    /**
-     * Get CSV export options. See CSVExportOptions
-     * 
-     * @return CSV export options
-     */
-    public CSVExportOptions csvOptions() {
-        ParamBean param = paramBeanFactory.getInstance();
-        String characterEncoding = param.getProperty("csv.characterEncoding", "iso-8859-1");
-        CSVExportOptions csvOption = new CSVExportOptions();
-        csvOption.setSeparatorCharacter(';');
-        csvOption.setCharacterEncoding(characterEncoding);
-        return csvOption;
-    }
-
-    // Commented as no use was found neither in java nor xhtml
-    // /**
-    // * Dummy codes for avoiding to get custom field templates
-    // *
-    // * @return A list of custom field templates
-    // */
-    // public List<CustomFieldTemplate> getCustomFieldTemplates() {
-    // return null;
-    // }
+//    /**
+//     * Get CSV export options. See CSVExportOptions
+//     * 
+//     * @return CSV export options
+//     */
+//    public CSVExportOptions csvOptions() {
+//        ParamBean param = paramBeanFactory.getInstance();
+//        String characterEncoding = param.getProperty("csv.characterEncoding", "iso-8859-1");
+//        CSVExportOptions csvOption = new CSVExportOptions();
+//        csvOption.setSeparatorCharacter(';');
+//        csvOption.setCharacterEncoding(characterEncoding);
+//        return csvOption;
+//    }
 
     /**
      * Get Filter to apply in search
@@ -1391,8 +1374,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
     }
 
     /**
-     * A helper method to add a new blank item to collection. Instantiate a new item based on parameterized collection type. Used in conjunction with value list in formListField
-     * component.
+     * A helper method to add a new blank item to collection. Instantiate a new item based on parameterized collection type. Used in conjunction with value list in formListField component.
      * 
      * @param values A collection of values
      * @param itemClass Class of a new item
@@ -1529,8 +1511,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
      * 
      * @param entityClass class to reference
      * @param id Entity ID
-     * @return A concatenated list of entities (humanized classnames and their codes) E.g. Customer Account: first ca, second ca, third ca; Customer: first customer, second
-     *         customer
+     * @return A concatenated list of entities (humanized classnames and their codes) E.g. Customer Account: first ca, second ca, third ca; Customer: first customer, second customer
      */
     @SuppressWarnings("rawtypes")
     private String findReferencedByEntities(Class<T> entityClass, Long id) {
@@ -1637,13 +1618,13 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
         // Check that two dates are one after another
         return !(from != null && to != null && from.compareTo(to) > 0);
     }
-    
+
     public static void showDeprecatedWarning(String pWarningMessage) {
-    	List<FacesMessage> messageList = FacesContext.getCurrentInstance().getMessageList();
-		if(messageList!=null && messageList.stream().anyMatch(x -> FacesMessage.SEVERITY_WARN.equals(x.getSeverity()) && pWarningMessage.equals(x.getSummary()))) {
-			return;
-    	}
-    	FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, pWarningMessage, pWarningMessage));
+        List<FacesMessage> messageList = FacesContext.getCurrentInstance().getMessageList();
+        if (messageList != null && messageList.stream().anyMatch(x -> FacesMessage.SEVERITY_WARN.equals(x.getSeverity()) && pWarningMessage.equals(x.getSummary()))) {
+            return;
+        }
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, pWarningMessage, pWarningMessage));
     }
 
 }

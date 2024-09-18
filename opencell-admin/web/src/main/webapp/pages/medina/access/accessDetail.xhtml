@@ -91,7 +91,7 @@
 						<p:commandButton id="saveAccessBackSubDetail"
 							value="#{messages['action.save']}"
 							action="#{accessBean.saveOrUpdate(false)}"
-							icon="ui-icon-check" update="@form">
+							icon="pi pi-check" update="@form">
 							<f:param name="subscriptionId" value="#{accessBean.subscriptionId}"/>
 							<f:setPropertyActionListener value="5" target="#{subscriptionBean.activeMainTab}"/>
 						</p:commandButton>

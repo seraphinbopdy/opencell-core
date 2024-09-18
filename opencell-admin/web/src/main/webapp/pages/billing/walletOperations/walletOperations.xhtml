@@ -155,15 +155,15 @@
                     <h:outputText value="Actions" />
                 </f:facet>
                 <hftl:actionsColumn renderEditLink="false" renderDeleteLink="false" />
-                <p:commandButton id="updateWallet" icon="ui-icon-play" actionListener="#{walletOperationBean.updatedToRerate(entity)}"
+                <p:commandButton id="updateWallet" icon="pi pi-play" actionListener="#{walletOperationBean.updatedToRerate(entity)}"
                     rendered="#{walletOperationBean.canUserUpdateEntity()}" update="@form messages">
-                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.walletOperation.update']}" icon="ui-icon-alert" />
+                    <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.walletOperation.update']}" icon="pi pi-exclamation-triangle" />
                 </p:commandButton>
             </p:column>
         </hftl:dataList>
         <p:panel styleClass="action-buttons" rendered="#{walletOperationBean.canUserUpdateEntity()}">
-            <p:commandButton id="massUpdateWallet" value="#{messages['action.massRerate']}" action="#{walletOperationBean.massToRerate()}" icon="ui-icon-check">
-                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.walletOperation.update']}" icon="ui-icon-alert" />
+            <p:commandButton id="massUpdateWallet" value="#{messages['action.massRerate']}" action="#{walletOperationBean.massToRerate()}" icon="pi pi-check">
+                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['message.confirm.walletOperation.update']}" icon="pi pi-exclamation-triangle" />
             </p:commandButton>
         </p:panel>
 

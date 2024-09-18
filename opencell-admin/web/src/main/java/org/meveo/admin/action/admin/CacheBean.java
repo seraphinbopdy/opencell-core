@@ -28,11 +28,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.enterprise.inject.Instance;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.BasicCache;
@@ -45,7 +40,11 @@ import org.meveo.model.IEntity;
 import org.meveo.util.view.LazyDataModelWSize;
 import org.omnifaces.cdi.Param;
 import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.SortOrder;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 @ViewScoped
@@ -186,7 +185,7 @@ public class CacheBean implements Serializable {
 
                 @SuppressWarnings("unchecked")
                 @Override
-                public List load(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
+                public List load(int first, int pageSize, Map sortBy, Map filterBy) {
                     setRowCount(selectedCache.size());
 
                     if (getRowCount() > 0) {
@@ -219,7 +218,7 @@ public class CacheBean implements Serializable {
 
                 @SuppressWarnings("unchecked")
                 @Override
-                public List load(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
+                public List load(int first, int pageSize, Map sortBy, Map filterBy) {
                     Map selectedMap = (Map) selectedCacheMapItem.getValue();
                     setRowCount(selectedMap.size());
 
@@ -252,7 +251,7 @@ public class CacheBean implements Serializable {
                 private static final long serialVersionUID = -5796910936316457322L;
 
                 @Override
-                public List load(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
+                public List load(int first, int pageSize, Map sortBy, Map filterBy) {
                     List valueList;
                     if (selectedCacheItem.getValue() instanceof HashSet) {
                         valueList = (List) new ArrayList<>((HashSet) selectedCacheItem.getValue());

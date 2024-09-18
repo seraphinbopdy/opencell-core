@@ -87,7 +87,7 @@
 
                 </hf:formButtons>
 
-                <p:commandButton id="publishModuleButton" update=":#{p:component('publishModuleDialog')}" value="#{messages['meveoModule.publishModule']}"
+                <p:commandButton id="publishModuleButton" update="@([id$=publishModuleDialog])" value="#{messages['meveoModule.publishModule']}"
                     rendered="#{not meveoModuleBean.entity.transient}" oncomplete="PF('publishModuleDialog').show()" style="margin-top:10px">
                     <f:setPropertyActionListener value="#{null}" target="#{meveoModuleBean.meveoInstance}" />
                 </p:commandButton>
@@ -135,7 +135,7 @@
                 </h:panelGrid>
                 <div class="clearLeft">
                     <p:commandButton id="cropButton" value="#{messages['meveoModule.crop']}" action="#{meveoModuleBean.cropLogo}" update="uploadPictureForm :moduleForm:logo"
-                        icon="ui-icon-scissors" />
+                        icon="pi pi-expand" />
                     <p:commandButton id="closeButton" value="#{messages['commons.close']}" onclick="PF('uploadPictureDialog').hide()" type="button" />
                 </div>
             </h:form>

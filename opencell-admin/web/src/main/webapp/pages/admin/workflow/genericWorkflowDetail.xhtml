@@ -107,10 +107,10 @@
 									<p:commandButton
 										action="#{genericWorkflowBean.selectWFStatus(wfStatus)}"
 										update=":genericWFFormId:tabView:wfStatusDetails" process="@this"
-										icon="ui-icon-document" immediate="true" />
+										icon="pi pi-file-edit" immediate="true" />
 									<p:commandButton
 										action="#{genericWorkflowBean.deleteWFStatus(wfStatus)}"
-										icon="ui-icon-trash" update="@form" process="@this"/>
+										icon="pi pi-trash" update="@form" process="@this"/>
 								</p:column>
 							</p:dataTable>
 							<p:commandButton value="#{messages['commons.addNew']}"
@@ -169,15 +169,15 @@
 
 								<p:commandButton id="editDunningPlanTransitionLink" update=":genericWFFormId:tabView:dunningPlanTransition_panel"
 									 action="#{genericWorkflowBean.editgWFTransition(entity)}"
-                                    icon="ui-icon-document" process="@this"/>
+                                    icon="pi pi-file-edit" process="@this"/>
                                 <p:commandButton id="duplicateDunningPlanTransitionLink" update=":genericWFFormId:tabView:dunningPlanTransition_panel"
 									 action="#{genericWorkflowBean.duplicateWfTransition(entity)}"
-                                    icon="ui-icon-plus" process="@this"/>
-                                <p:commandButton id="deleteDunningPlanTransitionLink" action="#{genericWorkflowBean.deleteWfTransition(entity)}" icon="ui-icon-trash"
+                                    icon="pi pi-plus" process="@this"/>
+                                <p:commandButton id="deleteDunningPlanTransitionLink" action="#{genericWorkflowBean.deleteWfTransition(entity)}" icon="pi pi-trash"
 												 update=":genericWFFormId:tabView:dunningPlanTransition_panel" process="@this"/>
-                                <p:commandButton id="moveUpTransitionLink" icon="ui-icon-arrowthick-1-n" action="#{genericWorkflowBean.moveUpTransition(entity)}"
+                                <p:commandButton id="moveUpTransitionLink" icon="pi pi-arrow-up" action="#{genericWorkflowBean.moveUpTransition(entity)}"
                                     update=":genericWFFormId:tabView:dunningPlanTransition_panel" process="@this"/>
-                                <p:commandButton id="moveDownTransitionLink" icon="ui-icon-arrowthick-1-s" action="#{genericWorkflowBean.moveDownTransition(entity)}"
+                                <p:commandButton id="moveDownTransitionLink" icon="pi pi-arrow-down" action="#{genericWorkflowBean.moveDownTransition(entity)}"
                                     update=":genericWFFormId:tabView:dunningPlanTransition_panel" process="@this" />
                             </p:column>
 

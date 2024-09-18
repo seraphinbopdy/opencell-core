@@ -545,7 +545,7 @@ http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_3.xsd">
 	</navigation-case>
 	<navigation-case>
 		<from-outcome>providerSelfDetail</from-outcome>
-		<to-view-id>/pages/admin/providers/providerSelfDetail.xhtml?</to-view-id>
+		<to-view-id>/pages/admin/providers/providerSelfDetail.xhtml</to-view-id>
 		<redirect include-view-params="true">
 			<view-param>
 				<name>mode</name>

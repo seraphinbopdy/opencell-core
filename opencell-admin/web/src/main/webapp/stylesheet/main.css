@@ -293,10 +293,10 @@ div.body > table > thead,
 .ui-menubar .ui-menu-list .ui-menu-child { -webkit-border-radius: 0px 15px 0px 15px; border-radius: 0px 15px 0px 15px; width : 210px; margin-right : 10px !important; box-shadow : none; border-top : none; border-color : rgba(0, 0, 0, .1) !important; margin-left : -1px; }
 .ui-menubar .ui-menu-list .ui-menu-child .ui-menu-list { /*border-top : 1px solid  #b3cecb; padding : 3px 1px 1px 3px; margin-left : 3px;*/ }
 .ui-menubar .ui-menu-list .ui-menu-child .ui-menuitem { padding : 0px !important; margin : 0px !important; width : 100%; border-left : none !important; border-right : none !important; -webkit-border-radius: 0px; border-radius: 0px; }
-.ui-menubar .ui-menu-list .ui-menu-child .ui-menuitem .ui-state-hover { color:#fff; background: #264676 !important; box-shadow : none; -webkit-border-radius: 0px 8px 0px 8px; border-radius: 0px 8px 0px 8px; box-sizing: border-box}
+.ui-menubar .ui-menu-list .ui-menu-child .ui-menuitem .ui-state-hover { color:#fff;  box-shadow : none; -webkit-border-radius: 0px 8px 0px 8px; border-radius: 0px 8px 0px 8px; box-sizing: border-box}
 
 .ui-menu .ui-menuitem .ui-menuitem-link .ui-icon-triangle-1-s{background-image: none !important;}
-.ui-menu .ui-menu-parent .ui-menu-child { background: #1A3A6A !important; padding: 0; }
+.ui-menu .ui-menu-parent .ui-menu-child {  padding: 0; }
 .ui-menubar .ui-menu-list .ui-menu-child .ui-menuitem .ui-menuitem-link { text-shadow : none; padding : 1px 0px 0px 0px; padding: 7px 10px; box-sizing: border-box; }
 .ui-menu .ui-menuitem-text {  padding : 2px; }
 .ui-menubar .ui-menuitem-link { padding : 15px 10px 14px; }

@@ -28,9 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.seam.international.status.builder.BundleKey;
@@ -50,7 +47,7 @@ import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.TreeNode;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -60,6 +57,9 @@ import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Edward P. Legaspi
@@ -73,9 +73,9 @@ public class OfferTemplateCategoryBean extends CustomFieldBean<OfferTemplateCate
     @Inject
     private OfferTemplateCategoryService offerTemplateCategoryService;
 
-    private SortedTreeNode rootOfferTemplateCategory;
+    private SortedTreeNode<OfferTemplateCategory> rootOfferTemplateCategory;
 
-    private TreeNode selectedOfferTemplateCategory;
+    private TreeNode<OfferTemplateCategory> selectedOfferTemplateCategory;
 
     private Boolean isEdit = Boolean.FALSE;
 
@@ -377,7 +377,7 @@ public class OfferTemplateCategoryBean extends CustomFieldBean<OfferTemplateCate
      * 
      * @param rootNode
      */
-    private void unSelectedAllNode(TreeNode rootNode) {
+    private void unSelectedAllNode(TreeNode<OfferTemplateCategory> rootNode) {
         if (rootNode.getChildCount() == 0) {
             rootNode.setSelected(false);
         }
@@ -389,7 +389,7 @@ public class OfferTemplateCategoryBean extends CustomFieldBean<OfferTemplateCate
         }
     }
 
-    public class SortedTreeNode extends DefaultTreeNode {
+    public class SortedTreeNode<T> extends DefaultTreeNode<T> {
 
         private static final long serialVersionUID = 3694377290046737073L;
 
@@ -397,7 +397,7 @@ public class OfferTemplateCategoryBean extends CustomFieldBean<OfferTemplateCate
             super();
         }
 
-        public SortedTreeNode(Object data, TreeNode parent) {
+        public SortedTreeNode(T data, TreeNode<T> parent) {
             super(data, parent);
         }
 
@@ -487,7 +487,7 @@ public class OfferTemplateCategoryBean extends CustomFieldBean<OfferTemplateCate
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             writer.writeValues(baos).writeAll(result);
             InputStream inStream = new ByteArrayInputStream(baos.toByteArray());
-            return new DefaultStreamedContent(inStream, "text/csv", "offerTemplateCategories.csv");
+            return DefaultStreamedContent.builder().name("offerTemplateCategories.csv").contentType("text/csv").stream(() -> inStream).build();
         } catch (IOException e) {
             log.error("error = {}", e);
         }
@@ -519,7 +519,7 @@ public class OfferTemplateCategoryBean extends CustomFieldBean<OfferTemplateCate
             ObjectReader oReader = mapper.readerFor(OfferTemplateCategory.class).with(schema);
 
             // read from file
-            try (Reader reader = new InputStreamReader(importFile.getInputstream())) {
+            try (Reader reader = new InputStreamReader(importFile.getInputStream())) {
                 MappingIterator<OfferTemplateCategory> mi = oReader.readValues(reader);
                 while (mi.hasNext()) {
                     OfferTemplateCategory cat = mi.next();

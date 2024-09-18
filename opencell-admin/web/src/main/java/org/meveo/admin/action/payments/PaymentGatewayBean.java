@@ -17,6 +17,11 @@
  */
 package org.meveo.admin.action.payments;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.meveo.admin.action.BaseBean;
 import org.meveo.admin.action.CustomFieldBean;
 import org.meveo.admin.exception.BusinessException;
@@ -28,16 +33,14 @@ import org.meveo.model.payments.PaymentGatewayTypeEnum;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.local.IPersistenceService;
+import org.meveo.service.payments.impl.GatewayPaymentInterface;
 import org.meveo.service.payments.impl.PaymentGatewayRumSequenceService;
 import org.meveo.service.payments.impl.PaymentGatewayService;
 import org.meveo.util.PaymentGatewayClass;
 
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Standard backing bean for {@link PaymentGateway} (extends {@link BaseBean} that provides almost all common methods to handle entities filtering/sorting in datatable, their
@@ -126,9 +129,9 @@ public class PaymentGatewayBean extends CustomFieldBean<PaymentGateway> {
     @SuppressWarnings({"rawtypes"})
     public List<String> autocompleteClassNames(String query) {
 
-        List<Class> classes;
+        Set<Class<? extends GatewayPaymentInterface>> classes;
         try {
-            classes = ReflectionUtils.getClasses("org.meveo.service.payments");
+            classes = ReflectionUtils.getClasses("org.meveo.service.payments", GatewayPaymentInterface.class);
         } catch (Exception e) {
             log.error("Failed to get a list of classes for service payments  package", e);
             return new ArrayList<>();

@@ -20,10 +20,7 @@ package org.meveo.admin.action.payments;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import java.util.Set;
 
 import org.meveo.admin.action.BaseBean;
 import org.meveo.admin.action.CustomFieldBean;
@@ -34,8 +31,13 @@ import org.meveo.model.payments.DDRequestBuilder;
 import org.meveo.model.payments.DDRequestBuilderTypeEnum;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.local.IPersistenceService;
+import org.meveo.service.payments.impl.DDRequestBuilderInterface;
 import org.meveo.service.payments.impl.DDRequestBuilderService;
 import org.meveo.util.DDRequestBuilderClass;
+
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 
 /**
@@ -119,9 +121,9 @@ public class DDRequestBuilderBean extends CustomFieldBean<DDRequestBuilder> {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public List<String> autocompleteClassNames(String query) {
 
-        List<Class> classes = null;
+        Set<Class<? extends DDRequestBuilderInterface>> classes = null;
         try {
-            classes = ReflectionUtils.getClasses("org.meveo.admin.sepa");
+            classes = ReflectionUtils.getClasses("org.meveo.admin.sepa", DDRequestBuilderInterface.class);
         } catch (Exception e) {
             log.error("Failed to get a list of classes for service payments  package", e);
             return null;

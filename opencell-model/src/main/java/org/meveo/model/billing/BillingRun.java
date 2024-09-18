@@ -17,53 +17,51 @@
  */
 package org.meveo.model.billing;
 
-import static javax.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.LAZY;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.CustomFieldEntity;
-import org.meveo.model.EnableEntity;
-import org.meveo.model.ICustomFieldEntity;
+import org.meveo.model.EnableCFEntity;
 import org.meveo.model.IReferenceEntity;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.ReferenceIdentifierQuery;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.admin.User;
-import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.jobs.JobExecutionResultImpl;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Billing run
@@ -77,18 +75,18 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 @ReferenceIdentifierQuery("BillingRun.findByIdAndBCCode")
 @CustomFieldEntity(cftCodePrefix = "BillingRun")
 @Table(name = "billing_billing_run")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "billing_billing_run_seq") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_billing_run_seq"),
+        @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "BillingRun.getForInvoicing", query = "SELECT br FROM BillingRun br where br.status in ('NEW', 'PREVALIDATED', 'INVOICES_GENERATED', 'POSTVALIDATED') or (br.status='POSTINVOICED' and br.processType='FULL_AUTOMATIC') and br.disabled = false order by br.id asc"),
         @NamedQuery(name = "BillingRun.getForInvoicingLimitToIds", query = "SELECT br FROM BillingRun br where (br.status in ('NEW', 'PREVALIDATED', 'POSTVALIDATED') or (br.status='POSTINVOICED' and br.processType='FULL_AUTOMATIC')) and br.id in :ids and br.disabled = false order by br.id asc"),
-        @NamedQuery(name = "BillingRun.findByIdAndBCCode", query = "from BillingRun br join fetch br.billingCycle bc where lower(concat(br.id,'/',bc.code)) like :code "),
+        @NamedQuery(name = "BillingRun.findByIdAndBCCode", query = "select br from BillingRun br join fetch br.billingCycle bc where lower(concat(br.id,'/',bc.code)) like :code "),
         @NamedQuery(name = "BillingRun.nullifyBillingRunXMLExecutionResultIds", query = "update BillingRun br set br.xmlJobExecutionResultId = null where br = :billingRun"),
-        @NamedQuery(name = "BillingRun.nullifyBillingRunPDFExecutionResultIds", query = "update BillingRun br set br.pdfJobExecutionResultId = null where br = :billingRun") ,
-        @NamedQuery(name = "BillingRun.calculateBRStatisticsByInvoices", 
-		query = "SELECT SUM(i.amountWithTax) AS amountWithTax, SUM(i.amountTax) AS amountTax, SUM(i.amountWithoutTax) AS amountWithoutTax, COUNT(DISTINCT i.billingAccount.id) AS countBA, COUNT(i) AS countInvoices "
-				+ "FROM Invoice i WHERE i.billingRun.id = :billingRunId AND i.status <> 'CANCELED'"),
-        @NamedQuery(name = "BillingRun.findByBillingCycle", query = "FROM BillingRun br WHERE br.billingCycle = :bc")})
-public class BillingRun extends EnableEntity implements ICustomFieldEntity, IReferenceEntity {
+        @NamedQuery(name = "BillingRun.nullifyBillingRunPDFExecutionResultIds", query = "update BillingRun br set br.pdfJobExecutionResultId = null where br = :billingRun"),
+        @NamedQuery(name = "BillingRun.calculateBRStatisticsByInvoices", query = "SELECT SUM(i.amountWithTax) AS amountWithTax, SUM(i.amountTax) AS amountTax, SUM(i.amountWithoutTax) AS amountWithoutTax, COUNT(DISTINCT i.billingAccount.id) AS countBA, COUNT(i) AS countInvoices "
+                + "FROM Invoice i WHERE i.billingRun.id = :billingRunId AND i.status <> 'CANCELED'"),
+        @NamedQuery(name = "BillingRun.findByBillingCycle", query = "select br FROM BillingRun br WHERE br.billingCycle = :bc") })
+public class BillingRun extends EnableCFEntity implements IReferenceEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -268,7 +266,7 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * Selected billing accounts (identifiers)
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "selected_billing_accounts")
     private String selectedBillingAccounts;
 
@@ -279,36 +277,13 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     private List<RejectedBillingAccount> rejectedBillingAccounts = new ArrayList<>();
 
     /**
-     * Custom field values in JSON format
-     */
-    @Type(type = "cfjson")
-    @Column(name = "cf_values", columnDefinition = "jsonb")
-    private CustomFieldValues cfValues;
-
-    /**
-     * Accumulated custom field values in JSON format
-     */
-//    @Type(type = "cfjson")
-//    @Column(name = "cf_values_accum", columnDefinition = "TEXT")
-    @Transient
-    private CustomFieldValues cfAccumulatedValues;
-
-    /**
-     * Unique identifier - UUID
-     */
-    @Column(name = "uuid", nullable = false, updatable = false, length = 60)
-    @Size(max = 60)
-    @NotNull
-    private String uuid;
-
-    /**
      * Reference date
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "reference_date")
     private ReferenceDateEnum referenceDate = ReferenceDateEnum.TODAY;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "skip_validation_script")
     private boolean skipValidationScript = false;
 
@@ -321,7 +296,7 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * To decide whether or not dates should be recomputed at invoice validation.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "compute_dates_validation")
     private Boolean computeDatesAtValidation;
 
@@ -335,21 +310,21 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * To indicates that invoice minimum job has already been run on the BR.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "minimum_applied")
     private Boolean minimumApplied;
 
     /**
      * To indicates that invoicing threshold job has already been run on the BR.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "threshold_checked")
     private Boolean thresholdChecked;
 
     /**
      * To indicates that that invoice discounts job has already been run on the BR.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "discount_applied")
     private Boolean discountApplied;
 
@@ -364,7 +339,7 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * Filtering option used in exceptional billing run.
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "filters", columnDefinition = "jsonb")
     private Map<String, Object> filters;
 
@@ -397,11 +372,11 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * i18n Description
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_quarantine")
     private Boolean isQuarantine;
 
@@ -419,21 +394,21 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * To decide whether or not generate account oeprations.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "generate_ao", nullable = false)
     private Boolean generateAO = Boolean.FALSE;
 
     /**
      * Do not aggregate RTs to ILs at all
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "disable_aggregation")
     private boolean disableAggregation = false;
 
     /**
      * To decide if adding invoice lines incrementally or not.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "incremental_invoice_lines")
     private Boolean incrementalInvoiceLines = Boolean.FALSE;
 
@@ -447,28 +422,28 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * Aggregate per unit amount
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "aggregate_unit_amounts")
     private boolean aggregateUnitAmounts = false;
 
     /**
      * Aggregate based on accounting article label instead of RT description
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "use_accounting_article_label")
     private boolean useAccountingArticleLabel = false;
 
     /**
      * If TRUE, aggregation will ignore subscription field (multiple subscriptions will be aggregated together)
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "ignore_subscriptions")
     private boolean ignoreSubscriptions = true;
 
     /**
      * If TRUE, aggregation will ignore order field (multiple orders will be aggregated together)
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "ignore_orders")
     private boolean ignoreOrders = true;
 
@@ -482,7 +457,7 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * To decide if billing run report will be generated during billing run creation
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "pre_report_auto_on_create")
     private boolean preReportAutoOnCreate = false;
 
@@ -496,7 +471,7 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * To decide if billing run report will be generated during invoice line job
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "pre_report_auto_on_invoice_line_job")
     private boolean preReportAutoOnInvoiceLinesJob = false;
 
@@ -510,7 +485,7 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     /**
      * Billing run aggregation setting for user accounts
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "ignore_user_accounts")
     private boolean ignoreUserAccounts = true;
 
@@ -765,59 +740,6 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
             rejectedBillingAccounts = new ArrayList<RejectedBillingAccount>();
         }
         rejectedBillingAccounts.add(rejectedBillingAccount);
-    }
-
-    @Override
-    public CustomFieldValues getCfValues() {
-        return cfValues;
-    }
-
-    @Override
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
-    }
-
-    /**
-     * setting uuid if null
-     */
-    @PrePersist
-    @PreUpdate
-    public void setUUIDIfNull() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID().toString();
-        }
-    }
-
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfAccumulatedValues) {
-        this.cfAccumulatedValues = cfAccumulatedValues;
-    }
-
-    @Override
-    public String getUuid() {
-        setUUIDIfNull(); // setting uuid if null to be sure that the existing code expecting uuid not null will not be impacted
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    @Override
-    public ICustomFieldEntity[] getParentCFEntities() {
-        return null;
-    }
-
-    @Override
-    public String clearUuid() {
-        String oldUuid = uuid;
-        uuid = UUID.randomUUID().toString();
-        return oldUuid;
     }
 
     @Override
@@ -1224,13 +1146,13 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
         this.applicationEl = applicationEl;
     }
 
-	public boolean isIgnoreUserAccounts() {
-		return ignoreUserAccounts;
-}
+    public boolean isIgnoreUserAccounts() {
+        return ignoreUserAccounts;
+    }
 
-	public void setIgnoreUserAccounts(boolean ignoreUserAccounts) {
-		this.ignoreUserAccounts = ignoreUserAccounts;
-	}
+    public void setIgnoreUserAccounts(boolean ignoreUserAccounts) {
+        this.ignoreUserAccounts = ignoreUserAccounts;
+    }
 
     public List<String> getAdditionalAggregationFields() {
         return additionalAggregationFields;
@@ -1239,9 +1161,9 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     public void setAdditionalAggregationFields(List<String> additionalAggregationFields) {
         this.additionalAggregationFields = additionalAggregationFields;
     }
-    
+
     public void addInvoiceNumber(int count) {
-    	this.invoiceNumber=(this.invoiceNumber!=null?this.invoiceNumber:0)+count;
+        this.invoiceNumber = (this.invoiceNumber != null ? this.invoiceNumber : 0) + count;
     }
 
 }

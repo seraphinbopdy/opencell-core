@@ -20,15 +20,16 @@ package org.meveo.model.scripts;
 
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Script category
@@ -38,13 +39,12 @@ import org.meveo.model.BusinessEntity;
  */
 @Entity
 @Table(name = "meveo_script_instance_cat", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "meveo_script_instance_cat_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "meveo_script_instance_cat_seq"), @Parameter(name = "increment_size", value = "1") })
 public class ScriptInstanceCategory extends BusinessEntity {
 
     private static final long serialVersionUID = 3368033230915325843L;
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 
@@ -54,22 +54,20 @@ public class ScriptInstanceCategory extends BusinessEntity {
 
     public void setDescriptionI18n(Map<String, String> descriptionI18n) {
         this.descriptionI18n = descriptionI18n;
-    }  
+    }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-        }
-        else if (!super.equals(obj)) {
+        } else if (!super.equals(obj)) {
             return false;
-        }
-        else if (!(obj instanceof ScriptInstanceCategory)) {
+        } else if (!(obj instanceof ScriptInstanceCategory)) {
             return false;
         }
         return true;
     }
-    
+
     @Override
     public int hashCode() {
         return 961 + ("ScriptInstanceCategory" + getId()).hashCode();

@@ -21,25 +21,25 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.catalog.WalletTemplate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Prepaid or postpaid Wallet instance
@@ -50,13 +50,11 @@ import org.meveo.model.catalog.WalletTemplate;
 @ObservableEntity
 @ExportIdentifier({ "code", "userAccount.code" })
 @Table(name = "billing_wallet", uniqueConstraints = @UniqueConstraint(columnNames = { "code", "user_account_id" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_wallet_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_wallet_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "WalletInstance.listPrepaidActiveWalletIds", query = "SELECT c.id FROM WalletInstance c where c.walletTemplate.walletType=org.meveo.model.billing.BillingWalletTypeEnum.PREPAID and c.userAccount.status=org.meveo.model.billing.AccountStatusEnum.ACTIVE"),
         @NamedQuery(name = "WalletInstance.listPrepaidWalletsToMatchIds", query = "SELECT c.id FROM WalletInstance c where c.walletTemplate.walletType=org.meveo.model.billing.BillingWalletTypeEnum.PREPAID and c.userAccount.status=org.meveo.model.billing.AccountStatusEnum.ACTIVE AND (c.nextMatchingDate IS NULL OR nextMatchingDate <= :matchingDate) "),
-        @NamedQuery(name = "WalletInstance.openWalletOperationsByCharge", query = "SELECT op.description ,sum(op.quantity) as QT, sum(op.amountWithoutTax) as MT ,op.inputUnitDescription FROM  WalletOperation op , UsageChargeTemplate ct, ChargeInstance ci  where op.wallet.id = :walletInsanceId and  op.status = 'OPEN'  and op.chargeInstance.id = ci.id and ci.chargeTemplate.id = ct.id group by op.description, op.inputUnitDescription"),
-         })
+        @NamedQuery(name = "WalletInstance.openWalletOperationsByCharge", query = "SELECT op.description ,sum(op.quantity) as QT, sum(op.amountWithoutTax) as MT ,op.inputUnitDescription FROM  WalletOperation op , UsageChargeTemplate ct, ChargeInstance ci  where op.wallet.id = :walletInsanceId and  op.status = 'OPEN'  and op.chargeInstance.id = ci.id and ci.chargeTemplate.id = ct.id group by op.description, op.inputUnitDescription"), })
 public class WalletInstance extends BusinessEntity {
 
     private static final long serialVersionUID = 1L;
@@ -148,8 +146,7 @@ public class WalletInstance extends BusinessEntity {
 
     @Override
     public String toString() {
-        return String.format("WalletInstance [%s, walletTemplate=%s, userAccount=%s]", super.toString(), walletTemplate != null ? walletTemplate.getId() : null,
-            userAccount != null ? userAccount.getId() : null);
+        return String.format("WalletInstance [%s, walletTemplate=%s, userAccount=%s]", super.toString(), walletTemplate != null ? walletTemplate.getId() : null, userAccount != null ? userAccount.getId() : null);
     }
 
     /**
@@ -168,7 +165,8 @@ public class WalletInstance extends BusinessEntity {
 
     /**
      */
-    public Date getCreated() { return Created;
+    public Date getCreated() {
+        return Created;
     }
 
     /**

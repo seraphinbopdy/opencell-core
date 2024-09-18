@@ -18,30 +18,31 @@
 
 package org.meveo.model.notification;
 
+import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.PostPersist;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.apache.commons.codec.binary.Base64;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.meveo.commons.keystore.KeystoreManager;
 import org.meveo.model.ModuleItem;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Notification that access URL
@@ -121,11 +122,11 @@ public class WebHook extends Notification {
     /**
      * A list of expressions to construct request headers
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "adm_notif_webhook_header")
-    @Column(name = "headers" )
-    @MapKeyColumn(name="headers_key")
+    @Column(name = "headers")
+    @MapKeyColumn(name = "headers_key")
     private Map<String, String> headers = new HashMap<>();
 
     /**
@@ -206,8 +207,7 @@ public class WebHook extends Notification {
     public String getPassword() {
         if (KeystoreManager.existKeystore()) {
             return getPasswordKS();
-        }
-        else {
+        } else {
             return getPasswordDB();
         }
     }
@@ -217,16 +217,14 @@ public class WebHook extends Notification {
             passwordDB = "";
             this.passwordKS = password;
             setPasswordKS();
-        }
-        else
+        } else
             setPasswordDB(password);
     }
 
     public String getPasswordKS() {
         if (KeystoreManager.existCredential(getClass().getSimpleName() + "." + getId())) {
             return KeystoreManager.retrieveCredential(getClass().getSimpleName() + "." + getId());
-        }
-        else {
+        } else {
             return "";
         }
     }
@@ -237,7 +235,7 @@ public class WebHook extends Notification {
             this.passwordKS = "";
         }
 
-        if (getId() != null && KeystoreManager.existKeystore() &&! this.passwordKS.equals(getPasswordKS())) {
+        if (getId() != null && KeystoreManager.existKeystore() && !this.passwordKS.equals(getPasswordKS())) {
             KeystoreManager.addCredential(getClass().getSimpleName() + "." + getId(), this.passwordKS);
         }
     }
@@ -267,9 +265,8 @@ public class WebHook extends Notification {
     @Override
     public String toString() {
         final int maxLen = 10;
-        return String.format("WebHook [host=%s, port=%s, page=%s, httpMethod=%s, username=%s, pass_word=%s, headers=%s, webhookParams=%s, notification=%s]", host, port, page,
-            httpMethod, username, password, headers != null ? toString(headers.entrySet(), maxLen) : null,
-            webhookParams != null ? toString(webhookParams.entrySet(), maxLen) : null, super.toString());
+        return String.format("WebHook [host=%s, port=%s, page=%s, httpMethod=%s, username=%s, pass_word=%s, headers=%s, webhookParams=%s, notification=%s]", host, port, page, httpMethod, username, password,
+            headers != null ? toString(headers.entrySet(), maxLen) : null, webhookParams != null ? toString(webhookParams.entrySet(), maxLen) : null, super.toString());
     }
 
     private String toString(Collection<?> collection, int maxLen) {

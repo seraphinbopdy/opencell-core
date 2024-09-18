@@ -2,24 +2,23 @@ package org.meveo.model.cpq.tags;
 
 import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.cpq.enums.OperatorEnum;
 import org.meveo.model.cpq.enums.OperatorLogicEnum;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * 
@@ -31,150 +30,141 @@ import org.meveo.model.cpq.enums.OperatorLogicEnum;
 
 @Entity
 @Table(name = "cpq_tag_filter")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_tag_filter_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_tag_filter_seq"), @Parameter(name = "increment_size", value = "1") })
 public class TagFilter extends BusinessEntity {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id")
     private Tag tag;
-	
-	@Column(name = "operator", nullable = false)
-	@Valid
-	@NotNull
-	@Enumerated(EnumType.STRING)
-	private OperatorEnum operator;
-	
-	@Column(name = "entity", length = 50, nullable = false)
-	@Size(max = 50)
-	@NotNull
-	private String entity;
-	
-	@Column(name = "field", nullable = false, length = 50)
-	@NotNull
-	@Valid
-	@Size(max = 50)
-	private String field;
 
-	@Column(name = "comparaison", nullable = false)
-	@Valid
-	@NotNull
-	@Enumerated(EnumType.STRING)
-	private OperatorLogicEnum comparaison;
-	
-	@Column(name = "value", length = 50)
-	@Size(max = 50)
-	private String value;
-	
-	
+    @Column(name = "operator", nullable = false)
+    @Valid
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private OperatorEnum operator;
 
-	public Tag getTag() {
-		return tag;
-	}
+    @Column(name = "entity", length = 50, nullable = false)
+    @Size(max = 50)
+    @NotNull
+    private String entity;
 
-	public void setTag(Tag tag) {
-		this.tag = tag;
-	}
+    @Column(name = "field", nullable = false, length = 50)
+    @NotNull
+    @Valid
+    @Size(max = 50)
+    private String field;
 
-	/**
-	 * @return the operator
-	 */
-	public OperatorEnum getOperator() {
-		return operator;
-	}
+    @Column(name = "comparaison", nullable = false)
+    @Valid
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private OperatorLogicEnum comparaison;
 
-	/**
-	 * @param operator the operator to set
-	 */
-	public void setOperator(OperatorEnum operator) {
-		this.operator = operator;
-	}
+    @Column(name = "value", length = 50)
+    @Size(max = 50)
+    private String value;
 
-	/**
-	 * @return the entity
-	 */
-	public String getEntity() {
-		return entity;
-	}
+    public Tag getTag() {
+        return tag;
+    }
 
-	/**
-	 * @param entity the entity to set
-	 */
-	public void setEntity(String entity) {
-		this.entity = entity;
-	}
+    public void setTag(Tag tag) {
+        this.tag = tag;
+    }
 
-	/**
-	 * @return the field
-	 */
-	public String getField() {
-		return field;
-	}
+    /**
+     * @return the operator
+     */
+    public OperatorEnum getOperator() {
+        return operator;
+    }
 
-	/**
-	 * @param field the field to set
-	 */
-	public void setField(String field) {
-		this.field = field;
-	}
+    /**
+     * @param operator the operator to set
+     */
+    public void setOperator(OperatorEnum operator) {
+        this.operator = operator;
+    }
 
-	/**
-	 * @return the comparison
-	 */
-	public OperatorLogicEnum getComparaison() {
-		return comparaison;
-	}
+    /**
+     * @return the entity
+     */
+    public String getEntity() {
+        return entity;
+    }
 
-	/**
-	 * @param comparaison the comparison to set
-	 */
-	public void setComparaison(OperatorLogicEnum comparaison) {
-		this.comparaison = comparaison;
-	}
+    /**
+     * @param entity the entity to set
+     */
+    public void setEntity(String entity) {
+        this.entity = entity;
+    }
 
-	/**
-	 * @return the value
-	 */
-	public String getValue() {
-		return value;
-	}
+    /**
+     * @return the field
+     */
+    public String getField() {
+        return field;
+    }
 
-	/**
-	 * @param value the value to set
-	 */
-	public void setValue(String value) {
-		this.value = value;
-	}
+    /**
+     * @param field the field to set
+     */
+    public void setField(String field) {
+        this.field = field;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(comparaison, entity, field, operator, value);
-		return result;
-	}
+    /**
+     * @return the comparison
+     */
+    public OperatorLogicEnum getComparaison() {
+        return comparaison;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TagFilter other = (TagFilter) obj;
-		return comparaison == other.comparaison && Objects.equals(entity, other.entity)
-				&& Objects.equals(field, other.field) && operator == other.operator
-				&& Objects.equals(value, other.value);
-	}
+    /**
+     * @param comparaison the comparison to set
+     */
+    public void setComparaison(OperatorLogicEnum comparaison) {
+        this.comparaison = comparaison;
+    }
 
+    /**
+     * @return the value
+     */
+    public String getValue() {
+        return value;
+    }
 
+    /**
+     * @param value the value to set
+     */
+    public void setValue(String value) {
+        this.value = value;
+    }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(comparaison, entity, field, operator, value);
+        return result;
+    }
 
-	
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TagFilter other = (TagFilter) obj;
+        return comparaison == other.comparaison && Objects.equals(entity, other.entity) && Objects.equals(field, other.field) && operator == other.operator && Objects.equals(value, other.value);
+    }
+
 }

@@ -20,13 +20,13 @@ package org.meveo.model.billing;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 /**
  * Invoice category aggregate for the invoice
@@ -163,11 +163,11 @@ public class CategoryInvoiceAgregate extends InvoiceAgregate {
                 amountWithoutTax = amountWithoutTax.add(subCategoryInvoiceAgregate.getAmountWithoutTax());
                 amountWithTax = amountWithTax.add(subCategoryInvoiceAgregate.getAmountWithTax());
                 amountTax = amountTax.add(subCategoryInvoiceAgregate.getAmountTax());
-                if(subCategoryInvoiceAgregate.isUseSpecificPriceConversion()) {
-                	transactionalAmountWithoutTax = transactionalAmountWithoutTax.add(subCategoryInvoiceAgregate.getTransactionalAmountWithoutTax());
-                	transactionalAmountWithTax = transactionalAmountWithTax.add(subCategoryInvoiceAgregate.getTransactionalAmountWithTax());
-                	transactionalAmountTax = transactionalAmountTax.add(subCategoryInvoiceAgregate.getTransactionalAmountTax());
-                	setUseSpecificPriceConversion(true);
+                if (subCategoryInvoiceAgregate.isUseSpecificPriceConversion()) {
+                    transactionalAmountWithoutTax = transactionalAmountWithoutTax.add(subCategoryInvoiceAgregate.getTransactionalAmountWithoutTax());
+                    transactionalAmountWithTax = transactionalAmountWithTax.add(subCategoryInvoiceAgregate.getTransactionalAmountWithTax());
+                    transactionalAmountTax = transactionalAmountTax.add(subCategoryInvoiceAgregate.getTransactionalAmountTax());
+                    setUseSpecificPriceConversion(true);
                 }
             }
         }

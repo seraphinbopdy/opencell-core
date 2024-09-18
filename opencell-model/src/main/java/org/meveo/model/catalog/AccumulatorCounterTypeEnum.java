@@ -7,11 +7,12 @@ package org.meveo.model.catalog;
  */
 public enum AccumulatorCounterTypeEnum {
     MULTI_VALUE(1, "accumulatorCounterTypeEnum.multiValue"), SINGLE_VALUE(2, "accumulatorCounterTypeEnum.singleValue");
+
     private Integer id;
     private String label;
 
     /**
-     * @param id    the ID
+     * @param id the ID
      * @param label the label
      */
     AccumulatorCounterTypeEnum(Integer id, String label) {

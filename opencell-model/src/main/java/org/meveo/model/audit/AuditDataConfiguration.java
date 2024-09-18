@@ -18,21 +18,21 @@
 
 package org.meveo.model.audit;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.NamedStoredProcedureQueries;
-import javax.persistence.NamedStoredProcedureQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.StoredProcedureParameter;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.NamedStoredProcedureQueries;
+import jakarta.persistence.NamedStoredProcedureQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.StoredProcedureParameter;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Configuration for data auditing
@@ -41,7 +41,7 @@ import org.meveo.model.AuditableEntity;
  **/
 @Entity
 @Table(name = "audit_data_config")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "audit_data_config_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "audit_data_config_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "AuditDataConfiguration.findByEntityClass", query = "SELECT adc FROM AuditDataConfiguration adc where adc.entityClass=:entityClass"),
         @NamedQuery(name = "AuditDataConfiguration.getEntityClasses", query = "SELECT adc.entityClass FROM AuditDataConfiguration adc", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }) })
 @NamedStoredProcedureQueries({

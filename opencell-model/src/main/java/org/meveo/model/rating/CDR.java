@@ -18,30 +18,32 @@
 package org.meveo.model.rating;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.PartitionKey;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.custom.CustomFieldValues;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Charging Data Record - CDR - information
@@ -53,19 +55,16 @@ import org.meveo.model.crm.custom.CustomFieldValues;
 @Entity
 @Table(name = "rating_cdr")
 @CustomFieldEntity(cftCodePrefix = "CDR")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "rating_cdr_seq"),
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "rating_cdr_seq"),
         @Parameter(name = "increment_size", value = "5000") })
-@NamedQueries({ 
-        @NamedQuery(name = "CDR.checkFileNameExists", query = "SELECT originBatch FROM CDR where originBatch=:fileName"), 
-        @NamedQuery(name = "CDR.findByEdr", query = "from CDR where headerEDR = :edr"),
-        @NamedQuery(name = "CDR.checkRTBilledExists", query = "from RatedTransaction rt where status = 'BILLED' and rt.edr.originBatch=:fileName"),
+@NamedQueries({ @NamedQuery(name = "CDR.checkFileNameExists", query = "SELECT originBatch FROM CDR where originBatch=:fileName"),
+        @NamedQuery(name = "CDR.findByEdr", query = "select cdr from CDR cdr where cdr.headerEDR = :edr"),
+        @NamedQuery(name = "CDR.checkRTBilledExists", query = "select rt from RatedTransaction rt where status = 'BILLED' and rt.edr.originBatch=:fileName"),
         @NamedQuery(name = "CDR.deleteRTs", query = "delete from RatedTransaction rt where status <> 'BILLED' and rt.edr in (select e from EDR e where e.originBatch=:fileName)"),
         @NamedQuery(name = "CDR.deleteWOs", query = "delete from WalletOperation wo where wo.edr in (select e from EDR e where e.originBatch=:fileName)"),
-        @NamedQuery(name = "CDR.deleteEDRs", query = "delete from EDR where originBatch=:fileName"), 
-        @NamedQuery(name = "CDR.deleteCDRs", query = "delete from CDR where originBatch=:fileName"),
-        @NamedQuery(name = "CDR.listCDRsToReprocess", query = "from CDR where Status = 'TO_REPROCESS'"),
-        @NamedQuery(name = "CDR.checkDuplicateCDR", query = "from CDR cdr where cdr.originRecord = :originRecord")
-})
+        @NamedQuery(name = "CDR.deleteEDRs", query = "delete from EDR where originBatch=:fileName"), @NamedQuery(name = "CDR.deleteCDRs", query = "delete from CDR where originBatch=:fileName"),
+        @NamedQuery(name = "CDR.listCDRsToReprocess", query = "select cdr from CDR cdr where cdr.status = 'TO_REPROCESS'"),
+        @NamedQuery(name = "CDR.checkDuplicateCDR", query = "select cdr from CDR cdr where cdr.originRecord = :originRecord") })
 public class CDR extends BaseEntity implements ICustomFieldEntity {
 
     private static final long serialVersionUID = 1278336601263933734L;
@@ -253,13 +252,14 @@ public class CDR extends BaseEntity implements ICustomFieldEntity {
     /**
      * Parameter
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "EXTRA_PARAMETER")
     private String extraParam;
 
     /**
      * Processing status
      */
+    @PartitionKey
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private CDRStatusEnum status = CDRStatusEnum.OPEN;
@@ -274,7 +274,7 @@ public class CDR extends BaseEntity implements ICustomFieldEntity {
     /**
      * Rejection reason
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "reject_reason")
     private String rejectReason;
 
@@ -297,8 +297,8 @@ public class CDR extends BaseEntity implements ICustomFieldEntity {
 
     /** The serialized CDR dto. to be used while re-processing the CDR */
     // TODO Currently source field is not used when reprocessing a CDR - a line field is used instead
-    //@Type(type = "longText")
-    //@Column(name = "source", nullable = true)
+    // @JdbcTypeCode(Types.LONGVARCHAR)
+    // @Column(name = "source", nullable = true)
     @Transient
     private String source;
 
@@ -717,32 +717,18 @@ public class CDR extends BaseEntity implements ICustomFieldEntity {
     }
 
     @Override
-    public ICustomFieldEntity[] getParentCFEntities() {
-        return null;
-    }
-
-    @Override
-    public CustomFieldValues getCfValues() {
+    public CustomFieldValues getCFValuesTransient() {
         return cfValues;
     }
 
     @Override
-    public void setCfValues(CustomFieldValues cfValues) {
+    public void setCFValuesTransient(CustomFieldValues cfValues) {
         this.cfValues = cfValues;
     }
 
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfAccumulatedValues) {
-        this.cfAccumulatedValues = cfAccumulatedValues;
-    }
-
     /**
-     * Copy parsed values from another CDR 
+     * Copy parsed values from another CDR
+     * 
      * @param otherCDR OtherCDR to copy values from
      */
     public void fillFrom(CDR otherCDR) {
@@ -770,5 +756,17 @@ public class CDR extends BaseEntity implements ICustomFieldEntity {
         this.parameter8 = otherCDR.getParameter8();
         this.parameter9 = otherCDR.getParameter9();
         this.quantity = otherCDR.getQuantity();
+    }
+
+    @Override
+    public String getCfValuesAsJson() {
+
+        // Not implemented as CDR custom fields are fake
+        return null;
+    }
+
+    @Override
+    public void setCfValuesAsJson(String cfValuesAsJson) {
+        // Not implemented as CDR custom fields are fake
     }
 }

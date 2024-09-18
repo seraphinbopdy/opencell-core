@@ -25,16 +25,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
-
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ModuleItem;
 import org.meveo.model.admin.User;
@@ -43,6 +33,16 @@ import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldMapKeyEnum;
 import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 /**
  * Notification by sending email
@@ -56,7 +56,7 @@ import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 public class EmailNotification extends Notification {
 
     private static final long serialVersionUID = -8948201462950547554L;
-    
+
     public static final String EMAIL_TEMPLATE_PARAMS = "EmailTemplate_Params";
 
     /**
@@ -152,8 +152,8 @@ public class EmailNotification extends Notification {
     @Override
     public String toString() {
         final int maxLen = 10;
-        return String.format("EmailNotification [emailFrom=%s, emailToEl=%s, emails=%s,  subject=%s, attachmentExpressions=%s, notification=%s]", emailFrom, emailToEl,
-            emails != null ? toString(emails, maxLen) : null, emailTemplate != null ? emailTemplate.getId() : null, attachmentExpressions != null ? toString(attachmentExpressions, maxLen) : null, super.toString());
+        return String.format("EmailNotification [emailFrom=%s, emailToEl=%s, emails=%s,  subject=%s, attachmentExpressions=%s, notification=%s]", emailFrom, emailToEl, emails != null ? toString(emails, maxLen) : null,
+            emailTemplate != null ? emailTemplate.getId() : null, attachmentExpressions != null ? toString(attachmentExpressions, maxLen) : null, super.toString());
     }
 
     private String toString(Collection<?> collection, int maxLen) {
@@ -168,7 +168,7 @@ public class EmailNotification extends Notification {
         builder.append("]");
         return builder.toString();
     }
-    
+
     public Map<String, CustomFieldTemplate> getCustomFields() {
         Map<String, CustomFieldTemplate> result = new HashMap<String, CustomFieldTemplate>();
 

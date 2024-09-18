@@ -22,9 +22,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.*;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Where;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.IWFEntity;
@@ -34,14 +33,25 @@ import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.RecordedInvoice;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 /**
  * Dunning document
  */
 @Entity
 @WorkflowedEntity
-@Table(name="dunning_document")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "dunning_document_seq"), })
+@Table(name = "dunning_document")
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @org.hibernate.annotations.Parameter(name = "sequence_name", value = "dunning_document_seq"), @Parameter(name = "increment_size", value = "1") })
 public class DunningDocument extends BusinessEntity implements IWFEntity {
 
     /**
@@ -68,8 +78,7 @@ public class DunningDocument extends BusinessEntity implements IWFEntity {
     private List<RecordedInvoice> dueInvoices = new ArrayList<>();
 
     /**
-     * payments done withing the dunning process
-     * associated with this dunning doc
+     * payments done withing the dunning process associated with this dunning doc
      */
     @OneToMany(mappedBy = "dunningDocument", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH, orphanRemoval = true)
     @Where(clause = "transaction_type='P'")
@@ -109,33 +118,33 @@ public class DunningDocument extends BusinessEntity implements IWFEntity {
     public List<Payment> getPayments() {
         return payments;
     }
-    
+
     public void setPayments(List<Payment> payments) {
         this.payments = payments;
     }
-    
+
     @Transient
     public List<Payment> addPayment(Payment payment) {
-        if(payments == null) {
+        if (payments == null) {
             payments = new ArrayList<Payment>();
         }
         payments.add(payment);
         return payments;
     }
-    
+
     @Transient
     public BigDecimal getAmountWithoutTax() {
-		return dueInvoices.stream().map(RecordedInvoice::getAmountWithoutTax).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return dueInvoices.stream().map(RecordedInvoice::getAmountWithoutTax).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-    
+
     @Transient
     public BigDecimal getAmountWithTax() {
-    	return dueInvoices.stream().map(RecordedInvoice::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return dueInvoices.stream().map(RecordedInvoice::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-    
+
     @Transient
     public BigDecimal getPaidAmount() {
-    	return payments.stream().map(Payment::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return payments.stream().map(Payment::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public void setStatus(DunningDocumentStatus status) {

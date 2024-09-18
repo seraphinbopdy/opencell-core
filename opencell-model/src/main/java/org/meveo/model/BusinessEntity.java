@@ -17,15 +17,15 @@
  */
 package org.meveo.model;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Represents a business entity that can be uniquely identified by a code
@@ -78,7 +78,7 @@ public abstract class BusinessEntity extends AuditableEntity implements ISearcha
     }
 
     public void setCode(String code) {
-        this.code = code != null ? code : "" ;
+        this.code = code != null ? code : "";
     }
 
     public String getDescription() {
@@ -215,5 +215,5 @@ public abstract class BusinessEntity extends AuditableEntity implements ISearcha
     public String getReferenceDescription() {
         return description;
     }
-    
+
 }

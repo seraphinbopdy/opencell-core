@@ -20,19 +20,20 @@ package org.meveo.model.bi;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.ExportIdentifier;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 /**
  * Data transformation Job
@@ -40,7 +41,7 @@ import org.meveo.model.ExportIdentifier;
 @Entity
 @ExportIdentifier("name")
 @Table(name = "bi_job")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "bi_job_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "bi_job_seq"), @Parameter(name = "increment_size", value = "1") })
 public class Job extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;
@@ -67,7 +68,7 @@ public class Job extends AuditableEntity {
     /**
      * Is job enabled
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "active")
     private boolean active;
 

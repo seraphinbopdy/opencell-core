@@ -20,12 +20,12 @@ package org.meveo.model.catalog;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 
 /**
  * Product charge template
@@ -35,9 +35,8 @@ import javax.persistence.NamedQuery;
  */
 @Entity
 @DiscriminatorValue("P")
-@NamedQueries({
-            @NamedQuery(name = "productChargeTemplate.getNbrProductWithNotPricePlan", query = "select count (*) from ProductChargeTemplate o where not exists elements(o.pricePlans) "),
-        @NamedQuery(name = "productChargeTemplate.getProductWithNotPricePlan", query = "from ProductChargeTemplate o where not exists elements(o.pricePlans) "), })
+@NamedQueries({ @NamedQuery(name = "productChargeTemplate.getNbrProductWithNotPricePlan", query = "select count (*) from ProductChargeTemplate o where not exists elements(o.pricePlans) "),
+        @NamedQuery(name = "productChargeTemplate.getProductWithNotPricePlan", query = "select o from ProductChargeTemplate o where not exists elements(o.pricePlans) "), })
 public class ProductChargeTemplate extends ChargeTemplate {
 
     private static final long serialVersionUID = 1L;
@@ -55,7 +54,7 @@ public class ProductChargeTemplate extends ChargeTemplate {
     public void setProductTemplates(List<ProductTemplate> productTemplates) {
         this.productTemplates = productTemplates;
     }
-    
+
     @Override
     public ChargeMainTypeEnum getChargeMainType() {
         return ChargeMainTypeEnum.PRODUCT;

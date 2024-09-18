@@ -41,8 +41,7 @@ public enum CustomFieldInheritanceEnum {
     INHERIT_NO_MERGE,
 
     /**
-     * Entity's own custom field values are merged with custom field values from parent entities (map and matrix type). In addition custom field values from parent entities as
-     * retrieved as separate custom field values.
+     * Entity's own custom field values are merged with custom field values from parent entities (map and matrix type). In addition custom field values from parent entities as retrieved as separate custom field values.
      * 
      * CustomFieldsDto.customField = entity's custom field values + parent entity's custom field values, CustomFieldsDto.inheritedCustomField = parent entity's custom field values
      * 
@@ -50,8 +49,7 @@ public enum CustomFieldInheritanceEnum {
     INHERIT_MERGED,
 
     /**
-     * Entity's own custom field values are NOT merged with parent entities custom field values. Inherited custom field values are entity's own custom field values merged with
-     * parent entities custom field values
+     * Entity's own custom field values are NOT merged with parent entities custom field values. Inherited custom field values are entity's own custom field values merged with parent entities custom field values
      * 
      * CustomFieldsDto.customField = entity's custom field values, CustomFieldsDto.inheritedCustomField = entity's custom field values + parent entity's custom field values
      * 

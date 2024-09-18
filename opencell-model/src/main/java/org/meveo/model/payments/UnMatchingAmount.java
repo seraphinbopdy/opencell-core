@@ -17,16 +17,17 @@
  */
 package org.meveo.model.payments;
 
+import java.math.BigDecimal;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import java.math.BigDecimal;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * UnMatchingAmount of Account operations
@@ -35,8 +36,7 @@ import java.math.BigDecimal;
  */
 @Entity
 @Table(name = "ar_unmatching_amount")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_unmatching_amount_seq"),})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_unmatching_amount_seq"), @Parameter(name = "increment_size", value = "1") })
 public class UnMatchingAmount extends AuditableEntity {
 
     @ManyToOne
@@ -124,6 +124,5 @@ public class UnMatchingAmount extends AuditableEntity {
         }
         return false;
     }
-
 
 }

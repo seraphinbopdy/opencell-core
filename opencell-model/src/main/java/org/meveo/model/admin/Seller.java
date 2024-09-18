@@ -17,29 +17,19 @@
  */
 package org.meveo.model.admin;
 
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 import org.meveo.model.AccountEntity;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.CustomFieldEntity;
@@ -52,7 +42,6 @@ import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.billing.GeneralLedger;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.InvoiceTypeSellerSequence;
-import org.meveo.model.billing.IsoIcd;
 import org.meveo.model.billing.TradingCountry;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.billing.TradingLanguage;
@@ -62,8 +51,18 @@ import org.meveo.model.crm.CustomerSequence;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.PaymentGateway;
 
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 /**
  * Seller
@@ -83,7 +82,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 @CustomFieldEntity(cftCodePrefix = "Seller", inheritCFValuesFrom = "seller", inheritFromProvider = true)
 @ExportIdentifier({ "code" })
 @Table(name = "crm_seller")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "crm_seller_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "crm_seller_seq"), @Parameter(name = "increment_size", value = "1") })
 public class Seller extends AccountEntity implements IWFEntity {
 
     private static final long serialVersionUID = 1L;
@@ -112,7 +111,7 @@ public class Seller extends AccountEntity implements IWFEntity {
     /**
      * A legal text for the seller
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "legal_text")
     private String legalText;
 
@@ -154,26 +153,26 @@ public class Seller extends AccountEntity implements IWFEntity {
 
     @OneToMany(mappedBy = "seller", fetch = FetchType.LAZY)
     private List<Contract> contracts = new ArrayList<>();
-    
+
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "billing_seller_media", joinColumns = @JoinColumn(name = "seller_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
     private List<Media> medias = new ArrayList<>();
-	
-	@OneToMany
-	@JoinColumn(name = "seller_id")
-	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
-	
-	public List<RegistrationNumber> getRegistrationNumbers() {
-		if(registrationNumbers == null) {
-			registrationNumbers = new ArrayList<>();
-		}
-		return registrationNumbers;
-	}
-	
-	public void setRegistrationNumbers(List<RegistrationNumber> registrationNumbers) {
-		this.registrationNumbers = registrationNumbers;
-	}
-    
+
+    @OneToMany
+    @JoinColumn(name = "seller_id")
+    private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+
+    public List<RegistrationNumber> getRegistrationNumbers() {
+        if (registrationNumbers == null) {
+            registrationNumbers = new ArrayList<>();
+        }
+        return registrationNumbers;
+    }
+
+    public void setRegistrationNumbers(List<RegistrationNumber> registrationNumbers) {
+        this.registrationNumbers = registrationNumbers;
+    }
+
     public List<Contract> getContracts() {
         return contracts;
     }
@@ -297,8 +296,7 @@ public class Seller extends AccountEntity implements IWFEntity {
     }
 
     /**
-     * Traverse seller hierarchy and find a seller that has a invoice numbering sequence for a given invoice type If the sequence not found on cust.seller, we try in seller.parent
-     * (until seller.parent=null).
+     * Traverse seller hierarchy and find a seller that has a invoice numbering sequence for a given invoice type If the sequence not found on cust.seller, we try in seller.parent (until seller.parent=null).
      * 
      * @param cfName Custom field name storing invoice numbering sequence
      * @param date Date
@@ -349,26 +347,26 @@ public class Seller extends AccountEntity implements IWFEntity {
         this.generalLedger = generalLedger;
     }
 
-	/**
-	 * @return the medias
-	 */
-	public List<Media> getMedias() {
-		return medias;
-	}
+    /**
+     * @return the medias
+     */
+    public List<Media> getMedias() {
+        return medias;
+    }
 
-	/**
-	 * @param medias the medias to set
-	 */
-	public void setMedias(List<Media> medias) {
-		this.medias = medias;
-	}
-	
-	// check if the list of registration numbers is not empty
-	// get all registration numbers and join them with a comma
-	public String getRegistrationNo(){
-		if (isNotEmpty(registrationNumbers)) {
-			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
-		}
-		return registrationNo;
-	}
+    /**
+     * @param medias the medias to set
+     */
+    public void setMedias(List<Media> medias) {
+        this.medias = medias;
+    }
+
+    // check if the list of registration numbers is not empty
+    // get all registration numbers and join them with a comma
+    public String getRegistrationNo() {
+        if (isNotEmpty(registrationNumbers)) {
+            registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+        }
+        return registrationNo;
+    }
 }

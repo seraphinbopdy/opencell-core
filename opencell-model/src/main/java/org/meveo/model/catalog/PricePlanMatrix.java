@@ -18,6 +18,7 @@
 package org.meveo.model.catalog;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,29 +28,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ISearchable;
@@ -60,6 +42,26 @@ import org.meveo.model.billing.TradingCountry;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.scripts.ScriptInstance;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Size;
 
 /**
  * Price plan
@@ -74,11 +76,9 @@ import org.meveo.model.scripts.ScriptInstance;
 @Cacheable
 @CustomFieldEntity(cftCodePrefix = "PricePlanMatrix")
 @Table(name = "cat_price_plan_matrix", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cat_price_plan_matrix_seq"), })
-@NamedQueries({
-        @NamedQuery(name = "PricePlanMatrix.getPricePlansByChargeCode", query = "SELECT ppm from PricePlanMatrix ppm join ppm.chargeTemplates as ct where ct.code=:chargeCode order by ppm.priority ASC"),
-        @NamedQuery(name = "PricePlanMatrix.getActivePricePlansByChargeCode", query = "SELECT ppm from PricePlanMatrix ppm join ppm.chargeTemplates as ct where ppm.disabled is false and ct.code=:chargeCode order by ppm.priority ASC, ppm.id", hints = {
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_price_plan_matrix_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "PricePlanMatrix.getPricePlansByChargeCode", query = "SELECT ppm from PricePlanMatrix ppm join ppm.chargeTemplates as ct where ct.code=:chargeCode order by ppm.priority ASC"),
+        @NamedQuery(name = "PricePlanMatrix.getActivePricePlansByChargeCode", query = "SELECT ppm from PricePlanMatrix ppm join ppm.chargeTemplates as ct where ppm.disabled = false and ct.code=:chargeCode order by ppm.priority ASC, ppm.id", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "true"), @QueryHint(name = "org.hibernate.readOnly", value = "true") }) })
 
 public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparable<PricePlanMatrix>, ISearchable {
@@ -88,51 +88,51 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
      * Cache region for Price plan selection
      */
     public static final String CACHE_REGION_PP = "pp-selection";
-    
-	public PricePlanMatrix() {
-		super();
-	}
 
-	public PricePlanMatrix(PricePlanMatrix copy) {
-		super();
-		this.offerTemplate = copy.offerTemplate;
-		this.startSubscriptionDate = copy.startSubscriptionDate;
-		this.endSubscriptionDate = copy.endSubscriptionDate;
-		this.startRatingDate = copy.startRatingDate;
-		this.endRatingDate = copy.endRatingDate;
-		this.minQuantity = copy.minQuantity;
-		this.maxQuantity = copy.maxQuantity;
-		this.minSubscriptionAgeInMonth = copy.minSubscriptionAgeInMonth;
-		this.maxSubscriptionAgeInMonth = copy.maxSubscriptionAgeInMonth;
-		this.criteria1Value = copy.criteria1Value;
-		this.criteria2Value = copy.criteria2Value;
-		this.criteria3Value = copy.criteria3Value;
-		this.criteriaEL = copy.criteriaEL;
-		this.amountWithoutTax = copy.amountWithoutTax;
-		this.amountWithTax = copy.amountWithTax;
-		this.amountWithoutTaxEL = copy.amountWithoutTaxEL;
-		this.amountWithTaxEL = copy.amountWithTaxEL;
-		this.tradingCurrency = copy.tradingCurrency;
-		this.tradingCountry = copy.tradingCountry;
-		this.priority = copy.priority;
-		this.seller = copy.seller;
-		this.validityCalendar = copy.validityCalendar;
-		this.sequence = copy.sequence;
-		this.scriptInstance = copy.scriptInstance;
-		this.descriptionI18n = copy.descriptionI18n;
-		this.woDescriptionEL = copy.woDescriptionEL;
-		this.totalAmountEL = copy.totalAmountEL;
-		this.minimumAmountEL = copy.minimumAmountEL;
-		this.invoiceSubCategoryEL = copy.invoiceSubCategoryEL;
-		this.validityFrom = copy.validityFrom;
-		this.validityDate = copy.validityDate;
-		this.parameter1El = copy.parameter1El;
-		this.parameter2El = copy.parameter2El;
-		this.parameter3El = copy.parameter3El;
-		this.code = copy.code;
-		this.description = copy.description;
-		this.setUuid(UUID.randomUUID().toString());
-	}
+    public PricePlanMatrix() {
+        super();
+    }
+
+    public PricePlanMatrix(PricePlanMatrix copy) {
+        super();
+        this.offerTemplate = copy.offerTemplate;
+        this.startSubscriptionDate = copy.startSubscriptionDate;
+        this.endSubscriptionDate = copy.endSubscriptionDate;
+        this.startRatingDate = copy.startRatingDate;
+        this.endRatingDate = copy.endRatingDate;
+        this.minQuantity = copy.minQuantity;
+        this.maxQuantity = copy.maxQuantity;
+        this.minSubscriptionAgeInMonth = copy.minSubscriptionAgeInMonth;
+        this.maxSubscriptionAgeInMonth = copy.maxSubscriptionAgeInMonth;
+        this.criteria1Value = copy.criteria1Value;
+        this.criteria2Value = copy.criteria2Value;
+        this.criteria3Value = copy.criteria3Value;
+        this.criteriaEL = copy.criteriaEL;
+        this.amountWithoutTax = copy.amountWithoutTax;
+        this.amountWithTax = copy.amountWithTax;
+        this.amountWithoutTaxEL = copy.amountWithoutTaxEL;
+        this.amountWithTaxEL = copy.amountWithTaxEL;
+        this.tradingCurrency = copy.tradingCurrency;
+        this.tradingCountry = copy.tradingCountry;
+        this.priority = copy.priority;
+        this.seller = copy.seller;
+        this.validityCalendar = copy.validityCalendar;
+        this.sequence = copy.sequence;
+        this.scriptInstance = copy.scriptInstance;
+        this.descriptionI18n = copy.descriptionI18n;
+        this.woDescriptionEL = copy.woDescriptionEL;
+        this.totalAmountEL = copy.totalAmountEL;
+        this.minimumAmountEL = copy.minimumAmountEL;
+        this.invoiceSubCategoryEL = copy.invoiceSubCategoryEL;
+        this.validityFrom = copy.validityFrom;
+        this.validityDate = copy.validityDate;
+        this.parameter1El = copy.parameter1El;
+        this.parameter2El = copy.parameter2El;
+        this.parameter3El = copy.parameter3El;
+        this.code = copy.code;
+        this.description = copy.description;
+        this.setUuid(UUID.randomUUID().toString());
+    }
 
     /**
      * Filtering criteria - Offer template
@@ -243,7 +243,7 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
     /**
      * Expression to calculate amount without tax
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "amount_without_tax_el")
     @Size(max = 2000)
     private String amountWithoutTaxEL;
@@ -251,7 +251,7 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
     /**
      * Expression to calculate amount with tax
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "amount_with_tax_el")
     @Size(max = 2000)
     private String amountWithTaxEL;
@@ -306,33 +306,32 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
     /**
      * Translated descriptions in JSON format with language code as a key and translated description as a value
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "wo_description_el")
     @Size(max = 2000)
     private String woDescriptionEL;
-    
+
     /**
      * Expression to calculate price with/without tax. It overrides quantity x unitPrice when set.
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "total_amount_el")
     @Size(max = 2000)
     private String totalAmountEL;
-        
+
     /**
-	 * Minimum allowed amount for a walletOperation. If this amount is less than the
-	 * walletOperation this amount is save and the old value is save in rawAmount.
-	 */
-    @Type(type = "longText")
+     * Minimum allowed amount for a walletOperation. If this amount is less than the walletOperation this amount is save and the old value is save in rawAmount.
+     */
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "minimum_amount_el")
     @Size(max = 2000)
     private String minimumAmountEL;
-    
-    @Type(type = "longText")
+
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "invoice_subcategory_el")
     @Size(max = 2000)
     private String invoiceSubCategoryEL;
@@ -373,9 +372,9 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
     @OneToMany(mappedBy = "pricePlan", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ContractItem> contractItems;
     /**
-	 * Discount plan items
-	 */
-	@OneToMany(mappedBy = "pricePlanMatrix", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+     * Discount plan items
+     */
+    @OneToMany(mappedBy = "pricePlanMatrix", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<DiscountPlanItem> discountPlanItems = new ArrayList<>();
 
     public OfferTemplate getOfferTemplate() {
@@ -591,13 +590,12 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
     @Override
     public String toString() {
         return String.format(
-                "PricePlanMatrix [%s, offerTemplate=%s, startSubscriptionDate=%s, endSubscriptionDate=%s, startRatingDate=%s, endRatingDate=%s, minQuantity=%s, maxQuantity=%s, " +
-                        "minSubscriptionAgeInMonth=%s, maxSubscriptionAgeInMonth=%s, criteria1Value=%s, criteria2Value=%s, criteria3Value=%s, criteriaEL=%s, amountWithoutTax=%s, " +
-                        "amountWithTax=%s, tradingCurrency=%s, tradingCountry=%s, priority=%s, seller=%s, validityCalendar=%s]",
-                super.toString(), offerTemplate != null ? offerTemplate.getId() : null, startSubscriptionDate, endSubscriptionDate, startRatingDate, endRatingDate,
-                minQuantity, maxQuantity, minSubscriptionAgeInMonth, maxSubscriptionAgeInMonth, criteria1Value, criteria2Value, criteria3Value, criteriaEL, amountWithoutTax,
-                amountWithTax, tradingCurrency != null ? tradingCurrency.getId() : null, tradingCountry != null ? tradingCountry.getId() : null, priority,
-                seller != null ? seller.getId() : null, validityCalendar != null ? validityCalendar.getId() : null);
+            "PricePlanMatrix [%s, offerTemplate=%s, startSubscriptionDate=%s, endSubscriptionDate=%s, startRatingDate=%s, endRatingDate=%s, minQuantity=%s, maxQuantity=%s, "
+                    + "minSubscriptionAgeInMonth=%s, maxSubscriptionAgeInMonth=%s, criteria1Value=%s, criteria2Value=%s, criteria3Value=%s, criteriaEL=%s, amountWithoutTax=%s, "
+                    + "amountWithTax=%s, tradingCurrency=%s, tradingCountry=%s, priority=%s, seller=%s, validityCalendar=%s]",
+            super.toString(), offerTemplate != null ? offerTemplate.getId() : null, startSubscriptionDate, endSubscriptionDate, startRatingDate, endRatingDate, minQuantity, maxQuantity, minSubscriptionAgeInMonth,
+            maxSubscriptionAgeInMonth, criteria1Value, criteria2Value, criteria3Value, criteriaEL, amountWithoutTax, amountWithTax, tradingCurrency != null ? tradingCurrency.getId() : null,
+            tradingCountry != null ? tradingCountry.getId() : null, priority, seller != null ? seller.getId() : null, validityCalendar != null ? validityCalendar.getId() : null);
     }
 
     @Override
@@ -721,8 +719,7 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
     }
 
     /**
-     * Instantiate descriptionI18n field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record
-     * will be updated in DB
+     * Instantiate descriptionI18n field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record will be updated in DB
      * 
      * @return descriptionI18n value or instantiated descriptionI18n field value
      */
@@ -746,7 +743,7 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
     public void setWoDescriptionEL(String woDescriptionEL) {
         this.woDescriptionEL = woDescriptionEL;
     }
-   
+
     public String getInvoiceSubCategoryEL() {
         return invoiceSubCategoryEL;
     }
@@ -757,34 +754,37 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
 
     /**
      * Expression to get the total amount. Previously called ratingEL.
+     * 
      * @return total amount expression
      */
-	public String getTotalAmountEL() {
-		return totalAmountEL;
-	}
+    public String getTotalAmountEL() {
+        return totalAmountEL;
+    }
 
-	/**
-	 * Expression to get the total amount. Previously called ratingEL.
-	 * @param totalAmountEL EL expression
-	 */
-	public void setTotalAmountEL(String totalAmountEL) {
-		this.totalAmountEL = totalAmountEL;
-	}
+    /**
+     * Expression to get the total amount. Previously called ratingEL.
+     * 
+     * @param totalAmountEL EL expression
+     */
+    public void setTotalAmountEL(String totalAmountEL) {
+        this.totalAmountEL = totalAmountEL;
+    }
 
-	/**
-	 * Expression to set the minimum allowed amount. 
-	 * @return EL expression
-	 */
-	public String getMinimumAmountEL() {
-		return minimumAmountEL;
-	}
+    /**
+     * Expression to set the minimum allowed amount.
+     * 
+     * @return EL expression
+     */
+    public String getMinimumAmountEL() {
+        return minimumAmountEL;
+    }
 
-	/**
-	 * @param minimumAmountEL Expression to set the minimum allowed amount. 
-	 */
-	public void setMinimumAmountEL(String minimumAmountEL) {
-		this.minimumAmountEL = minimumAmountEL;
-	}
+    /**
+     * @param minimumAmountEL Expression to set the minimum allowed amount.
+     */
+    public void setMinimumAmountEL(String minimumAmountEL) {
+        this.minimumAmountEL = minimumAmountEL;
+    }
 
     public Date getValidityFrom() {
         return validityFrom;
@@ -865,7 +865,7 @@ public class PricePlanMatrix extends EnableBusinessCFEntity implements Comparabl
     }
 
     public String getLocalizedDescription(String lang) {
-        if(descriptionI18n != null) {
+        if (descriptionI18n != null) {
             return descriptionI18n.getOrDefault(lang, this.description);
         } else {
             return this.description;

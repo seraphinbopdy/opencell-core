@@ -19,19 +19,19 @@ package org.meveo.model.billing;
 
 import java.math.BigDecimal;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.validation.constraints.Size;
-
-import org.meveo.model.catalog.UsageChargeTemplate;
 import org.meveo.model.catalog.ChargeTemplate.ChargeMainTypeEnum;
+import org.meveo.model.catalog.UsageChargeTemplate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.validation.constraints.Size;
 
 /**
  * Usage charge as part of subscribed service
@@ -46,7 +46,7 @@ import org.meveo.model.catalog.ChargeTemplate.ChargeMainTypeEnum;
         @NamedQuery(name = "UsageChargeInstance.getActiveUsageChargesBySubscriptionId", query = "SELECT c FROM UsageChargeInstance c where c.status='ACTIVE' and c.subscription.id=:subscriptionId order by c.priority ASC", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
         @NamedQuery(name = "UsageChargeInstance.getActiveUsageCharges", query = "SELECT c FROM UsageChargeInstance c where c.status='ACTIVE'  order by c.priority ASC", hints = {
-                @QueryHint(name = "org.hibernate.cacheable", value = "true") })})
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }) })
 public class UsageChargeInstance extends ChargeInstance {
 
     private static final long serialVersionUID = 1L;
@@ -77,7 +77,7 @@ public class UsageChargeInstance extends ChargeInstance {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "charge_template_id", insertable = false, updatable = false)
     private UsageChargeTemplate usageChargeTemplate;
-    
+
     /**
      * Instantiate Usage charge instance
      */
@@ -93,13 +93,12 @@ public class UsageChargeInstance extends ChargeInstance {
      * @param serviceInstance Service instance that charge will belong to
      * @param status Activation status
      */
-    public UsageChargeInstance(BigDecimal amountWithoutTax, BigDecimal amountWithTax, UsageChargeTemplate usageChargeTemplate, ServiceInstance serviceInstance,
-            InstanceStatusEnum status) {
+    public UsageChargeInstance(BigDecimal amountWithoutTax, BigDecimal amountWithTax, UsageChargeTemplate usageChargeTemplate, ServiceInstance serviceInstance, InstanceStatusEnum status) {
 
         super(amountWithoutTax, amountWithTax, usageChargeTemplate, serviceInstance, status);
 
         String chargeRatingUnitDescription = usageChargeTemplate.getRatingUnitDescription();
-		this.ratingUnitDescription = chargeRatingUnitDescription==null || chargeRatingUnitDescription.length()<20?chargeRatingUnitDescription:chargeRatingUnitDescription.substring(0,20);
+        this.ratingUnitDescription = chargeRatingUnitDescription == null || chargeRatingUnitDescription.length() < 20 ? chargeRatingUnitDescription : chargeRatingUnitDescription.substring(0, 20);
         this.priority = usageChargeTemplate.getPriority();
         this.usageChargeTemplate = usageChargeTemplate;
     }
@@ -132,11 +131,11 @@ public class UsageChargeInstance extends ChargeInstance {
     public ChargeMainTypeEnum getChargeMainType() {
         return ChargeMainTypeEnum.USAGE;
     }
-    
+
     public UsageChargeTemplate getUsageChargeTemplate() {
         return usageChargeTemplate;
     }
-    
+
     public void setUsageChargeTemplate(UsageChargeTemplate usageChargeTemplate) {
         this.usageChargeTemplate = usageChargeTemplate;
     }

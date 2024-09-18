@@ -17,9 +17,8 @@
  */
 package org.meveo.model.cpq.enums;
 
-
-/** 
- * @author Mbarek-Ay 
+/**
+ * @author Mbarek-Ay
  * @lastModifiedVersion 11.0
  */
 

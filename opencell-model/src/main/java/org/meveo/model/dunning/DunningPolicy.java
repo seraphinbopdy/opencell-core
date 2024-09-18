@@ -1,26 +1,37 @@
 package org.meveo.model.dunning;
 
-import static javax.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.LAZY;
+
+import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.EnableEntity;
 import org.meveo.model.admin.Currency;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "dunning_policy")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "dunning_policy_seq")})
-@NamedQueries({
-        @NamedQuery(name = "DunningPolicy.findByName", query = "SELECT dp FROM DunningPolicy dp where dp.policyName=:policyName"),
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_policy_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "DunningPolicy.findByName", query = "SELECT dp FROM DunningPolicy dp where dp.policyName=:policyName"),
         @NamedQuery(name = "DunningPolicy.listPoliciesByIsActive", query = "SELECT DISTINCT dp FROM DunningPolicy dp left join fetch dp.dunningLevels dpl left join fetch dpl.dunningLevel dl where dp.isActivePolicy=:active"),
         @NamedQuery(name = "DunningPolicy.DeactivateDunningPolicies", query = "UPDATE DunningPolicy dp SET dp.isActivePolicy=false WHERE dp.id IN (:ids)"),
-        @NamedQuery(name = "DunningPolicy.checkIfPriorityAlreadyTaken", query = "SELECT dp FROM DunningPolicy dp where dp.policyPriority=:priority")})
+        @NamedQuery(name = "DunningPolicy.checkIfPriorityAlreadyTaken", query = "SELECT dp FROM DunningPolicy dp where dp.policyPriority=:priority") })
 public class DunningPolicy extends EnableEntity {
 
     private static final long serialVersionUID = 1L;
@@ -49,29 +60,29 @@ public class DunningPolicy extends EnableEntity {
     private DunningDetermineLevelBy determineLevelBy;
 
     @Column(name = "include_due_invoices_in_threshold")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean includeDueInvoicesInThreshold;
 
     @Column(name = "total_dunning_levels")
     private Integer totalDunningLevels;
 
     @Column(name = "include_pay_reminder")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean includePayReminder;
 
     @Column(name = "attach_invoices_to_emails")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean attachInvoicesToEmails;
 
     @Column(name = "policy_priority")
     private Integer policyPriority;
 
     @Column(name = "is_default_policy")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean isDefaultPolicy;
 
     @Column(name = "is_active_policy")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean isActivePolicy;
 
     @Column(name = "type", nullable = false)

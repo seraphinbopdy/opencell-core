@@ -18,20 +18,20 @@
 
 package org.meveo.model.billing;
 
-import org.meveo.model.cpq.commercial.CommercialOrder;
-
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.CascadeType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Transient;
+import org.meveo.model.cpq.commercial.CommercialOrder;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Transient;
 
 @Entity
 @DiscriminatorValue("R")
@@ -90,12 +90,11 @@ public class WalletReservation extends WalletOperation {
      * @param commercialOrder commercial order
      */
     public WalletReservation(ChargeInstance chargeInstance, BigDecimal inputQuantity, BigDecimal quantityInChargeUnits, Date operationDate, String orderNumber, String criteria1, String criteria2, String criteria3,
-                             String criteriaExtra, Tax tax, Date startDate, Date endDate, AccountingCode accountingCode, Date invoicingDate, Reservation reservation, CommercialOrder commercialOrder) {
-        super(chargeInstance, inputQuantity, quantityInChargeUnits, operationDate, orderNumber, criteria1, criteria2, criteria3, criteriaExtra,
-                tax, startDate, endDate, accountingCode, invoicingDate, commercialOrder);
-        
+            String criteriaExtra, Tax tax, Date startDate, Date endDate, AccountingCode accountingCode, Date invoicingDate, Reservation reservation, CommercialOrder commercialOrder) {
+        super(chargeInstance, inputQuantity, quantityInChargeUnits, operationDate, orderNumber, criteria1, criteria2, criteria3, criteriaExtra, tax, startDate, endDate, accountingCode, invoicingDate, commercialOrder);
+
         this.reservation = reservation;
-                
+
         setStatus(WalletOperationStatusEnum.RESERVED);
     }
 

@@ -19,8 +19,7 @@ package org.meveo.model.accountingScheme;
 
 public enum JournalEntryDirectionEnum {
 
-    DEBIT(1, "accountingEntryDirectionEnum.debit"),
-    CREDIT(2, "accountingEntryDirectionEnum.credit");
+    DEBIT(1, "accountingEntryDirectionEnum.debit"), CREDIT(2, "accountingEntryDirectionEnum.credit");
 
     private String label;
     private Integer id;

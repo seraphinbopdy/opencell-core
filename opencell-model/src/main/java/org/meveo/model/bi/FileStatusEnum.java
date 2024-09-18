@@ -30,8 +30,8 @@ public enum FileStatusEnum {
      */
     BAD_FORMED,
     /**
-     * indicates syntactic correctness and the file content respect the configuration template (beanIO or flatWorm)
-     * Note : the file is only controlled by the fileFormat validator and not yet validated by the appropriate job.
+     * indicates syntactic correctness and the file content respect the configuration template (beanIO or flatWorm) Note : the file is only controlled by the fileFormat validator and not yet validated by the appropriate
+     * job.
      */
     WELL_FORMED,
     /**

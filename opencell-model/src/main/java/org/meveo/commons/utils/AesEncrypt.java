@@ -34,115 +34,113 @@ import org.apache.commons.codec.binary.Base64;
 
 public class AesEncrypt {
 
-	private Cipher cipher;
+    private Cipher cipher;
 
-	/**
-	 * 
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 */
-	@SuppressWarnings("java:S5542")
-	public AesEncrypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
-		this.cipher = Cipher.getInstance("AES");
-	}
+    /**
+     * 
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     */
+    @SuppressWarnings("java:S5542")
+    public AesEncrypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
+        this.cipher = Cipher.getInstance("AES");
+    }
 
-	/**
-	 * 
-	 * @param key
-	 * @return Secret key
-	 * @throws Exception
-	 */
-	public SecretKey getKey(String key) {
-		byte[] keyBytes = Base64.decodeBase64(key);
-		return new SecretKeySpec(keyBytes, "AES");		
-	}
+    /**
+     * 
+     * @param key
+     * @return Secret key
+     * @throws Exception
+     */
+    public SecretKey getKey(String key) {
+        byte[] keyBytes = Base64.decodeBase64(key);
+        return new SecretKeySpec(keyBytes, "AES");
+    }
 
-	/**
+    /**
      * 
      * @return String encryption/decryption key from opencell-admin.properties
      */
-    public String getFileKey()  {
+    public String getFileKey() {
         return ParamBean.getInstance().getProperty("opencell.aes.key", null);
     }
 
-	/**
-	 * 
-	 * @param msg encrypt
-	 * @param key secretKey
-	 * @return encrypted msg
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 * @throws UnsupportedEncodingException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 * @throws InvalidKeyException
-	 */
-	public String encryptText(String msg, SecretKey key) throws 
-			 IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
-		this.cipher.init(Cipher.ENCRYPT_MODE, key);
-		return Base64.encodeBase64String(cipher.doFinal(msg.getBytes(StandardCharsets.UTF_8)));
-	}
+    /**
+     * 
+     * @param msg encrypt
+     * @param key secretKey
+     * @return encrypted msg
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws UnsupportedEncodingException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws InvalidKeyException
+     */
+    public String encryptText(String msg, SecretKey key) throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        this.cipher.init(Cipher.ENCRYPT_MODE, key);
+        return Base64.encodeBase64String(cipher.doFinal(msg.getBytes(StandardCharsets.UTF_8)));
+    }
 
-	/**
-	 * 
-	 * @param msg to decrypt
-	 * @param key secretKey
-	 * @return
-	 * @throws InvalidKeyException
-	 * @throws UnsupportedEncodingException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 */
-	public String decryptText(String msg, SecretKey key)
-			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		this.cipher.init(Cipher.DECRYPT_MODE, key);
-		return new String(cipher.doFinal(Base64.decodeBase64(msg)),StandardCharsets.UTF_8);
-	}
+    /**
+     * 
+     * @param msg to decrypt
+     * @param key secretKey
+     * @return
+     * @throws InvalidKeyException
+     * @throws UnsupportedEncodingException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
+    public String decryptText(String msg, SecretKey key) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        this.cipher.init(Cipher.DECRYPT_MODE, key);
+        return new String(cipher.doFinal(Base64.decodeBase64(msg)), StandardCharsets.UTF_8);
+    }
 
-	/**
-	 * 
-	 * @param iban
-	 * @param ae
-	 * @return encryptedIban if encryption key exist in config file else return iban
-	 * @throws Exception
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 * @throws UnsupportedEncodingException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 * @throws InvalidKeyException
-	 */
-	public String getEncyptedIban(String iban, AesEncrypt ae) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
-		String encryptedIban;
-		String key = ae.getFileKey();
-		if(key == null || key.isEmpty()) {
-			return iban;
-		}
-		SecretKey secretKey = ae.getKey(key);
-		encryptedIban = ae.encryptText(iban, secretKey);
-		return "AES" + encryptedIban;
-	}
+    /**
+     * 
+     * @param iban
+     * @param ae
+     * @return encryptedIban if encryption key exist in config file else return iban
+     * @throws Exception
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws UnsupportedEncodingException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws InvalidKeyException
+     */
+    public String getEncyptedIban(String iban, AesEncrypt ae) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        String encryptedIban;
+        String key = ae.getFileKey();
+        if (key == null || key.isEmpty()) {
+            return iban;
+        }
+        SecretKey secretKey = ae.getKey(key);
+        encryptedIban = ae.encryptText(iban, secretKey);
+        return "AES" + encryptedIban;
+    }
 
-	/**
-	 * 
-	 * @param iban
-	 * @param ae
-	 * @return decryptedIban if encryption key exist in config file else return iban
-	 * @throws Exception
-	 * @throws InvalidKeyException
-	 * @throws UnsupportedEncodingException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 */
-	public String getDecryptedIban(String iban, AesEncrypt ae) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		String decryptedIban;
-		String key = ae.getFileKey();
-		if(key == null || key.isEmpty()) {
-			return iban;
-		}
-		SecretKey secretKey = ae.getKey(key);
-		decryptedIban = ae.decryptText(iban, secretKey);
-		return decryptedIban;
-	}
+    /**
+     * 
+     * @param iban
+     * @param ae
+     * @return decryptedIban if encryption key exist in config file else return iban
+     * @throws Exception
+     * @throws InvalidKeyException
+     * @throws UnsupportedEncodingException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
+    public String getDecryptedIban(String iban, AesEncrypt ae) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        String decryptedIban;
+        String key = ae.getFileKey();
+        if (key == null || key.isEmpty()) {
+            return iban;
+        }
+        SecretKey secretKey = ae.getKey(key);
+        decryptedIban = ae.decryptText(iban, secretKey);
+        return decryptedIban;
+    }
 
 }

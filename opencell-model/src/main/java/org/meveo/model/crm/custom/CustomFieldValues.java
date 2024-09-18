@@ -34,15 +34,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.persistence.Transient;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-
 import org.meveo.model.DatePeriod;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -52,6 +43,15 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
+import jakarta.persistence.Transient;
 
 /**
  * Represents custom field values held by an ICustomFieldEntity entity
@@ -131,6 +131,7 @@ public class CustomFieldValues implements Cloneable, Serializable {
      * @param newValuesByCode values by code
      */
     public void setValuesByCode(Map<String, List<CustomFieldValue>> newValuesByCode) {
+
         this.valuesByCode = newValuesByCode;
     }
 
@@ -140,6 +141,7 @@ public class CustomFieldValues implements Cloneable, Serializable {
      * @param newValuesByCode values by code
      */
     public void setValues(Map<String, List<CustomFieldValue>> newValuesByCode) {
+
         if (newValuesByCode == null || newValuesByCode.isEmpty()) {
             clearValues();
             return;
@@ -544,6 +546,7 @@ public class CustomFieldValues implements Cloneable, Serializable {
      * @param value Value to set
      */
     public void setValue(String cfCode, Object value) {
+
         if (valuesByCode == null) {
             valuesByCode = new HashMap<>();
         }
@@ -580,6 +583,7 @@ public class CustomFieldValues implements Cloneable, Serializable {
      * @param value Value to set
      */
     public void setValue(String cfCode, DatePeriod period, Integer priority, Object value) {
+
         if (valuesByCode == null) {
             valuesByCode = new HashMap<>();
         }
@@ -611,8 +615,7 @@ public class CustomFieldValues implements Cloneable, Serializable {
                 dirtyCfValues.add(cfCode);
             }
             DatePeriod oldPeriod = valueByPeriod.getPeriod();
-            if (oldPriority != null && oldPriority == priority && oldPeriod != null && period != null && (!Objects.equals(oldPeriod.getFrom(), period.getFrom())
-                    || !Objects.equals(oldPeriod.getTo(), period.getTo()))) {
+            if (oldPriority != null && oldPriority == priority && oldPeriod != null && period != null && (!Objects.equals(oldPeriod.getFrom(), period.getFrom()) || !Objects.equals(oldPeriod.getTo(), period.getTo()))) {
                 valueByPeriod.setPeriod(period);
 
                 // Mark dirty fields - value change
@@ -999,7 +1002,7 @@ public class CustomFieldValues implements Cloneable, Serializable {
 
     @Override
     public CustomFieldValues clone() {
-        if(getValuesByCode() != null) {
+        if (getValuesByCode() != null) {
             Map<String, List<CustomFieldValue>> cfCopy = new HashMap<>();
             for (Entry<String, List<CustomFieldValue>> cfValue : getValuesByCode().entrySet()) {
                 if (!cfValue.getValue().isEmpty()) {

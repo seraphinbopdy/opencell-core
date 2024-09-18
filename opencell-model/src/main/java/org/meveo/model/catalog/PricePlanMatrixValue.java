@@ -3,27 +3,28 @@ package org.meveo.model.catalog;
 import java.util.Date;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BaseEntity;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "cpq_price_plan_matrix_value")
 
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "cpq_price_plan_matrix_value_sq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_price_plan_matrix_value_sq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "PricePlanMatrixValue.findByPricePlanMatrixLine", query = "select p from PricePlanMatrixValue p where p.pricePlanMatrixLine=:pricePlanMatrixLine"),
         @NamedQuery(name = "PricePlanMatrixValue.findByPPVersionForRating", query = "select new org.meveo.model.catalog.PricePlanMatrixValueForRating(pc.attribute.id, pc.type, pl.id, pl.ratingAccuracy=0, pv.longValue, pv.doubleValue, pv.stringValue, pv.dateValue, pv.fromDateValue, pv.toDateValue, pv.fromDoubleValue, pv.toDoubleValue, pv.booleanValue) from PricePlanMatrixValue pv right join pv.pricePlanMatrixLine pl left join pv.pricePlanMatrixColumn pc where pl.pricePlanMatrixVersion.id=:pricePlanMatrixVersionId order by pl.priority, pl.ratingAccuracy desc, pl.id", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }) })
@@ -65,14 +66,12 @@ public class PricePlanMatrixValue extends BaseEntity {
     @Column(name = "to_double_value")
     private Double toDoubleValue;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "boolean_value")
     protected Boolean booleanValue;
-    
-    
 
     public PricePlanMatrixValue() {
-	}
+    }
 
     public PricePlanMatrixValue(PricePlanMatrixValue copy) {
         this.pricePlanMatrixColumn = copy.pricePlanMatrixColumn;
@@ -170,20 +169,15 @@ public class PricePlanMatrixValue extends BaseEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PricePlanMatrixValue)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof PricePlanMatrixValue))
+            return false;
         PricePlanMatrixValue that = (PricePlanMatrixValue) o;
-        return Objects.equals(getPricePlanMatrixLine(), that.getPricePlanMatrixLine()) &&
-                Objects.equals(getLongValue(), that.getLongValue()) &&
-                Objects.equals(getDoubleValue(), that.getDoubleValue()) &&
-                Objects.equals(getStringValue(), that.getStringValue()) &&
-                Objects.equals(getDateValue(), that.getDateValue()) &&
-                Objects.equals(getFromDateValue(), that.getFromDateValue()) &&
-                Objects.equals(getToDateValue(), that.getToDateValue()) &&
-                Objects.equals(getFromDoubleValue(), that.getFromDoubleValue()) &&
-                Objects.equals(getToDoubleValue(), that.getToDoubleValue()) &&
-                Objects.equals(getPricePlanMatrixColumn(), that.getPricePlanMatrixColumn())
-                ;
+        return Objects.equals(getPricePlanMatrixLine(), that.getPricePlanMatrixLine()) && Objects.equals(getLongValue(), that.getLongValue()) && Objects.equals(getDoubleValue(), that.getDoubleValue())
+                && Objects.equals(getStringValue(), that.getStringValue()) && Objects.equals(getDateValue(), that.getDateValue()) && Objects.equals(getFromDateValue(), that.getFromDateValue())
+                && Objects.equals(getToDateValue(), that.getToDateValue()) && Objects.equals(getFromDoubleValue(), that.getFromDoubleValue()) && Objects.equals(getToDoubleValue(), that.getToDoubleValue())
+                && Objects.equals(getPricePlanMatrixColumn(), that.getPricePlanMatrixColumn());
     }
 
     @Override

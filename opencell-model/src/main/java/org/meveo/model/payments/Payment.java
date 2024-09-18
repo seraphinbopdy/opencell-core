@@ -17,11 +17,16 @@
  */
 package org.meveo.model.payments;
 
-import org.meveo.model.dunning.DunningDocument;
-
 import java.math.BigDecimal;
 
-import javax.persistence.*;
+import org.meveo.model.dunning.DunningDocument;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 @DiscriminatorValue(value = "P")
@@ -46,8 +51,8 @@ public class Payment extends AccountOperation {
      * Amount of financial expenses exluded in the amount
      */
     @Column(name = "payment_fees")
-    private BigDecimal fees = BigDecimal.ZERO;    
-    
+    private BigDecimal fees = BigDecimal.ZERO;
+
     /**
      * Transactional amount of financial expenses exluded in the amount
      */
@@ -62,7 +67,8 @@ public class Payment extends AccountOperation {
     private PaymentGateway paymentGateway;
 
     /**
-     * get the  associated dunning doc if exists
+     * get the associated dunning doc if exists
+     * 
      * @return dunningDocument
      */
     public DunningDocument getDunningDocument() {
@@ -71,6 +77,7 @@ public class Payment extends AccountOperation {
 
     /**
      * set the dunning doc of the payment
+     * 
      * @param dunningDocument
      */
     public void setDunningDocument(DunningDocument dunningDocument) {
@@ -105,19 +112,19 @@ public class Payment extends AccountOperation {
         this.fees = fees;
     }
 
-	/**
-	 * @return the transactionalFees
-	 */
-	public BigDecimal getTransactionalFees() {
-		return transactionalFees;
-	}
+    /**
+     * @return the transactionalFees
+     */
+    public BigDecimal getTransactionalFees() {
+        return transactionalFees;
+    }
 
-	/**
-	 * @param transactionalFees the transactionalFees to set
-	 */
-	public void setTransactionalFees(BigDecimal transactionalFees) {
-		this.transactionalFees = transactionalFees;
-	}
+    /**
+     * @param transactionalFees the transactionalFees to set
+     */
+    public void setTransactionalFees(BigDecimal transactionalFees) {
+        this.transactionalFees = transactionalFees;
+    }
 
     public PaymentGateway getPaymentGateway() {
         return paymentGateway;

@@ -18,12 +18,7 @@
 
 package org.meveo.model.crm;
 
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import java.util.Objects;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
@@ -32,7 +27,12 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.sequence.GenericSequence;
 
-import java.util.Objects;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Customer numbering sequence
@@ -43,8 +43,7 @@ import java.util.Objects;
 @Entity
 @ExportIdentifier({ "code", "seller.code" })
 @Table(name = "crm_customer_sequence")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "crm_customer_sequence_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "crm_customer_sequence_seq"), @Parameter(name = "increment_size", value = "1") })
 public class CustomerSequence extends BusinessEntity {
 
     private static final long serialVersionUID = 181203276349593823L;
@@ -77,18 +76,21 @@ public class CustomerSequence extends BusinessEntity {
     public void setSeller(Seller seller) {
         this.seller = seller;
     }
-	
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof CustomerSequence)) return false;
-		if (!super.equals(o)) return false;
-		CustomerSequence that = (CustomerSequence) o;
-		return Objects.equals(getGenericSequence(), that.getGenericSequence()) && Objects.equals(getSeller(), that.getSeller());
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(super.hashCode(), getGenericSequence(), getSeller());
-	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof CustomerSequence))
+            return false;
+        if (!super.equals(o))
+            return false;
+        CustomerSequence that = (CustomerSequence) o;
+        return Objects.equals(getGenericSequence(), that.getGenericSequence()) && Objects.equals(getSeller(), that.getSeller());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getGenericSequence(), getSeller());
+    }
 }

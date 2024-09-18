@@ -4,16 +4,21 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "dunning_policy_rule_line")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "dunning_policy_rule_line_seq")})
-@NamedQueries({
-    @NamedQuery(name = "DunningPolicyRuleLine.findByDunningPolicyId", query = "SELECT dprl from DunningPolicyRuleLine dprl where dprl.dunningPolicyRule.dunningPolicy.id = :policyId"),
-    @NamedQuery(name = "DunningPolicyRuleLine.findByDunningPolicyRuleId", query = "SELECT dprl from DunningPolicyRuleLine dprl where dprl.dunningPolicyRule.id = :dunningPolicyRuleId")})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_policy_rule_line_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "DunningPolicyRuleLine.findByDunningPolicyId", query = "SELECT dprl from DunningPolicyRuleLine dprl where dprl.dunningPolicyRule.dunningPolicy.id = :policyId"),
+        @NamedQuery(name = "DunningPolicyRuleLine.findByDunningPolicyRuleId", query = "SELECT dprl from DunningPolicyRuleLine dprl where dprl.dunningPolicyRule.id = :dunningPolicyRuleId") })
 public class DunningPolicyRuleLine extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;

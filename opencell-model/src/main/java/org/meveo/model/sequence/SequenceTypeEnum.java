@@ -19,6 +19,7 @@
 package org.meveo.model.sequence;
 
 import static java.util.Arrays.stream;
+
 /**
  * Type of generic sequence.
  * 
@@ -29,9 +30,6 @@ public enum SequenceTypeEnum {
     RUM, CUSTOMER_NO, SEQUENCE, NUMERIC, ALPHA_UP, UUID, REGEXP;
 
     public static SequenceTypeEnum fromValue(String value) {
-        return  stream(SequenceTypeEnum.values())
-                    .filter(sequenceType -> sequenceType.name().equalsIgnoreCase(value))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("No sequence type for value : " + value));
+        return stream(SequenceTypeEnum.values()).filter(sequenceType -> sequenceType.name().equalsIgnoreCase(value)).findFirst().orElseThrow(() -> new IllegalArgumentException("No sequence type for value : " + value));
     }
 }

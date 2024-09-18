@@ -20,8 +20,7 @@ package org.meveo.model.notification;
 
 public enum StrategyImportTypeEnum {
 
-    UPDATED(1, "enum.strategyImportTypeEnum.UPDATED"), REJECTE_IMPORT(2, "enum.strategyImportTypeEnum.REJECTE_IMPORT"), REJECT_EXISTING_RECORDS(3,
-            "enum.strategyImportTypeEnum.REJECT_EXISTING_RECORDS");
+    UPDATED(1, "enum.strategyImportTypeEnum.UPDATED"), REJECTE_IMPORT(2, "enum.strategyImportTypeEnum.REJECTE_IMPORT"), REJECT_EXISTING_RECORDS(3, "enum.strategyImportTypeEnum.REJECT_EXISTING_RECORDS");
 
     private Integer id;
     private String label;

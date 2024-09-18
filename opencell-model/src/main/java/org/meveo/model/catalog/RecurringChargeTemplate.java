@@ -17,22 +17,23 @@
  */
 package org.meveo.model.catalog;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.cpq.Attribute;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Recurring charge template
@@ -46,7 +47,7 @@ import org.meveo.model.cpq.Attribute;
         @NamedQuery(name = "recurringChargeTemplate.getNbrRecurringChrgNotAssociated", query = "select count(*) from RecurringChargeTemplate r where (r.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateRecurring serv) "
                 + " OR not exists elements(r.pricePlans) )", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
 
-        @NamedQuery(name = "recurringChargeTemplate.getRecurringChrgNotAssociated", query = "from RecurringChargeTemplate r where (r.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateRecurring serv) "
+        @NamedQuery(name = "recurringChargeTemplate.getRecurringChrgNotAssociated", query = "select r from RecurringChargeTemplate r where (r.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateRecurring serv) "
                 + " OR not exists elements(r.pricePlans) )  ") })
 public class RecurringChargeTemplate extends ChargeTemplate {
 
@@ -75,21 +76,21 @@ public class RecurringChargeTemplate extends ChargeTemplate {
     /**
      * Prorate amount when subscribing
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "subscription_prorata")
     private Boolean subscriptionProrata;
 
     /**
      * Prorate amount when terminating
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "termination_prorata")
     private Boolean terminationProrata;
 
     /**
      * Prorata On Price Change subscribed
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "prorata_on_price_change", nullable = false)
     @NotNull
     private boolean prorataOnPriceChange = false;
@@ -97,7 +98,7 @@ public class RecurringChargeTemplate extends ChargeTemplate {
     /**
      * Apply charge in advance - at the beginning of the period. If false, charge will be applied at the end of the period
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "apply_in_advance")
     private Boolean applyInAdvance;
 
@@ -149,19 +150,17 @@ public class RecurringChargeTemplate extends ChargeTemplate {
     @Column(name = "apply_terminated_charge_to_date_el", length = 2000)
     @Size(max = 2000)
     private String applyTerminatedChargeToDateEL;
-    
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attribute_duration_id")
     private Attribute attributeDuration;
-    
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attribute_calendar_id")
     private Attribute attributeCalendar;
-    
+
     @Column(name = "anticipate_end_of_subscription")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean anticipateEndOfSubscription;
 
     /**
@@ -376,14 +375,14 @@ public class RecurringChargeTemplate extends ChargeTemplate {
     public void setProrataOnPriceChange(boolean prorataOnPriceChange) {
         this.prorataOnPriceChange = prorataOnPriceChange;
     }
-    
+
     /**
      * @return Expression to determine and override the date that recurring charge should be charged to upon charge/service termination
      */
     public String getApplyTerminatedChargeToDateEL() {
         return applyTerminatedChargeToDateEL;
     }
-    
+
     /**
      * @param applyTerminatedChargeToDateEL Expression to determine and override the date that recurring charge should be charged to upon charge/service termination
      */
@@ -391,46 +390,46 @@ public class RecurringChargeTemplate extends ChargeTemplate {
         this.applyTerminatedChargeToDateEL = applyTerminatedChargeToDateEL;
     }
 
-	/**
-	 * @return the attributeDuration
-	 */
-	public Attribute getAttributeDuration() {
-		return attributeDuration;
-	}
+    /**
+     * @return the attributeDuration
+     */
+    public Attribute getAttributeDuration() {
+        return attributeDuration;
+    }
 
-	/**
-	 * @param attributeDuration the attributeDuration to set
-	 */
-	public void setAttributeDuration(Attribute attributeDuration) {
-		this.attributeDuration = attributeDuration;
-	}
+    /**
+     * @param attributeDuration the attributeDuration to set
+     */
+    public void setAttributeDuration(Attribute attributeDuration) {
+        this.attributeDuration = attributeDuration;
+    }
 
-	/**
-	 * @return the attributeCalendar
-	 */
-	public Attribute getAttributeCalendar() {
-		return attributeCalendar;
-	}
+    /**
+     * @return the attributeCalendar
+     */
+    public Attribute getAttributeCalendar() {
+        return attributeCalendar;
+    }
 
-	/**
-	 * @param attributeCalendar the attributeCalendar to set
-	 */
-	public void setAttributeCalendar(Attribute attributeCalendar) {
-		this.attributeCalendar = attributeCalendar;
-	}
+    /**
+     * @param attributeCalendar the attributeCalendar to set
+     */
+    public void setAttributeCalendar(Attribute attributeCalendar) {
+        this.attributeCalendar = attributeCalendar;
+    }
 
-	/**
-	 * @return the anticipateEndOfSubscription
-	 */
-	public boolean isAnticipateEndOfSubscription() {
-		return anticipateEndOfSubscription;
-	}
+    /**
+     * @return the anticipateEndOfSubscription
+     */
+    public boolean isAnticipateEndOfSubscription() {
+        return anticipateEndOfSubscription;
+    }
 
-	/**
-	 * @param anticipateEndOfSubscription the anticipateEndOfSubscription to set
-	 */
-	public void setAnticipateEndOfSubscription(boolean anticipateEndOfSubscription) {
-		this.anticipateEndOfSubscription = anticipateEndOfSubscription;
-	}
-	
+    /**
+     * @param anticipateEndOfSubscription the anticipateEndOfSubscription to set
+     */
+    public void setAnticipateEndOfSubscription(boolean anticipateEndOfSubscription) {
+        this.anticipateEndOfSubscription = anticipateEndOfSubscription;
+    }
+
 }

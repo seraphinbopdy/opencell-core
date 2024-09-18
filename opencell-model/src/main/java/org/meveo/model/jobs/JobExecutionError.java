@@ -20,23 +20,23 @@ package org.meveo.model.jobs;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.IEntity;
 import org.meveo.model.NotifiableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 
 /**
  * Job execution error log
@@ -46,7 +46,7 @@ import org.meveo.model.NotifiableEntity;
 @Entity
 @Table(name = "job_execution_error")
 @NotifiableEntity
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "job_execution_error_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "job_execution_error_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "JobExecutionError.purgeByJobInstance", query = "delete JobExecutionError err WHERE err.jobInstance=:jobInstance") })
 
 public class JobExecutionError extends BaseEntity {
@@ -92,13 +92,12 @@ public class JobExecutionError extends BaseEntity {
     @Column(name = "error_reason", length = 2000)
     private String errorReason;
 
-    
     /**
      * Entity - looked up by entity Id
      */
     @Transient
     private IEntity entity;
-    
+
     /**
      * @return Job instance
      */
@@ -189,7 +188,7 @@ public class JobExecutionError extends BaseEntity {
     public IEntity getEntity() {
         return entity;
     }
-    
+
     /**
      * @param entity Entity - looked up by entity Id
      */

@@ -20,12 +20,12 @@ package org.meveo.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.meveo.security.MeveoUser;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 /**
  * Tracks record/entity create/update information
@@ -124,18 +124,18 @@ public class Auditable implements Serializable {
             this.created = this.updated;
         }
     }
-    
+
     public int compareByUpdated(Auditable other) {
-    	 if (this.updated == null && other.updated == null) {
-             return 0;
-         } else if (this.updated != null && other.updated == null) {
-             return 1;
-         } else if (this.updated == null && other.updated != null) {
-             return -1;
-         } else if (this.updated != null) {
-             return this.updated.compareTo(other.updated);
-         }
-         return 0;
+        if (this.updated == null && other.updated == null) {
+            return 0;
+        } else if (this.updated != null && other.updated == null) {
+            return 1;
+        } else if (this.updated == null && other.updated != null) {
+            return -1;
+        } else if (this.updated != null) {
+            return this.updated.compareTo(other.updated);
+        }
+        return 0;
     }
 
     /**

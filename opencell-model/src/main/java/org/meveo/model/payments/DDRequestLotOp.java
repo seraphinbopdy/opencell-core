@@ -19,25 +19,26 @@ package org.meveo.model.payments;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.filter.Filter;
 import org.meveo.model.scripts.ScriptInstance;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.Size;
 
 /**
  * The Class DDRequestLotOp.
@@ -48,8 +49,7 @@ import org.meveo.model.scripts.ScriptInstance;
  */
 @Entity
 @Table(name = "ar_ddrequest_lot_op")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_ddrequest_lot_op_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_ddrequest_lot_op_seq"), @Parameter(name = "increment_size", value = "1") })
 public class DDRequestLotOp extends AuditableEntity {
 
     /** The Constant serialVersionUID. */
@@ -99,27 +99,27 @@ public class DDRequestLotOp extends AuditableEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "script_instance_id")
     private ScriptInstance scriptInstance;
-    
+
     /** The recurrent. */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "recurrent")
     private Boolean recurrent;
-    
+
     /** The Payment Or Refund Enum. */
     @Column(name = "payment_or_refund")
     @Enumerated(EnumType.STRING)
     private PaymentOrRefundEnum paymentOrRefundEnum;
-    
+
     /** The Seller. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
-    
+
     /** Flag to activate generation of payment lines (by default true). */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "generate_payment_lines")
     private Boolean generatePaymentLines = Boolean.TRUE;
-    
+
     /** Default payment status. */
     @Column(name = "payment_status")
     @Enumerated(EnumType.STRING)
@@ -278,7 +278,6 @@ public class DDRequestLotOp extends AuditableEntity {
         return scriptInstance;
     }
 
-
     /**
      * Sets the script instance.
      *
@@ -286,8 +285,7 @@ public class DDRequestLotOp extends AuditableEntity {
      */
     public void setScriptInstance(ScriptInstance scriptInstance) {
         this.scriptInstance = scriptInstance;
-}
-
+    }
 
     /**
      * Gets the recurrent.
@@ -306,7 +304,7 @@ public class DDRequestLotOp extends AuditableEntity {
     public void setRecurrent(Boolean recurrent) {
         this.recurrent = recurrent;
     }
-   
+
     /**
      * @return the seller
      */
@@ -335,19 +333,19 @@ public class DDRequestLotOp extends AuditableEntity {
         this.paymentOrRefundEnum = paymentOrRefundEnum;
     }
 
-	/**
-	 * @return the generatePaymentLines
-	 */
-	public Boolean isGeneratePaymentLines() {
-		return generatePaymentLines;
-	}
+    /**
+     * @return the generatePaymentLines
+     */
+    public Boolean isGeneratePaymentLines() {
+        return generatePaymentLines;
+    }
 
-	/**
-	 * @param generatePaymentLines the generatePaymentLines to set
-	 */
-	public void setGeneratePaymentLines(Boolean generatePaymentLines) {
-		this.generatePaymentLines = generatePaymentLines;
-	}
+    /**
+     * @param generatePaymentLines the generatePaymentLines to set
+     */
+    public void setGeneratePaymentLines(Boolean generatePaymentLines) {
+        this.generatePaymentLines = generatePaymentLines;
+    }
 
     /**
      * @return the paymentStatus
@@ -362,5 +360,5 @@ public class DDRequestLotOp extends AuditableEntity {
     public void setPaymentStatus(PaymentStatusEnum paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
-	
+
 }

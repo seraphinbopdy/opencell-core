@@ -17,32 +17,32 @@
  */
 package org.meveo.model.payments;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.Size;
+import org.hibernate.annotations.JdbcTypeCode;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @DiscriminatorValue(value = "R")
 @NamedQueries({
-    @NamedQuery(name = "RejectedPayment.updateRejectionActionsStatus", query = "UPDATE RejectedPayment rp SET rp.rejectionActionsStatus = :statusDestination WHERE rp.rejectedCode = :rejectedCode AND rp.rejectionActionsStatus in (:statusSourceList) AND NOT EXISTS (SELECT 1 FROM PaymentRejectionActionReport r WHERE r.action <> null and r.rejectedPayment = rp.id)"),
-})
+        @NamedQuery(name = "RejectedPayment.updateRejectionActionsStatus", query = "UPDATE RejectedPayment rp SET rp.rejectionActionsStatus = :statusDestination WHERE rp.rejectedCode = :rejectedCode AND rp.rejectionActionsStatus in (:statusSourceList) AND NOT EXISTS (SELECT 1 FROM PaymentRejectionActionReport r WHERE r.action <> null and r.rejectedPayment.id = rp.id)"), })
 public class RejectedPayment extends AccountOperation {
 
     private static final long serialVersionUID = 1L;
@@ -66,7 +66,7 @@ public class RejectedPayment extends AccountOperation {
     /**
      * Bank LOT number
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "bank_lot")
     private String bankLot;
 
@@ -81,11 +81,11 @@ public class RejectedPayment extends AccountOperation {
     List<AccountOperation> listAaccountOperationSupposedPaid = new ArrayList<AccountOperation>();
 
     private PaymentMethodEnum paymentMethod;
-    
+
     @Column(name = "rejection_actions_status")
     @Enumerated(EnumType.STRING)
     private RejectionActionStatus rejectionActionsStatus = RejectionActionStatus.NO_ACTION;
-    
+
     @OneToMany(mappedBy = "rejectedPayment")
     List<PaymentRejectionActionReport> paymentRejectionActionReports = new ArrayList<PaymentRejectionActionReport>();
 
@@ -160,6 +160,7 @@ public class RejectedPayment extends AccountOperation {
 
     /**
      * get paymentMethod
+     * 
      * @return paymentMethod
      */
     public PaymentMethodEnum getPaymentMethod() {
@@ -168,27 +169,28 @@ public class RejectedPayment extends AccountOperation {
 
     /**
      * set paymentMethod
+     * 
      * @param paymentMethod paymentMethod
      */
     public void setPaymentMethod(PaymentMethodEnum paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
-	public RejectionActionStatus getRejectionActionsStatus() {
-		return rejectionActionsStatus;
-	}
+    public RejectionActionStatus getRejectionActionsStatus() {
+        return rejectionActionsStatus;
+    }
 
-	public void setRejectionActionsStatus(RejectionActionStatus rejectionActionsStatus) {
-		this.rejectionActionsStatus = rejectionActionsStatus;
-	}
+    public void setRejectionActionsStatus(RejectionActionStatus rejectionActionsStatus) {
+        this.rejectionActionsStatus = rejectionActionsStatus;
+    }
 
-	public List<PaymentRejectionActionReport> getPaymentRejectionActionReports() {
-		return paymentRejectionActionReports;
-	}
+    public List<PaymentRejectionActionReport> getPaymentRejectionActionReports() {
+        return paymentRejectionActionReports;
+    }
 
-	public void setPaymentRejectionActionReports(List<PaymentRejectionActionReport> paymentRejectionActionReports) {
-		this.paymentRejectionActionReports = paymentRejectionActionReports;
-	}
+    public void setPaymentRejectionActionReports(List<PaymentRejectionActionReport> paymentRejectionActionReports) {
+        this.paymentRejectionActionReports = paymentRejectionActionReports;
+    }
 
     public PaymentGateway getPaymentGateway() {
         return paymentGateway;

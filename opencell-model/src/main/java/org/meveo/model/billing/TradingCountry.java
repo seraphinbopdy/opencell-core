@@ -17,23 +17,23 @@
  */
 package org.meveo.model.billing;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.listeners.TradingCountryListener;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
 
 /**
  * Country enabled in application
@@ -48,10 +48,9 @@ import org.meveo.model.listeners.TradingCountryListener;
 @EntityListeners({ TradingCountryListener.class })
 @Cacheable
 @Table(name = "billing_trading_country")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_trading_country_seq"), })
-@NamedQueries({ @NamedQuery(name = "TradingCountry.getByCode", query = "from TradingCountry tr where tr.country.countryCode = :tradingCountryCode ", hints = {
-        @QueryHint(name = "org.hibernate.cacheable", value = "true") }) })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_trading_country_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({
+        @NamedQuery(name = "TradingCountry.getByCode", query = "select tr from TradingCountry tr where tr.country.countryCode = :tradingCountryCode ", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }) })
 public class TradingCountry extends EnableBusinessCFEntity {
 
     private static final long serialVersionUID = 1L;

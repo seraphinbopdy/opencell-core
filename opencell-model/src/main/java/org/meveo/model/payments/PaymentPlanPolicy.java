@@ -5,267 +5,269 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.dunning.DunningPauseReason;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 
 @Embeddable
 public class PaymentPlanPolicy implements Serializable, Cloneable {
-	private static final long serialVersionUID = 1L;
-	public PaymentPlanPolicy() {
+    private static final long serialVersionUID = 1L;
+
+    public PaymentPlanPolicy() {
     }
 
     public PaymentPlanPolicy(PaymentPlanPolicy paymentPlanPolicy) {
-    	this.setMinAllowedReceivableAmount(minAllowedReceivableAmount);
-    	this.setMaxAllowedReceivableAmount(maxAllowedReceivableAmount);
-    	this.setMinInstallmentAmount(minInstallmentAmount);
-    	this.setMaxPaymentPlanDuration(maxPaymentPlanDuration);
-    	this.setDefaultRecurrenceUnit(defaultRecurrenceUnit);
-    	this.setDefaultInstallmentCount(defaultInstallmentCount);
-    	this.setSplitEvenly(splitEvenly);
-    	this.setAllowCustomInstallmentPlan(allowCustomInstallmentPlan);
-    	this.setAddInterestRate(addInterestRate);
-    	this.setDefaultInterestRate(defaultInterestRate);
-    	this.setAddInstallmentFee(addInstallmentFee);
-    	this.setDefaultFeePerInstallmentPlan(defaultFeePerInstallmentPlan);
-    	this.setInstallmentAmountRounding(installmentAmountRounding);
-    	this.setActionOnRemainingAmount(actionOnRemainingAmount);
-    	this.setClearingPriority(clearingPriority);
-    	this.setDefaultBlockPayments(defaultBlockPayments);
-    	this.setRequireInternalApproval(requireInternalApproval);
-    	this.setTheresHoldForApproval(theresHoldForApproval);
-    	this.setAllowedPaymentMethods(allowedPaymentMethods);
-    	this.setDunningDefaultPauseReason(dunningDefaultPauseReason);
-    	this.setAllowedCreditCategories(allowedCreditCategories);
-    	this.setDefaultStartingDateOfPlan(defaultStartingDateOfPlan);
+        this.setMinAllowedReceivableAmount(minAllowedReceivableAmount);
+        this.setMaxAllowedReceivableAmount(maxAllowedReceivableAmount);
+        this.setMinInstallmentAmount(minInstallmentAmount);
+        this.setMaxPaymentPlanDuration(maxPaymentPlanDuration);
+        this.setDefaultRecurrenceUnit(defaultRecurrenceUnit);
+        this.setDefaultInstallmentCount(defaultInstallmentCount);
+        this.setSplitEvenly(splitEvenly);
+        this.setAllowCustomInstallmentPlan(allowCustomInstallmentPlan);
+        this.setAddInterestRate(addInterestRate);
+        this.setDefaultInterestRate(defaultInterestRate);
+        this.setAddInstallmentFee(addInstallmentFee);
+        this.setDefaultFeePerInstallmentPlan(defaultFeePerInstallmentPlan);
+        this.setInstallmentAmountRounding(installmentAmountRounding);
+        this.setActionOnRemainingAmount(actionOnRemainingAmount);
+        this.setClearingPriority(clearingPriority);
+        this.setDefaultBlockPayments(defaultBlockPayments);
+        this.setRequireInternalApproval(requireInternalApproval);
+        this.setTheresHoldForApproval(theresHoldForApproval);
+        this.setAllowedPaymentMethods(allowedPaymentMethods);
+        this.setDunningDefaultPauseReason(dunningDefaultPauseReason);
+        this.setAllowedCreditCategories(allowedCreditCategories);
+        this.setDefaultStartingDateOfPlan(defaultStartingDateOfPlan);
     }
-    
-	@Column(name = "min_allowed_receivable_amount")
-	private BigDecimal minAllowedReceivableAmount;
 
-	@Column(name = "max_allowed_receivable_amount")
-	private BigDecimal maxAllowedReceivableAmount;
+    @Column(name = "min_allowed_receivable_amount")
+    private BigDecimal minAllowedReceivableAmount;
 
-	@Column(name = "min_installment_amount")
-	private BigDecimal minInstallmentAmount;
+    @Column(name = "max_allowed_receivable_amount")
+    private BigDecimal maxAllowedReceivableAmount;
 
-	@Column(name = "theres_hold_for_approval")
-	private BigDecimal theresHoldForApproval;
-	
-	@Column(name = "max_payment_plan_duration")
-	private Integer maxPaymentPlanDuration;
-	
-	@Column(name = "default_installment_count")
-	private Integer defaultInstallmentCount;
-	
-	@Column(name = "default_fee_per_installment_plan")
-	private Integer defaultFeePerInstallmentPlan = 0;
+    @Column(name = "min_installment_amount")
+    private BigDecimal minInstallmentAmount;
 
-	@Column(name = "installment_amount_rounding")
-	private Integer installmentAmountRounding =  2;
-	
-	@Type(type = "numeric_boolean")
-	@Column(name = "split_evenly", nullable = false)	
-	private boolean splitEvenly = true;
+    @Column(name = "theres_hold_for_approval")
+    private BigDecimal theresHoldForApproval;
 
-	@Type(type = "numeric_boolean")
-	@Column(name = "allow_custom_installment_plan", nullable = false)	
-	private boolean allowCustomInstallmentPlan = false;
+    @Column(name = "max_payment_plan_duration")
+    private Integer maxPaymentPlanDuration;
 
-	@Type(type = "numeric_boolean")
-	@Column(name = "add_interest_rate", nullable = false)	
-	private boolean addInterestRate = false;
+    @Column(name = "default_installment_count")
+    private Integer defaultInstallmentCount;
 
-	@Type(type = "numeric_boolean")
-	@Column(name = "add_installment_fee", nullable = false)	
-	private boolean addInstallmentFee = false;
-	
-	@Type(type = "numeric_boolean")
-	@Column(name = "default_block_payments", nullable = false)	
-	private boolean defaultBlockPayments;
-	
-	@Type(type = "numeric_boolean")
-	@Column(name = "require_internal_approval", nullable = false)	
-	private boolean requireInternalApproval  = false;
-	
+    @Column(name = "default_fee_per_installment_plan")
+    private Integer defaultFeePerInstallmentPlan = 0;
+
+    @Column(name = "installment_amount_rounding")
+    private Integer installmentAmountRounding = 2;
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "split_evenly", nullable = false)
+    private boolean splitEvenly = true;
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "allow_custom_installment_plan", nullable = false)
+    private boolean allowCustomInstallmentPlan = false;
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "add_interest_rate", nullable = false)
+    private boolean addInterestRate = false;
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "add_installment_fee", nullable = false)
+    private boolean addInstallmentFee = false;
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "default_block_payments", nullable = false)
+    private boolean defaultBlockPayments;
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "require_internal_approval", nullable = false)
+    private boolean requireInternalApproval = false;
+
     @Column(name = "default_interest_rate", nullable = false)
     @NotNull
     private int defaultInterestRate = 0;
-    
-	@Enumerated(value = EnumType.STRING)
-	@Column(name = "default_recurrence_unit")
-	private RecurrenceUnitEnum defaultRecurrenceUnit = RecurrenceUnitEnum.MONTH;
 
-	@Enumerated(value = EnumType.STRING)
-	@Column(name = "action_on_remaining_amount")
-	private ActionOnRemainingAmountEnum actionOnRemainingAmount = ActionOnRemainingAmountEnum.FIRST;
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "default_recurrence_unit")
+    private RecurrenceUnitEnum defaultRecurrenceUnit = RecurrenceUnitEnum.MONTH;
 
-	@Enumerated(value = EnumType.STRING)
-	@Column(name = "clearing_priority")
-	private ClearingPriorityEnum clearingPriority = ClearingPriorityEnum.OLDEST;
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "action_on_remaining_amount")
+    private ActionOnRemainingAmountEnum actionOnRemainingAmount = ActionOnRemainingAmountEnum.FIRST;
 
-	@Enumerated(value = EnumType.STRING)
-	@Column(name = "default_starting_date_of_plan")
-	private DefaultStartingDateOfPlan defaultStartingDateOfPlan;
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "clearing_priority")
+    private ClearingPriorityEnum clearingPriority = ClearingPriorityEnum.OLDEST;
 
-	public BigDecimal getMinAllowedReceivableAmount() {
-		return minAllowedReceivableAmount;
-	}
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "default_starting_date_of_plan")
+    private DefaultStartingDateOfPlan defaultStartingDateOfPlan;
 
-	public void setMinAllowedReceivableAmount(BigDecimal minAllowedReceivableAmount) {
-		this.minAllowedReceivableAmount = minAllowedReceivableAmount;
-	}
+    public BigDecimal getMinAllowedReceivableAmount() {
+        return minAllowedReceivableAmount;
+    }
 
-	public BigDecimal getMaxAllowedReceivableAmount() {
-		return maxAllowedReceivableAmount;
-	}
+    public void setMinAllowedReceivableAmount(BigDecimal minAllowedReceivableAmount) {
+        this.minAllowedReceivableAmount = minAllowedReceivableAmount;
+    }
 
-	public void setMaxAllowedReceivableAmount(BigDecimal maxAllowedReceivableAmount) {
-		this.maxAllowedReceivableAmount = maxAllowedReceivableAmount;
-	}
+    public BigDecimal getMaxAllowedReceivableAmount() {
+        return maxAllowedReceivableAmount;
+    }
 
-	public BigDecimal getMinInstallmentAmount() {
-		return minInstallmentAmount;
-	}
+    public void setMaxAllowedReceivableAmount(BigDecimal maxAllowedReceivableAmount) {
+        this.maxAllowedReceivableAmount = maxAllowedReceivableAmount;
+    }
 
-	public void setMinInstallmentAmount(BigDecimal minInstallmentAmount) {
-		this.minInstallmentAmount = minInstallmentAmount;
-	}
+    public BigDecimal getMinInstallmentAmount() {
+        return minInstallmentAmount;
+    }
 
-	public Integer getMaxPaymentPlanDuration() {
-		return maxPaymentPlanDuration;
-	}
+    public void setMinInstallmentAmount(BigDecimal minInstallmentAmount) {
+        this.minInstallmentAmount = minInstallmentAmount;
+    }
 
-	public void setMaxPaymentPlanDuration(Integer maxPaymentPlanDuration) {
-		this.maxPaymentPlanDuration = maxPaymentPlanDuration;
-	}
+    public Integer getMaxPaymentPlanDuration() {
+        return maxPaymentPlanDuration;
+    }
 
-	public RecurrenceUnitEnum getDefaultRecurrenceUnit() {
-		return defaultRecurrenceUnit;
-	}
+    public void setMaxPaymentPlanDuration(Integer maxPaymentPlanDuration) {
+        this.maxPaymentPlanDuration = maxPaymentPlanDuration;
+    }
 
-	public void setDefaultRecurrenceUnit(RecurrenceUnitEnum defaultRecurrenceUnit) {
-		this.defaultRecurrenceUnit = defaultRecurrenceUnit;
-	}
+    public RecurrenceUnitEnum getDefaultRecurrenceUnit() {
+        return defaultRecurrenceUnit;
+    }
 
-	public Integer getDefaultInstallmentCount() {
-		return defaultInstallmentCount;
-	}
+    public void setDefaultRecurrenceUnit(RecurrenceUnitEnum defaultRecurrenceUnit) {
+        this.defaultRecurrenceUnit = defaultRecurrenceUnit;
+    }
 
-	public void setDefaultInstallmentCount(Integer defaultInstallmentCount) {
-		this.defaultInstallmentCount = defaultInstallmentCount;
-	}
+    public Integer getDefaultInstallmentCount() {
+        return defaultInstallmentCount;
+    }
 
-	public boolean isSplitEvenly() {
-		return splitEvenly;
-	}
+    public void setDefaultInstallmentCount(Integer defaultInstallmentCount) {
+        this.defaultInstallmentCount = defaultInstallmentCount;
+    }
 
-	public void setSplitEvenly(boolean splitEvenly) {
-		this.splitEvenly = splitEvenly;
-	}
+    public boolean isSplitEvenly() {
+        return splitEvenly;
+    }
 
-	public boolean isAllowCustomInstallmentPlan() {
-		return allowCustomInstallmentPlan;
-	}
+    public void setSplitEvenly(boolean splitEvenly) {
+        this.splitEvenly = splitEvenly;
+    }
 
-	public void setAllowCustomInstallmentPlan(boolean allowCustomInstallmentPlan) {
-		this.allowCustomInstallmentPlan = allowCustomInstallmentPlan;
-	}
+    public boolean isAllowCustomInstallmentPlan() {
+        return allowCustomInstallmentPlan;
+    }
 
-	public boolean isAddInterestRate() {
-		return addInterestRate;
-	}
+    public void setAllowCustomInstallmentPlan(boolean allowCustomInstallmentPlan) {
+        this.allowCustomInstallmentPlan = allowCustomInstallmentPlan;
+    }
 
-	public void setAddInterestRate(boolean addInterestRate) {
-		this.addInterestRate = addInterestRate;
-	}
+    public boolean isAddInterestRate() {
+        return addInterestRate;
+    }
 
-	public int getDefaultInterestRate() {
-		return defaultInterestRate;
-	}
+    public void setAddInterestRate(boolean addInterestRate) {
+        this.addInterestRate = addInterestRate;
+    }
 
-	public void setDefaultInterestRate(int defaultInterestRate) {
-		this.defaultInterestRate = defaultInterestRate;
-	}
+    public int getDefaultInterestRate() {
+        return defaultInterestRate;
+    }
 
-	public boolean isAddInstallmentFee() {
-		return addInstallmentFee;
-	}
+    public void setDefaultInterestRate(int defaultInterestRate) {
+        this.defaultInterestRate = defaultInterestRate;
+    }
 
-	public void setAddInstallmentFee(boolean addInstallmentFee) {
-		this.addInstallmentFee = addInstallmentFee;
-	}
+    public boolean isAddInstallmentFee() {
+        return addInstallmentFee;
+    }
 
-	public Integer getDefaultFeePerInstallmentPlan() {
-		return defaultFeePerInstallmentPlan;
-	}
+    public void setAddInstallmentFee(boolean addInstallmentFee) {
+        this.addInstallmentFee = addInstallmentFee;
+    }
 
-	public void setDefaultFeePerInstallmentPlan(Integer defaultFeePerInstallmentPlan) {
-		this.defaultFeePerInstallmentPlan = defaultFeePerInstallmentPlan;
-	}
+    public Integer getDefaultFeePerInstallmentPlan() {
+        return defaultFeePerInstallmentPlan;
+    }
 
-	public Integer getInstallmentAmountRounding() {
-		return installmentAmountRounding;
-	}
+    public void setDefaultFeePerInstallmentPlan(Integer defaultFeePerInstallmentPlan) {
+        this.defaultFeePerInstallmentPlan = defaultFeePerInstallmentPlan;
+    }
 
-	public void setInstallmentAmountRounding(Integer installmentAmountRounding) {
-		this.installmentAmountRounding = installmentAmountRounding;
-	}
+    public Integer getInstallmentAmountRounding() {
+        return installmentAmountRounding;
+    }
 
-	public ActionOnRemainingAmountEnum getActionOnRemainingAmount() {
-		return actionOnRemainingAmount;
-	}
+    public void setInstallmentAmountRounding(Integer installmentAmountRounding) {
+        this.installmentAmountRounding = installmentAmountRounding;
+    }
 
-	public void setActionOnRemainingAmount(ActionOnRemainingAmountEnum actionOnRemainingAmount) {
-		this.actionOnRemainingAmount = actionOnRemainingAmount;
-	}
+    public ActionOnRemainingAmountEnum getActionOnRemainingAmount() {
+        return actionOnRemainingAmount;
+    }
 
-	public ClearingPriorityEnum getClearingPriority() {
-		return clearingPriority;
-	}
+    public void setActionOnRemainingAmount(ActionOnRemainingAmountEnum actionOnRemainingAmount) {
+        this.actionOnRemainingAmount = actionOnRemainingAmount;
+    }
 
-	public void setClearingPriority(ClearingPriorityEnum clearingPriority) {
-		this.clearingPriority = clearingPriority;
-	}
+    public ClearingPriorityEnum getClearingPriority() {
+        return clearingPriority;
+    }
 
-	public boolean isDefaultBlockPayments() {
-		return defaultBlockPayments;
-	}
+    public void setClearingPriority(ClearingPriorityEnum clearingPriority) {
+        this.clearingPriority = clearingPriority;
+    }
 
-	public void setDefaultBlockPayments(boolean defaultBlockPayments) {
-		this.defaultBlockPayments = defaultBlockPayments;
-	}
+    public boolean isDefaultBlockPayments() {
+        return defaultBlockPayments;
+    }
 
-	public boolean isRequireInternalApproval() {
-		return requireInternalApproval;
-	}
+    public void setDefaultBlockPayments(boolean defaultBlockPayments) {
+        this.defaultBlockPayments = defaultBlockPayments;
+    }
 
-	public void setRequireInternalApproval(boolean requireInternalApproval) {
-		this.requireInternalApproval = requireInternalApproval;
-	}
+    public boolean isRequireInternalApproval() {
+        return requireInternalApproval;
+    }
 
-	public BigDecimal getTheresHoldForApproval() {
-		return theresHoldForApproval;
-	}
+    public void setRequireInternalApproval(boolean requireInternalApproval) {
+        this.requireInternalApproval = requireInternalApproval;
+    }
 
-	public void setTheresHoldForApproval(BigDecimal theresHoldForApproval) {
-		this.theresHoldForApproval = theresHoldForApproval;
-	}
-	
+    public BigDecimal getTheresHoldForApproval() {
+        return theresHoldForApproval;
+    }
+
+    public void setTheresHoldForApproval(BigDecimal theresHoldForApproval) {
+        this.theresHoldForApproval = theresHoldForApproval;
+    }
+
     /**
      * allowedPaymentMethods
      */
@@ -275,49 +277,49 @@ public class PaymentPlanPolicy implements Serializable, Cloneable {
     @Column(name = "payment_method")
     @Enumerated(EnumType.STRING)
     private List<PaymentMethodEnum> allowedPaymentMethods = new ArrayList<PaymentMethodEnum>();
-    
-	public List<PaymentMethodEnum> getAllowedPaymentMethods() {
-		return allowedPaymentMethods;
-	}
 
-	public void setAllowedPaymentMethods(List<PaymentMethodEnum> allowedPaymentMethods) {
-		this.allowedPaymentMethods = allowedPaymentMethods;
-	}
+    public List<PaymentMethodEnum> getAllowedPaymentMethods() {
+        return allowedPaymentMethods;
+    }
 
-	@ManyToOne
+    public void setAllowedPaymentMethods(List<PaymentMethodEnum> allowedPaymentMethods) {
+        this.allowedPaymentMethods = allowedPaymentMethods;
+    }
+
+    @ManyToOne
     @JoinColumn(name = "dunning_default_pause_reason_id")
     private DunningPauseReason dunningDefaultPauseReason;
-    
+
     public DunningPauseReason getDunningDefaultPauseReason() {
-		return dunningDefaultPauseReason;
-	}
+        return dunningDefaultPauseReason;
+    }
 
-	public void setDunningDefaultPauseReason(DunningPauseReason dunningDefaultPauseReason) {
-		this.dunningDefaultPauseReason = dunningDefaultPauseReason;
-	}
-	
-	@OneToMany(mappedBy = "provider", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    public void setDunningDefaultPauseReason(DunningPauseReason dunningDefaultPauseReason) {
+        this.dunningDefaultPauseReason = dunningDefaultPauseReason;
+    }
+
+    @OneToMany(mappedBy = "provider", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<CreditCategory> allowedCreditCategories = new ArrayList<CreditCategory>();
-    
-	public List<CreditCategory> getAllowedCreditCategories() {
-		return allowedCreditCategories;
-	}
 
-	public void setAllowedCreditCategories(List<CreditCategory> allowedCreditCategories) {
-		this.allowedCreditCategories = allowedCreditCategories;
-	}
+    public List<CreditCategory> getAllowedCreditCategories() {
+        return allowedCreditCategories;
+    }
+
+    public void setAllowedCreditCategories(List<CreditCategory> allowedCreditCategories) {
+        this.allowedCreditCategories = allowedCreditCategories;
+    }
 
     @Override
     public Object clone() throws CloneNotSupportedException {
-    	PaymentPlanPolicy o = (PaymentPlanPolicy) super.clone();
+        PaymentPlanPolicy o = (PaymentPlanPolicy) super.clone();
         return o;
     }
 
-	public DefaultStartingDateOfPlan getDefaultStartingDateOfPlan() {
-		return defaultStartingDateOfPlan;
-	}
+    public DefaultStartingDateOfPlan getDefaultStartingDateOfPlan() {
+        return defaultStartingDateOfPlan;
+    }
 
-	public void setDefaultStartingDateOfPlan(DefaultStartingDateOfPlan defaultStartingDateOfPlan) {
-		this.defaultStartingDateOfPlan = defaultStartingDateOfPlan;
-	}
+    public void setDefaultStartingDateOfPlan(DefaultStartingDateOfPlan defaultStartingDateOfPlan) {
+        this.defaultStartingDateOfPlan = defaultStartingDateOfPlan;
+    }
 }

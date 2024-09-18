@@ -18,14 +18,15 @@
 
 package org.meveo.model.dwh;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
+import org.hibernate.type.NumericBooleanConverter;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 /**
  * Line type chart
@@ -42,7 +43,7 @@ public class LineChart extends Chart {
     /**
      * Is it filled
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "filled")
     private boolean filled;
 
@@ -63,7 +64,7 @@ public class LineChart extends Chart {
     /**
      * Show shadow
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "shadow")
     private boolean shadow = true;
 
@@ -94,7 +95,7 @@ public class LineChart extends Chart {
     /**
      * Whether line segments should be broken at null value, fall will join point on either side of line.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "break_on_null")
     private boolean breakOnNull;
 
@@ -127,28 +128,28 @@ public class LineChart extends Chart {
     /**
      * Whether to stack series
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "stacked")
     private boolean stacked;
 
     /**
      * Enables plot zooming.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "zoom")
     private boolean zoom;
 
     /**
      * Enables animation on plot rendering
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "animate")
     private boolean animate;
 
     /**
      * Defines visibility of datatip.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "show_data_tip")
     private boolean showDataTip = true;
 

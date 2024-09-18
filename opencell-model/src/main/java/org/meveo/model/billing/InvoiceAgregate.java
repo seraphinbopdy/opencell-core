@@ -17,32 +17,33 @@
  */
 package org.meveo.model.billing;
 
-import static java.math.BigDecimal.ZERO;
 import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.ZERO;
 
 import java.math.BigDecimal;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Invoice aggregate
@@ -54,13 +55,14 @@ import org.meveo.model.AuditableEntity;
 @Table(name = "billing_invoice_agregate")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
-@NamedQueries({ @NamedQuery(name = "InvoiceAgregate.deleteByBR", query = "delete from InvoiceAgregate ia where ia.billingRun.id=:billingRunId AND "
-		+ "ia.invoice.id in (select ia2.invoice.id from InvoiceAgregate ia2 where ia2.invoice.status <> org.meveo.model.billing.InvoiceStatusEnum.VALIDATED)"),
+@NamedQueries({
+        @NamedQuery(name = "InvoiceAgregate.deleteByBR", query = "delete from InvoiceAgregate ia where ia.billingRun.id=:billingRunId AND "
+                + "ia.invoice.id in (select ia2.invoice.id from InvoiceAgregate ia2 where ia2.invoice.status <> org.meveo.model.billing.InvoiceStatusEnum.VALIDATED)"),
         @NamedQuery(name = "InvoiceAgregate.deleteByInvoiceIds", query = "delete from InvoiceAgregate ia where ia.invoice.id IN (:invoicesIds)"),
         @NamedQuery(name = "InvoiceAggregate.updateByInvoiceIds", query = "update InvoiceAgregate ia set ia.invoice = null where ia.invoice.id IN (:invoicesIds)"),
         @NamedQuery(name = "InvoiceAggregate.fetchInvoiceAggregateByBR", query = "SELECT ia.id FROM InvoiceAgregate ia WHERE ia.billingRun.id = :billingRunId"),
         @NamedQuery(name = "InvoiceAgregate.deleteByInvoiceId", query = "delete from InvoiceAgregate ia where ia.invoice.id = :invoiceId") })
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_agregate_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_agregate_seq"), @Parameter(name = "increment_size", value = "1") })
 public abstract class InvoiceAgregate extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;
@@ -90,7 +92,7 @@ public abstract class InvoiceAgregate extends AuditableEntity {
      * Number of Rated transactions that fall in this aggregate
      */
     @Column(name = "item_number")
-    protected Integer itemNumber=0;
+    protected Integer itemNumber = 0;
 
     /**
      * Description
@@ -154,11 +156,11 @@ public abstract class InvoiceAgregate extends AuditableEntity {
     protected String prDescription;
 
     @Column(name = "use_specific_price_conversion")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean useSpecificPriceConversion;
-    
+
     @Column(name = "conversion_from_billing_currency")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean conversionFromBillingCurrency = false;
 
     /**
@@ -178,7 +180,7 @@ public abstract class InvoiceAgregate extends AuditableEntity {
      */
     @Column(name = "transactional_amount_with_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     protected BigDecimal transactionalAmountWithTax = ZERO;
-    
+
     public TradingCurrency getTradingCurrency() {
         return tradingCurrency;
     }
@@ -295,70 +297,70 @@ public abstract class InvoiceAgregate extends AuditableEntity {
     }
 
     /**
-	 * @return the useSpecificPriceConversion
-	 */
-	public boolean isUseSpecificPriceConversion() {
-		return useSpecificPriceConversion;
-	}
+     * @return the useSpecificPriceConversion
+     */
+    public boolean isUseSpecificPriceConversion() {
+        return useSpecificPriceConversion;
+    }
 
-	/**
-	 * @param useSpecificPriceConversion the useSpecificPriceConversion to set
-	 */
-	public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
-		this.useSpecificPriceConversion = useSpecificPriceConversion;
-	}
-	
-	public boolean isConversionFromBillingCurrency() {
-		return conversionFromBillingCurrency;
-	}
+    /**
+     * @param useSpecificPriceConversion the useSpecificPriceConversion to set
+     */
+    public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
+        this.useSpecificPriceConversion = useSpecificPriceConversion;
+    }
 
-	public void setConversionFromBillingCurrency(boolean conversionFromBillingCurrency) {
-		this.conversionFromBillingCurrency = conversionFromBillingCurrency;
-	}
+    public boolean isConversionFromBillingCurrency() {
+        return conversionFromBillingCurrency;
+    }
 
-	/**
-	 * @return the transactionalAmountWithoutTax
-	 */
-	public BigDecimal getTransactionalAmountWithoutTax() {
-		return transactionalAmountWithoutTax;
-	}
+    public void setConversionFromBillingCurrency(boolean conversionFromBillingCurrency) {
+        this.conversionFromBillingCurrency = conversionFromBillingCurrency;
+    }
 
-	/**
-	 * @param transactionalAmountWithoutTax the transactionalAmountWithoutTax to set
-	 */
-	public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
-		this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
-	}
+    /**
+     * @return the transactionalAmountWithoutTax
+     */
+    public BigDecimal getTransactionalAmountWithoutTax() {
+        return transactionalAmountWithoutTax;
+    }
 
-	/**
-	 * @return the transactionalAmountTax
-	 */
-	public BigDecimal getTransactionalAmountTax() {
-		return transactionalAmountTax;
-	}
+    /**
+     * @param transactionalAmountWithoutTax the transactionalAmountWithoutTax to set
+     */
+    public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
+        this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
+    }
 
-	/**
-	 * @param transactionalAmountTax the transactionalAmountTax to set
-	 */
-	public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
-		this.transactionalAmountTax = transactionalAmountTax;
-	}
+    /**
+     * @return the transactionalAmountTax
+     */
+    public BigDecimal getTransactionalAmountTax() {
+        return transactionalAmountTax;
+    }
 
-	/**
-	 * @return the transactionalAmountWithTax
-	 */
-	public BigDecimal getTransactionalAmountWithTax() {
-		return transactionalAmountWithTax;
-	}
+    /**
+     * @param transactionalAmountTax the transactionalAmountTax to set
+     */
+    public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
+        this.transactionalAmountTax = transactionalAmountTax;
+    }
 
-	/**
-	 * @param transactionalAmountWithTax the transactionalAmountWithTax to set
-	 */
-	public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
-		this.transactionalAmountWithTax = transactionalAmountWithTax;
-	}
-	
-	public void addAmount(BigDecimal amountToAdd) {
+    /**
+     * @return the transactionalAmountWithTax
+     */
+    public BigDecimal getTransactionalAmountWithTax() {
+        return transactionalAmountWithTax;
+    }
+
+    /**
+     * @param transactionalAmountWithTax the transactionalAmountWithTax to set
+     */
+    public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
+        this.transactionalAmountWithTax = transactionalAmountWithTax;
+    }
+
+    public void addAmount(BigDecimal amountToAdd) {
         if (amount == null) {
             amount = new BigDecimal("0");
         }
@@ -422,7 +424,7 @@ public abstract class InvoiceAgregate extends AuditableEntity {
     public void addTransactionAmountWithTax(BigDecimal deltaAmount) {
         if (deltaAmount != null) {
             if (transactionalAmountWithTax == null) {
-            	transactionalAmountWithTax = new BigDecimal("0");
+                transactionalAmountWithTax = new BigDecimal("0");
             }
             transactionalAmountWithTax = transactionalAmountWithTax.add(deltaAmount);
         }
@@ -431,7 +433,7 @@ public abstract class InvoiceAgregate extends AuditableEntity {
     public void subtractTransactionAmountWithTax(BigDecimal deltaAmount) {
         if (deltaAmount != null) {
             if (transactionalAmountWithTax == null) {
-            	transactionalAmountWithTax = new BigDecimal("0");
+                transactionalAmountWithTax = new BigDecimal("0");
             }
             transactionalAmountWithTax = transactionalAmountWithTax.subtract(deltaAmount);
         }
@@ -440,7 +442,7 @@ public abstract class InvoiceAgregate extends AuditableEntity {
     public void addTransactionAmountWithoutTax(BigDecimal deltaAmount) {
         if (deltaAmount != null) {
             if (transactionalAmountWithoutTax == null) {
-            	transactionalAmountWithoutTax = new BigDecimal("0");
+                transactionalAmountWithoutTax = new BigDecimal("0");
             }
             transactionalAmountWithoutTax = transactionalAmountWithoutTax.add(deltaAmount);
         }
@@ -449,7 +451,7 @@ public abstract class InvoiceAgregate extends AuditableEntity {
     public void subtractTransactionAmountWithoutTax(BigDecimal deltaAmount) {
         if (deltaAmount != null) {
             if (transactionalAmountWithoutTax == null) {
-            	transactionalAmountWithoutTax = new BigDecimal("0");
+                transactionalAmountWithoutTax = new BigDecimal("0");
             }
             transactionalAmountWithoutTax = transactionalAmountWithoutTax.subtract(deltaAmount);
         }
@@ -458,7 +460,7 @@ public abstract class InvoiceAgregate extends AuditableEntity {
     public void addTransactionAmountTax(BigDecimal deltaAmount) {
         if (deltaAmount != null) {
             if (transactionalAmountTax == null) {
-            	transactionalAmountTax = new BigDecimal("0");
+                transactionalAmountTax = new BigDecimal("0");
             }
             transactionalAmountTax = transactionalAmountTax.add(deltaAmount);
         }
@@ -467,7 +469,7 @@ public abstract class InvoiceAgregate extends AuditableEntity {
     public void subtractTransactionAmountTax(BigDecimal deltaAmount) {
         if (deltaAmount != null) {
             if (transactionalAmountTax == null) {
-            	transactionalAmountTax = new BigDecimal("0");
+                transactionalAmountTax = new BigDecimal("0");
             }
             transactionalAmountTax = transactionalAmountTax.subtract(deltaAmount);
         }
@@ -479,10 +481,10 @@ public abstract class InvoiceAgregate extends AuditableEntity {
         setAmountWithoutTax(new BigDecimal(0));
         setAmountWithTax(new BigDecimal(0));
     }
-    
+
     @Transient
     public String getDescriminatorValue() {
-    	return this.getClass().getAnnotation(DiscriminatorValue.class).value();
+        return this.getClass().getAnnotation(DiscriminatorValue.class).value();
     }
 
     @PrePersist

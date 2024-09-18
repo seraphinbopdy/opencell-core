@@ -1,30 +1,29 @@
 package org.meveo.model.dunning;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
 /**
- *The dunning policy level
+ * The dunning policy level
+ * 
  * @author khalid.horri
  *
  */
 @Entity
 @Table(name = "dunning_policy_level")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "dunning_policy_level_seq")})
-@NamedQueries({
-        @NamedQuery(name = "DunningPolicyLevel.findDunningPolicyLevels", query = "SELECT dpl FROM DunningPolicyLevel dpl where dpl.dunningPolicy.id=:policyId")})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_policy_level_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "DunningPolicyLevel.findDunningPolicyLevels", query = "SELECT dpl FROM DunningPolicyLevel dpl where dpl.dunningPolicy.id=:policyId") })
 public class DunningPolicyLevel extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;
@@ -51,8 +50,7 @@ public class DunningPolicyLevel extends AuditableEntity {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "collection_plan_status_id", referencedColumnName = "id")
-     private DunningCollectionPlanStatus collectionPlanStatus;
-
+    private DunningCollectionPlanStatus collectionPlanStatus;
 
     public Integer getSequence() {
         return sequence;

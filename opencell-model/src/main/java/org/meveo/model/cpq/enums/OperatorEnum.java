@@ -6,25 +6,24 @@ import java.util.stream.Stream;
 /**
  * 
  * @author Tarik FAKHOURI.
- *  @author Mbarek-Ay.
+ * @author Mbarek-Ay.
  * @version 10.0
  */
 public enum OperatorEnum {
 
-	AND("AND"), 
-	OR("OR");
-	
-	private OperatorEnum(String value) {
-		this.value = value;
-	}
-	
-	private String value;
-	
-	public String getValue() {
-		return this.value;
-	}
+    AND("AND"), OR("OR");
 
-	public Optional<OperatorEnum> getCurrentStatus(String value) {
-		return Stream.of(OperatorEnum.values()).filter(v -> v.value == value).findFirst();
-	}
+    private OperatorEnum(String value) {
+        this.value = value;
+    }
+
+    private String value;
+
+    public String getValue() {
+        return this.value;
+    }
+
+    public Optional<OperatorEnum> getCurrentStatus(String value) {
+        return Stream.of(OperatorEnum.values()).filter(v -> v.value == value).findFirst();
+    }
 }

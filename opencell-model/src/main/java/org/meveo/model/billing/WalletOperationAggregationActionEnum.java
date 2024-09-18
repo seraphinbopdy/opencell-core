@@ -11,7 +11,7 @@ public enum WalletOperationAggregationActionEnum {
     MAX(8, "WalletOperationAggregationActionEnum.max"), //
     TRUNCATE(9, "WalletOperationAggregationActionEnum.truncate"), //
     CUSTOM(10, "WalletOperationAggregationActionEnum.stringAgg"), //
-	EMBEDDED_KEY(11, "WalletOperationAggregationActionEnum.embeddedKey"); //
+    EMBEDDED_KEY(11, "WalletOperationAggregationActionEnum.embeddedKey"); //
 
     private Integer id;
     private String label;

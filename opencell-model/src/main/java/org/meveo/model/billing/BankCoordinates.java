@@ -24,16 +24,17 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
-import javax.validation.constraints.Size;
 
-import org.meveo.commons.utils.StringUtils;
 import org.meveo.commons.encryption.BankDataEncryptor;
 import org.meveo.commons.utils.AesEncrypt;
+import org.meveo.commons.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.Size;
 
 /**
  * Bank account information
@@ -76,7 +77,7 @@ public class BankCoordinates implements Serializable, Cloneable {
     /**
      * IBAN number
      */
-    @Convert(converter=BankDataEncryptor.class)
+    @Convert(converter = BankDataEncryptor.class)
     @Column(name = "iban", length = 100)
     @Size(max = 100)
     private String iban;
@@ -84,7 +85,7 @@ public class BankCoordinates implements Serializable, Cloneable {
     /**
      * BIC number
      */
-    @Convert(converter=BankDataEncryptor.class)
+    @Convert(converter = BankDataEncryptor.class)
     @Column(name = "bic", length = 100)
     @Size(max = 100)
     private String bic;
@@ -131,14 +132,11 @@ public class BankCoordinates implements Serializable, Cloneable {
     @Size(max = 35)
     private String ics;
 
-    
-    
-    
     public BankCoordinates() {
-		super();		
-	}
+        super();
+    }
 
-	public String getBankCode() {
+    public String getBankCode() {
         return bankCode;
     }
 
@@ -170,28 +168,26 @@ public class BankCoordinates implements Serializable, Cloneable {
         this.key = key;
     }
 
-    
-
     public String getIban() {
-    	try {
-			return decryptIban(iban);
-		} catch (Exception e) {
-			Logger log = LoggerFactory.getLogger(BankCoordinates.class);
-			log.error("Error when decrypting Iban", e);
-			return null;
-    }
+        try {
+            return decryptIban(iban);
+        } catch (Exception e) {
+            Logger log = LoggerFactory.getLogger(BankCoordinates.class);
+            log.error("Error when decrypting Iban", e);
+            return null;
+        }
     }
 
     public void setIban(String iban) {
-    	try {
-			this.iban = encryptIban(encryptIban(iban));
-		} catch (Exception e) {
-			Logger log = LoggerFactory.getLogger(BankCoordinates.class);
-			log.error("Error when encrypting Iban", e);
-    }
+        try {
+            this.iban = encryptIban(encryptIban(iban));
+        } catch (Exception e) {
+            Logger log = LoggerFactory.getLogger(BankCoordinates.class);
+            log.error("Error when encrypting Iban", e);
+        }
     }
 
-	public String getBic() {
+    public String getBic() {
         return bic;
     }
 
@@ -214,11 +210,11 @@ public class BankCoordinates implements Serializable, Cloneable {
     public void setBankName(String bankName) {
         this.bankName = bankName;
     }
-    
+
     @Override
     public Object clone() throws CloneNotSupportedException {
-    	return  super.clone();
-        
+        return super.clone();
+
     }
 
     public void setBankId(String bankId) {
@@ -255,16 +251,15 @@ public class BankCoordinates implements Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return "BankCoordinates [bankCode=" + bankCode + ", branchCode=" + branchCode + ", accountNumber=" + accountNumber + ", key=" + key + ", iban=" + iban + ", bic=" + bic
-                + ", accountOwner=" + accountOwner + ", bankName=" + bankName + ", bankId=" + bankId + ", issuerNumber=" + issuerNumber + ", issuerName=" + issuerName + ", ics="
-                + ics + "]";
+        return "BankCoordinates [bankCode=" + bankCode + ", branchCode=" + branchCode + ", accountNumber=" + accountNumber + ", key=" + key + ", iban=" + iban + ", bic=" + bic + ", accountOwner=" + accountOwner
+                + ", bankName=" + bankName + ", bankId=" + bankId + ", issuerNumber=" + issuerNumber + ", issuerName=" + issuerName + ", ics=" + ics + "]";
     }
-    
+
     public void anonymize(String code) {
-        setKey(code.substring(0,2));
-        setBankCode(code.substring(0,5));
-        setBranchCode(code.substring(0,5));
-        setAccountNumber(code.substring(0,11));
+        setKey(code.substring(0, 2));
+        setBankCode(code.substring(0, 5));
+        setBranchCode(code.substring(0, 5));
+        setAccountNumber(code.substring(0, 11));
         setIban(code);
         setBic(code);
         setAccountOwner(code);
@@ -272,7 +267,7 @@ public class BankCoordinates implements Serializable, Cloneable {
         setBankId(code);
         setIssuerNumber(code);
         setIssuerName(code);
-        setIcs(code.substring(0,35));
+        setIcs(code.substring(0, 35));
     }
 
     @Override
@@ -289,45 +284,46 @@ public class BankCoordinates implements Serializable, Cloneable {
 
         return StringUtils.compare(iban, other.getIban()) == 0;
     }
+
     /**
-	 * 
-	 * @param iban
-	 * @return encrypted iban if encryption key exist in config file else return iban
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
-     * @throws InvalidKeyException 
-	 * @throws Exception
-	 */
-	public String encryptIban(String iban) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException  {
+     * 
+     * @param iban
+     * @return encrypted iban if encryption key exist in config file else return iban
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws BadPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws InvalidKeyException
+     * @throws Exception
+     */
+    public String encryptIban(String iban) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
-		if (iban != null && !(iban.startsWith("AES"))) {
-			AesEncrypt ae = new AesEncrypt();
-			return ae.getEncyptedIban(iban, ae);
-}
-		return iban;
-	}
+        if (iban != null && !(iban.startsWith("AES"))) {
+            AesEncrypt ae = new AesEncrypt();
+            return ae.getEncyptedIban(iban, ae);
+        }
+        return iban;
+    }
 
-	/**
-	 * 
-	 * @param iban
-	 * @return decrypted iban if iban is already encypted
-	 * @throws NoSuchPaddingException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * @throws InvalidKeyException 
-	 * @throws Exception
-	 */
-	public String decryptIban(String iban) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException  {
+    /**
+     * 
+     * @param iban
+     * @return decrypted iban if iban is already encypted
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws BadPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws InvalidKeyException
+     * @throws Exception
+     */
+    public String decryptIban(String iban) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
-		if (iban != null && iban.startsWith("AES")) {
-			iban = iban.substring(3);
-			AesEncrypt ae = new AesEncrypt();
-			return ae.getDecryptedIban(iban, ae);
-		}
-		return iban;
-	}
+        if (iban != null && iban.startsWith("AES")) {
+            iban = iban.substring(3);
+            AesEncrypt ae = new AesEncrypt();
+            return ae.getDecryptedIban(iban, ae);
+        }
+        return iban;
+    }
 
 }

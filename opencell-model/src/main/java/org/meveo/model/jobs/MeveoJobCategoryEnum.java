@@ -22,19 +22,10 @@ import org.meveo.commons.utils.MeveoEnum;
 @MeveoEnum(identifier = JobCategoryEnum.class)
 public enum MeveoJobCategoryEnum implements JobCategoryEnum {
 
-    RATING(1, "jobCategoryEnum.rating"),
-    INVOICING(2, "jobCategoryEnum.invoicing"),
-    IMPORT_HIERARCHY(3, "jobCategoryEnum.importHierarchy"),
-    ACCOUNT_RECEIVABLES(4, "jobCategoryEnum.accountReceivables"),
-    WALLET(5, "jobCategoryEnum.wallet"),
-    UTILS(6, "jobCategoryEnum.utils"),
-    MEDIATION(7, "jobCategoryEnum.mediation"),
-    PAYMENT(8, "jobCategoryEnum.payment"),
-    REPORTING_QUERY(9, "jobCategoryEnum.reporting_query"),
-    ACCOUNTING(10, "jobCategoryEnum.accounting"),
-    DUNNING(11, "jobCategoryEnum.dunning"),
-    ORDERING(12, "jobCategoryEnum.ordering"),
-    MASSADJUSTMENT(13, "jobCategoryEnum.Mass_Adjustment");
+    RATING(1, "jobCategoryEnum.rating"), INVOICING(2, "jobCategoryEnum.invoicing"), IMPORT_HIERARCHY(3, "jobCategoryEnum.importHierarchy"), ACCOUNT_RECEIVABLES(4, "jobCategoryEnum.accountReceivables"), WALLET(5,
+            "jobCategoryEnum.wallet"), UTILS(6, "jobCategoryEnum.utils"), MEDIATION(7, "jobCategoryEnum.mediation"), PAYMENT(8, "jobCategoryEnum.payment"), REPORTING_QUERY(9,
+                    "jobCategoryEnum.reporting_query"), ACCOUNTING(10,
+                            "jobCategoryEnum.accounting"), DUNNING(11, "jobCategoryEnum.dunning"), ORDERING(12, "jobCategoryEnum.ordering"), MASSADJUSTMENT(13, "jobCategoryEnum.Mass_Adjustment");
 
     private Integer id;
     private String label;

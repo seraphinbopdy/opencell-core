@@ -17,29 +17,31 @@
  */
 package org.meveo.model.communication;
 
+import java.sql.Types;
 import java.util.Date;
 import java.util.Map;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ObservableEntity;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @ObservableEntity
@@ -48,8 +50,7 @@ import org.meveo.model.ObservableEntity;
 @Table(name = "com_message_template", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
 @DiscriminatorColumn(name = "media")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "com_msg_tmpl_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "com_msg_tmpl_seq"), @Parameter(name = "increment_size", value = "1") })
 public abstract class MessageTemplate extends BusinessEntity {
 
     private static final long serialVersionUID = 5835960109145222442L;
@@ -82,13 +83,13 @@ public abstract class MessageTemplate extends BusinessEntity {
         return media;
     }
 
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "textcontent")
     private String textContent;
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "textcontent_i18n", columnDefinition = "jsonb")
-    private Map<String,String> translatedTextContent;
+    private Map<String, String> translatedTextContent;
 
     public String getTextContent() {
         return textContent;

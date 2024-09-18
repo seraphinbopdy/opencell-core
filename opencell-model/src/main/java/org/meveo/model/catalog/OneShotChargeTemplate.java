@@ -17,16 +17,17 @@
  */
 package org.meveo.model.catalog;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
+import org.hibernate.type.NumericBooleanConverter;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
 
 /**
  * One shot charge template
@@ -37,17 +38,15 @@ import org.hibernate.annotations.Type;
 @DiscriminatorValue("O")
 @NamedQueries({
         @NamedQuery(name = "oneShotChargeTemplate.getNbrSubscriptionChrgNotAssociated", query = "select count (*) from  OneShotChargeTemplate o where (o.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateSubscription serv) "
-                + "OR not exists elements(o.pricePlans) )"
-                + " and  oneShotChargeTemplateType=:oneShotChargeTemplateType", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+                + "OR not exists elements(o.pricePlans) )" + " and  oneShotChargeTemplateType=:oneShotChargeTemplateType", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
 
-        @NamedQuery(name = "oneShotChargeTemplate.getSubscriptionChrgNotAssociated", query = "from  OneShotChargeTemplate o where (o.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateSubscription serv) "
+        @NamedQuery(name = "oneShotChargeTemplate.getSubscriptionChrgNotAssociated", query = "select o from  OneShotChargeTemplate o where (o.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateSubscription serv) "
                 + " OR not exists elements(o.pricePlans) ) and  oneShotChargeTemplateType=:oneShotChargeTemplateType"),
 
         @NamedQuery(name = "oneShotChargeTemplate.getNbrTerminationChrgNotAssociated", query = "select count (*) from  OneShotChargeTemplate o where (o.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateTermination serv) "
-                + " OR not exists elements(o.pricePlans) )"
-                + " and  oneShotChargeTemplateType=:oneShotChargeTemplateType ", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+                + " OR not exists elements(o.pricePlans) )" + " and  oneShotChargeTemplateType=:oneShotChargeTemplateType ", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
 
-        @NamedQuery(name = "oneShotChargeTemplate.getTerminationChrgNotAssociated", query = "from  OneShotChargeTemplate o where (o.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateTermination serv) "
+        @NamedQuery(name = "oneShotChargeTemplate.getTerminationChrgNotAssociated", query = "select o from  OneShotChargeTemplate o where (o.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateTermination serv) "
                 + " OR not exists elements(o.pricePlans) ) and  oneShotChargeTemplateType=:oneShotChargeTemplateType") })
 public class OneShotChargeTemplate extends ChargeTemplate {
 
@@ -63,7 +62,7 @@ public class OneShotChargeTemplate extends ChargeTemplate {
     /**
      * Immediate invoicing
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "immediate_invoicing")
     private Boolean immediateInvoicing = false;
 

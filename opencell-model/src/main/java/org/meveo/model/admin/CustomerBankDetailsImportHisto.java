@@ -17,12 +17,12 @@
  */
 package org.meveo.model.admin;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.validation.constraints.Size;
-
 import org.meveo.model.bi.JobHistory;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @DiscriminatorValue(value = "CUSTOMER_BANK_DETAILS_IMPORT")
@@ -33,7 +33,7 @@ public class CustomerBankDetailsImportHisto extends JobHistory {
     @Column(name = "file_name", length = 255)
     @Size(max = 255)
     private String fileName;
-    
+
     @Column(name = "nb_customer_accounts")
     private Integer nbCustomerAccounts;
 
@@ -49,7 +49,6 @@ public class CustomerBankDetailsImportHisto extends JobHistory {
     @Column(name = "nb_customer_accounts_created")
     private Integer nbCustomerAccountsCreated;
 
-
     /**
      * @return the fileName
      */
@@ -64,7 +63,6 @@ public class CustomerBankDetailsImportHisto extends JobHistory {
         this.fileName = fileName;
     }
 
-   
     /**
      * @return the nbCustomerAccounts
      */

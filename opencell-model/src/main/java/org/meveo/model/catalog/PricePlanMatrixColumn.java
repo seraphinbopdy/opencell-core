@@ -3,49 +3,59 @@ package org.meveo.model.catalog;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.Product;
 
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
 @SuppressWarnings("serial")
 @Entity
 @ExportIdentifier({ "code", "pricePlanMatrixVersion.currentVersion" })
 @Table(name = "cpq_price_plan_matrix_column")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_price_plan_matrix_column_sq"), })
-@NamedQueries({
-        @NamedQuery(name = "PricePlanMatrixColumn.findByAttributes", query = "select p from PricePlanMatrixColumn p where p.attribute in :attribute"),
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_price_plan_matrix_column_sq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "PricePlanMatrixColumn.findByAttributes", query = "select p from PricePlanMatrixColumn p where p.attribute in :attribute"),
         @NamedQuery(name = "PricePlanMatrixColumn.findByProduct", query = "select p from PricePlanMatrixColumn p where p.product in :product"),
         @NamedQuery(name = "PricePlanMatrixColumn.findByCodeAndVersion", query = "select p from PricePlanMatrixColumn p where p.code=:code and p.pricePlanMatrixVersion.id=:pricePlanMatrixVersionId"),
-        @NamedQuery(name = "PricePlanMatrixColumn.findByVersion", query = "select p from PricePlanMatrixColumn p where p.pricePlanMatrixVersion.id=:pricePlanMatrixVersionId"),
-})
+        @NamedQuery(name = "PricePlanMatrixColumn.findByVersion", query = "select p from PricePlanMatrixColumn p where p.pricePlanMatrixVersion.id=:pricePlanMatrixVersionId"), })
 @Cacheable
 public class PricePlanMatrixColumn extends BusinessEntity {
 
-	public PricePlanMatrixColumn() {
-	}
+    public PricePlanMatrixColumn() {
+    }
 
-	public PricePlanMatrixColumn(PricePlanMatrixColumn copy) {
-		this.pricePlanMatrixVersion = copy.pricePlanMatrixVersion;
-		this.position = copy.position;
-		this.type = copy.type;
-		this.elValue = copy.elValue;
-		this.offerTemplate = copy.offerTemplate;
-		this.attribute = copy.attribute;
-		this.isRange = copy.isRange;
-		this.pricePlanMatrixValues = new HashSet<PricePlanMatrixValue>();
-		this.description = copy.description;
-		this.code = copy.code;
-	}
+    public PricePlanMatrixColumn(PricePlanMatrixColumn copy) {
+        this.pricePlanMatrixVersion = copy.pricePlanMatrixVersion;
+        this.position = copy.position;
+        this.type = copy.type;
+        this.elValue = copy.elValue;
+        this.offerTemplate = copy.offerTemplate;
+        this.attribute = copy.attribute;
+        this.isRange = copy.isRange;
+        this.pricePlanMatrixValues = new HashSet<PricePlanMatrixValue>();
+        this.description = copy.description;
+        this.code = copy.code;
+    }
 
-	@ManyToOne
+    @ManyToOne
     @JoinColumn(name = "ppm_version_id")
     @NotNull
     private PricePlanMatrixVersion pricePlanMatrixVersion;
@@ -74,11 +84,11 @@ public class PricePlanMatrixColumn extends BusinessEntity {
     @JoinColumn(name = "attribute_id")
     private Attribute attribute;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_range")
     private Boolean isRange;
 
-    @OneToMany(mappedBy = "pricePlanMatrixColumn", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    @OneToMany(mappedBy = "pricePlanMatrixColumn", fetch = FetchType.LAZY, cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH }, orphanRemoval = true)
     private Set<PricePlanMatrixValue> pricePlanMatrixValues = new HashSet<>();
 
     public PricePlanMatrixVersion getPricePlanMatrixVersion() {

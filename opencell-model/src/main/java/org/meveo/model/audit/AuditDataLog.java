@@ -7,45 +7,45 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.ColumnResult;
-import javax.persistence.ConstructorResult;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.SqlResultSetMapping;
-import javax.persistence.SqlResultSetMappings;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.IEntity;
+
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedNativeQueries;
+import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.SqlResultSetMapping;
+import jakarta.persistence.SqlResultSetMappings;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "audit_data_log")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "audit_data_log_seq"),
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "audit_data_log_seq"),
         @Parameter(name = "increment_size", value = "100") })
 
-@NamedQueries({
-        @NamedQuery(name = "AuditDataLogRecord.purgeAuditDataLog", query = "delete from AuditDataLog a where a.created < :purgeDate")})
+@NamedQueries({ @NamedQuery(name = "AuditDataLogRecord.purgeAuditDataLog", query = "delete from AuditDataLog a where a.created < :purgeDate") })
 @NamedNativeQueries({
         @NamedNativeQuery(name = "AuditDataLogRecord.listConvertToAggregate", query = "select id, created, user_name, ref_table, ref_id, tx_id, action, origin, origin_name, data_old #>> '{}' as values_old, data_new #>> '{}' as values_new  from {h-schema}audit_data_log_rec where id<=:maxId order by tx_id, id", resultSetMapping = "AuditDataLogRecordResultMapping"),
         @NamedNativeQuery(name = "AuditDataLogRecord.getConvertToAggregateSummary", query = "SELECT count(distinct a.tx_id), max(a.id), min(a.id) FROM {h-schema}audit_data_log_rec a"),
         @NamedNativeQuery(name = "AuditDataLogRecord.deleteAuditDataLogRecords", query = "delete from {h-schema}audit_data_log_rec where id in :ids"),
-        @NamedNativeQuery(name = "AuditDataLogRecord.purgeAuditDataLogRecords", query = "delete from {h-schema}audit_data_log_rec where created < :purgeDate")})
+        @NamedNativeQuery(name = "AuditDataLogRecord.purgeAuditDataLogRecords", query = "delete from {h-schema}audit_data_log_rec where created < :purgeDate") })
 
 @SqlResultSetMappings({ @SqlResultSetMapping(name = "AuditDataLogRecordResultMapping", classes = @ConstructorResult(targetClass = AuditDataLogRecord.class, columns = { @ColumnResult(name = "id", type = Long.class),
         @ColumnResult(name = "created"), @ColumnResult(name = "user_name"), @ColumnResult(name = "ref_table"), @ColumnResult(name = "ref_id", type = Long.class), @ColumnResult(name = "tx_id", type = Long.class),
@@ -117,14 +117,14 @@ public class AuditDataLog implements Serializable, IEntity {
     /**
      * Previous values
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "data_old", columnDefinition = "jsonb")
     private Map<String, Object> valuesOld;
 
     /**
      * Value changes (new values)
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "data_new", columnDefinition = "jsonb")
     private Map<String, Object> valuesChanged;
 

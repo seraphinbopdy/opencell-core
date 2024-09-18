@@ -21,42 +21,43 @@ package org.meveo.model.admin;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.IEnable;
 import org.meveo.model.IEntity;
+
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Entity accessibility rules
  */
 @Entity
 @Table(name = "adm_secured_entity")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "adm_secured_entity_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "adm_secured_entity_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "SecuredEntity.listByRoleName", query = "SELECT s from org.meveo.model.admin.SecuredEntity s where s.roleName=:roleName", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
         @NamedQuery(name = "SecuredEntity.listByUserName", query = "SELECT s from org.meveo.model.admin.SecuredEntity s where lower(s.userName)=:userName", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
-        @NamedQuery(name = "SecuredEntity.validateByRoleName", query = "SELECT count(*) from org.meveo.model.admin.SecuredEntity s where s.roleName=:roleName and entity_code=:entityCode and entity_class=:entityClass"),
-        @NamedQuery(name = "SecuredEntity.validateByUserName", query = "SELECT count(*) from org.meveo.model.admin.SecuredEntity s where lower(s.userName)=:userName and entity_code=:entityCode and entity_class=:entityClass"),
+        @NamedQuery(name = "SecuredEntity.validateByRoleName", query = "SELECT count(*) from org.meveo.model.admin.SecuredEntity s where s.roleName=:roleName and s.entityCode=:entityCode and s.entityClass=:entityClass"),
+        @NamedQuery(name = "SecuredEntity.validateByUserName", query = "SELECT count(*) from org.meveo.model.admin.SecuredEntity s where lower(s.userName)=:userName and s.entityCode=:entityCode and s.entityClass=:entityClass"),
         @NamedQuery(name = "SecuredEntity.listForCurrentUser", query = "SELECT new org.meveo.security.SecuredEntity(s.entityId, s.entityCode, s.entityClass, s.permission) from org.meveo.model.admin.SecuredEntity s where s.disabled=false and (lower(s.userName)=:userName or s.roleName in :roleNames)", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }) })
 public class SecuredEntity implements Serializable, IEntity, IEnable {
@@ -115,7 +116,7 @@ public class SecuredEntity implements Serializable, IEntity, IEnable {
     @Enumerated(EnumType.STRING)
     private SecuredEntityPermissionEnum permission = SecuredEntityPermissionEnum.READ;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "disabled", nullable = false)
     @NotNull
     private boolean disabled;

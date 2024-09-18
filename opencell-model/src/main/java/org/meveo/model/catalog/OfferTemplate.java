@@ -21,31 +21,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.QueryHint;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.IWFEntity;
@@ -60,6 +38,28 @@ import org.meveo.model.cpq.tags.Tag;
 import org.meveo.model.cpq.trade.CommercialRuleHeader;
 import org.meveo.model.document.Document;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 /**
  * @author Edward P. Legaspi, Andrius Karpavicius
  * @author Abdellatif BARI
@@ -72,11 +72,10 @@ import org.meveo.model.document.Document;
 @NamedQueries({ @NamedQuery(name = "OfferTemplate.countActive", query = "SELECT COUNT(*) FROM OfferTemplate WHERE businessOfferModel is not null and lifeCycleStatus='ACTIVE'"),
         @NamedQuery(name = "OfferTemplate.countDisabled", query = "SELECT COUNT(*) FROM OfferTemplate WHERE businessOfferModel is not null and lifeCycleStatus<>'ACTIVE'"),
         @NamedQuery(name = "OfferTemplate.getMimimumRTUsed", query = "select ot.minimumAmountEl from OfferTemplate ot where ot.minimumAmountEl is not null"),
-        @NamedQuery(name = "OfferTemplate.countExpiring", query = "SELECT COUNT(*) FROM OfferTemplate WHERE :nowMinusXDay<validity.to and validity.to<=NOW() and businessOfferModel is not null"),
+        @NamedQuery(name = "OfferTemplate.countExpiring", query = "SELECT COUNT(*) FROM OfferTemplate WHERE :nowMinusXDay<validity.to and validity.to<=function('NOW') and businessOfferModel is not null"),
         @NamedQuery(name = "OfferTemplate.findByServiceTemplate", query = "SELECT t FROM OfferTemplate t JOIN t.offerServiceTemplates ost WHERE ost.serviceTemplate = :serviceTemplate", hints = @QueryHint(name = "org.hibernate.flushMode", value = "COMMIT")),
         @NamedQuery(name = "OfferTemplate.findByTags", query = "select o from OfferTemplate o LEFT JOIN o.tags as tag WHERE tag.code IN (:tagCodes)"),
-        @NamedQuery(name = "OfferTemplate.massEnableDisable", query = "update OfferTemplate o set o.disabled = :flag where o.id in (:ids)")
-})
+        @NamedQuery(name = "OfferTemplate.massEnableDisable", query = "update OfferTemplate o set o.disabled = :flag where o.id in (:ids)") })
 public class OfferTemplate extends ProductOffering implements IWFEntity, ISearchable {
     private static final long serialVersionUID = 1L;
 
@@ -98,7 +97,6 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
      */
     @OneToMany(mappedBy = "offerTemplate", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OfferComponent> offerComponents = new ArrayList<>();
-
 
     /**
      * Expression to determine minimum amount value
@@ -147,10 +145,9 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     @Transient
     private String transientCode;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "auto_end_of_engagement")
     private Boolean autoEndOfEngagement = Boolean.FALSE;
-
 
     /**
      * list of tag attached
@@ -159,12 +156,9 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     @JoinTable(name = "cpq_offer_template_tags", joinColumns = @JoinColumn(name = "offer_template_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
     private List<Tag> tags = new ArrayList<>();
 
-
-
-
-	/**
+    /**
      * list of Media
-     */   
+     */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "cpq_offer_template_media", joinColumns = @JoinColumn(name = "offer_template_id"), inverseJoinColumns = @JoinColumn(name = "media_id"))
     private List<Media> medias = new ArrayList<Media>();
@@ -180,18 +174,13 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     @Temporal(TemporalType.TIMESTAMP)
     private Date statusDate;
 
-
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_offer_change_restricted")
     private Boolean isOfferChangeRestricted = Boolean.FALSE;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "cat_offer_allowed_offer_change", 
-            joinColumns = @JoinColumn(name = "offer_tmpl_id", referencedColumnName = "id"), 
-            inverseJoinColumns = @JoinColumn(name = "allowed_offer_change_id", referencedColumnName = "id")
-    )
+    @JoinTable(name = "cat_offer_allowed_offer_change", joinColumns = @JoinColumn(name = "offer_tmpl_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "allowed_offer_change_id", referencedColumnName = "id"))
     private List<OfferTemplate> allowedOffersChange = new ArrayList<>();
-
 
     /**
      * Corresponding to minimum invoice AccountingArticle
@@ -199,29 +188,27 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "minimum_article_id")
     private AccountingArticle minimumArticle;
-    
-    
-    @Type(type = "numeric_boolean")
+
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_model")
     private Boolean isModel;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "offer_model_id")
     private OfferTemplate offerModel;
-    
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "generate_quote_edr_per_product")
     private boolean generateQuoteEdrPerProduct;
-    
+
     /**
-    * Display
-    */
-    @Type(type = "numeric_boolean")
+     * Display
+     */
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display")
     @NotNull
     private boolean display;
-    
+
     /**
      * sequence for Offer Template and attribute
      */
@@ -231,14 +218,14 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id")
     private Document document;
-    
+
     /**
      * @return the display
      */
     public boolean isDisplay() {
         return display;
     }
-    
+
     /**
      * @param display the display to set
      */
@@ -252,7 +239,7 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     public Integer getSequence() {
         return sequence;
     }
-    
+
     /**
      * @param sequence the sequence to set
      */
@@ -524,87 +511,82 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
         this.minimumChargeTemplate = minimumChargeTemplate;
     }
 
+    /**
+     * @return the tags
+     */
+    public List<Tag> getTags() {
+        return tags;
+    }
 
+    /**
+     * @param tags the tags to set
+     */
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
 
-	/**
-	 * @return the tags
-	 */
-	public List<Tag> getTags() {
-		return tags;
-	}
+    public void setProductTemplates(List<ProductTemplate> productTemplates) {
+        this.productTemplates = productTemplates;
+    }
 
-	/**
-	 * @param tags the tags to set
-	 */
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
-	}
+    /**
+     * @return the offerComponents
+     */
+    public List<OfferComponent> getOfferComponents() {
+        return offerComponents;
+    }
 
-	public void setProductTemplates(List<ProductTemplate> productTemplates) {
-		this.productTemplates = productTemplates;
-	}
+    /**
+     * @param offerComponents the offerComponents to set
+     */
+    public void setOfferComponents(List<OfferComponent> offerComponents) {
+        this.offerComponents = offerComponents;
+    }
 
-	/**
-	 * @return the offerComponents
-	 */
-	public List<OfferComponent> getOfferComponents() {
-		return offerComponents;
-	}
+    /**
+     * @return the medias
+     */
+    public List<Media> getMedias() {
+        return medias;
+    }
 
-	/**
-	 * @param offerComponents the offerComponents to set
-	 */
-	public void setOfferComponents(List<OfferComponent> offerComponents) {
-		this.offerComponents = offerComponents;
-	}
+    /**
+     * @param medias the medias to set
+     */
+    public void setMedias(List<Media> medias) {
+        this.medias = medias;
+    }
 
-	/**
-	 * @return the medias
-	 */
-	public List<Media> getMedias() {
-		return medias;
-	}
+    /**
+     * @return the statusDate
+     */
+    public Date getStatusDate() {
+        return statusDate;
+    }
 
-	/**
-	 * @param medias the medias to set
-	 */
-	public void setMedias(List<Media> medias) {
-		this.medias = medias;
-	}
+    /**
+     * @param statusDate the statusDate to set
+     */
+    public void setStatusDate(Date statusDate) {
+        this.statusDate = statusDate;
+    }
 
-	/**
-	 * @return the statusDate
-	 */
-	public Date getStatusDate() {
-		return statusDate;
-	}
+    /**
+     * @return the commercialRules
+     */
+    public List<CommercialRuleHeader> getCommercialRules() {
+        return commercialRules;
+    }
 
-	/**
-	 * @param statusDate the statusDate to set
-	 */
-	public void setStatusDate(Date statusDate) {
-		this.statusDate = statusDate;
-	}
-
-	/**
-	 * @return the commercialRules
-	 */
-	public List<CommercialRuleHeader> getCommercialRules() {
-		return commercialRules;
-	}
-
-	/**
-	 * @param commercialRules the commercialRules to set
-	 */
-	public void setCommercialRules(List<CommercialRuleHeader> commercialRules) {
-		this.commercialRules = commercialRules;
-	}
-
+    /**
+     * @param commercialRules the commercialRules to set
+     */
+    public void setCommercialRules(List<CommercialRuleHeader> commercialRules) {
+        this.commercialRules = commercialRules;
+    }
 
     public boolean haveProduct(String productCode) {
-	    return offerComponents.stream()
-                .filter(off -> off.getProduct() != null)
-                .anyMatch(off -> off.getProduct().getCode().equals(productCode));
+        return offerComponents.stream().filter(off -> off.getProduct() != null).anyMatch(off -> off.getProduct().getCode().equals(productCode));
     }
 
     /**
@@ -637,41 +619,41 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
         this.minimumArticle = minimumArticle;
     }
 
-	public Boolean getIsModel() {
-		return isModel;
-	}
+    public Boolean getIsModel() {
+        return isModel;
+    }
 
-	public void setIsModel(Boolean isModel) {
-		this.isModel = isModel;
-	}
+    public void setIsModel(Boolean isModel) {
+        this.isModel = isModel;
+    }
 
-	/**
-	 * @return the offerModel
-	 */
-	public OfferTemplate getOfferModel() {
-		return offerModel;
-	}
+    /**
+     * @return the offerModel
+     */
+    public OfferTemplate getOfferModel() {
+        return offerModel;
+    }
 
-	/**
-	 * @param offerModel the offerModel to set
-	 */
-	public void setOfferModel(OfferTemplate offerModel) {
-		this.offerModel = offerModel;
-	}
+    /**
+     * @param offerModel the offerModel to set
+     */
+    public void setOfferModel(OfferTemplate offerModel) {
+        this.offerModel = offerModel;
+    }
 
-	/**
-	 * @return the offerAttributes
-	 */
-	public List<OfferTemplateAttribute> getOfferAttributes() {
-		return offerAttributes;
-	}
+    /**
+     * @return the offerAttributes
+     */
+    public List<OfferTemplateAttribute> getOfferAttributes() {
+        return offerAttributes;
+    }
 
-	/**
-	 * @param offerAttributes the offerAttributes to set
-	 */
-	public void setOfferAttributes(List<OfferTemplateAttribute> offerAttributes) {
-		this.offerAttributes = offerAttributes;
-	}
+    /**
+     * @param offerAttributes the offerAttributes to set
+     */
+    public void setOfferAttributes(List<OfferTemplateAttribute> offerAttributes) {
+        this.offerAttributes = offerAttributes;
+    }
 
     public boolean isGenerateQuoteEdrPerProduct() {
         return generateQuoteEdrPerProduct;
@@ -688,5 +670,5 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     public void setDocument(Document document) {
         this.document = document;
     }
-    
+
 }

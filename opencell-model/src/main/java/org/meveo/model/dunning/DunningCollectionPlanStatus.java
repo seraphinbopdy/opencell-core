@@ -1,23 +1,23 @@
 package org.meveo.model.dunning;
 
-import static javax.persistence.EnumType.STRING;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import static jakarta.persistence.EnumType.STRING;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * @author Mbarek-Ay
@@ -25,11 +25,8 @@ import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
  */
 @Entity
 @Table(name = "dunning_collection_plan_statuses")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "dunning_collection_plan_statuses_seq") })
-@NamedQueries({
-		@NamedQuery(name = "DunningCollectionPlanStatus.findByStatus", query = "SELECT cps FROM DunningCollectionPlanStatus cps where cps.status = :status")
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_collection_plan_statuses_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "DunningCollectionPlanStatus.findByStatus", query = "SELECT cps FROM DunningCollectionPlanStatus cps where cps.status = :status") })
 public class DunningCollectionPlanStatus extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;

@@ -54,7 +54,7 @@ public interface IInvoiceable {
     public void setAmountTax(BigDecimal amountTax);
 
     public Long getTaxId();
-    
+
     public Tax getTax();
 
     public void setTax(Tax tax);

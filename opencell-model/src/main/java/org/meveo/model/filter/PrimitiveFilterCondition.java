@@ -20,16 +20,16 @@ package org.meveo.model.filter;
 
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * @author Edward P. Legaspi
@@ -37,8 +37,7 @@ import org.meveo.model.BaseEntity;
 @Entity
 @Table(name = "meveo_primitive_filter_condition")
 @DiscriminatorValue(value = "PRIMITIVE")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "meveo_primitive_filter_condition_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "meveo_primitive_filter_condition_seq"), @Parameter(name = "increment_size", value = "1") })
 public class PrimitiveFilterCondition extends FilterCondition {
 
     private static final long serialVersionUID = 5812098177203454113L;

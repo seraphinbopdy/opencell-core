@@ -18,24 +18,26 @@
 
 package org.meveo.model.notification;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import java.sql.Types;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 import org.meveo.model.AuditableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Notification execution history
@@ -44,8 +46,7 @@ import org.meveo.model.AuditableEntity;
  */
 @Entity
 @Table(name = "adm_notif_history")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "adm_notif_history_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "adm_notif_history_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "NotificationHistory.countHistoryToPurgeByDate", query = "select count(*) FROM NotificationHistory hist WHERE hist.auditable.created<=:date"),
         @NamedQuery(name = "NotificationHistory.purgeHistoryByDate", query = "delete NotificationHistory hist WHERE hist.auditable.created<=:date"),
         @NamedQuery(name = "NotificationHistory.countHistoryToPurgeByDateAndNotification", query = "select count(*) FROM NotificationHistory hist WHERE hist.auditable.created<=:date and hist.notification=:notification"),
@@ -88,7 +89,7 @@ public class NotificationHistory extends AuditableEntity {
     /**
      * Entity's ID or a serialized entity (toString()) if ID is not available yet
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "serialized_entity")
     private String serializedEntity;
 

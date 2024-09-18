@@ -18,9 +18,10 @@
 
 package org.meveo.model.security;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableCFEntity;
@@ -29,30 +30,17 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.IReferenceEntity;
 import org.meveo.model.ReferenceIdentifierCode;
 import org.meveo.model.ReferenceIdentifierDescription;
-import org.meveo.model.admin.SecuredEntity;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Cacheable;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Application security role
@@ -68,7 +56,7 @@ import java.util.Set;
 @ReferenceIdentifierCode("name")
 @ReferenceIdentifierDescription("description")
 @Table(name = "adm_role")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "adm_role_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "adm_role_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "Role.getByName", query = "SELECT r FROM Role r WHERE lower(r.name)=:name", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }), })
 public class Role extends AuditableCFEntity implements IReferenceEntity {
 
@@ -106,14 +94,13 @@ public class Role extends AuditableCFEntity implements IReferenceEntity {
      */
     @Transient
     private Set<Role> roles = new HashSet<>();
-    
-    
+
     /**
      * Create In KC
      */
     @Transient
-    private Boolean replicateInKc=Boolean.TRUE;
-	
+    private Boolean replicateInKc = Boolean.TRUE;
+
     public Role() {
         // TODO Auto-generated constructor stub
     }
@@ -250,11 +237,11 @@ public class Role extends AuditableCFEntity implements IReferenceEntity {
         this.parentRole = parentRole;
     }
 
-	public Boolean getReplicateInKc() {
-		return replicateInKc;
-	}
+    public Boolean getReplicateInKc() {
+        return replicateInKc;
+    }
 
-	public void setReplicateInKc(Boolean replicateInKc) {
-		this.replicateInKc = replicateInKc;
-	}
+    public void setReplicateInKc(Boolean replicateInKc) {
+        this.replicateInKc = replicateInKc;
+    }
 }

@@ -1,30 +1,19 @@
 package org.meveo.model.article;
 
-import static javax.persistence.FetchType.EAGER;
-import static javax.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.LAZY;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.accountingScheme.AccountingCodeMapping;
@@ -34,45 +23,58 @@ import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.UntdidAllowanceCode;
 import org.meveo.model.tax.TaxClass;
 
-@Entity@CustomFieldEntity(cftCodePrefix = "AccountingArticle")
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+
+@Entity
+@CustomFieldEntity(cftCodePrefix = "AccountingArticle")
 @Table(name = "billing_accounting_article", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-        parameters = { @org.hibernate.annotations.Parameter(name = "sequence_name", value = "billing_accounting_article_seq"), })
-@NamedQueries({
-        @NamedQuery(name = "AccountingArticle.findByAccountingCode", query = "select a from AccountingArticle a where a.accountingCode.code = :accountingCode"),
-        @NamedQuery(name = "AccountingArticle.findByTaxClassAndSubCategory", query = "select a from AccountingArticle a where a.taxClass = :taxClass and a.invoiceSubCategory = :invoiceSubCategory"),
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {
+        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "billing_accounting_article_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "AccountingArticle.findByAccountingCode", query = "select a from AccountingArticle a where a.accountingCode.code = :accountingCode"),
+        @NamedQuery(name = "AccountingArticle.findByTaxClassAndSubCategory", query = "select a from AccountingArticle a where a.taxClass = :taxClass and a.invoiceSubCategory = :invoiceSubCategory"), })
 @Cacheable
 public class AccountingArticle extends EnableBusinessCFEntity {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-	@ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "tax_class_id")
     private TaxClass taxClass;
 
-	@ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "invoice_sub_category_id")
     private InvoiceSubCategory invoiceSubCategory;
 
-	@ManyToOne(fetch = LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "article_family_id")
     private ArticleFamily articleFamily;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "accounting_code_id")
     private AccountingCode accountingCode;
-    
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "invoice_type_id")
     private InvoiceType invoiceType;
 
     @Column(name = "invoice_type_el")
-    private String invoiceTypeEl;    
-    
+    private String invoiceTypeEl;
+
     @Column(name = "analytic_code_1")
     private String analyticCode1;
 
@@ -85,7 +87,7 @@ public class AccountingArticle extends EnableBusinessCFEntity {
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 
@@ -98,12 +100,11 @@ public class AccountingArticle extends EnableBusinessCFEntity {
     @OneToMany(mappedBy = "accountingArticle", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private List<AccountingCodeMapping> accountingCodeMappings;
-    
 
     /**
      * Ignore aggregation
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "ignore_aggregation", nullable = false)
     private boolean ignoreAggregation;
 
@@ -117,10 +118,10 @@ public class AccountingArticle extends EnableBusinessCFEntity {
     /**
      * Need to know if article is physical of not : used by Tax calculation
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "physical", nullable = false)
     private boolean physical;
-    
+
     public UntdidAllowanceCode getAllowanceCode() {
         return allowanceCode;
     }
@@ -176,13 +177,13 @@ public class AccountingArticle extends EnableBusinessCFEntity {
     }
 
     public Map<String, String> getDescriptionI18n() {
-        if(descriptionI18n == null)
+        if (descriptionI18n == null)
             descriptionI18n = new HashMap<>();
         return descriptionI18n;
     }
 
-    public Map<String, String> getDescriptionI18nNotNull() {
-        if(descriptionI18n == null)
+    public Map<String, String> getDescriptionI18nNullSafe() {
+        if (descriptionI18n == null)
             descriptionI18n = new HashMap<>();
         return descriptionI18n;
     }
@@ -214,15 +215,15 @@ public class AccountingArticle extends EnableBusinessCFEntity {
     public void setAnalyticCode3(String analyticCode3) {
         this.analyticCode3 = analyticCode3;
     }
-    
-	public BigDecimal getUnitPrice() {
-		return unitPrice;
-	}
 
-	public void setUnitPrice(BigDecimal unitPrice) {
-		this.unitPrice = unitPrice;
-	}
-	
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
     public InvoiceType getInvoiceType() {
         return invoiceType;
     }
@@ -256,30 +257,30 @@ public class AccountingArticle extends EnableBusinessCFEntity {
     }
 
     @Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result;
-		return result;
-	}
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result;
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (!(obj instanceof AccountingArticle))
-			return false;
-		AccountingArticle other = (AccountingArticle) obj;
-		if (id == null) {
-			if (other.getId() != null)
-				return false;
-		} else if (other.getId()!=null && !id.equals(other.getId())) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof AccountingArticle))
+            return false;
+        AccountingArticle other = (AccountingArticle) obj;
+        if (id == null) {
+            if (other.getId() != null)
+                return false;
+        } else if (other.getId() != null && !id.equals(other.getId())) {
+            return false;
+        }
+        return true;
+    }
 
     public List<AccountingCodeMapping> getAccountingCodeMappings() {
         return accountingCodeMappings;

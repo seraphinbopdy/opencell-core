@@ -21,8 +21,6 @@ package org.meveo.model.intcrm;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
@@ -32,6 +30,14 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.communication.contact.Contact;
 import org.meveo.model.crm.Customer;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
 /**
  * Address book
  * 
@@ -40,8 +46,7 @@ import org.meveo.model.crm.Customer;
 @Entity
 @ExportIdentifier({ "code" })
 @Table(name = "crm_address_book")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "crm_address_book_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "crm_address_book_seq"), @Parameter(name = "increment_size", value = "1") })
 public class AddressBook extends BusinessEntity {
 
     private static final long serialVersionUID = 6638793926019456947L;

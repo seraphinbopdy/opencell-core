@@ -22,20 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
@@ -45,6 +31,20 @@ import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.catalog.ProductTemplate;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.Size;
 
 /**
  * Purchased product
@@ -59,8 +59,7 @@ import org.meveo.model.catalog.ProductTemplate;
 @ExportIdentifier({ "code" })
 @Table(name = "billing_product_instance")
 @AttributeOverrides({ @AttributeOverride(name = "code", column = @Column(name = "code", unique = false)) })
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_product_instance_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_product_instance_seq"), @Parameter(name = "increment_size", value = "1") })
 public class ProductInstance extends BusinessCFEntity {
 
     private static final long serialVersionUID = 1L;
@@ -139,8 +138,8 @@ public class ProductInstance extends BusinessCFEntity {
      * @param orderNumber Order number if tied to one
      * @param seller Seller. Defaults to subscription.seller in case product instance is tied to a subscription.
      */
-    public ProductInstance(UserAccount userAccount, Subscription subscription, ProductTemplate productTemplate, BigDecimal quantity, Date applicationDate, String code,
-            String description, String orderNumber, Seller seller) {
+    public ProductInstance(UserAccount userAccount, Subscription subscription, ProductTemplate productTemplate, BigDecimal quantity, Date applicationDate, String code, String description, String orderNumber,
+            Seller seller) {
         this.applicationDate = applicationDate;
         this.code = code;
         this.description = description;
@@ -156,7 +155,7 @@ public class ProductInstance extends BusinessCFEntity {
             this.userAccount = subscription.getUserAccount();
             this.seller = subscription.getSeller();
         }
-        if(this.seller == null) {
+        if (this.seller == null) {
             this.seller = this.userAccount.getBillingAccount().getCustomerAccount().getCustomer().getSeller();
         }
     }

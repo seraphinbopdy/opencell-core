@@ -20,14 +20,17 @@ package org.meveo.model.crm.custom;
 
 import java.io.Serializable;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.IntegerJdbcType;
+
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Defines a column inside a custom field key and values matrix. e.g. as table column.
@@ -58,6 +61,7 @@ public class CustomFieldMatrixColumn implements Serializable {
     /**
      * Is column to be used as key or as value field
      */
+    @JdbcType(IntegerJdbcType.class)
     @Column(name = "column_use", nullable = false)
     @Enumerated(value = EnumType.ORDINAL)
     @NotNull
@@ -88,6 +92,7 @@ public class CustomFieldMatrixColumn implements Serializable {
     /**
      * Data entry type
      */
+    @JdbcType(IntegerJdbcType.class)
     @Column(name = "key_type", nullable = false, length = 10)
     @Enumerated(value = EnumType.ORDINAL)
     @NotNull

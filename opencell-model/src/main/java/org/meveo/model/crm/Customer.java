@@ -22,30 +22,12 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AccountEntity;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.CustomFieldEntity;
@@ -64,6 +46,25 @@ import org.meveo.model.intcrm.AdditionalDetails;
 import org.meveo.model.intcrm.AddressBook;
 import org.meveo.model.payments.CustomerAccount;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+
 /**
  * Customer
  *
@@ -78,13 +79,11 @@ import org.meveo.model.payments.CustomerAccount;
 @ExportIdentifier({ "code" })
 @DiscriminatorValue(value = "ACCT_CUST")
 @Table(name = "crm_customer")
-@NamedQueries({
-        @NamedQuery(name = "Customer.getMinimumAmountUsed", query = "select c.minimumAmountEl from Customer c where c.minimumAmountEl is not null"),
+@NamedQueries({ @NamedQuery(name = "Customer.getMinimumAmountUsed", query = "select c.minimumAmountEl from Customer c where c.minimumAmountEl is not null"),
         @NamedQuery(name = "Customer.getByAddressBook", query = "select c from Customer c where c.addressbook.id =:addressBookId"),
         @NamedQuery(name = "Customer.getCustomersWithMinAmountELNotNullByBA", query = "select c from Customer c where c.minimumAmountEl is not null  AND c=:customer"),
         @NamedQuery(name = "Customer.getProspects", query = "select c from Customer c left join c.customerAccounts as ca left join ca.billingAccounts as ba "
-                + "left join ba.invoices as inv left join ba.usersAccounts as ua left join ua.subscriptions as sub "
-                + "where sub.id is null and inv.id is null and c.auditable.created < :creationDate")})
+                + "left join ba.invoices as inv left join ba.usersAccounts as ua left join ua.subscriptions as sub " + "where sub.id is null and inv.id is null and c.auditable.created < :creationDate") })
 public class Customer extends AccountEntity implements IInvoicingMinimumApplicable, IWFEntity, ICounterEntity {
 
     private static final long serialVersionUID = 1L;
@@ -148,7 +147,6 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
     @JoinColumn(name = "minimum_target_account_id")
     private BillingAccount minimumTargetAccount;
 
-
     /**
      * Invoicing threshold - do not invoice for a lesser amount.
      */
@@ -157,14 +155,15 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
 
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     private List<Contract> contracts = new ArrayList<>();
-	
-	@OneToMany
-	@JoinColumn(name = "customer_id")
-	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
-	
-	public List<RegistrationNumber> getRegistrationNumbers() {
-		return registrationNumbers;
-	}
+
+    @OneToMany
+    @JoinColumn(name = "customer_id")
+    private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+
+    public List<RegistrationNumber> getRegistrationNumbers() {
+        return registrationNumbers;
+    }
+
     public List<Contract> getContracts() {
         return contracts;
     }
@@ -183,23 +182,23 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
     /**
      * check threshold per entity?
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "threshold_per_entity")
     private boolean thresholdPerEntity;
 
     /**
-     * Parent customer 
+     * Parent customer
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_customer_id")
     private Customer parentCustomer;
-    
+
     /**
-     * Children customers 
+     * Children customers
      */
     @OneToMany(mappedBy = "parentCustomer", fetch = FetchType.LAZY)
     private List<Customer> childrenCustomers = new ArrayList<>();
-    
+
     public Date getAnonymizationDate() {
         return anonymizationDate;
     }
@@ -208,14 +207,14 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
         this.anonymizationDate = anonymizationDate;
     }
 
-    public boolean isAnonymized(){
+    public boolean isAnonymized() {
         return anonymizationDate != null;
     }
 
     public AddressBook getAddressbook() {
         return addressbook;
     }
-	
+
     public void setAddressbook(AddressBook addressbook) {
         this.addressbook = addressbook;
     }
@@ -229,13 +228,13 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
     }
 
     public boolean isThresholdPerEntity() {
-    	return thresholdPerEntity;
-	}
+        return thresholdPerEntity;
+    }
 
-	public void setThresholdPerEntity(boolean thresholdPerEntity) {
-		this.thresholdPerEntity = thresholdPerEntity;
-	}
-	
+    public void setThresholdPerEntity(boolean thresholdPerEntity) {
+        this.thresholdPerEntity = thresholdPerEntity;
+    }
+
     public Seller getSeller() {
         return seller;
     }
@@ -313,7 +312,7 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
     public void setCounters(Map<String, CounterInstance> counters) {
         this.counters = counters;
     }
-    
+
     public BillingAccount getMinimumTargetAccount() {
         return minimumTargetAccount;
     }
@@ -354,28 +353,28 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
         this.checkThreshold = checkThreshold;
     }
 
-	public Customer getParentCustomer() {
-		return parentCustomer;
-	}
+    public Customer getParentCustomer() {
+        return parentCustomer;
+    }
 
-	public void setParentCustomer(Customer parentCustomer) {
-		this.parentCustomer = parentCustomer;
-	}
+    public void setParentCustomer(Customer parentCustomer) {
+        this.parentCustomer = parentCustomer;
+    }
 
-	public List<Customer> getChildrenCustomers() {
-		return childrenCustomers;
-	}
+    public List<Customer> getChildrenCustomers() {
+        return childrenCustomers;
+    }
 
-	public void setChildrenCustomers(List<Customer> childrenCustomers) {
-		this.childrenCustomers = childrenCustomers;
-	}
-	
-	// check if the list of registration numbers is not empty
-	// get all registration numbers and join them with a comma
-	public String getRegistrationNo(){
-		if (isNotEmpty(registrationNumbers)) {
-			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
-		}
-		return registrationNo;
-	}
+    public void setChildrenCustomers(List<Customer> childrenCustomers) {
+        this.childrenCustomers = childrenCustomers;
+    }
+
+    // check if the list of registration numbers is not empty
+    // get all registration numbers and join them with a comma
+    public String getRegistrationNo() {
+        if (isNotEmpty(registrationNumbers)) {
+            registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+        }
+        return registrationNo;
+    }
 }

@@ -12958,8 +12958,8 @@ Meaning that advances won’t be available for further invoices."/>
 
     <changeSet id="#INTRD-22676" author="AndriusKarpavicius">
         <createTable tableName="adm_endpoint">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true"/>
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="adm_endpoint_pkey" />
             </column>
             <column name="version" type="int4"/>
             <column name="disabled" type="${type.boolean}" defaultValueNumeric="0"/>
@@ -13055,7 +13055,28 @@ Meaning that advances won’t be available for further invoices."/>
             <column name="max_pool" type="int4"/>
             <column name="max_idle_time_pool" type="int4"/>
         </addColumn>                         
+                              
+        <createSequence sequenceName="adm_endpoint_seq" startValue="1"/>                              
+                              
+        <createTable tableName="adm_endpoint_seq">
+            <column name="next_val" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="adm_endpoint_seq_pk" />
+            </column>
+        </createTable>
+        <sql>insert into ${db.schema.adapted}adm_endpoint_seq values(1)</sql>                              
                                  
+	</changeSet>
+	
+	<changeSet id="INTRD-24987" author="AndriusKarpavicius">
+		<addColumn tableName="adm_notif_im">
+			<column name="im_provider_name" type="varchar(20)"/>
+		</addColumn>
+		<sql>update ${db.schema.adapted}adm_notif_im set im_provider_name='FACEBOOK' where im_provider=1</sql>
+		<sql>update ${db.schema.adapted}adm_notif_im set im_provider_name='TWITTER' where im_provider=2</sql>
+		<sql>update ${db.schema.adapted}adm_notif_im set im_provider_name='GTALK' where im_provider=3</sql>
+		<sql>update ${db.schema.adapted}adm_notif_im set im_provider_name='YAHOO_MESSENGER' where im_provider=4</sql>
+		<dropColumn tableName="adm_notif_im" columnName="im_provider" />
+		<addNotNullConstraint tableName="adm_notif_im" columnName="im_provider_name" />
 	</changeSet>
 
 </databaseChangeLog>

@@ -17,19 +17,26 @@
  */
 package org.meveo.model.admin;
 
-import javax.persistence.*;
-import javax.validation.constraints.Size;
+import java.util.Map;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.ExportIdentifier;
 
-import java.util.Map;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 /**
  * Currency entity
+ * 
  * @author Khalid HORRI
  * @lastModifiedVersion 5.3
  */
@@ -37,19 +44,18 @@ import java.util.Map;
 @Cacheable
 @ExportIdentifier("currencyCode")
 @Table(name = "adm_currency")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "adm_currency_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "adm_currency_seq"), @Parameter(name = "increment_size", value = "1") })
 public class Currency extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;
 
     /** Currency code e.g. EUR for euros. */
-    @Column(name = "currency_code", length = 3, unique = true, nullable=false)
+    @Column(name = "currency_code", length = 3, unique = true, nullable = false)
     @Size(max = 3)
     private String currencyCode;
 
     /** Currency name. */
-    @Column(name = "description_en", length = 255, unique = true, nullable=false)
+    @Column(name = "description_en", length = 255, unique = true, nullable = false)
     @Size(max = 255)
     private String descriptionEn;
 
@@ -57,16 +63,16 @@ public class Currency extends AuditableEntity {
     @Column(name = "symbol", length = 255)
     @Size(max = 255)
     private String symbol;
-    
+
     /** Flag field that indicates if it is system currency. */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "system_currency")
     private Boolean systemCurrency;
 
     /**
      * Translated descriptions in JSON format with language code as a key and translated description as a value
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 
@@ -87,14 +93,14 @@ public class Currency extends AuditableEntity {
     }
 
     public String getSymbol() {
-		return symbol;
-	}
+        return symbol;
+    }
 
-	public void setSymbol(String symbol) {
-		this.symbol = symbol;
-	}
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
 
-	public Boolean getSystemCurrency() {
+    public Boolean getSystemCurrency() {
         return systemCurrency;
     }
 
@@ -154,7 +160,7 @@ public class Currency extends AuditableEntity {
     }
 
     public String getLocalizedDescription(String lang) {
-        if(descriptionI18n != null) {
+        if (descriptionI18n != null) {
             return descriptionI18n.getOrDefault(lang, this.descriptionEn);
         } else {
             return this.descriptionEn;

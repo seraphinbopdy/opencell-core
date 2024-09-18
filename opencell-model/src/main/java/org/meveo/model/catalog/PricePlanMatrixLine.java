@@ -5,43 +5,42 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableCFEntity;
 import org.meveo.model.CustomFieldEntity;
 
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+
 @Entity
 @Table(name = "cpq_price_plan_matrix_line")
 @Cacheable
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_price_plan_matrix_line_sq") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_price_plan_matrix_line_sq"), @Parameter(name = "increment_size", value = "1") })
 @CustomFieldEntity(cftCodePrefix = "PricePlanMatrixLine")
 @NamedQueries({
-    @NamedQuery(name = "PricePlanMatrixLine.findDefaultByPricePlanMatrixVersion", query = "select p from PricePlanMatrixLine p where p.pricePlanMatrixVersion.id=:pricePlanMatrixVersionId and ratingAccuracy=0", hints = {
-            @QueryHint(name = "org.hibernate.cacheable", value = "TRUE"), @QueryHint(name = "org.hibernate.readOnly", value = "true") }),
-	@NamedQuery(name = "PricePlanMatrixLine.findByPricePlanMatrixVersion", query = "select distinct(p) from PricePlanMatrixLine p left join fetch p.pricePlanMatrixValues pv where p.pricePlanMatrixVersion.id=:pricePlanMatrixVersionId order by p.priority, p.id", hints = {
-            @QueryHint(name = "org.hibernate.cacheable", value = "TRUE"), @QueryHint(name = "org.hibernate.readOnly", value = "true") }),
-    @NamedQuery(name = "PricePlanMatrixLine.findByPricePlanMatrixVersionIds", query = "select p from PricePlanMatrixLine p where p.pricePlanMatrixVersion.id in (:ppmvIds)")})
+        @NamedQuery(name = "PricePlanMatrixLine.findDefaultByPricePlanMatrixVersion", query = "select p from PricePlanMatrixLine p where p.pricePlanMatrixVersion.id=:pricePlanMatrixVersionId and ratingAccuracy=0", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "TRUE"), @QueryHint(name = "org.hibernate.readOnly", value = "true") }),
+        @NamedQuery(name = "PricePlanMatrixLine.findByPricePlanMatrixVersion", query = "select distinct(p) from PricePlanMatrixLine p left join fetch p.pricePlanMatrixValues pv where p.pricePlanMatrixVersion.id=:pricePlanMatrixVersionId order by p.priority, p.id", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "TRUE"), @QueryHint(name = "org.hibernate.readOnly", value = "true") }),
+        @NamedQuery(name = "PricePlanMatrixLine.findByPricePlanMatrixVersionIds", query = "select p from PricePlanMatrixLine p where p.pricePlanMatrixVersion.id in (:ppmvIds)") })
 public class PricePlanMatrixLine extends AuditableCFEntity {
 
     private static final long serialVersionUID = -4919786663248378605L;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH )
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     @JoinColumn(name = "ppm_version_id")
     private PricePlanMatrixVersion pricePlanMatrixVersion;
 
@@ -52,7 +51,7 @@ public class PricePlanMatrixLine extends AuditableCFEntity {
     private String valueEL;
 
     @Deprecated
-	@Column(name = "value", precision = NB_PRECISION, scale = NB_DECIMALS, insertable = false, updatable = false)
+    @Column(name = "value", precision = NB_PRECISION, scale = NB_DECIMALS, insertable = false, updatable = false)
     @Digits(integer = NB_PRECISION, fraction = NB_DECIMALS)
     private BigDecimal priceWithoutTax;
 
@@ -65,21 +64,21 @@ public class PricePlanMatrixLine extends AuditableCFEntity {
 
     @OneToMany(mappedBy = "pricePlanMatrixLine", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PricePlanMatrixValue> pricePlanMatrixValues = new HashSet<>();
-    
-    @OneToMany(mappedBy = "pricePlanMatrixLine", fetch = FetchType.LAZY, cascade = CascadeType.ALL,orphanRemoval = true)
+
+    @OneToMany(mappedBy = "pricePlanMatrixLine", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TradingPricePlanMatrixLine> tradingPricePlanMatrixLines = new HashSet<>();
 
     @Column(name = "priority")
     @NotNull
     private Integer priority = 0;
-    
-    /** 
-     * Rating accuracy - how many values are specified 
+
+    /**
+     * Rating accuracy - how many values are specified
      */
     @Column(name = "accuracy")
     @NotNull
     private int ratingAccuracy = 0;
-    
+
     public PricePlanMatrixLine() {
         super();
     }
@@ -113,15 +112,15 @@ public class PricePlanMatrixLine extends AuditableCFEntity {
 
     @Deprecated
     public BigDecimal getPriceWithoutTax() {
-		return value;
-	}
+        return value;
+    }
 
     @Deprecated
-	public void setPriceWithoutTax(BigDecimal priceWithoutTax) {
-		this.value = priceWithoutTax;
-	}
+    public void setPriceWithoutTax(BigDecimal priceWithoutTax) {
+        this.value = priceWithoutTax;
+    }
 
-	public Set<PricePlanMatrixValue> getPricePlanMatrixValues() {
+    public Set<PricePlanMatrixValue> getPricePlanMatrixValues() {
         return pricePlanMatrixValues;
     }
 
@@ -144,7 +143,7 @@ public class PricePlanMatrixLine extends AuditableCFEntity {
     public void setValueEL(String priceEL) {
         this.valueEL = priceEL;
     }
-    
+
     public BigDecimal getValue() {
         return value;
     }
@@ -154,29 +153,28 @@ public class PricePlanMatrixLine extends AuditableCFEntity {
     }
 
     /**
-     * @return Rating accuracy - how many values are specified 
+     * @return Rating accuracy - how many values are specified
      */
     public int getRatingAccuracy() {
         return ratingAccuracy;
     }
-    
+
     /**
-     * @param ratingAccuracy Rating accuracy - how many values are specified 
+     * @param ratingAccuracy Rating accuracy - how many values are specified
      */
     public void setRatingAccuracy(int ratingAccuracy) {
         this.ratingAccuracy = ratingAccuracy;
     }
-        
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PricePlanMatrixLine)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof PricePlanMatrixLine))
+            return false;
         PricePlanMatrixLine that = (PricePlanMatrixLine) o;
-        return Objects.equals(getPricePlanMatrixVersion(), that.getPricePlanMatrixVersion()) &&
-                Objects.equals(getDescription(), that.getDescription()) &&
-                Objects.equals(getValue(), that.getValue()) &&
-                Objects.equals(getValueEL(), that.getValueEL()) &&
-                Objects.equals(getPriority(), that.getPriority());
+        return Objects.equals(getPricePlanMatrixVersion(), that.getPricePlanMatrixVersion()) && Objects.equals(getDescription(), that.getDescription()) && Objects.equals(getValue(), that.getValue())
+                && Objects.equals(getValueEL(), that.getValueEL()) && Objects.equals(getPriority(), that.getPriority());
     }
 
     @Override
@@ -191,5 +189,5 @@ public class PricePlanMatrixLine extends AuditableCFEntity {
     public void setTradingPricePlanMatrixLines(Set<TradingPricePlanMatrixLine> tradingPricePlanMatrixLines) {
         this.tradingPricePlanMatrixLines = tradingPricePlanMatrixLines;
     }
-    
+
 }

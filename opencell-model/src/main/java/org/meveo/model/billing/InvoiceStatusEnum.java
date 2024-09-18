@@ -25,7 +25,6 @@ import java.util.List;
  */
 public enum InvoiceStatusEnum {
 
-    
     /**
      * invoice entity has been created but incomplete
      */
@@ -40,7 +39,7 @@ public enum InvoiceStatusEnum {
      * invoice has been rejected by automatic controls (this status block automatic generation)
      */
     REJECTED,
-    
+
     /**
      * invoice is complete but not validated. It can be edited.
      */
@@ -50,47 +49,41 @@ public enum InvoiceStatusEnum {
      * invoice has been canceled (all related rated transactions are released. This is a final status)
      */
     CANCELED,
-    
+
     /**
      * invoice is validated and cannot be edited anymore (this a final status)
      */
     VALIDATED;
 
-    
     private Integer id;
     private String label;
     private List<InvoiceStatusEnum> previousStats;
-    
+
     static {
         NEW.id = 1;
         NEW.label = "invoiceStatusEnum.new";
-        NEW.previousStats = Arrays.asList(new InvoiceStatusEnum[]{null});
-        
+        NEW.previousStats = Arrays.asList(new InvoiceStatusEnum[] { null });
 
         SUSPECT.id = 2;
         SUSPECT.label = "invoiceStatusEnum.suspect";
-        SUSPECT.previousStats = Arrays.asList(new InvoiceStatusEnum[]{NEW, DRAFT});
-        
+        SUSPECT.previousStats = Arrays.asList(new InvoiceStatusEnum[] { NEW, DRAFT });
 
         REJECTED.id = 3;
         REJECTED.label = "invoiceStatusEnum.rejected";
-        REJECTED.previousStats = Arrays.asList(new InvoiceStatusEnum[]{DRAFT, NEW, SUSPECT});
-        
+        REJECTED.previousStats = Arrays.asList(new InvoiceStatusEnum[] { DRAFT, NEW, SUSPECT });
 
         DRAFT.id = 4;
         DRAFT.label = "invoiceStatusEnum.draft";
-        DRAFT.previousStats = Arrays.asList(new InvoiceStatusEnum[]{NEW, SUSPECT, REJECTED});
-        
+        DRAFT.previousStats = Arrays.asList(new InvoiceStatusEnum[] { NEW, SUSPECT, REJECTED });
 
         CANCELED.id = 5;
         CANCELED.label = "invoiceStatusEnum.canceled";
-        CANCELED.previousStats = Arrays.asList(new InvoiceStatusEnum[]{NEW, SUSPECT, REJECTED,DRAFT});
-        
+        CANCELED.previousStats = Arrays.asList(new InvoiceStatusEnum[] { NEW, SUSPECT, REJECTED, DRAFT });
 
         VALIDATED.id = 6;
         VALIDATED.label = "invoiceStatusEnum.validated";
-        VALIDATED.previousStats = Arrays.asList(new InvoiceStatusEnum[]{null, SUSPECT, NEW, DRAFT, REJECTED});
-        
+        VALIDATED.previousStats = Arrays.asList(new InvoiceStatusEnum[] { null, SUSPECT, NEW, DRAFT, REJECTED });
+
     }
 
     public Integer getId() {
@@ -118,11 +111,11 @@ public enum InvoiceStatusEnum {
         return null;
     }
 
-	/**
-	 * @return the nextStats
-	 */
-	public List<InvoiceStatusEnum> getPreviousStats() {
-		return previousStats;
-	}
+    /**
+     * @return the nextStats
+     */
+    public List<InvoiceStatusEnum> getPreviousStats() {
+        return previousStats;
+    }
 
 }

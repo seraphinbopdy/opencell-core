@@ -19,7 +19,6 @@ package org.meveo.model.catalog;
 
 import static java.util.Calendar.APRIL;
 import static java.util.Calendar.JANUARY;
-import static java.util.Calendar.JULY;
 import static java.util.Calendar.MARCH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -29,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.validation.ValidationException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.meveo.model.DatePeriod;
@@ -38,6 +35,8 @@ import org.meveo.model.catalog.CalendarJoin.CalendarJoinTypeEnum;
 import org.meveo.model.shared.DateUtils;
 
 import com.google.common.collect.Lists;
+
+import jakarta.validation.ValidationException;
 
 public class CalendarTest {
 

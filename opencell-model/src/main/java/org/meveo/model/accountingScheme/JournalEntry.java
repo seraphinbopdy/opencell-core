@@ -17,7 +17,10 @@
  */
 package org.meveo.model.accountingScheme;
 
+import java.math.BigDecimal;
+
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.AccountingCode;
@@ -27,25 +30,26 @@ import org.meveo.model.billing.Tax;
 import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.CustomerAccount;
 
-import javax.persistence.*;
-import java.math.BigDecimal;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "accounting_journal_entry")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "accounting_journal_entry_seq")})
-@NamedQueries({
-        @NamedQuery(name = "JournalEntry.checkExistenceWithAccountingCode",
-                query = "SELECT COUNT(je) FROM JournalEntry je WHERE je.accountOperation.id = :ID_AO AND je.accountingCode.id = :ID_ACCOUNTING_CODE"),
-        @NamedQuery(name = "JournalEntry.checkAuxiliaryCodeUniqniess",
-                query = "SELECT COUNT(je) FROM JournalEntry je WHERE je.auxiliaryAccountCode = :auxiliaryAccountCode AND je.customerAccount <> :customerAccount"),
-        @NamedQuery(name = "JournalEntry.getByAccountOperationAndDirection",
-                query = "SELECT je FROM JournalEntry je WHERE je.accountOperation.id = :ID_AO AND je.direction = :DIRECTION"),
-        @NamedQuery(name = "JournalEntry.findAoWithoutMatchingCode", query = "SELECT je.accountOperation FROM JournalEntry je" +
-                " JOIN FETCH je.accountOperation.matchingAmounts ma" +
-                " WHERE je.accountOperation.matchingStatus = 'L' AND je.accountOperation.type = 'I' AND je.matchingCode IS NULL" +
-                " AND je.accountOperation.status = 'EXPORTED'")
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {
+        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "accounting_journal_entry_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "JournalEntry.checkExistenceWithAccountingCode", query = "SELECT COUNT(je) FROM JournalEntry je WHERE je.accountOperation.id = :ID_AO AND je.accountingCode.id = :ID_ACCOUNTING_CODE"),
+        @NamedQuery(name = "JournalEntry.checkAuxiliaryCodeUniqniess", query = "SELECT COUNT(je) FROM JournalEntry je WHERE je.auxiliaryAccountCode = :auxiliaryAccountCode AND je.customerAccount <> :customerAccount"),
+        @NamedQuery(name = "JournalEntry.getByAccountOperationAndDirection", query = "SELECT je FROM JournalEntry je WHERE je.accountOperation.id = :ID_AO AND je.direction = :DIRECTION"),
+        @NamedQuery(name = "JournalEntry.findAoWithoutMatchingCode", query = "SELECT je.accountOperation FROM JournalEntry je" + " JOIN FETCH je.accountOperation.matchingAmounts ma"
+                + " WHERE je.accountOperation.matchingStatus = 'L' AND je.accountOperation.type = 'I' AND je.matchingCode IS NULL" + " AND je.accountOperation.status = 'EXPORTED'") })
 public class JournalEntry extends AuditableEntity {
 
     /**
@@ -76,18 +80,18 @@ public class JournalEntry extends AuditableEntity {
     @JoinColumn(name = "customer_account_id", nullable = false)
     private CustomerAccount customerAccount;
 
-	/**
-	 * Based on account operation type settings
-	 */
-	@Enumerated(EnumType.STRING)
-	@Column(name = "direction", nullable = false)
-	private JournalEntryDirectionEnum direction;
+    /**
+     * Based on account operation type settings
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "direction", nullable = false)
+    private JournalEntryDirectionEnum direction;
 
-	/**
-	 * Account operation’s amount
-	 */
-	@Column(name = "amount", nullable = false)
-	private BigDecimal amount;
+    /**
+     * Account operation’s amount
+     */
+    @Column(name = "amount", nullable = false)
+    private BigDecimal amount;
 
     /**
      * Based on account operation type settings
@@ -118,33 +122,33 @@ public class JournalEntry extends AuditableEntity {
      * Operation number
      */
     @Column(name = "operation_number")
-    private Long operationNumber; 
-    
+    private Long operationNumber;
+
     /**
      * Seller code
      */
     @Column(name = "seller_code", nullable = false)
-    private String sellerCode; 
-    
+    private String sellerCode;
+
     /**
      * Client unique id
      */
     @Column(name = "client_unique_id")
-    private String clientUniqueId; 
+    private String clientUniqueId;
 
     /**
      * Code currency
      */
     @Column(name = "currency", nullable = false)
-    private String currency; 
-    
+    private String currency;
+
     /**
      * Invoice
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supporting_document_ref")
     private Invoice supportingDocumentRef;
-    
+
     /**
      * Invoice type
      */
@@ -155,25 +159,25 @@ public class JournalEntry extends AuditableEntity {
      * Code trading currency
      */
     @Column(name = "trading_currency")
-    private String tradingCurrency; 
-    
-	/**
-	 * transactional amount
-	 */
-	@Column(name = "transactional_amount")
-	private BigDecimal transactionalAmount;
+    private String tradingCurrency;
+
+    /**
+     * transactional amount
+     */
+    @Column(name = "transactional_amount")
+    private BigDecimal transactionalAmount;
 
     /**
      * Auxiliary account code
      */
     @Column(name = "auxiliary_account_code")
-	private String auxiliaryAccountCode;
+    private String auxiliaryAccountCode;
 
     /**
      * Auxiliary account label
      */
     @Column(name = "auxiliary_account_label")
-	private String auxiliaryAccountLabel;
+    private String auxiliaryAccountLabel;
 
     /**
      * Journal Code
@@ -232,7 +236,7 @@ public class JournalEntry extends AuditableEntity {
 
     @Column(name = "matching_code")
     private String matchingCode;
-    
+
     public AccountOperation getAccountOperation() {
         return accountOperation;
     }
@@ -313,69 +317,69 @@ public class JournalEntry extends AuditableEntity {
         this.analyticCode3 = analyticCode3;
     }
 
-	public Long getOperationNumber() {
-		return operationNumber;
-	}
+    public Long getOperationNumber() {
+        return operationNumber;
+    }
 
-	public void setOperationNumber(Long operationNumber) {
-		this.operationNumber = operationNumber;
-	}
+    public void setOperationNumber(Long operationNumber) {
+        this.operationNumber = operationNumber;
+    }
 
-	public String getSellerCode() {
-		return sellerCode;
-	}
+    public String getSellerCode() {
+        return sellerCode;
+    }
 
-	public void setSellerCode(String sellerCode) {
-		this.sellerCode = sellerCode;
-	}
+    public void setSellerCode(String sellerCode) {
+        this.sellerCode = sellerCode;
+    }
 
-	public String getClientUniqueId() {
-		return clientUniqueId;
-	}
+    public String getClientUniqueId() {
+        return clientUniqueId;
+    }
 
-	public void setClientUniqueId(String clientUniqueId) {
-		this.clientUniqueId = clientUniqueId;
-	}
+    public void setClientUniqueId(String clientUniqueId) {
+        this.clientUniqueId = clientUniqueId;
+    }
 
-	public String getCurrency() {
-		return currency;
-	}
+    public String getCurrency() {
+        return currency;
+    }
 
-	public void setCurrency(String currency) {
-		this.currency = currency;
-	}
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
 
-	public Invoice getSupportingDocumentRef() {
-		return supportingDocumentRef;
-	}
+    public Invoice getSupportingDocumentRef() {
+        return supportingDocumentRef;
+    }
 
-	public void setSupportingDocumentRef(Invoice supportingDocumentRef) {
-		this.supportingDocumentRef = supportingDocumentRef;
-	}
+    public void setSupportingDocumentRef(Invoice supportingDocumentRef) {
+        this.supportingDocumentRef = supportingDocumentRef;
+    }
 
-	public String getSupportingDocumentType() {
-		return supportingDocumentType;
-	}
+    public String getSupportingDocumentType() {
+        return supportingDocumentType;
+    }
 
-	public void setSupportingDocumentType(String supportingDocumentType) {
-		this.supportingDocumentType = supportingDocumentType;
-	}
+    public void setSupportingDocumentType(String supportingDocumentType) {
+        this.supportingDocumentType = supportingDocumentType;
+    }
 
-	public String getTradingCurrency() {
-		return tradingCurrency;
-	}
+    public String getTradingCurrency() {
+        return tradingCurrency;
+    }
 
-	public void setTradingCurrency(String tradingCurrency) {
-		this.tradingCurrency = tradingCurrency;
-	}
+    public void setTradingCurrency(String tradingCurrency) {
+        this.tradingCurrency = tradingCurrency;
+    }
 
-	public BigDecimal getTransactionalAmount() {
-		return transactionalAmount;
-	}
+    public BigDecimal getTransactionalAmount() {
+        return transactionalAmount;
+    }
 
-	public void setTransactionalAmount(BigDecimal transactionalAmount) {
-		this.transactionalAmount = transactionalAmount;
-	}
+    public void setTransactionalAmount(BigDecimal transactionalAmount) {
+        this.transactionalAmount = transactionalAmount;
+    }
 
     public String getAuxiliaryAccountCode() {
         return auxiliaryAccountCode;
@@ -393,77 +397,77 @@ public class JournalEntry extends AuditableEntity {
         this.auxiliaryAccountLabel = auxiliaryAccountLabel;
     }
 
-	public String getJournalCode() {
-		return journalCode;
-	}
+    public String getJournalCode() {
+        return journalCode;
+    }
 
-	public void setJournalCode(String journalCode) {
-		this.journalCode = journalCode;
-	}
+    public void setJournalCode(String journalCode) {
+        this.journalCode = journalCode;
+    }
 
-	public ChartOfAccountTypeEnum getCategory() {
-		return category;
-	}
+    public ChartOfAccountTypeEnum getCategory() {
+        return category;
+    }
 
-	public void setCategory(ChartOfAccountTypeEnum category) {
-		this.category = category;
-	}
+    public void setCategory(ChartOfAccountTypeEnum category) {
+        this.category = category;
+    }
 
-	public String getAccount() {
-		return account;
-	}
+    public String getAccount() {
+        return account;
+    }
 
-	public void setAccount(String account) {
-		this.account = account;
-	}
+    public void setAccount(String account) {
+        this.account = account;
+    }
 
-	public String getLabel() {
-		return label;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-	public String getCustomerCode() {
-		return customerCode;
-	}
+    public String getCustomerCode() {
+        return customerCode;
+    }
 
-	public void setCustomerCode(String customerCode) {
-		this.customerCode = customerCode;
-	}
+    public void setCustomerCode(String customerCode) {
+        this.customerCode = customerCode;
+    }
 
-	public String getCustomerName() {
-		return customerName;
-	}
+    public String getCustomerName() {
+        return customerName;
+    }
 
-	public void setCustomerName(String customerName) {
-		this.customerName = customerName;
-	}
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
 
-	public String getSellerName() {
-		return sellerName;
-	}
+    public String getSellerName() {
+        return sellerName;
+    }
 
-	public void setSellerName(String sellerName) {
-		this.sellerName = sellerName;
-	}
+    public void setSellerName(String sellerName) {
+        this.sellerName = sellerName;
+    }
 
-	public String getReference() {
-		return reference;
-	}
+    public String getReference() {
+        return reference;
+    }
 
-	public void setReference(String reference) {
-		this.reference = reference;
-	}
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
 
-	public String getDocumentType() {
-		return documentType;
-	}
+    public String getDocumentType() {
+        return documentType;
+    }
 
-	public void setDocumentType(String documentType) {
-		this.documentType = documentType;
-	}
+    public void setDocumentType(String documentType) {
+        this.documentType = documentType;
+    }
 
     public String getMatchingCode() {
         return matchingCode;

@@ -22,21 +22,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.Formula;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.dunning.DunningDocument;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @DiscriminatorValue(value = "I")
@@ -71,7 +70,7 @@ public class RecordedInvoice extends AccountOperation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dunning_document_id")
     private DunningDocument dunningDocument;
-    
+
     /**
      * if an invoice becomes unpaid then, it's associated with a dunning doc
      */
@@ -152,23 +151,22 @@ public class RecordedInvoice extends AccountOperation {
         this.dunningDocument = dunningDocument;
     }
 
-    
     /**
      * @return invoiceTypeCode
      */
-	public Invoice getInvoice() {
-		return invoice;
-	}
-	
-	/**
-    *
-    * @param invoiceTypeCode
-    */
-	public void setInvoice(Invoice invoice) {
-		this.invoice = invoice;
-	}
+    public Invoice getInvoice() {
+        return invoice;
+    }
 
-	public BigDecimal getTransactionalNetToPay() {
+    /**
+     *
+     * @param invoiceTypeCode
+     */
+    public void setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+    }
+
+    public BigDecimal getTransactionalNetToPay() {
         return transactionalNetToPay;
     }
 
@@ -176,20 +174,20 @@ public class RecordedInvoice extends AccountOperation {
         this.transactionalNetToPay = transactionalNetToPay;
     }
 
-	@Override
-	public BigDecimal getAppliedRate() {
-	    if(super.getAppliedRate() == null && invoice != null && invoice.getAppliedRate() != null) {
-	        return invoice.getAppliedRate();
-	    }else {
-	        return super.getAppliedRate();
-	    }
+    @Override
+    public BigDecimal getAppliedRate() {
+        if (super.getAppliedRate() == null && invoice != null && invoice.getAppliedRate() != null) {
+            return invoice.getAppliedRate();
+        } else {
+            return super.getAppliedRate();
+        }
     }
 
-	@Override
+    @Override
     public Date getAppliedRateDate() {
-        if(super.getAppliedRateDate() == null && invoice != null && invoice.getLastAppliedRateDate() != null) {
+        if (super.getAppliedRateDate() == null && invoice != null && invoice.getLastAppliedRateDate() != null) {
             return invoice.getLastAppliedRateDate();
-        }else {
+        } else {
             return super.getAppliedRateDate();
         }
     }

@@ -48,29 +48,27 @@ public enum OrderStatusEnum {
      */
     COMPLETED("Completed"),
     /**
-     * The Rejected state is where: - An order failed the Order Feasibility check - Invalid information is provided through the order request - The order request fails to meet
-     * business rules for ordering.
+     * The Rejected state is where: - An order failed the Order Feasibility check - Invalid information is provided through the order request - The order request fails to meet business rules for ordering.
      */
     REJECTED("Rejected"),
     /**
-     * The Pending state is used when an order is currently in a waiting stage for an action/activity to be completed before the order can progress further, pending order amend or
-     * cancel assessment. In situations where Access Seeker action is required, an “information required” notification will be issued on transition into this state.
+     * The Pending state is used when an order is currently in a waiting stage for an action/activity to be completed before the order can progress further, pending order amend or cancel assessment. In situations where
+     * Access Seeker action is required, an “information required” notification will be issued on transition into this state.
      * 
      * A pending stage can lead into auto cancellation of an order, if no action is taken within the defined timeframes to be described under the Agreement.
      */
     PENDING("Pending"),
     /**
-     * The Held state is used when an order cannot be progressed due to an issue. SP has temporarily delayed completing an order to resolve an infrastructure shortfall to
-     * facilitate supply of order. Upon resolution of the issue, the order will continue to progress.
+     * The Held state is used when an order cannot be progressed due to an issue. SP has temporarily delayed completing an order to resolve an infrastructure shortfall to facilitate supply of order. Upon resolution of
+     * the issue, the order will continue to progress.
      */
     HELD("Held"),
     /**
      * All Order items have failed which results in the entire Order has Failed.
      */
     FAILED("Failed"),
-	/**
-     * Orders that are to be processed alongside other 'associated' (related) orders. 
-     * And all the ‘associated’ orders have not yet been submitted for processing
+    /**
+     * Orders that are to be processed alongside other 'associated' (related) orders. And all the ‘associated’ orders have not yet been submitted for processing
      */
     WAITING("Waiting"),
     /**

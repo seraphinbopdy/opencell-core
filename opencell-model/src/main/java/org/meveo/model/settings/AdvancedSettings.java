@@ -1,18 +1,20 @@
 package org.meveo.model.settings;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
+import java.util.Map;
+
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessEntity;
 
-import java.util.Map;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
 
 /**
  * Represents advanced configuration settings.
@@ -20,11 +22,8 @@ import java.util.Map;
 @Entity
 @Cacheable
 @Table(name = "advanced_settings")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "advanced_settings_seq") })
-@NamedQueries({
-		@NamedQuery(name = "AdvancedSettings.getGroupConfiguration", query = "from AdvancedSettings where group=:group ", hints = {
-				@QueryHint(name = "org.hibernate.cacheable", value = "true") }) })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "advanced_settings_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "AdvancedSettings.getGroupConfiguration", query = "select as from AdvancedSettings as where as.group=:group ", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }) })
 public class AdvancedSettings extends BusinessEntity {
     /**
      * Contains the old configuration origin if migrated.
@@ -51,12 +50,13 @@ public class AdvancedSettings extends BusinessEntity {
      */
     @Column(name = "property_type", length = 255)
     protected String type;
-	/**
-	 * Translated descriptions in JSON format with language code as a key and translated description as a value
-	 */
-	@Type(type = "json")
-	@Column(name = "description_i18n", columnDefinition = "jsonb")
-	private Map<String, String> descriptionI18n;
+    /**
+     * Translated descriptions in JSON format with language code as a key and translated description as a value
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "description_i18n", columnDefinition = "jsonb")
+    private Map<String, String> descriptionI18n;
+
     /**
      * Get the old configuration origin.
      *
@@ -65,6 +65,7 @@ public class AdvancedSettings extends BusinessEntity {
     public String getOrigin() {
         return origin;
     }
+
     /**
      * Set the old configuration origin.
      *
@@ -73,6 +74,7 @@ public class AdvancedSettings extends BusinessEntity {
     public void setOrigin(String origin) {
         this.origin = origin;
     }
+
     /**
      * Get the configuration's functional purpose.
      *
@@ -81,6 +83,7 @@ public class AdvancedSettings extends BusinessEntity {
     public String getCategory() {
         return category;
     }
+
     /**
      * Set the configuration's functional purpose.
      *
@@ -89,6 +92,7 @@ public class AdvancedSettings extends BusinessEntity {
     public void setCategory(String category) {
         this.category = category;
     }
+
     /**
      * Get the property-related group.
      *
@@ -97,6 +101,7 @@ public class AdvancedSettings extends BusinessEntity {
     public String getGroup() {
         return group;
     }
+
     /**
      * Set the property-related group.
      *
@@ -105,6 +110,7 @@ public class AdvancedSettings extends BusinessEntity {
     public void setGroup(String group) {
         this.group = group;
     }
+
     /**
      * Get the property value.
      *
@@ -113,6 +119,7 @@ public class AdvancedSettings extends BusinessEntity {
     public String getValue() {
         return value;
     }
+
     /**
      * Set the property value.
      *
@@ -121,6 +128,7 @@ public class AdvancedSettings extends BusinessEntity {
     public void setValue(String value) {
         this.value = value;
     }
+
     /**
      * Get the property's full class name for casting.
      *
@@ -129,6 +137,7 @@ public class AdvancedSettings extends BusinessEntity {
     public String getType() {
         return type;
     }
+
     /**
      * Set the property's full class name for casting.
      *
@@ -137,12 +146,12 @@ public class AdvancedSettings extends BusinessEntity {
     public void setType(String type) {
         this.type = type;
     }
-	
-	public Map<String, String> getDescriptionI18n() {
-		return descriptionI18n;
-	}
-	
-	public void setDescriptionI18n(Map<String, String> descriptionI18n) {
-		this.descriptionI18n = descriptionI18n;
-	}
+
+    public Map<String, String> getDescriptionI18n() {
+        return descriptionI18n;
+    }
+
+    public void setDescriptionI18n(Map<String, String> descriptionI18n) {
+        this.descriptionI18n = descriptionI18n;
+    }
 }

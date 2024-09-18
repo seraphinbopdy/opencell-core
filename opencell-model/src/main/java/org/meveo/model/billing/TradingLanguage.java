@@ -17,24 +17,24 @@
  */
 package org.meveo.model.billing;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.EnableEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ObservableEntity;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Language enabled in application
@@ -46,19 +46,16 @@ import org.meveo.model.ObservableEntity;
 @ExportIdentifier({ "language.languageCode" })
 @Cacheable
 @Table(name = "billing_trading_language")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_trading_language_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_trading_language_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "TradingLanguage.getNbLanguageNotAssociated", query = "select count(*) from TradingLanguage tr where tr.id not in (select s.tradingLanguage.id from Seller s where s.tradingLanguage.id is not null)", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-        @NamedQuery(name = "TradingLanguage.getLanguagesNotAssociated", query = "from TradingLanguage tr where tr.id not in (select s.tradingLanguage.id from Seller s where s.tradingLanguage.id is not null) "),
-        @NamedQuery(name = "TradingLanguage.getByCode", query = "from TradingLanguage tr where tr.language.languageCode = :tradingLanguageCode ", hints = {
-                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-        @NamedQuery(name = "TradingLanguage.findAll", query = "from TradingLanguage tr left join fetch tr.language"),
+        @NamedQuery(name = "TradingLanguage.getLanguagesNotAssociated", query = "select tr from TradingLanguage tr where tr.id not in (select s.tradingLanguage.id from Seller s where s.tradingLanguage.id is not null) "),
+        @NamedQuery(name = "TradingLanguage.getByCode", query = "select tr from TradingLanguage tr where tr.language.languageCode = :tradingLanguageCode ", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "TradingLanguage.findAll", query = "select tr from TradingLanguage tr left join fetch tr.language"),
         @NamedQuery(name = "TradingLanguage.languageCodes", query = "select distinct la.languageCode from TradingLanguage tr left join tr.language la order by la.languageCode", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-        @NamedQuery(name = "TradingLanguage.findLanguageDetails", query = "SELECT tr.id, tr.language.id, tr.language.languageCode, tr.language.descriptionEn from TradingLanguage tr"),
-})
+        @NamedQuery(name = "TradingLanguage.findLanguageDetails", query = "SELECT tr.id, tr.language.id, tr.language.languageCode, tr.language.descriptionEn from TradingLanguage tr"), })
 public class TradingLanguage extends EnableEntity {
     private static final long serialVersionUID = 1L;
 

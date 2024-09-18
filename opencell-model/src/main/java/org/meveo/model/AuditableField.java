@@ -19,21 +19,22 @@ package org.meveo.model;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.meveo.model.audit.AuditChangeTypeEnum;
 import org.meveo.model.audit.ChangeOriginEnum;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Tracks Field change history
@@ -43,10 +44,9 @@ import org.meveo.model.audit.ChangeOriginEnum;
  */
 @Entity
 @Table(name = "audit_field_changes_history")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "audit_field_changes_history_seq"), })
-@NamedQueries({
-        @NamedQuery(name = "AuditableField.purgeAuditableField", query = "delete from AuditableField a where a.created < :purgeDate")})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {
+        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "audit_field_changes_history_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "AuditableField.purgeAuditableField", query = "delete from AuditableField a where a.created < :purgeDate") })
 public class AuditableField extends BaseEntity {
 
     private static final long serialVersionUID = -7263546632393279781L;

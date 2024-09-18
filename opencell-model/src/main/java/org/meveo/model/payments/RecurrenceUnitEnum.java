@@ -6,7 +6,7 @@ package org.meveo.model.payments;
  * @author HHANINE
  */
 public enum RecurrenceUnitEnum {
-	MONTH(1, "Month"), DAY(2, "Day");
+    MONTH(1, "Month"), DAY(2, "Day");
 
     private String label;
     private Integer id;

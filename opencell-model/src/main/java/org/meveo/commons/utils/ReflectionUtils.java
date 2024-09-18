@@ -19,6 +19,7 @@ package org.meveo.commons.utils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -34,13 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Vector;
-
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -48,6 +42,12 @@ import org.meveo.model.BusinessEntity;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Utils class for java reflection api.
@@ -105,17 +105,13 @@ public class ReflectionUtils {
      * @param className Class name for which instance is created.
      * @return Instance of className.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static Object createObject(String className) {
         Object object = null;
         try {
             Class classDefinition = Class.forName(className);
-            object = classDefinition.newInstance();
-        } catch (InstantiationException e) {
-            logger.error("Object could not be created by name!", e);
-        } catch (IllegalAccessException e) {
-            logger.error("Object could not be created by name!", e);
-        } catch (ClassNotFoundException e) {
+            object = classDefinition.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             logger.error("Object could not be created by name!", e);
         }
         return object;
@@ -125,39 +121,18 @@ public class ReflectionUtils {
      * Get a list of classes from a given package
      *
      * @param packageName Package name
+     * @param subtypeOf A parent class/interface to match
      * @return A list of classes
+     * @param <T> type Parent class/interface
      */
-    @SuppressWarnings("rawtypes")
-    public static List<Class> getClasses(String packageName) {
+    public static <T> Set<Class<? extends T>> getClasses(String packageName, Class<T> subtypeOf) {
 
-        try {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        Reflections reflections = new Reflections(packageName); // new ConfigurationBuilder().forPackage(packageName).setScanners(Scanners.SubTypes).addClassLoaders(Thread.currentThread().getContextClassLoader()));
 
-            Class CL_class = classLoader.getClass();
-            while (CL_class != java.lang.ClassLoader.class) {
-                CL_class = CL_class.getSuperclass();
-            }
-            java.lang.reflect.Field ClassLoader_classes_field = CL_class.getDeclaredField("classes");
-            ClassLoader_classes_field.setAccessible(true);
-            Vector classes = (Vector) ClassLoader_classes_field.get(classLoader);
+        Set<Class<? extends T>> classes = reflections.getSubTypesOf(subtypeOf);
 
-            ArrayList<Class> classList = new ArrayList<Class>();
+        return classes;
 
-            synchronized (classes) {
-                for (Object clazz : classes) {
-                    if (((Class) clazz).getName().startsWith(packageName)) {
-                        classList.add((Class) clazz);
-                    }
-                }
-            }
-
-            return classList;
-
-        } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-            logger.error("Failed to get a list of classes", e);
-        }
-
-        return new ArrayList<>();
     }
 
     /**
@@ -377,26 +352,6 @@ public class ReflectionUtils {
     }
 
     /**
-     * Find a class by its simple name in a given package
-     *
-     * @param className Simple classname to match
-     * @param packageName Package name
-     * @return A class object
-     * @throws ClassNotFoundException Class was not found by a given name
-     */
-    @SuppressWarnings({ "rawtypes" })
-    public static Class<?> getClassBySimpleNameAndPackage(String className, String packageName) throws ClassNotFoundException {
-
-        List<Class> classes = getClasses(packageName);
-        for (Class<?> clazz : classes) {
-            if (className.equals(clazz.getSimpleName())) {
-                return clazz;
-            }
-        }
-        throw new ClassNotFoundException("Class with a simple name " + className + " was not found");
-    }
-
-    /**
      * Find subclasses of a certain class.
      *
      * @param parentClass Parent or interface class
@@ -405,10 +360,7 @@ public class ReflectionUtils {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Set<Class<?>> getSubclasses(Class parentClass) {
 
-        Reflections reflections = new Reflections("org.meveo");
-        Set<Class<?>> classes = reflections.getSubTypesOf(parentClass);
-
-        return classes;
+        return getClasses("org.meveo", parentClass);
     }
 
     /**
@@ -433,6 +385,7 @@ public class ReflectionUtils {
         return new Reflections(packageName);
     }
 
+    @SuppressWarnings("rawtypes")
     public static Object getSubclassObjectByDiscriminatorValue(Class parentClass, String discriminatorValue) {
         Set<Class<?>> subClasses = getSubclasses(parentClass);
         Object result = null;
@@ -558,7 +511,6 @@ public class ReflectionUtils {
         return getFieldThrowException(c, fieldName, false);
     }
 
-    @SuppressWarnings("rawtypes")
     public static Field getField(Class<?> c, String fieldName) {
         return getField(c, fieldName, false);
     }
@@ -787,7 +739,7 @@ public class ReflectionUtils {
         return annotatedMethods;
     }
 
-    private static Method getMethodFromInterface(Class<?> cls, Class<? extends Annotation> annotationClass, String methodName, Class... parameterTypes) {
+    private static Method getMethodFromInterface(Class<?> cls, Class<? extends Annotation> annotationClass, String methodName, @SuppressWarnings("rawtypes") Class... parameterTypes) {
         while (cls != null) {
             Class<?>[] interfaces = cls.getInterfaces();
 
@@ -828,6 +780,7 @@ public class ReflectionUtils {
      * @return An optional with a return value in case when method is a function
      * @throws Exception Any exception while calling a method
      */
+    @SuppressWarnings("rawtypes")
     public static Optional<Object> getMethodValue(Object object, String methodName, Object... args) throws Exception {
 
         Class[] classes = null;
@@ -843,7 +796,7 @@ public class ReflectionUtils {
         }
 
         try {
-            Method method = object.getClass().getDeclaredMethod(methodName, classes);
+            Method method = object.getClass().getMethod(methodName, classes);
             return Optional.ofNullable(method.invoke(object, parameters));
         } catch (Exception e) {
             Logger log = LoggerFactory.getLogger(ReflectionUtils.class);

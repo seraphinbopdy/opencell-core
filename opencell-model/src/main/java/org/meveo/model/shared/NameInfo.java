@@ -19,10 +19,13 @@ package org.meveo.model.shared;
 
 import java.io.Serializable;
 
-import javax.persistence.*;
-import javax.validation.constraints.Size;
-
 import org.meveo.commons.encryption.PersonnalDataEncryptor;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Name
@@ -44,7 +47,7 @@ public class NameInfo implements Serializable, Cloneable {
     /**
      * First name or company name
      */
-    @Convert(converter=PersonnalDataEncryptor.class)
+    @Convert(converter = PersonnalDataEncryptor.class)
     @Column(name = "firstname", length = 100)
     @Size(max = 100)
     protected String firstName;
@@ -52,7 +55,7 @@ public class NameInfo implements Serializable, Cloneable {
     /**
      * Last name
      */
-    @Convert(converter=PersonnalDataEncryptor.class)
+    @Convert(converter = PersonnalDataEncryptor.class)
     @Column(name = "lastname", length = 100)
     @Size(max = 100)
     protected String lastName;
@@ -92,8 +95,7 @@ public class NameInfo implements Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return (title != null ? ((title.getDescription() != null ? title.getDescription() : title.getCode()) + " " + (firstName != null ? firstName : "")
-                + (lastName != null ? " " + lastName : "")) : "");
+        return (title != null ? ((title.getDescription() != null ? title.getDescription() : title.getCode()) + " " + (firstName != null ? firstName : "") + (lastName != null ? " " + lastName : "")) : "");
     }
 
     @Override
@@ -102,8 +104,7 @@ public class NameInfo implements Serializable, Cloneable {
     }
 
     public String getFullName() {
-        return "" + (title != null ? (title.getDescription() != null ? title.getDescription() : title.getCode()) + " " : "") + (firstName != null ? firstName + " " : "")
-                + (lastName != null ? lastName : "");
+        return "" + (title != null ? (title.getDescription() != null ? title.getDescription() : title.getCode()) + " " : "") + (firstName != null ? firstName + " " : "") + (lastName != null ? lastName : "");
     }
 
     public void anonymize(String code) {

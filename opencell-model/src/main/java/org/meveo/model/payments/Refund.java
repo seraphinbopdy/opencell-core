@@ -17,19 +17,17 @@
  */
 package org.meveo.model.payments;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 
 @Entity
 @DiscriminatorValue(value = "RF")
-@NamedQueries({
-        @NamedQuery(name = "Refund.countLinkedPayment", query = "SELECT SUM(r.amount) FROM Refund AS r WHERE r.refundedPayment.id=:REFUNDED_PAYMENT_ID")
-})
+@NamedQueries({ @NamedQuery(name = "Refund.countLinkedPayment", query = "SELECT SUM(r.amount) FROM Refund AS r WHERE r.refundedPayment.id=:REFUNDED_PAYMENT_ID") })
 public class Refund extends AccountOperation {
 
     private static final long serialVersionUID = 1L;

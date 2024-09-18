@@ -88,7 +88,7 @@ public abstract class MeveoUser implements Serializable {
     protected String authenticationTokenId;
 
     protected int authTime;
-    
+
     protected String userGroup;
 
     public MeveoUser() {
@@ -243,13 +243,14 @@ public abstract class MeveoUser implements Serializable {
     public String getUserGroup() {
         return userGroup;
     }
-    
+
     /**
      * @param userGroup User group that user belongs
      */
     public void setUserGroup(String userGroup) {
         this.userGroup = userGroup;
     }
+
     /**
      * Return unproxied instance of MeveoUser - preserving username and provider code only
      * 

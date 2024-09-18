@@ -3,12 +3,6 @@ package org.meveo.model.billing;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.CustomFieldEntity;
@@ -18,17 +12,22 @@ import org.meveo.model.cpq.commercial.OrderAttribute;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.security.MeveoUser;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 @Entity
 @CustomFieldEntity(cftCodePrefix = "AttributeInstance")
 @Table(name = "cpq_attribute_instance")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_quote_attribute_seq")})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_quote_attribute_seq"), @Parameter(name = "increment_size", value = "1") })
 public class AttributeInstance extends AttributeValue<AttributeInstance> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_instance_id")
     private ServiceInstance serviceInstance;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
@@ -37,46 +36,40 @@ public class AttributeInstance extends AttributeValue<AttributeInstance> {
     }
 
     public AttributeInstance(QuoteAttribute quoteAttribute) {
-        attribute=quoteAttribute.getAttribute();
-        stringValue=quoteAttribute.getStringValue();
-        dateValue=quoteAttribute.getDateValue();
-        doubleValue=quoteAttribute.getDoubleValue();
+        attribute = quoteAttribute.getAttribute();
+        stringValue = quoteAttribute.getStringValue();
+        dateValue = quoteAttribute.getDateValue();
+        doubleValue = quoteAttribute.getDoubleValue();
         booleanValue = quoteAttribute.getBooleanValue();
-        if(AttributeTypeEnum.BOOLEAN==attribute.getAttributeType() && booleanValue==null && stringValue!=null ) {
-        	booleanValue=Boolean.valueOf(stringValue);
+        if (AttributeTypeEnum.BOOLEAN == attribute.getAttributeType() && booleanValue == null && stringValue != null) {
+            booleanValue = Boolean.valueOf(stringValue);
         }
-        if(quoteAttribute.getAssignedAttributeValue()!=null && !quoteAttribute.getAssignedAttributeValue().isEmpty()) {
-        assignedAttributeValue = quoteAttribute.getAssignedAttributeValue()
-                                        .stream()
-                                        .map(AttributeInstance::new)
-                                        .collect(Collectors.toList());
+        if (quoteAttribute.getAssignedAttributeValue() != null && !quoteAttribute.getAssignedAttributeValue().isEmpty()) {
+            assignedAttributeValue = quoteAttribute.getAssignedAttributeValue().stream().map(AttributeInstance::new).collect(Collectors.toList());
         }
     }
-    
+
     public AttributeInstance(MeveoUser currentUser) {
-    	super();
-    	updateAudit(currentUser);
+        super();
+        updateAudit(currentUser);
     }
 
     public AttributeInstance(OrderAttribute orderAttribute, MeveoUser currentUser) {
-        attribute=orderAttribute.getAttribute();
-        stringValue=orderAttribute.getStringValue();
-        dateValue=orderAttribute.getDateValue();
-        doubleValue=orderAttribute.getDoubleValue();
+        attribute = orderAttribute.getAttribute();
+        stringValue = orderAttribute.getStringValue();
+        dateValue = orderAttribute.getDateValue();
+        doubleValue = orderAttribute.getDoubleValue();
         booleanValue = orderAttribute.getBooleanValue();
-        if(AttributeTypeEnum.BOOLEAN==attribute.getAttributeType() && booleanValue==null && stringValue!=null ) {
-        	booleanValue=Boolean.valueOf(stringValue);
+        if (AttributeTypeEnum.BOOLEAN == attribute.getAttributeType() && booleanValue == null && stringValue != null) {
+            booleanValue = Boolean.valueOf(stringValue);
         }
         updateAudit(currentUser);
-        if(orderAttribute.getAssignedAttributeValue() != null) {
-            assignedAttributeValue = orderAttribute.getAssignedAttributeValue()
-                    .stream()
-                    .map(oa -> {
-                        AttributeInstance attributeInstance = new AttributeInstance(oa, currentUser);
-                        attributeInstance.setParentAttributeValue(this);
-                        return attributeInstance;
-                    })
-                    .collect(Collectors.toList());
+        if (orderAttribute.getAssignedAttributeValue() != null) {
+            assignedAttributeValue = orderAttribute.getAssignedAttributeValue().stream().map(oa -> {
+                AttributeInstance attributeInstance = new AttributeInstance(oa, currentUser);
+                attributeInstance.setParentAttributeValue(this);
+                return attributeInstance;
+            }).collect(Collectors.toList());
         }
     }
 
@@ -98,12 +91,14 @@ public class AttributeInstance extends AttributeValue<AttributeInstance> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AttributeInstance)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof AttributeInstance))
+            return false;
+        if (!super.equals(o))
+            return false;
         AttributeInstance that = (AttributeInstance) o;
-        return Objects.equals(serviceInstance, that.serviceInstance) &&
-                Objects.equals(subscription, that.subscription);
+        return Objects.equals(serviceInstance, that.serviceInstance) && Objects.equals(subscription, that.subscription);
     }
 
     @Override

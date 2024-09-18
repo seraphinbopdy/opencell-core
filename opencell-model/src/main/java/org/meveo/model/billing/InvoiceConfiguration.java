@@ -20,22 +20,22 @@ package org.meveo.model.billing;
 
 import java.io.Serializable;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.IEntity;
 import org.meveo.model.article.AccountingArticle;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 /**
  * Invoicing configuration
@@ -46,7 +46,7 @@ import org.meveo.model.article.AccountingArticle;
 @ExportIdentifier({ "provider" })
 @Cacheable
 @Table(name = "billing_invoice_configuration")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_configuration_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_configuration_seq"), @Parameter(name = "increment_size", value = "1") })
 public class InvoiceConfiguration extends BaseEntity implements Serializable, IEntity {
 
     private static final long serialVersionUID = -735961368678724497L;
@@ -54,77 +54,77 @@ public class InvoiceConfiguration extends BaseEntity implements Serializable, IE
     /**
      * Should subscriptions be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_subscriptions")
     private boolean displaySubscriptions = false;
 
     /**
      * Should services be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_services")
     private boolean displayServices = false;
 
     /**
      * Should offers be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_offers")
     private boolean displayOffers = false;
 
     /**
      * Should price plans be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_priceplans")
     private boolean displayPricePlans = false;
 
     /**
      * Should EDRs be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_edrs")
     private boolean displayEdrs = false;
 
     /**
      * Should provider information be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_provider")
     private boolean displayProvider = false;
 
     /**
      * Should subcategory aggregates be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_detail")
     private boolean displayDetail = true;
 
     /**
      * Should custom field values be displayed in the XML invoice in XML or JSON format
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_cf_as_xml")
     private boolean displayCfAsXML = false;
 
     /**
      * Should Billing cycle be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_billing_cycle")
     private boolean displayBillingCycle = false;
 
     /**
      * Should orders be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_orders")
     private boolean displayOrders = false;
 
     /**
      * Should tax details be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_tax_details")
     private boolean displayTaxDetails = false;
 
@@ -141,27 +141,27 @@ public class InvoiceConfiguration extends BaseEntity implements Serializable, IE
     @JoinColumn(name = "default_invoice_subcategory_id")
     private InvoiceSubCategory defaultInvoiceSubCategory;
 
-	/**
+    /**
      * Default generic accounting article
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "default_generic_article_id")
     private AccountingArticle defaultGenericAccountingArticle;
-    
+
     /**
      * Default discount accounting article
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "default_discount_article_id")
     private AccountingArticle defaultDiscountAccountingArticle;
-    
+
     /**
      * Default advanced payment accounting article
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "default_advanced_payment_article_id")
     private AccountingArticle defaultAdvancedPaymentAccountingArticle;
-    
+
     /**
      * Default advanced payment accounting article
      */
@@ -172,30 +172,30 @@ public class InvoiceConfiguration extends BaseEntity implements Serializable, IE
     /**
      * Should wallet operations be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_wallet_operations")
     private boolean displayWalletOperations = false;
 
     /**
      * Should user account hierarchy be displayed in the XML invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_user_account_hierarchy")
     private boolean displayUserAccountHierarchy = false;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_rated_items")
     private boolean displayRatedItems = false;
 
     public boolean isDisplayUserAccountHierarchy() {
-		return displayUserAccountHierarchy;
-	}
+        return displayUserAccountHierarchy;
+    }
 
-	public void setDisplayUserAccountHierarchy(boolean displayUserAccountHierarchy) {
-		this.displayUserAccountHierarchy = displayUserAccountHierarchy;
-	}
+    public void setDisplayUserAccountHierarchy(boolean displayUserAccountHierarchy) {
+        this.displayUserAccountHierarchy = displayUserAccountHierarchy;
+    }
 
-	public boolean isDisplayWalletOperations() {
+    public boolean isDisplayWalletOperations() {
         return displayWalletOperations;
     }
 
@@ -274,88 +274,93 @@ public class InvoiceConfiguration extends BaseEntity implements Serializable, IE
     public void setDisplayBillingCycle(boolean displayBillingCycle) {
         this.displayBillingCycle = displayBillingCycle;
     }
-    
+
     /**
      * 
      * @return default invoice sub-category
      */
     public InvoiceSubCategory getDefaultInvoiceSubCategory() {
-		return defaultInvoiceSubCategory;
-	}
-    
+        return defaultInvoiceSubCategory;
+    }
+
     /**
      * set default invoice sub-category
+     * 
      * @param defaultInvoiceSubCategory
      */
-	public void setDefaultInvoiceSubCategory(InvoiceSubCategory defaultInvoiceSubCategory) {
-		this.defaultInvoiceSubCategory = defaultInvoiceSubCategory;
-	}
-	
-	/**
-	 * 
-	 * @return default generic accounting article
-	 */
-	public AccountingArticle getDefaultGenericAccountingArticle() {
-		return defaultGenericAccountingArticle;
-	}
-	
-	/**
-	 * set default generic accounting article
-	 * @param defaultGenericAccountingArticle
-	 */
-	public void setDefaultGenericAccountingArticle(AccountingArticle defaultGenericAccountingArticle) {
-		this.defaultGenericAccountingArticle = defaultGenericAccountingArticle;
-	}
-	
-	/**
-	 * 
-	 * @return default discount accounting article
-	 */
-	public AccountingArticle getDefaultDiscountAccountingArticle() {
-		return defaultDiscountAccountingArticle;
-	}
-	
-	/**
-	 * set default discount accounting article
-	 * @param defaultDiscountAccountingArticle
-	 */
-	public void setDefaultDiscountAccountingArticle(AccountingArticle defaultDiscountAccountingArticle) {
-		this.defaultDiscountAccountingArticle = defaultDiscountAccountingArticle;
-	}
-	
-	/**
-	 * 
-	 * @return default advanced payment accounting article
-	 */
-	public AccountingArticle getDefaultAdvancedPaymentAccountingArticle() {
-		return defaultAdvancedPaymentAccountingArticle;
-	}
-	
-	/**
-	 * set default advanced payment accounting article
-	 * @param defaultAdvancedPaymentAccountingArticle
-	 */
-	public void setDefaultAdvancedPaymentAccountingArticle(AccountingArticle defaultAdvancedPaymentAccountingArticle) {
-		this.defaultAdvancedPaymentAccountingArticle = defaultAdvancedPaymentAccountingArticle;
-	}
-	
-	/**
-	 * 
-	 * @return default invoice minimum accounting article
-	 */
-	public AccountingArticle getDefaultInvoiceMinimumAccountingArticle() {
-		return defaultInvoiceMinimumAccountingArticle;
-	}
-	
-	/**
-	 * set default invoice minimum accounting article
-	 * @param defaultInvoiceMinimumAccountingArticle
-	 */
-	public void setDefaultInvoiceMinimumAccountingArticle(AccountingArticle defaultInvoiceMinimumAccountingArticle) {
-		this.defaultInvoiceMinimumAccountingArticle = defaultInvoiceMinimumAccountingArticle;
-	}
+    public void setDefaultInvoiceSubCategory(InvoiceSubCategory defaultInvoiceSubCategory) {
+        this.defaultInvoiceSubCategory = defaultInvoiceSubCategory;
+    }
 
-	@Override
+    /**
+     * 
+     * @return default generic accounting article
+     */
+    public AccountingArticle getDefaultGenericAccountingArticle() {
+        return defaultGenericAccountingArticle;
+    }
+
+    /**
+     * set default generic accounting article
+     * 
+     * @param defaultGenericAccountingArticle
+     */
+    public void setDefaultGenericAccountingArticle(AccountingArticle defaultGenericAccountingArticle) {
+        this.defaultGenericAccountingArticle = defaultGenericAccountingArticle;
+    }
+
+    /**
+     * 
+     * @return default discount accounting article
+     */
+    public AccountingArticle getDefaultDiscountAccountingArticle() {
+        return defaultDiscountAccountingArticle;
+    }
+
+    /**
+     * set default discount accounting article
+     * 
+     * @param defaultDiscountAccountingArticle
+     */
+    public void setDefaultDiscountAccountingArticle(AccountingArticle defaultDiscountAccountingArticle) {
+        this.defaultDiscountAccountingArticle = defaultDiscountAccountingArticle;
+    }
+
+    /**
+     * 
+     * @return default advanced payment accounting article
+     */
+    public AccountingArticle getDefaultAdvancedPaymentAccountingArticle() {
+        return defaultAdvancedPaymentAccountingArticle;
+    }
+
+    /**
+     * set default advanced payment accounting article
+     * 
+     * @param defaultAdvancedPaymentAccountingArticle
+     */
+    public void setDefaultAdvancedPaymentAccountingArticle(AccountingArticle defaultAdvancedPaymentAccountingArticle) {
+        this.defaultAdvancedPaymentAccountingArticle = defaultAdvancedPaymentAccountingArticle;
+    }
+
+    /**
+     * 
+     * @return default invoice minimum accounting article
+     */
+    public AccountingArticle getDefaultInvoiceMinimumAccountingArticle() {
+        return defaultInvoiceMinimumAccountingArticle;
+    }
+
+    /**
+     * set default invoice minimum accounting article
+     * 
+     * @param defaultInvoiceMinimumAccountingArticle
+     */
+    public void setDefaultInvoiceMinimumAccountingArticle(AccountingArticle defaultInvoiceMinimumAccountingArticle) {
+        this.defaultInvoiceMinimumAccountingArticle = defaultInvoiceMinimumAccountingArticle;
+    }
+
+    @Override
     public String toString() {
         return "InvoiceConfiguration [displaySubscriptions=" + displaySubscriptions + ", displayServices=" + displayServices + ", displayOffers=" + displayOffers + ", " + "displayPricePlans=" + displayPricePlans
                 + ", displayEdrs=" + displayEdrs + ", displayProvider=" + displayProvider + ", " + "displayDetail=" + displayDetail + ", displayCfAsXML=" + displayCfAsXML + ", displayWalletOperations="
@@ -385,6 +390,7 @@ public class InvoiceConfiguration extends BaseEntity implements Serializable, IE
 
     /**
      * set the display tax Details
+     * 
      * @param displayTaxDetails
      */
     public void setDisplayTaxDetails(boolean displayTaxDetails) {
@@ -433,6 +439,5 @@ public class InvoiceConfiguration extends BaseEntity implements Serializable, IE
     public void setDisplayRatedItems(boolean displayRatedItems) {
         this.displayRatedItems = displayRatedItems;
     }
-
 
 }

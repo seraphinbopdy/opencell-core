@@ -1,38 +1,37 @@
 package org.meveo.model.billing;
 
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.TemporalType.TIMESTAMP;
 import static java.math.BigDecimal.ZERO;
-import static javax.persistence.EnumType.STRING;
-import static javax.persistence.FetchType.LAZY;
-import static javax.persistence.TemporalType.TIMESTAMP;
 import static org.meveo.model.billing.BillingRunReportTypeEnum.OPEN_RATED_TRANSACTIONS;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.meveo.model.AuditableEntity;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Enumerated;
-import javax.persistence.JoinColumn;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.type.NumericBooleanConverter;
+import org.meveo.model.AuditableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.validation.constraints.NotNull;
+
 @Entity
 @Table(name = "billing_run_report")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-        parameters = {@Parameter(name = "sequence_name", value = "bill_run_report_seq"), })
-@NamedQueries({
-        @NamedQuery(name = "BillingRunReport.findAssociatedReportToBillingRun", query = "select report from BillingRunReport report where report.billingRun.id=:billingRunId ORDER BY report.id ASC")
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "bill_run_report_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "BillingRunReport.findAssociatedReportToBillingRun", query = "select report from BillingRunReport report where report.billingRun.id=:billingRunId ORDER BY report.id ASC") })
 public class BillingRunReport extends AuditableEntity {
 
     @OneToOne(fetch = LAZY)
@@ -104,10 +103,10 @@ public class BillingRunReport extends AuditableEntity {
 
     @OneToMany(mappedBy = "billingRunReport", fetch = LAZY)
     private List<SubscriptionAmount> topSubscriptions;
-	
-	@Type(type = "numeric_boolean")
-	@Column(name = "report_final")
-	private boolean reportFinal = false;
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "report_final")
+    private boolean reportFinal = false;
 
     public BillingRunReport() {
         this.totalAmountWithoutTax = ZERO;
@@ -187,13 +186,13 @@ public class BillingRunReport extends AuditableEntity {
     public void setOneShotTransactionsCount(BigDecimal oneShotTransactionsCount) {
         this.oneShotTransactionsCount = oneShotTransactionsCount;
     }
-    
+
     public void addOneShotTransactionsCount(BigDecimal oneShotTransactionsCountToAdd) {
         if (this.oneShotTransactionsCount == null) {
-        	this.oneShotTransactionsCount = ZERO;
+            this.oneShotTransactionsCount = ZERO;
         }
         if (oneShotTransactionsCountToAdd != null) {
-        	this.oneShotTransactionsCount = this.oneShotTransactionsCount.add(oneShotTransactionsCountToAdd);
+            this.oneShotTransactionsCount = this.oneShotTransactionsCount.add(oneShotTransactionsCountToAdd);
         }
     }
 
@@ -223,13 +222,13 @@ public class BillingRunReport extends AuditableEntity {
 
     public void addOneShotTotalAmountWithoutTax(BigDecimal oneShotTotalAmountWithoutTaxToAdd) {
         if (this.oneShotTotalAmountWithoutTax == null) {
-        	this.oneShotTotalAmountWithoutTax = ZERO;
+            this.oneShotTotalAmountWithoutTax = ZERO;
         }
         if (oneShotTotalAmountWithoutTaxToAdd != null) {
-        	this.oneShotTotalAmountWithoutTax = this.oneShotTotalAmountWithoutTax.add(oneShotTotalAmountWithoutTaxToAdd);
+            this.oneShotTotalAmountWithoutTax = this.oneShotTotalAmountWithoutTax.add(oneShotTotalAmountWithoutTaxToAdd);
         }
     }
-    
+
     public BigDecimal getRecurringTotalAmountWithoutTax() {
         return recurringTotalAmountWithoutTax;
     }
@@ -285,12 +284,12 @@ public class BillingRunReport extends AuditableEntity {
     public void setTopSubscriptions(List<SubscriptionAmount> topSubscriptions) {
         this.topSubscriptions = topSubscriptions;
     }
-	
-	public boolean isReportFinal() {
-		return reportFinal;
-	}
-	
-	public void setReportFinal(boolean reportFinal) {
-		this.reportFinal = reportFinal;
-	}
+
+    public boolean isReportFinal() {
+        return reportFinal;
+    }
+
+    public void setReportFinal(boolean reportFinal) {
+        this.reportFinal = reportFinal;
+    }
 }

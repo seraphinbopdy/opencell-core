@@ -19,14 +19,14 @@ package org.meveo.model.shared;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.Size;
-
 import org.meveo.model.billing.Country;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Size;
 
 /**
  * Address information
@@ -106,7 +106,7 @@ public class Address implements Serializable, Cloneable {
     }
 
     public Address(Address address) {
-        this(address.address1, address.address2, address.address3,address.address4, address.address5, address.zipCode, address.city, address.country, address.state);
+        this(address.address1, address.address2, address.address3, address.address4, address.address5, address.zipCode, address.city, address.country, address.state);
     }
 
     public Address(String address1, String address2, String address3, String zipCode, String city, Country country, String state) {
@@ -120,7 +120,7 @@ public class Address implements Serializable, Cloneable {
         this.state = state;
     }
 
-    public Address(String address1, String address2, String address3,String address4, String address5, String zipCode, String city, Country country, String state) {
+    public Address(String address1, String address2, String address3, String address4, String address5, String zipCode, String city, Country country, String state) {
         super();
         this.address1 = address1;
         this.address2 = address2;
@@ -197,8 +197,8 @@ public class Address implements Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return (address1 == null ? "" : address1) + "|" + (address2 == null ? "" : address2) + "|" + (address3 == null ? "" : address3) + "|" + (zipCode == null ? "" : zipCode)
-                + "|" + (city == null ? "" : city) + "|" + (state == null ? "" : state) + "|" + (country == null ? "" : country);
+        return (address1 == null ? "" : address1) + "|" + (address2 == null ? "" : address2) + "|" + (address3 == null ? "" : address3) + "|" + (zipCode == null ? "" : zipCode) + "|" + (city == null ? "" : city) + "|"
+                + (state == null ? "" : state) + "|" + (country == null ? "" : country);
     }
 
     @Override
@@ -217,31 +217,31 @@ public class Address implements Serializable, Cloneable {
         setCountry(null);
     }
 
-	/**
-	 * @return the address4
-	 */
-	public String getAddress4() {
-		return address4;
-	}
+    /**
+     * @return the address4
+     */
+    public String getAddress4() {
+        return address4;
+    }
 
-	/**
-	 * @param address4 the address4 to set
-	 */
-	public void setAddress4(String address4) {
-		this.address4 = address4;
-	}
+    /**
+     * @param address4 the address4 to set
+     */
+    public void setAddress4(String address4) {
+        this.address4 = address4;
+    }
 
-	/**
-	 * @return the address5
-	 */
-	public String getAddress5() {
-		return address5;
-	}
+    /**
+     * @return the address5
+     */
+    public String getAddress5() {
+        return address5;
+    }
 
-	/**
-	 * @param address5 the address5 to set
-	 */
-	public void setAddress5(String address5) {
-		this.address5 = address5;
-	}
+    /**
+     * @param address5 the address5 to set
+     */
+    public void setAddress5(String address5) {
+        this.address5 = address5;
+    }
 }

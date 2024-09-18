@@ -6,8 +6,7 @@ public class EncryptionException extends RuntimeException {
      * 
      */
     private static final long serialVersionUID = 5175511780611978989L;
-    
-    
+
     public EncryptionException() {
         super();
     }

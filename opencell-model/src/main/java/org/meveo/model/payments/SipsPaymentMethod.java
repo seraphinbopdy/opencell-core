@@ -20,8 +20,8 @@ package org.meveo.model.payments;
 
 import org.meveo.commons.utils.StringUtils;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 @Entity
 @DiscriminatorValue(value = "SIPS")

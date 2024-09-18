@@ -19,9 +19,8 @@ package org.meveo.model.billing;
 
 public enum RatedTransactionStatusEnum {
 
-    OPEN(1, "ratedTransactionStatus.open"), BILLED(2, "ratedTransactionStatus.billed"),
-    REJECTED(3, "ratedTransactionStatus.rejected"), RERATED(4, "ratedTransactionStatus.rerated"),
-    CANCELED(5, "ratedTransactionStatus.canceled"), PROCESSED(6, "ratedTransactionStatus.processed");
+    OPEN(1, "ratedTransactionStatus.open"), BILLED(2, "ratedTransactionStatus.billed"), REJECTED(3, "ratedTransactionStatus.rejected"), RERATED(4, "ratedTransactionStatus.rerated"), CANCELED(5,
+            "ratedTransactionStatus.canceled"), PROCESSED(6, "ratedTransactionStatus.processed");
 
     private Integer id;
     private String label;

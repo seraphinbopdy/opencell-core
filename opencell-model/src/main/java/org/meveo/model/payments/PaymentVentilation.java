@@ -20,22 +20,22 @@ package org.meveo.model.payments;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 /**
  * Ventilation of payment to customerAccount.
@@ -44,8 +44,7 @@ import org.meveo.model.AuditableEntity;
  */
 @Entity
 @Table(name = "ar_payment_ventilation")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_payment_ventilation_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_payment_ventilation_seq"), @Parameter(name = "increment_size", value = "1") })
 public class PaymentVentilation extends AuditableEntity {
 
     /** The Constant serialVersionUID. */
@@ -79,7 +78,7 @@ public class PaymentVentilation extends AuditableEntity {
     @Column(name = "ventilation_date")
     @Temporal(TemporalType.DATE)
     private Date ventilationDate;
-    
+
     /**
      * Ventilation action status
      */
@@ -92,31 +91,22 @@ public class PaymentVentilation extends AuditableEntity {
      */
     public PaymentVentilation() {
     }
-    
 
     public OtherTransaction getOriginalOT() {
         return originalOT;
     }
 
-
-
     public void setOriginalOT(OtherTransaction originalOT) {
         this.originalOT = originalOT;
     }
-
-
 
     public OtherTransaction getNewOT() {
         return newOT;
     }
 
-
-
     public void setNewOT(OtherTransaction newOT) {
         this.newOT = newOT;
     }
-
-
 
     public AccountOperation getAccountOperation() {
         return accountOperation;
@@ -149,18 +139,14 @@ public class PaymentVentilation extends AuditableEntity {
     public void setVentilationDate(Date ventilationDate) {
         this.ventilationDate = ventilationDate;
     }
-    
-    
 
     public VentilationActionStatusEnum getVentilationActionStatus() {
         return ventilationActionStatus;
     }
 
-
     public void setVentilationActionStatus(VentilationActionStatusEnum ventilationActionStatus) {
         this.ventilationActionStatus = ventilationActionStatus;
     }
-
 
     /*
      * (non-Javadoc)

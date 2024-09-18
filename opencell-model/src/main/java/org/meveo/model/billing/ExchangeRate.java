@@ -3,32 +3,30 @@ package org.meveo.model.billing;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.EnableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "exchange_rate")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "exchange_rate_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "exchange_rate_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
-    @NamedQuery(name = "ExchangeRate.getAllTradingCurrencyWithCurrentRate",
-            query = "SELECT s.id FROM ExchangeRate s WHERE (s.tradingCurrency.id, s.fromDate)" +
-                    " IN (SELECT ex.tradingCurrency.id, MAX(ex.fromDate) FROM ExchangeRate ex WHERE ex.fromDate <=:sysDate GROUP BY ex.tradingCurrency.id)"),
-    @NamedQuery(name = "ExchangeRate.findByfromDate", query = "SELECT ec FROM ExchangeRate ec WHERE ec.fromDate = :fromDate and ec.tradingCurrency.id = :tradingCurrencyId")
-})
+        @NamedQuery(name = "ExchangeRate.getAllTradingCurrencyWithCurrentRate", query = "SELECT s.id FROM ExchangeRate s WHERE (s.tradingCurrency.id, s.fromDate)"
+                + " IN (SELECT ex.tradingCurrency.id, MAX(ex.fromDate) FROM ExchangeRate ex WHERE ex.fromDate <=:sysDate GROUP BY ex.tradingCurrency.id)"),
+        @NamedQuery(name = "ExchangeRate.findByfromDate", query = "SELECT ec FROM ExchangeRate ec WHERE ec.fromDate = :fromDate and ec.tradingCurrency.id = :tradingCurrencyId") })
 public class ExchangeRate extends EnableEntity {
     private static final long serialVersionUID = 1L;
     public static final int NB_DECIMALS = 6;
@@ -46,9 +44,9 @@ public class ExchangeRate extends EnableEntity {
     @Column(name = "from_date")
     private Date fromDate;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "current_rate", nullable = false)
-    private boolean isCurrentRate  = false;
+    private boolean isCurrentRate = false;
 
     public TradingCurrency getTradingCurrency() {
         return tradingCurrency;

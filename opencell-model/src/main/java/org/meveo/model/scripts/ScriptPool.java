@@ -5,10 +5,11 @@ package org.meveo.model.scripts;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import org.hibernate.type.NumericBooleanConverter;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
 
 /**
  * Configuration of the script instances pool of an endpoint
@@ -24,7 +25,7 @@ public class ScriptPool implements Serializable {
      * Use a pool of script instances
      */
     @Column(name = "use_pool")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean usePool = false;
 
     /**

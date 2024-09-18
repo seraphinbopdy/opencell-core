@@ -18,9 +18,9 @@
 
 package org.meveo.commons.utils;
 
-import javax.persistence.AttributeConverter;
-
 import org.meveo.model.jobs.JobCategoryEnum;
+
+import jakarta.persistence.AttributeConverter;
 
 public class JobCategoryEnumCoverter implements AttributeConverter<JobCategoryEnum, String> {
 
@@ -31,6 +31,6 @@ public class JobCategoryEnumCoverter implements AttributeConverter<JobCategoryEn
 
     @Override
     public JobCategoryEnum convertToEntityAttribute(String dbData) {
-    	return (JobCategoryEnum) EnumBuilder.build(dbData, JobCategoryEnum.class);
+        return (JobCategoryEnum) EnumBuilder.build(dbData, JobCategoryEnum.class);
     }
 }

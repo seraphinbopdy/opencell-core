@@ -25,9 +25,8 @@ import org.meveo.model.crm.custom.CustomFieldTypeEnum;
  **/
 public enum FilterParameterTypeEnum {
 
-    BIG_DECIMAL("cfDecimal", CustomFieldTypeEnum.DOUBLE), BOOLEAN("cfBoolean", CustomFieldTypeEnum.LIST), DATE("cfDate", CustomFieldTypeEnum.DATE), ENTITY("cfEntity",
-            CustomFieldTypeEnum.ENTITY), ENUM("cfEnum", CustomFieldTypeEnum.LIST), INTEGER("cfInteger",
-                    CustomFieldTypeEnum.LONG), LONG("cfLong", CustomFieldTypeEnum.LONG), STRING("cfString", CustomFieldTypeEnum.STRING);
+    BIG_DECIMAL("cfDecimal", CustomFieldTypeEnum.DOUBLE), BOOLEAN("cfBoolean", CustomFieldTypeEnum.LIST), DATE("cfDate", CustomFieldTypeEnum.DATE), ENTITY("cfEntity", CustomFieldTypeEnum.ENTITY), ENUM("cfEnum",
+            CustomFieldTypeEnum.LIST), INTEGER("cfInteger", CustomFieldTypeEnum.LONG), LONG("cfLong", CustomFieldTypeEnum.LONG), STRING("cfString", CustomFieldTypeEnum.STRING);
 
     private String prefix;
     private CustomFieldTypeEnum fieldType;

@@ -1,53 +1,54 @@
 package org.meveo.model.dunning;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.meveo.model.BusinessEntity;
-import org.meveo.model.admin.Currency;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.type.NumericBooleanConverter;
+import org.meveo.model.BusinessEntity;
+import org.meveo.model.admin.Currency;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
 /**
- *The dunning level
+ * The dunning level
+ * 
  * @author khalid.horri
  *
  */
 @Entity
 @Table(name = "dunning_level")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "dunning_level_seq")})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_level_seq"), @Parameter(name = "increment_size", value = "1") })
 public class DunningLevel extends BusinessEntity {
 
     private static final long serialVersionUID = 8092970257735394941L;
 
     /**
-     * A reminder level, is a level with a send notification action, its purpose is to remind the customer that his payment is due in a couple of days.
-     * It is the first level of a policy, and a policy can only have one reminder level.
-     * This level is previous to a collection plan, it doesn’t trigger a collection plan.
+     * A reminder level, is a level with a send notification action, its purpose is to remind the customer that his payment is due in a couple of days. It is the first level of a policy, and a policy can only have one
+     * reminder level. This level is previous to a collection plan, it doesn’t trigger a collection plan.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "reminder")
     private Boolean isReminder = Boolean.FALSE;
 
     /**
      * A level can be activated or deactivate at any time, it means it is triggered or not within a policy
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "active")
     private Boolean isActive = Boolean.TRUE;
 
@@ -61,7 +62,7 @@ public class DunningLevel extends BusinessEntity {
     /**
      * If set to TRUE, the level is only triggered when the reason for invoice failure is a soft decline of an automatic payment.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "soft_decline")
     private Boolean isSoftDecline = Boolean.FALSE;
 
@@ -88,7 +89,7 @@ public class DunningLevel extends BusinessEntity {
     /**
      * Value of the charge to be applied at the level.
      *
-     *  ​if DunningLevelChargeType = Percentage, value < 100
+     * ​if DunningLevelChargeType = Percentage, value < 100
      */
     @Column(name = "charge_value", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal chargeValue;
@@ -103,7 +104,7 @@ public class DunningLevel extends BusinessEntity {
     /**
      * The end of dunning level refers to the last level of a dunning policy
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "end_dunning_level")
     private Boolean isEndOfDunningLevel = Boolean.FALSE;
 
@@ -217,6 +218,7 @@ public class DunningLevel extends BusinessEntity {
     public DunningModeEnum getType() {
         return type;
     }
+
     public void setType(DunningModeEnum type) {
         this.type = type;
     }

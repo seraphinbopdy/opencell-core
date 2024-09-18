@@ -21,22 +21,7 @@
  */
 package org.meveo.model.payments;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PostPersist;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
@@ -51,12 +36,26 @@ import org.meveo.model.billing.Country;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.scripts.ScriptInstance;
 
-import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
- * The PaymentGateway on opencell exists in 2 types {@link org.meveo.model.payments.PaymentGatewayTypeEnum PaymentGatewayTypeEnum}: &lt;ul&gt; &lt;li&gt;Custom: The administrator
- * can define the implementation in a script.&lt;/li&gt; &lt;li&gt;Native: The business implementation code is available on the opencell core, currently the available PSP are
- * Inginico Ogone, and Slimpay .&lt;/li&gt; &lt;/ul&gt;
+ * The PaymentGateway on opencell exists in 2 types {@link org.meveo.model.payments.PaymentGatewayTypeEnum PaymentGatewayTypeEnum}: &lt;ul&gt; &lt;li&gt;Custom: The administrator can define the implementation in a
+ * script.&lt;/li&gt; &lt;li&gt;Native: The business implementation code is available on the opencell core, currently the available PSP are Inginico Ogone, and Slimpay .&lt;/li&gt; &lt;/ul&gt;
  *
  *
  * @author anasseh
@@ -70,8 +69,7 @@ import java.util.List;
 @ModuleItem
 @CustomFieldEntity(cftCodePrefix = "PaymentGateway")
 @Table(name = "ar_payment_gateway", uniqueConstraints = @UniqueConstraint(columnNames = { "payment_method", "country_id", "trading_currency_id" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_payment_gateway_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_payment_gateway_seq"), @Parameter(name = "increment_size", value = "1") })
 public class PaymentGateway extends EnableBusinessCFEntity implements ISearchable {
 
     /** The Constant serialVersionUID. */
@@ -194,17 +192,15 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
      */
     @Column(name = "profile")
     private String profile;
-    
-	@OneToOne(mappedBy = "paymentGateway", cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToOne(mappedBy = "paymentGateway", cascade = CascadeType.ALL, orphanRemoval = true)
     private PaymentGatewayRumSequence rumSequence;
 
-	
     /**
      * Bank coordinates
      */
     @Embedded
     private BankCoordinates bankCoordinates = new BankCoordinates();
-    
 
     /**
      * Seller associated to a customer
@@ -218,7 +214,7 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
      */
     @OneToMany(mappedBy = "paymentGateway", fetch = FetchType.LAZY)
     private List<PaymentRejectionCode> paymentRejectionCodes;
-    
+
     /**
      * Instantiates a new payment gateway
      */
@@ -463,8 +459,7 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
     public String getSecretKey() {
         if (KeystoreManager.existKeystore()) {
             return getSecretKeyKS();
-        }
-        else {
+        } else {
             return getSecretKeyDB();
         }
     }
@@ -474,8 +469,7 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
             secretKeyDB = "";
             this.secretKeyKS = password;
             setSecretKeyKS();
-        }
-        else {
+        } else {
             setSecretKeyDB(password);
         }
     }
@@ -483,8 +477,7 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
     public String getSecretKeyKS() {
         if (KeystoreManager.existCredential(getClass().getSimpleName() + "." + getId())) {
             return KeystoreManager.retrieveCredential(getClass().getSimpleName() + "." + getId());
-        }
-        else {
+        } else {
             return "";
         }
     }
@@ -495,7 +488,7 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
             this.secretKeyKS = "";
         }
 
-        if (getId() != null && KeystoreManager.existKeystore() &&! this.secretKeyKS.equals(getSecretKeyKS())) {
+        if (getId() != null && KeystoreManager.existKeystore() && !this.secretKeyKS.equals(getSecretKeyKS())) {
             KeystoreManager.addCredential(getClass().getSimpleName() + "." + getId(), this.secretKeyKS);
         }
     }
@@ -519,23 +512,26 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
     }
 
     /**
-      * Gets  Webhooks Key Id
-      * @return the webhooksKeyId
-      */
+     * Gets Webhooks Key Id
+     * 
+     * @return the webhooksKeyId
+     */
     public String getWebhooksKeyId() {
         return webhooksKeyId;
     }
 
     /**
-      * Sets the Webhooks Key Id.
-      * @param webhooksKeyId
-      */
+     * Sets the Webhooks Key Id.
+     * 
+     * @param webhooksKeyId
+     */
     public void setWebhooksKeyId(String webhooksKeyId) {
         this.webhooksKeyId = webhooksKeyId;
     }
 
     /**
      * Gets the Webhooks Secret Key.
+     * 
      * @return the webhooksSecretKey
      */
     public String getWebhooksSecretKey() {
@@ -544,6 +540,7 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
 
     /**
      * Sets the Webhooks Secret Key.
+     * 
      * @param webhooksSecretKey
      */
     public void setWebhooksSecretKey(String webhooksSecretKey) {
@@ -568,22 +565,20 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
         this.profile = profile;
     }
 
-
     @Override
     public String toString() {
-        return "PaymentGateway [marchandId=" + marchandId + ", type=" + type + ", paymentMethodType=" + paymentMethodType + ", scriptInstance="
-                + (scriptInstance == null ? null : scriptInstance.getCode()) + ", implementationClassName=" + implementationClassName + ", applicationEL=" + applicationEL
-                + ", Country=" + (country == null ? null : country.getCountryCode()) + ", tradingCurrency=" + (tradingCurrency == null ? null : tradingCurrency.getCurrencyCode())
-                + ", cardType=" + cardType + "]";
+        return "PaymentGateway [marchandId=" + marchandId + ", type=" + type + ", paymentMethodType=" + paymentMethodType + ", scriptInstance=" + (scriptInstance == null ? null : scriptInstance.getCode())
+                + ", implementationClassName=" + implementationClassName + ", applicationEL=" + applicationEL + ", Country=" + (country == null ? null : country.getCountryCode()) + ", tradingCurrency="
+                + (tradingCurrency == null ? null : tradingCurrency.getCurrencyCode()) + ", cardType=" + cardType + "]";
     }
 
-	public PaymentGatewayRumSequence getRumSequence() {
-		return rumSequence;
-	}
+    public PaymentGatewayRumSequence getRumSequence() {
+        return rumSequence;
+    }
 
-	public void setRumSequence(PaymentGatewayRumSequence rumSequence) {
-		this.rumSequence = rumSequence;
-	}
+    public void setRumSequence(PaymentGatewayRumSequence rumSequence) {
+        this.rumSequence = rumSequence;
+    }
 
     /**
      * @return the bankCoordinates
@@ -612,7 +607,6 @@ public class PaymentGateway extends EnableBusinessCFEntity implements ISearchabl
     public void setSeller(Seller seller) {
         this.seller = seller;
     }
-
 
     public List<PaymentRejectionCode> getPaymentRejectionCodes() {
         return paymentRejectionCodes;

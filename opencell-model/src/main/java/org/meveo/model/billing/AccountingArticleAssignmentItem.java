@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 public class AccountingArticleAssignmentItem implements Serializable {
-	
+
     private static final long serialVersionUID = 1L;
-	private Long chargeTemplateId;
+    private Long chargeTemplateId;
     private Long offerTemplateId;
     private Long serviceInstanceId;
     private List<Long> chargeInstancesIDs = new ArrayList<>();

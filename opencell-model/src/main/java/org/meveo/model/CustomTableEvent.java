@@ -25,77 +25,75 @@ import org.meveo.model.notification.NotificationEventTypeEnum;
 @ObservableEntity
 public class CustomTableEvent {
 
-	
+    public CustomTableEvent(String cetCode, Long id, Map<String, Object> values, NotificationEventTypeEnum type) {
+        this.type = type;
+        this.values = values;
+        this.cetCode = cetCode;
+        this.setId(id);
+    }
 
-	public CustomTableEvent(String cetCode, Long id, Map<String, Object> values, NotificationEventTypeEnum type) {
-		this.type=type;
-		this.values = values;
-		this.cetCode=cetCode;
-		this.setId(id);
-	}
-	
-	private Long id;
-	
-	private NotificationEventTypeEnum type;
-	
-	private String cetCode;
+    private Long id;
 
-	private Map<String, Object> values;
+    private NotificationEventTypeEnum type;
 
-	/**
-	 * @return the values
-	 */
-	public Map<String, Object> getValues() {
-		return values;
-	}
+    private String cetCode;
 
-	/**
-	 * @param values the values to set
-	 */
-	public void setValues(Map<String, Object> values) {
-		this.values = values;
-	}
+    private Map<String, Object> values;
 
-	/**
-	 * @return the type
-	 */
-	public NotificationEventTypeEnum getType() {
-		return type;
-	}
+    /**
+     * @return the values
+     */
+    public Map<String, Object> getValues() {
+        return values;
+    }
 
-	/**
-	 * @param type the type to set
-	 */
-	public void setType(NotificationEventTypeEnum type) {
-		this.type = type;
-	}
+    /**
+     * @param values the values to set
+     */
+    public void setValues(Map<String, Object> values) {
+        this.values = values;
+    }
 
-	/**
-	 * @return the cetCode
-	 */
-	public String getCetCode() {
-		return cetCode;
-	}
+    /**
+     * @return the type
+     */
+    public NotificationEventTypeEnum getType() {
+        return type;
+    }
 
-	/**
-	 * @param cetCode the cetCode to set
-	 */
-	public void setCetCode(String cetCode) {
-		this.cetCode = cetCode;
-	}
+    /**
+     * @param type the type to set
+     */
+    public void setType(NotificationEventTypeEnum type) {
+        this.type = type;
+    }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the cetCode
+     */
+    public String getCetCode() {
+        return cetCode;
+    }
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param cetCode the cetCode to set
+     */
+    public void setCetCode(String cetCode) {
+        this.cetCode = cetCode;
+    }
+
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
 }

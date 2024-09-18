@@ -18,14 +18,15 @@
 
 package org.meveo.model.dwh;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
+import org.hibernate.type.NumericBooleanConverter;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 /**
  * Pie type chart
@@ -42,7 +43,7 @@ public class PieChart extends Chart {
     /**
      * Is it filled
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "filled")
     private boolean filled;
 
@@ -75,14 +76,14 @@ public class PieChart extends Chart {
     /**
      * Show shadow
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "shadow")
     private boolean shadow = true;
 
     /**
      * Show data labels
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "show_data_labels")
     private boolean showDataLabels;
 

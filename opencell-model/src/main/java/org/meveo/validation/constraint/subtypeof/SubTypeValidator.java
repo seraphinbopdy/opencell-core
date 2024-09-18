@@ -18,8 +18,8 @@ package org.meveo.validation.constraint.subtypeof;
 
 import java.util.Collection;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validates that the target entity is a subtype of specified class

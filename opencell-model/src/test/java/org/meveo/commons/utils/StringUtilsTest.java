@@ -17,52 +17,53 @@
  */
 
 package org.meveo.commons.utils;
-import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.Test;
 
 public class StringUtilsTest {
 
     @Test
     public void should_return_false_when_value_is_null() {
-        //Given
+        // Given
         String value = null;
-        //When
+        // When
         boolean notBlank = StringUtils.isNotBlank(value);
-        //Then
+        // Then
         assertThat(notBlank).isFalse();
 
     }
 
     @Test
     public void should_return_false_when_value_is_empty() {
-        //Given
+        // Given
         String value = "";
-        //When
+        // When
         boolean notBlank = StringUtils.isNotBlank(value);
-        //Then
+        // Then
         assertThat(notBlank).isFalse();
 
     }
 
     @Test
     public void should_return_false_when_value_is_white_space() {
-        //Given
+        // Given
         String value = " ";
-        //When
+        // When
         boolean notBlank = StringUtils.isNotBlank(value);
-        //Then
+        // Then
         assertThat(notBlank).isFalse();
 
     }
 
     @Test
     public void should_return_true_when_value_is_not_empty_and_not_white_space() {
-        //Given
+        // Given
         String value = " value ";
-        //When
+        // When
         boolean notBlank = StringUtils.isNotBlank(value);
-        //Then
+        // Then
         assertThat(notBlank).isTrue();
 
     }
@@ -71,46 +72,46 @@ public class StringUtilsTest {
     public void should_compute_next_alphabet_sequence() {
         String current;
         CharSequence nextSequence;
-        //Given
+        // Given
         current = "AZ";
-        //When
+        // When
         nextSequence = StringUtils.computeNextAlphabetSequence(current);
-        //Then
+        // Then
         assertThat(nextSequence).isEqualTo("BA");
 
-        //Given
+        // Given
         current = "AA";
-        //When
+        // When
         nextSequence = StringUtils.computeNextAlphabetSequence(current);
-        //Then
+        // Then
         assertThat(nextSequence).isEqualTo("AB");
 
-        //Given
+        // Given
         current = "AZZ";
-        //When
+        // When
         nextSequence = StringUtils.computeNextAlphabetSequence(current);
-        //Then
+        // Then
         assertThat(nextSequence).isEqualTo("BAA");
 
-        //Given
+        // Given
         current = "BBA";
-        //When
+        // When
         nextSequence = StringUtils.computeNextAlphabetSequence(current);
-        //Then
+        // Then
         assertThat(nextSequence).isEqualTo("BBB");
 
-        //Given
+        // Given
         current = "BZA";
-        //When
+        // When
         nextSequence = StringUtils.computeNextAlphabetSequence(current);
-        //Then
+        // Then
         assertThat(nextSequence).isEqualTo("BZB");
 
-        //Given
+        // Given
         current = "ZZZ";
-        //When
+        // When
         nextSequence = StringUtils.computeNextAlphabetSequence(current);
-        //Then
+        // Then
         assertThat(nextSequence).isEqualTo("AAAA");
     }
 }

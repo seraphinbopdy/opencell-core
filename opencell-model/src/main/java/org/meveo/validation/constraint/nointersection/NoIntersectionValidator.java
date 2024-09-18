@@ -1,13 +1,14 @@
 package org.meveo.validation.constraint.nointersection;
 
+import java.util.Collection;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import java.util.Collection;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class NoIntersectionValidator implements ConstraintValidator<NoIntersectionBetween, Object> {
 

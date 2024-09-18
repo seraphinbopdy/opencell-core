@@ -18,10 +18,10 @@
 package org.meveo.model.billing;
 
 import java.math.BigDecimal;
-import java.util.*;
-
-import javax.persistence.*;
-import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
@@ -29,6 +29,22 @@ import org.meveo.model.EnableEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.admin.Currency;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Currency enabled in application
@@ -40,14 +56,12 @@ import org.meveo.model.admin.Currency;
 @Cacheable
 @ExportIdentifier({ "currency.currencyCode" })
 @Table(name = "billing_trading_currency")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_trading_currency_seq"), })
-@NamedQueries({ @NamedQuery(name = "TradingCurrency.getByCode", query = "from TradingCurrency tr where tr.currency.currencyCode = :tradingCurrencyCode ", hints = {
-        @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-	@NamedQuery(name = "TradingCurrency.getByCodeOrId", query = "from TradingCurrency tr where tr.id = :tradingCurrencyId or tr.currency.currencyCode = :tradingCurrencyCode ", 
-	hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-        @NamedQuery(name = "TradingCurrency.getTradingFromCurrency", query = "SELECT trc FROM TradingCurrency trc where trc.currency.id = :currencyID"),
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_trading_currency_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({
+        @NamedQuery(name = "TradingCurrency.getByCode", query = "select tr from TradingCurrency tr where tr.currency.currencyCode = :tradingCurrencyCode ", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "TradingCurrency.getByCodeOrId", query = "select tr from TradingCurrency tr where tr.id = :tradingCurrencyId or tr.currency.currencyCode = :tradingCurrencyCode ", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "TradingCurrency.getTradingFromCurrency", query = "SELECT trc FROM TradingCurrency trc where trc.currency.id = :currencyID"), })
 public class TradingCurrency extends EnableEntity {
     private static final long serialVersionUID = 1L;
 
@@ -105,7 +119,7 @@ public class TradingCurrency extends EnableEntity {
     public void setExchangeRates(List<ExchangeRate> exchangeRates) {
         this.exchangeRates = exchangeRates;
     }
-    
+
     public BigDecimal getPrCurrencyToThis() {
         return prCurrencyToThis;
     }
@@ -210,7 +224,7 @@ public class TradingCurrency extends EnableEntity {
         if (ratesList == null || ratesList.isEmpty()) {
             return null;
         }
-        return ratesList.stream().sorted(Comparator.comparing(ExchangeRate::getFromDate).reversed()).filter(rate -> (
-                (rate.getFromDate().toInstant().equals(invoiceDate.toInstant())) || rate.getFromDate().toInstant().isBefore(invoiceDate.toInstant()))).findFirst().orElse(null);
+        return ratesList.stream().sorted(Comparator.comparing(ExchangeRate::getFromDate).reversed())
+            .filter(rate -> ((rate.getFromDate().toInstant().equals(invoiceDate.toInstant())) || rate.getFromDate().toInstant().isBefore(invoiceDate.toInstant()))).findFirst().orElse(null);
     }
 }

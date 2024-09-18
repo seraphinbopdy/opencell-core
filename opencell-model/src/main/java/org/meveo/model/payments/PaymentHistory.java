@@ -25,23 +25,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Payment history.
@@ -52,12 +51,10 @@ import org.meveo.model.AuditableEntity;
 
 @Entity
 @Table(name = "ar_payment_history")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_payment_history_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_payment_history_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "PaymentHistory.findByPaymentId", query = "SELECT paymentHistory FROM PaymentHistory paymentHistory WHERE paymentHistory.payment.id=:paymentId") })
 public class PaymentHistory extends AuditableEntity {
-
 
 	private static final long serialVersionUID = 4319694328397367053L;
 
@@ -152,10 +149,8 @@ public class PaymentHistory extends AuditableEntity {
 	@JoinColumn(name = "refund_id")
 	private Refund refund;
 	
-	
 	@ManyToMany(mappedBy = "paymentHistories")
 	List<AccountOperation> listAoPaid;
-
 
     /**
      * Gets the seller code.
@@ -541,4 +536,3 @@ public class PaymentHistory extends AuditableEntity {
 	}
 
 }
-

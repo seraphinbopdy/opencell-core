@@ -17,10 +17,10 @@
  */
 package org.meveo.model.payments;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 import org.meveo.commons.utils.StringUtils;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 /**
  * Payment by Stripe payment method
@@ -32,22 +32,22 @@ import org.meveo.commons.utils.StringUtils;
 public class StripePaymentMethod extends PaymentMethod {
 
     private static final long serialVersionUID = 8726571611074346199L;
-    
+
     public StripePaymentMethod() {
         this.paymentType = PaymentMethodEnum.STRIPEDIRECTLINK;
     }
 
-    public StripePaymentMethod(boolean isDisabled, String alias, boolean preferred, CustomerAccount customerAccount,String userId) {
+    public StripePaymentMethod(boolean isDisabled, String alias, boolean preferred, CustomerAccount customerAccount, String userId) {
         super();
         setDisabled(isDisabled);
         this.paymentType = PaymentMethodEnum.STRIPEDIRECTLINK;
         this.alias = alias;
         this.preferred = preferred;
         this.customerAccount = customerAccount;
-        if(StringUtils.isBlank(userId)) {
-        	this.userId = customerAccount.getContactInformationNullSafe().getEmail();
-        }else {
-        	this.userId = userId;
+        if (StringUtils.isBlank(userId)) {
+            this.userId = customerAccount.getContactInformationNullSafe().getEmail();
+        } else {
+            this.userId = userId;
         }
     }
 
@@ -57,32 +57,29 @@ public class StripePaymentMethod extends PaymentMethod {
         this.alias = alias;
         this.preferred = preferred;
     }
-    
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj == null) {
+            return false;
+        } else if (!(obj instanceof StripePaymentMethod)) {
+            return false;
+        }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		} else if (obj == null) {
-			return false;
-		} else if (!(obj instanceof StripePaymentMethod)) {
-			return false;
-		}
+        StripePaymentMethod other = (StripePaymentMethod) obj;
 
-		StripePaymentMethod other = (StripePaymentMethod) obj;
+        if (getId() != null && other.getId() != null && getId().equals(other.getId())) {
+            return true;
+        }
 
-		if (getId() != null && other.getId() != null && getId().equals(other.getId())) {
-			return true;
-		}
+        if (getUserId() != null && getUserId().equals(other.getUserId())) {
+            return true;
+        }
 
-		if (getUserId() != null && getUserId().equals(other.getUserId())) {
-			return true;
-		}
-
-		
-		return false;
-	}
+        return false;
+    }
 
     @Override
     public void updateWith(PaymentMethod paymentMethod) {

@@ -26,10 +26,12 @@ package org.meveo.model.payments;
  *
  */
 public enum PaymentOrRefundEnum {
-  PAYMENT(OperationCategoryEnum.DEBIT),REFUND((OperationCategoryEnum.CREDIT));
+    PAYMENT(OperationCategoryEnum.DEBIT), 
     
+    REFUND(OperationCategoryEnum.CREDIT);
+
     private OperationCategoryEnum operationCategoryToProcess;
-    
+
     PaymentOrRefundEnum(OperationCategoryEnum operationCategoryToProcess) {
         this.operationCategoryToProcess = operationCategoryToProcess;
     }
@@ -37,7 +39,7 @@ public enum PaymentOrRefundEnum {
     public String getLabel() {
         return this.getClass().getSimpleName() + "." + this.name();
     }
-    
+
     /**
      * @return the operationCategoryToProcess
      */
@@ -51,6 +53,5 @@ public enum PaymentOrRefundEnum {
     public void setOperationCategoryToProcess(OperationCategoryEnum operationCategoryToProcess) {
         this.operationCategoryToProcess = operationCategoryToProcess;
     }
-    
-    
+
 }

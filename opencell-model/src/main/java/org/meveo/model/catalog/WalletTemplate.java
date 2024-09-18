@@ -19,24 +19,25 @@ package org.meveo.model.catalog;
 
 import java.math.BigDecimal;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.billing.BillingWalletTypeEnum;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 
 /**
  * Prepaid wallet template
@@ -48,8 +49,7 @@ import org.meveo.model.billing.BillingWalletTypeEnum;
 @ObservableEntity
 @ExportIdentifier({ "code" })
 @Table(name = "cat_wallet_template", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cat_wallet_template_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_wallet_template_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "WalletTemplate.listPrepaidBySubscription", query = "select distinct wi.walletTemplate from ChargeInstance ci JOIN ci.walletInstances wi where wi.walletTemplate.walletType='PREPAID' and ci.subscription=:subscription order by wi.walletTemplate.code") })
 public class WalletTemplate extends BusinessEntity {
@@ -69,7 +69,7 @@ public class WalletTemplate extends BusinessEntity {
      * Deprecated in 5.3 for not use
      */
     @Deprecated
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "consumption_alert_set")
     private boolean consumptionAlertSet;
 
@@ -98,14 +98,14 @@ public class WalletTemplate extends BusinessEntity {
     @Column(name = "low_balance_level_el", length = 2000)
     @Size(max = 2000)
     private String lowBalanceLevelEl;
-    
-	/**
+
+    /**
      * Expression to determine reject Level
      */
     @Column(name = "reject_level_el", length = 2000)
     @Size(max = 2000)
     private String rejectLevelEl;
-    
+
     /**
      * @return Wallet type
      */
@@ -163,33 +163,33 @@ public class WalletTemplate extends BusinessEntity {
     public void setRejectLevel(BigDecimal rejectLevel) {
         this.rejectLevel = rejectLevel;
     }
-    
+
     /**
      * @return lowBalanceLevelEl expression language to calculate lowBalanceLevel Balance level at which LowBalance event should be fired
      */
     public String getLowBalanceLevelEl() {
-		return lowBalanceLevelEl;
-	}
+        return lowBalanceLevelEl;
+    }
 
     /**
      * @param lowBalanceLevelEl expression language to calculate lowBalanceLevel Balance level at which LowBalance event should be fired
      */
-	public void setLowBalanceLevelEl(String lowBalanceLevelEl) {
-		this.lowBalanceLevelEl = lowBalanceLevelEl;
-	}
+    public void setLowBalanceLevelEl(String lowBalanceLevelEl) {
+        this.lowBalanceLevelEl = lowBalanceLevelEl;
+    }
 
-	/**
+    /**
      * @return RejectLevelEl Balance level el to calculate RejectLevel at which further consumption should be rejected
      */
-	public String getRejectLevelEl() {
-		return rejectLevelEl;
-	}
+    public String getRejectLevelEl() {
+        return rejectLevelEl;
+    }
 
-	/**
+    /**
      * @param RejectLevelEl Balance level el to calculate RejectLevel at which further consumption should be rejected
      */
-	public void setRejectLevelEl(String rejectLevelEl) {
-		this.rejectLevelEl = rejectLevelEl;
-	}
+    public void setRejectLevelEl(String rejectLevelEl) {
+        this.rejectLevelEl = rejectLevelEl;
+    }
 
 }

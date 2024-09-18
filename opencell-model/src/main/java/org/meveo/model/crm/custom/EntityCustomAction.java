@@ -21,25 +21,26 @@ package org.meveo.model.crm.custom;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.EnableBusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ModuleItem;
 import org.meveo.model.crm.CustomFieldTemplate.GroupedCustomFieldTreeItemType;
 import org.meveo.model.scripts.ScriptInstance;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * A custom action on an entity
@@ -51,8 +52,7 @@ import org.meveo.model.scripts.ScriptInstance;
 @Cacheable
 @ExportIdentifier({ "code", "appliesTo" })
 @Table(name = "crm_custom_action", uniqueConstraints = @UniqueConstraint(columnNames = { "code", "applies_to" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "crm_custom_action_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "crm_custom_action_seq"), @Parameter(name = "increment_size", value = "1") })
 public class EntityCustomAction extends EnableBusinessEntity {
 
     private static final long serialVersionUID = -1640429569087958881L;
@@ -82,7 +82,7 @@ public class EntityCustomAction extends EnableBusinessEntity {
     /**
      * Translated label in JSON format with language code as a key and translated label as a value
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "label_i18n", columnDefinition = "jsonb")
     private Map<String, String> labelI18n;
 
@@ -99,8 +99,7 @@ public class EntityCustomAction extends EnableBusinessEntity {
      * 
      * Tab and field group names support translation in the following format: &lt;default value&gt;|&lt;language3 letter key=translated value&gt;
      * 
-     * e.g. tab:Tab default title|FRA=Title in french|ENG=Title in english:0;fieldGroup:Field group default label|FRA=Field group label in french|ENG=Field group label in
-     * english:0;action:0 OR tab:Second tab:1;action:1
+     * e.g. tab:Tab default title|FRA=Title in french|ENG=Title in english:0;fieldGroup:Field group default label|FRA=Field group label in french|ENG=Field group label in english:0;action:0 OR tab:Second tab:1;action:1
      */
     @Column(name = "gui_position", length = 2000)
     @Size(max = 2000)
@@ -214,8 +213,7 @@ public class EntityCustomAction extends EnableBusinessEntity {
     }
 
     /**
-     * Instantiate labelI18n field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record will be
-     * updated in DB
+     * Instantiate labelI18n field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record will be updated in DB
      * 
      * @return labelI18n value or instantiated labelI18n field value
      */

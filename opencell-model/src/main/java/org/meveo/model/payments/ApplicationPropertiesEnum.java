@@ -27,23 +27,13 @@ import org.meveo.commons.utils.ParamBean;
  */
 public enum ApplicationPropertiesEnum {
 
-    EIRCODE_ADDRESS_API_URL("eir.eircode.address.api.url"),
-    ARD_ADDRESS_API_URL("eir.ard.address.api.url"),
-    BROKER_ADDRESS_API_USER("broker_address_api_user", "opencell.admin"),
-    BROKER_ADDRESS_API_PASSWORD("broker_address_api_password", "eir.admin"),
-    DOWNLOAD_MAX_FILE_SIZE_MEGA_BYTE("eir.download.max.file.size.mega.byte"),
-    RETRIES_NUMBER_ADDRESS_API("eir.retries.number.address.api", "1"),
-    RETRY_DELAY_ADDRESS_API("eir.retry.delay.address.api", "2000"),
-    TEMPLATE_TRANSFER_ACCOUNT_CREDIT("occ.templateTransferAccountCredit", "CRD_TRS"),
-    TEMPLATE_TRANSFER_ACCOUNT_DEBIT("occ.templateTransferAccountDebit", "DBT_TRS"),
-    TEMPLATE_REVERSE_PAYMENT_DEBIT("occ.templateReversePaymentDebit", "REV_PAY"),
-    TEMPLATE_BATCH_PAYMENT_CREDIT("occ.templateBatchPaymentCredit", "PAY_BATCH"),
-    DESCRIPTION_TRANSFER_FROM("occ.descTransferFrom", "transfer from"),
-    DESCRIPTION_TRANSFER_TO("occ.descTransferTo", "transfer to"),
-    OPENEIR_SELLER_CODE("eir.openeir.seller.code", "OPENEIR"),
-    SUSPENSE_BILLING_ACCOUNT_CODE("eir.suspense.billingAccount.code", "SUSP_Payments"),
-    INVOICE_DATE_FORMAT("invoice.dateFormat",  "dd/MM/yyyy"),
-    INVOICE_DATE_TIME_FORMAT("invoice.dateTimeFormat",  "yyyy-MM-dd'T'HH:mm:ss");
+    EIRCODE_ADDRESS_API_URL("eir.eircode.address.api.url"), ARD_ADDRESS_API_URL("eir.ard.address.api.url"), BROKER_ADDRESS_API_USER("broker_address_api_user", "opencell.admin"), BROKER_ADDRESS_API_PASSWORD(
+            "broker_address_api_password", "eir.admin"), DOWNLOAD_MAX_FILE_SIZE_MEGA_BYTE("eir.download.max.file.size.mega.byte"), RETRIES_NUMBER_ADDRESS_API("eir.retries.number.address.api",
+                    "1"), RETRY_DELAY_ADDRESS_API("eir.retry.delay.address.api", "2000"), TEMPLATE_TRANSFER_ACCOUNT_CREDIT("occ.templateTransferAccountCredit", "CRD_TRS"), TEMPLATE_TRANSFER_ACCOUNT_DEBIT(
+                            "occ.templateTransferAccountDebit", "DBT_TRS"), TEMPLATE_REVERSE_PAYMENT_DEBIT("occ.templateReversePaymentDebit", "REV_PAY"), TEMPLATE_BATCH_PAYMENT_CREDIT("occ.templateBatchPaymentCredit",
+                                    "PAY_BATCH"), DESCRIPTION_TRANSFER_FROM("occ.descTransferFrom", "transfer from"), DESCRIPTION_TRANSFER_TO("occ.descTransferTo",
+                                            "transfer to"), OPENEIR_SELLER_CODE("eir.openeir.seller.code", "OPENEIR"), SUSPENSE_BILLING_ACCOUNT_CODE("eir.suspense.billingAccount.code",
+                                                    "SUSP_Payments"), INVOICE_DATE_FORMAT("invoice.dateFormat", "dd/MM/yyyy"), INVOICE_DATE_TIME_FORMAT("invoice.dateTimeFormat", "yyyy-MM-dd'T'HH:mm:ss");
 
     private String key;
     private String defaultValue;
@@ -65,4 +55,3 @@ public enum ApplicationPropertiesEnum {
         return ParamBean.getInstance().getProperty(key, defaultValue);
     }
 }
-

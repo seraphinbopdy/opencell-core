@@ -1,17 +1,34 @@
 package org.meveo.model.document;
 
-
-import org.hibernate.annotations.Type;
-import org.meveo.model.*;
-import org.meveo.model.admin.FileType;
-
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.meveo.model.AccountEntity;
+import org.meveo.model.BusinessCFEntity;
+import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.admin.FileType;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Document entity handles file storage
@@ -22,17 +39,14 @@ import java.util.Map;
 @Entity
 @CustomFieldEntity(cftCodePrefix = "Document")
 @Table(name = "document", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@NamedQueries({
-	@NamedQuery(name = "Document.findByFileNameAndType", query = "FROM Document document where document.fileName=:fileName AND document.fileType.id=:fileTypeId"),
-    @NamedQuery(name = "Document.findByCodeAndLastVersion", query = "FROM Document d WHERE d.code = :code AND d.documentVersion = (SELECT MAX(d2.documentVersion) FROM Document d2 WHERE d2.code = :code)"),
-	@NamedQuery(name = "Document.findByCodeAndVersion", query = "FROM Document d WHERE d.code = :code AND d.documentVersion = :version")
-})
+@NamedQueries({ @NamedQuery(name = "Document.findByFileNameAndType", query = "select document FROM Document document where document.fileName=:fileName AND document.fileType.id=:fileTypeId"),
+        @NamedQuery(name = "Document.findByCodeAndLastVersion", query = "select d FROM Document d WHERE d.code = :code AND d.documentVersion = (SELECT MAX(d2.documentVersion) FROM Document d2 WHERE d2.code = :code)"),
+        @NamedQuery(name = "Document.findByCodeAndVersion", query = "select d FROM Document d WHERE d.code = :code AND d.documentVersion = :version") })
 public class Document extends BusinessCFEntity {
     /**
-     * Translated descriptions in JSON format with language code as a key and
-     * translated description as a value
+     * Translated descriptions in JSON format with language code as a key and translated description as a value
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
     /**
@@ -61,7 +75,7 @@ public class Document extends BusinessCFEntity {
     /**
      * List of tags linked to the document.
      */
-    @ElementCollection//meveo_filter_selector_ignore_fields
+    @ElementCollection // meveo_filter_selector_ignore_fields
     @CollectionTable(name = "document_tags", joinColumns = @JoinColumn(name = "document_id"))
     @Column(name = "tags")
     private List<String> tags = new ArrayList<>();
@@ -76,7 +90,7 @@ public class Document extends BusinessCFEntity {
     /**
      * account entity - document related account entity.
      */
-    @ManyToOne(fetch = FetchType.LAZY, optional = false ,targetEntity = DocumentCategory.class)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = DocumentCategory.class)
     @JoinColumn(name = "document_category_id")
     private DocumentCategory category;
 
@@ -87,7 +101,7 @@ public class Document extends BusinessCFEntity {
     @Column(name = "document_status", length = 25, nullable = false)
     @NotNull
     private DocumentStatus documentStatus = DocumentStatus.ACTIVE;
-    
+
     /**
      * document version
      */
@@ -158,12 +172,12 @@ public class Document extends BusinessCFEntity {
         this.documentStatus = documentStatus;
     }
 
-	public Integer getDocumentVersion() {
-		return documentVersion;
-	}
+    public Integer getDocumentVersion() {
+        return documentVersion;
+    }
 
-	public void setDocumentVersion(Integer documentVersion) {
-		this.documentVersion = documentVersion;
-	}
-  
+    public void setDocumentVersion(Integer documentVersion) {
+        this.documentVersion = documentVersion;
+    }
+
 }

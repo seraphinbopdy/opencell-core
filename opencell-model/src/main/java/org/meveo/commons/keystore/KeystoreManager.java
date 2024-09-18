@@ -73,12 +73,10 @@ public class KeystoreManager {
             if (passwordCred != null) {
                 password = passwordCred.getPassword();
 
-                if (password instanceof ClearPassword)
-                {
+                if (password instanceof ClearPassword) {
                     return new String(((ClearPassword) password).getPassword());
                 }
-            }
-            else {
+            } else {
                 log.error("Keystore does not contain a password with credential alias {} to retrieve", credentialAlias);
             }
         } catch (CredentialStoreException e) {

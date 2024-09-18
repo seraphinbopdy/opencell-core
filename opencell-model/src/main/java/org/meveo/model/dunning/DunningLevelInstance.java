@@ -1,21 +1,8 @@
 package org.meveo.model.dunning;
 
-import static javax.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.LAZY;
 
 import java.util.List;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
@@ -23,12 +10,23 @@ import org.meveo.model.AuditableEntity;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.payments.CustomerAccount;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
 @Entity
 @Table(name = "dunning_level_instance")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "dunning_level_instance_seq") })
-@NamedQueries({
-        @NamedQuery(name = "DunningLevelInstance.findByCollectionPlan", query = "SELECT li FROM DunningLevelInstance li where li.collectionPlan = :collectionPlan order by li.daysOverdue"),
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_level_instance_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "DunningLevelInstance.findByCollectionPlan", query = "SELECT li FROM DunningLevelInstance li where li.collectionPlan = :collectionPlan order by li.daysOverdue"),
         @NamedQuery(name = "DunningLevelInstance.findByLevelId", query = "SELECT li FROM DunningLevelInstance li where li.dunningLevel.id = :levelId AND li.collectionPlan is NULL"),
         @NamedQuery(name = "DunningLevelInstance.findBySequence", query = "SELECT li FROM DunningLevelInstance li LEFT JOIN FETCH li.actions where li.collectionPlan = :collectionPlan and li.sequence = :sequence"),
         @NamedQuery(name = "DunningLevelInstance.findLastLevelInstance", query = "SELECT li FROM DunningLevelInstance li LEFT JOIN li.dunningLevel d where li.collectionPlan = :collectionPlan and d.isEndOfDunningLevel = true"),
@@ -137,16 +135,20 @@ public class DunningLevelInstance extends AuditableEntity {
     public void setDunningLevel(DunningLevel dunningLevel) {
         this.dunningLevel = dunningLevel;
     }
+
     public Invoice getInvoice() {
         return invoice;
     }
+
     public DunningLevelInstance setInvoice(Invoice invoice) {
         this.invoice = invoice;
         return this;
     }
+
     public CustomerAccount getCustomerAccount() {
         return customerAccount;
     }
+
     public DunningLevelInstance setCustomerAccount(CustomerAccount customerAccount) {
         this.customerAccount = customerAccount;
         return this;

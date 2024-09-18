@@ -1,12 +1,18 @@
 package org.meveo.model.cpq;
 
-import org.hibernate.annotations.Type;
+import static jakarta.persistence.EnumType.STRING;
+
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BaseEntity;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
-import static javax.persistence.EnumType.STRING;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.validation.constraints.NotNull;
 
 @MappedSuperclass
 public class AttributeBaseEntity extends BaseEntity {
@@ -28,26 +34,25 @@ public class AttributeBaseEntity extends BaseEntity {
     @NotNull
     private Attribute attribute;
 
-
     @Column(name = "mandatorwith_el", length = 255)
     private String mandatoryWithEl;
 
     /**
      * Mandatory
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "mandatory")
     @NotNull
     private boolean mandatory = Boolean.FALSE;
     /**
      * Display
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display")
     @NotNull
     private boolean display;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "read_only")
     private Boolean readOnly = Boolean.FALSE;
 
@@ -64,10 +69,8 @@ public class AttributeBaseEntity extends BaseEntity {
     @Column(name = "validation_label")
     private String validationLabel;
 
-
     public AttributeBaseEntity() {
     }
-
 
     public AttributeBaseEntity(AttributeBaseEntity copy) {
         this.attribute = copy.getAttribute();

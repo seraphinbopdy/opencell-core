@@ -27,6 +27,6 @@ public enum MediaEnum {
     QUEUE, // JMS
     FTP_FILE, // FTP
     CFT_FILE, // CFT
-    DATABASE,// SQL
-	DUNNING_MEDIA; //Dunning template
+    DATABASE, // SQL
+    DUNNING_MEDIA; // Dunning template
 }

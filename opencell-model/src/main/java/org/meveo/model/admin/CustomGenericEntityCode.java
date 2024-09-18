@@ -18,18 +18,24 @@
 
 package org.meveo.model.admin;
 
-import static javax.persistence.FetchType.LAZY;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.sequence.Sequence;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Custom generic entity code.
@@ -41,8 +47,7 @@ import org.meveo.model.sequence.Sequence;
 @Cacheable
 @ExportIdentifier("entityClass")
 @Table(name = "adm_custom_generic_entity_code")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "adm_custom_generic_entity_code_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "adm_custom_generic_entity_code_seq"), @Parameter(name = "increment_size", value = "1") })
 
 public class CustomGenericEntityCode extends AuditableEntity {
 
@@ -68,19 +73,18 @@ public class CustomGenericEntityCode extends AuditableEntity {
     @JoinColumn(name = "sequence_id")
     private Sequence sequence;
 
-	
-	@Transient
-	private BaseEntity entity;
-	
-	public BaseEntity getEntity() {
-		return entity;
-	}
-	
-	public void setEntity(BaseEntity entity) {
-		this.entity = entity;
-	}
-	
-	/**
+    @Transient
+    private BaseEntity entity;
+
+    public BaseEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(BaseEntity entity) {
+        this.entity = entity;
+    }
+
+    /**
      * @return the entityClass
      */
     public String getEntityClass() {
@@ -108,7 +112,9 @@ public class CustomGenericEntityCode extends AuditableEntity {
         this.codeEL = codeEL;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -119,7 +125,9 @@ public class CustomGenericEntityCode extends AuditableEntity {
         return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -139,7 +147,9 @@ public class CustomGenericEntityCode extends AuditableEntity {
         return true;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override

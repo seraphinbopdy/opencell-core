@@ -1,27 +1,32 @@
 package org.meveo.model.article;
 
-import static javax.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.LAZY;
 
 import java.util.Map;
-import java.util.UUID;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
-import org.meveo.model.BusinessEntity;
-import org.meveo.model.ICustomFieldEntity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.type.SqlTypes;
+import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.billing.AccountingCode;
-import org.meveo.model.crm.custom.CustomFieldValues;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "billing_article_family")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-        parameters = { @org.hibernate.annotations.Parameter(name = "sequence_name", value = "billing_article_family_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @org.hibernate.annotations.Parameter(name = "sequence_name", value = "billing_article_family_seq"),
+        @Parameter(name = "increment_size", value = "1") })
 @Cacheable
-public class ArticleFamily extends BusinessEntity implements ICustomFieldEntity {
+public class ArticleFamily extends BusinessCFEntity {
+
+    private static final long serialVersionUID = 6592652289497255389L;
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "accounting_code_id")
@@ -31,34 +36,14 @@ public class ArticleFamily extends BusinessEntity implements ICustomFieldEntity 
     @JoinColumn(name = "article_family_ref_id")
     private ArticleFamily articleFamily;
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
-
-    @Column(name = "uuid", nullable = false, updatable = false, length = 60)
-    @Size(max = 60)
-    @NotNull
-    private String uuid;
-
-    /**
-     * Custom field values in JSON format
-     */
-    @Type(type = "cfjson")
-    @Column(name = "cf_values", columnDefinition = "jsonb")
-    private CustomFieldValues cfValues;
-
-    /**
-     * Accumulated custom field values in JSON format
-     */
-//    @Type(type = "cfjson")
-//    @Column(name = "cf_values_accum", columnDefinition = "TEXT")
-    @Transient
-    private CustomFieldValues cfAccumulatedValues;
 
     public ArticleFamily() {
     }
 
-    public ArticleFamily(Long id){
+    public ArticleFamily(Long id) {
         this.id = id;
     }
 
@@ -82,51 +67,6 @@ public class ArticleFamily extends BusinessEntity implements ICustomFieldEntity 
 
     public void setArticleFamily(ArticleFamily articleFamily) {
         this.articleFamily = articleFamily;
-    }
-
-    @Override
-    public String getUuid() {
-        setUUIDIfNull();
-        return uuid;
-    }
-
-    @Override
-    public String clearUuid() {
-        String oldUuid = uuid;
-        uuid = UUID.randomUUID().toString();
-        return oldUuid;
-    }
-
-    @PrePersist
-    public void setUUIDIfNull() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID().toString();
-        }
-    }
-
-    @Override
-    public ICustomFieldEntity[] getParentCFEntities() {
-        return new ICustomFieldEntity[0];
-    }
-
-    @Override
-    public CustomFieldValues getCfValues() {
-        return null;
-    }
-
-    @Override
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
-    }
-
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return this.cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfValues) {
-        this.cfAccumulatedValues = cfValues;
     }
 
     public Map<String, String> getDescriptionI18n() {

@@ -20,13 +20,19 @@ package org.meveo.model.jobs;
 
 import java.util.Date;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * File transferred via FTP
@@ -36,8 +42,7 @@ import org.meveo.model.BusinessEntity;
  */
 @Entity
 @Table(name = "ftp_transferred_file")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ftp_transferred_file_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ftp_transferred_file_seq"), @Parameter(name = "increment_size", value = "1") })
 public class FtpTransferredFile extends BusinessEntity {
     private static final long serialVersionUID = 430457580612075457L;
 
@@ -73,8 +78,7 @@ public class FtpTransferredFile extends BusinessEntity {
     @Column(name = "operation")
     private FtpOperationEnum operation;
 
-
-    public FtpTransferredFile(){
+    public FtpTransferredFile() {
     }
 
     /**
@@ -142,19 +146,22 @@ public class FtpTransferredFile extends BusinessEntity {
 
     /**
      * operation : IMPORT or EXPORT
+     * 
      * @param operation FTP operation
      */
     public void setOperation(FtpOperationEnum operation) {
         this.operation = operation;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return "FtpTransferredFile [uri=" + uri + ", size=" + size + ", transferDate=" + transferDate + ", lastModification=" + lastModification + ", code=" + code + ", description="
-                + description + ", appendGeneratedCode=" + appendGeneratedCode + ", id=" + id + ", operation=" + operation + "]";
+        return "FtpTransferredFile [uri=" + uri + ", size=" + size + ", transferDate=" + transferDate + ", lastModification=" + lastModification + ", code=" + code + ", description=" + description
+                + ", appendGeneratedCode=" + appendGeneratedCode + ", id=" + id + ", operation=" + operation + "]";
     }
 
 }

@@ -5,14 +5,12 @@ public enum DunningLevelChargeTypeEnum {
     /**
      * Flat amount
      */
-    FLAT_AMOUNT(1,"dunningLevelChargeTypeEnum.flat_amount"),
+    FLAT_AMOUNT(1, "dunningLevelChargeTypeEnum.flat_amount"),
 
     /**
      * Percentage
      */
-    PERCENTAGE(2,"dunningLevelChargeTypeEnum.percentage");
-
-
+    PERCENTAGE(2, "dunningLevelChargeTypeEnum.percentage");
 
     private Integer id;
     private String label;

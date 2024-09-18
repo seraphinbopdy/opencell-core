@@ -2,9 +2,8 @@ package org.meveo.model.billing;
 
 public enum BillingRunTypeEnum {
 
-	CYCLE(1, "BillingRunTypeEnum.cycle"), // the BR is attached to a BillingCycle
-	EXCEPTIONAL(2, "BillingRunTypeEnum.exceptional"); // No BillingCycle is attached to a the BR
-	
+    CYCLE(1, "BillingRunTypeEnum.cycle"), // the BR is attached to a BillingCycle
+    EXCEPTIONAL(2, "BillingRunTypeEnum.exceptional"); // No BillingCycle is attached to a the BR
 
     private Integer id;
     private String label;

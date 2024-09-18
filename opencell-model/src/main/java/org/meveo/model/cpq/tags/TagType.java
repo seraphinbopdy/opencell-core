@@ -4,12 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.persistence.*;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.Seller;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+
 /**
  * 
  * @author Tarik F.
@@ -19,88 +28,69 @@ import org.meveo.model.admin.Seller;
  */
 @Entity
 @Table(name = "cpq_tag_type", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_tag_type_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_tag_type_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQuery(name = "TagType.findByCode", query = "select t from TagType t where t.code=:code")
 @Cacheable
 public class TagType extends BusinessEntity {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
+    /**
+     * seller associated to the entity
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
 
-	/**
-	 * seller associated to the entity
-	 */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "seller_id")
-	private Seller seller;
-	
-	
-	 /**
+    /**
      * A list of tags
-     */ 
+     */
     @OneToMany(mappedBy = "tagType", fetch = FetchType.LAZY)
-    private List<Tag> tags=new ArrayList<Tag>();
+    private List<Tag> tags = new ArrayList<Tag>();
 
+    public Seller getSeller() {
+        return seller;
+    }
 
-	public Seller getSeller() {
-		return seller;
-	}
+    public void setSeller(Seller seller) {
+        this.seller = seller;
+    }
 
+    /**
+     * @return the tags
+     */
+    public List<Tag> getTags() {
+        return tags;
+    }
 
-	public void setSeller(Seller seller) {
-		this.seller = seller;
-	}
-	
-	
+    /**
+     * @param tags the tags to set
+     */
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(seller);
+        return result;
+    }
 
-	/**
-	 * @return the tags
-	 */
-	public List<Tag> getTags() {
-		return tags;
-	}
-
-
-	/**
-	 * @param tags the tags to set
-	 */
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
-	}
-
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(seller);
-		return result;
-	}
-
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TagType other = (TagType) obj;
-		return Objects.equals(seller, other.seller);
-	}
-	
-	
-	
-	
-
-	
-	
-	
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TagType other = (TagType) obj;
+        return Objects.equals(seller, other.seller);
+    }
 
 }

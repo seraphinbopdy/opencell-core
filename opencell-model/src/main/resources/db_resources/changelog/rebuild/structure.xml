@@ -513,6 +513,7 @@
         <createSequence sequenceName="ar_payment_rejection_codes_group_seq" startValue="1" />
         <createSequence sequenceName="ar_payment_rejection_action_report_seq" startValue="1" />
         <createSequence sequenceName="payment_term_seq" startValue="1"/>
+        <createSequence sequenceName="adm_endpoint_seq" startValue="1"/>
 
     </changeSet>
 
@@ -1631,6 +1632,13 @@
             </column>
         </createTable>
         <sql>insert into ${db.schema.adapted}invoice_sub_totals_seq values(1)</sql>
+
+        <createTable tableName="adm_endpoint_seq">
+            <column name="next_val" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="adm_endpoint_seq_pk" />
+            </column>
+        </createTable>
+        <sql>insert into ${db.schema.adapted}adm_endpoint_seq values(1)</sql>
     </changeSet>
 
     <!-- end sequence -->
@@ -1884,7 +1892,7 @@
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-131">
         <createTable tableName="adm_notif_im">
             <column name="id_expression" type="varchar(2000)" />
-            <column name="im_provider" type="int4">
+            <column name="im_provider_name" type="varchar(20)">
                 <constraints nullable="false" />
             </column>
             <column name="message" type="varchar(2000)">
@@ -19761,6 +19769,7 @@
                      tableName="accounting_journal_entry">
             <column name="auxiliary_account_code"/>
         </createIndex>
+        <sql>CREATE INDEX edr_created_index ON ${db.schema.adapted}rating_edr USING btree(((created)::date))</sql>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-index-998" dbms="mysql">
         <sql>CREATE INDEX adm_title_index ON ${db.schema.adapted}adm_title(code)</sql>
@@ -21058,10 +21067,8 @@
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe" />
     <changeSet id="#INTRD-24626_20240730" author="AbdellatifBARI" />
     <changeSet id="#INTRD-22676" author="AndriusKarpavicius" />
-
-    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
-        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
-    </changeSet>
+    <changeSet id="INTRD-24987" author="AndriusKarpavicius" />
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi" />      
     <changeSet id="#INTRD-21018_20240723" author="ZakariaB" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

@@ -1,4 +1,4 @@
-/*
+    /*
  * (C) Copyright 2015-2020 Opencell SAS (https://opencellsoft.com/) and contributors.
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
@@ -20,20 +20,20 @@ package org.meveo.model.catalog;
 
 import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OrderColumn;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.cpq.Product;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * product to charge template mapping
@@ -43,11 +43,9 @@ import org.meveo.model.cpq.Product;
  * @param <T> Charge template type
  */
 
-
 @Entity
 @Table(name = "cpq_product_charge_template_mapping", uniqueConstraints = @UniqueConstraint(columnNames = { "id" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_product_charge_template_mapping_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_product_charge_template_mapping_seq"), @Parameter(name = "increment_size", value = "1") })
 public class ProductChargeTemplateMapping<T extends ChargeTemplate> extends BaseEntity {
 
     private static final long serialVersionUID = -1872859127097329926L;
@@ -105,54 +103,53 @@ public class ProductChargeTemplateMapping<T extends ChargeTemplate> extends Base
         this.counterTemplate = counterTemplate;
     }
 
+    /**
+     * @return the product
+     */
+    public Product getProduct() {
+        return product;
+    }
 
     /**
-	 * @return the product
-	 */
-	public Product getProduct() {
-		return product;
-	}
-
-	/**
-	 * @param product the product to set
-	 */
-	public void setProduct(Product product) {
-		this.product = product;
-	}
-
-	/**
-	 * @return the walletTemplates
-	 */
-	public List<WalletTemplate> getWalletTemplates() {
-		return walletTemplates;
-	}
-
-	/**
-	 * @param walletTemplates the walletTemplates to set
-	 */
-	public void setWalletTemplates(List<WalletTemplate> walletTemplates) {
-		this.walletTemplates = walletTemplates;
-	}
-
-	/**
-	 * @return the accumulatorCounterTemplates
-	 */
-	public List<CounterTemplate> getAccumulatorCounterTemplates() {
-		return accumulatorCounterTemplates;
-	}
-
-	/**
-	 * @param accumulatorCounterTemplates the accumulatorCounterTemplates to set
-	 */
-	public void setAccumulatorCounterTemplates(List<CounterTemplate> accumulatorCounterTemplates) {
-		this.accumulatorCounterTemplates = accumulatorCounterTemplates;
-	}
-	
-	@Override
-    public int hashCode() {
-	    return 961 + ("ProductChargeTemplateMapping" + id).hashCode();
+     * @param product the product to set
+     */
+    public void setProduct(Product product) {
+        this.product = product;
     }
-	
+
+    /**
+     * @return the walletTemplates
+     */
+    public List<WalletTemplate> getWalletTemplates() {
+        return walletTemplates;
+    }
+
+    /**
+     * @param walletTemplates the walletTemplates to set
+     */
+    public void setWalletTemplates(List<WalletTemplate> walletTemplates) {
+        this.walletTemplates = walletTemplates;
+    }
+
+    /**
+     * @return the accumulatorCounterTemplates
+     */
+    public List<CounterTemplate> getAccumulatorCounterTemplates() {
+        return accumulatorCounterTemplates;
+    }
+
+    /**
+     * @param accumulatorCounterTemplates the accumulatorCounterTemplates to set
+     */
+    public void setAccumulatorCounterTemplates(List<CounterTemplate> accumulatorCounterTemplates) {
+        this.accumulatorCounterTemplates = accumulatorCounterTemplates;
+    }
+
+    @Override
+    public int hashCode() {
+        return 961 + ("ProductChargeTemplateMapping" + id).hashCode();
+    }
+
     @Override
     public boolean equals(Object obj) {
 

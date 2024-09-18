@@ -6,7 +6,6 @@ public enum BillingRunAutomaticActionEnum {
     MOVE(2, "BillingRunAutomaticActionsEnum.move"), // automatically moves rejected and suspect invoices to a new billing run
     MANUAL_ACTION(3, "BillingRunAutomaticActionsEnum.manualAction"), // default Action on REJECTED
     AUTOMATIC_VALIDATION(4, "BillingRunAutomaticActionsEnum.automaticValidation"); // default Action on SUSPECT
-	
 
     private Integer id;
     private String label;

@@ -1,22 +1,32 @@
 package org.meveo.model.ordering;
 
+import java.util.List;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
 
-import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.List;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "open_order_threshold")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "open_order_threshold_seq"),})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "open_order_threshold_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "Threshold.deleteByOpenOrderTemplate", query = "delete from Threshold t where t.openOrderTemplate.id =:openOrderTemplateId "),
-        @NamedQuery(name = "Threshold.deleteByOpenOrder", query = "delete from Threshold t where t.openOrder.id =:openOrderId ")})
+        @NamedQuery(name = "Threshold.deleteByOpenOrder", query = "delete from Threshold t where t.openOrder.id =:openOrderId ") })
 public class Threshold extends BaseEntity {
 
     @Column(name = "sequence")
@@ -39,10 +49,10 @@ public class Threshold extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "open_order_template_id", updatable = false)
     private OpenOrderTemplate openOrderTemplate;
-    
+
     @Column(name = "external_recipient")
     private String externalRecipient;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "open_order_quote_id")
     private OpenOrderQuote openOrderQuote;
@@ -83,21 +93,21 @@ public class Threshold extends BaseEntity {
         this.openOrderTemplate = openOrderTemplate;
     }
 
-	public String getExternalRecipient() {
-		return externalRecipient;
-	}
+    public String getExternalRecipient() {
+        return externalRecipient;
+    }
 
-	public void setExternalRecipient(String externalRecipient) {
-		this.externalRecipient = externalRecipient;
-	}
+    public void setExternalRecipient(String externalRecipient) {
+        this.externalRecipient = externalRecipient;
+    }
 
-	public OpenOrderQuote getOpenOrderQuote() {
-		return openOrderQuote;
-	}
+    public OpenOrderQuote getOpenOrderQuote() {
+        return openOrderQuote;
+    }
 
-	public void setOpenOrderQuote(OpenOrderQuote openOrderQuote) {
-		this.openOrderQuote = openOrderQuote;
-	}
+    public void setOpenOrderQuote(OpenOrderQuote openOrderQuote) {
+        this.openOrderQuote = openOrderQuote;
+    }
 
     public OpenOrder getOpenOrder() {
         return openOrder;

@@ -1,27 +1,26 @@
 package org.meveo.model.intcrm;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.communication.contact.Contact;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+
 @Entity
 @Table(name = "crm_address_book_contact")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "crm_address_book_contact_seq")})
-@NamedQueries({
-        @NamedQuery(name = "AddressBookContact.findAddressBookMainContact", query = "select abc from AddressBookContact abc where abc.addressBook.id=:addressBookId and abc.mainContact=true"),
-        @NamedQuery(name = "AddressBookContact.findAddressBookContactByContact", query = "select abc from AddressBookContact abc where abc.contact.id=:contactId")
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "crm_address_book_contact_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "AddressBookContact.findAddressBookMainContact", query = "select abc from AddressBookContact abc where abc.addressBook.id=:addressBookId and abc.mainContact=true"),
+        @NamedQuery(name = "AddressBookContact.findAddressBookContactByContact", query = "select abc from AddressBookContact abc where abc.contact.id=:contactId") })
 public class AddressBookContact extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,7 +35,7 @@ public class AddressBookContact extends BaseEntity {
     private String position;
 
     @Column(name = "main_contact")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     protected Boolean mainContact = Boolean.FALSE;
 
     public AddressBookContact() {

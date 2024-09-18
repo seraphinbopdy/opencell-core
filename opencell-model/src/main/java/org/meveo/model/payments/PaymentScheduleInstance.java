@@ -25,20 +25,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.CustomFieldEntity;
@@ -48,6 +34,20 @@ import org.meveo.model.audit.AuditChangeTypeEnum;
 import org.meveo.model.audit.AuditTarget;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.catalog.Calendar;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * The Class PaymentScheduleInstance.
@@ -60,8 +60,7 @@ import org.meveo.model.catalog.Calendar;
 @Entity
 @CustomFieldEntity(cftCodePrefix = "PaymentScheduleInstance", inheritCFValuesFrom = "paymentScheduleTemplate")
 @Table(name = "ar_payment_schedule_inst")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_payment_schedule_inst_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_payment_schedule_inst_seq"), @Parameter(name = "increment_size", value = "1") })
 public class PaymentScheduleInstance extends EnableBusinessCFEntity {
 
     /** The Constant serialVersionUID. */
@@ -286,7 +285,6 @@ public class PaymentScheduleInstance extends EnableBusinessCFEntity {
         this.endDate = endDate;
     }
 
-
     /**
      * Gets the payment day in month.
      *
@@ -296,7 +294,6 @@ public class PaymentScheduleInstance extends EnableBusinessCFEntity {
         return paymentDayInMonth;
     }
 
-
     /**
      * Sets the payment day in month.
      *
@@ -305,7 +302,7 @@ public class PaymentScheduleInstance extends EnableBusinessCFEntity {
     public void setPaymentDayInMonth(Integer paymentDayInMonth) {
         this.paymentDayInMonth = paymentDayInMonth;
     }
-    
+
     @Override
     public ICustomFieldEntity[] getParentCFEntities() {
         if (paymentScheduleTemplate != null) {

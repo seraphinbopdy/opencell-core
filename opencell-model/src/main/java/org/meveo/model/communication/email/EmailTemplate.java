@@ -17,15 +17,17 @@
  */
 package org.meveo.model.communication.email;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.validation.constraints.Size;
+import java.sql.Types;
+import java.util.Map;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.communication.MessageTemplate;
 
-import java.util.Map;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @DiscriminatorValue("EMAIL")
@@ -36,15 +38,15 @@ public class EmailTemplate extends MessageTemplate {
     @Size(max = 255)
     private String subject;
 
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "htmlcontent")
     private String htmlContent;
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "htmlcontent_i18n", columnDefinition = "jsonb")
     private Map<String, String> translatedHtmlContent;
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "subject_i18n", columnDefinition = "jsonb")
     private Map<String, String> translatedSubject;
 

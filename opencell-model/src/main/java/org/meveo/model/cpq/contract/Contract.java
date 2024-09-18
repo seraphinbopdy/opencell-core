@@ -1,19 +1,15 @@
 package org.meveo.model.cpq.contract;
 
-import static javax.persistence.CascadeType.ALL;
+import static jakarta.persistence.CascadeType.ALL;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.WorkflowedEntity;
@@ -23,6 +19,23 @@ import org.meveo.model.cpq.enums.ContractStatusEnum;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.payments.CustomerAccount;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 /**
  * @author Tarik FAKHOURI
  * @version 10.0
@@ -31,8 +44,8 @@ import org.meveo.model.payments.CustomerAccount;
 @WorkflowedEntity
 @CustomFieldEntity(cftCodePrefix = "Contract")
 @Table(name = "cpq_contract", uniqueConstraints = { @UniqueConstraint(columnNames = {"code"})})
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_contract_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {
+        @Parameter(name = "sequence_name", value = "cpq_contract_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
 	@NamedQuery(name = "Contract.findBillingAccount", query = "select c from Contract c  left join fetch  c.billingAccount cb where lower(cb.code) = lower(:codeBillingAccount)"),
 	@NamedQuery(name = "Contract.findCustomerAccount", query = "select c from Contract c left join c.customerAccount cc where lower(cc.code) = lower(:codeCustomerAccount)"),
@@ -40,11 +53,11 @@ import org.meveo.model.payments.CustomerAccount;
     @NamedQuery(name = "Contract.findByAccounts", query = "select c from Contract c where c.status='ACTIVE' and (cast(:operationDate as date) is null or (c.beginDate<=:operationDate and c.endDate>:operationDate)) "
     		+ " and (c.customer.id is null or c.customer.id in :customerIds) "
 				+ " and (c.billingAccount.id is null or c.billingAccount.id=:billingAccountId) and (c.customerAccount.id is null or c.customerAccount.id=:customerAccountId)  "
-				+ " and (c.seller.id is null or c.seller.id in :sellerIds) order by c.contractDate desc , c.auditable.created desc  ", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "TRUE"), @QueryHint(name = "org.hibernate.readOnly", value = "true")}),
+                + " and (c.seller.id is null or c.seller.id in :sellerIds) order by c.contractDate desc , c.auditable.created desc  ", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "TRUE"),
+                        @QueryHint(name = "org.hibernate.readOnly", value = "true") }),
 	@NamedQuery(name = "Contract.findByCustomersBillingAccountCustomerAccount", query = "select c from Contract c where c.status='ACTIVE' and (c.beginDate<=current_date and c.endDate>current_date) "
     		+ " and (c.customer.id is null or c.customer.id in :customerId) "
-				+ " and (c.billingAccount.id is null or c.billingAccount.id=:billingAccountId) and (c.customerAccount.id is null or c.customerAccount.id=:customerAccountId)  " )
-})
+                + " and (c.billingAccount.id is null or c.billingAccount.id=:billingAccountId) and (c.customerAccount.id is null or c.customerAccount.id=:customerAccountId)  ") })
 public class Contract extends EnableBusinessCFEntity {
 
 	public Contract() {
@@ -126,7 +139,7 @@ public class Contract extends EnableBusinessCFEntity {
 	/**
 	 * flag if this contract will be renewal
 	 */
-	@Type(type = "numeric_boolean") 
+    @Convert(converter = NumericBooleanConverter.class)
 	@Column(name = "renewal", nullable = false)
 	private boolean renewal;
 	
@@ -213,7 +226,6 @@ public class Contract extends EnableBusinessCFEntity {
 		this.customer = customer;
 	}
 
- 
 	public String getStatus() {
 		return status;
 	}
@@ -307,8 +319,7 @@ public class Contract extends EnableBusinessCFEntity {
 	}
 
 	/**
-     * Check if a date is within this contract effective date. Exclusive of the endDate. If startDate is null, it returns true. If startDate is not null and endDate is null,
-     * endDate is computed from the given duration.
+     * Check if a date is within this contract effective date. Exclusive of the endDate. If startDate is null, it returns true. If startDate is not null and endDate is null, endDate is computed from the given duration.
      *
      * @param date the given date
      * @return returns true if this DiscountItem is to be applied
@@ -326,13 +337,11 @@ public class Contract extends EnableBusinessCFEntity {
         return (date.compareTo(beginDate) >= 0) && (date.before(endDate));
     }
 	
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(beginDate, billingAccount, contractDate, contractDuration, customer,
-				customerAccount, endDate, renewal, seller, status, statusDate);
+        result = prime * result + Objects.hash(beginDate, billingAccount, contractDate, contractDuration, customer, customerAccount, endDate, renewal, seller, status, statusDate);
 		return result;
 	}
 
@@ -345,12 +354,9 @@ public class Contract extends EnableBusinessCFEntity {
 		if (getClass() != obj.getClass())
 			return false;
 		Contract other = (Contract) obj;
-		return Objects.equals(beginDate, other.beginDate) && Objects.equals(billingAccount, other.billingAccount)
-				&& Objects.equals(contractDate, other.contractDate) && contractDuration == other.contractDuration
-				&& Objects.equals(customer, other.customer) && Objects.equals(customerAccount, other.customerAccount)
-				&& Objects.equals(endDate, other.endDate) && renewal == other.renewal
-				&& Objects.equals(seller, other.seller) && status == other.status
-				&& Objects.equals(statusDate, other.statusDate);
+        return Objects.equals(beginDate, other.beginDate) && Objects.equals(billingAccount, other.billingAccount) && Objects.equals(contractDate, other.contractDate) && contractDuration == other.contractDuration
+                && Objects.equals(customer, other.customer) && Objects.equals(customerAccount, other.customerAccount) && Objects.equals(endDate, other.endDate) && renewal == other.renewal
+                && Objects.equals(seller, other.seller) && status == other.status && Objects.equals(statusDate, other.statusDate);
 	}
 
 	/**
@@ -380,6 +386,5 @@ public class Contract extends EnableBusinessCFEntity {
 	public void setApplicationEl(String applicationEl) {
 		this.applicationEl = applicationEl;
 	}
-	
 	
 }

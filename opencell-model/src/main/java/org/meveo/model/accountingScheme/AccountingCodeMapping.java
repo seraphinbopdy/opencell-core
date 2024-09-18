@@ -18,6 +18,7 @@
 package org.meveo.model.accountingScheme;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
@@ -25,16 +26,21 @@ import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.TradingCountry;
 import org.meveo.model.billing.TradingCurrency;
 
-import javax.persistence.*;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "accounting_accountingcode_mapping")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "accounting_accountingcode_mapping_seq")})
-@NamedQueries({
-        @NamedQuery(name = "AccountingCodeMapping.findByAccountingArticle",
-                query = "SELECT accMap FROM AccountingCodeMapping accMap WHERE accMap.accountingArticle.id =:ACCOUNTING_ARTICLE_ID")
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {
+        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "accounting_accountingcode_mapping_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "AccountingCodeMapping.findByAccountingArticle", query = "SELECT accMap FROM AccountingCodeMapping accMap WHERE accMap.accountingArticle.id =:ACCOUNTING_ARTICLE_ID") })
 @Cacheable
 public class AccountingCodeMapping extends AuditableEntity {
 

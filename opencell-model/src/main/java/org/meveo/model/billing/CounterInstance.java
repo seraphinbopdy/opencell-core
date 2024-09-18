@@ -21,18 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
@@ -41,6 +29,17 @@ import org.meveo.model.crm.Customer;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.shared.DateUtils;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
 /**
  * Instantiated counter
  * 
@@ -48,16 +47,14 @@ import org.meveo.model.shared.DateUtils;
  */
 @Entity
 @Table(name = "billing_counter")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_counter_instance_seq"), })
-@NamedQueries({ 
-	@NamedQuery(name = "CounterInstance.findByCounterAndCustomer", query = "SELECT ci FROM CounterInstance ci left join ci.customer ca where ci.counterTemplate.code=:counterTemplateCode"),
-	@NamedQuery(name = "CounterInstance.findByCounterAndCustomerAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.customerAccount cust where cust.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
-	@NamedQuery(name = "CounterInstance.findByCounterAndBillingAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.billingAccount ba where ba.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
-	@NamedQuery(name = "CounterInstance.findByCounterAndUserAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.userAccount ua where ua.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
-	@NamedQuery(name = "CounterInstance.findByCounterAndSubscription", query = "SELECT ci.id FROM CounterInstance ci left join ci.subscription su where su.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
-	@NamedQuery(name = "CounterInstance.findByCounterAndService", query = "SELECT ci.id FROM CounterInstance ci left join ci.serviceInstance si where si.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode")
-	
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_counter_instance_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "CounterInstance.findByCounterAndCustomer", query = "SELECT ci FROM CounterInstance ci left join ci.customer ca where ci.counterTemplate.code=:counterTemplateCode"),
+        @NamedQuery(name = "CounterInstance.findByCounterAndCustomerAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.customerAccount cust where cust.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
+        @NamedQuery(name = "CounterInstance.findByCounterAndBillingAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.billingAccount ba where ba.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
+        @NamedQuery(name = "CounterInstance.findByCounterAndUserAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.userAccount ua where ua.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
+        @NamedQuery(name = "CounterInstance.findByCounterAndSubscription", query = "SELECT ci.id FROM CounterInstance ci left join ci.subscription su where su.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
+        @NamedQuery(name = "CounterInstance.findByCounterAndService", query = "SELECT ci.id FROM CounterInstance ci left join ci.serviceInstance si where si.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode")
+
 })
 public class CounterInstance extends BusinessEntity {
     private static final long serialVersionUID = -4924601467998738157L;
@@ -70,7 +67,7 @@ public class CounterInstance extends BusinessEntity {
     private CounterTemplate counterTemplate;
 
     /**
-     * Customer  that counter is tracked on.
+     * Customer that counter is tracked on.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
@@ -116,13 +113,13 @@ public class CounterInstance extends BusinessEntity {
      */
     @OneToMany(mappedBy = "counterInstance", fetch = FetchType.LAZY)
     private List<CounterPeriod> counterPeriods = new ArrayList<>();
-    
+
     /**
      * usage charges instances
      */
     @OneToMany(mappedBy = "counter", fetch = FetchType.LAZY)
     private List<UsageChargeInstance> usageChargeInstances = new ArrayList<>();
-    
+
     /**
      * charge instances related as accumulator counters
      */
@@ -180,6 +177,7 @@ public class CounterInstance extends BusinessEntity {
 
     /**
      * Gets the subscription
+     * 
      * @return a subscription
      */
     public Subscription getSubscription() {
@@ -188,6 +186,7 @@ public class CounterInstance extends BusinessEntity {
 
     /**
      * Sets subscription
+     * 
      * @param subscription a subscription
      */
     public void setSubscription(Subscription subscription) {
@@ -196,6 +195,7 @@ public class CounterInstance extends BusinessEntity {
 
     /**
      * Gets a service instance
+     * 
      * @return a service instance
      */
     public ServiceInstance getServiceInstance() {
@@ -247,21 +247,20 @@ public class CounterInstance extends BusinessEntity {
         this.customerAccount = customerAccount;
     }
 
-	public List<UsageChargeInstance> getUsageChargeInstances() {
-		return usageChargeInstances;
-	}
+    public List<UsageChargeInstance> getUsageChargeInstances() {
+        return usageChargeInstances;
+    }
 
-	public void setUsageChargeInstances(List<UsageChargeInstance> usageChargeInstances) {
-		this.usageChargeInstances = usageChargeInstances;
-	}
+    public void setUsageChargeInstances(List<UsageChargeInstance> usageChargeInstances) {
+        this.usageChargeInstances = usageChargeInstances;
+    }
 
-	public List<ChargeInstance> getChargeInstances() {
-		return chargeInstances;
-	}
+    public List<ChargeInstance> getChargeInstances() {
+        return chargeInstances;
+    }
 
-	public void setChargeInstances(List<ChargeInstance> chargeInstances) {
-		this.chargeInstances = chargeInstances;
-	}
-    
-    
+    public void setChargeInstances(List<ChargeInstance> chargeInstances) {
+        this.chargeInstances = chargeInstances;
+    }
+
 }

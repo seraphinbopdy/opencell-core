@@ -18,7 +18,6 @@
 
 package org.meveo.model.billing;
 
-
 public enum AuthenticationTypeEnum {
     /**
      * Basic authentification
@@ -30,12 +29,8 @@ public enum AuthenticationTypeEnum {
      */
     OAUTH2;
 
-    
-
     public String getLabel() {
         return this.getClass().getSimpleName() + "." + this.name();
     }
-
-    
 
 }

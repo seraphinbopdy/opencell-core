@@ -17,16 +17,16 @@
  */
 package org.meveo.model.catalog;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.ExportIdentifier;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Hour in day entry for monthly calendar
@@ -37,8 +37,7 @@ import org.meveo.model.ExportIdentifier;
 @Cacheable
 @ExportIdentifier({ "hour", "minute" })
 @Table(name = "cat_hour_in_day", uniqueConstraints = @UniqueConstraint(columnNames = { "hour", "min" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cat_hour_in_day_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_hour_in_day_seq"), @Parameter(name = "increment_size", value = "1") })
 public class HourInDay extends BaseEntity implements Comparable<HourInDay> {
 
     private static final long serialVersionUID = 1L;

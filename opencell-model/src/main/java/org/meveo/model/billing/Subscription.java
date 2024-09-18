@@ -17,9 +17,10 @@
  */
 package org.meveo.model.billing;
 
-import static javax.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.LAZY;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -32,39 +33,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.Where;
+import org.hibernate.type.NumericBooleanConverter;
 import org.hibernate.validator.constraints.Email;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
@@ -99,6 +73,35 @@ import org.meveo.model.pricelist.PriceList;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.DateUtils;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 /**
  * Subscription
  * 
@@ -114,12 +117,10 @@ import org.meveo.model.shared.DateUtils;
 @CustomFieldEntity(cftCodePrefix = "Subscription", inheritCFValuesFrom = { "offer", "userAccount" })
 @ExportIdentifier({ "code" })
 @Table(name = "billing_subscription", uniqueConstraints = @UniqueConstraint(columnNames = { "code", "valid_from", "valid_to" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_subscription_seq"), })
-@NamedQueries({
-        @NamedQuery(name = "Subscription.getExpired", query = "select s.id from Subscription s where s.subscribedTillDate is not null and s.subscribedTillDate<=:date and s.status in (:statuses)"),
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_subscription_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "Subscription.getExpired", query = "select s.id from Subscription s where s.subscribedTillDate is not null and s.subscribedTillDate<=:date and s.status in (:statuses)"),
         @NamedQuery(name = "Subscription.getToNotifyExpiration", query = "select s.id from Subscription s where s.subscribedTillDate is not null and s.renewalNotifiedDate is null and s.notifyOfRenewalDate is not null and s.notifyOfRenewalDate<=:date and :date < s.subscribedTillDate and s.status in (:statuses)"),
-        @NamedQuery(name = "Subscription.findByValidity", query = "select s from Subscription s where lower(s.code)=:code and (s.validity is null or ((s.validity.from is null or s.validity.from <= :validityDate) and  (s.validity.to is null or :validityDate < s.validity.to)))") ,
+        @NamedQuery(name = "Subscription.findByValidity", query = "select s from Subscription s where lower(s.code)=:code and (s.validity is null or ((s.validity.from is null or s.validity.from <= :validityDate) and  (s.validity.to is null or :validityDate < s.validity.to)))"),
         @NamedQuery(name = "Subscription.getIdsByUsageChargeTemplate", query = "select ci.serviceInstance.subscription.id from UsageChargeInstance ci where ci.chargeTemplate=:chargeTemplate"),
         @NamedQuery(name = "Subscription.listByBillingRun", query = "select s from Subscription s where s.billingRun.id=:billingRunId order by s.id"),
         @NamedQuery(name = "Subscription.getMinimumAmountUsed", query = "select s.minimumAmountEl from Subscription s where s.minimumAmountEl is not null"),
@@ -129,8 +130,8 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "Subscription.unlinkPaymentMehtodByBA", query = "update Subscription s set s.paymentMethod = null where s.userAccount in (select u from UserAccount u where u.billingAccount=:billingAccount)"),
         @NamedQuery(name = "Subscription.listByCustomer", query = "select s from Subscription s inner join s.userAccount ua inner join ua.billingAccount ba inner join ba.customerAccount ca inner join ca.customer c where c=:customer order by s.code asc"),
         @NamedQuery(name = "Subscription.getCountByParent", query = "select count(*) from Subscription s where s.userAccount=:parent"),
-        @NamedQuery(name = "Subscription.getSubscriptionIdsUsingProduct", query = "select si.subscription.id from ServiceInstance si where si.subscription.status not in ('CANCELED','RESILIATED','CLOSED') and si.productVersion.product in (select pc.product from ProductChargeTemplateMapping pc where pc.chargeTemplate.id in (:chargeIds))")})
-public class Subscription extends BusinessCFEntity implements IInvoicingMinimumApplicable,IBillableEntity, IWFEntity, IDiscountable, ICounterEntity {
+        @NamedQuery(name = "Subscription.getSubscriptionIdsUsingProduct", query = "select si.subscription.id from ServiceInstance si where si.subscription.status not in ('CANCELED','RESILIATED','CLOSED') and si.productVersion.product in (select pc.product from ProductChargeTemplateMapping pc where pc.chargeTemplate.id in (:chargeIds))") })
+public class Subscription extends BusinessCFEntity implements IInvoicingMinimumApplicable, IBillableEntity, IWFEntity, IDiscountable, ICounterEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -254,14 +255,14 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
      * Deprecated in 5.3 for not use
      */
     @Deprecated
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "default_level")
     private Boolean defaultLevel = true;
 
     /**
      * If true, end of agreement date will be extended automatically till subscribedTillDate field
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "auto_end_of_engagement")
     private Boolean autoEndOfEngagement = Boolean.FALSE;
 
@@ -276,7 +277,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
      * Was subscription renewed
      */
     @AuditTarget(type = AuditChangeTypeEnum.RENEWAL, history = true, notif = true)
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "renewed")
     private boolean renewed;
 
@@ -307,12 +308,11 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     @Column(name = "minimum_label_el", length = 2000)
     @Size(max = 2000)
     private String minimumLabelEl;
-    
+
     /** Corresponding to minimum invoice subcategory */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "minimum_invoice_sub_category_id")
     private InvoiceSubCategory minimumInvoiceSubCategory;
-
 
     /** Corresponding to minimum one shot charge template */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -349,7 +349,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     /**
      * Instance of discount plans.
      */
-    @OneToMany(mappedBy = "subscription", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "subscription", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
     private List<DiscountPlanInstance> discountPlanInstances = new ArrayList<DiscountPlanInstance>();
 
     /**
@@ -363,7 +363,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
      */
     @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY)
     private List<DunningDocument> dunningDocuments;
-    
+
     /**
      * Invoices produced by the subscription
      */
@@ -371,13 +371,14 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     private List<Invoice> invoices = new ArrayList<>();
 
     public List<Invoice> getInvoices() {
-		return invoices;
-	}
+        return invoices;
+    }
 
-	public void setInvoices(List<Invoice> invoices) {
-		this.invoices = invoices;
-	}
-	@ManyToOne(fetch = FetchType.LAZY)
+    public void setInvoices(List<Invoice> invoices) {
+        this.invoices = invoices;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "email_template_id")
     private EmailTemplate emailTemplate;
 
@@ -394,10 +395,10 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     @Size(max = 255)
     private String email;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "electronic_billing")
     private boolean electronicBilling;
-    
+
     /**
      * The sales person name
      */
@@ -442,7 +443,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     /**
      * Initial subscription renewal configuration
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "initial_renewal")
     private String initialSubscriptionRenewal;
 
@@ -476,20 +477,17 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
 
     @Transient
     private List<InvoiceLine> minInvoiceLines;
-    
+
     /**
      * Commercial offer attached to the subscription
-     */ 
-    
+     */
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_offer_id",referencedColumnName = "id")
+    @JoinColumn(name = "order_offer_id", referencedColumnName = "id")
     private OrderOffer orderOffer;
-    
-    
+
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
     private List<AttributeInstance> attributeInstances = new ArrayList<>();
-
-    
 
     /**
      * Usage charge instances related to subscription
@@ -505,21 +503,15 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "price_list_id")
     private PriceList priceList;
-    
+
     /**
-     * This method is called implicitly by hibernate, used to enable
-	 * encryption for custom fields of this entity
+     * This method is called implicitly by hibernate, used to enable encryption for custom fields of this entity
      */
     @PrePersist
-	@PreUpdate
-	public void preUpdate() {
-		if (cfValues != null) {
-			cfValues.setEncrypted(true);
-		}
-		if (cfAccumulatedValues != null) {
-			cfAccumulatedValues.setEncrypted(true);
-		}
-	}
+    @PreUpdate
+    public void preUpdate() {
+        this.encryptCfValues();
+    }
 
     public Integer getVersionNumber() {
         return versionNumber;
@@ -691,7 +683,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
      */
     public String getOrderNumber() {
         String orderNumber = null;
-        if(this.order != null){
+        if (this.order != null) {
             orderNumber = this.order.getOrderNumber();
         }
         if (serviceInstances != null && !serviceInstances.isEmpty()) {
@@ -1050,19 +1042,19 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     public void setElectronicBilling(boolean electronicBilling) {
         this.electronicBilling = electronicBilling;
     }
-    
+
     /**
      * @return the salesPersonName
      */
     public String getSalesPersonName() {
-    	return salesPersonName;
+        return salesPersonName;
     }
-    
+
     /**
      * @param salesPersonName the salesPersonName to set
      */
     public void setSalesPersonName(String salesPersonName) {
-    	this.salesPersonName = salesPersonName;
+        this.salesPersonName = salesPersonName;
     }
 
     public List<DiscountPlanInstance> getDiscountPlanInstances() {
@@ -1147,6 +1139,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
 
     /**
      * Gets the charge template used in minimum amount.
+     * 
      * @return a one Shot Charge template
      */
     public OneShotChargeTemplate getMinimumChargeTemplate() {
@@ -1155,6 +1148,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
 
     /**
      * Sets the minimum amount charge template.
+     * 
      * @param minimumChargeTemplate a one Shot Charge template
      */
     public void setMinimumChargeTemplate(OneShotChargeTemplate minimumChargeTemplate) {
@@ -1163,6 +1157,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
 
     /**
      * Gets the subscription payment method
+     * 
      * @return payment method a reference to an active PaymentMethod defined on the CustomerAccount
      */
     public PaymentMethod getPaymentMethod() {
@@ -1171,6 +1166,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
 
     /**
      * Sets the subscription payment method.
+     * 
      * @param paymentMethod payment method a reference to an active PaymentMethod defined on the CustomerAccount
      */
     public void setPaymentMethod(PaymentMethod paymentMethod) {
@@ -1186,12 +1182,12 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     }
 
     public void setToValidity(Date validToDate) {
-        if(getValidity() == null){
+        if (getValidity() == null) {
             DatePeriod datePeriod = new DatePeriod();
             datePeriod.setTo(validToDate);
             setValidity(datePeriod);
-        }else{
-            if(getValidity().getFrom() != null && validToDate != null && validToDate.before(getValidity().getFrom()))
+        } else {
+            if (getValidity().getFrom() != null && validToDate != null && validToDate.before(getValidity().getFrom()))
                 getValidity().setTo(getValidity().getFrom());
             else
                 getValidity().setTo(validToDate);
@@ -1199,22 +1195,22 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     }
 
     public void setFromValidity(Date validFromDate) {
-        if(getValidity() == null){
+        if (getValidity() == null) {
             DatePeriod datePeriod = new DatePeriod();
             datePeriod.setFrom(validFromDate);
             setValidity(datePeriod);
-        }else{
+        } else {
             getValidity().setFrom(validFromDate);
         }
     }
 
     public void addServiceInstance(ServiceInstance serviceInstance) {
-		serviceInstances=serviceInstances!=null?serviceInstances:new ArrayList<ServiceInstance>();
-		if(serviceInstance!=null) {
-			serviceInstances.add(serviceInstance);
-		}
+        serviceInstances = serviceInstances != null ? serviceInstances : new ArrayList<ServiceInstance>();
+        if (serviceInstance != null) {
+            serviceInstances.add(serviceInstance);
+        }
 
-	}
+    }
 
     public CommercialOrder getOrder() {
         return order;
@@ -1246,112 +1242,114 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
         this.minInvoiceLines = invoiceLines;
     }
 
-	/**
-	 * @param prestation the prestation to set
-	 */
-	public void setPrestation(String prestation) {
-		this.prestation = prestation;
-	}
+    /**
+     * @param prestation the prestation to set
+     */
+    public void setPrestation(String prestation) {
+        this.prestation = prestation;
+    }
 
-	public OrderOffer getOrderOffer() {
-		return orderOffer;
-	}
+    public OrderOffer getOrderOffer() {
+        return orderOffer;
+    }
 
-	public void setOrderOffer(OrderOffer orderOffer) {
-		this.orderOffer = orderOffer;
-	}
-	
-	
-	
-	public List<AttributeInstance> getAttributeInstances() {
-		return attributeInstances;
-	}
+    public void setOrderOffer(OrderOffer orderOffer) {
+        this.orderOffer = orderOffer;
+    }
 
-	public void setAttributeInstances(List<AttributeInstance> attributeInstances) {
-		this.attributeInstances = attributeInstances;
-	}
+    public List<AttributeInstance> getAttributeInstances() {
+        return attributeInstances;
+    }
 
-	public void addAttributeInstance(AttributeInstance attributeInstance) {
-		attributeInstances=attributeInstances!=null?attributeInstances:new ArrayList<AttributeInstance>();
-		if(attributeInstance!=null) {
-			attributeInstances.add(attributeInstance);
-		}
+    public void setAttributeInstances(List<AttributeInstance> attributeInstances) {
+        this.attributeInstances = attributeInstances;
+    }
 
-	}
-	public Date getRenewalDate() {
-		if(getSubscriptionDate()==null) {
-			return null;
-		}
-		Calendar calendar = new GregorianCalendar();
+    public void addAttributeInstance(AttributeInstance attributeInstance) {
+        attributeInstances = attributeInstances != null ? attributeInstances : new ArrayList<AttributeInstance>();
+        if (attributeInstance != null) {
+            attributeInstances.add(attributeInstance);
+        }
+
+    }
+
+    public Date getRenewalDate() {
+        if (getSubscriptionDate() == null) {
+            return null;
+        }
+        Calendar calendar = new GregorianCalendar();
         calendar.setTime(getSubscriptionDate());
-		if(getSubscriptionRenewal()!=null) {
+        if (getSubscriptionRenewal() != null) {
             calendar.add(getSubscriptionRenewal().getInitialyActiveForUnit().getCalendarField(), getSubscriptionRenewal().getInitialyActiveFor());
-		}
-		return calendar.getTime();
-	}
-	
-	public int getSubscriptionDaysAge() {
-		return getSubscriptionDaysAge(null);
-	}
-	
-	public int getSubscriptionDaysAge(Date operationDate) {
-		if(getSubscriptionDate()==null) {
-			return 0;
-		}
-		if(operationDate==null) {
-			operationDate=new Date();
-		}
-		return (int) DateUtils.daysBetween(getSubscriptionDate(),operationDate);
-	}
-	
-	public int getSubscriptionMonthsAge() {
-	    return calculateAge(ChronoUnit.MONTHS,null);
-	}
-	
-	public int getSubscriptionMonthsAge(Date operationDate) {
-	    return calculateAge(ChronoUnit.MONTHS,operationDate);
-	}
-	public int calculateAge(final ChronoUnit unit,Date operationDate) {
-		if(getSubscriptionDate()==null) {
-			return 0;
-		}
-		if(operationDate==null) {
-			operationDate=new Date();
-		}
-	    YearMonth m1 = YearMonth.from(getSubscriptionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-	    YearMonth m2 = YearMonth.from(operationDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-	    return Math.toIntExact(m1.until(m2, unit))+1; //+1 is added to include the last month
-	}
+        }
+        return calendar.getTime();
+    }
 
-	/**
-	 * @return the contract
-	 */
-	public Contract getContract() {
-		return contract;
-	}
+    public int getSubscriptionDaysAge() {
+        return getSubscriptionDaysAge(null);
+    }
 
-	/**
-	 * @param contract the contract to set
-	 */
-	public void setContract(Contract contract) {
-		this.contract = contract;
-	}
-	
-	/**
-	 * @return Usage charge instances related to subscription
-	 */
-	public List<UsageChargeInstance> getUsageChargeInstances() {
+    public int getSubscriptionDaysAge(Date operationDate) {
+        if (getSubscriptionDate() == null) {
+            return 0;
+        }
+        if (operationDate == null) {
+            operationDate = new Date();
+        }
+        return (int) DateUtils.daysBetween(getSubscriptionDate(), operationDate);
+    }
+
+    public int getSubscriptionMonthsAge() {
+        return calculateAge(ChronoUnit.MONTHS, null);
+    }
+
+    public int getSubscriptionMonthsAge(Date operationDate) {
+        return calculateAge(ChronoUnit.MONTHS, operationDate);
+    }
+
+    public int calculateAge(final ChronoUnit unit, Date operationDate) {
+        if (getSubscriptionDate() == null) {
+            return 0;
+        }
+        if (operationDate == null) {
+            operationDate = new Date();
+        }
+        YearMonth m1 = YearMonth.from(getSubscriptionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        YearMonth m2 = YearMonth.from(operationDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        return Math.toIntExact(m1.until(m2, unit)) + 1; // +1 is added to include the last month
+    }
+
+    /**
+     * @return the contract
+     */
+    public Contract getContract() {
+        return contract;
+    }
+
+    /**
+     * @param contract the contract to set
+     */
+    public void setContract(Contract contract) {
+        this.contract = contract;
+    }
+
+    /**
+     * @return Usage charge instances related to subscription
+     */
+    public List<UsageChargeInstance> getUsageChargeInstances() {
         return usageChargeInstances;
     }
-	/**
-	 * @param usageChargeInstances Usage charge instances related to subscription
-	 */
-	public void setUsageChargeInstances(List<UsageChargeInstance> usageChargeInstances) {
+
+    /**
+     * @param usageChargeInstances Usage charge instances related to subscription
+     */
+    public void setUsageChargeInstances(List<UsageChargeInstance> usageChargeInstances) {
         this.usageChargeInstances = usageChargeInstances;
     }
 
     /**
      * PriceList Getter
+     * 
      * @return the priceList
      */
     public PriceList getPriceList() {
@@ -1360,6 +1358,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
 
     /**
      * PriceList Setter
+     * 
      * @param priceList value to set
      */
     public void setPriceList(PriceList priceList) {

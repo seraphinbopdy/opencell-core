@@ -20,9 +20,10 @@ package org.meveo.model.jobs;
 
 /**
  * Enum for Ftp transfer operation
+ * 
  * @author mboukayoua
  */
-public enum  FtpOperationEnum {
+public enum FtpOperationEnum {
 
     /**
      * import operations
@@ -36,6 +37,7 @@ public enum  FtpOperationEnum {
 
     /**
      * enum label
+     * 
      * @return label
      */
     public String getLabel() {
@@ -44,6 +46,7 @@ public enum  FtpOperationEnum {
 
     /**
      * private constructor
+     * 
      * @param label enum label
      */
     FtpOperationEnum(final String label) {
@@ -52,6 +55,7 @@ public enum  FtpOperationEnum {
 
     /**
      * toString
+     * 
      * @return toString
      */
     public String toString() {
@@ -59,4 +63,3 @@ public enum  FtpOperationEnum {
     }
 
 }
-

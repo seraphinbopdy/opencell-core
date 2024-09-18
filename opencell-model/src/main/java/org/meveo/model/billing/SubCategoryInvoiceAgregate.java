@@ -26,32 +26,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKeyJoinColumn;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.commons.utils.NumberUtils;
 import org.meveo.model.catalog.DiscountPlanItem;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKeyJoinColumn;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * The Class SubCategoryInvoiceAgregate.
  */
 @Entity
 @DiscriminatorValue("F")
-@NamedQueries({ @NamedQuery(name = "SubCategoryInvoiceAgregate.deleteByBR", query = "delete from SubCategoryInvoiceAgregate ia where ia.billingRun.id=:billingRunId AND ia.invoice.id in (select ia2.invoice.id from SubCategoryInvoiceAgregate ia2 where ia2.invoice.status <> org.meveo.model.billing.InvoiceStatusEnum.VALIDATED)"),
+@NamedQueries({
+        @NamedQuery(name = "SubCategoryInvoiceAgregate.deleteByBR", query = "delete from SubCategoryInvoiceAgregate ia where ia.billingRun.id=:billingRunId AND ia.invoice.id in (select ia2.invoice.id from SubCategoryInvoiceAgregate ia2 where ia2.invoice.status <> org.meveo.model.billing.InvoiceStatusEnum.VALIDATED)"),
         @NamedQuery(name = "SubCategoryInvoiceAgregate.sumAmountsDiscountByBillingAccount", query = "select sum(ia.amountWithoutTax), sum(ia.amountWithTax), ia.invoice.subscription.id, ia.invoice.commercialOrder.id ,ia.invoice.id ,ia.billingAccount.id,  ia.billingAccount.customerAccount.id, ia.billingAccount.customerAccount.customer.id"
                 + " from  SubCategoryInvoiceAgregate ia where ia.billingRun.id=:billingRunId and ia.discountAggregate = true group by ia.invoice.subscription.id, ia.invoice.commercialOrder.id , ia.invoice.id, ia.billingAccount.id, ia.billingAccount.customerAccount.id, ia.billingAccount.customerAccount.customer.id"),
         @NamedQuery(name = "SubCategoryInvoiceAgregate.sumAmountsDiscountByCustomerAccount", query = "select sum(ia.amountWithoutTax), sum(ia.amountWithTax), ia.invoice.id, ia.billingAccount.customerAccount.id"
@@ -60,7 +62,7 @@ import org.meveo.model.catalog.DiscountPlanItem;
                 + " from  SubCategoryInvoiceAgregate ia where ia.billingRun.id=:billingRunId and ia.discountAggregate = true group by ia.invoice.id, ia.billingAccount.customerAccount.customer.id"),
         @NamedQuery(name = "SubCategoryInvoiceAgregate.deleteByInvoiceIds", query = "delete from SubCategoryInvoiceAgregate ia where ia.invoice.id IN (:invoicesIds)"),
         @NamedQuery(name = "SubCategoryInvoiceAgregate.moveToQuarantineBRByInvoiceIds", query = "update SubCategoryInvoiceAgregate ia set ia.billingRun=:billingRun where ia.invoice.id IN (:invoiceIds)"),
-        @NamedQuery(name = "SubCategoryInvoiceAggregate.removeInvoiceAggregateReferences", query = "UPDATE SubCategoryInvoiceAgregate ia set ia.categoryInvoiceAgregate= null WHERE ia.categoryInvoiceAgregate.id IN (:categoryInvoiceAggregateIds)")})
+        @NamedQuery(name = "SubCategoryInvoiceAggregate.removeInvoiceAggregateReferences", query = "UPDATE SubCategoryInvoiceAgregate ia set ia.categoryInvoiceAgregate= null WHERE ia.categoryInvoiceAgregate.id IN (:categoryInvoiceAggregateIds)") })
 public class SubCategoryInvoiceAgregate extends InvoiceAgregate {
 
     /** The Constant serialVersionUID. */
@@ -122,7 +124,7 @@ public class SubCategoryInvoiceAgregate extends InvoiceAgregate {
     @Column(name = "discount", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal discount;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "discount_aggregate", nullable = false)
     @NotNull
     private boolean discountAggregate;
@@ -669,7 +671,7 @@ public class SubCategoryInvoiceAgregate extends InvoiceAgregate {
         this.itemNumber++;
         this.invoiceLinesToAssociate.add(invoiceLine);
 
-        if(addAmounts) {
+        if (addAmounts) {
             if (isEnterprise) {
                 addAmountWithoutTax(invoiceLine.getAmountWithoutTax());
             } else {
@@ -688,18 +690,20 @@ public class SubCategoryInvoiceAgregate extends InvoiceAgregate {
             amountsByTax.put(invoiceLine.getTax(), subcategoryInvoiceAgregate);
         }
     }
-    
+
     public String getCategoryAggKey() {
-    	return ""+(this.userAccount==null?"":this.userAccount.getId())+this.invoiceSubCategory.getInvoiceCategory().getId();
+        return "" + (this.userAccount == null ? "" : this.userAccount.getId()) + this.invoiceSubCategory.getInvoiceCategory().getId();
     }
-    
+
     @Transient
-    private List<Long> ilIDs=new ArrayList<>();
+    private List<Long> ilIDs = new ArrayList<>();
+
     public void addILs(List<Long> ilIDs) {
-    	this.ilIDs.addAll(ilIDs);
+        this.ilIDs.addAll(ilIDs);
     }
+
     public List<Long> getIlIDs() {
-    	return this.ilIDs;
+        return this.ilIDs;
     }
 
     /**

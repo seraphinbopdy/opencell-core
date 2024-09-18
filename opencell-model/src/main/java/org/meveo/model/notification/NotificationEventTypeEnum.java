@@ -53,7 +53,7 @@ public enum NotificationEventTypeEnum {
      * Entity was disabled
      */
     DISABLED,
-    
+
     /**
      * Job execution has started
      */
@@ -103,7 +103,7 @@ public enum NotificationEventTypeEnum {
      * Subscription or service status was updated
      */
     STATUS_UPDATED,
-    
+
     /**
      * Invoice payment status was updated
      */
@@ -158,8 +158,7 @@ public enum NotificationEventTypeEnum {
      *
      * check if order progress is incrasing
      */
-    ADVT_RATE_INCREASED
-    ;
+    ADVT_RATE_INCREASED;
 
     public String getLabel() {
         return this.getClass().getSimpleName() + "." + this.name();

@@ -17,31 +17,16 @@
  */
 package org.meveo.model.billing;
 
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AccountEntity;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.CustomFieldEntity;
@@ -55,8 +40,24 @@ import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.crm.IInvoicingMinimumApplicable;
 
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 /**
  * User account
@@ -100,11 +101,11 @@ public class UserAccount extends AccountEntity implements IInvoicingMinimumAppli
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "subscription_date")
     private Date subscriptionDate = new Date();
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_useraccount_id",referencedColumnName = "id")
+    @JoinColumn(name = "parent_useraccount_id", referencedColumnName = "id")
     private UserAccount parentUserAccount;
-    
+
     @OneToMany(mappedBy = "parentUserAccount", fetch = FetchType.LAZY)
     private List<UserAccount> userAccounts = new ArrayList<>();
 
@@ -155,23 +156,23 @@ public class UserAccount extends AccountEntity implements IInvoicingMinimumAppli
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "termin_reason_id")
     private SubscriptionTerminationReason terminationReason;
-    
+
     /**
      * is the user account a consumer
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_consumer")
-    private Boolean isConsumer=Boolean.TRUE;
-	
-	@OneToMany
-	@JoinColumn(name = "user_account_id")
-	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
-	
-	public List<RegistrationNumber> getRegistrationNumbers() {
-		return registrationNumbers;
-	}
-	
-	public BillingAccount getBillingAccount() {
+    private Boolean isConsumer = Boolean.TRUE;
+
+    @OneToMany
+    @JoinColumn(name = "user_account_id")
+    private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+
+    public List<RegistrationNumber> getRegistrationNumbers() {
+        return registrationNumbers;
+    }
+
+    public BillingAccount getBillingAccount() {
         return billingAccount;
     }
 
@@ -194,7 +195,7 @@ public class UserAccount extends AccountEntity implements IInvoicingMinimumAppli
         return statusDate;
     }
 
-	public void setStatusDate(Date statusDate) {
+    public void setStatusDate(Date statusDate) {
         this.statusDate = statusDate;
     }
 
@@ -218,23 +219,23 @@ public class UserAccount extends AccountEntity implements IInvoicingMinimumAppli
         return subscriptions;
     }
 
-	public UserAccount getParentUserAccount() {
-		return parentUserAccount;
-	}
+    public UserAccount getParentUserAccount() {
+        return parentUserAccount;
+    }
 
-	public void setParentUserAccount(UserAccount parentUserAccount) {
-		this.parentUserAccount = parentUserAccount;
-	}
+    public void setParentUserAccount(UserAccount parentUserAccount) {
+        this.parentUserAccount = parentUserAccount;
+    }
 
-	public List<UserAccount> getUserAccounts() {
-		return userAccounts;
-	}
+    public List<UserAccount> getUserAccounts() {
+        return userAccounts;
+    }
 
-	public void setUserAccounts(List<UserAccount> userAccounts) {
-		this.userAccounts = userAccounts;
-	}
+    public void setUserAccounts(List<UserAccount> userAccounts) {
+        this.userAccounts = userAccounts;
+    }
 
-	public void setSubscriptions(List<Subscription> subscriptions) {
+    public void setSubscriptions(List<Subscription> subscriptions) {
         this.subscriptions = subscriptions;
     }
 
@@ -296,26 +297,27 @@ public class UserAccount extends AccountEntity implements IInvoicingMinimumAppli
         return BillingAccount.class;
     }
 
-	public Boolean getIsConsumer() {
-		return isConsumer;
-	}
+    public Boolean getIsConsumer() {
+        return isConsumer;
+    }
 
-	public void setIsConsumer(Boolean isConsumer) {
-		this.isConsumer = isConsumer;
-	}
-	
-	  public Seller getSeller() {
-	    	if(billingAccount==null) {
-	    		return null;
-	    	}
-	    	return billingAccount.getSeller();
-	    }
-	// check if the list of registration numbers is not empty
-	// get all registration numbers and join them with a comma
-	public String getRegistrationNo(){
-		if (isNotEmpty(registrationNumbers)) {
-			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
-		}
-		return registrationNo;
-	}
+    public void setIsConsumer(Boolean isConsumer) {
+        this.isConsumer = isConsumer;
+    }
+
+    public Seller getSeller() {
+        if (billingAccount == null) {
+            return null;
+        }
+        return billingAccount.getSeller();
+    }
+
+    // check if the list of registration numbers is not empty
+    // get all registration numbers and join them with a comma
+    public String getRegistrationNo() {
+        if (isNotEmpty(registrationNumbers)) {
+            registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+        }
+        return registrationNo;
+    }
 }

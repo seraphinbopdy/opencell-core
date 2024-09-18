@@ -19,36 +19,14 @@ package org.meveo.model.billing;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.PartitionKey;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BaseEntity;
+import org.meveo.model.CFEntity;
 import org.meveo.model.CustomFieldEntity;
-import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.admin.Seller;
@@ -62,9 +40,30 @@ import org.meveo.model.catalog.UnitOfMeasure;
 import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
-import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.tax.TaxClass;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedNativeQueries;
+import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Rated transaction - usually corresponds 1-1 to Wallet operation.
@@ -82,7 +81,8 @@ import org.meveo.model.tax.TaxClass;
 @ObservableEntity
 @CustomFieldEntity(cftCodePrefix = "RatedTransaction")
 @Table(name = "billing_rated_transaction")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "billing_rated_transaction_seq"), @Parameter(name = "increment_size", value = "5000") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_rated_transaction_seq"),
+        @Parameter(name = "increment_size", value = "5000") })
 @NamedQueries({ @NamedQuery(name = "RatedTransaction.listInvoiced", query = "SELECT r FROM RatedTransaction r where r.wallet=:wallet and r.status<>'OPEN' order by usageDate desc "),
 
         @NamedQuery(name = "RatedTransaction.listToInvoiceByOrderNumberInvoiceableData", query = "SELECT new org.meveo.service.billing.impl.InvoiceableData(r.id, r.billingAccount.id, r.userAccount.id, r.seller.id, r.subscription.id, r.wallet.id, r.taxClass.id, r.orderNumber, r.unitAmountWithoutTax, r.unitAmountWithTax, r.unitAmountTax, r.amountWithoutTax, r.amountWithTax, r.amountTax, r.tax.id, r.taxPercent, case when w.walletTemplate is not null then true else false end, r.invoiceSubCategory.id) FROM RatedTransaction r left join r.wallet w where r.status='OPEN' AND r.orderNumber=:orderNumber AND :firstTransactionDate<=r.usageDate AND r.usageDate<:lastTransactionDate and (r.invoicingDate is NULL or r.invoicingDate<:invoiceUpToDate)  order by r.billingAccount.id "),
@@ -136,11 +136,11 @@ import org.meveo.model.tax.TaxClass;
 
         @NamedQuery(name = "RatedTransaction.unInvoiceByInvoice", query = "update RatedTransaction r set r.status=:NEW_STATUS, r.updated = :now, r.billingRun= null, r.invoiceLine=null, r.invoice=null, r.invoiceAgregateF=null where r.status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and r.invoiceLine.id in (select il.id from InvoiceLine il where il.invoice=:invoice)"),
         @NamedQuery(name = "RatedTransaction.unInvoiceByBR", query = "update RatedTransaction r set r.status='OPEN', r.updated = :now, r.billingRun= null, r.invoiceLine=null, r.invoice=null, r.invoiceAgregateF=null where r.status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and r.billingRun=:billingRun \r\n"
-        		+ "AND r.invoiceLine.id in (select il.id from InvoiceLine il left join il.invoice i where il.billingRun=:billingRun and (i.id is null or i.status <> org.meveo.model.billing.InvoiceStatusEnum.VALIDATED))"),
+                + "AND r.invoiceLine.id in (select il.id from InvoiceLine il left join il.invoice i where il.billingRun=:billingRun and (i.id is null or i.status <> org.meveo.model.billing.InvoiceStatusEnum.VALIDATED))"),
 
         @NamedQuery(name = "RatedTransaction.deleteSupplementalRTByInvoice", query = "DELETE from RatedTransaction r WHERE r.type = 'MINIMUM' and r.status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and r.invoiceLine.id in (select il.id from InvoiceLine il where il.invoice=:invoice)"),
-        @NamedQuery(name = "RatedTransaction.deleteSupplementalRTByBR", query = "DELETE from RatedTransaction r WHERE r.type = 'MINIMUM' and r.status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and r.billingRun=:billingRun AND r.invoiceLine.id in (select il.id from InvoiceLine il " +
-                "left join il.invoice i where il.billingRun=:billingRun and (i.id is null or i.status <> org.meveo.model.billing.InvoiceStatusEnum.VALIDATED))"),
+        @NamedQuery(name = "RatedTransaction.deleteSupplementalRTByBR", query = "DELETE from RatedTransaction r WHERE r.type = 'MINIMUM' and r.status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and r.billingRun=:billingRun AND r.invoiceLine.id in (select il.id from InvoiceLine il "
+                + "left join il.invoice i where il.billingRun=:billingRun and (i.id is null or i.status <> org.meveo.model.billing.InvoiceStatusEnum.VALIDATED))"),
         @NamedQuery(name = "RatedTransaction.countNotInvoicedOpenByBA", query = "SELECT count(r) FROM RatedTransaction r WHERE r.billingAccount=:billingAccount AND r.status='OPEN' AND :firstTransactionDate<=r.usageDate AND r.usageDate<:lastTransactionDate and (r.invoicingDate is NULL or r.invoicingDate<:invoiceUpToDate) "),
 
         @NamedQuery(name = "RatedTransaction.countNotInvoicedByBA", query = "SELECT count(*) FROM RatedTransaction r WHERE r.status <> org.meveo.model.billing.RatedTransactionStatusEnum.BILLED AND r.billingAccount=:billingAccount"),
@@ -192,14 +192,11 @@ import org.meveo.model.tax.TaxClass;
         @NamedQuery(name = "RatedTransaction.reopenRatedTransactions", query = "update RatedTransaction r set r.status='OPEN', r.updated = :now, r.billingRun= null, r.invoice=null, r.invoiceAgregateF=null, r.invoiceLine=null where r.id IN (:rtIds)"),
         @NamedQuery(name = "RatedTransaction.cancelRatedTransactionsByBR", query = "update RatedTransaction rt set rt.status = 'CANCELED', rt.updated = CURRENT_TIMESTAMP ,rt.invoiceLine = null, rt.invoice = null where rt.billingRun.id = :billingRunId"),
         @NamedQuery(name = "RatedTransaction.findForAppyInvoicingRuleByIds", query = "SELECT rt FROM RatedTransaction rt WHERE rt.id in (:ids) AND  rt.status = 'OPEN' and rt.rulesContract is not null"),
-        @NamedQuery(name = "RatedTransaction.updateStatusDiscountedRT", query = "UPDATE RatedTransaction rt " +
-                "SET rt.status =: statusToUpdate WHERE rt.id IN (:ids)"),
-        @NamedQuery(name = "RatedTransaction.getDiscountedRTIds", query = "SELECT rt FROM RatedTransaction rt " +
-                "WHERE rt.invoiceLine.status != 'BILLED' AND rt.discountedRatedTransaction =: id"),
+        @NamedQuery(name = "RatedTransaction.updateStatusDiscountedRT", query = "UPDATE RatedTransaction rt " + "SET rt.status =: statusToUpdate WHERE rt.id IN (:ids)"),
+        @NamedQuery(name = "RatedTransaction.getDiscountedRTIds", query = "SELECT rt FROM RatedTransaction rt " + "WHERE rt.invoiceLine.status != 'BILLED' AND rt.discountedRatedTransaction =: id"),
         @NamedQuery(name = "RatedTransaction.cancelAggregatedRTByInvoiceLine", query = "UPDATE RatedTransaction rt SET rt.invoiceLine = null, rt.status = org.meveo.model.billing.RatedTransactionStatusEnum.OPEN, rt.updated = :now WHERE rt.status = org.meveo.model.billing.RatedTransactionStatusEnum.BILLED AND rt.invoiceLine.id IN ( SELECT rt.invoiceLine.id from RatedTransaction rt where rt.id in (SELECT wo.id FROM WalletOperation wo WHERE wo.id IN :woIds))"),
-        @NamedQuery(name = "RatedTransaction.getMissingAccountingArticleInputs", query =
-    	"select new org.meveo.model.billing.AccountingArticleAssignmentItem(ci.chargeTemplate.id, rt.offerTemplate.id, rt.serviceInstance.id, (string_agg(cast(ci.id as text),','))) "
-    		+ " FROM RatedTransaction rt left join rt.chargeInstance ci WHERE rt.status = 'OPEN' and rt.accountingArticle is null group by ci.chargeTemplate.id, rt.offerTemplate.id, rt.serviceInstance.id"),
+        @NamedQuery(name = "RatedTransaction.getMissingAccountingArticleInputs", query = "select new org.meveo.model.billing.AccountingArticleAssignmentItem(ci.chargeTemplate.id, rt.offerTemplate.id, rt.serviceInstance.id, (string_agg(cast(ci.id as text),','))) "
+                + " FROM RatedTransaction rt left join rt.chargeInstance ci WHERE rt.status = 'OPEN' and rt.accountingArticle is null group by ci.chargeTemplate.id, rt.offerTemplate.id, rt.serviceInstance.id"),
         @NamedQuery(name = "RatedTransaction.findBillingRunReportDetails", query = "SELECT COUNT(rt), COUNT(rt.billingAccount), COUNT(rt.subscription), COUNT(rt.chargeInstance), SUM(rt.amountWithoutTax), ci.chargeType FROM RatedTransaction rt LEFT JOIN rt.chargeInstance ci WHERE rt.id in (:ids) AND rt.status = 'OPEN' GROUP BY ci.chargeType"),
         @NamedQuery(name = "RatedTransaction.findBillingRunReportBilledDetails", query = "SELECT COUNT(rt), COUNT(rt.billingAccount), COUNT(rt.subscription), COUNT(rt.chargeInstance), SUM(rt.amountWithoutTax), ci.chargeType FROM RatedTransaction rt LEFT JOIN rt.chargeInstance ci WHERE rt.id in (:ids) GROUP BY ci.chargeType"),
         @NamedQuery(name = "RatedTransaction.findAmountsPerBillingAccountBilledDetails", query = "SELECT rt.billingAccount.id, SUM(rt.amountWithoutTax) AS ba_amount, COUNT(rt.id) FROM RatedTransaction rt WHERE rt.id in (:ids) GROUP BY rt.billingAccount.id ORDER BY ba_amount DESC"),
@@ -209,8 +206,7 @@ import org.meveo.model.tax.TaxClass;
         @NamedQuery(name = "RatedTransaction.findAmountsPerProductBilledDetails", query = "SELECT rt.serviceInstance.productVersion.product.id, SUM(rt.amountWithoutTax) AS product_amount, COUNT(rt.id) FROM RatedTransaction rt WHERE rt.id in (:ids) GROUP BY rt.serviceInstance.productVersion.product.id ORDER BY product_amount DESC"),
         @NamedQuery(name = "RatedTransaction.findReportInitialDataDetails", query = "SELECT COUNT(DISTINCT rt), COUNT(DISTINCT rt.billingAccount), COUNT(DISTINCT rt.subscription), COUNT(DISTINCT rt.chargeInstance) FROM RatedTransaction rt WHERE rt.id in (:ids)"),
         @NamedQuery(name = "RatedTransaction.cancelRTs", query = "UPDATE RatedTransaction set status='CANCELED', rejectReason=:rejectReason, updated=:updatedDate where id in :ids"),
-        @NamedQuery(name = "RatedTransaction.reopenRTs", query = "UPDATE RatedTransaction set status=org.meveo.model.billing.RatedTransactionStatusEnum.OPEN, updated=:now where status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and billingRun.id=:billingRunId and billingAccount.id in :baIds")
-})
+        @NamedQuery(name = "RatedTransaction.reopenRTs", query = "UPDATE RatedTransaction set status=org.meveo.model.billing.RatedTransactionStatusEnum.OPEN, updated=:now where status=org.meveo.model.billing.RatedTransactionStatusEnum.BILLED and billingRun.id=:billingRunId and billingAccount.id in :baIds") })
 
 @NamedNativeQueries({
         @NamedNativeQuery(name = "RatedTransaction.rtSummaryForRerating", query = "select rt.id, rt.status, rt.amount_without_tax, rt.amount_with_tax, rt.amount_tax, rt.quantity, rt.invoice_line_id, il.status as ilstatus, il.billing_run_id, il.amount_without_tax as il_amount_without_tax from {h-schema}billing_rated_transaction rt left join {h-schema}billing_invoice_line il on rt.invoice_line_id=il.id where rt.status not in ('CANCELED', 'REJECTED', 'RERATED') and rt.id in :rtIds"),
@@ -225,7 +221,7 @@ import org.meveo.model.tax.TaxClass;
         @NamedNativeQuery(name = "RatedTransaction.massUpdateWithDiscountedRTStepOracle", query = "UPDATE (SELECT rt.discounted_ratedtransaction_id, rt.updated FROM {h-schema}billing_rated_transaction rt, {h-schema}billing_wallet_operation discountWO, {h-schema}billing_wallet_operation discountedWO where discountWO.rated_transaction_id=rt.id and discountWO.discounted_wallet_operation_id=discountedWO.id and rt.status='OPEN' and rt.discounted_ratedtransaction_id is null and rt.id>=:minId and rt.id<=:maxId) SET rt.discounted_ratedtransaction_id=discountedWO.rated_transaction_id , updated=now()"),
         @NamedNativeQuery(name = "RatedTransaction.deletePendingTable", query = "delete from {h-schema}billing_rated_transaction_pending") })
 
-public class RatedTransaction extends BaseEntity implements ISearchable, ICustomFieldEntity, IInvoiceable {
+public class RatedTransaction extends CFEntity implements ISearchable, IInvoiceable {
 
     private static final long serialVersionUID = 1L;
 
@@ -247,14 +243,14 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     @JoinColumn(name = "billing_account__id", nullable = false)
     @NotNull
     private BillingAccount billingAccount;
-    
+
     /**
      * Origin Billing account associated to rated transaction
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_billing_account")
     private BillingAccount originBillingAccount;
-    
+
     /**
      * User account associated to rated transaction
      */
@@ -364,7 +360,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     /**
      * Do not trigger invoicing
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "do_not_trigger_invoicing")
     private boolean doNotTriggerInvoicing = false;
 
@@ -505,6 +501,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     /**
      * Status
      */
+    @PartitionKey
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     @NotNull
@@ -588,29 +585,6 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     @Column(name = "invoicing_date")
     private Date invoicingDate;
 
-    /**
-     * Custom field values in JSON format
-     */
-    @Type(type = "cfjson")
-    @Column(name = "cf_values", columnDefinition = "jsonb")
-    private CustomFieldValues cfValues;
-
-    /**
-     * Accumulated custom field values in JSON format
-     */
-//    @Type(type = "cfjson")
-//    @Column(name = "cf_values_accum", columnDefinition = "TEXT")
-    @Transient
-    private CustomFieldValues cfAccumulatedValues;
-
-    /**
-     * Unique identifier - UUID
-     */
-    @Column(name = "uuid", nullable = false, updatable = false, length = 60)
-    @Size(max = 60)
-    @NotNull
-    private String uuid;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "accounting_article_id")
     private AccountingArticle accountingArticle;
@@ -624,73 +598,73 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_plan_id")
-    private DiscountPlan discountPlan;    
-    
+    private DiscountPlan discountPlan;
+
     /**
      * What Rated transaction the current Rated transaction, that represents a discount amount, is related to - Points to an original Rated transaction with a full amount
      */
     @Column(name = "discounted_ratedtransaction_id")
     private Long discountedRatedTransaction;
-    
+
     @Column(name = "discount_value")
-	private BigDecimal discountValue;
-    
+    private BigDecimal discountValue;
+
     @Enumerated(EnumType.STRING)
-	@Column(name = "discount_plan_type", length = 50)
-	private DiscountPlanItemTypeEnum discountPlanType;
-    
+    @Column(name = "discount_plan_type", length = 50)
+    private DiscountPlanItemTypeEnum discountPlanType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_plan_item_id")
     private DiscountPlanItem discountPlanItem;
 
-    /**The amount after discount**/
+    /** The amount after discount **/
     @Column(name = "discounted_amount")
     private BigDecimal discountedAmount;
-    
+
     @ManyToOne
     @JoinColumn(name = "rules_contract_id")
     private Contract rulesContract;
-    
+
     @ManyToOne
     @JoinColumn(name = "origin_ratedtransaction_id")
     private RatedTransaction originRatedTransaction;
-    
+
     @Column(name = "use_specific_price_conversion")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean useSpecificPriceConversion;
-    
+
     @Column(name = "transactional_amount_without_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalAmountWithoutTax;
-    
+
     @Column(name = "transactional_amount_with_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalAmountWithTax;
-    
+
     @Column(name = "transactional_amount_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalAmountTax;
-    
+
     @Column(name = "transactional_unit_amount_without_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalUnitAmountWithoutTax;
-    
+
     @Column(name = "transactional_unit_amount_with_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalUnitAmountWithTax;
-    
+
     @Column(name = "transactional_unit_amount_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalUnitAmountTax;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trading_currency_id")
     private TradingCurrency tradingCurrency;
-    
+
     /**
-  	 * 
-  	 *filled only for price lines related to applied discounts, and contains the application sequence composed by the concatenation of the DP sequence and DPI sequence
-  	 */
-  	@Column(name = "sequence")
-  	private Integer sequence;
+     * 
+     * filled only for price lines related to applied discounts, and contains the application sequence composed by the concatenation of the DP sequence and DPI sequence
+     */
+    @Column(name = "sequence")
+    private Integer sequence;
 
     @Column(name = "business_key")
     private String businessKey;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_id")
     private Contract contract;
@@ -698,7 +672,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_line_id")
     private ContractItem contractLine;
-    
+
     public RatedTransaction() {
         super();
     }
@@ -849,7 +823,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.unityDescription = walletOperation.getInputUnitDescription();
         this.ratingUnitDescription = walletOperation.getRatingUnitDescription();
         this.sortIndex = walletOperation.getSortIndex();
-        this.cfValues = walletOperation.getCfValues();
+        this.setCfValuesAsJson(walletOperation.getCfValuesAsJson());
         this.discountPlan = walletOperation.getDiscountPlan();
         this.discountPlanItem = walletOperation.getDiscountPlanItem();
         this.discountPlanType = walletOperation.getDiscountPlanType();
@@ -870,7 +844,6 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.contract = walletOperation.getContract();
         this.contractLine = walletOperation.getContractLine();
     }
-
 
     public RatedTransaction(RatedTransaction rateTransactionToDuplicate) {
 
@@ -917,7 +890,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.unityDescription = rateTransactionToDuplicate.getUnityDescription();
         this.ratingUnitDescription = rateTransactionToDuplicate.getRatingUnitDescription();
         this.sortIndex = rateTransactionToDuplicate.getSortIndex();
-        this.cfValues = rateTransactionToDuplicate.getCfValues();
+        this.setCfValuesAsJson(rateTransactionToDuplicate.getCfValuesAsJson());
         this.discountPlan = rateTransactionToDuplicate.getDiscountPlan();
         this.discountPlanItem = rateTransactionToDuplicate.getDiscountPlanItem();
         this.discountPlanType = rateTransactionToDuplicate.getDiscountPlanType();
@@ -930,7 +903,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.contract = rateTransactionToDuplicate.getContract();
         this.contractLine = rateTransactionToDuplicate.getContractLine();
     }
-    
+
     public WalletInstance getWallet() {
         return wallet;
     }
@@ -1055,7 +1028,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     public void setOriginBillingAccount(BillingAccount originBillingAccount) {
         this.originBillingAccount = originBillingAccount;
     }
-    
+
     /**
      * @return User account associated to rated transaction
      */
@@ -1109,7 +1082,7 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     public void setRejectReason(String rejectReason) {
         this.rejectReason = rejectReason;
     }
-    
+
     public String getDescription() {
         return description;
     }
@@ -1327,17 +1300,16 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     }
 
     public void setIsEnterpriseAmount(boolean isEnterprise, BigDecimal amount) {
-        BigDecimal rate = tradingCurrency != null
-                && tradingCurrency.getCurrentRate() != null ? tradingCurrency.getCurrentRate() : BigDecimal.ONE;
+        BigDecimal rate = tradingCurrency != null && tradingCurrency.getCurrentRate() != null ? tradingCurrency.getCurrentRate() : BigDecimal.ONE;
         if (isEnterprise) {
             setAmountWithoutTax(amount);
-            if(tradingCurrency != null && tradingCurrency.getCurrentRate() != null) {
+            if (tradingCurrency != null && tradingCurrency.getCurrentRate() != null) {
                 transactionalAmountWithoutTax = amount.multiply(rate);
             }
 
         } else {
             setAmountWithTax(amount);
-            if(tradingCurrency != null && tradingCurrency.getCurrentRate() != null) {
+            if (tradingCurrency != null && tradingCurrency.getCurrentRate() != null) {
                 transactionalAmountWithTax = amount.multiply(rate);
             }
         }
@@ -1596,68 +1568,6 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.type = type;
     }
 
-    @Override
-    public CustomFieldValues getCfValues() {
-        return cfValues;
-    }
-
-    @Override
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
-    }
-
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfAccumulatedValues) {
-        this.cfAccumulatedValues = cfAccumulatedValues;
-    }
-
-    @Override
-    public String getUuid() {
-        setUUIDIfNull(); // setting uuid if null to be sure that the existing code expecting uuid not null will not be impacted
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    /**
-     * Set a new UUID value.
-     *
-     * @return Old UUID value
-     */
-    @Override
-    public String clearUuid() {
-        String oldUuid = uuid;
-        uuid = UUID.randomUUID().toString();
-        return oldUuid;
-    }
-
-    /**
-     * Get an array of parent custom field entity in case custom field values should be inherited from a parent entity.
-     *
-     * @return An entity
-     */
-    @Override
-    public ICustomFieldEntity[] getParentCFEntities() {
-        return new ICustomFieldEntity[0];
-    }
-
-    /**
-     * setting uuid if null
-     */
-    @PrePersist
-    public void setUUIDIfNull() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID().toString();
-        }
-    }
-
     /**
      * @return the orderInfo
      */
@@ -1680,45 +1590,45 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.invoiceLine = invoiceLine;
     }
 
-	public DiscountPlan getDiscountPlan() {
-		return discountPlan;
-	}
+    public DiscountPlan getDiscountPlan() {
+        return discountPlan;
+    }
 
-	public void setDiscountPlan(DiscountPlan discountPlan) {
-		this.discountPlan = discountPlan;
-	}
+    public void setDiscountPlan(DiscountPlan discountPlan) {
+        this.discountPlan = discountPlan;
+    }
 
-	public Long getDiscountedRatedTransaction() {
-		return discountedRatedTransaction;
-	}
+    public Long getDiscountedRatedTransaction() {
+        return discountedRatedTransaction;
+    }
 
-	public void setDiscountedRatedTransaction(Long discountedRatedTransaction) {
-		this.discountedRatedTransaction = discountedRatedTransaction;
-	}
+    public void setDiscountedRatedTransaction(Long discountedRatedTransaction) {
+        this.discountedRatedTransaction = discountedRatedTransaction;
+    }
 
-	public BigDecimal getDiscountValue() {
-		return discountValue;
-	}
+    public BigDecimal getDiscountValue() {
+        return discountValue;
+    }
 
-	public void setDiscountValue(BigDecimal discountValue) {
-		this.discountValue = discountValue;
-	}
+    public void setDiscountValue(BigDecimal discountValue) {
+        this.discountValue = discountValue;
+    }
 
-	public DiscountPlanItemTypeEnum getDiscountPlanType() {
-		return discountPlanType;
-	}
+    public DiscountPlanItemTypeEnum getDiscountPlanType() {
+        return discountPlanType;
+    }
 
-	public void setDiscountPlanType(DiscountPlanItemTypeEnum discountPlanType) {
-		this.discountPlanType = discountPlanType;
-	}
+    public void setDiscountPlanType(DiscountPlanItemTypeEnum discountPlanType) {
+        this.discountPlanType = discountPlanType;
+    }
 
-	public DiscountPlanItem getDiscountPlanItem() {
-		return discountPlanItem;
-	}
+    public DiscountPlanItem getDiscountPlanItem() {
+        return discountPlanItem;
+    }
 
-	public void setDiscountPlanItem(DiscountPlanItem discountPlanItem) {
-		this.discountPlanItem = discountPlanItem;
-	}
+    public void setDiscountPlanItem(DiscountPlanItem discountPlanItem) {
+        this.discountPlanItem = discountPlanItem;
+    }
 
     public BigDecimal getDiscountedAmount() {
         return discountedAmount;
@@ -1728,13 +1638,13 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
         this.discountedAmount = discountedAmount;
     }
 
-	public Integer getSequence() {
-		return sequence;
-	}
+    public Integer getSequence() {
+        return sequence;
+    }
 
-	public void setSequence(Integer sequence) {
-		this.sequence = sequence;
-	}
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
+    }
 
     public Contract getRulesContract() {
         return rulesContract;
@@ -1747,158 +1657,159 @@ public class RatedTransaction extends BaseEntity implements ISearchable, ICustom
     public Date getCreated() {
         return created;
     }
+
     public void setCreated(Date created) {
         this.created = created;
     }
 
-	/**
-	 * @return the originRatedTransaction
-	 */
-	public RatedTransaction getOriginRatedTransaction() {
-		return originRatedTransaction;
-	}
-
-	/**
-	 * @param originRatedTransaction the originRatedTransaction to set
-	 */
-	public void setOriginRatedTransaction(RatedTransaction originRatedTransaction) {
-		this.originRatedTransaction = originRatedTransaction;
-	}
+    /**
+     * @return the originRatedTransaction
+     */
+    public RatedTransaction getOriginRatedTransaction() {
+        return originRatedTransaction;
+    }
 
     /**
-	 * @return the useSpecificPriceConversion
-	 */
-	public boolean isUseSpecificPriceConversion() {
-		return useSpecificPriceConversion;
-	}
+     * @param originRatedTransaction the originRatedTransaction to set
+     */
+    public void setOriginRatedTransaction(RatedTransaction originRatedTransaction) {
+        this.originRatedTransaction = originRatedTransaction;
+    }
 
     /**
-	 * @param useSpecificPriceConversion the useSpecificPriceConversion to set
-	 */
-	public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
-		this.useSpecificPriceConversion = useSpecificPriceConversion;
-	}
+     * @return the useSpecificPriceConversion
+     */
+    public boolean isUseSpecificPriceConversion() {
+        return useSpecificPriceConversion;
+    }
 
     /**
-	 * @return the transactionalAmountWithoutTax
-	 */
-	public BigDecimal getTransactionalAmountWithoutTax() {
-		return transactionalAmountWithoutTax != null ? transactionalAmountWithoutTax : amountWithoutTax;
-	}
+     * @param useSpecificPriceConversion the useSpecificPriceConversion to set
+     */
+    public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
+        this.useSpecificPriceConversion = useSpecificPriceConversion;
+    }
 
     /**
-	 * @param transactionalAmountWithoutTax transactionalAmountWithoutTax to set
-	 */
-	public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
-		this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
-	}
+     * @return the transactionalAmountWithoutTax
+     */
+    public BigDecimal getTransactionalAmountWithoutTax() {
+        return transactionalAmountWithoutTax != null ? transactionalAmountWithoutTax : amountWithoutTax;
+    }
 
     /**
-	 * @return the transactionalAmountWithTax
-	 */
-	public BigDecimal getTransactionalAmountWithTax() {
-		return transactionalAmountWithTax != null ? transactionalAmountWithTax : amountWithTax;
-	}
+     * @param transactionalAmountWithoutTax transactionalAmountWithoutTax to set
+     */
+    public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
+        this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
+    }
 
     /**
-	 * @param transactionalAmountWithTax transactionalAmountWithTax to set
-	 */
-	public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
-		this.transactionalAmountWithTax = transactionalAmountWithTax;
-	}
+     * @return the transactionalAmountWithTax
+     */
+    public BigDecimal getTransactionalAmountWithTax() {
+        return transactionalAmountWithTax != null ? transactionalAmountWithTax : amountWithTax;
+    }
 
     /**
-	 * @return the transactionalAmountTax
-	 */
-	public BigDecimal getTransactionalAmountTax() {
-		return transactionalAmountTax != null ? transactionalAmountTax : amountTax;
-	}
+     * @param transactionalAmountWithTax transactionalAmountWithTax to set
+     */
+    public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
+        this.transactionalAmountWithTax = transactionalAmountWithTax;
+    }
 
     /**
-	 * @param transactionalAmountTax transactionalAmountTax to set
-	 */
-	public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
-		this.transactionalAmountTax = transactionalAmountTax;
-	}
+     * @return the transactionalAmountTax
+     */
+    public BigDecimal getTransactionalAmountTax() {
+        return transactionalAmountTax != null ? transactionalAmountTax : amountTax;
+    }
 
     /**
-	 * @return the transactionalUnitAmountWithoutTax
-	 */
-	public BigDecimal getTransactionalUnitAmountWithoutTax() {
-		return transactionalUnitAmountWithoutTax != null ? transactionalUnitAmountWithoutTax : unitAmountWithoutTax;
-	}
+     * @param transactionalAmountTax transactionalAmountTax to set
+     */
+    public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
+        this.transactionalAmountTax = transactionalAmountTax;
+    }
 
     /**
-	 * @param transactionalUnitAmountWithoutTax transactionalUnitAmountWithoutTax to set
-	 */
-	public void setTransactionalUnitAmountWithoutTax(BigDecimal transactionalUnitAmountWithoutTax) {
-		this.transactionalUnitAmountWithoutTax = transactionalUnitAmountWithoutTax;
-	}
+     * @return the transactionalUnitAmountWithoutTax
+     */
+    public BigDecimal getTransactionalUnitAmountWithoutTax() {
+        return transactionalUnitAmountWithoutTax != null ? transactionalUnitAmountWithoutTax : unitAmountWithoutTax;
+    }
 
     /**
-	 * @return the transactionalUnitAmountWithTax
-	 */
-	public BigDecimal getTransactionalUnitAmountWithTax() {
-		return transactionalUnitAmountWithTax != null ? transactionalUnitAmountWithTax : unitAmountWithTax;
-	}
+     * @param transactionalUnitAmountWithoutTax transactionalUnitAmountWithoutTax to set
+     */
+    public void setTransactionalUnitAmountWithoutTax(BigDecimal transactionalUnitAmountWithoutTax) {
+        this.transactionalUnitAmountWithoutTax = transactionalUnitAmountWithoutTax;
+    }
 
     /**
-	 * @param transactionalUnitAmountWithTax transactionalUnitAmountWithTax to set
-	 */
-	public void setTransactionalUnitAmountWithTax(BigDecimal transactionalUnitAmountWithTax) {
-		this.transactionalUnitAmountWithTax = transactionalUnitAmountWithTax;
-	}
+     * @return the transactionalUnitAmountWithTax
+     */
+    public BigDecimal getTransactionalUnitAmountWithTax() {
+        return transactionalUnitAmountWithTax != null ? transactionalUnitAmountWithTax : unitAmountWithTax;
+    }
 
     /**
-	 * @return the transactionalUnitAmountTax
-	 */
-	public BigDecimal getTransactionalUnitAmountTax() {
-		return transactionalUnitAmountTax != null ? transactionalUnitAmountTax : unitAmountTax;
-	}
+     * @param transactionalUnitAmountWithTax transactionalUnitAmountWithTax to set
+     */
+    public void setTransactionalUnitAmountWithTax(BigDecimal transactionalUnitAmountWithTax) {
+        this.transactionalUnitAmountWithTax = transactionalUnitAmountWithTax;
+    }
 
     /**
-	 * @param transactionalUnitAmountTax transactionalUnitAmountTax to set
-	 */
-	public void setTransactionalUnitAmountTax(BigDecimal transactionalUnitAmountTax) {
-		this.transactionalUnitAmountTax = transactionalUnitAmountTax;
-	}
+     * @return the transactionalUnitAmountTax
+     */
+    public BigDecimal getTransactionalUnitAmountTax() {
+        return transactionalUnitAmountTax != null ? transactionalUnitAmountTax : unitAmountTax;
+    }
 
     /**
-	 * @return the tradingCurrency
-	 */
-	public TradingCurrency getTradingCurrency() {
-		return tradingCurrency;
-	}
+     * @param transactionalUnitAmountTax transactionalUnitAmountTax to set
+     */
+    public void setTransactionalUnitAmountTax(BigDecimal transactionalUnitAmountTax) {
+        this.transactionalUnitAmountTax = transactionalUnitAmountTax;
+    }
 
     /**
-	 * @param tradingCurrency the tradingCurrency to set
-	 */
-	public void setTradingCurrency(TradingCurrency tradingCurrency) {
-		this.tradingCurrency = tradingCurrency;
-	}
+     * @return the tradingCurrency
+     */
+    public TradingCurrency getTradingCurrency() {
+        return tradingCurrency;
+    }
 
-	public String getBusinessKey() {
-		return businessKey;
-	}
+    /**
+     * @param tradingCurrency the tradingCurrency to set
+     */
+    public void setTradingCurrency(TradingCurrency tradingCurrency) {
+        this.tradingCurrency = tradingCurrency;
+    }
 
-	public void setBusinessKey(String businessKey) {
-		this.businessKey = businessKey;
-	}
+    public String getBusinessKey() {
+        return businessKey;
+    }
 
-	public Contract getContract() {
-		return contract;
-	}
+    public void setBusinessKey(String businessKey) {
+        this.businessKey = businessKey;
+    }
 
-	public void setContract(Contract contract) {
-		this.contract = contract;
-	}
+    public Contract getContract() {
+        return contract;
+    }
 
-	public ContractItem getContractLine() {
-		return contractLine;
-	}
+    public void setContract(Contract contract) {
+        this.contract = contract;
+    }
 
-	public void setContractLine(ContractItem contractLine) {
-		this.contractLine = contractLine;
-	}
-    
+    public ContractItem getContractLine() {
+        return contractLine;
+    }
+
+    public void setContractLine(ContractItem contractLine) {
+        this.contractLine = contractLine;
+    }
+
 }

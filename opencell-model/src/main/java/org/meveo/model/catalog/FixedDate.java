@@ -17,17 +17,17 @@
  */
 package org.meveo.model.catalog;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.DatePeriod;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Fixed Date entry for Fixed calendar
@@ -37,8 +37,7 @@ import org.meveo.model.DatePeriod;
 @Entity
 @Cacheable
 @Table(name = "cat_fixed_date")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cat_fixed_date_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_fixed_date_seq"), @Parameter(name = "increment_size", value = "1") })
 public class FixedDate extends BaseEntity {
 
     private static final long serialVersionUID = 1L;

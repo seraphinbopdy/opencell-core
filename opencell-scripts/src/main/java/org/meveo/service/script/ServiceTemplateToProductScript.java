@@ -148,8 +148,8 @@ public class ServiceTemplateToProductScript extends Script {
         product.setDescription(serviceTemplate.getDescription());
         List<ProductChargeTemplateMapping> productCharges = getProductCharges(serviceTemplate);
         product.setProductCharges(productCharges);
-        product.setCfValues(serviceTemplate.getCfValues());
-        product.setCfAccumulatedValues(serviceTemplate.getCfAccumulatedValues());
+        product.setCfValuesAsJson(serviceTemplate.getCfValuesAsJson());
+//        product.setCfAccumulatedValues(serviceTemplate.getCfAccumulatedValues());
         product.setDisabled(serviceTemplate.isDisabled());
         productService.create(product);
         return product;

@@ -25,16 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.annotation.security.PermitAll;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.core.Response;
-
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.keycloak.admin.client.Keycloak;
@@ -55,6 +45,16 @@ import org.wildfly.security.http.oidc.OidcPrincipal;
 import org.wildfly.security.http.oidc.OidcSecurityContext;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Provides methods to deal with currently authenticated user
@@ -324,8 +324,8 @@ public class CurrentUserProvider {
                     List<String> resourceIds = urlToResourceMap.get(url);
                     if (resourceIds != null) {
                         loop1: for (String resourceId : resourceIds) {
-                            for (Object permission : permissions) {
-                                if (resourceId.equals(((Map<String, Object>) permission).get("rsid"))) { // .getResourceId())) {
+                            for (Permission permission : permissions) {
+                                if (resourceId.equals( permission.getResourceId())) {
                                     result[i] = true;
                                     break loop1;
                                 }

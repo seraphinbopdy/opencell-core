@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 
 import org.apache.commons.collections4.MapUtils;
 import org.meveo.admin.exception.BusinessException;

@@ -18,16 +18,17 @@
 
 package org.meveo.api.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import org.meveo.commons.utils.StringUtils;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.meveo.commons.utils.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 
 /**
  * The Class PagingAndFiltering.

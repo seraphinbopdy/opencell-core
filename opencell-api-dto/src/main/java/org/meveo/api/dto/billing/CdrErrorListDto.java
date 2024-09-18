@@ -1,9 +1,9 @@
 package org.meveo.api.dto.billing;
 
+import java.util.List;
+
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
-
-import java.util.List;
 
 public class CdrErrorListDto extends ActionStatus {
 

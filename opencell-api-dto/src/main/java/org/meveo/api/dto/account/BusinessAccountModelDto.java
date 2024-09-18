@@ -18,14 +18,14 @@
 
 package org.meveo.api.dto.account;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.api.dto.module.MeveoModuleDto;
 import org.meveo.model.crm.AccountHierarchyTypeEnum;
 import org.meveo.model.crm.BusinessAccountModel;
 import org.meveo.model.module.MeveoModule;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class BusinessAccountModelDto.

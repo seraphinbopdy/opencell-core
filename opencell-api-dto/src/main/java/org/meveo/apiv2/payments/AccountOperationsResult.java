@@ -1,14 +1,16 @@
 package org.meveo.apiv2.payments;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.immutables.value.Value;
-
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.List;
 
+import jakarta.annotation.Nullable;
+
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(builder = ImmutableAccountOperationsResult.Builder.class)
 public interface AccountOperationsResult {
     @Nullable

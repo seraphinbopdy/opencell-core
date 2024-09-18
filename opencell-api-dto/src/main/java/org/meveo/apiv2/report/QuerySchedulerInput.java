@@ -2,7 +2,7 @@ package org.meveo.apiv2.report;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;
@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Immutable
-@Style(jdkOnly = true)
+@Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableQuerySchedulerInput.class)
 public interface QuerySchedulerInput {
 

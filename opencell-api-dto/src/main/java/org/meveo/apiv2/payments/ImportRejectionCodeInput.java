@@ -1,12 +1,13 @@
 package org.meveo.apiv2.payments;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 
-import javax.annotation.Nullable;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableImportRejectionCodeInput.class)
 public interface ImportRejectionCodeInput {
 

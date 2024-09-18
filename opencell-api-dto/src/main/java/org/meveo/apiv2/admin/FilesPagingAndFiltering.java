@@ -17,12 +17,14 @@
  */
 package org.meveo.apiv2.admin;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.immutables.value.Value;
-
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
+
+import jakarta.annotation.Nullable;
+
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 
 /**
@@ -32,7 +34,7 @@ import java.util.Map;
  * @since 14.1.16
  */
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableFilesPagingAndFiltering.class)
 public interface FilesPagingAndFiltering {
     @Nullable

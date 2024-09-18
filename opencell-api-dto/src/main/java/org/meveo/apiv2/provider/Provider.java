@@ -1,21 +1,26 @@
 package org.meveo.apiv2.provider;
 
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.immutables.value.Value;
-import org.meveo.commons.utils.StringUtils;
-import org.meveo.model.admin.Currency;
-import org.meveo.model.billing.*;
-import org.meveo.model.catalog.RoundingModeEnum;
-import org.meveo.model.payments.PaymentPlanPolicy;
-
-import javax.annotation.Nullable;
-
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.annotation.Nullable;
+
+import org.immutables.value.Value;
+import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.admin.Currency;
+import org.meveo.model.billing.BankCoordinates;
+import org.meveo.model.billing.Country;
+import org.meveo.model.billing.InvoiceConfiguration;
+import org.meveo.model.billing.Language;
+import org.meveo.model.billing.UserAccount;
+import org.meveo.model.catalog.RoundingModeEnum;
+import org.meveo.model.payments.PaymentPlanPolicy;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(builder = ImmutableProvider.Builder.class)
 public interface Provider {
 

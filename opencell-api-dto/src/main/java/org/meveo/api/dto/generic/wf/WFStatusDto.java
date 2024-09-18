@@ -17,13 +17,13 @@
  */
 package org.meveo.api.dto.generic.wf;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-
 import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.generic.wf.WFStatus;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
 
 /**
  * The Class WFStatusDto

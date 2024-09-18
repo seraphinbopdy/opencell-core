@@ -1,19 +1,18 @@
 package org.meveo.apiv2.payments;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import static java.lang.Boolean.FALSE;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.apiv2.models.Resource;
 
-import javax.annotation.Nullable;
-
-import java.util.Map;
-
-import static java.lang.Boolean.FALSE;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableRejectionCodeDeleteInput.class)
 public interface RejectionCodeDeleteInput extends Resource {
 

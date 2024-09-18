@@ -1,9 +1,9 @@
 package org.meveo.api.dto;
 
-import org.meveo.api.dto.catalog.OneShotChargeTemplateDto;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.meveo.api.dto.catalog.OneShotChargeTemplateDto;
 
 public class OneShotChargeTemplatesDto {
 

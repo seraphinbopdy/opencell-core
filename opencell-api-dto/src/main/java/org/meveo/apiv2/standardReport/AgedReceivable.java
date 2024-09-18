@@ -19,21 +19,23 @@
 package org.meveo.apiv2.standardReport;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
-import javax.annotation.Nullable;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.payments.DunningLevelEnum;
+import org.meveo.model.payments.OperationCategoryEnum;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.meveo.model.payments.OperationCategoryEnum;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(name = "agedReceivable", propOrder = {"customerAccountCode", "NotYetDue", "sum_1_30", "sum_31_60", "sum_61_90", "sum_90_up", "general_total"})
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableAgedReceivable.class)
 public interface AgedReceivable extends Resource {
     @Nullable

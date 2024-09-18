@@ -1,9 +1,11 @@
 package org.meveo.apiv2.media;
 
-import org.jboss.resteasy.annotations.providers.multipart.PartType;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.core.MediaType;
 import java.net.URL;
+
+import org.jboss.resteasy.annotations.providers.multipart.PartType;
+
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.core.MediaType;
 
 
 public class MediaFile {

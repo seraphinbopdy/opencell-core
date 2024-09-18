@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
-
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.GroupedAttributes;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 public class GroupedAttributeDto {
 

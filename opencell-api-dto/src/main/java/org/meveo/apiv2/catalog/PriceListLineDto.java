@@ -1,19 +1,20 @@
 package org.meveo.apiv2.catalog;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.pricelist.PriceListTypeEnum;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
-import java.math.BigDecimal;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutablePriceListLineDto.class)
 public interface PriceListLineDto extends Resource {
 

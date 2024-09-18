@@ -1,27 +1,19 @@
 package org.meveo.apiv2.billing;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
-import org.meveo.api.dto.DiscountInvoiceAggregateDto;
-import org.meveo.api.dto.RatedTransactionDto;
-import org.meveo.api.dto.SubCategoryInvoiceAgregateDto;
-import org.meveo.api.dto.SubcategoryInvoiceAgregateAmountDto;
 import org.meveo.apiv2.models.Resource;
-import org.meveo.model.billing.InvoicePaymentStatusEnum;
-import org.meveo.model.billing.InvoiceStatusEnum;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableSubCategoryInvoiceAgregate.class)
 public interface SubCategoryInvoiceAgregate extends Resource {
 

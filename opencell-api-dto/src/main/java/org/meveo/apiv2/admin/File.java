@@ -17,12 +17,15 @@
  */
 package org.meveo.apiv2.admin;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serializable;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 
-import javax.annotation.Nullable;
-import java.io.Serializable;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Files resource.
@@ -31,7 +34,7 @@ import java.io.Serializable;
  * @since 14.1.16
  */
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableFile.class)
 public interface File extends Serializable {
 

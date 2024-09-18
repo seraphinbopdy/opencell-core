@@ -18,12 +18,13 @@
 
 package org.meveo.api.dto.billing;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.meveo.api.dto.AuditableDto;
 import org.meveo.api.dto.EnableBusinessDto;
 import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.ChartOfAccountTypeEnum;
 import org.meveo.model.billing.ChartOfAccountViewTypeEnum;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * The Class AccountingCodeDto.

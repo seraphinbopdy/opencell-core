@@ -1,21 +1,24 @@
 package org.meveo.apiv2.billing;
 
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.billing.EvaluationModeEnum;
 import org.meveo.model.billing.InvoiceValidationStatusEnum;
 import org.meveo.model.cpq.enums.OperatorEnum;
 
-import javax.annotation.Nullable;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableInvoiceValidationRuleDto.class)
 public interface InvoiceValidationRuleDto extends Resource {
 

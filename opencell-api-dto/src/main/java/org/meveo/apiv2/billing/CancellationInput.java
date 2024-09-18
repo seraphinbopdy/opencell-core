@@ -2,16 +2,18 @@ package org.meveo.apiv2.billing;
 
 import static java.lang.Boolean.FALSE;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Map;
+
 import org.immutables.value.Value;
 import org.immutables.value.Value.Default;
 import org.meveo.apiv2.models.Resource;
 
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableCancellationInput.class)
 public interface CancellationInput extends Resource {
 

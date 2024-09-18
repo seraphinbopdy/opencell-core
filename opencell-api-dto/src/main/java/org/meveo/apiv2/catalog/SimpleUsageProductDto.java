@@ -1,10 +1,12 @@
 package org.meveo.apiv2.catalog;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 
-import javax.annotation.Nullable;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * {
@@ -24,7 +26,7 @@ import javax.annotation.Nullable;
  *
  */
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableSimpleUsageProductDto.class)
 public interface SimpleUsageProductDto extends SimpleChargeProductDto {
 

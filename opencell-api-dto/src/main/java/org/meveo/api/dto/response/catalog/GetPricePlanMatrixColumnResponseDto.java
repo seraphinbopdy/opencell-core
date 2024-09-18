@@ -19,13 +19,11 @@
 package org.meveo.api.dto.response.catalog;
 
 import org.meveo.api.dto.catalog.PricePlanMatrixColumnDto;
-import org.meveo.api.dto.catalog.PricePlanMatrixDto;
 import org.meveo.api.dto.response.BaseResponse;
-import org.meveo.model.catalog.PricePlanMatrixColumn;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 
 @XmlRootElement(name = "GetPricePlanMatrixColumnResponseDto")

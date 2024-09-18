@@ -1,12 +1,13 @@
 package org.meveo.api.dto.cpq.xml;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.meveo.api.dto.BaseEntityDto;
 import org.meveo.api.dto.cpq.PriceDTO;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import java.math.BigDecimal;
-import java.util.List;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TaxPricesDto extends BaseEntityDto {

@@ -1,13 +1,13 @@
 package org.meveo.apiv2.securityDeposit;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableSecurityDepositSuccessResponse.class)
 public interface SecurityDepositSuccessResponse {
 

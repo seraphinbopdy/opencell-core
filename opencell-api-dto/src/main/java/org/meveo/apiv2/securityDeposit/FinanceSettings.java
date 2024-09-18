@@ -1,21 +1,23 @@
 package org.meveo.apiv2.securityDeposit;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import static java.lang.Boolean.FALSE;
+
+import java.math.BigDecimal;
+import java.util.Map;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.apiv2.settings.OpenOrderSettingInput;
 import org.meveo.model.securityDeposit.ArticleSelectionModeEnum;
 
-import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableFinanceSettings.class)
 public interface FinanceSettings extends Resource {
 

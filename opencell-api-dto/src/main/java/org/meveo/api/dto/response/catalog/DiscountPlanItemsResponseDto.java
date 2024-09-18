@@ -18,12 +18,17 @@
 
 package org.meveo.api.dto.response.catalog;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.meveo.api.dto.catalog.DiscountPlanItemDto;
 import org.meveo.api.dto.response.SearchResponse;
 
-import javax.xml.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class DiscountPlanItemsResponseDto.

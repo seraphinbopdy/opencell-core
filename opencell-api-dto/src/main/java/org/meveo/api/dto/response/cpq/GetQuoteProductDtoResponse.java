@@ -1,15 +1,12 @@
 package org.meveo.api.dto.response.cpq;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.api.dto.ActionStatusEnum;
-import org.meveo.api.dto.cpq.QuoteOfferDTO;
 import org.meveo.api.dto.cpq.QuoteProductDTO;
 import org.meveo.api.dto.response.BaseResponse;
-import org.meveo.model.quote.Quote;
-import org.meveo.model.quote.QuoteProduct;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 
 

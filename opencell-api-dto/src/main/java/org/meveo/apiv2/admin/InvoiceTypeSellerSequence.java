@@ -1,12 +1,12 @@
 package org.meveo.apiv2.admin;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.immutables.value.Value;
-import org.meveo.apiv2.models.Resource;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nullable;
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @Value.Immutable
-@Value.Style(jdkOnly=true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableInvoiceTypeSellerSequence.class)
 public interface InvoiceTypeSellerSequence {
 	

@@ -2,16 +2,16 @@ package org.meveo.apiv2.securityDeposit;
 
 import java.math.BigDecimal;
 
-import javax.validation.constraints.NotNull;
-
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.payments.PaymentMethodEnum;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import jakarta.validation.constraints.NotNull;
+
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableSecurityDepositCreditInput.class)
 public interface SecurityDepositCreditInput extends Resource {
 

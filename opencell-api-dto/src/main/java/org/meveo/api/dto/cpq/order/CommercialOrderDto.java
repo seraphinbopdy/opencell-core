@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotNull;
-
 import org.meveo.api.dto.BaseEntityDto;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.account.AccessDto;
@@ -16,6 +14,7 @@ import org.meveo.model.cpq.commercial.OrderLot;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 @SuppressWarnings("serial")
 public class CommercialOrderDto extends BaseEntityDto {

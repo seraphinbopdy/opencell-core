@@ -1,13 +1,13 @@
 package org.meveo.apiv2.dunning;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableDunningLevelInstanceSuccessResponse.class)
 public interface DunningLevelInstanceSuccessResponse {
 

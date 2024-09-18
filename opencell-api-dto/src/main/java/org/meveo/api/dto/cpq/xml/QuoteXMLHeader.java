@@ -1,13 +1,14 @@
 package org.meveo.api.dto.cpq.xml;
 
+import java.util.Date;
+
 import org.meveo.api.dto.cpq.CurrencyDetailDto;
 import org.meveo.api.dto.cpq.TaxDetailDTO;
 import org.meveo.model.quote.QuoteVersion;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import java.util.Date;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class QuoteXMLHeader extends Header {

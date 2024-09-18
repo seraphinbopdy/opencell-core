@@ -1,18 +1,19 @@
 package org.meveo.apiv2.report;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.admin.User;
-import org.meveo.model.report.query.QueryVisibilityEnum;
 
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableQueryScheduler.class)
 public interface QueryScheduler extends Resource {
 

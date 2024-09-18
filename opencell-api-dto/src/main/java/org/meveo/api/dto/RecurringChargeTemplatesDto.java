@@ -1,10 +1,10 @@
 package org.meveo.api.dto;
 
-import org.meveo.api.dto.catalog.RecurringChargeTemplateDto;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.meveo.api.dto.catalog.RecurringChargeTemplateDto;
 
 public class RecurringChargeTemplatesDto implements Serializable {
 

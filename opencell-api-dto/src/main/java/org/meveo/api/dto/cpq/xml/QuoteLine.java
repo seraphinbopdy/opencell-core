@@ -1,5 +1,11 @@
 package org.meveo.api.dto.cpq.xml;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.meveo.api.dto.cpq.PriceDTO;
 import org.meveo.api.dto.cpq.TaxDTO;
 import org.meveo.model.billing.TradingCurrency;
@@ -8,12 +14,11 @@ import org.meveo.model.cpq.enums.PriceTypeEnum;
 import org.meveo.model.quote.QuoteArticleLine;
 import org.meveo.model.quote.QuotePrice;
 
-import javax.xml.bind.annotation.*;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class QuoteLine {

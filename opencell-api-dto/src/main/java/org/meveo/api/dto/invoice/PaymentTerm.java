@@ -1,14 +1,15 @@
 package org.meveo.api.dto.invoice;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.List;
+
 import org.immutables.value.Value;
 import org.meveo.api.dto.LanguageDescriptionDto;
 import org.meveo.apiv2.models.Resource;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutablePaymentTerm.class)
 public interface PaymentTerm extends Resource {
 	

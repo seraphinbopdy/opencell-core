@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
-import org.meveo.api.dto.job.JobExecutionResultDto;
-import org.meveo.api.dto.response.job.JobExecutionResultResponseDto;
 import org.meveo.apiv2.billing.ProcessCdrListResult.Statistics;
 
 public class DuplicateRTResult {

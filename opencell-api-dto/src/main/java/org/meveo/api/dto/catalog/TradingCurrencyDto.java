@@ -1,9 +1,9 @@
 package org.meveo.api.dto.catalog;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
 import org.meveo.api.dto.BusinessEntityDto;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TradingCurrencyDto extends BusinessEntityDto {

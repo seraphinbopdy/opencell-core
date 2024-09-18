@@ -18,12 +18,12 @@
 
 package org.meveo.api.dto.catalog;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.api.dto.EnableBusinessDto;
 import org.meveo.model.catalog.DigitalResource;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "DigitalResource")
 @XmlAccessorType(XmlAccessType.FIELD)

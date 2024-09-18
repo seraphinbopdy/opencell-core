@@ -9,7 +9,7 @@ import org.meveo.apiv2.models.Resource;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Immutable
-@Style(jdkOnly = true)
+@Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableImportPricePlanVersionsDto.class)
 public interface ImportPricePlanVersionsDto extends Resource {
 

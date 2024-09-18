@@ -1,14 +1,13 @@
 package org.meveo.api.dto.crm;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.meveo.api.dto.IEntityDto;
 import org.meveo.api.dto.account.CustomerDto;
 import org.meveo.api.dto.account.NameDto;
-import org.meveo.model.communication.contact.Contact;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.intcrm.AddressBook;
-
-import java.util.Collections;
-import java.util.Map;
 
 public class AddressBookContactDto implements IEntityDto {
     private Long id;

@@ -2,9 +2,10 @@ package org.meveo.apiv2.billing;
 
 import static java.lang.Boolean.FALSE;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Date;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;
@@ -12,11 +13,13 @@ import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.FilterDto;
 import org.meveo.apiv2.models.Resource;
 
-import javax.annotation.Nullable;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Immutable
-@Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableGenerateInvoiceInput.class)
 public interface GenerateInvoiceInput extends Resource {
 

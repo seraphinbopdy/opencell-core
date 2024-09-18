@@ -3,13 +3,13 @@ package org.meveo.api.dto.cpq.xml;
 import java.util.Date;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-
 import org.meveo.model.quote.QuoteArticleLine;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AccountingArticle {
@@ -35,7 +35,7 @@ public class AccountingArticle {
 
     public AccountingArticle(org.meveo.model.article.AccountingArticle accountingArticle, List<QuoteArticleLine> lines, String tradingLanguage, String openOrderNumber, String openOrderReference, Date openOrderStartDate) {
         this.code = accountingArticle.getCode();
-        this.label = accountingArticle.getDescriptionI18nNotNull().get(tradingLanguage) == null ? accountingArticle.getDescription() : accountingArticle.getDescriptionI18n().get(tradingLanguage);
+        this.label = accountingArticle.getDescriptionI18nNullSafe().get(tradingLanguage) == null ? accountingArticle.getDescription() : accountingArticle.getDescriptionI18n().get(tradingLanguage);
         this.openOrderNumber = openOrderNumber;
         this.openOrderReference = openOrderReference;
         this.openOrderStartDate = openOrderStartDate;

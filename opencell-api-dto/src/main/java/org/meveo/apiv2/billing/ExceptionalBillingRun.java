@@ -2,13 +2,16 @@ package org.meveo.apiv2.billing;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static org.immutables.value.Value.Default;
-import static org.immutables.value.Value.Immutable;
-import static org.immutables.value.Value.Style;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import jakarta.annotation.Nullable;
+
+import org.immutables.value.Value.Default;
+import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Style;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.billing.BillingProcessTypesEnum;
@@ -16,13 +19,13 @@ import org.meveo.model.billing.BillingRunAutomaticActionEnum;
 import org.meveo.model.billing.DateAggregationOption;
 import org.meveo.model.billing.DiscountAggregationModeEnum;
 
-import javax.annotation.Nullable;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Immutable
-@Style(jdkOnly = true)
+@Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableExceptionalBillingRun.class)
 public interface ExceptionalBillingRun extends Resource {
 

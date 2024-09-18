@@ -1,13 +1,14 @@
 package org.meveo.api.dto.cpq;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
+
 import org.meveo.api.dto.BusinessEntityDto;
 
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import java.math.BigDecimal;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TaxDTO extends BusinessEntityDto {

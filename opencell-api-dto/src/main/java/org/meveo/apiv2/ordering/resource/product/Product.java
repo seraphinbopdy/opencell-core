@@ -18,19 +18,22 @@
 
 package org.meveo.apiv2.ordering.resource.product;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.immutables.value.Value;
-import org.meveo.apiv2.models.Resource;
-
-import javax.annotation.Nullable;
-import javax.xml.bind.annotation.XmlType;
 import java.math.BigDecimal;
 import java.util.List;
 
+import jakarta.annotation.Nullable;
+
+import org.immutables.value.Value;
+import org.meveo.apiv2.models.Resource;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import jakarta.xml.bind.annotation.XmlType;
+
 @XmlType(name="product", propOrder = { "id", "code", "name", "description" })
 @Value.Immutable
-@Value.Style(jdkOnly=true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableProduct.class)
 public interface Product extends Resource {
     @Nullable

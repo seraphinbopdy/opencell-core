@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A base class for all API DTO classes
@@ -41,7 +41,7 @@ public abstract class BaseEntityDto implements Serializable {
 
     /** The id. */
     @JsonIgnore
-    @ApiModelProperty("Entity id")
+    @Schema(description = "Entity id")
     protected Long id;
 
     /**

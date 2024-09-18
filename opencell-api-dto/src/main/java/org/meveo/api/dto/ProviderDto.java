@@ -18,17 +18,17 @@
 
 package org.meveo.api.dto;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.api.dto.account.BankCoordinatesDto;
-import org.meveo.api.dto.response.payment.PaymentPlanPolicyDto;
 import org.meveo.api.dto.invoice.InvoiceConfigurationDto;
+import org.meveo.api.dto.response.payment.PaymentPlanPolicyDto;
 import org.meveo.model.catalog.RoundingModeEnum;
 import org.meveo.model.crm.Provider;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class ProviderDto.

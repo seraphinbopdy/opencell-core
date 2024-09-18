@@ -2,7 +2,7 @@ package org.meveo.apiv2.catalog;
 
 import java.util.Date;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;
@@ -11,7 +11,7 @@ import org.meveo.model.cpq.enums.VersionStatusEnum;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Immutable
-@Style(jdkOnly = true)
+@Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableImportPricePlanVersionsItem.class)
 public interface ImportPricePlanVersionsItem {
 

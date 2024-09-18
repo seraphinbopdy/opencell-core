@@ -19,15 +19,12 @@
 package org.meveo.api.dto.account;
 
 import java.io.Serializable;
-import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 
 /**
  * The Class ContactInformationDto.

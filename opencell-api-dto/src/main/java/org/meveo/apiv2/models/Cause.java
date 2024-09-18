@@ -18,14 +18,16 @@
 
 package org.meveo.apiv2.models;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 
-import javax.annotation.Nullable;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import jakarta.annotation.Nullable;
 
 @Value.Immutable
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonSerialize
-public interface Cause{
+public interface Cause {
     @Nullable
     String getCauseMessage();
 }

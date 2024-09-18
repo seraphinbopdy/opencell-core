@@ -2,13 +2,12 @@ package org.meveo.api.dto.catalog;
 
 import java.math.BigDecimal;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
 import org.meveo.api.dto.BaseEntityDto;
 import org.meveo.model.catalog.TradingPricePlanMatrixLine;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TradingPricePlanMatrixLineDto extends BaseEntityDto {

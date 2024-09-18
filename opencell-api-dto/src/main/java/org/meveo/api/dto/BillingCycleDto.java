@@ -22,19 +22,19 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingEntityTypeEnum;
 import org.meveo.model.billing.DateAggregationOption;
 import org.meveo.model.billing.DiscountAggregationModeEnum;
 import org.meveo.model.billing.ReferenceDateEnum;
 import org.meveo.model.billing.ThresholdOptionsEnum;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class BillingCycleDto.

@@ -18,11 +18,11 @@
 
 package org.meveo.api.dto.response.payment;
 
-import org.meveo.api.dto.account.CreditCategoryDto;
-import org.meveo.api.dto.response.SearchResponse;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.meveo.api.dto.account.CreditCategoryDto;
+import org.meveo.api.dto.response.SearchResponse;
 
 /**
  * The Class CreditCategoriesResponseDto.

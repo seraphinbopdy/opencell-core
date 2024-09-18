@@ -5,6 +5,6 @@ import org.meveo.apiv2.models.PaginatedResource;
 import org.meveo.model.IEntity;
 
 @Value.Immutable
-@Value.Style(jdkOnly=true)
+@Value.Style(jdkOnly = true, jakarta = true)
 public interface GenericPaginatedResource extends PaginatedResource<IEntity> {
 }

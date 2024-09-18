@@ -18,13 +18,13 @@
 
 package org.meveo.api.dto.dwh;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.model.dwh.BarChart;
 import org.meveo.model.dwh.LegendPositionEnum;
 import org.meveo.model.dwh.OrientationEnum;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class BarChartDto.

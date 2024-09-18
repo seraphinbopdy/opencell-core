@@ -2,11 +2,11 @@ package org.meveo.api.dto.bi;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Size;
-
 import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.model.admin.FileFormat;
 import org.meveo.model.bi.FileStatusEnum;
+
+import jakarta.validation.constraints.Size;
 
 public class FlatFileDto extends BusinessEntityDto implements Serializable {
 

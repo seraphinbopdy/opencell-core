@@ -9,7 +9,7 @@ import org.meveo.apiv2.models.Resource;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableCdrDtoResponse.class)
 public interface CdrDtoResponse extends Resource {
 

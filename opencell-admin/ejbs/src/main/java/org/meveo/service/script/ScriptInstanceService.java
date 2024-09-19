@@ -633,6 +633,7 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
 
         CompiledScript compiledScript = compiledScripts.get(cacheKey);
         if (compiledScript == null) {
+            log.warn("Script interface {} with cache key {} was NOT found in compiled script cache. Currently cache contains {}", scriptCode, cacheKey.toString(), compiledScripts.keySet());
             return scriptCompilerService.getScriptInterfaceWCompile(scriptCode);
         }
 
@@ -700,9 +701,9 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
         // First check if there is a compiled script already
         CompiledScript compiledScript = compiledScripts.get(cacheKey);
         if (compiledScript != null) {
-
             return compiledScript.getScriptInstance();
         }
+
 
         // Then check if it is a deployed script
         ScriptInterface script = (ScriptInterface) EjbUtils.getServiceInterface(scriptCode.lastIndexOf('.') > 0 ? scriptCode.substring(scriptCode.lastIndexOf('.') + 1) : scriptCode);
@@ -710,6 +711,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> {
             return script;
         }
 
+        log.warn("Script instance {} with cache key {} was NOT found in compiled script cache. Currently cache contains {}", scriptCode, cacheKey.toString(), compiledScripts.keySet());
+        
         // And lastly get it from the compiled source code
         return scriptCompilerService.getScriptInstanceWCompile(scriptCode);
     }

@@ -2043,6 +2043,9 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
 		this.amountTax=BigDecimal.ZERO;
 		this.amountWithTax=BigDecimal.ZERO;
 		this.amountWithoutTax=BigDecimal.ZERO;
+		this.transactionalAmountTax=BigDecimal.ZERO;
+		this.transactionalAmountWithTax=BigDecimal.ZERO;
+		this.transactionalAmountWithoutTax=BigDecimal.ZERO;
 	}
 
     public BigDecimal getInvoiceBalance() {

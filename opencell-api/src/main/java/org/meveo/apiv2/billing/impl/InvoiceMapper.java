@@ -18,9 +18,11 @@ import org.meveo.apiv2.billing.ImmutableInvoice;
 import org.meveo.apiv2.billing.ImmutableInvoiceLine;
 import org.meveo.apiv2.models.ImmutableResource;
 import org.meveo.apiv2.ordering.ResourceMapper;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.Invoice;
+import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.order.Order;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
 
@@ -89,6 +91,12 @@ public class InvoiceMapper extends ResourceMapper<org.meveo.apiv2.billing.Invoic
 				Order order = new Order();
 				order.setId(resource.getOrder().getId());
 				invoice.setOrder(order);
+			}
+
+			if(StringUtils.isNotBlank(resource.getInvoiceTypeCode())) {
+				InvoiceType invoiceType = new InvoiceType();
+				invoiceType.setCode(resource.getInvoiceTypeCode());
+				invoice.setInvoiceType(invoiceType);
 			}
 
 			return invoice;

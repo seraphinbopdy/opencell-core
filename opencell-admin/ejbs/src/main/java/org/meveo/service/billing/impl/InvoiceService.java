@@ -6932,6 +6932,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
         //if the dueDate == null, it will be calculated at the level of the method invoiceService.calculateInvoice(updateInvoice)
         toUpdate.setDueDate(input.getDueDate());
         
+        if(input.getInvoiceType() != null) {
+            InvoiceType invoiceType = invoiceTypeService.findByCode(input.getInvoiceType().getCode());
+            if (invoiceType == null) {
+                throw new EntityDoesNotExistsException(InvoiceType.class, input.getInvoiceType().getCode());
+            }
+            toUpdate.setInvoiceType(invoiceType);
+        }
+        
         if (invoiceResource.getPaymentMethod() != null) {
             final Long pmId = invoiceResource.getPaymentMethod().getId();
             PaymentMethod pm = (PaymentMethod) tryToFindByEntityClassAndId(PaymentMethod.class, pmId);

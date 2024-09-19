@@ -354,6 +354,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 			populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), updateInvoice, true);
 			invoiceService.update(updateInvoice);
 		}
+		invoiceService.getEntityManager().flush();
 		invoiceService.calculateInvoice(updateInvoice, false);
 		invoiceService.cancelUnpaidAdv(invoice);
 		return updateInvoice;

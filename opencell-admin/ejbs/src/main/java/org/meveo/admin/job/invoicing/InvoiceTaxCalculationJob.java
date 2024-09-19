@@ -19,11 +19,10 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.job.Job;
-import org.meveo.service.job.ScopedJob;
 
 
 @Stateless
-public class InvoiceTaxCalculationJob extends ScopedJob {
+public class InvoiceTaxCalculationJob extends Job {
 
 
     public static final String INVOICE_TAX_CALCULATION_JOB = "JobInstance_InvoiceTaxCalculationJob";

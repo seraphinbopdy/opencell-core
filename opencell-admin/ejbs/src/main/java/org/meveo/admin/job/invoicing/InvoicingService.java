@@ -250,6 +250,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         final InvoiceSubCategory invoiceSubCategory = firstSCIA.getInvoiceSubCategory();
         final InvoiceCategory invoiceCategory = invoiceSubCategory.getInvoiceCategory();
         CategoryInvoiceAgregate cAggregate = new CategoryInvoiceAgregate(invoiceCategory, billingAccount, firstSCIA.getUserAccount(), invoice);
+		cAggregate.setUseSpecificPriceConversion(scAggregateList.stream().anyMatch(InvoiceAgregate::isUseSpecificPriceConversion));
         cAggregate.updateAudit(currentUser);
         addTranslatedDescription(languageCode, invoiceCategory, cAggregate,"C");
         invoice.addInvoiceAggregate(cAggregate);
@@ -410,10 +411,18 @@ public class InvoicingService extends PersistenceService<Invoice> {
         InvoicingItem summuryItem = new InvoicingItem(items);
         Tax tax = getTax(taxId);
         BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(summuryItem.getAmountWithoutTax(), summuryItem.getAmountWithTax(), tax.getPercent(), isEntreprise() , getInvoiceRounding(), getRoundingMode());
+        BigDecimal[] transactionalAmounts = NumberUtils.computeDerivedAmounts(summuryItem.getTransactionalAmountWithoutTax(), summuryItem.getTransactionalAmountWithTax(), tax.getPercent(), isEntreprise() , getInvoiceRounding(), getRoundingMode());
         invoiceAggregate.addAmountWithoutTax(amounts[0]);
         invoiceAggregate.addAmountWithTax(amounts[1]);
         invoiceAggregate.addAmountTax(amounts[2]);
+        invoiceAggregate.addTransactionAmountWithoutTax(transactionalAmounts[0]);
+        invoiceAggregate.addTransactionAmountWithTax(transactionalAmounts[1]);
+        invoiceAggregate.addTransactionAmountTax(transactionalAmounts[2]);
         invoiceAggregate.addItemNumber(summuryItem.getCount());
+		if (items.stream().anyMatch(InvoicingItem::isUseSpecificTransactionalAmount)) {
+			invoiceAggregate.setUseSpecificPriceConversion(true);
+		}
+		;
         if(invoiceAggregate instanceof SubCategoryInvoiceAgregate) {
             ((SubCategoryInvoiceAgregate)invoiceAggregate).addILs(summuryItem.getilIDs());
         }
@@ -423,6 +432,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
         invoiceAggregate.addAmountWithoutTax(subTaxAggregate.getAmountWithoutTax());
         invoiceAggregate.addAmountWithTax(subTaxAggregate.getAmountWithTax());
         invoiceAggregate.addAmountTax(subTaxAggregate.getAmountTax());
+        invoiceAggregate.addTransactionAmountWithoutTax(subTaxAggregate.getTransactionalAmountWithoutTax());
+        invoiceAggregate.addTransactionAmountWithTax(subTaxAggregate.getTransactionalAmountWithTax());
+        invoiceAggregate.addTransactionAmountTax(subTaxAggregate.getTransactionalAmountTax());
         invoiceAggregate.addItemNumber(subTaxAggregate.getItemNumber());
     }
     
@@ -513,6 +525,12 @@ public class InvoicingService extends PersistenceService<Invoice> {
         invoice.addAmountTax(invoiceAgg.getAmountTax());
         invoice.addAmountWithTax(invoiceAgg.getAmountWithTax());
         invoice.addAmountWithoutTax(invoiceAgg.getAmountWithoutTax());
+        invoice.addTransactionalAmountTax(invoiceAgg.getTransactionalAmountTax());
+        invoice.addTransactionalAmountWithTax(invoiceAgg.getTransactionalAmountWithTax());
+        invoice.addTransactionalAmountWithoutTax(invoiceAgg.getTransactionalAmountWithoutTax());
+		if (invoiceAgg.isUseSpecificPriceConversion()) {
+			invoice.setUseSpecificPriceConversion(true);
+		}
     }
     
     public void addInvoiceAggregateWithAmounts(Invoice invoice, InvoiceAgregate invoiceAgg) {

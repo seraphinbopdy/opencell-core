@@ -96,6 +96,7 @@ public class WirePaymentMethod extends PaymentMethod {
 
         setAlias(paymentMethod.getAlias());
         setPreferred(paymentMethod.isPreferred());
+        setBankCoordinates(((WirePaymentMethod) paymentMethod).getBankCoordinates());
     }
 
     @Override

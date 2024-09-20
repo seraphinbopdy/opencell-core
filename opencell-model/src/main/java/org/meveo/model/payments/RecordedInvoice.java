@@ -214,7 +214,7 @@ public class RecordedInvoice extends AccountOperation {
     public void setUnMatchingAmount(BigDecimal unMatchingAmount) {
         if (unMatchingAmount != null && getUnMatchingAmount() != null
                 && unMatchingAmount.compareTo(getUnMatchingAmount()) < 0) {
-            paymentRequests = paymentRequests + 1;
+            paymentRequests = paymentRequests != null ? paymentRequests + 1 : 1;
         }
         super.setUnMatchingAmount(unMatchingAmount);
     }

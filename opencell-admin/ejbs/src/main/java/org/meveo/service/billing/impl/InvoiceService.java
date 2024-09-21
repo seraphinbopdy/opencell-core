@@ -7671,7 +7671,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                     adv.setInvoiceBalance(BigDecimal.ZERO);
                     adv.setTransactionalInvoiceBalance(ZERO);
                 }
-                if (amount.intValue() == ZERO.intValue()) continue;
+                if (amount.compareTo(ZERO) == 0) continue;
                 if (toUpdate.isPresent()) {
                     toUpdate.get().setTransactionalAmount(toUpdate.get().getTransactionalAmount().add(amount));
                 } else {

@@ -7912,17 +7912,31 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		if (invoice == null) {
 			throw new EntityDoesNotExistsException(Invoice.class, invoiceId);
 		}
-		if(billingRun == null || billingRun.getBillingCycle() == null) {
-			invoice.setStartDate(invoice.getInvoiceDate());
+		
+		Invoice previousInvoice = null;
+		StringBuilder querySql = new StringBuilder("SELECT i FROM Invoice i LEFT JOIN BillingAccount ba on ba.id = i.billingAccount.id ");
+		querySql.append(" WHERE i.id !=:currentInvoiceId ");
+		if(billingRun.getBillingCycle() != null) {
+			querySql.append(" AND ba.billingCycle.type = :billingCycleType ");
+		}
+		querySql.append(" order by i.auditable.created DESC");
+		var query = getEntityManager().createQuery(querySql.toString());
+		query.setParameter("currentInvoiceId", invoiceId);
+		if(billingRun.getBillingCycle() != null) {
+			query.setParameter("billingCycleType", billingRun.getBillingCycle().getType());
+		}
+		List<Invoice> previousInvoices = query.setMaxResults(1).getResultList();
+		if(CollectionUtils.isNotEmpty(previousInvoices)) {
+			previousInvoice = previousInvoices.get(0); // get the second previous invoice because the first one is the current invoice
+		}
+		
+		if(billingRun == null) {
+			if(previousInvoice != null) {
+				invoice.setStartDate(previousInvoice.getInvoiceDate().from(previousInvoice.getInvoiceDate().toInstant().plus(1, ChronoUnit.DAYS)));
+			}
 			invoice.setEndDate(invoice.getInvoiceDate());
 			update(invoice);
 			return;
-		}
-		Invoice previousInvoice = null;
-		List<Invoice> previousInvoices = getEntityManager().createNamedQuery("Invoice.findByBillingCycle")
-																.setParameter("currentInvoiceId", invoiceId).setParameter("billingCycleType", billingRun.getBillingCycle().getType()).setMaxResults(1).getResultList();
-		if(CollectionUtils.isNotEmpty(previousInvoices)) {
-			previousInvoice = previousInvoices.get(0); // get the second previous invoice because the first one is the current invoice
 		}
 		
 		if(previousInvoice != null) {

@@ -13321,4 +13321,24 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <sql>create index idx_billing_invoice_line__accounting_article_id on ${db.schema.adapted}billing_invoice_line (accounting_article_id desc)</sql>
     </changeSet>
 
+    <changeSet id="#INTRD-25155_secured_tmp" author="a.rouaguebe">
+        <createTable tableName="tmp_secured_entity">
+            <column name="uuid" type="varchar(36)" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="search_id" type="varchar(36)">
+                <constraints nullable="false" />
+            </column>
+            <column name="code" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="created" type="datetime" defaultValueDate="${db.current.time}">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createIndex indexName="tmp_secured_entity_search_id_idx" tableName="tmp_secured_entity">
+            <column name="search_id" />
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

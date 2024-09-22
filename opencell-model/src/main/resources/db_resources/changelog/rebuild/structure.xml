@@ -14123,6 +14123,27 @@
             <column name="description_i18n" type="${type.json}"></column>
         </createTable>
     </changeSet>
+
+
+    <changeSet id="#INTRD-25155_secured_tmp-rebuild" author="a.rouaguebe">
+        <createTable tableName="tmp_secured_entity">
+            <column name="uuid" type="varchar(36)" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="search_id" type="varchar(36)">
+                <constraints nullable="false" />
+            </column>
+            <column name="code" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="created" type="datetime" defaultValueDate="${db.current.time}">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createIndex indexName="tmp_secured_entity_search_id_idx" tableName="tmp_secured_entity">
+            <column name="search_id" />
+        </createIndex>
+    </changeSet>
     <!-- end tables -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-def-val-1">
@@ -20999,6 +21020,7 @@
     <changeSet id="#INTRD-25028_20240916" author="TarikFA." />
     <changeSet id="#INTRD-25370_" author="a.rouaguebe" />
     <changeSet id="#INTRD-25429_20240923" author="MohammedELAZZOUZI"/>
+    <changeSet id="#INTRD-25155_secured_tmp" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

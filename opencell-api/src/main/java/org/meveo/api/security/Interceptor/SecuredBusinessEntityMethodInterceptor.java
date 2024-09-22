@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -56,6 +58,7 @@ import org.meveo.api.security.parameter.SecureMethodParameterHandler;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.BusinessEntity;
+import org.meveo.model.admin.TmpSecuredEntity;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.security.SecuredEntity;
@@ -333,19 +336,34 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
 
             String propertyToFilterClass = propertyToFilter.getEntityClass().getSimpleName();
 
+            Map<String, List<SecuredEntity>> collect = securedEntities.stream()
+                                                                      .collect(Collectors.groupingBy(SecuredEntity::getEntityClass));
+
             List<String> entityClasses = securedEntities.stream()
                                                         .map(SecuredEntity::getEntityClass)
                                                         .distinct()
                                                         .collect(Collectors.toList());
 
-            for(String entityClass: entityClasses) {
-                List<String> propertyToFilterPaths = getCriteriaPath(fieldName, propertyToFilterClass, entityClass, false);
+            for(Entry<String, List<SecuredEntity>> entityClass: collect.entrySet()) {
+                List<String> propertyToFilterPaths = getCriteriaPath(fieldName, propertyToFilterClass, entityClass.getKey(), false);
                 if (propertyToFilterPaths == null) {
                     continue;
                 }
 
+                String uuid = UUID.randomUUID().toString();
+                /*entityClass.getValue().stream().map(s -> new TmpSecuredEntity(uuid, s.getCode())).forEach(s -> securedBusinessEntityService.getEntityManager().persist(s));
+                securedBusinessEntityService.getEntityManager().flush();*/
+                
+                var insertSQL = new StringBuilder("insert into tmp_secured_entity (search_id, code) ");
 
-                StringBuilder sql = new StringBuilder("select lower(s.entityCode) from org.meveo.model.admin.SecuredEntity s where s.disabled=false and s.entityClass = '%s'");
+                String collect1 = entityClass.getValue()
+                                             .stream()
+                                             .map(s -> String.format("('%s', '%s')", uuid, s.getCode()))
+                                             .collect(Collectors.joining(","));
+                // insertSQL.append("values ").append(collect1);
+                
+                
+                StringBuilder sql = new StringBuilder("select '%s', lower(s.entity_code) from adm_secured_entity s where s.disabled=0 and s.entity_class = '%s'");
                 if(!currentUser.getRoles().isEmpty()) {
                     String roles = currentUser.getRoles()
                                               .stream()
@@ -353,14 +371,21 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
                                               .collect(Collectors.joining(","));
 
 
-                    sql.append(" and (lower(s.userName)='%s' or s.roleName in (")
+                    sql.append(" and (lower(s.user_name)='%s' or s.role_name in (")
                        .append(roles)
                        .append("))");
                 } else {
-                    sql.append(" and lower(s.userName)='%s'");
+                    sql.append(" and lower(s.user_name)='%s'");
                 }
+
+                insertSQL.append(String.format(sql.toString(), uuid, entityClass.getKey(), currentUser.getUserName()));
+                securedBusinessEntityService.getEntityManager().createNativeQuery(insertSQL.toString()).executeUpdate();
                 
-                propertyToFilterPaths.forEach(path -> newFilterCriteria.put(path, String.format(sql.toString(), entityClass, currentUser.getUserName())));
+                
+                // propertyToFilterPaths.forEach(path -> newFilterCriteria.put(path, String.format(sql.toString(), uuid, entityClass, currentUser.getUserName())));
+                
+                String sql2 = "select lower(s.code) from org.meveo.model.admin.TmpSecuredEntity s where s.searchId = '%s'";
+                propertyToFilterPaths.forEach(path -> newFilterCriteria.put(path, String.format(sql2, uuid)));
             }
 
             // Add IS NULL as a possible value if field is optional

@@ -90,6 +90,9 @@ public class NativeExpressionFactory {
             case "not-inList":
                 addInListFilter(value, exp.getFieldName(), true);
                 break;
+            case "inSqlList":
+                addSqlListFilters(value, exp.getFieldName());
+                break;
             case "minmaxRange":
                 queryBuilder.addValueInBetweenTwoFields(extractFieldWithAlias(exp.getFieldName()), extractFieldWithAlias(exp.getFieldName2()), value, false, false);
                 break;
@@ -181,6 +184,10 @@ public class NativeExpressionFactory {
 
     protected void addInListFilter(Object value, String fieldName, boolean notIn) {
         queryBuilder.addFieldInAListOfValues(extractFieldWithAlias(fieldName), value, notIn, false);
+    }
+
+    protected void addSqlListFilters(Object value, String fieldName) {
+        queryBuilder.addFieldInSubQuery(extractFieldWithAlias(fieldName), (String) value);
     }
 
     protected void addFiltersToEntity(Object value, String condition, String fieldName) {

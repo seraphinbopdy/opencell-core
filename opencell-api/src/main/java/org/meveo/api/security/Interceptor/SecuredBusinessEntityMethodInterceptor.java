@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -108,6 +109,12 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
      */
     public static boolean isSecuredEntitiesEnabled() {
         return ParamBean.getInstance().getPropertyAsBoolean("secured.entities.enabled", true);
+    }
+
+    public static long getSqlFilterThreshold() {
+        return Optional.ofNullable(ParamBean.getInstance())
+                       .map(paramBean -> paramBean.getPropertyAsInteger("secured.entities.sql.filter.threshold", 25600))
+                       .orElse(25600);
     }
 
     /**
@@ -251,7 +258,7 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
     /**
      * Get all accessible entities for the current user, both associated directly to the user or to its associated roles. Those accessible entities are then grouped by types into Map
      *
-     * @param currentUser MeveoUser current user
+     * @param allSecuredEntities all secured entities to group by entityClass
      * @return current user's accessible entities
      */
     private Map<String, Set<SecuredEntity>> getAllSecuredEntitiesGroupedByClass(List<SecuredEntity> allSecuredEntities) {
@@ -290,7 +297,11 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
             if (obj instanceof PagingAndFiltering) {
                 PagingAndFiltering pagingAndFiltering = (PagingAndFiltering) obj;
                 Map<String, Object> filters = Optional.ofNullable(pagingAndFiltering.getFilters()).orElse(new HashMap<>());
-                updateFilters(securedEntities, filters, filterResultsConfig);
+                if(securedEntities.size() < getSqlFilterThreshold()) {
+                    updateFilters(securedEntities, filters, filterResultsConfig);
+                } else {
+                    updateFiltersUsingSQL(securedEntities, filters, filterResultsConfig);
+                }
                 pagingAndFiltering.setFilters(filters);
                 break;
 
@@ -298,11 +309,80 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
             } else if (obj instanceof PaginationConfiguration) {
                 PaginationConfiguration paginationConfiguration = (PaginationConfiguration) obj;
                 Map<String, Object> filters = Optional.ofNullable(paginationConfiguration.getFilters()).orElse(new HashMap<>());
-                updateFilters(securedEntities, filters, filterResultsConfig);
+                if(securedEntities.size() < getSqlFilterThreshold()) {
+                    updateFilters(securedEntities, filters, filterResultsConfig);
+                } else {
+                    updateFiltersUsingSQL(securedEntities, filters, filterResultsConfig);
+                }
                 paginationConfiguration.setFilters(filters);
                 break;
             }
         }
+    }
+
+    private void updateFiltersUsingSQL(List<SecuredEntity> securedEntities, Map<String, Object> filters, FilterResultsConfig filterResultsConfig) throws AccessDeniedException {
+
+        if (filterResultsConfig.getItemPropertiesToFilter().length == 0) {
+            return;
+        }
+
+        Map<String, Object> newFilterCriteria = new HashMap<>();
+        for (FilterPropertyConfig propertyToFilter : filterResultsConfig.getItemPropertiesToFilter()) {
+
+            String fieldName = propertyToFilter.getProperty();
+
+            String propertyToFilterClass = propertyToFilter.getEntityClass().getSimpleName();
+
+            List<String> entityClasses = securedEntities.stream()
+                                                        .map(SecuredEntity::getEntityClass)
+                                                        .distinct()
+                                                        .collect(Collectors.toList());
+
+            for(String entityClass: entityClasses) {
+                List<String> propertyToFilterPaths = getCriteriaPath(fieldName, propertyToFilterClass, entityClass, false);
+                if (propertyToFilterPaths == null) {
+                    continue;
+                }
+
+
+                StringBuilder sql = new StringBuilder("select lower(s.entityCode) from org.meveo.model.admin.SecuredEntity s where s.disabled=false and s.entityClass = '%s'");
+                if(!currentUser.getRoles().isEmpty()) {
+                    String roles = currentUser.getRoles()
+                                              .stream()
+                                              .map(r -> "'" + r + "'")
+                                              .collect(Collectors.joining(","));
+
+
+                    sql.append(" and (lower(s.userName)='%s' or s.roleName in (")
+                       .append(roles)
+                       .append("))");
+                } else {
+                    sql.append(" and lower(s.userName)='%s'");
+                }
+                
+                propertyToFilterPaths.forEach(path -> newFilterCriteria.put(path, String.format(sql.toString(), entityClass, currentUser.getUserName())));
+            }
+
+            // Add IS NULL as a possible value if field is optional
+            if (propertyToFilter.isAllowAccessIfNull()) {
+                List<String> list = new ArrayList<>();
+                list.add(PersistenceService.SEARCH_IS_NULL);
+                newFilterCriteria.put(PersistenceService.SEARCH_AND + AND_OR_FIELD_SUFFIX + " " + fieldName, list);
+            }
+        }
+
+        // Was not able to apply any allowed entity as filtering criteria. A case when user is granted access to user account, but a higher resource (e.g. seller) is being accessed
+        if (newFilterCriteria.isEmpty()) {
+            throw new AccessDeniedException("Access to entity list is not allowed.");
+        }
+
+        Map<String, Object> orFilterItems = new HashMap<>();
+        for (Entry<String, Object> filterInfo : newFilterCriteria.entrySet()) {
+            log.debug("Adding an access limit filter for {} field by {}", filterInfo.getKey(), filterInfo.getValue());
+            orFilterItems.put("inSqlList "+ filterInfo.getKey(), filterInfo.getValue());
+        }
+
+        filters.put(PersistenceService.SEARCH_OR + AND_OR_FIELD_SUFFIX, orFilterItems);
     }
 
     /**

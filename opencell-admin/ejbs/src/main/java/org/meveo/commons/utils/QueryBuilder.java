@@ -1360,6 +1360,12 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder addFieldInSubQuery(String field, String sqlSubQuery) {
+        field = createExplicitInnerJoins(field);
+        addSql(String.format("lower(%s) IN (%s)", field, sqlSubQuery));
+        return this;
+    }
+
     /**
      * Add a criteria to check field value is/not equal to a value e.g. fieldValue=value
      * 

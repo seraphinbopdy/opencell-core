@@ -7758,8 +7758,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
                     if (aoAdjInvoice.getMatchingStatus() != MatchingStatusEnum.L) {
                         try {
+							List<Long> aoIds = new ArrayList<>();
+	                        aoIds.add(aoAdjInvoice.getId());
+							aoIds.add(aoOriginalInvoice.getId());
                             matchingCodeService.matchOperations(aoAdjInvoice.getCustomerAccount().getId(), aoAdjInvoice.getCustomerAccount().getCode(),
-                                    List.of(aoAdjInvoice.getId(), aoOriginalInvoice.getId()), aoOriginalInvoice.getId(),
+		                            aoIds, aoOriginalInvoice.getId(),
                                     MatchingTypeEnum.A, aoOriginalInvoice.getAmount());
                         } catch (Exception e) {
                             log.error("Error on payment callback processing:", e);

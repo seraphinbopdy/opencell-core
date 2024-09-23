@@ -223,6 +223,7 @@ import org.meveo.model.communication.email.MailingTypeEnum;
 import org.meveo.model.cpq.CpqQuote;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.enums.OperatorEnum;
+import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.filter.Filter;
@@ -268,6 +269,7 @@ import org.meveo.service.communication.impl.InternationalSettingsService;
 import org.meveo.service.cpq.CpqQuoteService;
 import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
+import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.filter.FilterService;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
@@ -462,7 +464,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     @Inject
     private InvoiceAgregateService invoiceAgregateService;
-	
+
 	@Inject
 	private AdvancedSettingsService advancedSettingsService;
 	
@@ -476,6 +478,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	
 	@Inject
 	private OCCTemplateService occtemplateService;
+
+    @Inject
+    protected CustomFieldTemplateService customFieldTemplateService;
+
 	/**
      * folder for adjustment pdf.
      */
@@ -4693,7 +4699,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     private Invoice instantiateInvoice(IBillableEntity entity, BillingAccount billingAccount, Long sellerId, BillingRun billingRun, Date invoiceDate, boolean isDraft, BillingCycle billingCycle,
             PaymentMethod paymentMethod, InvoiceType invoiceType, boolean isPrepaid, boolean automaticInvoiceCheck) throws BusinessException {
-
         EntityManager em = getEntityManager();
 
         Invoice invoice = new Invoice();
@@ -4729,8 +4734,18 @@ public class InvoiceService extends PersistenceService<Invoice> {
             invoice.setPaymentMethodType(paymentMethod.getPaymentType());
             invoice.setPaymentMethod(paymentMethod);
         }
+        populateCustomFieldDefaultValues(invoice);
 
         return invoice;
+    }
+
+    private void populateCustomFieldDefaultValues(Invoice invoice) {
+        Map<String, CustomFieldTemplate> associatedCF = customFieldTemplateService.findByAppliesTo(Invoice.class.getSimpleName());
+        for (Map.Entry<String, CustomFieldTemplate> cfField : associatedCF.entrySet()) {
+            if (isNotBlank(cfField.getValue().getDefaultValue())) {
+                customFieldInstanceService.setCFValue(invoice, cfField.getKey(), cfField.getValue().getDefaultValue());
+            }
+        }
     }
 
     private void setInvoiceDueDate(Invoice invoice, BillingCycle billingCycle) {
@@ -7241,7 +7256,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         List<InvoiceLineRTs> invoiceLineRTs = invoiceLinesToReplicate.getInvoiceLinesRTs();
         InvoiceType invoiceType = null;
 
-        if (StringUtils.isNotBlank(invoiceLinesToReplicate.getAdjType())) {
+        if (isNotBlank(invoiceLinesToReplicate.getAdjType())) {
             if (!invoiceTypeService.getListAdjustementCode().contains(invoiceLinesToReplicate.getAdjType())) {
                 throw new BusinessException("The type with code '" +invoiceLinesToReplicate.getAdjType() +"' is not a valid InvoiceType Adjustment");
             }
@@ -7480,7 +7495,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public Invoice updateValidatedInvoice(Invoice toUpdate, String comment, CustomFieldValues customFieldValues, String purchaseOrder) {
         toUpdate = refreshOrRetrieve(toUpdate);
 
-		if (isNotBlank(comment)) {
+		if (org.apache.commons.lang3.StringUtils.isNotBlank(comment)) {
 			toUpdate.setComment(comment);
 		}
 

@@ -52,6 +52,7 @@ import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
+import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.order.Order;
 import org.meveo.model.payments.MatchingStatusEnum;
@@ -294,8 +295,20 @@ public class InvoicingService extends PersistenceService<Invoice> {
         balance = balance.multiply(new BigDecimal(balanceFlag));
 		invoice.setDueBalance(balance.setScale(getInvoiceRounding(), getRoundingMode()));
         invoice.setNewInvoicingProcess(true);
+        populateCustomFieldDefaultValues(invoice);
         return invoice;
     }
+
+    private void populateCustomFieldDefaultValues(Invoice invoice) {
+        Map<String, CustomFieldTemplate> associatedCF =
+                customFieldTemplateService.findByAppliesTo(Invoice.class.getSimpleName());
+        for (Map.Entry<String, CustomFieldTemplate> cfField : associatedCF.entrySet()) {
+            if (isNotBlank(cfField.getValue().getDefaultValue())) {
+                customFieldInstanceService.setCFValue(invoice, cfField.getKey(), cfField.getValue().getDefaultValue());
+            }
+        }
+    }
+
     private void addTranslatedDescription(String languageCode, I18nDescripted invoiceSubCategory, InvoiceAgregate aggregate, String prefix) {
         String translationKey = prefix+invoiceSubCategory.getId() + "_" + languageCode;
         String descTranslated = descriptionMap.get(translationKey);
@@ -576,7 +589,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private BigDecimal getDiscountAmountOrPercent(Invoice invoice, SubCategoryInvoiceAgregate scAggregate, BigDecimal amount, DiscountPlanItem discountPlanItem) {
         BigDecimal computedDiscount = discountPlanItem.getDiscountValue();
         final String dpValueEL = discountPlanItem.getDiscountValueEL();
-        if (isNotBlank(dpValueEL)) {
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(dpValueEL)) {
             //#MEL TODO
             final BigDecimal evalDiscountValue = evaluateDiscountPercentExpression(dpValueEL, scAggregate.getBillingAccount(), scAggregate.getWallet(), invoice, amount);
             log.debug("for discountPlan {} percentEL -> {}  on amount={}", discountPlanItem.getCode(), computedDiscount, amount);

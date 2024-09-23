@@ -7931,13 +7931,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		Invoice previousInvoice = null;
 		StringBuilder querySql = new StringBuilder("SELECT i FROM Invoice i LEFT JOIN BillingAccount ba on ba.id = i.billingAccount.id ");
 		querySql.append(" WHERE i.id !=:currentInvoiceId ");
-		if(billingRun.getBillingCycle() != null) {
+		if(billingRun != null && billingRun.getBillingCycle() != null) {
 			querySql.append(" AND ba.billingCycle.type = :billingCycleType ");
 		}
 		querySql.append(" order by i.auditable.created DESC");
 		var query = getEntityManager().createQuery(querySql.toString());
 		query.setParameter("currentInvoiceId", invoiceId);
-		if(billingRun.getBillingCycle() != null) {
+		if(billingRun != null && billingRun.getBillingCycle() != null) {
 			query.setParameter("billingCycleType", billingRun.getBillingCycle().getType());
 		}
 		List<Invoice> previousInvoices = query.setMaxResults(1).getResultList();

@@ -13314,5 +13314,11 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="listvalues_key" value="FILE" />
         </insert>
     </changeSet>
+    
+    <changeSet id="#INTRD-25429_20240923" author="MohammedELAZZOUZI">
+        <sql>create index idx__billing_rating_transaction__invoice_line_id ON ${db.schema.adapted}billing_rated_transaction (invoice_line_id)</sql>
+        <sql>create index idx__billing_rating_transaction__origin_ratedtransaction on ${db.schema.adapted}billing_rated_transaction (origin_ratedtransaction_id)</sql>
+        <sql>create index idx_billing_invoice_line__accounting_article_id on ${db.schema.adapted}billing_invoice_line (accounting_article_id desc)</sql>
+    </changeSet>
 
 </databaseChangeLog>

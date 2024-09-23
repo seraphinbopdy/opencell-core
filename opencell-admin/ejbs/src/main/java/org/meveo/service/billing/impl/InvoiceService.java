@@ -92,6 +92,7 @@ import javax.persistence.FlushModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import javax.ws.rs.BadRequestException;
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.OutputKeys;
@@ -106,6 +107,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -221,6 +223,7 @@ import org.meveo.model.communication.email.MailingTypeEnum;
 import org.meveo.model.cpq.CpqQuote;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.enums.OperatorEnum;
+import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.filter.Filter;
@@ -266,6 +269,7 @@ import org.meveo.service.communication.impl.InternationalSettingsService;
 import org.meveo.service.cpq.CpqQuoteService;
 import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
+import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.filter.FilterService;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
@@ -460,7 +464,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     @Inject
     private InvoiceAgregateService invoiceAgregateService;
-	
+
 	@Inject
 	private AdvancedSettingsService advancedSettingsService;
 	
@@ -474,6 +478,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	
 	@Inject
 	private OCCTemplateService occtemplateService;
+
+    @Inject
+    protected CustomFieldTemplateService customFieldTemplateService;
+
 	/**
      * folder for adjustment pdf.
      */
@@ -1962,7 +1970,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @return jasper file
      */
     private File getJasperTemplateFile(String resDir, String billingTemplate, PaymentMethodEnum paymentMethod, boolean isInvoiceAdjustment) {
-        String pdfDirName = new StringBuilder(resDir).append(File.separator).append(billingTemplate).toString();
+        String pdfDirName = new StringBuilder(resDir).append(File.separator).append(billingTemplate).append(File.separator).append(isInvoiceAdjustment ? ADJUSTEMENT_DIR_NAME : PDF_DIR_NAME).toString();
 
         File pdfDir = new File(pdfDirName);
         String paymentMethodFileName = new StringBuilder("invoice_").append(paymentMethod).append(".jasper").toString();
@@ -2860,8 +2868,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
         cancelInvoice(invoice, false, rtAction);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     private void cancelInvoice(Invoice invoice, boolean remove, RatedTransactionAction rtAction) {
     	invoice = refreshOrRetrieve(invoice);
+    	// checking invoice status
         checkNonValidateInvoice(invoice);
         cancelInvoiceAndRts(invoice, rtAction);
         cancelInvoiceAdvances(invoice, null, true);
@@ -2872,7 +2882,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
             super.remove(invoice);
         } else {
             invoiceLinesService.cancelIlByInvoices(invoicesIds);
-            cancelInvoiceById(invoice.getId(), currentUser.getUserName());
+            // Update status of invoice to CANCELED
+            invoice.setStatus(InvoiceStatusEnum.CANCELED);
+            invoice.setRejectedByRule(null);
+            invoice.setRejectReason(null);
+            invoice.getAuditable().setUpdated(new Date());
+            invoice.getAuditable().setUpdater(currentUser.getUserName());
+            super.update(invoice);
         }
         updateBillingRunStatistics(invoice);
         log.debug("Invoice canceled {}", invoice.getTemporaryInvoiceNumber());
@@ -4330,7 +4346,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if(invoice.getInvoiceLines() != null && !invoice.getInvoiceLines().isEmpty()) {
             BigDecimal amountDiscount = invoice.getInvoiceLines()
                     .stream()
-                    .map(InvoiceLine::getDiscountAmount)
+		            .filter(invoiceLine -> invoiceLine.getAmountWithTax().compareTo(BigDecimal.ZERO) > 0)
+                    .map(InvoiceLine::getDiscountAmount).map(BigDecimal::abs)
                     .reduce(BigDecimal::add)
                     .orElse(BigDecimal.ZERO);
             amountDiscount = amountDiscount.add(otherDiscount);
@@ -4682,7 +4699,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     private Invoice instantiateInvoice(IBillableEntity entity, BillingAccount billingAccount, Long sellerId, BillingRun billingRun, Date invoiceDate, boolean isDraft, BillingCycle billingCycle,
             PaymentMethod paymentMethod, InvoiceType invoiceType, boolean isPrepaid, boolean automaticInvoiceCheck) throws BusinessException {
-
         EntityManager em = getEntityManager();
 
         Invoice invoice = new Invoice();
@@ -4718,8 +4734,18 @@ public class InvoiceService extends PersistenceService<Invoice> {
             invoice.setPaymentMethodType(paymentMethod.getPaymentType());
             invoice.setPaymentMethod(paymentMethod);
         }
+        populateCustomFieldDefaultValues(invoice);
 
         return invoice;
+    }
+
+    private void populateCustomFieldDefaultValues(Invoice invoice) {
+        Map<String, CustomFieldTemplate> associatedCF = customFieldTemplateService.findByAppliesTo(Invoice.class.getSimpleName());
+        for (Map.Entry<String, CustomFieldTemplate> cfField : associatedCF.entrySet()) {
+            if (isNotBlank(cfField.getValue().getDefaultValue())) {
+                customFieldInstanceService.setCFValue(invoice, cfField.getKey(), cfField.getValue().getDefaultValue());
+            }
+        }
     }
 
     private void setInvoiceDueDate(Invoice invoice, BillingCycle billingCycle) {
@@ -6921,6 +6947,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
         //if the dueDate == null, it will be calculated at the level of the method invoiceService.calculateInvoice(updateInvoice)
         toUpdate.setDueDate(input.getDueDate());
         
+        if(input.getInvoiceType() != null) {
+            InvoiceType invoiceType = invoiceTypeService.findByCode(input.getInvoiceType().getCode());
+            if (invoiceType == null) {
+                throw new EntityDoesNotExistsException(InvoiceType.class, input.getInvoiceType().getCode());
+            }
+            toUpdate.setInvoiceType(invoiceType);
+        }
+        
         if (invoiceResource.getPaymentMethod() != null) {
             final Long pmId = invoiceResource.getPaymentMethod().getId();
             PaymentMethod pm = (PaymentMethod) tryToFindByEntityClassAndId(PaymentMethod.class, pmId);
@@ -7053,7 +7087,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		    seller.setCode(invoiceResource.getSellerCode());
 		    toUpdate.setSeller(tryToFindByCodeOrId(seller));
 	    }
-
         return update(toUpdate);
     }
 
@@ -7223,7 +7256,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         List<InvoiceLineRTs> invoiceLineRTs = invoiceLinesToReplicate.getInvoiceLinesRTs();
         InvoiceType invoiceType = null;
 
-        if (StringUtils.isNotBlank(invoiceLinesToReplicate.getAdjType())) {
+        if (isNotBlank(invoiceLinesToReplicate.getAdjType())) {
             if (!invoiceTypeService.getListAdjustementCode().contains(invoiceLinesToReplicate.getAdjType())) {
                 throw new BusinessException("The type with code '" +invoiceLinesToReplicate.getAdjType() +"' is not a valid InvoiceType Adjustment");
             }
@@ -7462,7 +7495,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public Invoice updateValidatedInvoice(Invoice toUpdate, String comment, CustomFieldValues customFieldValues, String purchaseOrder) {
         toUpdate = refreshOrRetrieve(toUpdate);
 
-		if (isNotBlank(comment)) {
+		if (org.apache.commons.lang3.StringUtils.isNotBlank(comment)) {
 			toUpdate.setComment(comment);
 		}
 
@@ -7638,7 +7671,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                     adv.setInvoiceBalance(BigDecimal.ZERO);
                     adv.setTransactionalInvoiceBalance(ZERO);
                 }
-                if (amount.intValue() == ZERO.intValue()) continue;
+                if (amount.compareTo(ZERO) == 0) continue;
                 if (toUpdate.isPresent()) {
                     toUpdate.get().setTransactionalAmount(toUpdate.get().getTransactionalAmount().add(amount));
                 } else {
@@ -7667,7 +7700,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		invoice.getLinkedInvoices().add(advanceMapping);
 	}
     
-	private void cancelInvoiceAdvances(Invoice invoice, List<Invoice> advInvoices, boolean delete) {
+	public void cancelInvoiceAdvances(Invoice invoice, List<Invoice> advInvoices, boolean delete) {
 		invoice.setInvoiceBalance(null);
         invoice.setTransactionalInvoiceBalance(null);
 		if (invoice.getLinkedInvoices() != null) {
@@ -7675,7 +7708,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			if (delete) {
 				invoice.getLinkedInvoices().stream().filter(advFilter).forEach(li -> li.getLinkedInvoiceValue().setInvoiceBalance(li.getLinkedInvoiceValue().getInvoiceBalance().add(li.getAmount())));
 				linkedInvoiceService.deleteByInvoiceIdAndType(invoice.getId(), InvoiceTypeEnum.ADVANCEMENT_PAYMENT);
-				invoice.getLinkedInvoices().removeIf(advFilter);
+				//invoice.getLinkedInvoices().removeIf(advFilter);
 			} else {
 				for (Invoice advInvoice : advInvoices) {
 					invoice.getLinkedInvoices().stream().filter(advFilter).filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getId() == advInvoice.getId()).findAny().ifPresent(li -> {
@@ -7740,8 +7773,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
                     if (aoAdjInvoice.getMatchingStatus() != MatchingStatusEnum.L) {
                         try {
+							List<Long> aoIds = new ArrayList<>();
+	                        aoIds.add(aoAdjInvoice.getId());
+							aoIds.add(aoOriginalInvoice.getId());
                             matchingCodeService.matchOperations(aoAdjInvoice.getCustomerAccount().getId(), aoAdjInvoice.getCustomerAccount().getCode(),
-                                    List.of(aoAdjInvoice.getId(), aoOriginalInvoice.getId()), aoOriginalInvoice.getId(),
+		                            aoIds, aoOriginalInvoice.getId(),
                                     MatchingTypeEnum.A, aoOriginalInvoice.getAmount());
                         } catch (Exception e) {
                             log.error("Error on payment callback processing:", e);
@@ -7885,23 +7921,37 @@ public class InvoiceService extends PersistenceService<Invoice> {
 					.setParameter("invoiceNumber", invoiceNumber).setMaxResults(1)
 					.getResultList();
 	}
-	
+
 	public void setInvoicingPeriod(BillingRun billingRun, Long invoiceId) {
 		Invoice invoice = findById(invoiceId);
 		if (invoice == null) {
 			throw new EntityDoesNotExistsException(Invoice.class, invoiceId);
 		}
-		if(billingRun == null || billingRun.getBillingCycle() == null) {
-			invoice.setStartDate(invoice.getInvoiceDate());
+		
+		Invoice previousInvoice = null;
+		StringBuilder querySql = new StringBuilder("SELECT i FROM Invoice i LEFT JOIN BillingAccount ba on ba.id = i.billingAccount.id ");
+		querySql.append(" WHERE i.id !=:currentInvoiceId ");
+		if(billingRun.getBillingCycle() != null) {
+			querySql.append(" AND ba.billingCycle.type = :billingCycleType ");
+		}
+		querySql.append(" order by i.auditable.created DESC");
+		var query = getEntityManager().createQuery(querySql.toString());
+		query.setParameter("currentInvoiceId", invoiceId);
+		if(billingRun.getBillingCycle() != null) {
+			query.setParameter("billingCycleType", billingRun.getBillingCycle().getType());
+		}
+		List<Invoice> previousInvoices = query.setMaxResults(1).getResultList();
+		if(CollectionUtils.isNotEmpty(previousInvoices)) {
+			previousInvoice = previousInvoices.get(0); // get the second previous invoice because the first one is the current invoice
+		}
+		
+		if(billingRun == null) {
+			if(previousInvoice != null) {
+				invoice.setStartDate(previousInvoice.getInvoiceDate().from(previousInvoice.getInvoiceDate().toInstant().plus(1, ChronoUnit.DAYS)));
+			}
 			invoice.setEndDate(invoice.getInvoiceDate());
 			update(invoice);
 			return;
-		}
-		Invoice previousInvoice = null;
-		List<Invoice> previousInvoices = getEntityManager().createNamedQuery("Invoice.findByBillingCycle")
-																.setParameter("currentInvoiceId", invoiceId).setParameter("billingCycleType", billingRun.getBillingCycle().getType()).setMaxResults(1).getResultList();
-		if(CollectionUtils.isNotEmpty(previousInvoices)) {
-			previousInvoice = previousInvoices.get(0); // get the second previous invoice because the first one is the current invoice
 		}
 		
 		if(previousInvoice != null) {
@@ -7959,13 +8009,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
 				return false;
 			});
 		}
-		this.updateNoCheck(invoice);
+		//this.updateNoCheck(invoice);
 	}
 	@JpaAmpNewTx
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void generateAoFromAdv(Invoice invoice, List<Invoice> advs) throws ImportInvoiceException, InvoiceExistException {
+	public void generateAoFromAdv(Long invoiceId, List<Invoice> advs) throws ImportInvoiceException, InvoiceExistException {
 		// generate AO for invoice with invoice balance
-		invoice = findById(invoice.getId());
+		var invoice = findById(invoiceId);
 		RecordedInvoice recordedInvoice = recordedInvoiceService.generateRecordedInvoice(invoice, null, false);
 		update(invoice);
 		// check if the user want to close the ADV
@@ -7976,7 +8026,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		advs.forEach(adv -> {
 			// the Adv is paid
 			List<AccountOperation> advAo = accountOperationService.listByInvoice(adv);
-			if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.PAID) {
+			var lnvoicePaymentStatusEnumAvailableValues = List.of(InvoicePaymentStatusEnum.PAID, InvoicePaymentStatusEnum.PPAID);
+			if(lnvoicePaymentStatusEnumAvailableValues.contains(adv.getPaymentStatus())) {
 				advAo.forEach(ao -> {
 					Set<Long> amountCodeIds = ao.getMatchingAmounts().stream().map(MatchingAmount::getMatchingCode).map(MatchingCode::getId).collect(Collectors.toSet());
 					List<AccountOperation> paymentAo = accountOperationService.findByMatchingId(amountCodeIds);
@@ -8021,7 +8072,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		});
 	}
 	
-	private void generateAoAndPaymentForUsedAndPaidAdv(Invoice invoice, AccountOperation ao, RecordedInvoice recordInvoice, AccountOperation advAccountOperation, Boolean allowUsingUnpaidAdvance){
+	private void generateAoAndPaymentForUsedAndPaidAdv(Invoice invoice, AccountOperation ao, RecordedInvoice recordInvoice, AccountOperation advAccountOperation, Boolean autoCloseAdvanceAfterInvoiceValidation){
 				if(ao instanceof  Payment) {
 					Payment paymentAo = (Payment) ao;
 					// unmatch the old AO from ADV
@@ -8036,19 +8087,21 @@ public class InvoiceService extends PersistenceService<Invoice> {
 					newAo.setOriginCallPayment(paymentAo);
 					try {
 						// matching the old AO from ADV to new AO of the invoice
-						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoice.getId())), paymentAo.getId(), recordInvoice.getUnMatchingAmount());
+						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoice.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());
 						
 						// matching the new PAY AO to the ADV AO
 						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(advAccountOperation.getId())), newAo.getId(), newAo.getUnMatchingAmount());
-						if(allowUsingUnpaidAdvance && advAccountOperation.getUnMatchingAmount().compareTo(ZERO) > 0) {
+						if(autoCloseAdvanceAfterInvoiceValidation) {
 							if(advAccountOperation.getUnMatchingAmount().compareTo(ZERO) > 0) {
-								AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", invoice.getBillingAccount().getCustomerAccount(), paymentAo.getUnMatchingAmount(), new Date());
-								matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), advAccountOperation.getId(), paymentAo.getUnMatchingAmount());
+								AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", paymentAo.getCustomerAccount(), advAccountOperation.getUnMatchingAmount(), new Date());
+								matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), advAccountOperation.getId(), advAccountOperation.getUnMatchingAmount());
 								closedAdv.setStatus(AccountOperationStatus.CLOSED);
 							}
+							newAo.setStatus(AccountOperationStatus.CLOSED);
+							advAccountOperation.setStatus(AccountOperationStatus.CLOSED);
 						}
-						newAo.setStatus(AccountOperationStatus.CLOSED);
-						advAccountOperation.setStatus(AccountOperationStatus.CLOSED);
+						
+						
 						
 					} catch (Exception e) {
 						log.error("error while matching the operation for ao id : " + ao.getId(), e);
@@ -8083,11 +8136,16 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	
 	public void checkIfAllAdvArePaid(Invoice invoice, List<Invoice> advs){
 		// check if advs has one adv with payment status is UNPAID
+		Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance");
+		if(allowUsingUnpaidAdvance) {
+			return;
+		}
 		List<Invoice> unpaidAdvs = advs.stream().filter(adv -> adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID).collect(Collectors.toList());
 		if(CollectionUtils.isNotEmpty(unpaidAdvs)) {
 			methodCallingUtils.callMethodInNewTx(() -> cancelInvoiceAdvances(invoice, unpaidAdvs, true));
 			String advsNumber = unpaidAdvs.stream().map(Invoice::getInvoiceNumber).collect(Collectors.joining(","));
-			throw new BusinessApiException("validation fails “Unpaid/closed advance {{"+advsNumber+"}} cannot be used. It will be removed from the invoice.“");
+			throw new BusinessApiException("validation fails “Unpaid/closed advance {{" + advsNumber + "}} cannot be used. It will be removed from the invoice.“");
+			
 		}
 	}
 	
@@ -8117,10 +8175,22 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			return;
 		}
 		// extract all ADV related to the invoice COM
+		
 		List<Invoice> advInvoices = recordedInvoices.stream().map(RecordedInvoice::getInvoice)
 															.flatMap(inv -> inv.getLinkedInvoices().stream())
 															.filter(li -> li.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV"))
 															.map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
+		if(CollectionUtils.isEmpty(advInvoices)) {
+			for (RecordedInvoice recordedInvoice: recordedInvoices) {
+				Invoice invoice = (Invoice) Hibernate.unproxy(recordedInvoice.getInvoice());
+				List<LinkedInvoice> linkedInvoices = linkedInvoiceService.findLinkedInvoiceAndType(invoice.getId(), InvoiceTypeEnum.ADVANCEMENT_PAYMENT);
+				for (LinkedInvoice linkedInvoice : linkedInvoices) {
+					if(linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV")) {
+						advInvoices.add(linkedInvoice.getLinkedInvoiceValue());
+					}
+				}
+			}
+		}
 		if(CollectionUtils.isNotEmpty(advInvoices)) {
 			Long customerId = accountOperation.getCustomerAccount().getId();
 			String customerCode = accountOperation.getCustomerAccount().getCode();
@@ -8167,6 +8237,23 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			});
 		}
 	}
+	
+	
+	public void cancelUnpaidAdv(Invoice inv){
+		inv = findById(inv.getId(), List.of("linkedInvoices", "invoiceType"));
+		if(inv.getStatus() == InvoiceStatusEnum.DRAFT &&
+				!(Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance") &&
+				inv.getInvoiceType() != null && !inv.getInvoiceType().getCode().equals("ADV")) {
+			List<Invoice> advList = inv.getLinkedInvoices().stream()
+					.filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV"))
+					.filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID)
+					.map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
+			if(CollectionUtils.isNotEmpty(advList)) {
+				cancelInvoiceAdvances(inv, advList, true);
+			}
+		}
+	}
+
 }
 
 

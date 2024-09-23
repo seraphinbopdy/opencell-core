@@ -281,7 +281,8 @@ public class AccountReceivableResourceImpl implements AccountReceivableResource 
 	@Override
 	public Response transferAmounts(Long accountOperationId, AmountsTransferDto amountsTransferDto) {
 		accountOperationServiceApi.transferAmounts(accountOperationId, amountsTransferDto);
-		return Response.status(Response.Status.OK).build();
+        ActionStatus result = new ActionStatus(ActionStatusEnum.SUCCESS, "");
+        return Response.ok(result).build();
 	}
 	
 	@Override

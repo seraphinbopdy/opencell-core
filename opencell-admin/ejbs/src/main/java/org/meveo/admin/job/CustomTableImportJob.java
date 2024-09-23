@@ -116,7 +116,8 @@ public class CustomTableImportJob extends Job {
                     try {
                         Thread.sleep(waitingMillis.longValue());
                     } catch (InterruptedException e) {
-                        log.error("", e);
+                        Thread.currentThread().interrupt();
+                        log.error("Thread was interrupted", e);
                     }
                 }
             }
@@ -128,7 +129,7 @@ public class CustomTableImportJob extends Job {
 
                 } catch (InterruptedException | CancellationException e) {
                     // It was cancelled from outside - no interest
-
+                	Thread.currentThread().interrupt();
                 } catch (ExecutionException e) {
                     Throwable cause = e.getCause();
                     result.registerError(cause.getMessage());

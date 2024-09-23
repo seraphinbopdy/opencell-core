@@ -640,7 +640,11 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
         }
         List<MatchingAmount> matchingAmounts = accountOperation.getMatchingAmounts();
         if (matchingAmounts != null && !matchingAmounts.isEmpty()) {
-            unmatching(matchingAmounts.get(0).getMatchingCode().getId());
+            List<Long> matchingCodes = accountOperation.getMatchingAmounts()
+                                                 .stream()
+                                                 .map(ma -> ma.getMatchingCode().getId())
+                                                 .collect(toList());
+            matchingCodes.forEach(this::unmatching);
         }
     }
 

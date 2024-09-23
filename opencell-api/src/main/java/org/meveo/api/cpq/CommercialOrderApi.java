@@ -196,11 +196,21 @@ public class CommercialOrderApi extends BaseApi {
 			order.setDiscountPlan(loadEntityByCode(discountPlanService, orderDto.getDiscountPlanCode(), DiscountPlan.class));
         }
 		order.setLabel(orderDto.getLabel());
+		
+		String code = null;
+		
 		if(!Strings.isEmpty(orderDto.getCode())){
-			order.setCode(orderDto.getCode());
+			code = orderDto.getCode();
 		} else {
-			order.setCode(customGenericEntityCodeService.getGenericEntityCode(order));
+			code = customGenericEntityCodeService.getGenericEntityCode(order);
 		}
+
+		AdvancedSettings uniqueOrderCode = advancedSettingsService.findByCode("uniqueOrderCode");
+		if (uniqueOrderCode != null && "true".equalsIgnoreCase(uniqueOrderCode.getValue()) && commercialOrderService.findByCodeOrExternalId(code) != null) {
+			throw new BusinessException(String.format("Order with code:%s already exists. Order code duplication is forbidden by configuration.", code));
+		}
+		order.setCode(code);
+		
 		if(!Strings.isEmpty(orderDto.getDescription())){
 			order.setDescription(orderDto.getDescription());
 		}
@@ -223,6 +233,10 @@ public class CommercialOrderApi extends BaseApi {
 		}
 		
 		if(!Strings.isEmpty(orderDto.getOrderNumber())) {
+			AdvancedSettings uniqueOrderNumber = advancedSettingsService.findByCode("uniqueOrderNumber");
+			if (uniqueOrderNumber != null && "true".equalsIgnoreCase(uniqueOrderNumber.getValue()) && commercialOrderService.findByOrderNumer(orderDto.getOrderNumber())!= null) {
+				throw new BusinessException(String.format("Order with number:%s already exists. Order number duplication is forbidden by configuration.", orderDto.getOrderNumber()));
+			}
 			order.setOrderNumber(orderDto.getOrderNumber());
 		}
 
@@ -359,6 +373,12 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		order.setSalesPersonName(orderDto.getSalesPersonName());
 		        
 		if(!Strings.isEmpty(orderDto.getCode())){
+			if(!order.getCode().equals(orderDto.getCode())) {
+				AdvancedSettings uniqueOrderCode = advancedSettingsService.findByCode("uniqueOrderCode");
+				if (uniqueOrderCode != null && "true".equalsIgnoreCase(uniqueOrderCode.getValue()) && commercialOrderService.findByCode(orderDto.getCode()) != null) {
+					throw new BusinessException(String.format("Order with code:%s already exists. Order code duplication is forbidden by configuration.", orderDto.getCode()));
+				}
+			}
 			order.setCode(orderDto.getCode());
 		}
 		if(!Strings.isEmpty(orderDto.getDescription())){
@@ -990,7 +1010,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		createOrderProduct(orderOfferDto.getOrderProducts(),orderOffer);
 		Optional.ofNullable(orderOffer.getProducts()).orElse(Collections.emptyList())
 				.forEach(orderProduct -> attributeService.validateAttributes(
-						orderOffer.getProducts().get(0).getProductVersion().getAttributes(),
+						orderProduct.getProductVersion().getAttributes(),
 						orderProduct.getOrderAttributes()));
 		createOrderAttribute(orderOfferDto.getOrderAttributes(),null,orderOffer);
 		if (isQuickOrder && orderOfferDto.getOrderLineType() == OfferLineTypeEnum.APPLY_ONE_SHOT){

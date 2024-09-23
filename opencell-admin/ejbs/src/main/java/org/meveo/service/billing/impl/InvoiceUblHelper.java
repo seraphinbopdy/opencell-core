@@ -204,8 +204,9 @@ public class InvoiceUblHelper {
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
 			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
-			if(invoice.getCommercialOrder() != null){
-			setBillingReferenceForInvoice(invoice.getCommercialOrder(), invoiceXml);
+			if(invoice.getCommercialOrder() != null || invoice.getInvoiceLines().stream().anyMatch(invoiceLine -> invoiceLine.getCommercialOrder() != null)) {
+				CommercialOrder commercialOrder = invoice.getCommercialOrder() != null ? invoice.getCommercialOrder() : invoice.getInvoiceLines().stream().filter(invoiceLine -> invoiceLine.getCommercialOrder() != null).findFirst().get().getCommercialOrder();
+				setBillingReferenceForInvoice(commercialOrder, invoiceXml);
 			}
 		}
 		
@@ -1157,16 +1158,21 @@ public class InvoiceUblHelper {
 	private void setBillingReference(org.meveo.model.billing.Invoice source, Invoice target){
 		source.getLinkedInvoices().forEach(linInv -> {
 			BillingReference billingReference = setBillingReference(linInv.getLinkedInvoiceValue());
-			target.getBillingReferences().add(billingReference);
+			if(billingReference != null &&
+							StringUtils.isNotBlank(billingReference.getInvoiceDocumentReference().getID().getValue()))
+				target.getBillingReferences().add(billingReference);
 		});
 	}
 	private void setBillingReference(org.meveo.model.billing.Invoice source, CreditNote target){
 		source.getLinkedInvoices().forEach(linInv -> {
 			BillingReference billingReference = setBillingReference(linInv.getLinkedInvoiceValue());
-			target.getBillingReferences().add(billingReference);
+			if(billingReference != null &&
+					StringUtils.isNotBlank(billingReference.getInvoiceDocumentReference().getID().getValue()))
+				target.getBillingReferences().add(billingReference);
 		});
 	}
 	private BillingReference setBillingReference(org.meveo.model.billing.Invoice source){
+		if(StringUtils.isBlank(source.getInvoiceNumber())) return null;
 		BillingReference billingReference = objectFactoryCommonAggrement.createBillingReference();
 		DocumentReferenceType documentReferenceType = objectFactoryCommonAggrement.createDocumentReferenceType();
 		ID id = objectFactorycommonBasic.createID();
@@ -1432,7 +1438,9 @@ public class InvoiceUblHelper {
 		// AccountingCustomerParty/Party/PostalAddress/Country
 		CountryType countryType = objectFactoryCommonAggrement.createCountryType();
 		IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
-		identificationCode.setValue(pCustomerAccount.getAddress().getCountry().getCode());
+		if(pCustomerAccount.getAddress() != null && pCustomerAccount.getAddress().getCountry() != null){
+			identificationCode.setValue(pCustomerAccount.getAddress().getCountry().getCode());
+		}
 		countryType.setIdentificationCode(identificationCode);
 		addressType.setCountry(countryType);
 

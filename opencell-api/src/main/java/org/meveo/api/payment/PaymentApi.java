@@ -69,12 +69,7 @@ import org.meveo.api.dto.payment.PaymentResponseDto;
 import org.meveo.api.dto.response.CustomerPaymentsResponse;
 import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
-import org.meveo.api.exception.BusinessApiException;
-import org.meveo.api.exception.EntityAlreadyExistsException;
-import org.meveo.api.exception.EntityDoesNotExistsException;
-import org.meveo.api.exception.InvalidParameterException;
-import org.meveo.api.exception.MeveoApiException;
-import org.meveo.api.exception.MissingParameterException;
+import org.meveo.api.exception.*;
 import org.meveo.api.security.Interceptor.SecuredBusinessEntityMethodInterceptor;
 import org.meveo.api.security.config.annotation.FilterProperty;
 import org.meveo.api.security.config.annotation.FilterResults;
@@ -98,6 +93,7 @@ import org.meveo.apiv2.payments.SequenceAction;
 import org.meveo.apiv2.payments.resource.RejectionActionMapper;
 import org.meveo.apiv2.payments.resource.RejectionCodeMapper;
 import org.meveo.apiv2.payments.resource.RejectionGroupMapper;
+import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.ExchangeRate;
 import org.meveo.model.billing.TradingCurrency;
@@ -105,6 +101,7 @@ import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.payments.*;
 import org.meveo.model.scripts.ScriptInstance;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.payments.impl.AccountOperationService;
@@ -182,6 +179,9 @@ public class PaymentApi extends BaseApi {
 	private RejectedPaymentService rejectedPaymentService;
 	@Inject
 	private InvoiceService invoiceService;
+	
+	@Inject
+	private AdvancedSettingsApiService advancedSettingsApiService;
 
 	private static final String PAYMENT_GATEWAY_NOT_FOUND_ERROR_MESSAGE = "Payment gateway not found";
 	private static final String PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE = "Payment rejection code not found";
@@ -223,6 +223,9 @@ public class PaymentApi extends BaseApi {
         if (!occTemplate.isManualCreationEnabled()) {
             throw new BusinessException(format("Creation is prohibited; occTemplate %s is not allowed for manual creation", paymentDto.getOccTemplateCode()));
         }
+		if(ZERO.compareTo(paymentDto.getAmount()) > 0) {
+			throw new InvalidParameterException("The operation amount should not be a negative value");
+		}
 
         Payment payment = new Payment();
 		paymentService.calculateAmountsByTransactionCurrency(payment, customerAccount,
@@ -477,11 +480,11 @@ public class PaymentApi extends BaseApi {
 	public void retryRejectedPayment(Long id) throws Exception {
 		// Get rejected payment
 		Payment payment = ofNullable(paymentService.findById(id))
-				.orElseThrow(() -> new NotFoundException("Payment not found for id=" + id));
+				.orElseThrow(() -> new ActionForbiddenException("Payment not found for id=" + id));
 
 		// Get rejected payment history
 		PaymentHistory paymentHistory = ofNullable(paymentHistoryService.findPaymentHistoryByPaymentIdAndPaymentStatus(payment.getId(), PaymentStatusEnum.REJECTED))
-				.orElseThrow(() -> new NotFoundException("Rejected payment not found for id=" + id));
+				.orElseThrow(() -> new ActionForbiddenException("Only rejected payments can be retried"));
 
 		// Get customer account
 		CustomerAccount customerAccount = payment.getCustomerAccount();
@@ -910,10 +913,16 @@ public class PaymentApi extends BaseApi {
 		if (isBlank(importRejectionCodeInput.getBase64csv())) {
 			throw new BusinessApiException("Encoded file should not be null or empty");
 		}
+
+		String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator")
+										 .map(AdvancedSettings::getValue).filter(value -> !value.isEmpty())
+										 .orElse(";");
+
 		ImportRejectionCodeConfig config =
 				new ImportRejectionCodeConfig(importRejectionCodeInput.getBase64csv(),
 						importRejectionCodeInput.getIgnoreLanguageErrors(),
-						importRejectionCodeInput.getMode());
+						importRejectionCodeInput.getMode(),
+						fieldsSeparator);
 		return rejectionCodeService.importRejectionCodes(config);
 	}
 
@@ -1295,22 +1304,20 @@ public class PaymentApi extends BaseApi {
 	 * @return RejectionPayment
 	 */
 	public RejectionPayment createRejectionPayment(RejectionPayment rejectionPayment) {
-		if (rejectionPayment.getId() == null
-				&& StringUtils.isBlank(rejectionPayment.getExternalPaymentId())) {
+		if (rejectionPayment.getId() == null && StringUtils.isBlank(rejectionPayment.getExternalPaymentId())) {
 			throw new MissingParameterException("Id or externalId are required");
 		}
-		Payment payment = rejectionPayment.getId() != null
-				? loadRejectionPaymentById(rejectionPayment) : loadRejectionPaymentByExternalId(rejectionPayment);
+
+		Payment payment = rejectionPayment.getId() != null ? loadRejectionPaymentById(rejectionPayment) : loadRejectionPaymentByExternalId(rejectionPayment);
 		if(payment.getRejectedPayment() != null) {
-			throw new ForbiddenException(format("Payment[id=%d, reference=%s] has already been rejected by RejectedPayment[id=%d]",
+			throw new ActionForbiddenException(format("Payment[id=%d, reference=%s] has already been rejected by RejectedPayment[id=%d]",
 					payment.getId(), payment.getReference(), payment.getRejectedPayment().getId()));
 		}
 		if (payment.getPaymentGateway() == null && isBlank(rejectionPayment.getPaymentGatewayCode())) {
-			throw new BadRequestException("Payment has no gateway. Please provide a paymentGatewayCode");
+			throw new ActionForbiddenException("Payment has no gateway. Please provide a paymentGatewayCode");
 		}
 		PaymentRejectionCode paymentRejectionCode = rejectionCodeService.findByCode(rejectionPayment.getRejectionCode());
-		ofNullable(paymentRejectionCode)
-				.orElseThrow(() -> new NotFoundException("Provided rejection code not found"));
+		ofNullable(paymentRejectionCode).orElseThrow(() -> new ActionForbiddenException("Provided rejection code not found"));
 		PaymentGateway paymentGateway = null;
 		if(rejectionPayment.getPaymentGatewayCode() != null) {
 			paymentGateway = paymentGatewayService.findByCode(rejectionPayment.getPaymentGatewayCode());
@@ -1393,10 +1400,9 @@ public class PaymentApi extends BaseApi {
 	}
 
 	private Payment loadRejectionPaymentById(RejectionPayment rejectionPayment) {
-		AccountOperation accountOperation
-				= accountOperationService.findById(rejectionPayment.getId());
+		AccountOperation accountOperation = accountOperationService.findById(rejectionPayment.getId());
 		if (accountOperation == null) {
-			throw new NotFoundException("Payment[id=" + rejectionPayment.getId() + "] does not exist");
+			throw new ActionForbiddenException("Payment[id=" + rejectionPayment.getId() + "] does not exist");
 		}
 		if (!(accountOperation instanceof Payment)) {
 			throw new BadRequestException("AccountOperation[id=" + rejectionPayment.getId() + "] is not a payment");

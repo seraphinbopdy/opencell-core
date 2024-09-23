@@ -167,8 +167,8 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     /**
      * Rating unit description
      */
-    @Column(name = "rating_unit_description", length = 20)
-    @Size(max = 20)
+    @Column(name = "rating_unit_description", length = 255)
+    @Size(max = 255)
     protected String ratingUnitDescription;
 
     /**

@@ -72,6 +72,7 @@ import org.meveo.model.catalog.ProductTemplate;
 import org.meveo.model.crm.BusinessAccountModel;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.shared.DateUtils;
+import org.meveo.model.shared.Title;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
 import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.billing.impl.BillingAccountService;
@@ -81,6 +82,7 @@ import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.UserAccountService;
 import org.meveo.service.billing.impl.WalletOperationService;
 import org.meveo.service.catalog.impl.ProductTemplateService;
+import org.meveo.service.catalog.impl.TitleService;
 import org.meveo.service.crm.impl.SubscriptionTerminationReasonService;
 
 /**
@@ -122,6 +124,9 @@ public class UserAccountApi extends AccountEntityApi {
     
     @Inject
     private IsoIcdService isoIcdService;
+
+    @Inject
+    private TitleService titleService;
 
     @Inject
     CustomGenericEntityCodeService customGenericEntityCodeService;
@@ -385,6 +390,19 @@ public class UserAccountApi extends AccountEntityApi {
             }
             userAccount.setBillingAccount(billingAccount);
         }
+
+        if(postData.getLegalEntityType() != null && postData.getLegalEntityType().getCode() != null) {
+            if(StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                userAccount.setLegalEntityType(null);
+            } else {
+                Title title = titleService.findByCode(postData.getLegalEntityType().getCode());
+                if(title == null) {
+                    throw new EntityDoesNotExistsException(Title.class, postData.getLegalEntityType().getCode());
+                }
+                userAccount.setLegalEntityType(title);
+            }
+        }
+        
         updateAccount(userAccount, postData, checkCustomFields);
 
         if (postData.getSubscriptionDate() != null) {
@@ -611,6 +629,11 @@ public class UserAccountApi extends AccountEntityApi {
                 if (postData.getCustomFields() != null && !postData.getCustomFields().isEmpty()) {
                     existedUserAccountDto.setCustomFields(postData.getCustomFields());
                 }
+                
+                if(postData.getLegalEntityType() != null) {
+                    existedUserAccountDto.setLegalEntityType(postData.getLegalEntityType());
+                }
+                
                 update(existedUserAccountDto);
             }
         }

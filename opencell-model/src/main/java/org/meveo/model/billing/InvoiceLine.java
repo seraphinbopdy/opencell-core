@@ -37,6 +37,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
@@ -46,6 +47,7 @@ import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.DatePeriod;
 import org.meveo.model.HugeEntity;
 import org.meveo.model.ObservableEntity;
+import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
@@ -68,6 +70,7 @@ import org.meveo.model.cpq.offer.QuoteOffer;
  *
  */
 @Entity
+@DynamicUpdate
 @HugeEntity
 @ObservableEntity
 @CustomFieldEntity(cftCodePrefix = "InvoiceLine")
@@ -133,7 +136,8 @@ import org.meveo.model.cpq.offer.QuoteOffer;
         @NamedQuery(name = "InvoiceLine.sumAmountByOpenOrderNumberAndBA", query = "SELECT SUM(il.amountWithTax) FROM InvoiceLine il WHERE il.status = 'BILLED' AND il.openOrderNumber = :openOrderNumber AND il.billingAccount.id = :billingAccountId"),
 		@NamedQuery(name = "InvoiceLine.linkToInvoice", query = "UPDATE InvoiceLine il set il.status=org.meveo.model.billing.InvoiceLineStatusEnum.BILLED, il.invoice=:invoice, il.invoiceAggregateF=:invoiceAgregateF where il.id in :ids"),
         @NamedQuery(name = "InvoiceLine.getInvoicingItems", query = 
-    	"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')), il.invoiceKey "
+    	"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')),"
+    	+ " il.invoiceKey, (CASE WHEN COUNT(CASE WHEN il.useSpecificPriceConversion is TRUE THEN 1 END) > 0 THEN TRUE ELSE FALSE END), sum(il.transactionalAmountWithoutTax), sum(il.transactionalAmountWithTax), sum(il.transactionalAmountTax) "
     		+ " FROM InvoiceLine il "
     		+ " WHERE il.billingRun.id=:billingRunId AND il.billingAccount.id IN (:ids) AND il.status='OPEN' "
     		+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.invoiceKey "
@@ -170,6 +174,11 @@ import org.meveo.model.cpq.offer.QuoteOffer;
 		@NamedQuery(name = "InvoiceLine.getInvoiceLinesStatistics", query = "select SUM(il.amountWithoutTax), SUM(il.amountWithTax), SUM(il.amountTax) FROM InvoiceLine il WHERE il.billingRun.id = (:billingRunId)"),
 		@NamedQuery(name = "InvoiceLine.cancelInvoiceLines", query = "UPDATE InvoiceLine il set il.status=org.meveo.model.billing.InvoiceLineStatusEnum.CANCELED, il.auditable.updated = :now where il.id in :ids"),
 		@NamedQuery(name = "InvoiceLine.cancelInvoiceLinesByBRandBAs", query = "UPDATE InvoiceLine il set il.status=org.meveo.model.billing.InvoiceLineStatusEnum.CANCELED, il.auditable.updated = :now where il.status=org.meveo.model.billing.InvoiceLineStatusEnum.OPEN and il.billingRun.id=:billingRunId and il.billingAccount.id in :baIds"),
+		
+		@NamedQuery(name = "InvoiceLine.getTaxMapping", query = "select il, m, m.tax FROM InvoiceLine il, TaxMapping m where m.accountTaxCategory=il.billingAccount.taxCategory and (m.chargeTaxClass=il.accountingArticle.taxClass or m.chargeTaxClass is null) and (m.sellerCountry=il.seller.tradingCountry or m.sellerCountry is null) and (m.buyerCountry=il.billingAccount.tradingCountry or m.buyerCountry is null) and ((m.valid.from is null or m.valid.from<=il.billingRun.invoiceDate) AND (il.billingRun.invoiceDate<m.valid.to or m.valid.to is null)) ORDER BY m.chargeTaxClass asc NULLS LAST, m.sellerCountry asc NULLS LAST, m.buyerCountry asc NULLS LAST, priority DESC"),
+		@NamedQuery(name = "InvoiceLines.getOpenByBillingRunSummary", query = "select count(1), billingRun.id FROM InvoiceLine il WHERE billingRun.id in(:billingRuns) group by billingRun.id"),
+		@NamedQuery(name = "InvoiceLine.listOpenByBillingRuns", query = "select il.id FROM InvoiceLine il WHERE billingRun.id in(:billingRuns) order by billingRun.id, seller.id, billingAccount.id, accountingArticle.id"),
+
 		@NamedQuery(name = "InvoiceLine.checkThresholdB2BByBA", query = "select ba.id from InvoiceLine il " +
 				"join il.billingAccount ba " +
 				"where il.status='OPEN' and il.billingRun.id=:billingRunId and ba.thresholdPerEntity=1 and ba.invoicingThreshold is not null " +
@@ -523,8 +532,9 @@ public class InvoiceLine extends AuditableCFEntity {
 	@Size(max = 255)
 	private String invoiceKey;
 
-	@Transient
-	private Long sellerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
 
 	@Transient
 	private Long invoiceTypeId;
@@ -1065,12 +1075,12 @@ public class InvoiceLine extends AuditableCFEntity {
 		this.invoiceKey = invoiceKey;
 	}
 
-	public Long getSellerId() {
-		return sellerId;
+	public Seller getSeller() {
+		return seller;
 	}
 
-	public void setSellerId(Long sellerId) {
-		this.sellerId = sellerId;
+	public void setSeller(Seller seller) {
+		this.seller = seller;
 	}
 
 	public Long getInvoiceTypeId() {

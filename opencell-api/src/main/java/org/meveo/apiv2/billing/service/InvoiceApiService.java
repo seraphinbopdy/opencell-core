@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -30,6 +31,7 @@ import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -52,6 +54,7 @@ import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceStatusEnum;
+import org.meveo.model.billing.LinkedInvoice;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.RatedTransactionAction;
 import org.meveo.model.catalog.DiscountPlan;
@@ -60,6 +63,7 @@ import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.service.billing.impl.*;
 import org.meveo.service.filter.FilterService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	
@@ -96,6 +100,9 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 	@Inject
 	private InvoiceTypeService invoiceTypeService;
+
+	@Inject
+	private AdvancedSettingsService advancedSettingsService;
 
 	@Override
 	public List<Invoice> list(Long offset, Long limit, String sort, String orderBy, String filter) {
@@ -339,15 +346,17 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 		return invoiceService.createInvoiceV11(input.getInvoice(), input.getSkipValidation(), input.getIsDraft(),
 				input.getIsVirtual(), input.getIsIncludeBalance(), input.getIsAutoValidation(), invoice);
 	}
-	
+
+	@Transactional
 	public Invoice update(Invoice invoice, Invoice input, org.meveo.apiv2.billing.Invoice invoiceResource) {
         Invoice updateInvoice = invoiceService.update(invoice, input, invoiceResource);
         if (invoiceResource.getCustomFields() != null) {
 			populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), updateInvoice, true);
 			invoiceService.update(updateInvoice);
 		}
+		invoiceService.getEntityManager().flush();
 		invoiceService.calculateInvoice(updateInvoice, false);
-
+		invoiceService.cancelUnpaidAdv(invoice);
 		return updateInvoice;
     }
 

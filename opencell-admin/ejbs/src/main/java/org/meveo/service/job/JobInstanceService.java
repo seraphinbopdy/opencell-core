@@ -44,11 +44,9 @@ import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
-import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobClusterBehaviorEnum;
-import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.TimerEntity;
 import org.meveo.model.report.query.QueryScheduler;
@@ -116,7 +114,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
             if (cfts != null && !cfts.isEmpty()) {
                 try {
                     customFieldTemplateService.createMissingTemplates(EntityCustomizationUtils.getAppliesTo(job.getClass(), null), cfts.values());
-                    jobExecutionResultService.createMissingCustomFieldTemplates(cfts.values());
+                    jobExecutionResultService.createMissingCustomFieldTemplates(job.getCustomFields().values());
                 } catch (Exception e) {
                     log.error("Failed to registed missing CF templates for job " + job.getClass());
                 }

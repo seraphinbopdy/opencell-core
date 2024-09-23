@@ -373,9 +373,6 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         walletOperation.setTradingCurrency(walletOperation.getBillingAccount() != null ? walletOperation.getBillingAccount().getTradingCurrency() : null);
 
         RatingResult ratedEDRResult = rateBareWalletOperation(walletOperation, chargeInstance.getAmountWithoutTax(), chargeInstance.getAmountWithTax(), chargeInstance.getCountry().getId(), chargeInstance.getCurrency(), isVirtual);
-	    if(edr != null) {
-		    edr.setWalletOperation(walletOperation);
-	    }
         ChargeTemplate chargeTemplate = chargeInstance.getChargeTemplate();
 
         if (walletOperation.getInputUnitDescription() == null) {
@@ -1209,11 +1206,12 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                     wo.setUnitAmountWithoutTax(priceWithoutTax);
                 }
                 if (ppmVersion.getPriceEL() != null) {
-	                var priceTemp = elUtils.evaluateAmountExpression(ppmVersion.getPriceEL(), wo, wo.getChargeInstance().getUserAccount(), null, priceWithoutTax).setScale(BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
+	                var priceTemp = elUtils.evaluateAmountExpression(ppmVersion.getPriceEL(), wo, wo.getChargeInstance().getUserAccount(), null, priceWithoutTax);
 	                if (priceTemp == null) {
 		                throw new PriceELErrorException("Can't evaluate price for price plan " + pricePlan.getId() + " EL:" + pricePlan.getAmountWithoutTaxEL());
 	                }
-                    if(appProvider.isEntreprise()) {
+	                priceTemp.setScale(BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
+	                if(appProvider.isEntreprise()) {
 						priceWithoutTax = priceTemp;
 					} else {
 						priceWithTax = priceTemp;

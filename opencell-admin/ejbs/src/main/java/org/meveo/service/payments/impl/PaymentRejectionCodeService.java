@@ -20,8 +20,10 @@ import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentRejectionCode;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.billing.impl.TradingLanguageService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -57,6 +59,9 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
     @Inject
     private PaymentGatewayService paymentGatewayService;
 
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
+    
     /**
      * Create payment rejection code
      *
@@ -125,10 +130,17 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         String exportFileName = "PaymentRejectionCodes_"
                 + (paymentGateway != null ? paymentGateway.getCode() : "AllGateways") + "_" + dateFormatter.format(new Date());
         List<Object[]> languagesDetails = getAvailableTradingLanguage();
-        List<String> dataToExport = prepareLines(list(new PaginationConfiguration(filters)), languagesDetails);
+        String fileNameExtension = ofNullable(advancedSettingsService.findByCode("standardExports.fileNameExtension")).map(AdvancedSettings::getValue)
+                                                                                                                      .filter(value -> !value.isEmpty())
+                                                                                                                      .orElse("csv");
+        String fieldsSeparator = ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator")).map(AdvancedSettings::getValue)
+                                                                                                                  .filter(value -> !value.isEmpty())
+                                                                                                                  .orElse(";");
+        List<String> dataToExport = prepareLines(list(new PaginationConfiguration(filters)), languagesDetails, fieldsSeparator);
         try {
-            String exportFile = buildExportFilePath(exportFileName, "exports");
-            String header = "Payment gateway;Rejection code;Description;" + getAvailableTradingLanguages(languagesDetails);
+            String exportFile = buildExportFilePath(exportFileName, "exports", fileNameExtension);
+            List<String> fields = List.of("Payment gateway", "Rejection code", "Description", getAvailableTradingLanguages(languagesDetails));
+            String header = String.join(fieldsSeparator, fields);
             try (PrintWriter writer = new PrintWriter(exportFile)) {
                 writer.println(header);
                 dataToExport.forEach(writer::println);
@@ -151,11 +163,10 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                 .getResultList();
     }
 
-    private List<String> prepareLines(List<PaymentRejectionCode> rejectionCodes, List<Object[]> languagesDetails) {
+    private List<String> prepareLines(List<PaymentRejectionCode> rejectionCodes, List<Object[]> languagesDetails, String fieldsSeparator) {
         return rejectionCodes.stream()
-                .map(rejectionCode -> convertToCSV(rejectionCode.getPaymentGateway().getCode(),
-                        rejectionCode.getCode(),
-                        rejectionCode.getDescription(),
+                .map(rejectionCode -> String.join(fieldsSeparator, rejectionCode.getPaymentGateway().getCode(),
+                        rejectionCode.getCode(), rejectionCode.getDescription(),
                         buildI18nDescription(rejectionCode.getDescriptionI18n(), languagesDetails)))
                 .collect(toList());
     }
@@ -176,13 +187,13 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                 .collect(joining(";"));
     }
 
-    private String buildExportFilePath(String fileName, String directoryName) {
+    private String buildExportFilePath(String fileName, String directoryName, String fileNameExtension) {
         String exportDirectoryPath = paramBeanFactory.getChrootDir() + separator + directoryName + separator;
         File exportDirectory = new File(exportDirectoryPath);
         if (!exportDirectory.exists()) {
             exportDirectory.mkdirs();
         }
-        return exportDirectory.getPath() + separator + fileName + ".csv";
+        return exportDirectory.getPath() + separator + fileName + "." + ofNullable(fileNameExtension).orElse("csv");
     }
 
     public String convertToCSV(String... data) {
@@ -204,7 +215,7 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         String[] lines = new String(importStream).split("\\n");
         int resultCount = 0;
         if (lines.length > 0) {
-            String[] header = lines[0].trim().split(DELIMITER);
+            String[] header = lines[0].trim().split(Optional.ofNullable(config.getFieldSeparator()).orElse(DELIMITER));
             List<Object[]> languagesDetails = getAvailableTradingLanguage();
             validateHeader(header, languagesDetails);
             List<PaymentRejectionCode> rejectionCodes = createCodesFromLines(lines, header, languagesDetails, config);
@@ -236,7 +247,7 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                                                              List<Object[]> languagesDetails, ImportRejectionCodeConfig config) {
         List<PaymentRejectionCode> rejectionCodes = new ArrayList<>();
         for (int index = 1; index < lines.length; index++) {
-            String[] line = lines[index].trim().split(DELIMITER);
+            String[] line = lines[index].trim().split(Optional.ofNullable(config.getFieldSeparator()).orElse(DELIMITER));
             PaymentRejectionCode paymentRejectionCode = createFromImportData(line, header, index);
             if(!config.isIgnoreLanguageErrors()) {
                 String languagesValidation =

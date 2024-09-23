@@ -381,6 +381,62 @@
         	<column name="code" value="EDR_numeric_parameter_5"></column>
         	<column name="description" value="EDR numeric parameter 5"></column>
         </insert>
+
+		<insert tableName="cpq_attribute">
+			<column name="id" valueSequenceNext="cpq_attribute_seq" />
+			<column name="code" value="trading_currency_code" />
+			<column name="uuid" value="trading_currency_code" />
+			<column name="description" value="Billing currency code" />
+			<column name="attribute_type" value="TEXT" />
+			<column name="version" value="0" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="creator" value="applicationInitializer" />
+			<column name="attribute_category" value="BUSINESS" />
+			<column name="el_value" value="#{ba.tradingCurrency.currencyCode}" />
+		</insert>
+
+		<insert tableName="cpq_attribute">
+			<column name="id" valueSequenceNext="cpq_attribute_seq" />
+			<column name="code" value="trading_country_code" />
+			<column name="uuid" value="trading_country_code" />
+			<column name="description" value="Billing country code" />
+			<column name="attribute_type" value="TEXT" />
+			<column name="version" value="0" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="creator" value="applicationInitializer" />
+			<column name="attribute_category" value="BUSINESS" />
+			<column name="el_value" value="#{ba.tradingCountry.countryCode}" />
+		</insert>
+
+		<insert tableName="cpq_attribute">
+			<column name="id" valueSequenceNext="cpq_attribute_seq" />
+			<column name="code" value="offer_code" />
+			<column name="uuid" value="offer_code" />
+			<column name="description" value="Offer code" />
+			<column name="attribute_type" value="TEXT" />
+			<column name="version" value="0" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="creator" value="applicationInitializer" />
+			<column name="attribute_category" value="BUSINESS" />
+			<column name="el_value" value="#{op.offerCode}" />
+		</insert>
+
+		<insert tableName="cpq_attribute">
+			<column name="id" valueSequenceNext="cpq_attribute_seq" />
+			<column name="code" value="is_termed_subscription" />
+			<column name="uuid" value="is_termed_subscription" />
+			<column name="description" value="Subscription is termed?" />
+			<column name="attribute_type" value="BOOLEAN" />
+			<column name="version" value="0" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="creator" value="applicationInitializer" />
+			<column name="attribute_category" value="BUSINESS" />
+			<column name="el_value" value="#{sub.subscriptionRenewal.autoRenew == false &amp;&amp; ((sub.subscriptionRenewal.initialyActiveFor != null &amp;&amp; sub.subscriptionRenewal.initialTermType == 'RECURRING') || (sub.subscriptionRenewal.initialTermType == 'CALENDAR' &amp;&amp; sub.subscriptionRenewal.calendarInitialyActiveFor != null) ||(sub.subscriptionRenewal.initialTermType == 'FIXED' &amp;&amp;  sub.subscribedTillDate != null ))}" />
+		</insert>
     </changeSet>
     
     <changeSet author="AndriusKarpavicius" id="rebuild-data-currencies">
@@ -9699,6 +9755,23 @@
                 ]]>
             </column>
         </insert>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="INVOICING"/>
+            <column name="job_template" value="InvoiceTaxCalculationJob"/>
+            <column name="code" value="InvoiceTaxCalculation"/>
+            <column name="uuid" value="InvoiceTaxCalculation"/>
+            <column name="description" value="Calculate tax and amounts on invoiceLine level"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}],"batchSize": [{"long": 10000}],"waitingMillis": [{"long": 0}]}
+                ]]>
+            </column>
+        </insert>
     </changeSet>
 
     <changeSet author="AndriusKarpavicius" id="rebuild-data-occTemplates">
@@ -13923,22 +13996,22 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="tag_end" value="}" />
             <column name="subject">
                 <![CDATA[
-                    #{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} "#{batchEntityDescription ENG}"
+                    #{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} "#{batchEntityDescription}"
                 ]]>
             </column>
             <column name="subject_i18n">
                 <![CDATA[
-                    {"FRA":"#{batchEntityStatus} Rouvrir les EDRs du lot #{batchEntityId} \"#{batchEntityDescription FRA}\"","ENG":"#{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} \"#{batchEntityDescription ENG}\""}
+                    {"FRA":"#{batchEntityStatus} Rouvrir les EDRs du lot #{batchEntityId} \"#{batchEntityDescription}\"","ENG":"#{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} \"#{batchEntityDescription}\""}
                 ]]>
             </column>
             <column name="htmlcontent">
                 <![CDATA[
-                    Batch "#{batchEntityDescription ENG}" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecution processed}<br>More information available on job execution report (id:#{jobExecutionId}) on the wallet operation screen in Portal.
+                    Batch "#{batchEntityDescription}" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the EDRs screen in Portal.
                 ]]>
             </column>
             <column name="htmlcontent_i18n">
                 <![CDATA[
-                    {"FRA":"Le lot \"#{batchEntityDescription FRA}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecution items processed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des wallet operations du Portail.","ENG":"Batch \"#{batchEntityDescription ENG}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecution processed}<br>More information available on job execution report (id:#{jobExecutionId}) on the wallet operation screen in Portal."}
+                    {"FRA":"Le lot \"#{batchEntityDescription}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecutionNbItemsProcessed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des EDRs du Portail.","ENG":"Batch \"#{batchEntityDescription}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the EDRs screen in Portal."}
                 ]]>
             </column>
         </insert>
@@ -14019,7 +14092,9 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="script_instance_id"
 					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
 		</insert>
-	</changeSet><changeSet id="INTRD-24052_ReRateV2_filter_data" author="a.rouaguebe">
+	</changeSet>
+	
+	<changeSet id="INTRD-24052_ReRateV2_filter_data" author="a.rouaguebe">
 
 	<insert tableName="crm_custom_field_tmpl">
 		<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
@@ -14180,6 +14255,46 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
                 "emailTemplate": [{"entity": {"code": "MASS_REOPEN_EDR_ZERO", "classname": "org.meveo.model.communication.email.EmailTemplate"}}],
                 "preUpdateEl": [{"string": "#{mv:validateAndCancelDerivedWosEdrsAndRts(edr)}"}]
                 }]]>
+			</column>
+		</insert>
+	</changeSet>
+	<changeSet id="#INTRD-24962_duplicated_order_number_rebuild" author="a.rouaguebe">
+		<insert tableName="advanced_settings">
+			<column name="id" valueSequenceNext="advanced_settings_seq"/>
+			<column name="version" value="0"/>
+			<column name="disabled" valueNumeric="0"/>
+			<column name="created" valueComputed="${db.current.time}"/>
+			<column name="category" value="Customer care"/>
+			<column name="property_group" value="Orders"/>
+			<column name="property_type" value="java.lang.Boolean"/>
+			<column name="property_value" value="true"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="code" value="uniqueOrderCode"/>
+			<column name="description" value="Enforce order code unicity"/>
+			<column name="description_i18n">
+				<![CDATA[{
+					"FRA":"Forcer l'unicit\u00e9 du code de commande",
+					"ENG":"Enforce order code unicity"
+				}]]>
+			</column>
+		</insert>
+		<insert tableName="advanced_settings">
+			<column name="id" valueSequenceNext="advanced_settings_seq"/>
+			<column name="version" value="0"/>
+			<column name="disabled" valueNumeric="0"/>
+			<column name="created" valueComputed="${db.current.time}"/>
+			<column name="category" value="Customer care"/>
+			<column name="property_group" value="Orders"/>
+			<column name="property_type" value="java.lang.Boolean"/>
+			<column name="property_value" value="true"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="code" value="uniqueOrderNumber"/>
+			<column name="description" value="Enforce order number unicity"/>
+			<column name="description_i18n">
+				<![CDATA[{
+					"FRA":"Forcer l'unicit\u00e9 du num\u00e9ro de commande",
+					"ENG":"Enforce order number unicity"
+				}]]>
 			</column>
 		</insert>
 	</changeSet>

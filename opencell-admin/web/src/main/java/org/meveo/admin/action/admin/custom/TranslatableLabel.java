@@ -62,7 +62,11 @@ public class TranslatableLabel implements Serializable {
             labelI18n = new HashMap<>();
             for (int i = 1; i < splitLabel.length; i++) {
                 String[] languageLabel = splitLabel[i].split("=");
-                labelI18n.put(languageLabel[0], languageLabel[1]);
+                if (languageLabel.length > 1) {
+                    labelI18n.put(languageLabel[0], languageLabel[1]);
+                } else {
+                    labelI18n.put(languageLabel[0], "");
+                }
             }
         }
     }

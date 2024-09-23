@@ -14266,6 +14266,34 @@ Meaning that advances won’t be available for further invoices."/>
             <where>code = 'MASS_REOPEN_EDR_ZERO'</where>
         </update>
     </changeSet>
+    <changeSet id="#INTRD-25224_20240909" author="Mohammed_ElAzzouzi">
+        <addColumn tableName="billing_invoice_line">
+            <column name="seller_id"  type="bigint" />
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="seller_id"
+        						 baseTableName="billing_invoice_line"
+        						 constraintName="fk_Invoice_line_seller_id"
+        						 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+            					 onUpdate="NO ACTION" referencedColumnNames="id"
+            					 referencedTableName="crm_seller" />
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="INVOICING"/>
+            <column name="job_template" value="InvoiceTaxCalculationJob"/>
+            <column name="code" value="InvoiceTaxCalculation"/>
+            <column name="uuid" value="InvoiceTaxCalculation"/>
+            <column name="description" value="Calculate tax and amounts on invoiceLine level"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}],"batchSize": [{"long": 10000}],"waitingMillis": [{"long": 0}]}
+                ]]>
+            </column>
+        </insert>
+    </changeSet>
 
     <changeSet id="#INTRD-25105_fix_default_filter" author="a.rouaguebe">
         <update tableName="meveo_job_instance">
@@ -14522,6 +14550,195 @@ Meaning that advances won’t be available for further invoices."/>
             <column name="description" value="Valid from" />
             <where>code = 'B2C +15fr'</where>
         </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-24962_duplicated_order_number" author="a.rouaguebe">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="Customer care"/>
+            <column name="property_group" value="Orders"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="uniqueOrderCode"/>
+            <column name="description" value="Enforce order code unicity"/>
+            <column name="description_i18n">
+                <![CDATA[{
+					"FRA":"Forcer l'unicit\u00e9 du code de commande",
+					"ENG":"Enforce order code unicity"
+				}]]>
+            </column>
+        </insert>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="Customer care"/>
+            <column name="property_group" value="Orders"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="uniqueOrderNumber"/>
+            <column name="description" value="Enforce order number unicity"/>
+            <column name="description_i18n">
+                <![CDATA[{
+					"FRA":"Forcer l'unicit\u00e9 du num\u00e9ro de commande",
+					"ENG":"Enforce order number unicity"
+				}]]>
+            </column>
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-25091_ji_desc_i18n" author="a.rouaguebe">
+        <addColumn tableName="meveo_job_instance">
+            <column name="description_i18n" type="${type.json}" />
+        </addColumn>
+        
+    </changeSet>
+
+    <changeSet id="#INTRD-25259_fix_repoen_template" author="a.rouaguebe">
+        <update tableName="com_message_template">
+
+            <column name="subject">
+                <![CDATA[
+                    #{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} "#{batchEntityDescription}"
+                ]]>
+            </column>
+            <column name="subject_i18n">
+                <![CDATA[
+                    {"FRA":"#{batchEntityStatus} Rouvrir les EDRs du lot #{batchEntityId} \"#{batchEntityDescription}\"","ENG":"#{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} \"#{batchEntityDescription}\""}
+                ]]>
+            </column>
+            <column name="htmlcontent">
+                <![CDATA[
+                    Batch "#{batchEntityDescription}" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the EDRs screen in Portal.
+                ]]>
+            </column>
+            <column name="htmlcontent_i18n">
+                <![CDATA[
+                    {"FRA":"Le lot \"#{batchEntityDescription}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecutionNbItemsProcessed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des ERDs du Portail.","ENG":"Batch \"#{batchEntityDescription}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the EDRs screen in Portal."}
+                ]]>
+            </column>
+        </update>
+    </changeSet>
+    
+    <changeSet id="#INTRD-24675_add_business_attribute" author="a.rouaguebe">
+        <modifyDataType tableName="cpq_attribute" columnName="el_value" newDataType="varchar(1000)" />
+        <insert tableName="cpq_attribute">
+            <column name="id" valueSequenceNext="cpq_attribute_seq" />
+            <column name="code" value="trading_currency_code" />
+            <column name="uuid" value="trading_currency_code" />
+            <column name="description" value="Billing currency code" />
+            <column name="attribute_type" value="TEXT" />
+            <column name="version" value="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="attribute_category" value="BUSINESS" />
+            <column name="el_value" value="#{ba.tradingCurrency.currencyCode}" />
+        </insert>
+
+        <insert tableName="cpq_attribute">
+            <column name="id" valueSequenceNext="cpq_attribute_seq" />
+            <column name="code" value="trading_country_code" />
+            <column name="uuid" value="trading_country_code" />
+            <column name="description" value="Billing country code" />
+            <column name="attribute_type" value="TEXT" />
+            <column name="version" value="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="attribute_category" value="BUSINESS" />
+            <column name="el_value" value="#{ba.tradingCountry.countryCode}" />
+        </insert>
+
+        <insert tableName="cpq_attribute">
+            <column name="id" valueSequenceNext="cpq_attribute_seq" />
+            <column name="code" value="offer_code" />
+            <column name="uuid" value="offer_code" />
+            <column name="description" value="Offer code" />
+            <column name="attribute_type" value="TEXT" />
+            <column name="version" value="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="attribute_category" value="BUSINESS" />
+            <column name="el_value" value="#{op.offerCode}" />
+        </insert>
+
+        <insert tableName="cpq_attribute">
+            <column name="id" valueSequenceNext="cpq_attribute_seq" />
+            <column name="code" value="is_termed_subscription" />
+            <column name="uuid" value="is_termed_subscription" />
+            <column name="description" value="Subscription is termed?" />
+            <column name="attribute_type" value="BOOLEAN" />
+            <column name="version" value="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="attribute_category" value="BUSINESS" />
+            <column name="el_value" value="#{sub.subscriptionRenewal.autoRenew == false &amp;&amp; ((sub.subscriptionRenewal.initialyActiveFor != null &amp;&amp; sub.subscriptionRenewal.initialTermType == 'RECURRING') || (sub.subscriptionRenewal.initialTermType == 'CALENDAR' &amp;&amp; sub.subscriptionRenewal.calendarInitialyActiveFor != null) ||(sub.subscriptionRenewal.initialTermType == 'FIXED' &amp;&amp;  sub.subscribedTillDate != null ))}" />
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-25028_20240916" author="TarikFA.">
+        <update tableName="advanced_settings">
+            <column name="description" value="If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you don’t manage customer balance in Opencell."/>
+            <column name="description_i18n" value='{"FRA":"Si ce paramètre est activé, alors Opencell n’attendra pas qu’un appel acompte validé soit effectivement payé pour l’utiliser sur une facture.
+Habituellement, ce comportement n’est souhaitable que si vous ne gérez pas la balance client dans Opencell.","ENG":"If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you don’t manage customer balance in Opencell."}'/>
+            <where>code = 'allowUsingUnpaidAdvance'</where>
+        </update>
+    </changeSet>
+    
+    <changeSet id="#INTRD-25308_rating_unit_desc" author="a.rouaguebe">
+        <modifyDataType tableName="cat_charge_template" columnName="rating_unit_description" newDataType="varchar(255)" />
+    </changeSet>
+
+    <changeSet id="#INTRD-25370_" author="a.rouaguebe">
+        <delete tableName="crm_custom_field_tmpl_val">
+            <where>customfieldtemplate_id in (select id from crm_custom_field_tmpl where code = 'SepaJob_paymentOrRefund' and applies_to = 'JobInstance_SepaDirectDebitJob')</where>
+        </delete>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_paymentOrRefund' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="PAYMENT" />
+            <column name="listvalues_key" value="PAYMENT" />
+        </insert>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_paymentOrRefund' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="REFUND" />
+            <column name="listvalues_key" value="REFUND" />
+        </insert>
+
+        <delete tableName="crm_custom_field_tmpl_val">
+            <where>customfieldtemplate_id in (select id from crm_custom_field_tmpl where code = 'SepaJob_ddRequestStateOp' and applies_to = 'JobInstance_SepaDirectDebitJob')</where>
+        </delete>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_ddRequestStateOp' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="PAYMENT" />
+            <column name="listvalues_key" value="PAYMENT" />
+        </insert>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_ddRequestStateOp' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="CREATE" />
+            <column name="listvalues_key" value="CREATE" />
+        </insert>
+        <insert tableName="crm_custom_field_tmpl_val">
+            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl ccftv where code = 'SepaJob_ddRequestStateOp' and applies_to = 'JobInstance_SepaDirectDebitJob')" />
+            <column name="listvalues" value="FILE" />
+            <column name="listvalues_key" value="FILE" />
+        </insert>
+    </changeSet>
+    
+    <changeSet id="#INTRD-25429_20240923" author="MohammedELAZZOUZI">
+        <sql>create index idx__billing_rating_transaction__invoice_line_id ON ${db.schema.adapted}billing_rated_transaction (invoice_line_id)</sql>
+        <sql>create index idx__billing_rating_transaction__origin_ratedtransaction on ${db.schema.adapted}billing_rated_transaction (origin_ratedtransaction_id)</sql>
+        <sql>create index idx_billing_invoice_line__accounting_article_id on ${db.schema.adapted}billing_invoice_line (accounting_article_id desc)</sql>
     </changeSet>
 
 </databaseChangeLog>

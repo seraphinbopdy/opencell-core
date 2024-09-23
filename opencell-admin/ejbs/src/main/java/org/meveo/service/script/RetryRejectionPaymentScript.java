@@ -9,16 +9,7 @@ import static org.meveo.model.shared.DateUtils.addDaysToDate;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.Invoice;
-import org.meveo.model.payments.AccountOperation;
-import org.meveo.model.payments.CardPaymentMethod;
-import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.Payment;
-import org.meveo.model.payments.PaymentGateway;
-import org.meveo.model.payments.PaymentHistory;
-import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.payments.PaymentMethodEnum;
-import org.meveo.model.payments.RecordedInvoice;
-import org.meveo.model.payments.RejectedPayment;
+import org.meveo.model.payments.*;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.payments.impl.PaymentGatewayService;
 import org.meveo.service.payments.impl.PaymentHistoryService;
@@ -70,6 +61,7 @@ public class RetryRejectionPaymentScript extends Script {
                                 .map(Invoice::getId)
                                 .collect(toList());
                         recordedInvoice.setLitigationReason("Maximum payment retries reached.");
+                        recordedInvoice.setMatchingStatus(MatchingStatusEnum.I);
                         invoiceService.getEntityManager()
                                 .createNamedQuery("Invoice.sendToLitigation")
                                 .setParameter("ids", invoices)

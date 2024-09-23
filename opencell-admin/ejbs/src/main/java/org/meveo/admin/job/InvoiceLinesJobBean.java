@@ -170,14 +170,21 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
             @Override
             public void execute(Connection connection) throws SQLException {
 
-                try (Statement statement = connection.createStatement()) {
-                    log.info("Dropping materialized view {}", viewName);
-                    statement.execute("drop materialized view if exists " + viewName);
+            	// Regular expression to allow only safe characters (alphanumeric and underscores)
+            	if (!viewName.matches("^[a-zA-Z0-9_]+$")) {
+            	    throw new IllegalArgumentException("Invalid view name");
+            	}
 
-                } catch (Exception e) {
-                    log.error("Failed to drop/create the materialized view " + viewName, e.getMessage());
-                    throw new BusinessException(e);
-                }
+            	log.info("Dropping materialized view {}", viewName);
+            	String dropQuery = "DROP MATERIALIZED VIEW IF EXISTS " + viewName;
+
+            	try (Statement statement = connection.createStatement()) {
+            	    statement.execute(dropQuery);
+            	} catch (SQLException e) {
+            	    log.error("Failed to drop materialized view {}", viewName, e);
+            	    throw new BusinessException(e);
+            	}
+            	
             }
         });
     }

@@ -1098,7 +1098,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
     }
 
     public List<Subscription> findListByCode(String code) {
-        TypedQuery<Subscription> query = getEntityManager().createQuery("select be from " + entityClass.getSimpleName() + " be where lower(code)=:code", entityClass)
+        TypedQuery<Subscription> query = getEntityManager().createQuery("select be from Subscription be where lower(code)=:code", entityClass)
                 .setParameter("code", code.toLowerCase());
         try {
             return query.getResultList();

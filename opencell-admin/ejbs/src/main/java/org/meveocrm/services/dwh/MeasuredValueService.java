@@ -65,7 +65,7 @@ public class MeasuredValueService extends PersistenceService<MeasuredValue> {
         }
 
         Query myQuery = getEntityManager()
-            .createQuery("from " + MeasuredValue.class.getName() + " m where m.date=:date and m.measurementPeriod=:period and m.measurableQuantity= :measurableQuantity");
+            .createQuery("from MeasuredValue m where m.date=:date and m.measurementPeriod=:period and m.measurableQuantity= :measurableQuantity");
         myQuery.setParameter("date", date).setParameter("period", period).setParameter("measurableQuantity", mq);
 
         @SuppressWarnings("unchecked")

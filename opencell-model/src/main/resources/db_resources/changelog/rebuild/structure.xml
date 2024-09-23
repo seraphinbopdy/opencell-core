@@ -20137,6 +20137,9 @@
         <sql>create index billing_redirection_rule__idx_contract_id_priority on ${db.schema.adapted}billing_redirection_rule using btree (contract_id, priority)</sql>
         <sql>create index cpq_attribute_instance__service_instance_index on ${db.schema.adapted}cpq_attribute_instance using btree (service_instance_id)</sql>
         <sql>create index idx_subscription_id_charge_type on ${db.schema.adapted}billing_charge_instance using btree (subscription_id, charge_type)</sql>
+        <sql>create index idx__billing_rating_transaction__invoice_line_id ON ${db.schema.adapted}billing_rated_transaction (invoice_line_id)</sql>
+        <sql>create index idx__billing_rating_transaction__origin_ratedtransaction on ${db.schema.adapted}billing_rated_transaction (origin_ratedtransaction_id)</sql>
+        <sql>create index idx_billing_invoice_line__accounting_article_id on ${db.schema.adapted}billing_invoice_line (accounting_article_id desc)</sql>
     </changeSet>
     
     <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
@@ -20995,6 +20998,7 @@
     <changeSet id="#INTRD-25308_rating_unit_desc" author="a.rouaguebe" />
     <changeSet id="#INTRD-25028_20240916" author="TarikFA." />
     <changeSet id="#INTRD-25370_" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25429_20240923" author="MohammedELAZZOUZI"/>
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

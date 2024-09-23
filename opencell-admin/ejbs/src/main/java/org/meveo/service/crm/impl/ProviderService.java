@@ -19,6 +19,7 @@ package org.meveo.service.crm.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.keycloak.KeycloakSecurityContext;
@@ -27,6 +28,7 @@ import org.meveo.cache.TenantCacheContainerProvider;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.JpaAmpNewTx;
+import org.meveo.model.admin.User;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.sequence.GenericSequence;
 import org.meveo.model.sequence.SequenceTypeEnum;
@@ -231,7 +233,7 @@ public class ProviderService extends PersistenceService<Provider> {
         }
 
         try {
-            kcService.createUser(name, null, null, email, name, null, Arrays.asList("CUSTOMER_CARE_USER", "CC_ADMIN", "superAdministrator"), provider.getCode());
+            kcService.createUser(name, null, null, email, name, null, Map.of(User.REALM_LEVEL_ROLES, Arrays.asList("CUSTOMER_CARE_USER", "CC_ADMIN", "superAdministrator")), provider.getCode(), null);
         } catch (BusinessException e) {
             log.error("Failed to create a user in Keycloak", e);
             throw e;

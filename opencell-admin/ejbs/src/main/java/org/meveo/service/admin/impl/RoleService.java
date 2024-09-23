@@ -24,9 +24,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
+import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.security.Role;
 import org.meveo.security.client.KeycloakAdminClientService;
+import org.meveo.service.admin.impl.UserService.UserManagementMasterEnum;
 import org.meveo.service.base.PersistenceService;
 
 import jakarta.ejb.Stateless;
@@ -53,13 +55,15 @@ public class RoleService extends PersistenceService<Role> {
      */
     @Override
     public List<Role> list(PaginationConfiguration paginationConfig) {
-    	if(!canSynchroWithKC()) {
+        if (getRoleManagementMaster().isOcRoleDuplicate()) {
     		if(paginationConfig==null) {
     			paginationConfig=new PaginationConfiguration(new HashMap());
     		}
     		return super.list(paginationConfig);
-    	}
+
+        } else {
     	return keycloakAdminClientService.listRoles(paginationConfig);
+    }
     }
 
     /**
@@ -93,7 +97,7 @@ public class RoleService extends PersistenceService<Role> {
      */
     public Role findByName(String name, boolean extendedInfo, boolean syncWithKC) {
 	    Role kcRole = null;
-		if(canSynchroWithKC()){
+        if (!getRoleManagementMaster().isOcRoleDuplicate()) {
 			kcRole = keycloakAdminClientService.findRole(name, false);
 			if (kcRole == null) {
 				return null;
@@ -127,7 +131,7 @@ public class RoleService extends PersistenceService<Role> {
     	Role role=null;
         try {
         	 role = getEntityManager().createNamedQuery("Role.getByName", Role.class).setParameter("name", name.toLowerCase()).setMaxResults(1).getSingleResult();
-             if(canSynchroWithKC() && keycloakAdminClientService.findRole(name, true)==null) {
+            if (getRoleManagementMaster().isKcRoleWrite() && keycloakAdminClientService.findRole(name, true) == null) {
                  if(parentRole==null) {
                      keycloakAdminClientService.createRole(name, name, true);
                  } else {
@@ -147,11 +151,12 @@ public class RoleService extends PersistenceService<Role> {
      */
     
     public void create(Role role,Boolean replicateInKc) throws BusinessException {
-    	if(BooleanUtils.isTrue(replicateInKc) && canSynchroWithKC()) {
+        if (BooleanUtils.isTrue(replicateInKc)) {
     		if (role.getParentRole() == null) {
     			keycloakAdminClientService.createRole(role.getName(), role.getDescription(), role.isClientRole());
     		} else {
-    			keycloakAdminClientService.createRole(role.getName(), role.getDescription(), role.isClientRole(), role.getParentRole().getName(), role.getParentRole().getDescription(), role.getParentRole().isClientRole());
+                keycloakAdminClientService.createRole(role.getName(), role.getDescription(), role.isClientRole(), role.getParentRole().getName(), role.getParentRole().getDescription(),
+                    role.getParentRole().isClientRole());
     		}
     	}
     	super.create(role);
@@ -165,14 +170,13 @@ public class RoleService extends PersistenceService<Role> {
     	create(role,role.getReplicateInKc());
     }
     
-    
     /**
      * Update a role in Keycloak and then in Opencell
      */
      
     public Role update(Role role,Boolean replicateInKc) throws BusinessException {
 	    
-	    if(BooleanUtils.isTrue(replicateInKc) && canSynchroWithKC()) {
+        if (BooleanUtils.isTrue(replicateInKc)) {
     		keycloakAdminClientService.updateRole(role.getName(), role.getDescription(), role.isClientRole());
     	}
     	role = super.update(role);
@@ -192,7 +196,6 @@ public class RoleService extends PersistenceService<Role> {
      */
     @Override
     public void remove(Role role) throws BusinessException {
-		if(canSynchroWithKC()) {
             keycloakAdminClientService.deleteRole(role.getName(), role.isClientRole());
 		}
         super.remove(role);
@@ -210,8 +213,19 @@ public class RoleService extends PersistenceService<Role> {
         }
     }
 	
-	private boolean canSynchroWithKC() {
-		String lUserManagementSource = paramBeanFactory.getInstance().getProperty("userManagement.master", "KC");
-		return lUserManagementSource.equalsIgnoreCase("KC");
+    /**
+     * Get user/role management division between Opencell and Keycloak applications
+     * 
+     * @return userManagement.master configuration property value
+     */
+    private UserManagementMasterEnum getRoleManagementMaster() {
+        String userManagementSource = ParamBean.getInstance().getProperty("userManagement.master", UserManagementMasterEnum.KC.name());
+        UserManagementMasterEnum master = UserManagementMasterEnum.KC;
+        try {
+            master = UserManagementMasterEnum.valueOf(userManagementSource);
+        } catch (Exception e) {
+            log.error("Unrecognized 'userManagement.master' property value. A default value of 'KC' will be used.");
 	}
+        return master;
+    }
 }

@@ -112,7 +112,7 @@ public class AddressBookApi  extends BaseApi {
 			case "User":
 			case "u":
 			case "U":
-				user = userService.findByUsername(code, false);
+				user = userService.findByUsername(code, false, false);
 				if(user != null)
 					addressBook = null;//user.getAddressbook();
 				else throw new EntityDoesNotExistsException("User with UserName : " + code + " does not exist.");

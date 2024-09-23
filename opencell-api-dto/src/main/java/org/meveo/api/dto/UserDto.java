@@ -68,7 +68,7 @@ public class UserDto extends AuditableEntityDto {
 
     /** The first name. */
     @Schema(description = "first name")
-	    private String firstName;
+    private String firstName;
 
     /** The last name. */
     @Schema(description = "last name")
@@ -127,7 +127,10 @@ public class UserDto extends AuditableEntityDto {
         lastName = user.getName() != null ? user.getName().getLastName() : null;
         email = user.getEmail();
         userLevel = user.getUserLevel();
-        roles = new ArrayList<String>(user.getRoles());
+        roles = user.getRealmLevelRoles();
+        attributes = user.getAttributes();
+        clientRoles = user.getClientLevelRoles();
+
         if (user.getAuditable() != null) {
             createdAt = user.getAuditable().getCreated();
         }

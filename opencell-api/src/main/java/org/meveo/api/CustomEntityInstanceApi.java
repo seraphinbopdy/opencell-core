@@ -202,7 +202,7 @@ public class CustomEntityInstanceApi extends BaseApi {
         handleMissingParameters();
 
         if(!currentUser.isForcedAuthentication() && currentUser.getRoles().isEmpty()) {
-            Set<String> roles = userService.findByUsername(currentUser.getUserName(), true, false, true).getRoles();
+            Set<String> roles = userService.findByUsername(currentUser.getUserName(), true, true).getRoles();
             if(!roles.contains(CustomEntityTemplate.getReadPermission(cetCode)) && !roles.contains("ReadAllCE")) {
                 if (!currentUser.hasRoles(CustomEntityTemplate.getReadPermission(cetCode), "ReadAllCE")) {
                     throw new ActionForbiddenException("User does not have permission '" + CustomEntityTemplate.getReadPermission(cetCode) + "'");

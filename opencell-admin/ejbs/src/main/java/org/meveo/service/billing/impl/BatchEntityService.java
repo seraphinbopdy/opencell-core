@@ -401,7 +401,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
                     from = provider.getEmail();
                 }
                 String username = batchEntity.getAuditable().getCreator();
-                User user = userService.findByUsername(username, false);
+                User user = userService.findByUsername(username, false, false);
                 if (user == null) {
                     log.warn("No user with username {} was found", username);
                     throw new BusinessException("No user with username " + username + " was found");

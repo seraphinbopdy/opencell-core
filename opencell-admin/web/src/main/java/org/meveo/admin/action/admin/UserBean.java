@@ -140,7 +140,7 @@ public class UserBean extends CustomFieldBean<User> {
     @Override
     public User initEntity() {
         if (username != null) {
-            entity = userService.findByUsername(username, true, true, false);
+            entity = userService.findByUsername(username, true, false);
 
         } else {
             entity = new User();

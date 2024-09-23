@@ -17,8 +17,11 @@
  */
 package org.meveo.model.admin;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.hibernate.annotations.Cache;
@@ -72,6 +75,8 @@ public class User extends AuditableCFEntity implements IReferenceEntity, ISearch
 
     private static final long serialVersionUID = 5664880105478197047L;
 
+    public static final String REALM_LEVEL_ROLES = "realm";
+
     /**
      * User name
      */
@@ -99,13 +104,13 @@ public class User extends AuditableCFEntity implements IReferenceEntity, ISearch
     private String password;
 
     /**
-     * Roles held by the user
+     * Keycloak realm and client level roles held by the user grouped by a client. "realm" identifies a realm level roles
      */
     @Transient
-    private Set<String> roles = new HashSet<String>();
+    private Map<String, List<String>> rolesByClient = new HashMap<String, List<String>>();
 
     /**
-     * Roles held by the user
+     * Roles held by the user on OC side
      */
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @ManyToMany(fetch = FetchType.LAZY)
@@ -117,6 +122,12 @@ public class User extends AuditableCFEntity implements IReferenceEntity, ISearch
      */
     @Transient
     private String userLevel;
+
+    /**
+     * Additional attributes held by a user in Keycloak
+     */
+    @Transient
+    Map<String, String> attributes;
 
     /**
      * Code
@@ -141,26 +152,89 @@ public class User extends AuditableCFEntity implements IReferenceEntity, ISearch
      * @param lastName last name
      * @param email Email
      * @param groups User groups
-     * @param roles Roles
+     * @param realmRoles Realm level roles
      */
-    public User(String username, String firstName, String lastName, String email, List<String> groups, List<String> roles) {
+    public User(String username, String firstName, String lastName, String email, List<String> groups, List<String> realmRoles) {
         this.userName = username;
         this.name = new NameInfo(null, firstName, lastName);
         this.email = email;
         if (groups != null && !groups.isEmpty()) {
             userLevel = groups.get(0);
         }
-        if (roles != null) {
-            this.roles = new HashSet<String>(roles);
+        if (realmRoles != null) {
+            addRealmLevelRoles(realmRoles);
         }
     }
 
+    /**
+     * Retrurn ALL roles assigned to a user in Keycloak. Contains both realm and client level roles.
+     * 
+     * @return Roles assigned to a user in Keycloak
+     */
     public Set<String> getRoles() {
-        return roles;
+
+        Set<String> allRoles = new HashSet<String>();
+        for (List<String> roleList : rolesByClient.values()) {
+            allRoles.addAll(roleList);
     }
 
-    public void setRoles(Set<String> val) {
-        this.roles = val;
+        return allRoles;
+    }
+
+    /**
+     * Add realm level roles
+     * 
+     * @param roles Realm level roles
+     */
+    public void addRealmLevelRoles(List<String> roles) {
+        if (roles != null) {
+            rolesByClient.put(REALM_LEVEL_ROLES, roles);
+        }
+    }
+
+    /**
+     * @return Realm level roles
+     */
+    public List<String> getRealmLevelRoles() {
+        if (rolesByClient != null) {
+            return rolesByClient.get(REALM_LEVEL_ROLES);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Add client level roles
+     * 
+     * @param rolesByClient Roles by client
+     */
+    public void addClientLevelRoles(Map<String, List<String>> rolesByClient) {
+        if (rolesByClient != null) {
+            this.rolesByClient.putAll(rolesByClient);
+        }
+    }
+
+    /**
+     * @return Client level roles
+     */
+    public Map<String, List<String>> getClientLevelRoles() {
+        Map<String, List<String>> clientOnlyRoles = new HashMap<String, List<String>>();
+
+        for (Entry<String, List<String>> roleInfo : rolesByClient.entrySet()) {
+            if (!roleInfo.getKey().equals(REALM_LEVEL_ROLES)) {
+                clientOnlyRoles.put(roleInfo.getKey(), roleInfo.getValue());
+            }
+        }
+
+        return clientOnlyRoles.isEmpty() ? null : clientOnlyRoles;
+    }
+
+    public Map<String, List<String>> getRolesByClient() {
+        return rolesByClient;
+    }
+
+    public void setRolesByClient(Map<String, List<String>> rolesByClient) {
+        this.rolesByClient = rolesByClient;
     }
 
     public String getUserLevel() {
@@ -169,6 +243,14 @@ public class User extends AuditableCFEntity implements IReferenceEntity, ISearch
 
     public void setUserLevel(String userLevel) {
         this.userLevel = userLevel;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
     }
 
     public String getUserName() {

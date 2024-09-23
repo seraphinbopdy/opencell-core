@@ -45,7 +45,7 @@ public class QuerySchedulerApiService implements ApiService<QueryScheduler> {
         try {
         	List<User> usersToNotify = new ArrayList<>();
         	for(User element: entity.getUsersToNotify()) {
-        		User user = userService.findByUsername(element.getUserName(), false);
+        		User user = userService.findByUsername(element.getUserName(), false, false);
         		if(user == null && element.getId() != null) {
         			user = userService.findById(element.getId());
         		}

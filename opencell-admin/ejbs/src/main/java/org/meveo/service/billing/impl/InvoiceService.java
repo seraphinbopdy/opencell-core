@@ -7930,13 +7930,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		
 		Invoice previousInvoice = null;
 		StringBuilder querySql = new StringBuilder("SELECT i FROM Invoice i LEFT JOIN BillingAccount ba on ba.id = i.billingAccount.id ");
-		querySql.append(" WHERE i.id !=:currentInvoiceId ");
+		querySql.append(" WHERE i.id !=:currentInvoiceId AND i.billingAccount.id = :billingAccountId ");
 		if(billingRun != null && billingRun.getBillingCycle() != null) {
 			querySql.append(" AND ba.billingCycle.type = :billingCycleType ");
 		}
 		querySql.append(" order by i.auditable.created DESC");
 		var query = getEntityManager().createQuery(querySql.toString());
 		query.setParameter("currentInvoiceId", invoiceId);
+		query.setParameter("billingAccountId", invoice.getBillingAccount().getId());
 		if(billingRun != null && billingRun.getBillingCycle() != null) {
 			query.setParameter("billingCycleType", billingRun.getBillingCycle().getType());
 		}
@@ -7948,6 +7949,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		if(billingRun == null) {
 			if(previousInvoice != null) {
 				invoice.setStartDate(previousInvoice.getInvoiceDate().from(previousInvoice.getInvoiceDate().toInstant().plus(1, ChronoUnit.DAYS)));
+			}else{
+				invoice.setStartDate(invoice.getInvoiceDate());
 			}
 			invoice.setEndDate(invoice.getInvoiceDate());
 			update(invoice);

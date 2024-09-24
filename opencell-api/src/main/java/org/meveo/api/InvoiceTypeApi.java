@@ -180,6 +180,10 @@ public class InvoiceTypeApi extends BaseCrudApi<InvoiceType, InvoiceTypeDto> {
         } else if (!StringUtils.isBlank(dto.getUpdatedCode())) {
             entity.setCode(dto.getUpdatedCode());
         }
+	    if (StringUtils.isBlank(dto.getInvoiceCodeType())) {
+			missingParameters.add("invoiceCodeType");
+			handleMissingParameters();
+	    }
         
         if (!StringUtils.isBlank(dto.getInvoiceValidationScriptCode())) {
         	ScriptInstance invoiceValidationScript = scriptInstanceService.findByCode(dto.getInvoiceValidationScriptCode());
@@ -376,13 +380,11 @@ public class InvoiceTypeApi extends BaseCrudApi<InvoiceType, InvoiceTypeDto> {
         if(dto.getExcludeFromAgedTrialBalance() != null) {
         	entity.setExcludeFromAgedTrialBalance(dto.getExcludeFromAgedTrialBalance());
         }
-        if (!StringUtils.isBlank(dto.getInvoiceCodeType())) {
-            UntdidInvoiceCodeType untdidInvoiceCodeType = untdidInvoiceCodeTypeService.getByCode(dto.getInvoiceCodeType());
-            if (untdidInvoiceCodeType == null) {
-                throw new EntityDoesNotExistsException(UntdidInvoiceCodeType.class, dto.getInvoiceCodeType());
-            }
-            entity.setUntdidInvoiceCodeType(untdidInvoiceCodeType);
+        UntdidInvoiceCodeType untdidInvoiceCodeType = untdidInvoiceCodeTypeService.getByCode(dto.getInvoiceCodeType());
+        if (untdidInvoiceCodeType == null) {
+            throw new EntityDoesNotExistsException(UntdidInvoiceCodeType.class, dto.getInvoiceCodeType());
         }
+        entity.setUntdidInvoiceCodeType(untdidInvoiceCodeType);
         if (!StringUtils.isBlank(dto.getVatPaymentOption())) {
             UntdidVatPaymentOption untdidVatPaymentOption = untdidVatPaymentOptionService.getByCode(dto.getVatPaymentOption());
             if (untdidVatPaymentOption == null) {

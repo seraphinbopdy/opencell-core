@@ -440,7 +440,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                 fullRatingPeriod, chargeMode, edr, reservation, isVirtual, commercialOrder);
 
         // Do not trigger EDRs for virtual or Scheduled operations
-        if (forSchedule || isVirtual) {
+        if (forSchedule) {
             return ratedEDRResult;
         }
 
@@ -558,7 +558,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                 }
             }
         }
-        if (evaluatEdrVersioning && !triggredEDRs.isEmpty()) {
+        if (evaluatEdrVersioning && !triggredEDRs.isEmpty() && !isVirtual) {
             mediationsettingService.applyEdrVersioningRule(triggredEDRs, null, true);
         }
         return triggredEDRs;

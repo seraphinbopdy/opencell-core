@@ -783,4 +783,11 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 		TypedQuery<CommercialOrder> query = getEntityManager().createNamedQuery("CommercialOrder.findWithInvoicingPlan", CommercialOrder.class);
 		return query.getResultList();
 	}
+	
+	public List<CommercialOrder> findByBillingAccount(Long billingAccountId) {
+		QueryBuilder queryBuilder = new QueryBuilder(CommercialOrder.class, "co");
+		queryBuilder.addCriterionEntity("co.billingAccount.id", billingAccountId);
+		Query query = queryBuilder.getQuery(getEntityManager());
+		return query.getResultList();
+	}
 }

@@ -8147,7 +8147,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		if(CollectionUtils.isNotEmpty(unpaidAdvs)) {
 			methodCallingUtils.callMethodInNewTx(() -> cancelInvoiceAdvances(invoice, unpaidAdvs, true));
 			String advsNumber = unpaidAdvs.stream().map(Invoice::getInvoiceNumber).collect(Collectors.joining(","));
-			throw new BusinessApiException("validation fails “Unpaid/closed advance {{" + advsNumber + "}} cannot be used. It will be removed from the invoice.“");
+			throw new BusinessApiException("Unpaid/closed advance " + advsNumber + " cannot be used. It will be removed from the invoice.");
 			
 		}
 	}

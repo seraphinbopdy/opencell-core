@@ -110,11 +110,11 @@ public class RetryRejectionPaymentScript extends Script {
                     TRUE, TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
                     paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
                     paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-                    TRUE, preferredPaymentMethod.getPaymentType(), true);
+                    TRUE, preferredPaymentMethod.getPaymentType(), true, null);
         } else {
             paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), aosToPay,
                     TRUE, TRUE, paymentGateway, null, null, null,
-                    null, null, TRUE, preferredPaymentMethod.getPaymentType(), true);
+                    null, null, TRUE, preferredPaymentMethod.getPaymentType(), true, null);
         }
         log.info("Payment request successfully created");
     }

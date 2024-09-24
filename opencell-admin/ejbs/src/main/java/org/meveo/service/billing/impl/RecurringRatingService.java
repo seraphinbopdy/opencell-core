@@ -626,9 +626,17 @@ public class RecurringRatingService extends RatingService implements Serializabl
     }
 
     private BigDecimal getQuantityAttribute(ServiceInstance serviceInstance, String quantityAttribute) {
-        Map<String, Object> attributeValues = fromAttributeValue(
-                fromAttributeInstances(serviceInstance));
-        return valueOf((Double) attributeValues.get(quantityAttribute));
+        BigDecimal quantityAttributeValue = ZERO;
+        Map<String, Object> attributeValues = fromAttributeValue(fromAttributeInstances(serviceInstance));
+        Object quantityObject = attributeValues.get(quantityAttribute);
+        if (quantityObject != null) {
+            try {
+                quantityAttributeValue = valueOf(Double.parseDouble(quantityObject.toString()));
+            } catch (NumberFormatException e) {
+                log.debug("wrong value format when formating quantity attribute cannot cast '{}' to double value", quantityObject);
+            }
+        }
+        return quantityAttributeValue;
     }
 
     private List<AttributeValue> fromAttributeInstances(ServiceInstance serviceInstance) {

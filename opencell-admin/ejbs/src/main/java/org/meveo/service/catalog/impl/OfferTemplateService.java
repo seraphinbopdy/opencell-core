@@ -420,7 +420,7 @@ public class OfferTemplateService extends GenericProductOfferingService<OfferTem
 
                 }
             }
-            if(commercialRulesHeader != null) {
+            if(commercialRulesHeader != null && commercialRulesHeader.size() > 0) {
                 offer.setCommercialRules(duplicateCommercialRules(offer, commercialRulesHeader));
             }
 

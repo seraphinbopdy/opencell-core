@@ -58,7 +58,9 @@ import org.meveo.model.IEntity;
         @NamedQuery(name = "SecuredEntity.validateByRoleName", query = "SELECT count(*) from org.meveo.model.admin.SecuredEntity s where s.roleName=:roleName and entity_code=:entityCode and entity_class=:entityClass"),
         @NamedQuery(name = "SecuredEntity.validateByUserName", query = "SELECT count(*) from org.meveo.model.admin.SecuredEntity s where lower(s.userName)=:userName and entity_code=:entityCode and entity_class=:entityClass"),
         @NamedQuery(name = "SecuredEntity.listForCurrentUser", query = "SELECT new org.meveo.security.SecuredEntity(s.entityId, s.entityCode, s.entityClass, s.permission) from org.meveo.model.admin.SecuredEntity s where s.disabled=false and (lower(s.userName)=:userName or s.roleName in :roleNames)", hints = {
-                @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }) })
+                @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
+        @NamedQuery(name = "SecuredEntity.deleteByRoleName", query = "DELETE from org.meveo.model.admin.SecuredEntity s where s.roleName=:roleName")
+})
 public class SecuredEntity implements Serializable, IEntity, IEnable {
 
     private static final long serialVersionUID = 84222776645282176L;

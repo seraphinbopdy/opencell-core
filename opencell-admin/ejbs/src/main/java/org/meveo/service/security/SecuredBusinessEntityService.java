@@ -327,4 +327,10 @@ public class SecuredBusinessEntityService extends PersistenceService<SecuredEnti
         securedEntity.setRoleName(roleName);
         create(securedEntity);
     }
+
+    public void removeSecuredEntityForRole(String roleName) {
+        getEntityManager().createNamedQuery("SecuredEntity.deleteByRoleName")
+                          .setParameter("roleName", roleName)
+                          .executeUpdate();
+    }
 }

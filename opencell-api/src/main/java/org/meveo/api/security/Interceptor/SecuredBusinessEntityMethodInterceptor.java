@@ -21,6 +21,7 @@ package org.meveo.api.security.Interceptor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -171,8 +172,9 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
 
         SecuredMethodConfig securedMethodConfig = sbeConfig.getSecuredMethodConfig();
 
+        List<String> searchIdToDelete = new ArrayList<>();
         if (securedMethodConfig.getResultFilter().equals(ListFilter.class)) {
-            addSecuredEntitiesToFilters(securedEntities, methodParameters, sbeConfig.getFilterResultsConfig());
+            searchIdToDelete.addAll(addSecuredEntitiesToFilters(securedEntities, methodParameters, sbeConfig.getFilterResultsConfig()));
         }
 
         // check validation
@@ -210,6 +212,13 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
             log.debug("Method {}.{} results will be filtered using {} filter.", objectName, methodName, resultsFilter);
             result = resultsFilter.filterResult(sbeConfig.getFilterResultsConfig(), result, currentUser, allSecuredEntitiesMap);
         }
+        
+        if(!searchIdToDelete.isEmpty()) {
+            securedBusinessEntityService.getEntityManager().createQuery("delete from TmpSecuredEntity s where s.searchId in :searchId")
+                .setParameter("searchId", searchIdToDelete)
+                .executeUpdate();
+        }
+        
         return result;
     }
 
@@ -293,8 +302,9 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
      * @param values the context parameter
      * @param filterResultsConfig Results filter configuration
      */
-    private void addSecuredEntitiesToFilters(List<SecuredEntity> securedEntities, Object[] values, FilterResultsConfig filterResultsConfig) {
+    private List<String> addSecuredEntitiesToFilters(List<SecuredEntity> securedEntities, Object[] values, FilterResultsConfig filterResultsConfig) {
 
+        List<String> searchIdToDelete = new ArrayList<>();
         for (Object obj : values) {
             // Search filters are in PagingAndFiltering
             if (obj instanceof PagingAndFiltering) {
@@ -303,7 +313,7 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
                 if(securedEntities.size() < getSqlFilterThreshold()) {
                     updateFilters(securedEntities, filters, filterResultsConfig);
                 } else {
-                    updateFiltersUsingSQL(securedEntities, filters, filterResultsConfig);
+                    searchIdToDelete.addAll(updateFiltersUsingSQL(securedEntities, filters, filterResultsConfig));
                 }
                 pagingAndFiltering.setFilters(filters);
                 break;
@@ -315,21 +325,23 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
                 if(securedEntities.size() < getSqlFilterThreshold()) {
                     updateFilters(securedEntities, filters, filterResultsConfig);
                 } else {
-                    updateFiltersUsingSQL(securedEntities, filters, filterResultsConfig);
+                    searchIdToDelete.addAll(updateFiltersUsingSQL(securedEntities, filters, filterResultsConfig));
                 }
                 paginationConfiguration.setFilters(filters);
                 break;
             }
         }
+        return searchIdToDelete;
     }
 
-    private void updateFiltersUsingSQL(List<SecuredEntity> securedEntities, Map<String, Object> filters, FilterResultsConfig filterResultsConfig) throws AccessDeniedException {
+    private List<String> updateFiltersUsingSQL(List<SecuredEntity> securedEntities, Map<String, Object> filters, FilterResultsConfig filterResultsConfig) throws AccessDeniedException {
 
         if (filterResultsConfig.getItemPropertiesToFilter().length == 0) {
-            return;
+            return Collections.emptyList();
         }
 
         Map<String, Object> newFilterCriteria = new HashMap<>();
+        List<String> lReturn = new ArrayList<>();
         for (FilterPropertyConfig propertyToFilter : filterResultsConfig.getItemPropertiesToFilter()) {
 
             String fieldName = propertyToFilter.getProperty();
@@ -339,11 +351,6 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
             Map<String, List<SecuredEntity>> collect = securedEntities.stream()
                                                                       .collect(Collectors.groupingBy(SecuredEntity::getEntityClass));
 
-            List<String> entityClasses = securedEntities.stream()
-                                                        .map(SecuredEntity::getEntityClass)
-                                                        .distinct()
-                                                        .collect(Collectors.toList());
-
             for(Entry<String, List<SecuredEntity>> entityClass: collect.entrySet()) {
                 List<String> propertyToFilterPaths = getCriteriaPath(fieldName, propertyToFilterClass, entityClass.getKey(), false);
                 if (propertyToFilterPaths == null) {
@@ -351,17 +358,8 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
                 }
 
                 String uuid = UUID.randomUUID().toString();
-                /*entityClass.getValue().stream().map(s -> new TmpSecuredEntity(uuid, s.getCode())).forEach(s -> securedBusinessEntityService.getEntityManager().persist(s));
-                securedBusinessEntityService.getEntityManager().flush();*/
                 
                 var insertSQL = new StringBuilder("insert into tmp_secured_entity (search_id, code) ");
-
-                String collect1 = entityClass.getValue()
-                                             .stream()
-                                             .map(s -> String.format("('%s', '%s')", uuid, s.getCode()))
-                                             .collect(Collectors.joining(","));
-                // insertSQL.append("values ").append(collect1);
-                
                 
                 StringBuilder sql = new StringBuilder("select '%s', lower(s.entity_code) from adm_secured_entity s where s.disabled=0 and s.entity_class = '%s'");
                 if(!currentUser.getRoles().isEmpty()) {
@@ -369,7 +367,6 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
                                               .stream()
                                               .map(r -> "'" + r + "'")
                                               .collect(Collectors.joining(","));
-
 
                     sql.append(" and (lower(s.user_name)='%s' or s.role_name in (")
                        .append(roles)
@@ -381,11 +378,10 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
                 insertSQL.append(String.format(sql.toString(), uuid, entityClass.getKey(), currentUser.getUserName()));
                 securedBusinessEntityService.getEntityManager().createNativeQuery(insertSQL.toString()).executeUpdate();
                 
+                String subQuery = "select lower(s.code) from org.meveo.model.admin.TmpSecuredEntity s where s.searchId = '%s'";
+                propertyToFilterPaths.forEach(path -> newFilterCriteria.put(path, String.format(subQuery, uuid)));
                 
-                // propertyToFilterPaths.forEach(path -> newFilterCriteria.put(path, String.format(sql.toString(), uuid, entityClass, currentUser.getUserName())));
-                
-                String sql2 = "select lower(s.code) from org.meveo.model.admin.TmpSecuredEntity s where s.searchId = '%s'";
-                propertyToFilterPaths.forEach(path -> newFilterCriteria.put(path, String.format(sql2, uuid)));
+                lReturn.add(uuid);
             }
 
             // Add IS NULL as a possible value if field is optional
@@ -408,6 +404,7 @@ public class SecuredBusinessEntityMethodInterceptor implements Serializable {
         }
 
         filters.put(PersistenceService.SEARCH_OR + AND_OR_FIELD_SUFFIX, orFilterItems);
+        return lReturn;
     }
 
     /**

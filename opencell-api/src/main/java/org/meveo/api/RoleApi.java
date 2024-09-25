@@ -318,9 +318,7 @@ public class RoleApi extends BaseApi {
 		Role role = roleService.findById(id);
 		if(role == null)
 			throw new EntityDoesNotExistsException(Role.class, id);
-		var securedEntity = securedBusinessEntityService.getSecuredEntitiesForRole(role.getName());
-		if(org.apache.commons.collections.CollectionUtils.isNotEmpty(securedEntity))
-			securedBusinessEntityService.remove(securedEntity.stream().map(SecuredEntity::getId).collect(Collectors.toSet()));
+        securedBusinessEntityService.removeSecuredEntityForRole(role.getName());
 	}
 	
 	@JpaAmpNewTx

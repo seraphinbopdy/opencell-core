@@ -1062,6 +1062,27 @@ public class AccountHierarchyApi extends BaseApi {
                                                     } else {
                                                         subscriptionDto.setUserAccount(userAccountDto.getCode());
                                                     }
+
+                                                    if (subscriptionDto.getSubscribedTillDate() != null && Version.V2.equals(version)) {
+                                                        if (subscriptionDto.getRenewalRule() == null) {
+                                                            missingParameters.add("subscription.renewalRule");
+                                                        } else {
+                                                            if (subscriptionDto.getRenewalRule().getInitialTermType() == null || StringUtils.isBlank(subscriptionDto.getRenewalRule().getInitialTermType())) {
+                                                                missingParameters.add("subscription.renewalRule.initialTermType");
+                                                            }
+
+                                                            if (subscriptionDto.getRenewalRule().getEndOfTermAction() == null || StringUtils.isBlank(subscriptionDto.getRenewalRule().getEndOfTermAction())) {
+                                                                missingParameters.add("subscription.renewalRule.endOfTermAction");
+                                                            }
+
+                                                            if (subscriptionDto.getRenewalRule().getTerminationReasonCode() == null || StringUtils.isBlank(subscriptionDto.getRenewalRule().getTerminationReasonCode())) {
+                                                                missingParameters.add("subscription.renewalRule.terminationReasonCode");
+                                                            }
+                                                        }
+
+                                                        handleMissingParameters();
+                                                    }
+
 	                                                processSubscriptionOnTransitionStatus(subscriptionDto);
                                                     if(subscriptionDto.getAccesses() != null) {
                                                         createAccess(subscriptionDto);

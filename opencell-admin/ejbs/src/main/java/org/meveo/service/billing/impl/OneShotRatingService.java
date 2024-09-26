@@ -91,7 +91,7 @@ public class OneShotRatingService extends RatingService implements Serializable 
                 && chargeInstance.getChargeTemplate().getQuantityAttribute() != null) {
             BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
                     chargeInstance.getChargeTemplate().getQuantityAttribute().getCode());
-            if (quantityAttribute.compareTo(ZERO) > 0) {
+            if (quantityAttribute.compareTo(ZERO) >= 0) {
                 inputQuantity = chargeInstance.getQuantity().multiply(quantityAttribute);
             }
         }

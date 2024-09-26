@@ -13172,12 +13172,12 @@ Meaning that advances won’t be available for further invoices."/>
             </column>
         </insert>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25091_ji_desc_i18n" author="a.rouaguebe">
         <addColumn tableName="meveo_job_instance">
             <column name="description_i18n" type="${type.json}" />
         </addColumn>
-        
+
     </changeSet>
 
     <changeSet id="#INTRD-25259_fix_repoen_template" author="a.rouaguebe">
@@ -13319,6 +13319,20 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <sql>create index idx__billing_rating_transaction__invoice_line_id ON ${db.schema.adapted}billing_rated_transaction (invoice_line_id)</sql>
         <sql>create index idx__billing_rating_transaction__origin_ratedtransaction on ${db.schema.adapted}billing_rated_transaction (origin_ratedtransaction_id)</sql>
         <sql>create index idx_billing_invoice_line__accounting_article_id on ${db.schema.adapted}billing_invoice_line (accounting_article_id desc)</sql>
+    </changeSet>
+    
+    <changeSet id="#INTRD-25542_fix_script_cat" author="a.rouaguebe">
+        <update tableName="meveo_script_instance">
+            <column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"></column>
+            <where>code = 'org.meveo.service.script.EnterLitigation'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-25028_20240926" author="TarikFA.">
+        <update tableName="advanced_settings">
+            <column name="category" value="AccountReceivable" />
+            <where> code  in ('allowUsingUnpaidAdvance', 'autoCloseAdvanceAfterInvoiceValidation')</where>
+        </update>
     </changeSet>
 
     <changeSet id="#INTRD-25155_secured_tmp" author="a.rouaguebe">

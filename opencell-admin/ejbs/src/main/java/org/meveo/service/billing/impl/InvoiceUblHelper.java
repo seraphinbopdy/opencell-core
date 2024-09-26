@@ -67,6 +67,7 @@ import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNote;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.Invoice;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.ObjectFactory;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.storage.StorageFactory;
@@ -114,7 +115,9 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class InvoiceUblHelper {
@@ -202,12 +205,14 @@ public class InvoiceUblHelper {
 			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
-			setBillingReference(invoice, invoiceXml);
-			//setOrderReference(invoice, invoiceXml);
+			//setBillingReference(invoice, invoiceXml);
+			setOrderReference(invoice, invoiceXml);
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
 			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
-			setBillingReferenceForInvoice(invoice.getBillingAccount(), invoiceXml);
+			var commercialorderIds = invoice.getInvoiceLines().stream().map(InvoiceLine::getCommercialOrder).filter(Objects::nonNull)
+					.collect(Collectors.toSet());
+			setBillingReferenceForInvoice(commercialorderIds, invoiceXml);
 		}
 		
 		
@@ -1295,13 +1300,13 @@ public class InvoiceUblHelper {
 
 	}
 	
-	private BillingReference setBillingReferenceForInvoice(BillingAccount billingAccount, Invoice target) {
+	private BillingReference setBillingReferenceForInvoice(Set<CommercialOrder> commercialOrders, Invoice target) {
 		BillingReference billingReference = null;
 		DocumentReferenceType documentReferenceType = null;
 		ID id = null;
-		List<CommercialOrder> orders = commercialOrderService.findByBillingAccount(billingAccount.getId());
-		if(CollectionUtils.isNotEmpty(orders)) {
-			for(CommercialOrder commercialOrder : orders) {
+		if(CollectionUtils.isNotEmpty(commercialOrders)) {
+			for(CommercialOrder commercialOrder : commercialOrders) {
+				if(Strings.isBlank(commercialOrder.getOrderNumber())) continue;
 				billingReference = objectFactoryCommonAggrement.createBillingReference();
 				documentReferenceType = objectFactoryCommonAggrement.createDocumentReferenceType();
 				id = objectFactorycommonBasic.createID();
@@ -1503,7 +1508,7 @@ public class InvoiceUblHelper {
 		
 		CountryType countryType = objectFactoryCommonAggrement.createCountryType();
 		IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
-		identificationCode.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry().getCountryCode());
+		//identificationCode.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry().getCountryCode());
 		countryType.setIdentificationCode(identificationCode);
 		addressType.setCountry(countryType);
 		

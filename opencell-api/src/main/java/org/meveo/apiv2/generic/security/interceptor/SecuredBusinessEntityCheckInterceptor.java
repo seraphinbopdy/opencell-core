@@ -14,6 +14,7 @@ import org.meveo.apiv2.generic.security.config.JsonConfigFactory;
 import org.meveo.apiv2.generic.security.config.SecuredBusinessEntityJsonConfig;
 import org.meveo.apiv2.generic.security.config.SecuredBusinessEntityJsonConfigFactory;
 import org.meveo.commons.utils.ParamBeanFactory;
+import org.slf4j.Logger;
 
 /**
  * This is the secured business entities interceptor which extends {@link SecuredBusinessEntityMethodInterceptor}, and uses {@link SecuredBusinessEntityJsonConfigFactory} to use the Json based config
@@ -50,6 +51,7 @@ public class SecuredBusinessEntityCheckInterceptor extends SecuredBusinessEntity
         if (!SecuredBusinessEntityMethodInterceptor.isSecuredEntitiesEnabled()) {
             return context.proceed();
         }
+        
         SecuredBusinessEntityConfig sbeConfig = this.securedBusinessEntityConfigFactory.get(context);
         return super.checkForSecuredEntities(context, sbeConfig);
     }

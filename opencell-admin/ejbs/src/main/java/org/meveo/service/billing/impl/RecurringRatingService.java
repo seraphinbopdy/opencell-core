@@ -300,7 +300,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
                     if (recurringChargeTemplate.getQuantityAttribute() != null) {
                         BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
                                 recurringChargeTemplate.getQuantityAttribute().getCode());
-                        if(quantityAttribute.compareTo(ZERO) > 0) {
+                        if(quantityAttribute.compareTo(ZERO) >= 0) {
                             inputQuantity = inputQuantity.multiply(quantityAttribute);
                         }
                     }
@@ -423,7 +423,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
                     if(recurringChargeTemplate.getQuantityAttribute() != null) {
                         BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
                                 recurringChargeTemplate.getQuantityAttribute().getCode());
-                        if(quantityAttribute.compareTo(ZERO) > 0) {
+                        if(quantityAttribute.compareTo(ZERO) >= 0) {
                             inputQuantity = inputQuantity.multiply(quantityAttribute);
                         } else {
                             log.info("Quantity attribute is set to zero it will be ignored");

@@ -36,6 +36,7 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.catalog.OneShotChargeTemplate;
 import org.meveo.model.crm.BusinessAccountModel;
@@ -255,6 +256,9 @@ public abstract class AccountEntity extends BusinessCFEntity {
     }
 
     public void anonymize(String code) {
+        if (!StringUtils.isBlank(description)) {
+            setDescription(code);
+        }
         if (name != null ) {
             name.anonymize(code);
         }

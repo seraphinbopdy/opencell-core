@@ -6895,7 +6895,7 @@
             <column name="version" value="0"/>
             <column name="disabled" valueNumeric="0"/>
             <column name="created" valueComputed="${db.current.time}"/>
-            <column name="category" value="callForAdvancePayment"/>
+            <column name="category" value="AccountReceivable"/>
             <column name="property_group" value="callForAdvancePayment"/>
             <column name="property_type" value="java.lang.Boolean"/>
             <column name="property_value" value="false"/>
@@ -6913,7 +6913,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="version" value="0"/>
             <column name="disabled" valueNumeric="0"/>
             <column name="created" valueComputed="${db.current.time}"/>
-            <column name="category" value="CallForAdvancePayment"/>
+            <column name="category" value="AccountReceivable"/>
             <column name="property_group" value="callForAdvancePayment"/>
             <column name="property_type" value="java.lang.Boolean"/>
             <column name="property_value" value="false"/>

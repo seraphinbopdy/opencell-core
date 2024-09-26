@@ -19756,7 +19756,7 @@
         <sql>CREATE INDEX cpq_price_plan_matrix_value__ppml_id__idx ON cpq_price_plan_matrix_value(ppml_id)</sql>
         <sql>CREATE INDEX CREATE INDEX cpq_ppl_ppVersion_index ON cpq_price_plan_matrix_line(ppm_version_id, priority, accuracy)</sql>
     </changeSet>
-        
+
         
     <!-- end index -->
 
@@ -20141,7 +20141,7 @@
         <sql>create index idx__billing_rating_transaction__origin_ratedtransaction on ${db.schema.adapted}billing_rated_transaction (origin_ratedtransaction_id)</sql>
         <sql>create index idx_billing_invoice_line__accounting_article_id on ${db.schema.adapted}billing_invoice_line (accounting_article_id desc)</sql>
     </changeSet>
-    
+
     <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
         <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
     </changeSet>
@@ -21000,7 +21000,9 @@
     <changeSet id="#INTRD-25370_" author="a.rouaguebe" />
     <changeSet id="#INTRD-25429_20240923" author="MohammedELAZZOUZI"/>
     <changeSet id="#INTRD-25542_fix_script_cat" author="a.rouaguebe" />
-    
+    <changeSet id="#INTRD-25506_fix_unloaded_cf_reopenZeroWO" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25028_20240926" author="TarikFA." />
+
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 
 

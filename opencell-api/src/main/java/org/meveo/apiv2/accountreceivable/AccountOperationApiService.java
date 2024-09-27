@@ -494,6 +494,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		accountOperationToTransfer.setUuid(UUID.randomUUID().toString());
 		accountOperationToTransfer.setSeller(accountOperation.getSeller());
 		accountOperationToTransfer.setJournal(occTemplate.getJournal());
+		accountOperationToTransfer.setTransactionalCurrency(accountOperation.getTransactionalCurrency());
 		
 		accountOperationService.create(accountOperationToTransfer);
 		

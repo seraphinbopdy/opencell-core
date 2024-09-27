@@ -354,10 +354,10 @@ public class AtosWalletGatewayPayment implements GatewayPaymentInterface {
 			data  +=  "|customerIpAddress="+hostedCheckoutInput.getCustomerIpAddress();
 		}
 		        		        
-		data  += "|holderContact.email="+email+
+		data  += "|holderContact.email="+StringUtils.enleverAccent(email)+
 		        "|holderContact.mobile="+phone+
-		        "|holderContact.firstName="+firstName+
-		        "|holderContact.lastName="+lastName;
+		        "|holderContact.firstName="+StringUtils.truncate(StringUtils.enleverAccent(firstName), 49, true) +
+		        "|holderContact.lastName="+StringUtils.truncate(StringUtils.enleverAccent(lastName), 49, true);
 				
 
 		if (!StringUtils.isBlank(hostedCheckoutInput.getVariant())) {

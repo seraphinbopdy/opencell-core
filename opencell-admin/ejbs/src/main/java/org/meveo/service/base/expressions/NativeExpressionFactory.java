@@ -42,7 +42,7 @@ public class NativeExpressionFactory {
             checkOnCondition(key, ids, new ExpressionParser(key.split(" ")));
     	} else {
 
-            if(StringUtils.containsIgnoreCase(key, "date") && !(value instanceof Date)) {
+            if(StringUtils.containsIgnoreCase(key, "date") && (value instanceof String)) {
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 try {
                     if(value instanceof String)

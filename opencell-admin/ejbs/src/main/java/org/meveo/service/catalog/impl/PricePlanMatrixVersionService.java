@@ -684,8 +684,13 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                                             .map(AdvancedSettings::getValue)
                                             .filter(StringUtils::isNotBlank)
                                             .orElse(",");
+            
+            String fileNameExtension = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fileNameExtension"))
+                                           .map(AdvancedSettings::getValue)
+                                           .filter(StringUtils::isNotBlank)
+                                           .orElse("csv");
             if (pricePlanMatrixVersions != null && !pricePlanMatrixVersions.isEmpty()) {
-                Set<Path> filePaths = pricePlanMatrixVersions.stream().map(ppv -> saveAsRecord(buildFileName(ppv), ppv, fileType, ppmvMaps, decimalSeparator, fieldSeparator)).collect(Collectors.toSet());
+                Set<Path> filePaths = pricePlanMatrixVersions.stream().map(ppv -> saveAsRecord(buildFileName(ppv), ppv, fileType, ppmvMaps, decimalSeparator, fieldSeparator, fileNameExtension)).collect(Collectors.toSet());
                 if (filePaths.size() > 1) {
                     return archiveFiles(filePaths);
                 }
@@ -919,6 +924,10 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             }
         }
 
+        private Path saveAsRecord(String fileName, PricePlanMatrixVersion ppv, String fileType, List<Map<String, Object>> ppmvMaps, String decimalSeparator, String fieldSeparator) {
+            return this.saveAsRecord(fileName, ppv, fileType, ppmvMaps, decimalSeparator, fieldSeparator, null);
+        }
+        
         /**
          * @param fileName
          * @param ppv
@@ -927,17 +936,18 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
          * @param fieldSeparator
          * @return
          */
-        private Path saveAsRecord(String fileName, PricePlanMatrixVersion ppv, String fileType, List<Map<String, Object>> ppmvMaps, String decimalSeparator, String fieldSeparator) {
+        private Path saveAsRecord(String fileName, PricePlanMatrixVersion ppv, String fileType, List<Map<String, Object>> ppmvMaps, String decimalSeparator, String fieldSeparator, String fileNameExtension) {
             Set<LinkedHashMap<String, Object>> records = ppv.isMatrix() ? toCSVLineGridRecords(ppv, fileType.equals("CSV")) : Collections.singleton(toCSVLineRecords(ppv, ppmvMaps));
-            String extensionFile = ".csv";
+            String extensionFile = Optional.ofNullable(fileNameExtension).map(e -> "."+e)
+                                           .orElse(".csv");
             try {
                 if(fileType.equals("CSV")) {
 
                     SimpleModule module = new SimpleModule();
                     if(decimalSeparator != null) {
-                        StdSerializer<Number> c = new StdSerializer<>(Number.class) {
+                        StdSerializer<BigDecimal> c = new StdSerializer<>(BigDecimal.class) {
                             @Override
-                            public void serialize(Number bigDecimal, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+                            public void serialize(BigDecimal bigDecimal, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
                                 DecimalFormatSymbols symbols = ",".equals(decimalSeparator) ? new DecimalFormatSymbols(Locale.FRENCH) : new DecimalFormatSymbols(Locale.ENGLISH);
                                 DecimalFormat formatter = new DecimalFormat("0.00", symbols);
                                 formatter.setGroupingUsed(false);
@@ -945,12 +955,10 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                             }
                         };
                         module.addSerializer(BigDecimal.class, c);
-                        module.addSerializer(Double.class, c);
-                        module.addSerializer(Float.class, c);
                     }
                     
                     CsvMapper csvMapper = new CsvMapper();
-                    // csvMapper.registerModule(module);
+                    csvMapper.registerModule(module);
                     CsvSchema invoiceCsvSchema = ppv.isMatrix() ? buildGridPricePlanVersionCsvSchema(records, fieldSeparator) : buildPricePlanVersionCsvSchema(records, fieldSeparator);
                     csvMapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
                     if(!Files.exists(Path.of(saveDirectory))){

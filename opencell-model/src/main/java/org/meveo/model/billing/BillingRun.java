@@ -522,6 +522,13 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     @Column(name = "fields")
     private List<String> additionalAggregationFields;
 
+    /**
+     * Billing cycle aggregation setting for service instance
+     */
+    @Type(type = "numeric_boolean")
+    @Column(name = "ignore_service_instances")
+    private boolean ignoreServiceInstances = true;
+
     public BillingRun getNextBillingRun() {
         return nextBillingRun;
     }
@@ -1244,4 +1251,11 @@ public class BillingRun extends EnableEntity implements ICustomFieldEntity, IRef
     	this.invoiceNumber=(this.invoiceNumber!=null?this.invoiceNumber:0)+count;
     }
 
+    public boolean isIgnoreServiceInstances() {
+        return ignoreServiceInstances;
+    }
+
+    public void setIgnoreServiceInstances(boolean ignoreServiceInstances) {
+        this.ignoreServiceInstances = ignoreServiceInstances;
+    }
 }

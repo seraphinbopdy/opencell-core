@@ -275,7 +275,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                 newPv.setLabel(split[0]);
                 newPv.setAmountWithoutTax(new BigDecimal(convertToDecimalFormat(split[1])));
                 create(newPv);
-                for(int i=2; i < split.length; i++) {
+                for(int i=4; i < split.length; i++) { // start index shifted to 4 as the export has added status and version column 
                     String[] unitPriceLineSplit = split[i].split(COLUMN_SEPARATOR);
                     TradingPricePlanVersion tppv = new TradingPricePlanVersion();
                     tppv.setTradingPrice(new BigDecimal(convertToDecimalFormat(unitPriceLineSplit[0])));

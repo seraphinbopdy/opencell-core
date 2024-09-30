@@ -468,7 +468,9 @@ public class RecurringRatingService extends RatingService implements Serializabl
                     }
                     // Apply prorating if needed
                     if (prorate || prorateLastPeriod) {
-                        inputQuantity = DateUtils.calculateProrataRatio(effectiveChargeFromDate, effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, false);
+                        //inputQuantity = DateUtils.calculateProrataRatio(effectiveChargeFromDate, effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, false);
+	                    inputQuantity = computeProrate(chargeInstance, effectiveChargeFromDate,
+	                            effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, inputQuantity);
                         if (inputQuantity == null) {
                             throw new RatingException("Failed to calculate prorating for charge id=" + chargeInstance.getId() + " : periodFrom=" + currentPeriodFromDate + ", periodTo=" + currentPeriodToDate
                                     + ", proratedFrom=" + effectiveChargeFromDate + ", proratedTo=" + effectiveChargeToDate);

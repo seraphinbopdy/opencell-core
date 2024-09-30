@@ -13355,4 +13355,10 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         </createIndex>
     </changeSet>
 
+    <changeSet id="#INTRD-25564_20240930" author="zelmeliani">
+        <addColumn tableName="ar_account_operation">
+            <column name="is_manual_payment" type="${type.boolean}" valueNumeric="0" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

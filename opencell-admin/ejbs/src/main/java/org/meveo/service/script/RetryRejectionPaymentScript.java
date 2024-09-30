@@ -104,18 +104,24 @@ public class RetryRejectionPaymentScript extends Script {
         PaymentGateway paymentGateway =
                 paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
         List<Long> aosToPay = paymentHistory.getListAoPaid().stream().map(AccountOperation::getId).collect(toList());
-        if (CARD.equals(payment.getPaymentMethod()) && CARD.equals(preferredPaymentMethod.getPaymentType())) {
-            CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
-            paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), aosToPay,
-                    TRUE, TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
-                    paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
-                    paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-                    TRUE, preferredPaymentMethod.getPaymentType(), true, null);
+
+        if (Boolean.TRUE.equals(payment.getIsManualPayment())) {
+            paymentService.createManualPaymentFromRejectedPayment(payment, payment.getCollectionDate(), aosToPay);
         } else {
-            paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), aosToPay,
-                    TRUE, TRUE, paymentGateway, null, null, null,
-                    null, null, TRUE, preferredPaymentMethod.getPaymentType(), true, null);
+            if (CARD.equals(payment.getPaymentMethod()) && CARD.equals(preferredPaymentMethod.getPaymentType())) {
+                CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
+                paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), aosToPay,
+                        TRUE, TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
+                        paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
+                        paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
+                        TRUE, preferredPaymentMethod.getPaymentType(), true, null);
+            } else {
+                paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), aosToPay,
+                        TRUE, TRUE, paymentGateway, null, null, null,
+                        null, null, TRUE, preferredPaymentMethod.getPaymentType(), true, null);
+            }
         }
+
         log.info("Payment request successfully created");
     }
 

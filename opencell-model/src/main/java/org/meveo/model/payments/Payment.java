@@ -17,6 +17,7 @@
  */
 package org.meveo.model.payments;
 
+import org.hibernate.annotations.Type;
 import org.meveo.model.dunning.DunningDocument;
 
 import java.math.BigDecimal;
@@ -60,6 +61,13 @@ public class Payment extends AccountOperation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_gateway_id")
     private PaymentGateway paymentGateway;
+
+    /**
+     * Is payment done manually
+     */
+    @Type(type = "numeric_boolean")
+    @Column(name = "is_manual_payment")
+    private Boolean isManualPayment = false;
 
     /**
      * get the  associated dunning doc if exists
@@ -125,5 +133,13 @@ public class Payment extends AccountOperation {
 
     public void setPaymentGateway(PaymentGateway paymentGateway) {
         this.paymentGateway = paymentGateway;
+    }
+
+    public Boolean getIsManualPayment() {
+        return isManualPayment;
+    }
+
+    public void setIsManualPayment(Boolean isManualPayment) {
+        this.isManualPayment = isManualPayment;
     }
 }

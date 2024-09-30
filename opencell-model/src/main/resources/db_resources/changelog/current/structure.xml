@@ -13180,9 +13180,8 @@ Meaning that advances won’t be available for further invoices."/>
 
     </changeSet>
 
-    <changeSet id="#INTRD-25259_fix_repoen_template" author="a.rouaguebe">
+    <changeSet id="#INTRD-25259_fix_repoen_template_replay" author="a.rouaguebe">
         <update tableName="com_message_template">
-
             <column name="subject">
                 <![CDATA[
                     #{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} "#{batchEntityDescription}"
@@ -13203,6 +13202,7 @@ Meaning that advances won’t be available for further invoices."/>
                     {"FRA":"Le lot \"#{batchEntityDescription}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecutionNbItemsProcessed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des ERDs du Portail.","ENG":"Batch \"#{batchEntityDescription}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the EDRs screen in Portal."}
                 ]]>
             </column>
+            <where>code = 'MASS_REOPEN_EDR_ZERO'</where>
         </update>
     </changeSet>
     

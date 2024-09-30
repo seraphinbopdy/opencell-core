@@ -7644,7 +7644,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             BigDecimal remainingAmount = lastApliedRate != null ? invoice.getAmountWithTax().multiply(lastApliedRate) : invoice.getAmountWithTax();
 
             for (Invoice adv : advInvoices) {
-                if (adv.getTransactionalInvoiceBalance() == null || adv.getTransactionalInvoiceBalance().toBigInteger().equals(BigInteger.ZERO)) {
+                if (adv.getTransactionalInvoiceBalance() == null || adv.getTransactionalInvoiceBalance().compareTo(ZERO) == 0) {
                     continue;
                 }
                 final BigDecimal amount;

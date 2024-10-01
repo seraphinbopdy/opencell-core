@@ -1127,9 +1127,9 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
         }
         
     	List<OrderProduct> products = processOrderProductFromOffer(orderOfferDto, orderOffer);
-		Optional.ofNullable(products).orElse(Collections.emptyList())
+		Optional.ofNullable(orderOffer.getProducts()).orElse(Collections.emptyList())
 				.forEach(orderProduct -> attributeService.validateAttributes(
-						products.get(0).getProductVersion().getAttributes(),
+						orderProduct.getProductVersion().getAttributes(),
 						orderProduct.getOrderAttributes()));
         processOrderAttribute(orderOfferDto,  orderOffer);
         if (orderOfferDto.getCustomFields() != null) {

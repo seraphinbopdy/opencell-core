@@ -146,13 +146,13 @@ public class DiscountPlanItemService extends PersistenceService<DiscountPlanItem
      * @param discountPlanItem Discount configuration
      * @return A discount percent (0-100)
      */
-    public BigDecimal getDiscountAmountOrPercent(Invoice invoice, InvoiceLine invoiceLine,SubCategoryInvoiceAgregate scAggregate, BigDecimal amount, DiscountPlanItem discountPlanItem,Product product, Set<AttributeValue> attributeValues) {
+    public BigDecimal getDiscountAmountOrPercent(Invoice invoice, InvoiceLine invoiceLine,SubCategoryInvoiceAgregate scAggregate, BigDecimal amount, DiscountPlanItem discountPlanItem,Product product, Set<AttributeValue> attributeValues, WalletOperation walletOperation) {
         BigDecimal computedDiscount = discountPlanItem.getDiscountValue();
 
         final String dpValueEL = discountPlanItem.getDiscountValueEL();
         if (isNotBlank(dpValueEL)) {
             final BigDecimal evalDiscountValue = evaluateDiscountPercentExpression(dpValueEL, scAggregate == null ? null : scAggregate.getBillingAccount(), 
-            																					scAggregate == null ? null : scAggregate.getWallet(), invoice,invoiceLine, amount);
+            																					scAggregate == null ? null : scAggregate.getWallet(), invoice,invoiceLine, amount, walletOperation);
             log.debug("for discountPlan {} percentEL -> {}  on amount={}", discountPlanItem.getCode(), computedDiscount, amount);
             if (evalDiscountValue != null) {
                 computedDiscount = evalDiscountValue;
@@ -182,7 +182,7 @@ public class DiscountPlanItemService extends PersistenceService<DiscountPlanItem
      * @return amount
      * @throws BusinessException business exception
      */
-    private BigDecimal evaluateDiscountPercentExpression(String expression, BillingAccount billingAccount, WalletInstance wallet, Invoice invoice, InvoiceLine invoiceLine,BigDecimal subCatTotal) throws BusinessException {
+    private BigDecimal evaluateDiscountPercentExpression(String expression, BillingAccount billingAccount, WalletInstance wallet, Invoice invoice, InvoiceLine invoiceLine,BigDecimal subCatTotal, WalletOperation walletOperation) throws BusinessException {
 
         if (StringUtils.isBlank(expression)) {
             return null;
@@ -196,16 +196,17 @@ public class DiscountPlanItemService extends PersistenceService<DiscountPlanItem
         userMap.put("invoiceLine", invoiceLine);
         userMap.put("wa", wallet);
         userMap.put("amount", subCatTotal);
+        userMap.put("walletOperation", walletOperation);
 
         BigDecimal result = ValueExpressionWrapper.evaluateExpression(expression, userMap, BigDecimal.class);
         return result;
     }
 
-    public BigDecimal getDiscountAmount(BigDecimal amountToApplyDiscountOn, DiscountPlanItem discountPlanItem, Product product,Invoice invoice, InvoiceLine invoiceLine, List<AttributeValue> attributeValues)
+    public BigDecimal getDiscountAmount(BigDecimal amountToApplyDiscountOn, DiscountPlanItem discountPlanItem, Product product,Invoice invoice, InvoiceLine invoiceLine, List<AttributeValue> attributeValues, WalletOperation walletOperation)
             throws BusinessException {
 
 
-        BigDecimal discountValue = getDiscountAmountOrPercent(invoice,invoiceLine, null, amountToApplyDiscountOn, discountPlanItem,product,Set.copyOf(attributeValues));
+        BigDecimal discountValue = getDiscountAmountOrPercent(invoice,invoiceLine, null, amountToApplyDiscountOn, discountPlanItem,product,Set.copyOf(attributeValues), walletOperation);
 
         if (BigDecimal.ZERO.compareTo(discountValue) == 0) {
             return BigDecimal.ZERO;

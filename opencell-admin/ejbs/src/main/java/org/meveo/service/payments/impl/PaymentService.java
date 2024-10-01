@@ -17,17 +17,18 @@
  */
 package org.meveo.service.payments.impl;
 
+import static java.math.BigDecimal.ZERO;
+import static java.util.Comparator.comparing;
+import static java.util.Optional.ofNullable;
+import static org.meveo.commons.utils.StringUtils.isBlank;
+import static org.meveo.model.payments.MatchingStatusEnum.O;
 import static org.meveo.model.payments.PaymentMethodEnum.CASH;
 import static org.meveo.model.payments.PaymentMethodEnum.PAYPALPAYMENTLINK;
 import static org.meveo.model.payments.PaymentMethodEnum.SIPS;
 import static org.meveo.model.payments.PaymentMethodEnum.STRIPEDIRECTLINK;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -42,9 +43,7 @@ import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.PaymentException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.api.dto.payment.PaymentResponseDto;
-import org.meveo.api.exception.EntityDoesNotExistsException;
-import org.meveo.api.exception.InvalidParameterException;
-import org.meveo.api.exception.MeveoApiException;
+import org.meveo.api.exception.*;
 import org.meveo.audit.logging.annotations.MeveoAudit;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
@@ -78,6 +77,7 @@ import org.meveo.model.payments.RejectedType;
 import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.service.billing.impl.JournalService;
 
 /**
  * Payment service implementation.
@@ -135,6 +135,9 @@ public class PaymentService extends PersistenceService<Payment> {
 	
 	@Inject
 	private PaymentRejectionActionReportService paymentRejectionActionReportService;
+
+    @Inject
+    private JournalService journalService;
 
     @MeveoAudit
     @Override
@@ -1155,6 +1158,129 @@ public class PaymentService extends PersistenceService<Payment> {
                     .getSingleResult();
         } catch (NoResultException exception) {
             return null;
+        }
+    }
+
+    /**
+     * Create a manual payment from a rejected payment
+     * @param rejectedPayment rejected payment
+     * @param collectionDate collection date
+     * @param idsToPay list of account operation ids to pay
+     * @throws NoAllOperationUnmatchedException if the operation is not matched
+     * @throws UnbalanceAmountException if the amount is not balanced
+     */
+    public void createManualPaymentFromRejectedPayment(Payment rejectedPayment, Date collectionDate, List<Long> idsToPay) throws UnbalanceAmountException, NoAllOperationUnmatchedException {
+        CustomerAccount customerAccount = rejectedPayment.getCustomerAccount();
+        OCCTemplate occTemplate = oCCTemplateService.findByCode(rejectedPayment.getCode());
+        Payment payment = new Payment();
+        this.calculateAmountsByTransactionCurrency(payment, customerAccount, rejectedPayment.getAmount(),
+                rejectedPayment.getTransactionalCurrency().getCurrencyCode(), payment.getTransactionDate());
+
+        payment.setJournal(occTemplate.getJournal());
+        payment.setPaymentMethod(rejectedPayment.getPaymentMethod());
+        payment.setAccountingCode(occTemplate.getAccountingCode());
+        payment.setCode(occTemplate.getCode());
+        payment.setDescription(isBlank(rejectedPayment.getDescription()) ? occTemplate.getDescription() : rejectedPayment.getDescription());
+        payment.setTransactionCategory(occTemplate.getOccCategory());
+        payment.setAccountCodeClientSide(occTemplate.getAccountCodeClientSide());
+        payment.setCustomerAccount(customerAccount);
+        payment.setReference(rejectedPayment.getReference().concat("-RETRY"));
+        payment.setDueDate(rejectedPayment.getDueDate() == null ? new Date() : rejectedPayment.getDueDate());
+        payment.setTransactionDate(rejectedPayment.getTransactionDate() == null ? new Date() : rejectedPayment.getTransactionDate());
+        payment.setMatchingStatus(O);
+        payment.setPaymentOrder(rejectedPayment.getPaymentOrder());
+        payment.setFees(rejectedPayment.getFees());
+        payment.setComment(rejectedPayment.getComment());
+        payment.setBankLot(rejectedPayment.getBankLot());
+        payment.setPaymentInfo(rejectedPayment.getPaymentInfo());
+        payment.setPaymentInfo1(rejectedPayment.getPaymentInfo1());
+        payment.setPaymentInfo2(rejectedPayment.getPaymentInfo2());
+        payment.setPaymentInfo3(rejectedPayment.getPaymentInfo3());
+        payment.setPaymentInfo4(rejectedPayment.getPaymentInfo4());
+        payment.setPaymentInfo5(rejectedPayment.getPaymentInfo5());
+        payment.setPaymentInfo6(rejectedPayment.getPaymentInfo6());
+        payment.setBankCollectionDate(rejectedPayment.getBankCollectionDate());
+        payment.setCollectionDate(collectionDate != null ? collectionDate : rejectedPayment.getCollectionDate());
+        payment.setAccountingDate(new Date());
+        payment.setIsManualPayment(true);
+        accountOperationService.handleAccountingPeriods(payment);
+
+        if (rejectedPayment.getCfValues() != null) {
+            payment.getCfValuesNullSafe().setValuesByCode(rejectedPayment.getCfValues().getValuesByCode());
+        }
+
+        payment.setJournal(journalService.findByCode("BAN"));
+        setPaymentGateway(payment, customerAccount);
+        this.create(payment);
+
+        paymentHistoryService.addHistory(customerAccount,
+                payment,
+                null, rejectedPayment.getAmount().multiply(new BigDecimal(100)).longValue(),
+                PaymentStatusEnum.ACCEPTED, null, null, payment.getReference(), null, null,
+                null,null, idsToPay);
+        paymentHistoryService.commit();
+        if (idsToPay != null && !idsToPay.isEmpty()) {
+            matchRejectedPayment(payment, idsToPay);
+        } else {
+            log.info("no matching created");
+        }
+        log.debug("payment created for amount: {}", payment.getAmount());
+    }
+
+    /**
+     * Match rejected payment with account operations
+     * @param payment rejected payment
+     * @param idsToPay list of account operation ids to pay
+     * @throws UnbalanceAmountException if the amount is not balanced
+     * @throws NoAllOperationUnmatchedException if the operation is not matched
+     */
+    private void matchRejectedPayment(Payment payment, List<Long> idsToPay) throws UnbalanceAmountException, NoAllOperationUnmatchedException {
+        List<AccountOperation> aosToPaid = new ArrayList<>();
+        for(Long id : idsToPay ) {
+            AccountOperation ao = accountOperationService.findById(id);
+            if(ao == null) {
+                throw new BusinessApiException("Cannot find account operation with id:" + id );
+            }
+            aosToPaid.add(ao);
+        }
+        Collections.sort(aosToPaid, comparing(AccountOperation::getDueDate));
+        if(checkAccountOperationCurrency(aosToPaid, payment.getTransactionalCurrency().getCurrencyCode())) {
+            throw new BusinessApiException("Transaction currency is different from account operation currency");
+        }
+        for(AccountOperation ao :aosToPaid ) {
+            if(ZERO.compareTo(payment.getUnMatchingAmount()) == 0) {
+                break;
+            }
+            List<Long> aosIdsToMatch = new ArrayList<>();
+            aosIdsToMatch.add(ao.getId());
+            aosIdsToMatch.add(payment.getId());
+            matchingCodeService.matchOperations(null, payment.getCustomerAccount().getCode(), aosIdsToMatch, payment.getId(), MatchingTypeEnum.A);
+        }
+    }
+
+    /**
+     * Check if the account operation currency is different from the transactional currency
+     * @param aosToPaid list of account operations
+     * @param transactionalCurrency transactional currency
+     * @return true if the account operation currency is different from the transactional currency
+     */
+    public boolean checkAccountOperationCurrency(List<AccountOperation> aosToPaid, String transactionalCurrency) {
+        return aosToPaid.stream()
+                .anyMatch(accountOperation -> ! accountOperation.getCode().endsWith("_SD") &&
+                        !accountOperation.getTransactionalCurrency().getCurrencyCode().equalsIgnoreCase(transactionalCurrency));
+    }
+
+    /**
+     * Set payment gateway to payment
+     * @param payment payment
+     * @param customerAccount customer account
+     */
+    private void setPaymentGateway(Payment payment, CustomerAccount customerAccount) {
+        if(payment.getPaymentGateway() == null && payment.getCustomerAccount() != null) {
+            PaymentMethod preferredPaymentMethod = payment.getCustomerAccount().getPreferredPaymentMethod();
+            PaymentGateway paymentGateway =
+                    paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
+            ofNullable(paymentGateway).ifPresent(payment::setPaymentGateway);
         }
     }
 }

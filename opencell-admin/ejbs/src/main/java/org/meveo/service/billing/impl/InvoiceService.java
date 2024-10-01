@@ -8086,8 +8086,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 					// match the old AO from ADV to new AO of the invoice
 					Long idCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getId();
 					String codeCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getCode();
-					newAo.setOriginPayment(advAccountOperation);
-					newAo.setOriginCallPayment(paymentAo);
+					newAo.setOriginPayment(paymentAo);
+					newAo.setOriginCallPayment(advAccountOperation);
 					try {
 						// matching the old AO from ADV to new AO of the invoice
 						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoice.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());

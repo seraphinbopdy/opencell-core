@@ -82,7 +82,7 @@ public class UsageChargeInstanceService extends BusinessService<UsageChargeInsta
             create(usageChargeInstance);
         }
 
-        if ((serviceUsageChargeTemplate.getAccumulatorCounterTemplates() != null && !serviceUsageChargeTemplate.getAccumulatorCounterTemplates().isEmpty()) || serviceUsageChargeTemplate.getCounterTemplate() != null) {
+        if (((serviceUsageChargeTemplate.getAccumulatorCounterTemplates() != null && !serviceUsageChargeTemplate.getAccumulatorCounterTemplates().isEmpty()) || serviceUsageChargeTemplate.getCounterTemplate() != null) && serviceInstance.getId() != null) {
             for (CounterTemplate counterTemplate : serviceUsageChargeTemplate.getAccumulatorCounterTemplates()) {
                 CounterInstance counterInstance = counterInstanceService.counterInstanciation(serviceInstance, counterTemplate, usageChargeInstance, isVirtual);
                 log.debug("Accumulator counter instance {} will be added to charge instance {}", counterInstance, usageChargeInstance);

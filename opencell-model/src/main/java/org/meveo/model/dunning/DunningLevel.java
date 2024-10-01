@@ -42,7 +42,7 @@ public class DunningLevel extends BusinessEntity {
      */
     @Type(type = "numeric_boolean")
     @Column(name = "reminder")
-    private Boolean isReminder = Boolean.FALSE;
+    private Boolean reminder = Boolean.FALSE;
 
     /**
      * A level can be activated or deactivate at any time, it means it is triggered or not within a policy
@@ -119,11 +119,11 @@ public class DunningLevel extends BusinessEntity {
     private List<DunningPolicyLevel> relatedPolicies;
 
     public Boolean isReminder() {
-        return isReminder;
+        return reminder;
     }
 
     public void setReminder(Boolean reminder) {
-        isReminder = reminder;
+        this.reminder = reminder;
     }
 
     public Boolean isActive() {

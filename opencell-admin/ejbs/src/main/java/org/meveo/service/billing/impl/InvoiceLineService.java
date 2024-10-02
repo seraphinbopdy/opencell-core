@@ -307,13 +307,13 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 	TaxInfo taxInfo = taxMappingService.determineTax(accountingArticle.getTaxClass(), seller, billingAccount, null, invoice.getInvoiceDate(),  false, false);
                         taxPercent = taxInfo.tax.getPercent();
                 }
-                BigDecimal discountAmount = discountPlanItemService.getDiscountAmount(invoiceLine.getUnitPrice(), discountPlanItem,null,invoice,invoiceLine, Collections.emptyList());
+                BigDecimal discountAmount = discountPlanItemService.getDiscountAmount(invoiceLine.getUnitPrice(), discountPlanItem,null,invoice,invoiceLine, Collections.emptyList(), null);
                 if(discountAmount != null) {
                 	invoiceLineDiscountAmount = invoiceLineDiscountAmount.add(discountAmount);
         	  	}
                 BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(discountAmount, discountAmount, taxPercent, appProvider.isEntreprise(),  rounding,
                         roundingMode.getRoundingMode());
-	            BigDecimal discountValue=discountPlanItemService.getDiscountAmountOrPercent(invoice,invoiceLine, null, invoiceLine.getUnitPrice(), discountPlanItem,null,Collections.emptySet());
+	            BigDecimal discountValue=discountPlanItemService.getDiscountAmountOrPercent(invoice,invoiceLine, null, invoiceLine.getUnitPrice(), discountPlanItem,null,Collections.emptySet(), null);
                 var quantity = invoiceLine.getQuantity();
                 discountInvoice.setUnitPrice(discountAmount);
                 discountInvoice.setAmountWithoutTax(quantity.compareTo(BigDecimal.ZERO)>0?quantity.multiply(amounts[0]):BigDecimal.ZERO);
@@ -355,7 +355,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                         TaxInfo taxInfo = taxMappingService.determineTax(entity.getAccountingArticle().getTaxClass(), seller, billingAccount, null, invoiceSource.getInvoiceDate(), false, false);
                             taxPercent = taxInfo.tax.getPercent();
                     }
-                    BigDecimal discountAmount = discountPlanItemService.getDiscountAmount(entity.getUnitPrice(), discountPlanItem,null,invoice,entity, Collections.emptyList());
+                    BigDecimal discountAmount = discountPlanItemService.getDiscountAmount(entity.getUnitPrice(), discountPlanItem,null,invoice,entity, Collections.emptyList(), null);
                     if(discountAmount != null) {
                         discountLineAmount = discountLineAmount.add(discountAmount);
                     }

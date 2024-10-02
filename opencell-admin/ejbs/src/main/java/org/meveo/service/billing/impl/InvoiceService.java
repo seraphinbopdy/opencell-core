@@ -7973,9 +7973,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if(org.meveo.commons.utils.ListUtils.isEmtyCollection(advs)) {
             return;
         }
+		var enabledStatus = List.of(InvoiceStatusEnum.DRAFT, InvoiceStatusEnum.NEW);
+		var enabledPaymentStatusStatus = List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PENDING);
 		if(!allowUsingUnpaidAdvance) {
 			// in this case of invoice is DRAFT and the ADV is UNPAID and not link to ADV then we ignore the ADV
-			if(invoice.getStatus() == InvoiceStatusEnum.DRAFT) {
+			if(enabledStatus.contains(invoice.getStatus())) {
 				advs.removeIf(adv -> {
 					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);
 					boolean isAoExist = advAos.stream().anyMatch(ao -> ao.getStatus() == AccountOperationStatus.CLOSED);
@@ -7987,7 +7989,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 								return true;
 							}
 						}
-					}else if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID || isAoExist) {
+					}else if(enabledPaymentStatusStatus.contains(adv.getPaymentStatus()) || isAoExist) {
 						return true;
 					}
 					return false;
@@ -7997,7 +7999,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			// the allow using unpaid advance is true
 			// if ADV is paid then the ADV will be attached to the invoice
 			advs.removeIf(adv -> {
-				if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID) {
+				if(enabledPaymentStatusStatus.contains(adv.getPaymentStatus())) {
 					return true;
 				}else if(invoice.getLinkedInvoices().stream().anyMatch(li -> li.getLinkedInvoiceValue().getId() == adv.getId())) {
 					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);

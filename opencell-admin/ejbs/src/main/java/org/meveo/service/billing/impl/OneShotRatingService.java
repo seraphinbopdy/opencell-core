@@ -1,5 +1,11 @@
 package org.meveo.service.billing.impl;
 
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.ZERO;
+import static java.math.BigDecimal.valueOf;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -30,11 +36,6 @@ import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
 import org.meveo.service.tax.TaxClassService;
-
-import static java.math.BigDecimal.ZERO;
-import static java.math.BigDecimal.valueOf;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 @Stateless
 public class OneShotRatingService extends RatingService implements Serializable {
@@ -208,7 +209,7 @@ public class OneShotRatingService extends RatingService implements Serializable 
      * @return Quantity attribute value
      */
     private BigDecimal getQuantityAttribute(ServiceInstance serviceInstance, String quantityAttribute) {
-        BigDecimal quantityAttributeValue = ZERO;
+        BigDecimal quantityAttributeValue = ONE;
         Map<String, Object> attributeValues = fromAttributeValue(fromAttributeInstances(serviceInstance));
         Object quantityObject = attributeValues.get(quantityAttribute);
 

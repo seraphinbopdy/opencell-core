@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.NumberUtils;
@@ -150,13 +151,13 @@ public class InvoiceLinesFactory {
         if(billingRun != null
                 && billingRun.isDisableAggregation()
                 && billingRun.isAggregateUnitAmounts()) {
-            BigDecimal unitAmount = (BigDecimal) data.getOrDefault("sum_without_tax", ZERO);
+            BigDecimal unitAmount = Optional.ofNullable((BigDecimal) data.get("sum_without_tax")).orElse(ZERO);
             BigDecimal quantity = (BigDecimal) data.getOrDefault("quantity", ZERO);
             BigDecimal unitPrice = quantity.compareTo(ZERO) == 0 ? unitAmount : unitAmount.divide(quantity,
                     appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
             invoiceLine.setUnitPrice(unitPrice);
         } else {
-            invoiceLine.setUnitPrice((BigDecimal) data.getOrDefault("unit_amount_without_tax", ZERO));
+            invoiceLine.setUnitPrice(Optional.ofNullable((BigDecimal) data.get("unit_amount_without_tax")).orElse(ZERO));
         }
         invoiceLine.setRawAmount(isEnterprise ? amountWithoutTax : amountWithTax);
         

@@ -24,13 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
-import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-
 import org.jboss.seam.international.status.builder.BundleKey;
 import org.meveo.admin.action.AccountBean;
 import org.meveo.admin.action.BaseBean;
@@ -57,6 +50,13 @@ import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.DualListModel;
 import org.primefaces.model.TreeNode;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Standard backing bean for {@link User} (extends {@link BaseBean} that provides almost all common methods to handle entities filtering/sorting in datatable, their create, edit, view, delete operations). It works with
@@ -141,6 +141,9 @@ public class UserBean extends CustomFieldBean<User> {
     public User initEntity() {
         if (username != null) {
             entity = userService.findByUsername(username, true, false);
+            if (entity.getName() == null) {
+                entity.setName(new NameInfo());
+            }
 
         } else {
             entity = new User();
@@ -225,9 +228,13 @@ public class UserBean extends CustomFieldBean<User> {
             getEntity().setUserLevel(userGroup.getName());
         }
 
-        getEntity().getUserRoles().clear();
-        getEntity().getUserRoles().addAll(rolesDM.getTarget().stream().map(codeRole -> roleService.findByName(codeRole)).collect(Collectors.toList()));
+        getEntity().addRealmLevelRoles(rolesDM.getTarget());
 
+        if (roleService.getRoleManagementMaster().isOcRoleDuplicate()) {
+
+            getEntity().getUserRoles().clear();
+            getEntity().getUserRoles().addAll(rolesDM.getTarget().stream().map(codeRole -> roleService.findByName(codeRole)).collect(Collectors.toList()));
+        }
         return super.saveOrUpdate(killConversation);
     }
 
@@ -248,9 +255,21 @@ public class UserBean extends CustomFieldBean<User> {
         if (rolesDM == null) {
             List<String> perksSource = new ArrayList<String>(roleService.listRoleNames((PaginationConfiguration) null));
             List<String> perksTarget = new ArrayList<String>();
-            if (getEntity().getUserRoles() != null) {
-                perksTarget.addAll(getEntity().getUserRoles().stream().map(Role::getName).collect(Collectors.toList()));
+
+            // All user held roles are available in Opencell
+            if (roleService.getRoleManagementMaster().isOcRoleDuplicate()) {
+                if (getEntity().getUserRoles() != null) {
+                    perksTarget.addAll(getEntity().getUserRoles().stream().map(Role::getName).collect(Collectors.toList()));
+                }
+
+                // All user held roles are in Keycloak
+            } else {
+                List<String> realmRoles = getEntity().getRealmLevelRoles();
+                if (realmRoles != null) {
+                    perksTarget.addAll(realmRoles);
+                }
             }
+
             perksSource.removeAll(perksTarget);
             rolesDM = new DualListModel<String>(perksSource, perksTarget);
         }
@@ -438,4 +457,5 @@ public class UserBean extends CustomFieldBean<User> {
         securedEntityFilter.clear();
         selectedAccountBean.getFilters().clear();
     }
+
 }

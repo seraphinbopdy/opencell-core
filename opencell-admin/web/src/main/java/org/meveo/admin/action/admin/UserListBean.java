@@ -48,8 +48,6 @@ public class UserListBean extends UserBean {
                 @Override
                 @SuppressWarnings("rawtypes")
                 public List load(int first, int pageSize, Map sortBy, Map filterBy) {
-                    filters.put("firstName", filters.get("name.firstName"));
-                    filters.put("lastName", filters.get("name.lastName"));
 
                     PaginationConfiguration paginationConfig = new PaginationConfiguration(first, pageSize, filters, null, null);
                     setRowCount(Long.valueOf(userService.count(paginationConfig)).intValue());

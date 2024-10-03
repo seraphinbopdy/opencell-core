@@ -148,6 +148,9 @@
           "client": {
             "opencell-web": [
               "uma_protection"
+            ],
+            "realm-management": [
+              "view-authorization"
             ]
           }
         },

@@ -132,7 +132,7 @@ public class UserService extends PersistenceService<User> {
             this.isKcUserWrite = isKcUserWrite;
             this.isKcUserRolesWrite = isKcUserRolesWrite;
             this.isKcRoleWrite = isKcRolesWrite;
-    }
+        }
 
         /**
          * @return Shall user information be duplicated in Opencell, and preferred over user information in Keycloak for consultation purpose.
@@ -191,13 +191,13 @@ public class UserService extends PersistenceService<User> {
             user.getRolesByClient(), null, user.getAttributes());
 
         User userInDb = getUserFromDatabase(user.getUserName());
-        
+
         // Create user in Opencell DB if applicable
         if (userId == null && userInDb != null && getUserManagementMaster().isOcUserDuplicate()) {
-        		throw new EntityAlreadyExistsException(User.class, user.getUserName(), "username");
+            throw new EntityAlreadyExistsException(User.class, user.getUserName(), "username");
 
         } else if (userInDb == null) {
-        	super.create(user);
+            super.create(user);
         }
     }
 
@@ -205,7 +205,7 @@ public class UserService extends PersistenceService<User> {
     @RolesAllowed({ "userManagement", "userSelfManagement", "apiUserManagement", "apiUserSelfManagement" })
     public User update(User user) throws ElementNotFoundException, InvalidParameterException {
         return update(user, true);
-        }
+    }
 
     /**
      * Update user in Opencell DB and Keycloak
@@ -220,14 +220,14 @@ public class UserService extends PersistenceService<User> {
     public User update(User user, boolean isReplaceRoles) throws ElementNotFoundException, InvalidParameterException {
 
         user.setUserName(user.getUserName().toUpperCase());
-		String firstName = user.getName() != null ? user.getName().getFirstName() : null;
-		String lastName = user.getName() != null ? user.getName().getLastName() : null;
+        String firstName = user.getName() != null ? user.getName().getFirstName() : null;
+        String lastName = user.getName() != null ? user.getName().getLastName() : null;
 
         // Update information in Keycloak
         keycloakAdminClientService.updateUser(user.getUserName(), firstName, lastName, user.getEmail(), user.getPassword(), user.getUserLevel(), user.getRolesByClient(), isReplaceRoles, user.getAttributes());
 
         // And in Opencell DB
-		 if(user.getId() != null) {
+        if (user.getId() != null) {
             return super.update(user);
         } else {
             return user;
@@ -250,32 +250,66 @@ public class UserService extends PersistenceService<User> {
      */
     public User findByUsername(String username, boolean extendedInfo, boolean extendedClientRoles) {
         User lUser = null;
-	    
+
         // Preference taken to user information from Opencell DB
         if (getUserManagementMaster().isOcUserDuplicate()) {
 
             lUser = getUserFromDatabase(username);
             if (lUser == null) {
-		    lUser = keycloakAdminClientService.findUser(username, extendedInfo, extendedClientRoles);
+                lUser = keycloakAdminClientService.findUser(username, extendedInfo, extendedClientRoles);
 
-        } else {
-			
+            } else {
+
                 if (extendedInfo) {
-				this.fillKeycloakUserInfo(lUser);
-			}
+                    this.fillKeycloakUserInfo(lUser);
+                }
                 if (extendedClientRoles) {
                     Map<String, List<String>> clientRoles = keycloakAdminClientService.getClientRoles(username);
                     lUser.addClientLevelRoles(clientRoles);
-		}
+                }
             }
 
         } else {
 
             lUser = keycloakAdminClientService.findUser(username, extendedInfo, extendedClientRoles);
+            lUser = getOrCreateDbUserFromKCUser(lUser);
         }
         return lUser;
     }
 
+    
+
+    /**
+     * Lookup additional information from a user in database. If user is not found in the database, create a new with information from a keycloak user
+     *
+     * @param kcUser keycloak user to lookup by
+     * @return User with additional information filled in
+     */
+    private User getOrCreateDbUserFromKCUser(User kcUser) {
+        User user = null;
+        
+        // Look up a used
+        try {
+            user = getEntityManager().createNamedQuery("User.getByUsername", User.class).setParameter("username", kcUser.getUserName().toLowerCase()).getSingleResult();
+        } catch (NoResultException ex) {
+            user = new User();
+            // Set fields, even they are transient, so they can be used in a notification if any is fired uppon user creation
+            user.setEmail(kcUser.getEmail());
+            user.setName(kcUser.getName());
+            user.setUserName(kcUser.getUserName());
+            super.create(user);
+        }
+
+        user.setEmail(kcUser.getEmail());
+        user.setName(kcUser.getName());
+        
+        user.setRolesByClient(kcUser.getRolesByClient());
+        user.setUserLevel(kcUser.getUserLevel());
+        user.setAttributes(kcUser.getAttributes());
+        return user;
+    }
+    
+    
     public User getUserFromDatabase(String pUserName) {
         User lUser = null;
         try {
@@ -294,19 +328,13 @@ public class UserService extends PersistenceService<User> {
         if (getUserManagementMaster().isOcUserDuplicate()) {
             String firstName = (String) config.getFilters().get("name.firstName");
             String lastName = (String) config.getFilters().get("name.lastName");
-            String email = (String) config.getFilters().get("email");
-
-            if(StringUtils.isBlank(firstName)) {
-                this.removeFilters(config, "name.firstName");
+            if (firstName != null) {
+                config.getFilters().put("firstName", firstName);
             }
-
-            if(StringUtils.isBlank(lastName)) {
-                this.removeFilters(config, "name.lastName");
+            if (lastName != null) {
+                config.getFilters().put("lastName", lastName);
             }
-
-            if(StringUtils.isBlank(email)) {
-                this.removeFilters(config, "email");
-            }
+            config.removeFilters("name.firstName", "name.lastName");
 
             users = super.list(config);
 
@@ -321,9 +349,8 @@ public class UserService extends PersistenceService<User> {
             }
 
         } else {
-            //Get user from keycloak
+            // Get user from keycloak
             users = keycloakAdminClientService.listUsers(config);
-            this.removeFilters(config, "name.firstName", "name.lastName", "email");
 
             // Load client roles if requested
             for (User user : users) {
@@ -332,15 +359,16 @@ public class UserService extends PersistenceService<User> {
                 }
             }
 
-            //Construct a list of names
+            // Construct a list of names
             List<String> usernamesList = users.stream().map(User::getUserName).collect(Collectors.toList());
+            config.removeFilters();
             config.getFilters().put("inList userName", usernamesList);
 
             // Get list of users from database and fill all missing fields
             List<User> lDbUsers = super.list(config);
             users.forEach(keycloakUser -> {
                 lDbUsers.forEach(dbUser -> {
-                    if(keycloakUser.getUserName().equalsIgnoreCase(dbUser.getUserName())) {
+                    if (keycloakUser.getUserName().equalsIgnoreCase(dbUser.getUserName())) {
                         fillEmptyFields(keycloakUser, dbUser);
                     }
                 });
@@ -357,14 +385,15 @@ public class UserService extends PersistenceService<User> {
         if (getUserManagementMaster().isOcUserDuplicate()) {
             String firstName = (String) config.getFilters().get("name.firstName");
             String lastName = (String) config.getFilters().get("name.lastName");
-            String email = (String) config.getFilters().get("email");
-
-            if(StringUtils.isBlank(firstName) && StringUtils.isBlank(lastName) && StringUtils.isBlank(email)) {
-                this.removeFilters(config, "name.firstName", "name.lastName", "email");
-                return super.count(config);
-            } else {
-                return super.count(config);
+            if (firstName != null) {
+                config.getFilters().put("firstName", firstName);
             }
+            if (lastName != null) {
+                config.getFilters().put("lastName", lastName);
+            }
+            config.removeFilters("name.firstName", "name.lastName");
+
+            return super.count(config);
 
         } else {
             List<User> users = keycloakAdminClientService.listUsers(config);
@@ -391,16 +420,16 @@ public class UserService extends PersistenceService<User> {
      */
     @Override
     public User findById(Long id, boolean extendedInfo) {
-        if(id == null) {
+        if (id == null) {
             return null;
         }
 
         User user = findById(id);
         if (user == null) {
-             return null;
+            return null;
         }
 
-        if(extendedInfo) {
+        if (extendedInfo) {
             this.fillKeycloakUserInfo(user);
         }
 
@@ -413,23 +442,11 @@ public class UserService extends PersistenceService<User> {
      * @param user user
      */
     private void fillKeycloakUserInfo(User user) {
-            User kcUser = keycloakAdminClientService.findUser(user.getUserName(), true, false);
+        User kcUser = keycloakAdminClientService.findUser(user.getUserName(), true, false);
         if (kcUser != null) {
             user.addRealmLevelRoles(new ArrayList<String>(kcUser.getRoles()));
             user.setUserLevel(kcUser.getUserLevel());
             user.setAttributes(kcUser.getAttributes());
-        }
-}
-
-    /**
-     * Remove filters from config
-     *
-     * @param pConfig {@link PaginationConfiguration}
-     * @param pKeys A list of keys to remove
-     */
-    private void removeFilters(PaginationConfiguration pConfig, String ... pKeys) {
-        for(String key : pKeys) {
-            pConfig.getFilters().remove(key);
         }
     }
 
@@ -440,11 +457,11 @@ public class UserService extends PersistenceService<User> {
      * @param pDbUser {@link User} User returned from database
      */
     private void fillEmptyFields(User pKeycloakUser, User pDbUser) {
-        if(pKeycloakUser.getEmail() == null && pDbUser.getEmail() != null && !pDbUser.getEmail().isBlank()) {
+        if (pKeycloakUser.getEmail() == null && pDbUser.getEmail() != null && !pDbUser.getEmail().isBlank()) {
             pKeycloakUser.setEmail(pDbUser.getEmail());
         }
 
-        if(pKeycloakUser.getUuid() == null && pDbUser.getUuid() != null && !pDbUser.getUuid().isEmpty()) {
+        if (pKeycloakUser.getUuid() == null && pDbUser.getUuid() != null && !pDbUser.getUuid().isEmpty()) {
             pKeycloakUser.setUuid(pDbUser.getUuid());
         }
     }
@@ -458,8 +475,8 @@ public class UserService extends PersistenceService<User> {
      */
     public String getUserAttributeValue(String username, String attributeName) {
         return keycloakAdminClientService.getUserAttributeValue(username, attributeName);
-                    }
-	
+    }
+
     /**
      * Get user/role management division between Opencell and Keycloak applications
      * 
@@ -472,7 +489,7 @@ public class UserService extends PersistenceService<User> {
             master = UserManagementMasterEnum.valueOf(userManagementSource);
         } catch (Exception e) {
             log.error("Unrecognized 'userManagement.master' property value. A default value of 'KC' will be used.");
-	}
+        }
         return master;
     }
 }

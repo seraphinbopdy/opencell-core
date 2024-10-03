@@ -410,4 +410,21 @@ public class PaginationConfiguration implements Serializable {
     public void setSelectFields(String selectFields) {
         this.selectFields = selectFields;
     }
+    
+    /**
+     * Remove filters
+     *
+     * @param pKeys A list of keys to remove. If none provided, all filters will be removed
+     */
+    public void removeFilters(String... pKeys) {
+
+        if (pKeys.length == 0) {
+            getFilters().clear();
+
+        } else {
+            for (String key : pKeys) {
+                getFilters().remove(key);
+            }
+        }
+    }
 }

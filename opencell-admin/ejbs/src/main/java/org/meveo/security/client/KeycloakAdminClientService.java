@@ -31,15 +31,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.Resource;
-import jakarta.ejb.SessionContext;
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-import jakarta.persistence.Entity;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.keycloak.KeycloakPrincipal;
@@ -74,7 +65,6 @@ import org.meveo.admin.exception.InvalidParameterException;
 import org.meveo.admin.exception.UsernameAlreadyExistsException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.UserDto;
-import org.meveo.api.exception.BusinessApiException;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.ReflectionUtils;
@@ -92,6 +82,15 @@ import org.meveo.service.admin.impl.UserService.UserManagementMasterEnum;
 import org.slf4j.Logger;
 import org.wildfly.security.http.oidc.OidcPrincipal;
 import org.wildfly.security.http.oidc.OidcSecurityContext;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Entity;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Keycloak management services - user, api access rules and secured entities management (last two implemented as authorization resources) <br/>
@@ -174,10 +173,10 @@ public class KeycloakAdminClientService implements Serializable {
      */
     public List<User> listUsers(PaginationConfiguration paginationConfig) {
 
-        String username = (String) paginationConfig.getFilters().get("userName");
-        String firstName = (String) paginationConfig.getFilters().get("name.firstName");
-        String lastName = (String) paginationConfig.getFilters().get("name.lastName");
-        String email = (String) paginationConfig.getFilters().get("email");
+        String username = StringUtils.defaultIfBlank((String) paginationConfig.getFilters().get("userName"), null);
+        String firstName = StringUtils.defaultIfBlank((String) paginationConfig.getFilters().get("name.firstName"), null);
+        String lastName = StringUtils.defaultIfBlank((String) paginationConfig.getFilters().get("name.lastName"), null);
+        String email = StringUtils.defaultIfBlank((String) paginationConfig.getFilters().get("email"), null);
 
         KeycloakAdminClientConfig keycloakAdminClientConfig = AuthenticationProvider.getKeycloakConfig();
         Keycloak keycloak = getKeycloakClient(keycloakAdminClientConfig);
@@ -401,9 +400,9 @@ public class KeycloakAdminClientService implements Serializable {
 
                 try {
                     usersResource.get(userId).update(user);
-                } catch (BusinessApiException e) {
+                } catch (Exception e) {
                     log.warn("Impossible to update user on keycloak : " + usersResource.get(userId));
-                    log.error("error when updating user  : " + user);
+                    log.error("error when updating user  : " + user, e);
                 }
 
             } else {
@@ -869,11 +868,15 @@ public class KeycloakAdminClientService implements Serializable {
         RoleRepresentation roleRepresentation = null;
         if (isClientRole) {
             List<RoleRepresentation> roleSearch = client.roles().list(roleName, false);
-            roleRepresentation = roleSearch.size() > 0 ? roleSearch.get(0) : null;
+            if (roleSearch.size() > 0) {
+                roleRepresentation = roleSearch.stream().filter(r -> r.getName().equalsIgnoreCase(roleName)).findFirst().orElse(null);
+            }
 
         } else {
             List<RoleRepresentation> roleSearch = realmResource.roles().list(roleName, false);
-            roleRepresentation = roleSearch.size() > 0 ? roleSearch.get(0) : null;
+            if (roleSearch.size() > 0) {
+                roleRepresentation = roleSearch.stream().filter(r -> r.getName().equalsIgnoreCase(roleName)).findFirst().orElse(null);
+            }
         }
 
         if (roleRepresentation != null) {

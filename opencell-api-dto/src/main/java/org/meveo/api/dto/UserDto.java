@@ -27,6 +27,7 @@ import org.meveo.model.admin.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -51,6 +52,7 @@ public class UserDto extends AuditableEntityDto {
     @XmlElement(required = true)
     @Schema(description = "the username of the user")
     @NotNull
+    @Size(min = 3, max = 50)
     private String username;
 
     /**

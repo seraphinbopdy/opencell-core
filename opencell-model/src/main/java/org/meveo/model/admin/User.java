@@ -86,8 +86,8 @@ public class User extends AuditableCFEntity implements IReferenceEntity, ISearch
     /**
      * Login name
      */
-    @Column(name = "username", length = 50, unique = true)
-    @Size(max = 50)
+    @Column(name = "username", length = 50, unique = true, nullable = false)
+    @Size(min = 3, max = 50)
     private String userName;
 
     /**
@@ -176,7 +176,7 @@ public class User extends AuditableCFEntity implements IReferenceEntity, ISearch
         Set<String> allRoles = new HashSet<String>();
         for (List<String> roleList : rolesByClient.values()) {
             allRoles.addAll(roleList);
-    }
+        }
 
         return allRoles;
     }

@@ -5971,6 +5971,18 @@
                 <column name="tax_category_id" valueNumeric="-3" />
     </insert>
 
+        <insert tableName="crm_customer_category">
+            <column name="id" valueNumeric="-5" />
+            <column name="version" valueNumeric="0" />
+            <column name="uuid" value="CCC_B2G" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="B2G" />
+            <column name="description" value="Governement" />
+            <column name="accounting_code_id" valueComputed="(select id from billing_accounting_code where code = '410000000')" />
+            <column name="tax_category_id" valueNumeric="-3" />
+            <column name="description_i18n" value='{"FRA":"Gouvernement","ENG":"Governement"}'/>
+        </insert>
+
         <insert tableName="cat_offer_template_category">
                 <column name="id" valueNumeric="-1" />
                 <column name="version" valueNumeric="0" />

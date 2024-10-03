@@ -478,7 +478,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		Date currentDate = new Date();
 		OtherCreditAndCharge accountOperationToTransfer = new OtherCreditAndCharge();
 		accountOperationToTransfer.setCode(occTemplate.getCode());
-		accountOperationToTransfer.setDescription(occTemplate.getAccountingCode() != null ? occTemplate.getAccountingCode().getDescription(): null);
+		accountOperationToTransfer.setDescription(occTemplate.getDescription());
 		accountOperationToTransfer.setAccountingCode(accountOperation.getAccountingCode());
 		accountOperationToTransfer.setAccountingDate(currentDate);
 		accountOperationToTransfer.setAmount(amountToTransfer);

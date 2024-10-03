@@ -13360,5 +13360,19 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="is_manual_payment" type="${type.boolean}" valueNumeric="0" />
         </addColumn>
     </changeSet>
+    
+    <changeSet id="#INTRD-25474_new_cg_20241003" author="a.rouaguebe">
+        <insert tableName="crm_customer_category">
+            <column name="id" valueNumeric="-5" />
+            <column name="version" valueNumeric="0" />
+            <column name="uuid" value="CCC_B2G" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="B2G" />
+            <column name="description" value="Governement" />
+            <column name="accounting_code_id" valueComputed="(select id from billing_accounting_code where code = '410000000')" />
+            <column name="tax_category_id" valueNumeric="-3" />
+            <column name="description_i18n" value='{"FRA":"Gouvernement","ENG":"Governement"}' />
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

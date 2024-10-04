@@ -21039,6 +21039,7 @@
 
     <changeSet id="#INTRD-25155_secured_tmp" author="a.rouaguebe" />
     <changeSet id="#INTRD-25259_fix_repoen_template_replay" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25474_new_cg_20241003" author="a.rouaguebe" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

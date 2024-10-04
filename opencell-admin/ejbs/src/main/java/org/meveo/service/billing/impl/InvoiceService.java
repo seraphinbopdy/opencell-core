@@ -7333,6 +7333,40 @@ public class InvoiceService extends PersistenceService<Invoice> {
         return adjustmentInvoice;
     }
 
+    /**
+     * Create an adjustment invoice for a given invoice.
+     *
+     * @param invoice invoice to adjust
+     * @param invoiceLinesIds invoice lines to adjust
+     * @param type invoice type
+     * @return the adjustment invoice
+     */
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public Invoice createAdjustmentForJob(Invoice invoice, List<Long> invoiceLinesIds, InvoiceType type) {
+        invoice = findById(invoice.getId());
+        Invoice adjustmentInvoice = duplicateByType(invoice, invoiceLinesIds, true);
+        addLinkedInvoice(invoice, adjustmentInvoice);
+        populateAdjustmentInvoiceForJob(adjustmentInvoice, type, invoice);
+        calculateOrUpdateInvoice(invoiceLinesIds, adjustmentInvoice);
+        return adjustmentInvoice;
+    }
+
+    /**
+     * Populate adjustment invoice for job.
+     * @param duplicatedInvoice Duplicated invoice
+     * @param type Type of invoice
+     * @param srcInvoice Source invoice
+     */
+    private void populateAdjustmentInvoiceForJob(Invoice duplicatedInvoice, InvoiceType type, Invoice srcInvoice) {
+        duplicatedInvoice.setInvoiceDate(new Date());
+        duplicatedInvoice.setInvoiceType(type != null ? type : invoiceTypeService.getDefaultAdjustement());
+        duplicatedInvoice.setStatus(InvoiceStatusEnum.DRAFT);
+        duplicatedInvoice.setOpenOrderNumber(StringUtils.EMPTY);
+        // Update ADJ Invoice PaymentMethod from original Invoice
+        duplicatedInvoice.setPaymentMethod(srcInvoice.getPaymentMethod());
+        getEntityManager().flush();
+    }
 
     private void updateInvoiceLinesAmountFromRatedTransactions(List<InvoiceLineRTs> invoiceLinesRTs, List<InvoiceLine> invoiceLines) {
 

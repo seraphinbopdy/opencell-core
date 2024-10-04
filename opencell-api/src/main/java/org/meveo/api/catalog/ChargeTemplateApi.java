@@ -352,12 +352,6 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
         }
         if (postData.getBusinessKeyIsHidden() != null) {
             chargeTemplate.setBusinessKeyIsHidden(postData.getBusinessKeyIsHidden());
-            if (postData.getQuantityAttribute() != null) {
-                Attribute quantityAttribute = ofNullable(attributeService.findByCode(postData.getQuantityAttribute()))
-                        .orElseThrow(() -> new EntityDoesNotExistsException(Attribute.class, postData.getQuantityAttribute()));
-                chargeTemplate.setQuantityAttribute(quantityAttribute);
-            }
-
             // populate customFields
             try {
                 populateCustomFields(postData.getCustomFields(), chargeTemplate, isNew);
@@ -368,6 +362,11 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
                 log.error("Failed to associate custom field instance to an entity", e);
                 throw e;
             }
+        }
+        if (postData.getQuantityAttribute() != null) {
+            Attribute quantityAttribute = ofNullable(attributeService.findByCode(postData.getQuantityAttribute()))
+                    .orElseThrow(() -> new EntityDoesNotExistsException(Attribute.class, postData.getQuantityAttribute()));
+            chargeTemplate.setQuantityAttribute(quantityAttribute);
         }
     }
     

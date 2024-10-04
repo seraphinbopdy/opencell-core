@@ -8008,23 +8008,21 @@ public class InvoiceService extends PersistenceService<Invoice> {
             return;
         }
 		var enabledStatus = List.of(InvoiceStatusEnum.DRAFT, InvoiceStatusEnum.NEW);
-		var enabledPaymentStatusStatus = List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PENDING);
+		var enabledPaymentStatusStatus = List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PPAID);
 		if(!allowUsingUnpaidAdvance) {
 			// in this case of invoice is DRAFT and the ADV is UNPAID and not link to ADV then we ignore the ADV
 			if(enabledStatus.contains(invoice.getStatus())) {
 				advs.removeIf(adv -> {
 					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);
 					boolean isAoExist = advAos.stream().anyMatch(ao -> ao.getStatus() == AccountOperationStatus.CLOSED);
-					if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID) {
+					if(enabledPaymentStatusStatus.contains(adv.getPaymentStatus()) || isAoExist) {
 						if(CollectionUtils.isNotEmpty(advAos)) {
 							AccountOperation advAo = advAos.get(0);
 							if(isAoExist) {
 								cancelInvoiceAdvances(invoice, List.of(adv), true);
-								return true;
 							}
+							return true;
 						}
-					}else if(enabledPaymentStatusStatus.contains(adv.getPaymentStatus()) || isAoExist) {
-						return true;
 					}
 					return false;
 				});
@@ -8074,7 +8072,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 						generateAoAndPaymentForUsedAndPaidAdv(adv, pao, recordedInvoice, ao, autoCloseAdvanceAfterInvoiceValidation);
 					});
 				});
-			}else if (adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID && allowUsingUnpaidAdvance) {
+			}else if (lnvoicePaymentStatusEnumAvailableValues.contains(adv.getPaymentStatus()) && allowUsingUnpaidAdvance) {
 				//    PAY_ADV AO is created to match with the INV_ADV (amount = amount used on invoice)
 				advAo.forEach(ao -> {
 					Set<Long> amountCodeIds = ao.getMatchingAmounts().stream().map(MatchingAmount::getMatchingCode).map(MatchingCode::getId).collect(Collectors.toSet());
@@ -8126,13 +8124,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
 					newAo.setOriginCallPayment(advAccountOperation);
 					try {
 						// matching the old AO from ADV to new AO of the invoice
-						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoice.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());
-						
+						if(recordInvoice.getUnMatchingAmount().compareTo(ZERO) > 0) {
+							matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoice.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());
+						}
 						// matching the new PAY AO to the ADV AO
 						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(advAccountOperation.getId())), newAo.getId(), newAo.getUnMatchingAmount());
 						if(autoCloseAdvanceAfterInvoiceValidation) {
 							if(advAccountOperation.getUnMatchingAmount().compareTo(ZERO) > 0) {
-								AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", paymentAo.getCustomerAccount(), advAccountOperation.getUnMatchingAmount(), new Date());
+								AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", null, paymentAo.getCustomerAccount(), advAccountOperation.getUnMatchingAmount(), new Date());
 								matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(closedAdv.getId())), advAccountOperation.getId(), advAccountOperation.getUnMatchingAmount());
 								closedAdv.setStatus(AccountOperationStatus.CLOSED);
 							}
@@ -8179,7 +8178,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		if(allowUsingUnpaidAdvance) {
 			return;
 		}
-		List<Invoice> unpaidAdvs = advs.stream().filter(adv -> adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID).collect(Collectors.toList());
+		List<Invoice> unpaidAdvs = advs.stream().filter(adv -> adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID ||
+															adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID)
+												.collect(Collectors.toList());
 		if(CollectionUtils.isNotEmpty(unpaidAdvs)) {
 			methodCallingUtils.callMethodInNewTx(() -> cancelInvoiceAdvances(invoice, unpaidAdvs, true));
 			String advsNumber = unpaidAdvs.stream().map(Invoice::getInvoiceNumber).collect(Collectors.joining(","));

@@ -74,6 +74,7 @@ public class RetryRejectionPaymentScript extends Script {
                 recordedInvoice = recordedInvoiceService.refreshOrRetrieve(recordedInvoice);
                 int firstDelay = context.get("firstRetryDelay") != null ? (Integer) context.get("firstRetryDelay") : 0;
                 recordedInvoice.setCollectionDate(addDaysToDate(rejectedPayment.getRejectedDate(), firstDelay));
+                recordedInvoice.setPaymentRequests(paymentRequests + 1);
                 recordedInvoiceService.update(recordedInvoice);
             } else {
                 createPaymentRequest(payment, paymentHistory);
@@ -81,6 +82,7 @@ public class RetryRejectionPaymentScript extends Script {
                 int nextRetriesDelay
                         = context.get("nextRetriesDelay") != null ? (Integer) context.get("nextRetriesDelay") : 0;
                 recordedInvoice.setCollectionDate(addDaysToDate(rejectedPayment.getRejectedDate(), nextRetriesDelay));
+                recordedInvoice.setPaymentRequests(paymentRequests + 1);
                 recordedInvoiceService.update(recordedInvoice);
             }
             context.put(REJECTION_ACTION_RESULT, true);

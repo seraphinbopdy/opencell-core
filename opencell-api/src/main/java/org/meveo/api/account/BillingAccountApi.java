@@ -524,8 +524,12 @@ public class BillingAccountApi extends AccountEntityApi {
             if (paymentMethod == null) {
                 throw new EntityNotFoundException("payment method not found!");
             }
+        } else {
+            // If the payment method is null, we will use the payment method already existing in the billing account
+            paymentMethod = billingAccount.getPaymentMethod();
         }
-	    billingAccount.setPaymentMethod(paymentMethod);
+
+        billingAccount.setPaymentMethod(paymentMethod);
 
         if (postData.getBillingCycle() != null) {
             BillingCycle billingCycle = billingCycleService.findByCode(postData.getBillingCycle());

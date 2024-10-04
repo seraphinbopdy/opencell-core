@@ -20,15 +20,7 @@ import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.payment.PaymentApi;
-import org.meveo.apiv2.payments.ImportRejectionCodeInput;
-import org.meveo.apiv2.payments.PaymentGatewayInput;
-import org.meveo.apiv2.payments.RejectionAction;
-import org.meveo.apiv2.payments.RejectionCode;
-import org.meveo.apiv2.payments.RejectionCodeClearInput;
-import org.meveo.apiv2.payments.RejectionCodeDeleteInput;
-import org.meveo.apiv2.payments.RejectionGroup;
-import org.meveo.apiv2.payments.RejectionPayment;
-import org.meveo.apiv2.payments.SequenceAction;
+import org.meveo.apiv2.payments.*;
 import org.meveo.apiv2.refund.CardRefund;
 import org.meveo.model.payments.CreditCardTypeEnum;
 
@@ -341,8 +333,8 @@ public class PaymentResourceImpl implements PaymentResource {
     }
 
     @Override
-    public Response retryRejectedPayment(@PathParam("id") Long paymentId) throws Exception {
-        paymentApi.retryRejectedPayment(paymentId);
+    public Response retryRejectedPayment(@PathParam("id") Long paymentId, RetryPayment retryPayment) throws Exception {
+        paymentApi.retryRejectedPayment(paymentId, retryPayment);
         return ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\"" +
                         ",\"message\":\"Payment successfully retried\"}}")
                 .build();

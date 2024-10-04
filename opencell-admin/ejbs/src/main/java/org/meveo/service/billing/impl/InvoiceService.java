@@ -7644,7 +7644,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             BigDecimal remainingAmount = lastApliedRate != null ? invoice.getAmountWithTax().multiply(lastApliedRate) : invoice.getAmountWithTax();
 
             for (Invoice adv : advInvoices) {
-                if (adv.getTransactionalInvoiceBalance() == null || adv.getTransactionalInvoiceBalance().toBigInteger().equals(BigInteger.ZERO)) {
+                if (adv.getTransactionalInvoiceBalance() == null || adv.getTransactionalInvoiceBalance().compareTo(ZERO) == 0) {
                     continue;
                 }
                 final BigDecimal amount;
@@ -7930,14 +7930,15 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		
 		Invoice previousInvoice = null;
 		StringBuilder querySql = new StringBuilder("SELECT i FROM Invoice i LEFT JOIN BillingAccount ba on ba.id = i.billingAccount.id ");
-		querySql.append(" WHERE i.id !=:currentInvoiceId ");
-		if(billingRun.getBillingCycle() != null) {
+		querySql.append(" WHERE i.id !=:currentInvoiceId AND i.billingAccount.id = :billingAccountId ");
+		if(billingRun != null && billingRun.getBillingCycle() != null) {
 			querySql.append(" AND ba.billingCycle.type = :billingCycleType ");
 		}
 		querySql.append(" order by i.auditable.created DESC");
 		var query = getEntityManager().createQuery(querySql.toString());
 		query.setParameter("currentInvoiceId", invoiceId);
-		if(billingRun.getBillingCycle() != null) {
+		query.setParameter("billingAccountId", invoice.getBillingAccount().getId());
+		if(billingRun != null && billingRun.getBillingCycle() != null) {
 			query.setParameter("billingCycleType", billingRun.getBillingCycle().getType());
 		}
 		List<Invoice> previousInvoices = query.setMaxResults(1).getResultList();
@@ -7948,6 +7949,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		if(billingRun == null) {
 			if(previousInvoice != null) {
 				invoice.setStartDate(previousInvoice.getInvoiceDate().from(previousInvoice.getInvoiceDate().toInstant().plus(1, ChronoUnit.DAYS)));
+			}else{
+				invoice.setStartDate(invoice.getInvoiceDate());
 			}
 			invoice.setEndDate(invoice.getInvoiceDate());
 			update(invoice);
@@ -7970,9 +7973,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if(org.meveo.commons.utils.ListUtils.isEmtyCollection(advs)) {
             return;
         }
+		var enabledStatus = List.of(InvoiceStatusEnum.DRAFT, InvoiceStatusEnum.NEW);
+		var enabledPaymentStatusStatus = List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PENDING);
 		if(!allowUsingUnpaidAdvance) {
 			// in this case of invoice is DRAFT and the ADV is UNPAID and not link to ADV then we ignore the ADV
-			if(invoice.getStatus() == InvoiceStatusEnum.DRAFT) {
+			if(enabledStatus.contains(invoice.getStatus())) {
 				advs.removeIf(adv -> {
 					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);
 					boolean isAoExist = advAos.stream().anyMatch(ao -> ao.getStatus() == AccountOperationStatus.CLOSED);
@@ -7984,7 +7989,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 								return true;
 							}
 						}
-					}else if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID || isAoExist) {
+					}else if(enabledPaymentStatusStatus.contains(adv.getPaymentStatus()) || isAoExist) {
 						return true;
 					}
 					return false;
@@ -7994,7 +7999,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			// the allow using unpaid advance is true
 			// if ADV is paid then the ADV will be attached to the invoice
 			advs.removeIf(adv -> {
-				if(adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID) {
+				if(enabledPaymentStatusStatus.contains(adv.getPaymentStatus())) {
 					return true;
 				}else if(invoice.getLinkedInvoices().stream().anyMatch(li -> li.getLinkedInvoiceValue().getId() == adv.getId())) {
 					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);
@@ -8083,8 +8088,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 					// match the old AO from ADV to new AO of the invoice
 					Long idCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getId();
 					String codeCustomerAccount = invoice.getBillingAccount().getCustomerAccount().getCode();
-					newAo.setOriginPayment(advAccountOperation);
-					newAo.setOriginCallPayment(paymentAo);
+					newAo.setOriginPayment(paymentAo);
+					newAo.setOriginCallPayment(advAccountOperation);
 					try {
 						// matching the old AO from ADV to new AO of the invoice
 						matchingCodeService.matchOperations(idCustomerAccount, codeCustomerAccount, new ArrayList<>(List.of(recordInvoice.getId())), paymentAo.getId(), paymentAo.getUnMatchingAmount());
@@ -8144,7 +8149,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		if(CollectionUtils.isNotEmpty(unpaidAdvs)) {
 			methodCallingUtils.callMethodInNewTx(() -> cancelInvoiceAdvances(invoice, unpaidAdvs, true));
 			String advsNumber = unpaidAdvs.stream().map(Invoice::getInvoiceNumber).collect(Collectors.joining(","));
-			throw new BusinessApiException("validation fails “Unpaid/closed advance {{" + advsNumber + "}} cannot be used. It will be removed from the invoice.“");
+			throw new BusinessApiException("Unpaid/closed advance " + advsNumber + " cannot be used. It will be removed from the invoice.");
 			
 		}
 	}

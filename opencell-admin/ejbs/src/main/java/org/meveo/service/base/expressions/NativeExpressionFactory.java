@@ -42,7 +42,7 @@ public class NativeExpressionFactory {
             checkOnCondition(key, ids, new ExpressionParser(key.split(" ")));
     	} else {
 
-            if(StringUtils.containsIgnoreCase(key, "date") && !(value instanceof Date)) {
+            if(StringUtils.containsIgnoreCase(key, "date") && (value instanceof String)) {
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 try {
                     if(value instanceof String)
@@ -89,6 +89,9 @@ public class NativeExpressionFactory {
                 break;
             case "not-inList":
                 addInListFilter(value, exp.getFieldName(), true);
+                break;
+            case "inSqlList":
+                addSqlListFilters(value, exp.getFieldName());
                 break;
             case "minmaxRange":
                 queryBuilder.addValueInBetweenTwoFields(extractFieldWithAlias(exp.getFieldName()), extractFieldWithAlias(exp.getFieldName2()), value, false, false);
@@ -181,6 +184,10 @@ public class NativeExpressionFactory {
 
     protected void addInListFilter(Object value, String fieldName, boolean notIn) {
         queryBuilder.addFieldInAListOfValues(extractFieldWithAlias(fieldName), value, notIn, false);
+    }
+
+    protected void addSqlListFilters(Object value, String fieldName) {
+        queryBuilder.addFieldInSubQuery(extractFieldWithAlias(fieldName), (String) value);
     }
 
     protected void addFiltersToEntity(Object value, String condition, String fieldName) {

@@ -33,6 +33,8 @@ import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -50,6 +52,7 @@ import org.meveo.cache.CompiledScript;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
+import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.scripts.ScriptInstanceError;
 import org.meveo.model.scripts.ScriptSourceTypeEnum;
@@ -83,8 +86,11 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
     /**
      * Compile and initialize all scriptInstances.
      */
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void compileAndInitializeAll() {
 
+        // Initialize reusable scripts that are based on compiled and included JAVA class in the project 
         List<ScriptInstance> scriptInstances = findByType(ScriptSourceTypeEnum.JAVA_CLASS);
         for (ScriptInstance scriptInstance : scriptInstances) {
             if (!scriptInstance.isReuse()) {
@@ -105,6 +111,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
             }
         }
 
+        // Compile JAVA type classes
         scriptInstances = findByType(ScriptSourceTypeEnum.JAVA);
         compile(scriptInstances);
 
@@ -287,11 +294,12 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
                         log.warn("Failed to initialize script for a cached script instance", e);
                     }
                 }
+                
+                log.info("Adding compiled script {} into compiled script cache with key {}", scriptCode, cacheKey);
+                
                 compiledScripts.put(cacheKey, new CompiledScript(compiledScript, scriptInstance));
                 InitialContext ic = new InitialContext();
                 ic.rebind("java:global/" + ParamBean.getInstance().getProperty("opencell.moduleName", "opencell") + "/" + scriptCode, scriptInstance);
-
-                log.debug("Compiled script {} added to compiled interface map", scriptCode);
             }
 
             return null;
@@ -451,6 +459,8 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
         CompiledScript compiledScript = compiledScripts.get(cacheKey);
         if (compiledScript == null) {
 
+            log.warn("Script {} with cache key {} was NOT found in compiled script cache. Currently cache contains {}", scriptCode, cacheKey.toString(), compiledScripts.keySet());
+            
             ScriptInstance script = findByCode(scriptCode);
             if (script == null) {
                 log.debug("ScriptInstance with {} does not exist", scriptCode);
@@ -478,7 +488,12 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
      * @param scriptCode Script code
      */
     public void clearCompiledScripts(String scriptCode) {
-        compiledScripts.remove(new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode));
+        
+        CacheKeyStr cacheKey = new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode);
+        
+        log.debug("Script {} with cache key {} will be removed from compiled script cache.", scriptCode, cacheKey.toString());
+        
+        compiledScripts.remove(cacheKey);
     }
 
     /**
@@ -487,8 +502,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
     public void clearCompiledScripts() {
 
         String currentProvider = currentUser.getProviderCode();
-        log.info("Clear CFTS cache for {}/{} ", currentProvider, currentUser);
-        // cftsByAppliesTo.keySet().removeIf(key -> (key.getProvider() == null) ? currentProvider == null : key.getProvider().equals(currentProvider));
+        log.info("Clear compiled scripts cache for {}/{} ", currentProvider, currentUser);
         Iterator<Entry<CacheKeyStr, CompiledScript>> iter = compiledScripts.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).entrySet().iterator();
         ArrayList<CacheKeyStr> itemsToBeRemoved = new ArrayList<>();
         while (iter.hasNext()) {
@@ -499,9 +513,9 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> {
             }
         }
 
-        for (CacheKeyStr elem : itemsToBeRemoved) {
-            log.debug("Remove element Provider:" + elem.getProvider() + " Key:" + elem.getKey() + ".");
-            compiledScripts.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).remove(elem);
+        for (CacheKeyStr cacheKey : itemsToBeRemoved) {
+            log.debug("Script with cache key {} will be removed from compiled script cache.", cacheKey.toString());
+            compiledScripts.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).remove(cacheKey);
         }
     }
 }

@@ -78,18 +78,7 @@ import org.meveo.api.security.config.annotation.SecuredBusinessEntityMethod;
 import org.meveo.api.security.filter.ListFilter;
 import org.meveo.apiv2.generic.exception.ConflictException;
 import org.meveo.apiv2.models.Resource;
-import org.meveo.apiv2.payments.ClearingResponse;
-import org.meveo.apiv2.payments.ImmutableClearingResponse;
-import org.meveo.apiv2.payments.ImmutableRejectionCodesExportResult;
-import org.meveo.apiv2.payments.ImportRejectionCodeInput;
-import org.meveo.apiv2.payments.PaymentGatewayInput;
-import org.meveo.apiv2.payments.RejectionAction;
-import org.meveo.apiv2.payments.RejectionCode;
-import org.meveo.apiv2.payments.RejectionCodeClearInput;
-import org.meveo.apiv2.payments.RejectionCodesExportResult;
-import org.meveo.apiv2.payments.RejectionGroup;
-import org.meveo.apiv2.payments.RejectionPayment;
-import org.meveo.apiv2.payments.SequenceAction;
+import org.meveo.apiv2.payments.*;
 import org.meveo.apiv2.payments.resource.RejectionActionMapper;
 import org.meveo.apiv2.payments.resource.RejectionCodeMapper;
 import org.meveo.apiv2.payments.resource.RejectionGroupMapper;
@@ -257,6 +246,7 @@ public class PaymentApi extends BaseApi {
         payment.setBankCollectionDate(paymentDto.getBankCollectionDate());
 		payment.setCollectionDate(paymentDto.getCollectionDate() == null ? paymentDto.getBankCollectionDate() : paymentDto.getCollectionDate());
 		payment.setAccountingDate(new Date());
+		payment.setIsManualPayment(true);
 		accountOperationService.handleAccountingPeriods(payment);
 
         // populate customFields
@@ -309,14 +299,6 @@ public class PaymentApi extends BaseApi {
 		return exchangeRate;
 	}
 
-	private void checkTransactionalCurrency(String transactionalcurrency, TradingCurrency tradingCurrency) {
-		if (tradingCurrency == null || isBlank(tradingCurrency)) {
-			throw new InvalidParameterException("Currency " + transactionalcurrency +
-					" is not recorded a trading currency in Opencell. Only currencies declared as trading currencies can be used to record account operations.");
-		}
-	}
-
-
 	private void matchPayment(PaymentDto paymentDto, CustomerAccount customerAccount, Payment payment)
 			throws BusinessApiException, BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException {
 		List<Long> listReferenceToMatch = new ArrayList<>();
@@ -342,7 +324,7 @@ public class PaymentApi extends BaseApi {
 			aosToPaid.add(ao);
 		}
 		 Collections.sort(aosToPaid, comparing(AccountOperation::getDueDate));
-		if(checkAccountOperationCurrency(aosToPaid, paymentDto.getTransactionalCurrency())) {
+		if(paymentService.checkAccountOperationCurrency(aosToPaid, paymentDto.getTransactionalCurrency())) {
 			throw new BusinessApiException("Transaction currency is different from account operation currency");
 		}
 		for(AccountOperation ao :aosToPaid ) {
@@ -354,12 +336,6 @@ public class PaymentApi extends BaseApi {
 			aosIdsToMatch.add(payment.getId());
 			matchingCodeService.matchOperations(null, customerAccount.getCode(), aosIdsToMatch, payment.getId(), MatchingTypeEnum.A);
 		}
-	}
-
-	private boolean checkAccountOperationCurrency(List<AccountOperation> aosToPaid, String transactionalCurrency) {
-		return aosToPaid.stream()
-				.anyMatch(accountOperation -> ! accountOperation.getCode().endsWith("_SD") &&
-						!accountOperation.getTransactionalCurrency().getCurrencyCode().equalsIgnoreCase(transactionalCurrency));
 	}
 
 
@@ -477,7 +453,7 @@ public class PaymentApi extends BaseApi {
 	 */
 	@SecuredBusinessEntityMethod(validate = @SecureMethodParameter(entityClass = CustomerAccount.class))
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void retryRejectedPayment(Long id) throws Exception {
+	public void retryRejectedPayment(Long id, RetryPayment retryPayment) throws Exception {
 		// Get rejected payment
 		Payment payment = ofNullable(paymentService.findById(id))
 				.orElseThrow(() -> new ActionForbiddenException("Payment not found for id=" + id));
@@ -486,35 +462,38 @@ public class PaymentApi extends BaseApi {
 		PaymentHistory paymentHistory = ofNullable(paymentHistoryService.findPaymentHistoryByPaymentIdAndPaymentStatus(payment.getId(), PaymentStatusEnum.REJECTED))
 				.orElseThrow(() -> new ActionForbiddenException("Only rejected payments can be retried"));
 
-		// Get customer account
-		CustomerAccount customerAccount = payment.getCustomerAccount();
-		// Get rejected payment invoices
-		List<Long> ids = new ArrayList<>();
-		paymentHistory.getListAoPaid().forEach(invoice -> ids.add(invoice.getId()));
+		List<Long> idsToPay = new ArrayList<>();
+		paymentHistory.getListAoPaid().forEach(invoice -> idsToPay.add(invoice.getId()));
 
-		// Get preferred payment method
-		PaymentMethod preferredPaymentMethod = customerAccount
-				.getPaymentMethods()
-				.stream()
-				.filter(PaymentMethod::isPreferred)
-				.findFirst()
-				.orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
-						+ customerAccount.getCode()));
-
-		// Get payment gateway
-		PaymentGateway paymentGateway = paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
-
-		if (payment.getPaymentMethod().equals(CARD) && preferredPaymentMethod.getPaymentType().equals(CARD)) {
-			CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
-			paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), ids,
-					Boolean.TRUE, Boolean.TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
-					paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
-					paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-					Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false);
+		if (Boolean.TRUE.equals(payment.getIsManualPayment())) {
+			paymentService.createManualPaymentFromRejectedPayment(payment, retryPayment.getCollectionDate(), idsToPay);
 		} else {
-			paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), ids,
-					Boolean.TRUE, Boolean.TRUE, paymentGateway, null, null,
-					null, null, null, Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false);
+			// Get customer account
+			CustomerAccount customerAccount = payment.getCustomerAccount();
+			// Get preferred payment method
+			PaymentMethod preferredPaymentMethod = customerAccount
+					.getPaymentMethods()
+					.stream()
+					.filter(PaymentMethod::isPreferred)
+					.findFirst()
+					.orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
+							+ customerAccount.getCode()));
+
+			// Get payment gateway
+			PaymentGateway paymentGateway = paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
+
+			if (payment.getPaymentMethod().equals(CARD) && preferredPaymentMethod.getPaymentType().equals(CARD)) {
+				CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
+				paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), idsToPay,
+						Boolean.TRUE, Boolean.TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
+						paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
+						paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
+						Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false, retryPayment.getCollectionDate());
+			} else {
+				paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), idsToPay,
+						Boolean.TRUE, Boolean.TRUE, paymentGateway, null, null,
+						null, null, null, Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false, retryPayment.getCollectionDate());
+			}
 		}
 	}
 	
@@ -1326,11 +1305,11 @@ public class PaymentApi extends BaseApi {
 			paymentGateway = payment.getPaymentGateway();
 		}
 		if(paymentGateway == null && rejectionPayment.getPaymentGatewayCode() != null) {
-			throw new BadRequestException("Payment has no gateway. Please provide a valid paymentGateway");
+			throw new ActionForbiddenException("Payment has no gateway. Please provide a valid paymentGateway");
 		}
 		if(paymentRejectionCode.getPaymentGateway() != null
 				&& !paymentGateway.getId().equals(paymentRejectionCode.getPaymentGateway().getId())) {
-			throw new BadRequestException("Rejection code " + rejectionPayment.getRejectionCode()
+			throw new ActionForbiddenException("Rejection code " + rejectionPayment.getRejectionCode()
 					+ " not found for gateway[code=" + payment.getPaymentGateway().getCode() + "]");
 		}
 		try {
@@ -1359,8 +1338,7 @@ public class PaymentApi extends BaseApi {
 			aos.add(rejectedPayment.getId());
 			matchingCodeService.matchOperations(payment.getCustomerAccount().getId(),
 					null, aos, null);
-			paymentHistoryService.rejectPaymentHistory(payment.getReference(),
-					rejectionPayment.getRejectionCode(), rejectionPayment.getComment());
+			paymentHistoryService.rejectPaymentHistory(payment.getId(), rejectionPayment.getRejectionCode(), rejectionPayment.getComment());
 			accountOperationService.update(payment);
 			return RejectionPayment.from(rejectedPayment);
 		} catch (Exception exception) {
@@ -1437,4 +1415,8 @@ public class PaymentApi extends BaseApi {
 			return (Payment) accountOperations.get(0);
 		}
 	}
+
+
+
+
 }

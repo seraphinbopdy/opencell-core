@@ -14592,17 +14592,16 @@ Meaning that advances won’t be available for further invoices."/>
             </column>
         </insert>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25091_ji_desc_i18n" author="a.rouaguebe">
         <addColumn tableName="meveo_job_instance">
             <column name="description_i18n" type="${type.json}" />
         </addColumn>
-        
+
     </changeSet>
 
-    <changeSet id="#INTRD-25259_fix_repoen_template" author="a.rouaguebe">
+    <changeSet id="#INTRD-25259_fix_repoen_template_replay" author="a.rouaguebe">
         <update tableName="com_message_template">
-
             <column name="subject">
                 <![CDATA[
                     #{batchEntityStatus} Reopen EDRs from batch #{batchEntityId} "#{batchEntityDescription}"
@@ -14620,9 +14619,10 @@ Meaning that advances won’t be available for further invoices."/>
             </column>
             <column name="htmlcontent_i18n">
                 <![CDATA[
-                    {"FRA":"Le lot \"#{batchEntityDescription}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecutionNbItemsProcessed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des ERDs du Portail.","ENG":"Batch \"#{batchEntityDescription}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the EDRs screen in Portal."}
+                    {"FRA":"Le lot \"#{batchEntityDescription}\" a été traité par le job #{jobInstanceCode}<br>Résultat: #{batchEntityStatus}<br>Éléments traités: #{jobExecutionNbItemsProcessed}<br>Plus d’information sur le rapport d’exécution du job (id:#{jobExecutionId}) sur l'écran des EDRs du Portail.","ENG":"Batch \"#{batchEntityDescription}\" has been processed by job #{jobInstanceCode}<br>Result: #{batchEntityStatus}<br>Items processed: #{jobExecutionNbItemsProcessed}<br>More information available on job execution report (id:#{jobExecutionId}) on the EDRs screen in Portal."}
                 ]]>
             </column>
+            <where>code = 'MASS_REOPEN_EDR_ZERO'</where>
         </update>
     </changeSet>
     
@@ -14739,6 +14739,46 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <sql>create index idx__billing_rating_transaction__invoice_line_id ON ${db.schema.adapted}billing_rated_transaction (invoice_line_id)</sql>
         <sql>create index idx__billing_rating_transaction__origin_ratedtransaction on ${db.schema.adapted}billing_rated_transaction (origin_ratedtransaction_id)</sql>
         <sql>create index idx_billing_invoice_line__accounting_article_id on ${db.schema.adapted}billing_invoice_line (accounting_article_id desc)</sql>
+    </changeSet>
+    
+    <changeSet id="#INTRD-25542_fix_script_cat" author="a.rouaguebe">
+        <update tableName="meveo_script_instance">
+            <column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"></column>
+            <where>code = 'org.meveo.service.script.EnterLitigation'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-25028_20240926" author="TarikFA.">
+        <update tableName="advanced_settings">
+            <column name="category" value="AccountReceivable" />
+            <where> code  in ('allowUsingUnpaidAdvance', 'autoCloseAdvanceAfterInvoiceValidation')</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-25155_secured_tmp" author="a.rouaguebe">
+        <createTable tableName="tmp_secured_entity">
+            <column name="uuid" type="varchar(36)" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="search_id" type="varchar(36)">
+                <constraints nullable="false" />
+            </column>
+            <column name="code" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="created" type="datetime" defaultValueDate="${db.current.time}">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createIndex indexName="tmp_secured_entity_search_id_idx" tableName="tmp_secured_entity">
+            <column name="search_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="#INTRD-25564_20240930" author="zelmeliani">
+        <addColumn tableName="ar_account_operation">
+            <column name="is_manual_payment" type="${type.boolean}" valueNumeric="0" />
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

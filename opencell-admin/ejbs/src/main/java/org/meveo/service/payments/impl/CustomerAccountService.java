@@ -530,7 +530,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
     @SuppressWarnings("unchecked")
     public List<CustomerAccount> getCustomerAccounts(String creditCategory, PaymentMethodEnum paymentMethod) {
         List<CustomerAccount> customerAccounts = getEntityManager()
-            .createQuery("from " + CustomerAccount.class.getSimpleName() + " where paymentMethod=:paymentMethod and creditCategory.code=:creditCategoryCode and status=:status ")
+            .createQuery("from CustomerAccount where paymentMethod=:paymentMethod and creditCategory.code=:creditCategoryCode and status=:status ")
             .setParameter("paymentMethod", paymentMethod).setParameter("creditCategoryCode", creditCategory).setParameter("status", CustomerAccountStatusEnum.ACTIVE).getResultList();
         return customerAccounts;
     }

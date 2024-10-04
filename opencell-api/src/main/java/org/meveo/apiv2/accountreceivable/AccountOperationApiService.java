@@ -494,6 +494,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		accountOperationToTransfer.setUuid(UUID.randomUUID().toString());
 		accountOperationToTransfer.setSeller(accountOperation.getSeller());
 		accountOperationToTransfer.setJournal(occTemplate.getJournal());
+		accountOperationToTransfer.setTransactionalCurrency(accountOperation.getTransactionalCurrency());
 		
 		accountOperationService.create(accountOperationToTransfer);
 		
@@ -584,8 +585,6 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		// check if all account operations have INT_ADV and its matching status are OPEN or PARTIAL
 		List<AccountOperation> accountOperationsToBeClosed = accountOperationsWithCode.stream()
 				.filter(accountOperation -> accountOperation.getMatchingStatus() == MatchingStatusEnum.O || accountOperation.getMatchingStatus() == MatchingStatusEnum.P)
-				.flatMap(accountOperation -> accountOperation.getMatchingAmounts().stream())
-				.map(MatchingAmount::getAccountOperation)
 				.collect(Collectors.toList());
 		if(CollectionUtils.isEmpty(accountOperationsToBeClosed)) {
 			throw new BusinessApiException("Only Account Operation having matchingStatus = Open or partially matched can be closed");

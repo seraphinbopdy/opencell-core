@@ -174,7 +174,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
      */
     @SuppressWarnings("unchecked")
     public List<AccountOperation> getAccountOperations(Date date, String operationCode) {
-        Query query = getEntityManager().createQuery("from " + getEntityClass().getSimpleName() + " a where a.occCode=:operationCode and  a.transactionDate=:date")
+        Query query = getEntityManager().createQuery("from AccountOperation a where a.occCode=:operationCode and  a.transactionDate=:date")
             .setParameter("date", date).setParameter("operationCode", operationCode);
 
         return query.getResultList();
@@ -192,7 +192,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
     public AccountOperation getAccountOperation(BigDecimal amount, CustomerAccount customerAccount, String transactionType) {
 
         Query query = getEntityManager()
-            .createQuery("from " + getEntityClass().getSimpleName() + " a where a.amount=:amount and  a.customerAccount=:customerAccount and  a.type=:transactionType")
+            .createQuery("from AccountOperation a where a.amount=:amount and  a.customerAccount=:customerAccount and  a.type=:transactionType")
             .setParameter("amount", amount).setParameter("transactionType", transactionType).setParameter("customerAccount", customerAccount);
         List<AccountOperation> accountOperations = query.getResultList();
 

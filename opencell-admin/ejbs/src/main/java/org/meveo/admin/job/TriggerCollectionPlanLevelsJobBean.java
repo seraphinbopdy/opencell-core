@@ -10,9 +10,12 @@ import static org.meveo.model.payments.ActionChannelEnum.LETTER;
 import static org.meveo.model.payments.ActionModeEnum.AUTOMATIC;
 import static org.meveo.model.payments.ActionTypeEnum.*;
 import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.*;
+import static org.meveo.model.payments.PaymentMethodEnum.CARD;
+import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
 import static org.meveo.model.shared.DateUtils.daysBetween;
 
+import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.admin.Seller;
@@ -77,6 +80,9 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
     @EJB
     private TriggerCollectionPlanLevelsJobBean jobBean;
+    
+    @Inject
+    private PaymentService paymentService;
 
     private final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -641,6 +647,36 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         }
 
         return listOccTemplateCodes;
+    }
+    
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void doPayment(PaymentMethod preferredPaymentMethod, CustomerAccount customerAccount,
+                          long amountToPay, List<Long> accountOperationsToPayIds, PaymentGateway paymentGateway) {
+        if (preferredPaymentMethod.getPaymentType().equals(DIRECTDEBIT) || preferredPaymentMethod.getPaymentType().equals(CARD)) {
+            try {
+                if (accountOperationsToPayIds != null && !accountOperationsToPayIds.isEmpty()) {
+                    if (preferredPaymentMethod.getPaymentType().equals(CARD)) {
+                        if (preferredPaymentMethod instanceof HibernateProxy) {
+                            preferredPaymentMethod = (PaymentMethod) ((HibernateProxy) preferredPaymentMethod).getHibernateLazyInitializer()
+                                    .getImplementation();
+                        }
+                        CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
+                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
+                                true, true, paymentGateway, paymentMethod.getCardNumber(),
+                                paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
+                                paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
+                                true, preferredPaymentMethod.getPaymentType(), false, null);
+                    } else {
+                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
+                                true, true, paymentGateway, null, null,
+                                null, null, null, true, preferredPaymentMethod.getPaymentType(), false, null);
+                    }
+                }
+            } catch (Exception exception) {
+                throw new BusinessException("Error occurred during payment process for customer " + customerAccount.getCode(), exception);
+            }
+        }
     }
 
     /**

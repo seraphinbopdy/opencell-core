@@ -18,6 +18,12 @@
 
 package org.meveo.service.billing.impl;
 
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.ZERO;
+import static java.math.BigDecimal.valueOf;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -71,11 +77,6 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.catalog.impl.CalendarService;
 import org.meveo.service.catalog.impl.PricePlanMatrixService;
-
-import static java.math.BigDecimal.ZERO;
-import static java.math.BigDecimal.valueOf;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 @Stateless
 public class RecurringRatingService extends RatingService implements Serializable {
@@ -300,7 +301,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
                     if (recurringChargeTemplate.getQuantityAttribute() != null) {
                         BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
                                 recurringChargeTemplate.getQuantityAttribute().getCode());
-                        if(quantityAttribute.compareTo(ZERO) > 0) {
+                        if(quantityAttribute.compareTo(ZERO) >= 0) {
                             inputQuantity = inputQuantity.multiply(quantityAttribute);
                         }
                     }
@@ -423,7 +424,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
                     if(recurringChargeTemplate.getQuantityAttribute() != null) {
                         BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
                                 recurringChargeTemplate.getQuantityAttribute().getCode());
-                        if(quantityAttribute.compareTo(ZERO) > 0) {
+                        if(quantityAttribute.compareTo(ZERO) >= 0) {
                             inputQuantity = inputQuantity.multiply(quantityAttribute);
                         } else {
                             log.info("Quantity attribute is set to zero it will be ignored");
@@ -468,8 +469,10 @@ public class RecurringRatingService extends RatingService implements Serializabl
                     }
                     // Apply prorating if needed
                     if (prorate || prorateLastPeriod) {
-                        BigDecimal prorata = DateUtils.calculateProrataRatio(effectiveChargeFromDate, effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, false);
-                        if (prorata == null) {
+                        //inputQuantity = DateUtils.calculateProrataRatio(effectiveChargeFromDate, effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, false);
+	                    inputQuantity = computeProrate(chargeInstance, effectiveChargeFromDate,
+	                            effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, inputQuantity);
+                        if (inputQuantity == null) {
                             throw new RatingException("Failed to calculate prorating for charge id=" + chargeInstance.getId() + " : periodFrom=" + currentPeriodFromDate + ", periodTo=" + currentPeriodToDate
                                     + ", proratedFrom=" + effectiveChargeFromDate + ", proratedTo=" + effectiveChargeToDate);
                         }
@@ -626,9 +629,17 @@ public class RecurringRatingService extends RatingService implements Serializabl
     }
 
     private BigDecimal getQuantityAttribute(ServiceInstance serviceInstance, String quantityAttribute) {
-        Map<String, Object> attributeValues = fromAttributeValue(
-                fromAttributeInstances(serviceInstance));
-        return valueOf((Double) attributeValues.get(quantityAttribute));
+        BigDecimal quantityAttributeValue = ONE;
+        Map<String, Object> attributeValues = fromAttributeValue(fromAttributeInstances(serviceInstance));
+        Object quantityObject = attributeValues.get(quantityAttribute);
+        if (quantityObject != null) {
+            try {
+                quantityAttributeValue = valueOf(Double.parseDouble(quantityObject.toString()));
+            } catch (NumberFormatException e) {
+                log.debug("wrong value format when formating quantity attribute cannot cast '{}' to double value", quantityObject);
+            }
+        }
+        return quantityAttributeValue;
     }
 
     private List<AttributeValue> fromAttributeInstances(ServiceInstance serviceInstance) {

@@ -13834,6 +13834,19 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <where>code='ADJ_REF'</where>
         </update>
     </changeSet>
+
+	<changeSet id="INTRD-19826_20240103-rebuild" author="ZBARIKI">
+		<insert tableName="meveo_script_instance_cat">
+			<column name="id" valueSequenceNext="meveo_script_instance_cat_seq"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="created" valueComputed="now()"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="code" value="PAYMENT_REJECTION_ACTIONS"/>
+			<column name="description" value="Payment rejection actions"/>
+			<column name="description_i18n" value='{"EN":"Payment rejection actions","FR":"Actions sur rejet de paiement"}' />
+		</insert>
+	</changeSet>
+
 	<changeSet id="INTRD-22954_20240521" author="ZBariki">
 		<insert tableName="meveo_script_instance">
 			<column name="id" valueSequenceNext="meveo_script_instance_seq" />

@@ -67,6 +67,7 @@ import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNote;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.Invoice;
 import oasis.names.specification.ubl.schema.xsd.invoice_2.ObjectFactory;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.storage.StorageFactory;
@@ -96,6 +97,7 @@ import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 import org.meveo.service.base.ValueExpressionWrapper;
+import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.crm.impl.ProviderService;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -113,7 +115,9 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class InvoiceUblHelper {
@@ -128,6 +132,7 @@ public class InvoiceUblHelper {
 	private final static PaymentTermService paymentTermService;
 	private final static EinvoiceSettingService einvoiceSettingService;
 	private final static ProviderService providerService;
+	private final static CommercialOrderService commercialOrderService;
 
 	private static final String XUN = "XUN";
 	public static final String ISO_IEC_6523 = "ISO/IEC 6523";
@@ -147,6 +152,7 @@ public class InvoiceUblHelper {
 		paymentTermService = (PaymentTermService) EjbUtils.getServiceInterface(PaymentTermService.class.getSimpleName());
 		einvoiceSettingService = (EinvoiceSettingService) EjbUtils.getServiceInterface(EinvoiceSettingService.class.getSimpleName());
 		providerService = (ProviderService) EjbUtils.getServiceInterface(ProviderService.class.getSimpleName());
+		commercialOrderService = (CommercialOrderService) EjbUtils.getServiceInterface(CommercialOrderService.class.getSimpleName());
 		Provider provider = providerService.getProvider();
 		if(provider != null) {
 			rounding = provider.getInvoiceRounding();
@@ -192,22 +198,21 @@ public class InvoiceUblHelper {
 		BigDecimal payableAmount = invoice.getNetToPay();
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
-			setBillingReference(invoice, creditNote);
+			//setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
 			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
-			setBillingReference(invoice, invoiceXml);
+			//setBillingReference(invoice, invoiceXml);
 			setOrderReference(invoice, invoiceXml);
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
 			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
-			if(invoice.getCommercialOrder() != null || invoice.getInvoiceLines().stream().anyMatch(invoiceLine -> invoiceLine.getCommercialOrder() != null)) {
-				CommercialOrder commercialOrder = invoice.getCommercialOrder() != null ? invoice.getCommercialOrder() : invoice.getInvoiceLines().stream().filter(invoiceLine -> invoiceLine.getCommercialOrder() != null).findFirst().get().getCommercialOrder();
-				setBillingReferenceForInvoice(commercialOrder, invoiceXml);
-			}
+			var commercialorderIds = invoice.getInvoiceLines().stream().map(InvoiceLine::getCommercialOrder).filter(Objects::nonNull)
+					.collect(Collectors.toSet());
+			setBillingReferenceForInvoice(commercialorderIds, invoiceXml);
 		}
 		
 		
@@ -1261,18 +1266,6 @@ public class InvoiceUblHelper {
 		return taxCategoryType;
 	}
 	
-	private BillingReference setBillingReferenceForInvoice(org.meveo.model.billing.Invoice source, Invoice target) {
-		BillingReference billingReference = setBillingReference(source);
-		DocumentReferenceType documentReferenceType =  billingReference.getInvoiceDocumentReference();
-		
-		IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
-		dueDate.setValue(toXmlDate(source.getDueDate()));
-		documentReferenceType.setIssueDate(dueDate);
-		
-		target.getBillingReferences().add(billingReference);
-		return billingReference;
-	}
-
 	private static MonetaryTotalType setTaxExclusiveAmount(BigDecimal totalPrepaidAmount, String currency, BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal lineExtensionAmount, BigDecimal payableAmount) {
 		MonetaryTotalType moneyTotalType = objectFactoryCommonAggrement.createMonetaryTotalType();
 		TaxInclusiveAmount taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
@@ -1307,19 +1300,28 @@ public class InvoiceUblHelper {
 
 	}
 	
-	private BillingReference setBillingReferenceForInvoice(CommercialOrder commercialOrder, Invoice target) {
-		BillingReference billingReference = objectFactoryCommonAggrement.createBillingReference();
-		DocumentReferenceType documentReferenceType = objectFactoryCommonAggrement.createDocumentReferenceType();
-		ID id = objectFactorycommonBasic.createID();
-		id.setValue(commercialOrder.getOrderNumber());
-		documentReferenceType.setID(id);
-		billingReference.setInvoiceDocumentReference(documentReferenceType);
+	private BillingReference setBillingReferenceForInvoice(Set<CommercialOrder> commercialOrders, Invoice target) {
+		BillingReference billingReference = null;
+		DocumentReferenceType documentReferenceType = null;
+		ID id = null;
+		if(CollectionUtils.isNotEmpty(commercialOrders)) {
+			for(CommercialOrder commercialOrder : commercialOrders) {
+				if(Strings.isBlank(commercialOrder.getOrderNumber())) continue;
+				billingReference = objectFactoryCommonAggrement.createBillingReference();
+				documentReferenceType = objectFactoryCommonAggrement.createDocumentReferenceType();
+				id = objectFactorycommonBasic.createID();
+				id.setValue(commercialOrder.getOrderNumber());
+				documentReferenceType.setID(id);
+				billingReference.setInvoiceDocumentReference(documentReferenceType);
+				
+				IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
+				dueDate.setValue(toXmlDate(commercialOrder.getOrderDate()));
+				documentReferenceType.setIssueDate(dueDate);
+				
+				target.getBillingReferences().add(billingReference);
+			}
+		}
 		
-		IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
-		dueDate.setValue(toXmlDate(commercialOrder.getOrderDate()));
-		documentReferenceType.setIssueDate(dueDate);
-		
-		target.getBillingReferences().add(billingReference);
 		return billingReference;
 	}
 	
@@ -1506,7 +1508,7 @@ public class InvoiceUblHelper {
 		
 		CountryType countryType = objectFactoryCommonAggrement.createCountryType();
 		IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
-		identificationCode.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry().getCountryCode());
+		//identificationCode.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry().getCountryCode());
 		countryType.setIdentificationCode(identificationCode);
 		addressType.setCountry(countryType);
 		

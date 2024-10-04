@@ -13375,4 +13375,8 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD-25724-increase-param-size" author="a.rouaguebe">
+        <modifyDataType tableName="adm_inbound_req_params" columnName="parameters" newDataType="varchar(1500)" />
+    </changeSet>
+
 </databaseChangeLog>

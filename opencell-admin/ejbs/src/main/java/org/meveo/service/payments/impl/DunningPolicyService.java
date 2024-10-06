@@ -3,8 +3,6 @@ package org.meveo.service.payments.impl;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.*;
-import static org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING;
-import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
 import static org.meveo.model.dunning.PolicyConditionTargetEnum.valueOf;
 
 import java.math.BigDecimal;
@@ -27,7 +25,7 @@ import org.meveo.model.admin.Currency;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.dunning.*;
-import org.meveo.model.jobs.JobExecutionResultImpl;
+import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.service.admin.impl.CurrencyService;
@@ -37,6 +35,8 @@ import org.meveo.service.billing.impl.InvoiceService;
 
 @Stateless
 public class DunningPolicyService extends PersistenceService<DunningPolicy> {
+
+    private static final String DUNNING_POLICY_NOT_FOUND = "Policy does not exists";
 
     @Inject
     private InvoiceService invoiceService;
@@ -59,11 +59,20 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
     @Inject
     protected ResourceBundle resourceMessages;
 
+    @Inject
+    private DunningSettingsService dunningSettingsService;
+
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
+    /**
+     * Find a dunning policy by name
+     * @param policyName Policy name
+     * @return Dunning policy {@link DunningPolicy}
+     */
     public DunningPolicy findByName(String policyName) {
         try {
-            return getEntityManager().createNamedQuery("DunningPolicy.findByName", DunningPolicy.class)
+            return getEntityManager()
+                    .createNamedQuery("DunningPolicy.findByName", DunningPolicy.class)
                     .setParameter("policyName", policyName)
                     .getSingleResult();
         } catch (NoResultException noResultException) {
@@ -73,67 +82,100 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         }
     }
 
+    /**
+     * Find eligible invoices for a dunning policy
+     * @param policy Dunning policy
+     * @return List of invoices {@link Invoice}
+     */
     public List<Invoice> findEligibleInvoicesForPolicy(DunningPolicy policy) {
+        List<Invoice> invoices = new ArrayList<>();
         policy = refreshOrRetrieve(policy);
-        if (policy == null) {
-            throw new BusinessException("Policy does not exists");
-        }
-        if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
-            try {
-                String query = "SELECT inv FROM Invoice inv WHERE (inv.paymentStatus = 'UNPAID' OR inv.paymentStatus = 'PPAID') AND inv.dunningCollectionPlanTriggered = false AND "
-                        + buildPolicyRulesFilter(policy.getDunningPolicyRules());
-                return (List<Invoice>) invoiceService.executeSelectQuery(query, null);
-            } catch (Exception exception) {
-                throw new BusinessException(exception.getMessage());
+
+        if (policy != null) {
+            if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
+                try {
+                    String query = "SELECT inv FROM Invoice inv WHERE (inv.paymentStatus = 'UNPAID' OR inv.paymentStatus = 'PPAID' OR inv.paymentStatus = 'PENDING') AND inv.dunningCollectionPlanTriggered = false AND "
+                            + buildPolicyRulesFilter(policy.getDunningPolicyRules());
+                    invoices = (List<Invoice>) invoiceService.executeSelectQuery(query, null);
+                } catch (Exception exception) {
+                    throw new BusinessException(exception.getMessage());
+                }
             }
+        } else {
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
-        return EMPTY_LIST;
+
+        return invoices;
     }
-    
-    public List<Invoice> findEligibleInvoicesForPolicy(DunningPolicy policy,List<Long> invoiceIds) {
+
+    /**
+     * Find eligible invoices for a dunning policy with invoice ids
+     * @param policy Dunning policy
+     * @param invoiceIds List of invoice ids
+     * @return List of invoices {@link Invoice}
+     */
+    public List<Invoice> findEligibleInvoicesForPolicyWithInvoiceIds(DunningPolicy policy,List<Long> invoiceIds) {
+        List<Invoice> invoices = new ArrayList<>();
         policy = refreshOrRetrieve(policy);
-        if (policy == null) {
-            throw new BusinessException("Policy does not exists");
-        }
-        
-        if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
-            try {
-                String query = "SELECT inv FROM Invoice inv WHERE inv.id in ("+ invoiceIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") and ( " + buildPolicyRulesFilter(policy.getDunningPolicyRules()) +" )";
-                return (List<Invoice>) invoiceService.executeSelectQuery(query, null);
-            } catch (Exception exception) {
-                throw new BusinessException(exception.getMessage());
+
+        if (policy != null) {
+            if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
+                try {
+                    String query = "SELECT inv FROM Invoice inv WHERE inv.id in ("+ invoiceIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") and ( " + buildPolicyRulesFilter(policy.getDunningPolicyRules()) +" )";
+                    invoices = (List<Invoice>) invoiceService.executeSelectQuery(query, null);
+                } catch (Exception exception) {
+                    throw new BusinessException(exception.getMessage());
+                }
             }
+        } else {
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
-        return EMPTY_LIST;
+
+        return invoices;
     }
-    
+
+    /**
+     * Check if policy has rules
+     * @param policy Dunning policy
+     * @return true if policy has rules, false if not
+     */
     public boolean existPolicyRulesCheck(DunningPolicy policy) {
         policy = refreshOrRetrieve(policy);
-        if (policy == null) {
-            throw new BusinessException("Policy does not exists");
+        if (policy != null) {
+            return (policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty());
+        } else {
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
-        return (policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty());
     }
-    
+
+    /**
+     * Check if policy has levels
+     * @param policy
+     * @param invoice
+     * @return
+     */
     public boolean minBalanceTriggerCurrencyCheck(DunningPolicy policy, Invoice invoice) {
 		boolean minBalanceTriggerCurrencyBool;
         policy = refreshOrRetrieve(policy);
         invoice = invoiceService.refreshOrRetrieve(invoice);
-        if (policy == null) {
-            throw new BusinessException("Policy does not exists");
-        }
 
-    	if(policy.getMinBalanceTriggerCurrency() != null && policy.getMinBalanceTriggerCurrency().getCurrencyCode() != null) {
-    		TradingCurrency tradingCurrency = tradingCurrencyService.findById(invoice.getTradingCurrency().getId());
-    		 if(tradingCurrency != null && policy.getMinBalanceTriggerCurrency().getCurrencyCode().equals(tradingCurrency.getCurrencyCode())) {
-    			 minBalanceTriggerCurrencyBool = true;
-    		 }else {
-    			 minBalanceTriggerCurrencyBool = false;
-    		 }
-    	}else {
-    		minBalanceTriggerCurrencyBool = true;
-    	}
-        return minBalanceTriggerCurrencyBool;
+        if (policy != null) {
+            if(policy.getMinBalanceTriggerCurrency() != null && policy.getMinBalanceTriggerCurrency().getCurrencyCode() != null) {
+                TradingCurrency tradingCurrency = tradingCurrencyService.findById(invoice.getTradingCurrency().getId());
+
+                if(tradingCurrency != null && policy.getMinBalanceTriggerCurrency().getCurrencyCode().equals(tradingCurrency.getCurrencyCode())) {
+                    minBalanceTriggerCurrencyBool = true;
+                } else {
+                    minBalanceTriggerCurrencyBool = false;
+                }
+            } else {
+                minBalanceTriggerCurrencyBool = true;
+            }
+
+            return minBalanceTriggerCurrencyBool;
+        } else {
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
+        }
     }
     
     public boolean minBalanceTriggerCheck(DunningPolicy policy, Invoice invoice) {
@@ -141,7 +183,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         policy = refreshOrRetrieve(policy);
         invoice = invoiceService.refreshOrRetrieve(invoice);
         if (policy == null) {
-            throw new BusinessException("Policy does not exists");
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
 
     	if(policy.getMinBalanceTrigger() != null) {
@@ -262,7 +304,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         }
     }
 
-    public void processEligibleInvoice(Map<DunningPolicy, List<Invoice>> eligibleInvoice, JobExecutionResultImpl jobExecutionResult) {
+    public int processEligibleInvoice(Map<DunningPolicy, List<Invoice>> eligibleInvoice) {
         DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
         AtomicInteger dunningCollectionPlanNumber = new AtomicInteger(0);
         for (Map.Entry<DunningPolicy, List<Invoice>> entry : eligibleInvoice.entrySet()) {
@@ -280,48 +322,55 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                         .filter(invoice -> invoiceEligibilityCheck(invoice, policy, dayOverDue))
                         .forEach(invoice -> {
                             dunningCollectionPlanNumber.incrementAndGet();
-                            collectionPlanService.createCollectionPlanFrom(invoice, policy, dayOverDue, collectionPlanStatus);
+                            collectionPlanService.createCollectionPlanFrom(invoice, policy, collectionPlanStatus);
                         });
             } else {
                 log.error("No level configured do meet the conditions for policy" + policy.getPolicyName());
             }
         }
-        if (dunningCollectionPlanNumber.get() != 0) {
-            jobExecutionResult.addReport(resourceMessages.getString("jobExecution.dunning.collection.plan.lines.number", dunningCollectionPlanNumber.get()));
-        }
+        return dunningCollectionPlanNumber.get();
     }
 
     private boolean doesPolicyContainReminder(List<DunningPolicyLevel> dunningLevels) {
     	return dunningLevels.stream().anyMatch(policyLevel -> policyLevel.getDunningLevel().isReminder());
 	}
 
+    /**
+     * Check if invoice is eligible for dunning
+     * @param invoice Invoice
+     * @param policy Dunning policy
+     * @param dayOverDue Days overdue
+     * @return true if invoice is eligible for dunning, false if not
+     */
 	private boolean invoiceEligibilityCheck(Invoice invoice, DunningPolicy policy, Integer dayOverDue) {
-        boolean dayOverDueAndThresholdCondition;
-        invoice = invoiceService.refreshOrRetrieve(invoice);
-        Date today;
-        Date dueDate;
+        boolean dayOverDueAndThresholdCondition = false;
+
         try {
-            today = simpleDateFormat.parse(simpleDateFormat.format(new Date()));
-            dueDate = simpleDateFormat.parse(simpleDateFormat.format(invoice.getDueDate()));
+            List<DunningCollectionPlan> collectionPlansByInvoiceId = collectionPlanService.findByInvoiceId(invoice.getId());
+
+            if (collectionPlansByInvoiceId.isEmpty()) {
+                // Refresh or retrieve invoice
+                invoice = invoiceService.refreshOrRetrieve(invoice);
+                // Get the current date and due date
+                Date today = simpleDateFormat.parse(simpleDateFormat.format(new Date()));
+                Date dueDate = simpleDateFormat.parse(simpleDateFormat.format(invoice.getDueDate()));
+                // Calculate the difference between the current date and due date
+                long daysDiff = TimeUnit.DAYS.convert((today.getTime() - dueDate.getTime()), TimeUnit.MILLISECONDS);
+                // Get the minimum balance
+                BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
+                        .map(RecordedInvoice::getUnMatchingAmount)
+                        .orElse(BigDecimal.ZERO);
+                // Check if the invoice overdue days is less than or equal to the policy overdue days
+                // And the minimum balance is greater than or equal to the policy minimum balance trigger
+                dayOverDueAndThresholdCondition =
+                        (dayOverDue.longValue() <= daysDiff && minBalance.doubleValue() >= policy.getMinBalanceTrigger()) &&
+                                minBalance.compareTo(BigDecimal.ZERO) > 0;
+            }
         } catch (ParseException exception) {
             throw new BusinessException(exception);
         }
-        long daysDiff = TimeUnit.DAYS.convert((today.getTime() - dueDate.getTime()), TimeUnit.MILLISECONDS);
-        if (policy.getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE)) {
-            BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
-                    .map(RecordedInvoice::getUnMatchingAmount)
-                    .orElse(BigDecimal.ZERO);
-            dayOverDueAndThresholdCondition = (dayOverDue.longValue() <= daysDiff) && minBalance.compareTo(BigDecimal.ZERO) > 0;
-        } else {
-            BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
-                                            .map(RecordedInvoice::getUnMatchingAmount)
-                                            .orElse(BigDecimal.ZERO);
-            dayOverDueAndThresholdCondition =
-                    (dayOverDue.longValue() == daysDiff || minBalance.doubleValue() >= policy.getMinBalanceTrigger()) && minBalance.compareTo(BigDecimal.ZERO) > 0;
-        }
-        return (invoice.getPaymentStatus().equals(UNPAID) || invoice.getPaymentStatus().equals(PENDING))
-                && collectionPlanService.findByInvoiceId(invoice.getId()).isEmpty()
-                && dayOverDueAndThresholdCondition;
+
+        return dayOverDueAndThresholdCondition;
     }
 
     public List<DunningPolicy> availablePoliciesForSwitch(Invoice invoice) {
@@ -340,9 +389,15 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                         .anyMatch(inv -> inv.getId() == invoice.getId());
     }
 
+    /**
+     * Get active policies
+     * @param active Active
+     * @return List of {@link DunningPolicy}
+     */
     public List<DunningPolicy> getPolicies(boolean active) {
         try {
-            return getEntityManager().createNamedQuery("DunningPolicy.listPoliciesByIsActive", DunningPolicy.class)
+            return getEntityManager()
+                    .createNamedQuery("DunningPolicy.listPoliciesByIsActive", DunningPolicy.class)
                     .setParameter("active", active)
                     .getResultList();
         } catch (Exception exception) {
@@ -383,8 +438,17 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
     }
 
     /**
+     * Update dunning policies by setting active = true or false according to the selected dunning settings (INVOICE_LEVEL or CUSTOMER_LEVEL)
+     * @param pDunningMode {@link DunningModeEnum}
+     */
+    public void updateDunningPoliciesAfterCreatingOrUpdatingDunningSetting(DunningModeEnum pDunningMode) {
+        getEntityManager().createNamedQuery("DunningPolicy.activateByDunningMode").setParameter("dunningMode", pDunningMode).executeUpdate();
+        getEntityManager().createNamedQuery("DunningPolicy.deactivateByDunningMode").setParameter("dunningMode", pDunningMode).executeUpdate();
+    }
+
+    /**
      * Check if priority already taken by an other policy
-     * @param priority
+     * @param priority Priority to check
      * @return true if priority already taken, false if not
      */
     public boolean checkIfSamePriorityExists(int priority) {
@@ -397,7 +461,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
     public List<Invoice> findEligibleInvoicesToTriggerReminder(DunningPolicy policy) {
         policy = refreshOrRetrieve(policy);
         if (policy == null) {
-            throw new BusinessException("Policy does not exists");
+            throw new BusinessException(DUNNING_POLICY_NOT_FOUND);
         }
         if(policy.getDunningPolicyRules() != null && !policy.getDunningPolicyRules().isEmpty()) {
             try {
@@ -429,5 +493,37 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                 super.update(dunningPolicy);
             }
         }));
+    }
+
+    /**
+     * Process eligible customer accounts
+     * @param eligibleCustomerAccountsByPolicy Customer account by policy
+     * @return Number of collection plans
+     */
+    public int processEligibleCustomerAccounts(Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy) {
+        DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
+        AtomicInteger dunningCollectionPlanNumber = new AtomicInteger(0);
+        for (Map.Entry<DunningPolicy, Map<CustomerAccount, BigDecimal>> entry : eligibleCustomerAccountsByPolicy.entrySet()) {
+            // Refresh dunning policy
+            DunningPolicy policy = refreshOrRetrieve(entry.getKey());
+            // Check if policy contains reminder
+            boolean policyIsReminderExists = policy.getDunningLevels().stream().anyMatch(policyLevel -> policyLevel.getDunningLevel().isReminder());
+            // Get the first level
+            Optional<DunningPolicyLevel> firstLevel = policy.getDunningLevels()
+                    .stream()
+                    .filter(policyLevel -> ((policyIsReminderExists && policyLevel.getSequence() == 1) || ( policyLevel.getSequence() == 0)) && !policyLevel.getDunningLevel().isReminder())
+                    .findFirst();
+            if(firstLevel.isPresent()) {
+                entry.getValue().forEach((customerAccount, minBalance) -> {
+                    if(minBalance.compareTo(BigDecimal.valueOf(policy.getMinBalanceTrigger())) > 0) {
+                        dunningCollectionPlanNumber.incrementAndGet();
+                        collectionPlanService.createCollectionPlanForCustomerLevel(customerAccount, minBalance, policy, collectionPlanStatus);
+                    }
+                });
+            } else {
+                log.error("No level configured do meet the conditions for policy {}", policy.getPolicyName());
+            }
+        }
+        return dunningCollectionPlanNumber.get();
     }
 }

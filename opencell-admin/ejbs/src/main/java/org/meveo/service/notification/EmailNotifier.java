@@ -19,6 +19,7 @@
 package org.meveo.service.notification;
 
 import static java.util.Arrays.asList;
+import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class EmailNotifier {
 
     @Inject
     NotificationHistoryService notificationHistoryService;
-    
+
     @Inject
     protected CustomFieldInstanceService customFieldInstanceService;
 
@@ -78,7 +79,7 @@ public class EmailNotifier {
 
     /**
      * Send email message as fired notification result
-     * 
+     *
      * @param notification Email type notification that was fired
      * @param entityOrEvent Entity or event that triggered notification
      * @param context Execution context
@@ -89,7 +90,7 @@ public class EmailNotifier {
     public void sendEmailAsync(EmailNotification notification, Object entityOrEvent, Map<String, Object> context, MeveoUser lastCurrentUser) {
     	sendEmail(notification, entityOrEvent, context, lastCurrentUser);
     }
-    
+
     /**
      * Send email message as fired notification result
      * 
@@ -139,15 +140,16 @@ public class EmailNotifier {
             }
 
             List<String> to = new ArrayList<>();
-            to.add(ValueExpressionWrapper.evaluateExpression(notification.getEmailToEl(), userMap, String.class));
-           
-            String result = context.containsKey("EMAIL_TO_LIST") ? (String)context.get("EMAIL_TO_LIST") : "" ;
-            for (String mail : result.split(",")) {
-            	if(!StringUtils.isBlank(mail)) {
-            		to.add(mail);
-            	}
+
+            String emailToList = context.get("EMAIL_TO_LIST") != null ? (String) context.get("EMAIL_TO_LIST") : "";
+            String emailToEL = ValueExpressionWrapper.evaluateExpression(notification.getEmailToEl(), userMap, String.class);
+            emailToList += (!StringUtils.isBlank(emailToEL) ? "," + emailToEL : "");
+            for (String mail : emailToList.split(",")) {
+                if(!StringUtils.isBlank(mail)) {
+                    to.add(mail);
+                }
             }
-            
+
             if (notification.getEmails() != null) {
                 to.addAll(notification.getEmails());
             }

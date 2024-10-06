@@ -101,7 +101,8 @@ import org.meveo.model.payments.plan.PaymentPlan;
 				+ "                   pm.paymentType =:paymentMethodIN   and pm.preferred is true and ao.dueDate >=:fromDueDateIN and ao.dueDate <:toDueDateIN group by ca.id having sum(ao.unMatchingAmount) <> 0"),
 		@NamedQuery(name = "CustomerAccount.getMinimumAmountUsed", query = "select ca.minimumAmountEl from CustomerAccount ca where ca.minimumAmountEl is not null"),
 		@NamedQuery(name = "CustomerAccount.getCustomerAccountsWithMinAmountELNotNullByBA", query = "select ca from CustomerAccount ca where ca.minimumAmountEl is not null AND ca.status = org.meveo.model.billing.AccountStatusEnum.ACTIVE AND ca=:customerAccount"),
-        @NamedQuery(name = "CustomerAccount.getCountByParent", query = "select count(*) from CustomerAccount ca where ca.customer=:parent")
+        @NamedQuery(name = "CustomerAccount.getCountByParent", query = "select count(*) from CustomerAccount ca where ca.customer=:parent"),
+		@NamedQuery(name = "CustomerAccount.getCustomerAccountNotExistOnDunningCollectionPlan", query = "select ca from CustomerAccount ca where ca.status = org.meveo.model.billing.AccountStatusEnum.ACTIVE and ca.id not in (select distinct dcp.customerAccount.id from DunningCollectionPlan dcp where dcp.customerAccount.id = ca.id and dcp.status.status = ('ACTIVE'))"),
 })
 public class CustomerAccount extends AccountEntity implements IInvoicingMinimumApplicable, IWFEntity, ICounterEntity {
 

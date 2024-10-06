@@ -108,7 +108,7 @@ public class DunningPolicyResourceImplTest {
         when(dunningSettingsService.getMaxNumberOfDunningLevels()).thenReturn(5);
         Response response = dunningPolicyResource.create(resource);
 
-        Assert.assertEquals(200, response.getStatus());
+        Assert.assertEquals(201, response.getStatus());
     }
 
     @Test

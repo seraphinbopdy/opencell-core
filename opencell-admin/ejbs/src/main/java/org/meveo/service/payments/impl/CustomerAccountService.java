@@ -83,6 +83,9 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
     @Inject
     private PaymentMethodService paymentMethodService;
 
+    @Inject
+    private AccountOperationService accountOperationService;
+
     private boolean isCheckIbanUnicityEnabled = true;
 
     /**
@@ -798,7 +801,41 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
      * @return A number of child customer accounts
      */
     public long getCountByParent(Customer parent) {
-
         return getEntityManager().createNamedQuery("CustomerAccount.getCountByParent", Long.class).setParameter("parent", parent).getSingleResult();
+    }
+
+    /**
+     * Get a list of customer accounts by a parent customer
+     *
+     * @return A list of customer accounts
+     */
+    public List<CustomerAccount> getListCustomerAccountNotUsedInDunning() {
+        return getEntityManager()
+                .createNamedQuery("CustomerAccount.getCustomerAccountNotExistOnDunningCollectionPlan", CustomerAccount.class)
+                .getResultList();
+    }
+
+    /**
+     * Retrieves the customer account balance based on the provided {@link CustomerAccount}.
+     *
+     * @param customerAccount The {@link CustomerAccount} from which to retrieve the balance.
+     * @param linkedOccTemplates The linked OCC templates.
+     * @return The balance of the customer account.
+     */
+    public BigDecimal getCustomerAccountBalance(CustomerAccount customerAccount, List<String> linkedOccTemplates) {
+        List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount.getId(),
+                null,
+                linkedOccTemplates,
+                null);
+        // Calculate totals for credit, debit, and balance
+        BigDecimal credit = accountOperations.stream()
+                .filter(aod -> aod.getTransactionCategory().equals(OperationCategoryEnum.CREDIT))
+                .map(AccountOperation::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal debit = accountOperations.stream()
+                .filter(aod -> aod.getTransactionCategory().equals(OperationCategoryEnum.DEBIT))
+                .map(AccountOperation::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return debit.subtract(credit);
     }
 }

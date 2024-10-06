@@ -54,11 +54,14 @@ public class DunningSettingsMapper extends ResourceMapper<org.meveo.apiv2.dunnin
         	customerBalance.setId(resource.getCustomerBalance().getId());
         	entity.setCustomerBalance(customerBalance);
         }
+
+        if (resource.getMaxDaysOutstanding() != null) {
+            entity.setMaxDaysOutstanding(resource.getMaxDaysOutstanding().intValue());
+        }
         
         entity.setDunningMode(resource.getDunningMode());
         entity.setId(resource.getId());
         entity.setInterestForDelayRate(resource.getInterestForDelayRate());
-        entity.setMaxDaysOutstanding(resource.getMaxDaysOutstanding());
         entity.setMaxDunningLevels(resource.getMaxDunningLevels());
         return entity;
     }

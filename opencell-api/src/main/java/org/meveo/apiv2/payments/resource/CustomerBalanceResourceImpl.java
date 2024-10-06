@@ -76,7 +76,7 @@ public class CustomerBalanceResourceImpl implements CustomerBalanceResource {
                         .build())
                 .build();
     }
-
+    
     @Override
     public Response getAccountOperations(AccountOperationsDetails resource) {
         if(resource != null) {

@@ -35,7 +35,9 @@ import org.meveo.model.payments.CustomerAccount;
         @NamedQuery(name = "DunningLevelInstance.checkDaysOverdueIsAlreadyExist", query = "SELECT count(li) FROM DunningLevelInstance li where li.collectionPlan = :collectionPlan and li.daysOverdue = :daysOverdue"),
         @NamedQuery(name = "DunningLevelInstance.minSequenceByDaysOverdue", query = "SELECT min(li.sequence) FROM DunningLevelInstance li where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue"),
         @NamedQuery(name = "DunningLevelInstance.findByInvoiceAndEmptyCollectionPlan", query = "SELECT li FROM DunningLevelInstance li where li.invoice = :invoice and li.collectionPlan is NULL"),
+        @NamedQuery(name = "DunningLevelInstance.findByCustomerAccountAndEmptyCollectionPlan", query = "SELECT li FROM DunningLevelInstance li where li.customerAccount = :customerAccount and li.collectionPlan is NULL"),
         @NamedQuery(name = "DunningLevelInstance.findByInvoice", query = "SELECT li FROM DunningLevelInstance li where li.invoice = :invoice"),
+        @NamedQuery(name = "DunningLevelInstance.findByCustomerAccount", query = "SELECT li FROM DunningLevelInstance li where li.customerAccount = :customerAccount and li.collectionPlan is NULL"),
         @NamedQuery(name = "DunningLevelInstance.incrementSequencesByDaysOverdue", query = "UPDATE DunningLevelInstance li set li.sequence = li.sequence+1 where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue"),
         @NamedQuery(name = "DunningLevelInstance.decrementSequencesByDaysOverdue", query = "UPDATE DunningLevelInstance li set li.sequence = li.sequence-1 where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue") })
 public class DunningLevelInstance extends AuditableEntity {
@@ -74,6 +76,7 @@ public class DunningLevelInstance extends AuditableEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_account_id")
     private CustomerAccount customerAccount;
@@ -137,16 +140,20 @@ public class DunningLevelInstance extends AuditableEntity {
     public void setDunningLevel(DunningLevel dunningLevel) {
         this.dunningLevel = dunningLevel;
     }
+
     public Invoice getInvoice() {
         return invoice;
     }
+
     public DunningLevelInstance setInvoice(Invoice invoice) {
         this.invoice = invoice;
         return this;
     }
+
     public CustomerAccount getCustomerAccount() {
         return customerAccount;
     }
+
     public DunningLevelInstance setCustomerAccount(CustomerAccount customerAccount) {
         this.customerAccount = customerAccount;
         return this;

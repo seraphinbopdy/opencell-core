@@ -19,11 +19,7 @@ import org.meveo.api.exception.BusinessApiException;
 import org.meveo.apiv2.dunning.impl.DunningPolicyRuleLineMapper;
 import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.model.admin.Currency;
-import org.meveo.model.dunning.DunningLevel;
-import org.meveo.model.dunning.DunningPolicy;
-import org.meveo.model.dunning.DunningPolicyLevel;
-import org.meveo.model.dunning.DunningPolicyRule;
-import org.meveo.model.dunning.DunningPolicyRuleLine;
+import org.meveo.model.dunning.*;
 import org.meveo.service.admin.impl.CurrencyService;
 import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.payments.impl.*;
@@ -52,13 +48,13 @@ public class DunningPolicyApiService implements ApiService<DunningPolicy> {
     private DunningPolicyRuleLineService dunningPolicyRuleLineService;
 
     @Inject
-    private DunningSettingsService dunningSettingsService;
-
-    @Inject
     private CurrencyService currencyService;
 
     @Inject
     protected ResourceBundle resourceMessages;
+
+    @Inject
+    DunningSettingsService dunningSettingsService;
     
     private List<String> fetchFields = asList("minBalanceTriggerCurrency");
 
@@ -97,10 +93,11 @@ public class DunningPolicyApiService implements ApiService<DunningPolicy> {
             if(dunningPolicy.getPolicyPriority() != null && dunningPolicyService.checkIfSamePriorityExists(dunningPolicy.getPolicyPriority())) {
                 throw new BusinessApiException("Policy with priority " + dunningPolicy.getPolicyPriority() + " already exists");
             }
+            DunningSettings dunningSettings = dunningSettingsService.findLastOne();
 
-            //Set dunning mode in dunning policy
-            dunningPolicy.setType(dunningSettingsService.findLastOne().getDunningMode());
-
+            if(dunningSettings != null) {
+                dunningPolicy.setType(dunningSettings.getDunningMode());
+            }
             dunningPolicyService.create(dunningPolicy);
             auditLogService.trackOperation("create", new Date(), dunningPolicy, dunningPolicy.getPolicyName());
             return findByCode(dunningPolicy.getPolicyName()).get();

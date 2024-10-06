@@ -1710,7 +1710,7 @@
             <column name="inboundrequest_id" type="bigint">
                 <constraints nullable="false" />
             </column>
-            <column name="parameters" type="varchar(255)" />
+            <column name="parameters" type="varchar(1500)" />
             <column name="parameters_key" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
@@ -21040,6 +21040,7 @@
     <changeSet id="#INTRD-25155_secured_tmp" author="a.rouaguebe" />
     <changeSet id="#INTRD-25259_fix_repoen_template_replay" author="a.rouaguebe" />
     <changeSet id="#INTRD-25474_new_cg_20241003" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25724-increase-param-size" author="a.rouaguebe" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

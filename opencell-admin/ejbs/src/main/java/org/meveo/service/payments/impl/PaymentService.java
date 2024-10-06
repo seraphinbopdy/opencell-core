@@ -20,6 +20,7 @@ package org.meveo.service.payments.impl;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toMap;
 import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.model.payments.MatchingStatusEnum.O;
 import static org.meveo.model.payments.PaymentMethodEnum.CASH;
@@ -49,32 +50,7 @@ import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.ExchangeRate;
 import org.meveo.model.billing.TradingCurrency;
-import org.meveo.model.payments.AccountOperation;
-import org.meveo.model.payments.AutomatedRefund;
-import org.meveo.model.payments.CardPaymentMethod;
-import org.meveo.model.payments.CreditCardTypeEnum;
-import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.DDPaymentMethod;
-import org.meveo.model.payments.MatchingAmount;
-import org.meveo.model.payments.MatchingStatusEnum;
-import org.meveo.model.payments.MatchingTypeEnum;
-import org.meveo.model.payments.OCCTemplate;
-import org.meveo.model.payments.OperationCategoryEnum;
-import org.meveo.model.payments.Payment;
-import org.meveo.model.payments.PaymentErrorEnum;
-import org.meveo.model.payments.PaymentErrorTypeEnum;
-import org.meveo.model.payments.PaymentGateway;
-import org.meveo.model.payments.PaymentHistory;
-import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.payments.PaymentMethodEnum;
-import org.meveo.model.payments.PaymentRejectionAction;
-import org.meveo.model.payments.PaymentRejectionActionReport;
-import org.meveo.model.payments.PaymentRejectionActionStatus;
-import org.meveo.model.payments.PaymentStatusEnum;
-import org.meveo.model.payments.Refund;
-import org.meveo.model.payments.RejectedPayment;
-import org.meveo.model.payments.RejectedType;
-import org.meveo.model.payments.RejectionActionStatus;
+import org.meveo.model.payments.*;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.JournalService;
@@ -138,6 +114,9 @@ public class PaymentService extends PersistenceService<Payment> {
 
     @Inject
     private JournalService journalService;
+
+    @Inject
+    private RecordedInvoiceService recordedInvoiceService;
 
     @MeveoAudit
     @Override
@@ -543,8 +522,10 @@ public class PaymentService extends PersistenceService<Payment> {
             boolean rejectPayment, Date collectionDate)
 			throws Exception {
 
-		PaymentResponseDto doPaymentResponseDto = new PaymentResponseDto();
+        // Get invoices to pay and their payment requests
+        Map<RecordedInvoice, Long> invoicePaymentRequests = getMapOfInvoicesPaymentRequests(rejectPayment, aoIdsToPay);
 
+        PaymentResponseDto doPaymentResponseDto = new PaymentResponseDto();
 		doPaymentResponseDto = createAO(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, cardNumber, ownerName, cvv, expiryDate, cardType, isPayment,
 				paymentMethodType, collectionDate);
 		
@@ -556,12 +537,39 @@ public class PaymentService extends PersistenceService<Payment> {
 			if (doPaymentResponseDto.getPaymentStatus() == PaymentStatusEnum.ACCEPTED || doPaymentResponseDto.getPaymentStatus() == PaymentStatusEnum.PENDING) {					
 				updatePaymentAO(aoId, doPaymentResponseDto);
 			}			
-		}		
+		}
+
+        // Update recorded invoices with the initial payment requests
+        invoicePaymentRequests.forEach((invoice, paymentRequest) -> {
+            RecordedInvoice recordedInvoice = recordedInvoiceService.findById(invoice.getId());
+            recordedInvoice.setPaymentRequests(paymentRequest);
+            recordedInvoiceService.update(recordedInvoice);
+        });
+
 		return doPaymentResponseDto;
 
 	}
 
-	private void cancelPayment(Long aoId) {
+    /**
+     * get invoices to pay and their payment requests
+     * @param rejectedPayment Rejected payment
+     * @param aoIdsToPay list of account operation's id to refund
+     * @return map of invoices to pay and their payment requests
+     */
+    private Map<RecordedInvoice, Long> getMapOfInvoicesPaymentRequests(Boolean rejectedPayment, List<Long> aoIdsToPay) {
+        final Map<RecordedInvoice, Long> invoicePaymentRequests;
+
+        if (Boolean.TRUE.equals(rejectedPayment) && !aoIdsToPay.isEmpty()) {
+            List<RecordedInvoice> recordedInvoices = recordedInvoiceService.findByIds(aoIdsToPay);
+            invoicePaymentRequests = recordedInvoices.stream().collect(toMap(invoice -> invoice, RecordedInvoice::getPaymentRequests));
+        } else {
+            invoicePaymentRequests = Collections.emptyMap();
+        }
+
+        return invoicePaymentRequests;
+    }
+
+    private void cancelPayment(Long aoId) {
 
 		if (aoId != null) {
 			matchingCodeService.unmatchingByAOid(aoId);
@@ -1169,9 +1177,14 @@ public class PaymentService extends PersistenceService<Payment> {
      * @throws NoAllOperationUnmatchedException if the operation is not matched
      * @throws UnbalanceAmountException if the amount is not balanced
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void createManualPaymentFromRejectedPayment(Payment rejectedPayment, Date collectionDate, List<Long> idsToPay) throws UnbalanceAmountException, NoAllOperationUnmatchedException {
         CustomerAccount customerAccount = rejectedPayment.getCustomerAccount();
         OCCTemplate occTemplate = oCCTemplateService.findByCode(rejectedPayment.getCode());
+
+        // Get invoices to pay and their payment requests
+        Map<RecordedInvoice, Long> invoicePaymentRequests = getMapOfInvoicesPaymentRequests(true, idsToPay);
+
         Payment payment = new Payment();
         this.calculateAmountsByTransactionCurrency(payment, customerAccount, rejectedPayment.getAmount(),
                 rejectedPayment.getTransactionalCurrency().getCurrencyCode(), payment.getTransactionDate());
@@ -1224,6 +1237,14 @@ public class PaymentService extends PersistenceService<Payment> {
         } else {
             log.info("no matching created");
         }
+
+        // Update recorded invoices with the initial payment requests
+        invoicePaymentRequests.forEach((invoice, paymentRequest) -> {
+            RecordedInvoice recordedInvoice = recordedInvoiceService.findById(invoice.getId());
+            recordedInvoice.setPaymentRequests(paymentRequest);
+            recordedInvoiceService.update(recordedInvoice);
+        });
+
         log.debug("payment created for amount: {}", payment.getAmount());
     }
 

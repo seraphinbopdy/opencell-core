@@ -498,17 +498,20 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		
 		accountOperationService.create(accountOperationToTransfer);
 		
-		/*if((accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT && occTemplate.getCode().equals("DBT_TRS") ) ||
+		if((accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT && occTemplate.getCode().equals("DBT_TRS") ) ||
 				(accountOperation.getTransactionCategory() == OperationCategoryEnum.DEBIT && occTemplate.getCode().equals("CRD_TRS")) ) {
 			try {
 				List<Long> operationIds = new ArrayList<>();
 				operationIds.add(accountOperation.getId());
 				operationIds.add(accountOperationToTransfer.getId());
-				matchingCodeService.matchOperations(accountOperation.getCustomerAccount().getId(), null, operationIds, null);
+				//matchingCodeService.matchOperations(accountOperation.getCustomerAccount().getId(), null, operationIds, null);
+				var customerId = accountOperation.getCustomerAccount().getId();
+				var cosutomerCode = accountOperation.getCustomerAccount().getCode();
+				matchingCodeService.matchOperations(customerId, cosutomerCode, operationIds, accountOperationToTransfer.getId(), amountToTransfer);
 			} catch (Exception e) {
 				throw new BusinessException(e.getMessage(), e);
 			}
-		}*/
+		}
 	}
 	/**
 	 * Check that sum of amount are lower of equal to source’s unmatched amount

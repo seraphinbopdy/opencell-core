@@ -103,8 +103,8 @@ import jakarta.validation.constraints.Size;
         @NamedQuery(name = "WalletOperation.listByBRId", query = "SELECT o FROM WalletOperation o WHERE o.status='TREATED' and o.ratedTransaction.billingRun.id=:brId"),
 
         @NamedQuery(name = "WalletOperation.getConvertToRTsSummary", query = "SELECT count(*), max(o.id), min(o.id) FROM WalletOperation o WHERE o.status='OPEN'"),
-        @NamedQuery(name = "WalletOperation.getOpenIds", query = "SELECT o.id FROM WalletOperation o WHERE o.status='OPEN' order by o.id asc"),
-        // @NamedQuery(name = "WalletOperation.listConvertToRTs", query = "SELECT o FROM WalletOperation o WHERE o.status='OPEN' and o.id<=:maxId"),
+        @NamedQuery(name = "WalletOperation.getConvertToRTsSummaryWithLimit", query = "SELECT max(o.woid), min(o.woid) from (select wo.id as woid FROM WalletOperation wo WHERE wo.status='OPEN' order by wo.id limit :limitNr) o"),
+        @NamedQuery(name = "WalletOperation.getOpenCount", query = "SELECT count(*) FROM WalletOperation o WHERE o.status='OPEN'"),
         @NamedQuery(name = "WalletOperation.listToRateIds", query = "SELECT o.id FROM WalletOperation o WHERE o.status='OPEN' and (o.invoicingDate is NULL or o.invoicingDate<:invoicingDate ) order by unitAmountWithoutTax desc"),
         @NamedQuery(name = "WalletOperation.listToRateByBA", query = "SELECT o FROM WalletOperation o WHERE o.status='OPEN' and (o.invoicingDate is NULL or o.invoicingDate<:invoicingDate ) AND o.billingAccount=:billingAccount"),
         @NamedQuery(name = "WalletOperation.listToRateBySubscription", query = "SELECT o FROM WalletOperation o WHERE o.status='OPEN' and (o.invoicingDate is NULL or o.invoicingDate<:invoicingDate ) AND o.subscription=:subscription"),

@@ -168,7 +168,6 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
             statelessSession.close();
         }
     }
-    
 
     /**
      * Bridge discount Rated transactions
@@ -186,7 +185,7 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
             jobContextHolder.clearMap(RatedTransactionsJob.BILLING_ACCOUNTS_MAP_KEY);
         }
     }
-    
+
     public void initBillingAccountsData() {
         if (jobContextHolder.isNotEmpty(RatedTransactionsJob.BILLING_ACCOUNTS_MAP_KEY)) {
             return;
@@ -226,13 +225,14 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
         int processNrInJobRun = ParamBean.getInstance().getPropertyAsInteger("jobs.ratedTransactionsJob.processNrInJobRun", 4000000);
 
         if (jobItemsLimit > 0) {
-            List<Long> ids = emWrapper.getEntityManager().createNamedQuery("WalletOperation.getOpenIds", Long.class).setMaxResults(jobItemsLimit).getResultList();
+            nrOfRecords = emWrapper.getEntityManager().createNamedQuery("WalletOperation.getOpenCount", Long.class).getSingleResult();
 
-            nrOfRecords = Long.valueOf(ids.size());
-            if (!ids.isEmpty()) {
-                maxId = Long.valueOf(ids.get(ids.size() - 1));
-                minId = Long.valueOf(ids.get(0));
+            if (nrOfRecords.intValue() > 0) {
+                Object[] convertSummary = (Object[]) emWrapper.getEntityManager().createNamedQuery("WalletOperation.getConvertToRTsSummaryWithLimit").setParameter("limitNr", jobItemsLimit).getSingleResult();
+                maxId = (Long) convertSummary[0];
+                minId = (Long) convertSummary[1];
             }
+            
         } else {
             Object[] convertSummary = (Object[]) emWrapper.getEntityManager().createNamedQuery("WalletOperation.getConvertToRTsSummary").getSingleResult();
 

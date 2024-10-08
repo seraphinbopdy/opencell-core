@@ -67,7 +67,7 @@ public class AuditDataLogAggregationJobBean extends IteratorBasedJobBean<List<Au
     private Long nrOfRecords = null;
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.NEVER)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED) // Transaction set to REQUIRED, so ScrollableResultset would do paging. With TX=NEVER all data is retrieved at once resulting in memory increase
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
         super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, null, this::aggregateAuditDataLogs, this::hasMore, this::closeResultset, null);
     }
@@ -102,9 +102,8 @@ public class AuditDataLogAggregationJobBean extends IteratorBasedJobBean<List<Au
         maxId = (Long) convertSummary[1];
 
         statelessSession = em.unwrap(Session.class).getSessionFactory().openStatelessSession();
-		scrollableResults = statelessSession.createNamedQuery("AuditDataLogRecord.listConvertToAggregate")
-				.setParameter("maxId", maxId).setReadOnly(true).setCacheable(false).setFetchSize(fetchSize)
-				.scroll(ScrollMode.FORWARD_ONLY);
+        scrollableResults = statelessSession.createNamedQuery("AuditDataLogRecord.listConvertToAggregate").setParameter("maxId", maxId).setReadOnly(true).setCacheable(false).setFetchSize(fetchSize)
+            .scroll(ScrollMode.FORWARD_ONLY);
 
         return Optional.of(new SynchronizedIteratorGrouped<AuditDataLogRecord>(scrollableResults, nrOfRecords.intValue()) {
 
@@ -138,8 +137,12 @@ public class AuditDataLogAggregationJobBean extends IteratorBasedJobBean<List<Au
      * @param jobExecutionResult Job execution result
      */
     private void closeResultset(JobExecutionResultImpl jobExecutionResult) {
-        if (scrollableResults != null) scrollableResults.close();
-        if (statelessSession != null) statelessSession.close();
+        if (scrollableResults != null) {
+            scrollableResults.close();
+        }
+        if (statelessSession != null) {
+            statelessSession.close();
+        }
     }
 
     @Override

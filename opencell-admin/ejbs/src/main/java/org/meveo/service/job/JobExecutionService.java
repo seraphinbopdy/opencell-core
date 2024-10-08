@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.JobExecutionException;
 import org.meveo.admin.job.IteratorBasedJobBean;
@@ -587,7 +588,7 @@ public class JobExecutionService extends BaseService {
 
         String currentNode = EjbUtils.getCurrentClusterNode();
 
-        if (currentNode == null || runOnNodes == null) {
+        if (currentNode == null || StringUtils.isBlank(runOnNodes)) {
             return true;
         }
 

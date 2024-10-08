@@ -85,7 +85,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
 
     @Inject
     private JobInstanceService jobInstanceService;
-    
+
     private AggregationConfiguration aggregationConfiguration;
     private boolean incrementalInvoiceLines;
 
@@ -401,7 +401,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
             billingRunExtensionService.updateBillingRun(billingRun.getId(), null, null, BillingRunStatusEnum.CREATING_INVOICE_LINES, null);
 
             // Determine aggregation options from Billing run
-            if(currentBillingRun.getAdditionalAggregationFields() != null
+            if (currentBillingRun.getAdditionalAggregationFields() != null
                     && currentBillingRun.getAdditionalAggregationFields() instanceof PersistentBag) {
                 currentBillingRun = billingRunService.findById(currentBillingRun.getId(), of("additionalAggregationFields"));
             }
@@ -434,7 +434,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
         minId = (Long) convertSummary[0];
         maxId = (Long) convertSummary[1];
 
-        scrollableResults = aggregationQueryInfo.getQuery().setReadOnly(true).setCacheable(false).setMaxResults(processNrInJobRun > jobItemsLimit ? jobItemsLimit : processNrInJobRun).setFetchSize(fetchSize)
+        scrollableResults = aggregationQueryInfo.getQuery().setReadOnly(true).setCacheable(false).setMaxResults(processNrInJobRun > jobItemsLimit && jobItemsLimit > 0 ? jobItemsLimit : processNrInJobRun).setFetchSize(fetchSize)
             .scroll(ScrollMode.FORWARD_ONLY);
 
         Long nrOfRecords = aggregationQueryInfo.getNumberOfIL();
@@ -498,7 +498,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
         JobInstance jobInstance = jobExecutionResult.getJobInstance();
 
         Long brId = (Long) jobInstance.getParamValue(BR_CURRENT);
-        if (brId== null) {
+        if (brId == null) {
             jobExecutionResult.addReportToBeginning("No billing run ID received in job execution parameters");
             return;
         }

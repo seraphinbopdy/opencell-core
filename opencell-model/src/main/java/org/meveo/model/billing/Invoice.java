@@ -819,6 +819,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     public Invoice(Invoice copy) {
 		this.billingAccount = copy.billingAccount;
 		this.paymentMethodType = copy.paymentMethodType;
+        this.paymentMethod = copy.paymentMethod;
 		this.dueDate = copy.dueDate;
 		this.invoiceDate = copy.invoiceDate;
 		this.discountPlan = copy.discountPlan;

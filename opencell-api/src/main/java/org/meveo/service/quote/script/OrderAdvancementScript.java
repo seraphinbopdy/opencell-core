@@ -61,6 +61,7 @@ OrderAdvancementScript extends ModuleScript {
         if(commercialOrder == null) {
             throw new BusinessException("No Commercial order is found");
         }
+	    commercialOrder.getOrderLots().size();
         // Force fetch nested entities to avoid LazyInitializationException
         // All those nested entities are not fetched : quote, orderType, invoices, orderLots, orderPrices
         log.info("Process CommericalOrder [quote='{}', orderType='{}']",

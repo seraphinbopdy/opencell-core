@@ -124,6 +124,8 @@ import org.meveo.model.rating.EDR;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.securityDeposit.ArticleSelectionModeEnum;
 import org.meveo.model.securityDeposit.FinanceSettings;
+import org.meveo.service.admin.impl.CurrencyService;
+import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
@@ -218,6 +220,12 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 
     @Inject
     protected ServiceInstanceService serviceInstanceService;
+	
+	@Inject
+	protected SellerService sellerService;
+	
+	@Inject
+	protected CurrencyService currencyService;
     
     /**
      * @param level level enum
@@ -370,7 +378,17 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         Integer sortIndex = getSortIndex(walletOperation);
         walletOperation.setSortIndex(sortIndex);
         walletOperation.setEdr(edr);
-        walletOperation.setTradingCurrency(walletOperation.getBillingAccount() != null ? walletOperation.getBillingAccount().getTradingCurrency() : null);
+		if(walletOperation.getBillingAccount() != null) {
+			walletOperation.setTradingCurrency(tradingCurrencyService.findById(walletOperation.getBillingAccount().getTradingCurrency().getId()));
+		}
+		if(chargeInstance.getUserAccount() != null) {
+			var userAccount = userAccountService.findById(chargeInstance.getUserAccount().getId(), Arrays.asList("wallet"));
+			walletOperation.setWallet(userAccount.getWallet());
+		}
+		if(chargeInstance.getCurrency() != null) {
+			var tradingCurrency = tradingCurrencyService.findById(chargeInstance.getCurrency().getId());
+			walletOperation.setCurrency(tradingCurrency.getCurrency());
+		}
 
         RatingResult ratedEDRResult = rateBareWalletOperation(walletOperation, chargeInstance.getAmountWithoutTax(), chargeInstance.getAmountWithTax(), chargeInstance.getCountry().getId(), chargeInstance.getCurrency(), isVirtual);
         ChargeTemplate chargeTemplate = chargeInstance.getChargeTemplate();
@@ -657,6 +675,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             Seller seller=bareWalletOperation.getSeller()!=null?bareWalletOperation.getSeller():customer.getSeller();
           //Get the list of seller (current and parents)
             List<Seller> sellers = new ArrayList<>();
+			seller = sellerService.findById(seller.getId(), Arrays.asList("seller"));
 			getSeller(seller, sellers);
 			List<Long> sellerIds = sellers.stream().map(Seller::getId).collect(Collectors.toList());
             List<Long> ids = customers.stream().map(Customer::getId).collect(Collectors.toList());

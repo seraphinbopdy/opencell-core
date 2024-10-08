@@ -20,6 +20,7 @@ package org.meveo.admin.job;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.commons.utils.ReflectionUtils;
+import org.meveo.model.billing.BatchEntity;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
@@ -123,6 +124,10 @@ public class UpdateHugeEntityJob extends Job {
      */
     public static final String CF_PRE_UPDATE_EL = "preUpdateEl";
 
+    /**
+     * Custom field containing the list of batch entities that will be processed.
+     */
+    public static final String BATCHES_TO_PROCESS = "batchesToProcess";
 
     /**
      * Job bean
@@ -248,6 +253,13 @@ public class UpdateHugeEntityJob extends Job {
                 CustomFieldTemplateUtils.buildCF(CF_PRE_UPDATE_EL,
                         resourceMessages.getString("jobExecution.updateHugeEntity.preUpdateEl"), CustomFieldTypeEnum.STRING,
                         "tab:Configuration:0;fieldGroup:Execution configuration:0;field:9", APPLIES_TO, 1000L));
+
+        result.put(BATCHES_TO_PROCESS,
+                CustomFieldTemplateUtils.buildCF(BATCHES_TO_PROCESS,
+                resourceMessages.getString("jobExecution.updateHugeEntity.batchesToProcess"), CustomFieldTypeEnum.ENTITY,
+                "tab:Configuration:0;fieldGroup:Execution configuration:0;field:10",
+                null, false, CustomFieldStorageTypeEnum.LIST, BatchEntity.class.getName(),
+                        APPLIES_TO, null));
         
         return result;
     }

@@ -22,6 +22,8 @@ import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -141,6 +143,13 @@ public abstract class AccountEntity extends BusinessCFEntity {
      */
     @Column(name = "vat_no", length = 100)
     private String vatNo;
+
+    /**
+     * VAT Validation status
+      */ 
+    @Column(name = "vat_status")
+    @Enumerated(EnumType.STRING)
+    private VatStatusEnum vatStatus = VatStatusEnum.UNKNOWN;
 
     /**
      * Registration number
@@ -274,6 +283,14 @@ public abstract class AccountEntity extends BusinessCFEntity {
 
     public void setVatNo(String vatNo) {
         this.vatNo = vatNo;
+    }
+
+    public VatStatusEnum getVatStatus() {
+        return vatStatus;
+    }
+
+    public void setVatStatus(VatStatusEnum vatStatus) {
+        this.vatStatus = vatStatus;
     }
 
     /*public String getRegistrationNo() {

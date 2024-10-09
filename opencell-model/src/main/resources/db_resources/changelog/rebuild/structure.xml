@@ -2331,6 +2331,7 @@
             <column name="mobile" type="varchar(100)" />
             <column name="phone" type="varchar(100)" />
             <column name="vat_no" type="varchar(100)" />
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN" />
             <column name="minimum_amount_el" type="varchar(2000)" />
             <column name="minimum_label_el" type="varchar(2000)" />
             <column name="minimum_charge_template_id" type="bigint" />
@@ -2738,6 +2739,7 @@
             <column name="mobile" type="varchar(100)" />
             <column name="phone" type="varchar(100)" />
             <column name="vat_no" type="varchar(100)" />
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN" />
             <column name="minimum_amount_el" type="varchar(2000)" />
             <column name="minimum_label_el" type="varchar(2000)" />
             <column name="minimum_charge_template_id" type="bigint" />
@@ -4028,6 +4030,7 @@
             <column name="mobile" type="varchar(100)" />
             <column name="phone" type="varchar(100)" />
             <column name="vat_no" type="varchar(100)" />
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN" />
             <column name="minimum_amount_el" type="varchar(2000)" />
             <column name="minimum_label_el" type="varchar(2000)" />
             <column name="minimum_charge_template_id" type="bigint" />
@@ -5432,6 +5435,7 @@
             <column name="mobile" type="varchar(100)" />
             <column name="phone" type="varchar(100)" />
             <column name="vat_no" type="varchar(100)" />
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN" />
             <column name="minimum_amount_el" type="varchar(2000)" />
             <column name="minimum_label_el" type="varchar(2000)" />
             <column name="minimum_charge_template_id" type="bigint" />
@@ -5755,6 +5759,7 @@
             <column name="mobile" type="varchar(100)" />
             <column name="phone" type="varchar(100)" />
             <column name="vat_no" type="varchar(100)" />
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN" />
             <column name="minimum_amount_el" type="varchar(2000)" />
             <column name="minimum_label_el" type="varchar(2000)" />
             <column name="minimum_charge_template_id" type="bigint" />
@@ -21041,6 +21046,7 @@
     <changeSet id="#INTRD-25259_fix_repoen_template_replay" author="a.rouaguebe" />
     <changeSet id="#INTRD-25474_new_cg_20241003" author="a.rouaguebe" />
     <changeSet id="#INTRD-25724-increase-param-size" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25754_vat_status" author="a.rouaguebe" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

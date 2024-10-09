@@ -14798,5 +14798,23 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
     <changeSet id="#INTRD-25724-increase-param-size" author="a.rouaguebe">
         <modifyDataType tableName="adm_inbound_req_params" columnName="parameters" newDataType="varchar(1500)" />
     </changeSet>
+    
+    <changeSet id="#INTRD-25754_vat_status" author="a.rouaguebe">
+        <addColumn tableName="crm_customer">
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN" />
+        </addColumn>
+        <addColumn tableName="ar_customer_account">
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN"  />
+        </addColumn>
+        <addColumn tableName="billing_billing_account">
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN"  />
+        </addColumn>
+        <addColumn tableName="billing_user_account">
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN"  />
+        </addColumn>
+        <addColumn tableName="crm_seller">
+            <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN"  />
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

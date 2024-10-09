@@ -469,8 +469,10 @@ public class RecurringRatingService extends RatingService implements Serializabl
                     }
                     // Apply prorating if needed
                     if ((prorate || prorateLastPeriod)
-                            && (chargeInstance.getServiceInstance() != null
-                            && chargeInstance.getServiceInstance().getQuoteProduct() == null)) {
+                            && ((chargeInstance.getServiceInstance() != null
+                            && chargeInstance.getServiceInstance().getQuoteProduct() == null)
+                            || (chargeInstance.getServiceInstance() != null
+                            && chargeInstance.getServiceInstance().getOrderNumber() != null))) {
                         //inputQuantity = DateUtils.calculateProrataRatio(effectiveChargeFromDate, effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, false);
 	                    inputQuantity = computeProrate(chargeInstance, effectiveChargeFromDate,
 	                            effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, inputQuantity);

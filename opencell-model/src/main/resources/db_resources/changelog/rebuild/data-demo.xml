@@ -1742,7 +1742,13 @@
             <column name="apply_reimbursment" valueNumeric="1" />
             <column name="apply_termination_charges" valueNumeric="1" />
             <column name="code" value="TERM_REASON_1" />
-            <column name="description" value="Agreement Reimbursement Charge" />
+            <column name="description" value="Charge agreement period, Reimburse advance charges, Apply termination fees" />
+            <column name="description_i18n">
+                <![CDATA[{
+                    "FRA":"Facturation de l’engagement, Remboursement des charges d’avance, Application des frais de résiliation",
+                    "ENG":"Charge agreement period, Reimburse advance charges, Apply termination fees"
+                }]]>
+            </column>
             <column name="created" valueDate="2015-03-19 00:04:19.829" />
         </insert>
         <insert tableName="billing_subscrip_termin_reason">
@@ -1752,7 +1758,13 @@
             <column name="apply_reimbursment" valueNumeric="0" />
             <column name="apply_termination_charges" valueNumeric="0" />
             <column name="code" value="TERM_REASON_2" />
-            <column name="description" value="Agreement" />
+            <column name="description" value="Charge agreement period" />
+            <column name="description_i18n">
+                <![CDATA[{
+                    "FRA":"Facturation de l’engagement",
+                    "ENG":"Charge agreement period"
+                }]]>
+            </column>
             <column name="created" valueDate="2015-03-19 00:04:19.829" />
         </insert>
         <insert tableName="billing_subscrip_termin_reason">
@@ -1762,7 +1774,13 @@
             <column name="apply_reimbursment" valueNumeric="1" />
             <column name="apply_termination_charges" valueNumeric="0" />
             <column name="code" value="TERM_REASON_3" />
-            <column name="description" value="Charge" />
+            <column name="description" value="Reimburse advance charges" />
+            <column name="description_i18n">
+                <![CDATA[{
+                    "FRA":"Remboursement des charges d’avance",
+                    "ENG":"Reimburse advance charges"
+                }]]>
+            </column>
             <column name="created" valueDate="2015-03-19 00:04:19.829" />
         </insert>
     </changeSet>

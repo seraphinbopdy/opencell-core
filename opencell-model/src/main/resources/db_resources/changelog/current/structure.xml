@@ -14817,4 +14817,38 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         </addColumn>
     </changeSet>
 
+    
+    <changeSet id="#INTRD-25744_add_desci18n" author="a.rouaguebe">
+        <update tableName="billing_subscrip_termin_reason">
+            <column name="description" value="Charge agreement period, Reimburse advance charges, Apply termination fees" />
+            <column name="description_i18n">
+                <![CDATA[{
+                    "FRA":"Facturation de l’engagement, Remboursement des charges d’avance, Application des frais de résiliation",
+                    "ENG":"Charge agreement period, Reimburse advance charges, Apply termination fees"
+                }]]>
+            </column>
+            <where>id = -1</where>
+        </update>
+        <update tableName="billing_subscrip_termin_reason">
+            <column name="description" value="Charge agreement period" />
+            <column name="description_i18n">
+                <![CDATA[{
+                    "FRA":"Facturation de l’engagement",
+                    "ENG":"Charge agreement period"
+                }]]>
+            </column>
+            <where>id = -2</where>
+        </update>
+        <update tableName="billing_subscrip_termin_reason">
+            <column name="description" value="Reimburse advance charges" />
+            <column name="description_i18n">
+                <![CDATA[{
+                    "FRA":"Remboursement des charges d’avance",
+                    "ENG":"Reimburse advance charges"
+                }]]>
+            </column>
+            <where>id = -3</where>
+        </update>
+    </changeSet>
+        
 </databaseChangeLog>

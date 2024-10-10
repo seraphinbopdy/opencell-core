@@ -31,7 +31,8 @@ import java.util.List;
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
         parameters = {@Parameter(name = "sequence_name", value = "bill_run_report_seq"), })
 @NamedQueries({
-        @NamedQuery(name = "BillingRunReport.findAssociatedReportToBillingRun", query = "select report from BillingRunReport report where report.billingRun.id=:billingRunId ORDER BY report.id ASC")
+        @NamedQuery(name = "BillingRunReport.findAssociatedReportToBillingRun", query = "select report from BillingRunReport report where report.billingRun.id=:billingRunId ORDER BY report.id ASC"),
+        @NamedQuery(name = "BillingRunReport.resetFinalStatus", query = "update BillingRunReport set reportFinal=false where billingRun.id in (:ids) and type in(:types)")
 })
 public class BillingRunReport extends AuditableEntity {
 

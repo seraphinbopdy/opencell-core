@@ -4,7 +4,6 @@
 
     <o:importConstants type="org.meveo.model.audit.AuditableFieldNameEnum" />
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView" listener="#{subscriptionBean.preRenderView}" />
 
@@ -17,7 +16,6 @@
             <f:viewParam name="mainTab" value="#{subscriptionBean.activeMainTab}" />
             <f:viewParam name="tab" value="#{subscriptionBean.activeTab}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <p:importEnum type="org.meveo.model.billing.SubscriptionStatusEnum" var="SubscriptionStatusEnum"></p:importEnum>

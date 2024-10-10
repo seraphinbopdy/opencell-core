@@ -7,13 +7,11 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:of="http://omnifaces.org/functions"
 	xmlns:o="http://omnifaces.org/ui" template="/layout/template.xhtml">
-	<ui:define name="metadata">
 		<f:metadata>
 			<f:event type="preRenderView"
 				listener="#{productAndBundleTemplateListBean.preRenderView}" />
 			<f:viewParam name="tab" value="#{productAndBundleTemplateListBean.activeTab}" />
 		</f:metadata>
-	</ui:define>
 
 	<ui:define name="body">
 		<h:form id="crumbmenuForm">

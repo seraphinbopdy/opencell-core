@@ -6,11 +6,9 @@
 	xmlns:hftl="http://hftl.org"
 	template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{dDRequestBuilderBean.objectId}" />
         </f:metadata>
-    </ui:define>
 
 	<ui:define name="body">
 	    <p:importEnum type="org.meveo.model.payments.DDRequestBuilderTypeEnum" var="DDRequestBuilderTypeEnum" />

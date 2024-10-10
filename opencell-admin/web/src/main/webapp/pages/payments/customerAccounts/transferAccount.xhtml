@@ -5,12 +5,10 @@
                 xmlns:hftl="http://hftl.org"
                 template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView" listener="#{customerAccountBean.preRenderView}" />
             <f:viewParam name="objectId" value="#{customerAccountBean.objectId}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <hftl:entityPopup id="customerAccountPopup"

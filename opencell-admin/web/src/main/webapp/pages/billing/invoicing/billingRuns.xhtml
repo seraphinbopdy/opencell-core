@@ -2,13 +2,11 @@
     xmlns:o="http://omnifaces.org/ui" xmlns:e="http://jboss.com/products/seam/excel" xmlns:p="http://primefaces.org/ui" xmlns:hftl="http://hftl.org"
     template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView" listener="#{billingRunListBean.preRenderView}" />
         </f:metadata>
 
         <o:importConstants type="org.meveo.model.billing.BillingRunStatusEnum" />
-    </ui:define>
 
     <ui:define name="body">
         <h:form id="crumbmenuForm">

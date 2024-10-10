@@ -6,11 +6,9 @@
 	xmlns:hftl="http://hftl.org" xmlns:pe="http://primefaces.org/ui/extensions"
 	template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{reportExtractBean.objectId}" />
         </f:metadata>
-    </ui:define>
 	<ui:define name="body">
 		<p:importEnum type="org.meveo.model.finance.ReportExtractScriptTypeEnum" var="ReportExtractScriptTypeEnum"></p:importEnum>
 		<p:importEnum type="org.meveo.model.finance.ReportExtractResultTypeEnum" var="ReportExtractResultTypeEnum"></p:importEnum>

@@ -8,12 +8,10 @@
                 xmlns:p="http://primefaces.org/ui"
                 template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView"
                      listener="#{languageListBean.preRenderView}"/>
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <h:form id="crumbmenuForm">

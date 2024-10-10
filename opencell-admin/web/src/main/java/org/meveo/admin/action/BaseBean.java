@@ -295,7 +295,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
      * @return Entity from database or a new entity if no ID was provided in request or set manually by other means.
      */
     public T initEntity() {
-        log.debug("Instantiating {} with id {}", this.getClass(), getObjectId());
+        log.trace("Instantiating {} with id {}", this.getClass(), getObjectId());
         if (getObjectId() != null) {
 
             List<String> formFieldsToFetch = getFormFieldsToFetch();
@@ -355,7 +355,7 @@ public abstract class BaseBean<T extends IEntity> implements Serializable {
      * @return Entity instantiated
      */
     public T newEntity() {
-        log.debug("instantiating {} with id {}", this.getClass(), getObjectId());
+        log.trace("instantiating {} with id {}", this.getClass(), getObjectId());
         entity = null;
         setObjectId(null);
         return initEntity();

@@ -25,8 +25,6 @@
 
         <f:view contentType="text/html" locale="#{localeSelector.currentLocale}">
 
-            <ui:insert name="metadata"/>
-
             <c:if test="#{!currentUser.hasRole('hideMenuHeaderFooter') }">
                 <div id="layout-topbar-cover">
                     <ui:include src="/layout/topbar.xhtml"/>

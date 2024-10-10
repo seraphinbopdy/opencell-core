@@ -7,14 +7,12 @@
     xmlns:p="http://primefaces.org/ui" xmlns:o="http://omnifaces.org/ui"
     template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <o:viewParam name="bomId" value="#{offerTemplateBean.bomId}" />
             <f:viewParam name="objectId" value="#{offerTemplateBean.objectId}" />
             <f:viewParam name="newVersion" value="#{offerTemplateBean.newVersion}" />
             <f:viewParam name="duplicateOffer" value="#{offerTemplateBean.duplicateOffer}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <h:form id="crumbmenuForm">

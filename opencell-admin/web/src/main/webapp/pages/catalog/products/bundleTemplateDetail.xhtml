@@ -2,14 +2,12 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:hftl="http://hftl.org"
                 template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="editMode" value="#{bundleTemplateBean.editMode}" />
             <f:viewParam name="objectId" value="#{bundleTemplateBean.objectId}" />
             <f:viewParam name="newVersion" value="#{bundleTemplateBean.newVersion}" />
             <f:viewParam name="duplicateBundle" value="#{bundleTemplateBean.duplicateBundle}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <h:form id="crumbmenuForm">

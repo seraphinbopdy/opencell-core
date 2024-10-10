@@ -4,7 +4,6 @@
 
 	<o:importConstants type="org.meveo.model.audit.AuditableFieldNameEnum" />
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{serviceInstanceBean.objectId}"></f:viewParam>
             <f:viewParam name="serviceInstanceId" value="#{serviceInstanceBean.objectId}"></f:viewParam>
@@ -12,7 +11,6 @@
             <f:viewParam name="tab" value="#{serviceInstanceBean.activeTab}" />
             <!--             <f:viewParam name="backView"/> -->
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
     	<p:importEnum type="org.meveo.model.billing.SubscriptionRenewal$EndOfTermActionEnum" var="EndOfTermActionEnum" />

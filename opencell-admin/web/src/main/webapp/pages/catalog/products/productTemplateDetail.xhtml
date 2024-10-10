@@ -2,7 +2,6 @@
     xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:hftl="http://hftl.org"
     xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags" xmlns:o="http://omnifaces.org/ui" template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
        	 	<o:viewParam name="bpmId" value="#{productTemplateBean.bpmId}" />
             <f:viewParam name="editMode" value="#{productTemplateBean.editMode}" />
@@ -10,7 +9,6 @@
             <f:viewParam name="newVersion" value="#{productTemplateBean.newVersion}" />
             <f:viewParam name="duplicateProduct" value="#{productTemplateBean.duplicateProduct}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <h:form id="crumbmenuForm">

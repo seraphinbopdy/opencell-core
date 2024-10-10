@@ -1,12 +1,10 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:p="http://primefaces.org/ui"
 	xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:hftl="http://hftl.org" template="/layout/template.xhtml">
 
-	<ui:define name="metadata">
 		<f:metadata>
 			<f:event type="preRenderView" listener="#{billingRunBean.preRenderView}" />
 			<f:viewParam name="objectId" value="#{billingRunBean.objectId}" />
 		</f:metadata>
-	</ui:define>
 
 	<ui:define name="body">
 		<h:form id="crumbmenuForm">

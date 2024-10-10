@@ -2,13 +2,11 @@
     xmlns:hftl="http://hftl.org" xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags" xmlns:p="http://primefaces.org/ui" xmlns:o="http://omnifaces.org/ui" 
     xmlns:c="http://java.sun.com/jsp/jstl/core" template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{offerTemplateBean.objectId}" />
             <f:viewParam name="tab" value="#{offerTemplateBean.activeTab}" />
             <f:viewParam name="newVersion" value="#{offerTemplateBean.newVersion}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <o:importFunctions type="org.meveo.admin.action.admin.custom.CustomFieldDataEntryBean" var="cfde" />

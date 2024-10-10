@@ -6,11 +6,9 @@
 	xmlns:hftl="http://hftl.org"
 	template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{paymentScheduleTemplateBean.objectId}" />
         </f:metadata>
-    </ui:define>
 
 	<ui:define name="body">
         <hftl:entityPopup id="searchInvoiceTypePopup" header="#{messages['paymentScheduleTemplate.advancePaymentInvoiceType']}" updateField=":formPaymentScheduleTemplate:tabView:invoiceTypeSelectedId :formPaymentScheduleTemplate:tabView:invoiceTypeSelectedId_text"

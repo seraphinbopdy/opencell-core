@@ -2,11 +2,9 @@
     xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:p="http://primefaces.org/ui" xmlns:custom="http://manaty.net/custom"
     xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags" template="/layout/template.xhtml" xmlns:hftl="http://hftl.org">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView" listener="#{configIssuesReportingBean.preRenderView}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <p:messages id="messages" />

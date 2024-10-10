@@ -7,14 +7,12 @@
 	xmlns:s="http://jboss.org/seam/faces"
 	xmlns:p="http://primefaces.org/ui">
 
-<ui:define name="metadata">
 	<f:metadata>
 		<f:event type="preRenderView"
 			listener="#{businessOfferModelBean.preRenderView}" />
 
 		<f:viewParam name="objectId" value="#{businessOfferModelBean.objectId}" />
 	</f:metadata>
-</ui:define>
 
 <h:head>
 	<link rel="stylesheet" type="text/css"

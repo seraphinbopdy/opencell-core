@@ -37,7 +37,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * Tracks Field change history
+ * Tracks Field change history. Audit Field logs are created for entity fields annotated with @AuditTarget(history=true) annotation.
  *
  * @author Abdellatif BARI
  * @since 7.0

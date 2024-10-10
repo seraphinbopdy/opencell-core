@@ -26,6 +26,7 @@ import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.customEntities.CustomEntityTemplate;
+import org.meveo.model.jobs.JobExecutionResultStatusEnum;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.JobLauncherEnum;
 import org.meveo.model.scripts.ScriptInstance;
@@ -103,8 +104,9 @@ public class ClusterEventMonitor implements MessageListener {
         try {
             if (rcvMessage instanceof ObjectMessage) {
                 ClusterEventDto eventDto = (ClusterEventDto) ((ObjectMessage) rcvMessage).getObject();
-                // Ignore message from same node unless it is Endpoint execution result lookup - JMS message is send in all cases when operating in cluster mode
-                if (EjbUtils.getCurrentClusterNode().equals(eventDto.getSourceNode()) && eventDto.getAction() != ClusterEventActionEnum.getEndpointExecutionResult) {
+                // Ignore message from same node unless it is Endpoint execution result lookup or job completion - JMS message is send in all cases when operating in cluster mode
+                if (EjbUtils.getCurrentClusterNode().equals(eventDto.getSourceNode()) && eventDto.getAction() != ClusterEventActionEnum.getEndpointExecutionResult
+                        && eventDto.getAction() != ClusterEventActionEnum.jobExecutionCompleted) {
                     return;
                 }
                 log.info("{} Received cluster synchronization event message {}", EjbUtils.getCurrentClusterNode(), eventDto);
@@ -168,6 +170,10 @@ public class ClusterEventMonitor implements MessageListener {
 
             } else if (eventDto.getAction() == ClusterEventActionEnum.lastJobDataMessageReceived) {
                 IteratorBasedJobBean.releaseJobDataProcessingThreads(eventDto.getId());
+
+            } else if (eventDto.getAction() == ClusterEventActionEnum.jobExecutionCompleted) {
+                JobExecutionService.releaseJobCompletionWaits(eventDto.getId(),
+                    eventDto.getAdditionalInfo() != null ? (JobExecutionResultStatusEnum) eventDto.getAdditionalInfo().get(JobExecutionResultStatusEnum.class.getSimpleName()) : null);
 
                 // Any modify/update
             } else {

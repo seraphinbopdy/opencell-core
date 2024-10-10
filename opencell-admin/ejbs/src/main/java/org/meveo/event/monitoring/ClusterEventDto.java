@@ -36,7 +36,27 @@ public class ClusterEventDto implements Serializable {
      *
      */
     public enum ClusterEventActionEnum {
-        create, update, remove, enable, disable,
+        /**
+         * Create an entity
+         */
+        create,
+        /**
+         * Update an entity
+         */
+        update,
+        /**
+         * Remove an entity
+         */
+        remove,
+        /**
+         * Enable an entity
+         */
+        enable,
+
+        /**
+         * Disable an entity
+         */
+        disable,
 
         /**
          * Launch a job
@@ -61,11 +81,16 @@ public class ClusterEventDto implements Serializable {
          * Last message was received in job processing data queue. Will indicate that data processing threads should continue.
          */
         lastJobDataMessageReceived,
-        
+
         /**
          * Get a result of a script execution for endpoint
          */
-        getEndpointExecutionResult
+        getEndpointExecutionResult,
+
+        /**
+         * Job execution has completed
+         */
+        jobExecutionCompleted
     };
 
     /**

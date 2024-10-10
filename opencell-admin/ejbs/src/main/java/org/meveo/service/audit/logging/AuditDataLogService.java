@@ -16,6 +16,7 @@ import org.meveo.model.AuditableField;
 import org.meveo.model.audit.AuditCrudActionEnum;
 import org.meveo.model.audit.AuditDataLog;
 import org.meveo.model.audit.AuditDataLogRecord;
+import org.meveo.model.audit.AuditTarget;
 import org.meveo.service.audit.AuditDataConfigurationService;
 import org.meveo.service.audit.AuditDataHierarchy;
 import org.meveo.service.audit.AuditFieldInfo;
@@ -154,7 +155,7 @@ public class AuditDataLogService extends PersistenceService<AuditDataLog> {
     }
 
     /**
-     * Create Audit Field logs and fire events if required
+     * Create Audit Field logs and fire events if required. Audit Field logs are created for entity fields annotated with @AuditTarget(history=true) and event are fired for fields annotated with @AuditTarget(notif=true)
      * 
      * @param auditDataLogs Audit data logs
      * @param auditableFieldsInfo Information about field to audit

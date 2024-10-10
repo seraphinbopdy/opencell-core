@@ -151,7 +151,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
     /**
      * Tracks countDowns used to wait for last message to receive when job load is spread over multiple nodes. Job identifier is a map key.<br/>
-     * When EOF message is received in a queue, a EJB event is fired and countDown is reduced.
+     * When EOF message is received in a queue, a EJB event is fired and countDown is reduced. <br/>
+     * When countDown is reduced a data processing thread continues passed countDown.await() call and future.get() successfully completes.
      */
     private static final Map<Long, CountDownLatch> countDowns = new HashMap<Long, CountDownLatch>();
 

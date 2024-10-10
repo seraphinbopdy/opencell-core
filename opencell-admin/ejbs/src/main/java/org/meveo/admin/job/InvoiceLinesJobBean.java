@@ -335,7 +335,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
         try {
             JobInstance jobInstance = jobInstanceService.findByCode(BILLING_RUN_REPORT_JOB_CODE);
             jobInstance.setRunTimeValues(jobParams);
-            jobExecutionService.executeJob(jobInstance, jobParams, JobLauncherEnum.TRIGGER);
+            jobExecutionService.executeJobWithWait(jobInstance, jobParams, JobLauncherEnum.TRIGGER);
         } catch (Exception exception) {
             throw new BusinessException("Exception occurred during billing run report job execution : " + exception.getMessage(), exception.getCause());
         }

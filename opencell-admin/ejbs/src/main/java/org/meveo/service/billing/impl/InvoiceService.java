@@ -8178,9 +8178,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		if(allowUsingUnpaidAdvance) {
 			return;
 		}
-		List<Invoice> unpaidAdvs = advs.stream().filter(adv -> adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID ||
-															adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID)
-												.collect(Collectors.toList());
+		List<Invoice> unpaidAdvs = advs.stream().filter(adv -> adv.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID).collect(Collectors.toList());
 		if(CollectionUtils.isNotEmpty(unpaidAdvs)) {
 			methodCallingUtils.callMethodInNewTx(() -> cancelInvoiceAdvances(invoice, unpaidAdvs, true));
 			String advsNumber = unpaidAdvs.stream().map(Invoice::getInvoiceNumber).collect(Collectors.joining(","));

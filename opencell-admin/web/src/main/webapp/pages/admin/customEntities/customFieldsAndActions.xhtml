@@ -11,10 +11,10 @@
         <p:panel width="100" header="#{messages['customizedEntities.fieldsAndActions']}" rendered="#{customEntityTemplateBean.cetPrefix!=null}">
             <p:treeTable id="fields" value="#{customEntityTemplateBean.fields}" var="entity" nodeVar="node" resizableColumns="true">
                 <p:column headerText="#{messages['BusinessEntity.code']}">
-                    <h:panelGroup styleClass="ui-icon ui-icon-play inlineIcon" rendered="#{node.type == 'action'}" />
+                    <h:panelGroup styleClass="pi pi-play inlineIcon" rendered="#{node.type == 'action'}" />
                     <h:outputText value="#{entity.code}" rendered="#{node.type == 'field' or node.type == 'action'}" />
-                    <h:panelGroup styleClass="ui-icon ui-icon-folder-collapsed inlineIcon" rendered="#{node.type == 'tab'}" />
-                    <h:panelGroup styleClass="ui-icon ui-icon-contact inlineIcon" rendered="#{node.type == 'fieldGroup'}" />
+                    <h:panelGroup styleClass="pi pi-folder inlineIcon" rendered="#{node.type == 'tab'}" />
+                    <h:panelGroup styleClass="pi pi-file inlineIcon" rendered="#{node.type == 'fieldGroup'}" />
                     <h:outputText value="#{entity.label}" rendered="#{node.type == 'tab' or node.type == 'fieldGroup'}" />
                 </p:column>
                 <p:column headerText="#{messages['customFieldTemplate.fieldLabel']}">
@@ -149,7 +149,7 @@
                             <f:setPropertyActionListener target="#{entityCustomActionBean.backViewSave}" value="customizedEntity" />
                         </p:commandButton>
 
-                        <p:commandButton id="enableActionlink" icon="pi pi-circle-check" rendered="#{entity.disabled}" actionListener="#{customEntityTemplateBean.refreshActions}"
+                        <p:commandButton id="enableActionlink" icon="pi pi-check-circle" rendered="#{entity.disabled}" actionListener="#{customEntityTemplateBean.refreshActions}"
                             action="#{entityCustomActionBean.enable()}" update="@form">
                             <f:setPropertyActionListener target="#{entityCustomActionBean.entity}" value="#{entity}" />
                             <p:confirm header="#{messages['commons.enable']}" message="#{messages['commons.confirmEnable']}" />

@@ -44,9 +44,9 @@
                 <hftl:column label="#{messages['timer.schedule']}" field="timerEntity.code" />
                 <hftl:column label="#{messages['timer.active']}" field="disabled" isDisabledMessage="true" />
                 <p:column headerText="#{messages['timer.isRunning']}">
-                    <h:outputText styleClass="ui-icon ui-icon-circle-check" title="#{messages['timer.isRunning.this']}"
+                    <h:outputText styleClass="pi pi-check-circle" title="#{messages['timer.isRunning.this']}"
                         rendered="#{jobInstanceListBean.isJobRunningOnThisNode(entity)}" />
-                    <h:outputText styleClass="ui-icon ui-icon-check" title="#{messages['timer.isRunning.other']}"
+                    <h:outputText styleClass="pi pi-check" title="#{messages['timer.isRunning.other']}"
                         rendered="#{jobInstanceListBean.isJobRunningOnAnotherNode(entity)}" />
                 </p:column>
                 <hftl:actionsColumn renderEnableLink="#{jobInstanceListBean.canUserUpdateEntity()}"

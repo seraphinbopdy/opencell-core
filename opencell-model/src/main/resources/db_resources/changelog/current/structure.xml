@@ -14096,7 +14096,7 @@ Meaning that advances won’t be available for further invoices."/>
         <addDefaultValue tableName="ar_account_operation" columnName="payment_requests" defaultValue="0" />
     </changeSet>
 
-    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi">
+    <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi" failOnError="false">
         <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
     </changeSet>
 
@@ -14283,7 +14283,7 @@ Meaning that advances won’t be available for further invoices."/>
             <where>code = 'MASS_REOPEN_EDR_ZERO'</where>
         </update>
     </changeSet>
-    <changeSet id="#INTRD-25224_20240909" author="Mohammed_ElAzzouzi">
+    <changeSet id="#INTRD-25224_20240909" author="Mohammed_ElAzzouzi" failOnError="false">
         <addColumn tableName="billing_invoice_line">
             <column name="seller_id"  type="bigint" />
         </addColumn>
@@ -15208,5 +15208,32 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="customization_id" type="varchar(200)" defaultValue="urn:cen.eu:en16931:2017" />
         </addColumn>
     </changeSet>
-    
+
+    <changeSet id="#INTRD-25749_add_mrr_arr" author="a.rouaguebe">
+        <addColumn tableName="billing_service_instance">
+            <column name="mrr" type="numeric(23, 12)" />
+        </addColumn>
+        <addColumn tableName="billing_subscription">
+            <column name="mrr" type="numeric(23, 12)" />
+        </addColumn>
+        <addColumn tableName="billing_billing_account">
+            <column name="mrr" type="numeric(23, 12)" />
+        </addColumn>
+        <addColumn tableName="cpq_quote_product">
+            <column name="mrr" type="numeric(23, 12)" />
+        </addColumn>
+        <addColumn tableName="cpq_quote">
+            <column name="mrr" type="numeric(23, 12)" />
+        </addColumn>
+        <addColumn tableName="cpq_order_product">
+            <column name="mrr" type="numeric(23, 12)" />
+        </addColumn>
+        <addColumn tableName="cpq_commercial_order">
+            <column name="mrr" type="numeric(23, 12)" />
+        </addColumn>
+        <addColumn tableName="cat_offer_template">
+            <column name="arr" type="numeric(23, 12)" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

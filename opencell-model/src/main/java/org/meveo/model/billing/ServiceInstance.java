@@ -371,6 +371,11 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     @JoinColumn(name = "order_product_id")
     private OrderProduct orderProduct;
 
+    
+    /** MRR. */
+    @Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal mrr;
+    
     /**
      * Gets the end agreement date.
      *
@@ -1335,6 +1340,8 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
 	public void setOrderProduct(OrderProduct orderProduct) {
 		this.orderProduct = orderProduct;
 	}
+    
+    
 
 	@Override
     public List<DiscountPlanInstance> getAllDiscountPlanInstances() {

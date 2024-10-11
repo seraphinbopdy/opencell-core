@@ -17,6 +17,7 @@
  */
 package org.meveo.model.catalog;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -233,6 +234,10 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id")
     private Document document;
+
+    /** MRR. */
+    @Column(name = "arr", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal arr;
     
     /**
      * @return the display
@@ -690,5 +695,12 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     public void setDocument(Document document) {
         this.document = document;
     }
-    
+
+    public BigDecimal getArr() {
+        return arr;
+    }
+
+    public void setArr(BigDecimal arr) {
+        this.arr = arr;
+    }
 }

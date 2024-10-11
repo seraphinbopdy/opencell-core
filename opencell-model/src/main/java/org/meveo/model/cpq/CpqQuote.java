@@ -82,6 +82,7 @@ public class CpqQuote extends BusinessEntity implements IBillableEntity  {
 		this.validity = copy.validity;
 		this.orderInvoiceType = copy.orderInvoiceType;
 		this.userAccount=copy.userAccount;
+		this.mrr = copy.mrr;
 	}
 	/**
 	 * seller
@@ -214,6 +215,10 @@ public class CpqQuote extends BusinessEntity implements IBillableEntity  {
 	@ManyToOne(fetch = FetchType.LAZY) 
 	@JoinColumn(name = "user_account_id") 
 	private UserAccount userAccount;
+
+	/** MRR. */
+	@Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+	private BigDecimal mrr;
 	 
 	
 	 /**
@@ -557,5 +562,12 @@ public class CpqQuote extends BusinessEntity implements IBillableEntity  {
 		}
 		return null;
 	}
-	
+
+	public BigDecimal getMrr() {
+		return mrr;
+	}
+
+	public void setMrr(BigDecimal mrr) {
+		this.mrr = mrr;
+	}
 }

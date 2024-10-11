@@ -99,6 +99,7 @@ public class CommercialOrder extends BusinessCFEntity implements IBillableEntity
 		this.totalInvoicingAmountWithTax = copy.totalInvoicingAmountWithTax;
 		this.totalInvoicingAmountTax = copy.totalInvoicingAmountTax;
 		this.minInvoiceLines = copy.minInvoiceLines;
+		this.mrr = copy.mrr;
 	}
 
 	/**
@@ -263,6 +264,10 @@ public class CommercialOrder extends BusinessCFEntity implements IBillableEntity
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "price_list_id")
 	private PriceList priceList;
+
+	/** MRR. */
+	@Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+	private BigDecimal mrr;
 
 	/**
      * Rated transactions to reach minimum amount per invoice
@@ -839,5 +844,13 @@ public class CommercialOrder extends BusinessCFEntity implements IBillableEntity
 	 */
 	public void setPriceList(PriceList priceList) {
 		this.priceList = priceList;
+	}
+
+	public BigDecimal getMrr() {
+		return mrr;
+	}
+
+	public void setMrr(BigDecimal mrr) {
+		this.mrr = mrr;
 	}
 }

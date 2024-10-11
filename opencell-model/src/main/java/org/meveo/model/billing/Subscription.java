@@ -507,6 +507,10 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "price_list_id")
     private PriceList priceList;
+
+    /** MRR. */
+    @Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal mrr;
     
     /**
      * This method is called implicitly by hibernate, used to enable
@@ -1366,5 +1370,13 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
      */
     public void setPriceList(PriceList priceList) {
         this.priceList = priceList;
+    }
+
+    public BigDecimal getMrr() {
+        return mrr;
+    }
+
+    public void setMrr(BigDecimal mrr) {
+        this.mrr = mrr;
     }
 }

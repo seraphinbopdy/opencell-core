@@ -404,6 +404,10 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
 	@OneToMany
 	@JoinColumn(name = "billing_account_id")
 	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+    
+    /** MRR. */
+    @Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal mrr;
 	
 	public List<RegistrationNumber> getRegistrationNumbers() {
 		return registrationNumbers;
@@ -908,8 +912,16 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     public void setPriceList(PriceList priceList) {
         this.priceList = priceList;
     }
-	
-	// check if the list of registration numbers is not empty
+
+    public BigDecimal getMrr() {
+        return mrr;
+    }
+
+    public void setMrr(BigDecimal mrr) {
+        this.mrr = mrr;
+    }
+
+    // check if the list of registration numbers is not empty
 	// get all registration numbers and join them with a comma
 	public String getRegistrationNo(){
 		if (isNotEmpty(registrationNumbers)) {

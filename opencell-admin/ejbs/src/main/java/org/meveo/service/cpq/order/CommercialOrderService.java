@@ -232,9 +232,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 		        }
 				subscription.setSubscriptionRenewal(offerTemplate != null ? offerTemplate.getSubscriptionRenewal().copy() : null);
 				subscription.setSalesPersonName(order.getSalesPersonName());
-				if(offer.getOfferTemplate() != null) {
-					subscription.setAutoEndOfEngagement(offer.getOfferTemplate().getAutoEndOfEngagement());
-				}
+				subscription.setAutoEndOfEngagement(offerTemplate.getAutoEndOfEngagement());
 				subscription.setPriceList(order.getPriceList());
 				if(offer.getTerminationDate() != null) {
 					subscription.setRenewed(false);

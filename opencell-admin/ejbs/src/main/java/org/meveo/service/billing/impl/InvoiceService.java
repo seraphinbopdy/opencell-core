@@ -2845,6 +2845,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
         recordedInvoiceService.generateRecordedInvoice(invoice, null);
         update(invoice);
     }
+	
+	public void generateRecordedInvoiceAO(Invoice invoice) throws InvoiceExistException, ImportInvoiceException, BusinessException {
+		recordedInvoiceService.generateRecordedInvoice(invoice, null);
+		update(invoice);
+	}
 
     /**
      * Cancel invoice and delete it.
@@ -7581,7 +7586,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
     
     @SuppressWarnings("unchecked")
-    private List<Invoice> checkAdvanceInvoice(Invoice invoice) {
+    public List<Invoice> checkAdvanceInvoice(Invoice invoice) {
         if(invoice.getInvoiceType() != null) {
             String invoiceTypeCode = invoice.getInvoiceType().getCode();
             OperationCategoryEnum occCategoryOperation = invoice.getInvoiceType().getOccTemplate() != null ? invoice.getInvoiceType().getOccTemplate().getOccCategory() : null;

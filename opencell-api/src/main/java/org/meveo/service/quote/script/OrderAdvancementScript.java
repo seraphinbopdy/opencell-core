@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.exception.ImportInvoiceException;
+import org.meveo.admin.exception.InvoiceExistException;
 import org.meveo.api.cpq.CommercialOrderApi;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.commons.utils.ParamBean;
@@ -36,6 +38,7 @@ import org.meveo.service.cpq.order.OrderArticleLineService;
 import org.meveo.service.cpq.order.OrderPriceService;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.script.module.ModuleScript;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +55,7 @@ OrderAdvancementScript extends ModuleScript {
     private CustomFieldInstanceService customFieldInstanceService = (CustomFieldInstanceService) getServiceInterface(CustomFieldInstanceService.class.getSimpleName());
     private OrderArticleLineService orderArticleLineService = (OrderArticleLineService) getServiceInterface(OrderArticleLineService.class.getSimpleName());
     private ServiceSingleton serviceSingleton  = (ServiceSingleton) getServiceInterface(ServiceSingleton.class.getSimpleName());
+	private AdvancedSettingsService advancedSettingsService =  (AdvancedSettingsService) getServiceInterface(AdvancedSettingsService.class.getSimpleName());;
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
 
@@ -197,19 +201,28 @@ OrderAdvancementScript extends ModuleScript {
            }
         }  
         List<Invoice> invoices = invoiceService.createAggregatesAndInvoiceWithIL(commercialOrder, null, null, invoiceDate, firstTransactionDate, nextDay, null, false, false, isDepositInvoice);
+	    
         invoices.stream()
                 .forEach(
                         invoice -> {
+	                        invoiceService.getEntityManager().refresh(invoice);
                             invoice = invoiceService.refreshOrRetrieve(invoice);
                             customFieldInstanceService.instantiateCFWithDefaultValue(invoice);
                             if(isDepositInvoice) {
-                            	invoice.setStatus(InvoiceStatusEnum.VALIDATED);
-                                serviceSingleton.assignInvoiceNumber(invoice, true);
+	                            try {
+		                            invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+		                            serviceSingleton.assignInvoiceNumber(invoice, true);
+		                            invoiceService.generateRecordedInvoiceAO(invoice);
+	                            } catch (InvoiceExistException | ImportInvoiceException e) {
+		                            throw new BusinessException(e.getCause().getMessage());
+	                            }
                             }
                             if(!isBillOver && invoice.getInvoiceType() != null && invoice.getInvoiceType().getCode().equals("ADV")) {
                                 BigDecimal amountWithTax = invoice.getInvoiceLines().stream().map(InvoiceLine::getAmountWithTax).reduce(BigDecimal.ZERO, BigDecimal::add);
                                 invoice.setInvoiceBalance(amountWithTax);
                             }
+	                        Boolean allowUsingUnpaidAdvance = (Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance");
+	                        invoiceService.applyAdvanceInvoice(invoice, invoiceService.checkAdvanceInvoice(invoice), allowUsingUnpaidAdvance != null ? allowUsingUnpaidAdvance : false);
                             invoiceService.update(invoice);
                         }
                 );

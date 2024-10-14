@@ -100,6 +100,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
     private static final String XCH_LOSS = "XCH_LOSS";
     private static final String XCH_GAIN = "XCH_GAIN";
     private static final String CAN_SD = "CAN_SD";
+    private static final String DEFAULT_CUSTOMER_CODE = "DEFAULT_CUSTOMER_CODE";
 
     @Inject
     private CustomerAccountService customerAccountService;
@@ -844,6 +845,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
 			PaymentHistory paymentHistory = paymentHistoryService.findHistoryByPaymentId(payment.getReference());
 			if (paymentHistory != null) {
 				List<Long> aoIdsToPay = operationIds.stream().filter(aoId -> !aoId.equals(payment.getId())).collect(toList());
+                if(org.apache.commons.lang3.StringUtils.isBlank(paymentHistory.getCustomerAccountCode())
+                        || DEFAULT_CUSTOMER_CODE.equals(paymentHistory.getCustomerAccountCode())) {
+                    setCustomerAccount(aoIdsToPay, paymentHistory);
+                }
 				if (paymentHistory.getListAoPaid() == null || paymentHistory.getListAoPaid().isEmpty()) {
 					List<AccountOperation> aoToPay = new ArrayList<>();
 					for (Long aoId : aoIdsToPay) {
@@ -930,7 +935,20 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
         return matchingReturnObject;
     }
 
-        public MatchingReturnObject matchOperations(Long customerAccountId, String customerAccountCode, List<Long> operationIds, Long aoToMatchLast, MatchingTypeEnum matchingTypeEnum, BigDecimal amount)
+    private void setCustomerAccount(List<Long> accountOperations, PaymentHistory paymentHistory) {
+        AccountOperation invoice = accountOperations.stream()
+                .map(accountOperationId -> accountOperationService.findById(accountOperationId))
+                .filter(accountOperation -> "I".equals(accountOperation.getType()))
+                .findFirst()
+                .orElse(null);
+        if(invoice != null && invoice.getCustomerAccount() != null) {
+            paymentHistory.setCustomerAccountCode(invoice.getCustomerAccount().getCode());
+            paymentHistory.setCustomerAccountName(invoice.getCustomerAccount().getName() == null ? null
+                    : invoice.getCustomerAccount().getName().getFullName());
+        }
+    }
+
+    public MatchingReturnObject matchOperations(Long customerAccountId, String customerAccountCode, List<Long> operationIds, Long aoToMatchLast, MatchingTypeEnum matchingTypeEnum, BigDecimal amount)
             throws BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException {
 
         log.info("matchOperations   customerAccountId:{}  customerAccountCode:{} operationIds:{} ", new Object[] { customerAccountId, customerAccountCode, operationIds });
@@ -993,6 +1011,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 if (paymentHistory != null) {
                     List<Long> aoIdsToPay = operationIds.stream().filter(aoId -> !aoId.equals(payment.getId())).collect(toList());
                     List<AccountOperation> aoToPay = new ArrayList<>();
+                    if(org.apache.commons.lang3.StringUtils.isBlank(paymentHistory.getCustomerAccountCode())
+                            || DEFAULT_CUSTOMER_CODE.equals(paymentHistory.getCustomerAccountCode())) {
+                        setCustomerAccount(aoIdsToPay, paymentHistory);
+                    }
                     for (Long aoId : aoIdsToPay) {
                         aoToPay.add(accountOperationService.findById(aoId));
                     }

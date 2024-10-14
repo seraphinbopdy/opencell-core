@@ -8016,7 +8016,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 				advs.removeIf(adv -> {
 					List<AccountOperation> advAos = accountOperationService.listByInvoice(adv);
 					boolean isAoExist = advAos.stream().anyMatch(ao -> ao.getStatus() == AccountOperationStatus.CLOSED);
-					if(enabledPaymentStatusStatus.contains(adv.getPaymentStatus()) || isAoExist) {
+					if(enabledPaymentStatusStatus.contains(adv.getPaymentStatus())) {
 						if(CollectionUtils.isNotEmpty(advAos)) {
 							AccountOperation advAo = advAos.get(0);
 							if(isAoExist) {

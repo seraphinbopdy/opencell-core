@@ -8289,6 +8289,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 					.map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
 			if(CollectionUtils.isNotEmpty(advList)) {
 				cancelInvoiceAdvances(inv, advList, true);
+                this.getEntityManager().flush();
+                this.getEntityManager().clear();
 			}
 		}
 	}

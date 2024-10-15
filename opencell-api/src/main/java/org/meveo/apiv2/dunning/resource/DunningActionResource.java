@@ -1,4 +1,4 @@
-package org.meveo.apiv2.dunning.action;
+package org.meveo.apiv2.dunning.resource;
 
 
 import io.swagger.v3.oas.annotations.Operation;

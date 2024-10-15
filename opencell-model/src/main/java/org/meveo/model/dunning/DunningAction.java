@@ -7,7 +7,8 @@ import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
-import org.meveo.model.BusinessEntity;
+import org.meveo.model.BusinessCFEntity;
+import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.payments.ActionChannelEnum;
 import org.meveo.model.payments.ActionModeEnum;
@@ -16,12 +17,13 @@ import org.meveo.model.scripts.ScriptInstance;
 
 @Entity
 @Table(name = "ar_dunning_action")
+@CustomFieldEntity(cftCodePrefix = "DunningAction")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
         @Parameter(name = "sequence_name", value = "ar_dunning_action_seq"), })
 @NamedQueries({
         @NamedQuery(name = "DunningAction.findByAgentId", query = "SELECT da FROM DunningAction da where da.assignedTo.id = :id")
 })
-public class DunningAction extends BusinessEntity {
+public class DunningAction extends BusinessCFEntity {
 
     private static final long serialVersionUID = -3093051277357043210L;
 

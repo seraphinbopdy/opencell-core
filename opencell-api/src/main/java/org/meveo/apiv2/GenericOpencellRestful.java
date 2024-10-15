@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -21,7 +19,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.meveo.api.rest.JacksonProvider;
-import org.meveo.api.rest.JaxRsActivator;
 import org.meveo.api.rest.JaxRsExceptionMapper;
 import org.meveo.api.rest.filter.RESTCorsRequestFilter;
 import org.meveo.api.rest.filter.RESTCorsResponseFilter;
@@ -59,7 +56,6 @@ import org.meveo.apiv2.billing.service.RollbackOnErrorExceptionMapper;
 import org.meveo.apiv2.catalog.resource.DiscountPlanResourceImpl;
 import org.meveo.apiv2.catalog.resource.PricePlanMatrixResourceImpl;
 import org.meveo.apiv2.catalog.resource.PricePlanResourceImpl;
-import org.meveo.apiv2.catalog.resource.ProductManagementRs;
 import org.meveo.apiv2.catalog.resource.ProductManagementRsImpl;
 import org.meveo.apiv2.catalog.resource.pricelist.CatalogPriceListResourceImpl;
 import org.meveo.apiv2.catalog.resource.pricelist.PriceListLineResourceImpl;
@@ -74,7 +70,7 @@ import org.meveo.apiv2.customaction.CustomActionResourceImpl;
 import org.meveo.apiv2.customtable.CustomTableResourceImpl;
 import org.meveo.apiv2.document.DocumentResourceImpl;
 import org.meveo.apiv2.documentCategory.impl.DocumentCategoryResourceImpl;
-import org.meveo.apiv2.dunning.action.DunningActionImpl;
+import org.meveo.apiv2.dunning.impl.DunningActionImpl;
 import org.meveo.apiv2.dunning.impl.CollectionPlanStatusResourceImpl;
 import org.meveo.apiv2.payments.resource.CustomerBalanceResourceImpl;
 import org.meveo.apiv2.dunning.impl.DunningAgentResourceImpl;
@@ -130,7 +126,6 @@ import org.meveo.apiv2.standardReport.impl.StandardReportResourceImpl;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ApplicationPath("/api/rest")
 public class GenericOpencellRestful extends Application {

@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.immutables.value.Value;
+import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.dunning.DunningAgent;
 import org.meveo.model.dunning.DunningLevel;
@@ -61,6 +63,10 @@ public interface DunningAction {
     default boolean getAttachDueInvoices() {
         return false;
     }
+
+    @Nullable
+    @Schema(description = "custom field associated to dunning action")
+    CustomFieldsDto getCustomFields();
 
     default org.meveo.model.dunning.DunningAction toEntity() {
         org.meveo.model.dunning.DunningAction dunningActionEntity = new org.meveo.model.dunning.DunningAction();

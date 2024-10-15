@@ -25,6 +25,7 @@ public class DunningLevelResourceImpl implements DunningLevelResource {
 	@Override
 	public Response create(org.meveo.apiv2.dunning.DunningLevel dunningLevel) {
 		var entity = mapper.toEntity(dunningLevel);
+		dunningLevelApiService.populateCustomFieldsForGenericApi(dunningLevel.getCustomFields(), entity, true);
 		var savedDunningLevel = dunningLevelApiService.create(entity);
 		return ok(LinkGenerator.getUriBuilderFromResource(DunningLevelResource.class, savedDunningLevel.getId()).build())
 				.entity(mapper.toResource(savedDunningLevel))
@@ -34,6 +35,7 @@ public class DunningLevelResourceImpl implements DunningLevelResource {
 	@Override
 	public Response update(org.meveo.apiv2.dunning.DunningLevel dunningLevel, Long dunningLevelId) {
 		var entity = mapper.toEntity(dunningLevel);
+		dunningLevelApiService.populateCustomFieldsForGenericApi(dunningLevel.getCustomFields(), entity, false);
 		var updated = dunningLevelApiService.update(dunningLevelId, entity).get();
 		return ok(LinkGenerator.getUriBuilderFromResource(DunningLevelResource.class, updated.getId()).build())
 				.entity(mapper.toResource(updated))

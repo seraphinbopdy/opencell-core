@@ -168,6 +168,7 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
         levelInstance.setDaysOverdue(pDunningPolicyLevel.getDunningLevel().getDaysOverdue());
         levelInstance.setInvoice(pInvoice);
         levelInstance.setCustomerAccount(pCustomerAccount);
+        levelInstance.setCfValues(pDunningPolicyLevel.getDunningLevel().getCFValuesCopy());
         this.create(levelInstance);
 
         if (pDunningPolicyLevel.getDunningLevel().getDunningActions() != null && !pDunningPolicyLevel.getDunningLevel().getDunningActions().isEmpty()) {
@@ -193,6 +194,7 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
         levelInstance.setLevelStatus(status);
         levelInstance.setSequence(policyLevel.getSequence());
         levelInstance.setDunningLevel(policyLevel.getDunningLevel());
+        levelInstance.setCfValues(policyLevel.getDunningLevel().getCFValuesCopy());
         levelInstance.setDaysOverdue(policyLevel.getDunningLevel().getDaysOverdue());
 
         // Check the related invoice and set it to the level instance

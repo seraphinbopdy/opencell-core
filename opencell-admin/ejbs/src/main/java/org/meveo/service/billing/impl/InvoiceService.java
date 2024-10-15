@@ -1528,10 +1528,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
                     }
                 }
             }
-            if(billingRun!=null) {
-            	if(InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getSuspectAutoAction())
-            			||  InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getRejectAutoAction()))
-        		invoice.setStatus(billingRun.getProcessType() == FULL_AUTOMATIC?InvoiceStatusEnum.VALIDATED:InvoiceStatusEnum.DRAFT);
+            if(billingRun!=null && billingRun.getProcessType() == FULL_AUTOMATIC) {
+            	if((InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getSuspectAutoAction()))
+            			||  (InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getRejectAutoAction())))
+        		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
         	}
             if(save) {
 	            update(invoice);
@@ -8307,6 +8307,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 this.getEntityManager().clear();
 			}
 		}
+	}
+
+	public void validateInvoicesOfBRByStatus(BillingRun billingRun, List<InvoiceStatusEnum> toValidate) {
+		getEntityManager().createNamedQuery("Invoice.validateInvoicesByStatusAndBr").setParameter("billingRun", billingRun).setParameter("toValidate", toValidate).executeUpdate();
 	}
 
 }

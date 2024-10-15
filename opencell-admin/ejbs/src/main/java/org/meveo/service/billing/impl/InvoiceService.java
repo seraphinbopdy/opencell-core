@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.meveo.commons.utils.NumberUtils.round;
+import static org.meveo.model.billing.BillingProcessTypesEnum.FULL_AUTOMATIC;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_BILLING_ACCOUNT;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_CUSTOMER_ACCOUNT;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_DISCOUNT_PLAN_INSTANCE;
@@ -1530,7 +1531,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             if(billingRun!=null) {
             	if(InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getSuspectAutoAction())
             			||  InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getRejectAutoAction()))
-        		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+        		invoice.setStatus(billingRun.getProcessType() == FULL_AUTOMATIC?InvoiceStatusEnum.VALIDATED:InvoiceStatusEnum.DRAFT);
         	}
             if(save) {
 	            update(invoice);

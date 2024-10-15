@@ -164,6 +164,7 @@ import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingEntityTypeEnum;
 import org.meveo.model.billing.BillingRun;
+import org.meveo.model.billing.BillingRunAutomaticActionEnum;
 import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.billing.CategoryInvoiceAgregate;
 import org.meveo.model.billing.DiscountPlanInstance;
@@ -1456,26 +1457,33 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param invoiceList
      */
     public void applyAutomaticInvoiceCheck(List<Invoice> invoiceList, boolean automaticInvoiceCheck, boolean save) {
+    	applyAutomaticInvoiceCheck(invoiceList, automaticInvoiceCheck, true, null);
+    }
+    
+    /**
+     * @param invoiceList
+     */
+    public void applyAutomaticInvoiceCheck(List<Invoice> invoiceList, boolean automaticInvoiceCheck, boolean save, BillingRun billingRun) {
         if (automaticInvoiceCheck) {
             for (Invoice invoice : invoiceList) {
-                applyAutomaticInvoiceCheck(invoice, automaticInvoiceCheck, save);
+                applyAutomaticInvoiceCheck(invoice, automaticInvoiceCheck, save, billingRun);
             }
         }
     }
-
+    
     /**
      * @param invoice
      * @param automaticInvoiceCheck
      */
     private void applyAutomaticInvoiceCheck(Invoice invoice, boolean automaticInvoiceCheck) {
-    	applyAutomaticInvoiceCheck(invoice, automaticInvoiceCheck, true);
+    	applyAutomaticInvoiceCheck(invoice, automaticInvoiceCheck, true, null);
     }
     	
     /**
      * @param invoice
      * @param automaticInvoiceCheck
      */
-    private void applyAutomaticInvoiceCheck(Invoice invoice, boolean automaticInvoiceCheck, boolean save) {
+    private void applyAutomaticInvoiceCheck(Invoice invoice, boolean automaticInvoiceCheck, boolean save, BillingRun billingRun) {
         log.debug("Will apply automatic invoice check. invId={}, automaticInvoiceCheck={}, save={}",
                 invoice.getId(), automaticInvoiceCheck, save);
     	InvoiceType invoiceType = invoiceTypeService.findById(invoice.getInvoiceType().getId(),List.of("invoiceValidationRules"));
@@ -1519,6 +1527,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
                     }
                 }
             }
+            if(billingRun!=null) {
+            	if(InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getSuspectAutoAction())
+            			||  InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getRejectAutoAction()))
+        		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+        	}
             if(save) {
 	            update(invoice);
 	            commit();

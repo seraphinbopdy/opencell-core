@@ -177,9 +177,6 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			invoiceService.applyligibleInvoiceForAdvancement(billingRun.getId());
 			invoiceService.linkInvoicesToSubscriptionsByBR(billingRun);
 		}
-		if (billingRun.getStatus() == DRAFT_INVOICES && isFullAutomatic) {
-		    billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, POSTVALIDATED, null);
-		}
 		if (billingRunValidationScript != null && billingRun.getBillingCycle() != null) {
 			billingRun.getBillingCycle().setBillingRunValidationScript(billingRunValidationScript);
 		}
@@ -201,6 +198,10 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			} else {
 				billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, REJECTED, null);
 			}
+		}
+		
+		if (billingRun.getStatus() == DRAFT_INVOICES && isFullAutomatic) {
+		    billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, POSTVALIDATED, null);
 		}
 
 		billingRun = billingRunService.refreshOrRetrieve(billingRun);

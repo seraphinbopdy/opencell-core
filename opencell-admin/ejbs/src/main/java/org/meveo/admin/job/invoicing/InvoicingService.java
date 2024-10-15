@@ -153,9 +153,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
         }
         return new AsyncResult<>("OK");
     }
-	private void validateInvoices(List<List<Invoice>> invoicesByBA) {
-        invoicesByBA.stream().forEach(invoices-> invoiceService.applyAutomaticInvoiceCheck(invoices, true, false));
+	private void validateInvoices(BillingRun billingRun, List<List<Invoice>> invoicesByBA) {
+        invoicesByBA.stream().forEach(invoices-> invoiceService.applyAutomaticInvoiceCheck(invoices, true, false, billingRun));
 	}
+
 	private List<List<Invoice>> generateInvoices(BillingRun billingRun, List<BillingAccountDetailsItem> invoicingItemsList,
                                                  Long jobInstanceId, boolean isFullAutomatic, BillingCycle billingCycle, JobExecutionResultImpl result) {
         List<List<Invoice>> invoicesByBA = new ArrayList<>();
@@ -197,7 +198,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         invoicesbyBA.forEach(invoices -> invoices.forEach(invoice
                 -> invoice.getSubCategoryInvoiceAgregate().forEach(sca
                 -> updateInvoiceLines(invoice, billingRun, sca))));
-        validateInvoices(invoicesbyBA);
+        validateInvoices(billingRun, invoicesbyBA);
     }
     private void assignNumberAndCreate(BillingRun billingRun, boolean isFullAutomatic, List<Invoice> invoices, BillingCycle billingCycle) {
         if(!isFullAutomatic) {

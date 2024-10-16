@@ -223,7 +223,6 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
             }
 
             billingRunExtensionService.updateBillingRunJobExecution(currentBillingRun.getId(), jobExecutionResult);
-            billingRunService.updateBillingRunJobExecution(currentBillingRun.getId(), jobExecutionResult);
             runBillingRunReports();
         }
         aggregatedStats.reset();

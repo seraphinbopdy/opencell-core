@@ -21048,6 +21048,8 @@
     <changeSet id="#INTRD-25724-increase-param-size" author="a.rouaguebe" />
     <changeSet id="#INTRD-25754_vat_status" author="a.rouaguebe" />
     <changeSet id="#INTRD-25744_add_desci18n" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25415_20240919" author="zelmeliani" />
+    
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

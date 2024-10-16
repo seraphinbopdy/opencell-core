@@ -14867,5 +14867,119 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>id = -3</where>
         </update>
     </changeSet>
-        
+    
+        <changeSet id="#INTRD-25415_20240919" author="zelmeliani">
+	    <!-- BillingRun - Automatic action on reject -->
+	    <insert tableName="crm_custom_field_tmpl">
+	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+	        <column name="version" valueNumeric="0" />
+	        <column name="disabled" valueNumeric="0" />
+	        <column name="created" valueDate="${db.current.time}" />
+	        <column name="code" value="BillingRunJob_rejectAutoAction"/>
+	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
+	        <column name="description" value="Automatic action on reject"/>
+	        <column name="field_type" value="LIST"/>
+	        <column name="storage_type" value="SINGLE"/>
+	        <column name="value_required" value="0"/>
+	        <column name="creator" value="applicationInitializer"/>
+	        <column name="gui_position" value="tab:Configuration:0;field:4"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
+	        <column name="listvalues" value="CANCEL"/>
+	        <column name="listvalues_key" value="1"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
+	        <column name="listvalues" value="MOVE"/>
+	        <column name="listvalues_key" value="2"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
+	        <column name="listvalues" value="MANUAL_ACTION"/>
+	        <column name="listvalues_key" value="3"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
+	        <column name="listvalues" value="AUTOMATIC_VALIDATION"/>
+	        <column name="listvalues_key" value="4"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
+	        <column name="listvalues" value="CANCEL_RT"/>
+	        <column name="listvalues_key" value="5"/>
+	    </insert>
+	    <!-- BillingRun - Automatic action on suspect -->
+	    <insert tableName="crm_custom_field_tmpl">
+	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+	        <column name="version" valueNumeric="0" />
+	        <column name="disabled" valueNumeric="0" />
+	        <column name="created" valueDate="${db.current.time}" />
+	        <column name="code" value="BillingRunJob_suspectAutoAction"/>
+	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
+	        <column name="description" value="Automatic action on suspect"/>
+	        <column name="field_type" value="LIST"/>
+	        <column name="storage_type" value="SINGLE"/>
+	        <column name="value_required" value="0"/>
+	        <column name="creator" value="applicationInitializer"/>
+	        <column name="gui_position" value="tab:Configuration:0;field:5"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
+	        <column name="listvalues" value="CANCEL"/>
+	        <column name="listvalues_key" value="1"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
+	        <column name="listvalues" value="MOVE"/>
+	        <column name="listvalues_key" value="2"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
+	        <column name="listvalues" value="MANUAL_ACTION"/>
+	        <column name="listvalues_key" value="3"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
+	        <column name="listvalues" value="AUTOMATIC_VALIDATION"/>
+	        <column name="listvalues_key" value="4"/>
+	    </insert>
+	    <insert tableName="crm_custom_field_tmpl_val">
+	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
+	        <column name="listvalues" value="CANCEL_RT"/>
+	        <column name="listvalues_key" value="5"/>
+	    </insert>
+	    <!-- BillingRun - Generate AO -->
+	    <insert tableName="crm_custom_field_tmpl">
+	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+	        <column name="version" valueNumeric="0" />
+	        <column name="disabled" valueNumeric="0" />
+	        <column name="created" valueDate="${db.current.time}" />
+	        <column name="code" value="BillingRunJob_generateAO"/>
+	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
+	        <column name="description" value="Generate account operation"/>
+	        <column name="field_type" value="BOOLEAN"/>
+	        <column name="storage_type" value="SINGLE"/>
+	        <column name="value_required" value="0"/>
+	        <column name="default_value" value="0"/>
+	        <column name="creator" value="applicationInitializer"/>
+	        <column name="gui_position" value="tab:Configuration:0;field:6"/>
+	    </insert>
+	    <!-- BillingRun - Compute date at validation -->
+	    <insert tableName="crm_custom_field_tmpl">
+	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
+	        <column name="version" valueNumeric="0" />
+	        <column name="disabled" valueNumeric="0" />
+	        <column name="created" valueDate="${db.current.time}" />
+	        <column name="code" value="BillingRunJob_computeDatesAtValidation"/>
+	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
+	        <column name="description" value="compute dates at invoicing validation"/>
+	        <column name="field_type" value="BOOLEAN"/>
+	        <column name="storage_type" value="SINGLE"/>
+	        <column name="value_required" value="0"/>
+	        <column name="default_value" value="0"/>
+	        <column name="creator" value="applicationInitializer"/>
+	        <column name="gui_position" value="tab:Configuration:0;field:7"/>
+	    </insert>
+	</changeSet>    
 </databaseChangeLog>

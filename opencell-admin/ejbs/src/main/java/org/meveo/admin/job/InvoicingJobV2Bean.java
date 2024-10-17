@@ -44,12 +44,13 @@ import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.BillingRunAutomaticActionEnum;
 import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.billing.InvoiceSequence;
+import org.meveo.model.billing.InvoiceStatusEnum;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.scripts.ScriptInstance;
-import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.BillingRunExtensionService;
+import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoicesToNumberInfo;
 import org.meveo.service.billing.impl.ServiceSingleton;
@@ -187,7 +188,7 @@ public class InvoicingJobV2Bean extends BaseJobBean {
                         || BillingRunStatusEnum.POSTVALIDATED.equals(billingRun.getStatus())
                         || BillingRunStatusEnum.DRAFT_INVOICES.equals(billingRun.getStatus())
                         || BillingRunStatusEnum.REJECTED.equals(billingRun.getStatus()))) {
-            billingRunService.applyAutomaticValidationActions(billingRun);
+            billingRunService.applyAutomaticValidationActions(billingRun, InvoiceStatusEnum.DRAFT);
             billingRun = billingRunService.refreshOrRetrieve(billingRun);
             
             if(!billingRunService.isBRValid(billingRun)) {

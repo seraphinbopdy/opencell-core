@@ -852,7 +852,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
      * @param billingRun the billing run to process
      * @return billingRun
      */
-    public BillingRun applyAutomaticValidationActions(BillingRun billingRun) {
+    public BillingRun applyAutomaticValidationActions(BillingRun billingRun, InvoiceStatusEnum validationStatus) {
         if (REJECTED.equals(billingRun.getStatus()) ||
                 DRAFT_INVOICES.equals(billingRun.getStatus()) ||
                 POSTVALIDATED.equals(billingRun.getStatus())) {
@@ -892,7 +892,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 billingRun = invoiceService.cancelInvoicesByStatus(billingRun, toCancel, action);
             }
             if (isNotEmpty(toValidate)) {
-                invoiceService.validateInvoicesOfBRByStatus(billingRun, toValidate);
+                invoiceService.validateInvoicesOfBRByStatus(billingRun, toValidate, validationStatus);
             }
         }
         

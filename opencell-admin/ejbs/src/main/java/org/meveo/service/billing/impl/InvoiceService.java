@@ -8309,8 +8309,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		}
 	}
 
-	public void validateInvoicesOfBRByStatus(BillingRun billingRun, List<InvoiceStatusEnum> toValidate) {
-		getEntityManager().createNamedQuery("Invoice.validateInvoicesByStatusAndBr").setParameter("billingRun", billingRun).setParameter("toValidate", toValidate).executeUpdate();
+	public void validateInvoicesOfBRByStatus(BillingRun billingRun, List<InvoiceStatusEnum> toValidate, InvoiceStatusEnum validationStatus) {
+		getEntityManager().createNamedQuery("Invoice.validateInvoicesByStatusAndBr").setParameter("status",validationStatus).setParameter("billingRun", billingRun).setParameter("toValidate", toValidate).executeUpdate();
 	}
 
 }

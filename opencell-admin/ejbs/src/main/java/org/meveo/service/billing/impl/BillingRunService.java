@@ -868,7 +868,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 action = CANCEL_RT.equals(billingRun.getRejectAutoAction()) ? RatedTransactionAction.CANCEL : REOPEN;
             } else if (billingRun.getRejectAutoAction() != null && billingRun.getRejectAutoAction().equals(MOVE)){
             	toQuarantine.add(InvoiceStatusEnum.REJECTED);
-            } else if (billingRun.getRejectAutoAction() != null && !billingRun.getRejectAutoAction().equals(AUTOMATIC_VALIDATION)){
+            } else if (billingRun.getRejectAutoAction() != null && billingRun.getRejectAutoAction().equals(AUTOMATIC_VALIDATION)){
             	toValidate.add(InvoiceStatusEnum.REJECTED);
             }
 
@@ -878,7 +878,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 action = CANCEL_RT.equals(billingRun.getSuspectAutoAction()) ? RatedTransactionAction.CANCEL : REOPEN;
             } else if(billingRun.getSuspectAutoAction() != null && billingRun.getSuspectAutoAction().equals(MOVE)){
                 toMove.add(InvoiceStatusEnum.SUSPECT);
-            } else if(billingRun.getSuspectAutoAction() != null && !billingRun.getSuspectAutoAction().equals(AUTOMATIC_VALIDATION)){
+            } else if(billingRun.getSuspectAutoAction() != null && billingRun.getSuspectAutoAction().equals(AUTOMATIC_VALIDATION)){
                 toValidate.add(InvoiceStatusEnum.SUSPECT);
             }
             

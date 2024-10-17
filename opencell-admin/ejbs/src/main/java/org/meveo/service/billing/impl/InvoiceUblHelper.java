@@ -290,7 +290,7 @@ public class InvoiceUblHelper {
 	
 	private void setUblExtension(Invoice target, CreditNote creditNote){
 		UBLVersionID ublVersionID = objectFactorycommonBasic.createUBLVersionID();
-		ublVersionID.setValue("2.1");
+		ublVersionID.setValue("2.2");
 		if(creditNote != null){
 			creditNote.setUBLVersionID(ublVersionID);
 		}else{

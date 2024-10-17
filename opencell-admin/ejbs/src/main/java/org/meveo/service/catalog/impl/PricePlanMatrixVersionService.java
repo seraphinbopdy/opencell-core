@@ -64,6 +64,7 @@ import org.meveo.api.dto.response.catalog.PricePlanMatrixLinesDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.apiv2.catalog.ImportPricePlanVersionsItem;
+import org.meveo.commons.utils.ListUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.DatePeriod;

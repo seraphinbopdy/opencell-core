@@ -1715,10 +1715,10 @@ public class QueryBuilder {
      */
     public String convertFieldToParam(String fieldname) {
         fieldname = fieldname.replace(".", "_").replace("(", "_").replace(")", "_").replace(",", "_").replace(" ", "");
-        StringBuilder newField = new StringBuilder(fieldname);
-        while (params.containsKey(newField.toString())) {
+        StringBuilder newField;
+        do {
             newField = new StringBuilder(fieldname).append("_" + String.valueOf(random.nextInt(100)));
-        }
+        } while (params.containsKey(newField.toString()));
         return newField.toString();
     }
 

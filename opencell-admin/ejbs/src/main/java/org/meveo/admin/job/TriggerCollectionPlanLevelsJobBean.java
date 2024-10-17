@@ -45,6 +45,8 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -226,11 +228,15 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                     nbLevelDone++;
                 }
 
+                LocalDate ldDateToCompare = dateToCompare.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate ldToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                boolean isDateEquals =  ldDateToCompare.isBefore(ldToday) || ldDateToCompare.isEqual(ldToday);
+
                 if (levelInstance.getLevelStatus().equals(DunningLevelInstanceStatusEnum.TO_BE_DONE) && !collectionPlan.getRelatedInvoice().getPaymentStatus().equals(PAID)) {
-                    if ((dateToCompare.before(today)
+                    if ((isDateEquals
                             && collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_AND_BALANCE_THRESHOLD)
-                            && collectionPlan.getRelatedInvoice().getRecordedInvoice().getUnMatchingAmount().compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0)
-                        || (collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE) && dateToCompare.before(today))) {
+                            && (collectionPlan.getRelatedInvoice().getRecordedInvoice().getUnMatchingAmount().compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0))
+                            || (isDateEquals && collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE))) {
                         nextLevel = index + 1;
                         boolean registerKO = false;
                         for (int i = 0; i < levelInstance.getActions().size(); i++) {
@@ -397,18 +403,22 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                     nbLevelDone++;
                 }
 
+                LocalDate ldDateToCompare = dateToCompare.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate ldToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                boolean isDateEquals =  ldDateToCompare.isBefore(ldToday) || ldDateToCompare.isEqual(ldToday);
+
                 if (levelInstance.getLevelStatus().equals(DunningLevelInstanceStatusEnum.TO_BE_DONE) && balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) > 0) {
-                    if ((dateToCompare.before(today)
+                    if ((isDateEquals
                             && collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_AND_BALANCE_THRESHOLD)
-                            && balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0)
-                            || (collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE) && dateToCompare.before(today))) {
+                            && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0))
+                            || (isDateEquals && collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE))) {
                         nextLevel = index + 1;
                         boolean registerKO = false;
                         for (int i = 0; i < levelInstance.getActions().size(); i++) {
                             DunningActionInstance actionInstance = levelInstance.getActions().get(i);
                             if (actionInstance.getActionMode().equals(AUTOMATIC) && actionInstance.getActionStatus().equals(TO_BE_DONE)) {
                                 try {
-                                    if (previousLevelInstance != null && (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED)) {
+                                    if (previousLevelInstance == null || (previousLevelInstance != null && (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED))) {
                                         triggerAction(actionInstance, collectionPlan);
                                         collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
                                         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
@@ -460,14 +470,14 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                         }
 
                         // Update collection plan status to FAILED if is end of dunning and invoice is unpaid
-                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0) {
+                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0)) {
                             collectionPlan.setStatus(collectionPlanStatusService.findByStatus(FAILED));
                             collectionPlan.setNextAction(null);
                             collectionPlan.setNextActionDate(null);
                         }
 
                         // Update collection plan status to SUCCESS if is end of dunning and invoice is paid
-                        if (balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0) {
+                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0)) {
                             collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
                             collectionPlan.setNextAction(null);
                             collectionPlan.setNextActionDate(null);
@@ -482,7 +492,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                     }
 
                     if (collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_AND_BALANCE_THRESHOLD)
-                            && balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0
+                            && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0)
                             && levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
                         levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IGNORED);
                         levelInstanceService.update(levelInstance);

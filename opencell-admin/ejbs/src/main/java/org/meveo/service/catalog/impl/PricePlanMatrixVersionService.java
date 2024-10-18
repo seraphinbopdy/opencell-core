@@ -995,7 +995,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             CSVLineRecords.put("label", ppv.getLabel());
             CSVLineRecords.put("amount", ppv.getPrice());
             CSVLineRecords.put("status", ppv.getStatus());
-            CSVLineRecords.put("version", ppv.getVersion());
+            CSVLineRecords.put("version", ppv.getCurrentVersion());
 
             for (Map<String, Object> ppmvMap : ppmvMaps)
             {

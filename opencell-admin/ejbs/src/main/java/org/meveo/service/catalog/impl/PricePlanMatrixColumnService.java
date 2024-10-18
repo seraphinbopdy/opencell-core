@@ -240,7 +240,16 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
 			
 			line = scanner.nextLine();
 			if(line.isEmpty()) continue;
-			String[] nextLine = line.substring(1, line.length() - 1).split("\";\"");
+			var startValue = 0;
+			var endValue = line.length() - 1;
+			if(line.startsWith(";\"")){
+				if(line.endsWith("\"\"")){
+					endValue = line.length() - 2;
+				}
+			}else {
+				startValue = 1;
+			}
+			String[] nextLine = line.substring(startValue, endValue).split(";\"");
 			
 			for(var columnIndex=0; columnIndex < columns.size() ; columnIndex++ ) {
 				PricePlanMatrixValueDto pricePlanMatrixValueDto = new PricePlanMatrixValueDto();

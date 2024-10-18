@@ -14833,7 +14833,6 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN"  />
         </addColumn>
     </changeSet>
-
     
     <changeSet id="#INTRD-25744_add_desci18n" author="a.rouaguebe">
         <update tableName="billing_subscrip_termin_reason">
@@ -14867,7 +14866,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>id = -3</where>
         </update>
     </changeSet>
-    
+
         <changeSet id="#INTRD-25415_20240919" author="zelmeliani">
 	    <!-- BillingRun - Automatic action on reject -->
 	    <insert tableName="crm_custom_field_tmpl">
@@ -14982,4 +14981,13 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
 	        <column name="gui_position" value="tab:Configuration:0;field:7"/>
 	    </insert>
 	</changeSet>    
+
+    <changeSet id="#INTRD-25118_2024_09_24" author="ZakariaB">
+        <addColumn tableName="billing_cycle">
+            <column name="ignore_service_instances" type="${type.boolean}" defaultValueNumeric="1" />
+        </addColumn>
+        <addColumn tableName="billing_billing_run">
+            <column name="ignore_service_instances" type="${type.boolean}" defaultValueNumeric="1" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

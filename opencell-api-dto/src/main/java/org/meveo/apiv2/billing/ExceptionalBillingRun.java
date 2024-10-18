@@ -163,4 +163,12 @@ public interface ExceptionalBillingRun extends Resource {
     @Schema(description = "Additional aggregation fields")
     @JsonProperty("additionalAggregationFields")
     List<String> getAdditionalAggregationFields();
+
+    @Nullable
+    @Default
+    @Schema(description = "If TRUE, aggregation will ignore service instances field")
+    @JsonProperty("ignoreServiceInstances")
+    default Boolean isIgnoreServiceInstances() {
+        return TRUE;
+    }
 }

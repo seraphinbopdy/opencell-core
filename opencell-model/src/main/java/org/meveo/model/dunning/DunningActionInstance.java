@@ -15,17 +15,19 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.meveo.model.BusinessEntity;
+import org.meveo.model.BusinessCFEntity;
+import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.payments.ActionModeEnum;
 import org.meveo.model.payments.ActionTypeEnum;
 
 @Entity
 @Table(name = "dunning_action_instance")
+@CustomFieldEntity(cftCodePrefix = "DunningActionInstance", inheritCFValuesFrom = "dunningAction")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
         @Parameter(name = "sequence_name", value = "dunning_action_instance_seq") })
 @NamedQueries({
         @NamedQuery(name = "DunningActionInstance.updateStatus", query = "UPDATE DunningActionInstance ai SET ai.actionStatus=:actionStatus WHERE ai.dunningLevelInstance=:dunningLevelInstance") })
-public class DunningActionInstance extends BusinessEntity {
+public class DunningActionInstance extends BusinessCFEntity {
 
     private static final long serialVersionUID = 2810376973487134233L;
 

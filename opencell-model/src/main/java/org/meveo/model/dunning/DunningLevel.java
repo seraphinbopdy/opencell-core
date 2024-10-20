@@ -3,7 +3,8 @@ package org.meveo.model.dunning;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
-import org.meveo.model.BusinessEntity;
+import org.meveo.model.BusinessCFEntity;
+import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.admin.Currency;
 
 import javax.persistence.*;
@@ -18,13 +19,14 @@ import java.util.List;
  */
 @Entity
 @Table(name = "dunning_level")
+@CustomFieldEntity(cftCodePrefix = "DunningLevel")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
         @Parameter(name = "sequence_name", value = "dunning_level_seq")})
 @NamedQueries({
         @NamedQuery(name = "DunningLevel.activateByDunningMode", query = "UPDATE DunningLevel SET isActive = TRUE WHERE type = :dunningMode"),
         @NamedQuery(name = "DunningLevel.deactivateByDunningMode", query = "UPDATE DunningLevel SET isActive = FALSE WHERE type != :dunningMode")
 })
-public class DunningLevel extends BusinessEntity {
+public class DunningLevel extends BusinessCFEntity {
 
     private static final long serialVersionUID = 8092970257735394941L;
 

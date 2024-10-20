@@ -14867,7 +14867,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         </update>
     </changeSet>
 
-        <changeSet id="#INTRD-25415_20240919" author="zelmeliani">
+    <changeSet id="#INTRD-25415_20240919" author="zelmeliani">
 	    <!-- BillingRun - Automatic action on reject -->
 	    <insert tableName="crm_custom_field_tmpl">
 	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
@@ -14990,4 +14990,146 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="ignore_service_instances" type="${type.boolean}" defaultValueNumeric="1" />
         </addColumn>
     </changeSet>
+    
+    <changeSet id="#INTRD-25340_update_dunning_actions_levels" author="zelmeliani">
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Automatic level 1 email to individual customer"/>
+            <where>code = 'Email B2C LVL1'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Automatic level 2 email to individual customer"/>
+            <where>code = 'Email B2C LVL2'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Manual level 3 call to individual customer"/>
+            <where>code = 'Call B2C LVL3'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Manual level 4 postal mail to individual customer"/>
+            <where>code = 'Letter B2C LVL4'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Automatic level 1 email to enterprise customer"/>
+            <where>code = 'Email B2B LVL1'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Automatic level 2 email to enterprise customer"/>
+            <where>code = 'Call B2B LVL2'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Manual level 3 call to enterprise customer"/>
+            <where>code = 'Call B2B LVL3'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Manual level 4 postal mail to enterprise customer"/>
+            <where>code = 'Letter B2B LVL4'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Courriel automatique de niveau 1 vers client particulier"/>
+            <where>code = 'Email B2C LVL1-FR'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Courriel automatique de niveau 2 vers client particulier"/>
+            <where>code = 'Email B2C LVL2-FR'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Appel manuel de niveau 3 vers client particulier"/>
+            <where>code = 'Call B2C LVL3-FR'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Courrier postal de niveau 4 vers client particulier"/>
+            <where>code = 'Letter B2C LVL4-FR'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Courriel automatique de niveau 1 vers client entreprise"/>
+            <where>code = 'Email B2B LVL1-FR'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Courriel automatique de niveau 2 vers client entreprise"/>
+            <where>code = 'Call B2B LVL2-FR'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Appel manuel de niveau 3 vers client entreprise"/>
+            <where>code = 'Call B2B LVL3-FR'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Courrier postal de niveau 4 vers client entreprise"/>
+            <where>code = 'Letter B2B LVL4-FR'</where>
+        </update>
+
+        <update tableName="dunning_level">
+            <column name="description" value="Dunning level 1 for individual customer"/>
+            <where>code = 'LVL1'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Dunning level 2 for individual customer"/>
+            <where>code = 'LVL2'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Dunning level 3 for individual customer"/>
+            <where>code = 'LVL3'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Dunning level 4 for individual customer"/>
+            <where>code = 'LVL4'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Dunning level 1 for enterprise customer"/>
+            <where>code = 'LVL1B2B'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Dunning level 2 for enterprise customer"/>
+            <where>code = 'LVL2B2B'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Dunning level 3 for enterprise customer"/>
+            <where>code = 'LVL3B2B'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Dunning level 4 for enterprise customer"/>
+            <where>code = 'LVL4B2B'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Niveau de relance 1 pour client particulier"/>
+            <where>code = 'LVL1-FR'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Niveau de relance 2 pour client particulier"/>
+            <where>code = 'LVL2-FR'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Niveau de relance 3 pour client particulier"/>
+            <where>code = 'LVL3-FR'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Niveau de relance 4 pour client particulier"/>
+            <where>code = 'LVL4-B2C-FR'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Niveau de relance 1 pour client entreprise"/>
+            <where>code = 'LVL1B2B-FR'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Niveau de relance 2 pour client entreprise"/>
+            <where>code = 'LVL2B2B-FR'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Niveau de relance 3 pour client entreprise"/>
+            <where>code = 'LVL3B2B-FR'</where>
+        </update>
+        <update tableName="dunning_level">
+            <column name="description" value="Niveau de relance 4 pour client entreprise"/>
+            <where>code = 'LVL4-B2B-FR'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-25341_update_dunning_actions_levels_instance" author="zelmeliani">
+		<addColumn tableName="dunning_level_instance">
+            <column name="cf_values" type="${type.json}" />
+        </addColumn>
+        <addColumn tableName="dunning_action_instance">
+            <column name="cf_values" type="${type.json}" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

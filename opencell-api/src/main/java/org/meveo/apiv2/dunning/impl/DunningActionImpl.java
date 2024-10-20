@@ -1,4 +1,4 @@
-package org.meveo.apiv2.dunning.action;
+package org.meveo.apiv2.dunning.impl;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -13,19 +13,24 @@ import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.dunning.DunningAction;
 import org.meveo.apiv2.dunning.ImmutableDunningAction;
+import org.meveo.apiv2.dunning.resource.DunningActionResource;
+import org.meveo.apiv2.dunning.service.DunningActionApiService;
 import org.meveo.apiv2.dunning.service.GlobalSettingsVerifier;
 import org.meveo.model.payments.ActionChannelEnum;
 import org.meveo.model.payments.ActionModeEnum;
 import org.meveo.service.payments.impl.DunningActionService;
 
 @Interceptors({ WsRestApiInterceptor.class })
-public class DunningActionImpl implements DunningActionResource{
+public class DunningActionImpl implements DunningActionResource {
 
     @Inject
     private DunningActionService dunningActionService;
 
     @Inject
     private GlobalSettingsVerifier globalSettingsVerifier;
+
+    @Inject
+    private DunningActionApiService dunningActionApiService;
 
     @Override
     public Response getDunningAction(String code) {
@@ -45,6 +50,7 @@ public class DunningActionImpl implements DunningActionResource{
             throw new EntityAlreadyExistsException("dunning action with code "+dunningAction.getCode()+" already exist.");
         }
         org.meveo.model.dunning.DunningAction dunningActionToCreate = dunningAction.toEntity();
+        dunningActionApiService.populateCustomFieldsForGenericApi(dunningAction.getCustomFields(), dunningActionToCreate, true);
         dunningActionService.create(dunningActionToCreate);
         return Response.ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"the Dunning Action successfully created\"},\"id\":"+dunningActionToCreate.getId()+"} ").build();
     }
@@ -76,6 +82,7 @@ public class DunningActionImpl implements DunningActionResource{
         updatePropertyIfNotNull(newDunningAction.getScriptInstance(), scriptInstance -> dunningActionToUpdate.setScriptInstance(scriptInstance));
         updatePropertyIfNotNull(newDunningAction.getActionNotificationTemplate(), actionNotificationTemplate -> dunningActionToUpdate.setActionNotificationTemplate(actionNotificationTemplate));
         updatePropertyIfNotNull(newDunningAction.getAssignedTo(), assignedTo -> dunningActionToUpdate.setAssignedTo(assignedTo));
+        dunningActionApiService.populateCustomFieldsForGenericApi(dunningAction.getCustomFields(), dunningActionToUpdate, false);
         dunningActionService.update(dunningActionToUpdate);
         return Response.ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\"}}").build();
     }

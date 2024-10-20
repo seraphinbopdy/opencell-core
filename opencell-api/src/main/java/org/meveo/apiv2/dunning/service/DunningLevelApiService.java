@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.hibernate.collection.spi.PersistentCollection;
+import org.meveo.api.BaseApi;
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
@@ -29,7 +30,7 @@ import org.meveo.service.payments.impl.DunningActionService;
 import org.meveo.service.payments.impl.DunningLevelService;
 import org.meveo.service.payments.impl.DunningSettingsService;
 
-public class DunningLevelApiService implements ApiService<DunningLevel> {
+public class DunningLevelApiService extends BaseApi implements ApiService<DunningLevel> {
 
     @Inject
     private GlobalSettingsVerifier globalSettingsVerifier;

@@ -1457,6 +1457,42 @@
 								{
 									"name": "Invoice Type",
 									"item": [
+										
+										{
+											"name": "electronicInvoicing_untdidVatPaymentOption",
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"name": "Content-Type",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n  \"code2005\": \"1\",\r\n  \"value2005\": \"Invoice document issue date time\",\r\n  \"code2475\": \"2\",\r\n  \"value2475\": \"Date of invoice\"\r\n }\r\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{opencell.url}}/v2/electronicInvoicing/untdidVatPaymentOption",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"v2",
+														"electronicInvoicing",
+														"untdidVatPaymentOption"
+													]
+												}
+											},
+											"response": []
+										},
 										{
 											"name": "invoiceType|code=COM|desc=Invoice",
 											"request": {

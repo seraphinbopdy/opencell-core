@@ -91,12 +91,14 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
                 eligibleInvoice.forEach(invoice -> {
                     List<AccountOperation> sdAOs = accountOperationService.listByInvoice(invoice);
                     boolean isDebitTransaction = sdAOs.stream().anyMatch(ao -> ao.getTransactionCategory().equals(OperationCategoryEnum.DEBIT));
-                    if (isDebitTransaction) {
+                    if (isDebitTransaction && eligibleInvoicesByPolicy.values().stream().noneMatch(invoices -> invoices.contains(invoice))) {
                         invoicesWithDebitTransaction.add(invoice);
                     }
                 });
 
-                eligibleInvoicesByPolicy.put(policy, invoicesWithDebitTransaction);
+                if (!invoicesWithDebitTransaction.isEmpty()) {
+                    eligibleInvoicesByPolicy.put(policy, invoicesWithDebitTransaction);
+                }
             }
         }
 

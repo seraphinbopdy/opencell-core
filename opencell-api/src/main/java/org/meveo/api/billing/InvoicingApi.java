@@ -243,6 +243,7 @@ public class InvoicingApi extends BaseApi {
             }
             billingRun.getAdditionalAggregationFields().addAll(billingCycle.getAdditionalAggregationFields());
         }
+        ofNullable(dto.getIgnoreServiceInstances()).ifPresent(billingRun::setIgnoreServiceInstances);
 
         billingRunService.create(billingRun);
 
@@ -400,6 +401,7 @@ public class InvoicingApi extends BaseApi {
         if (dto.getUseAccountingArticleLabel() != null) {
             billingRun.setUseAccountingArticleLabel(dto.getUseAccountingArticleLabel());
         }
+        ofNullable(dto.getIgnoreServiceInstances()).ifPresent(billingRun::setIgnoreServiceInstances);
 
         // populate customFields
         if(dto.getCustomFields() != null) {

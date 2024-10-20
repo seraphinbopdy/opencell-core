@@ -199,7 +199,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		// Check existence of all passed accountOperation
 		List<AccountOperation> aos = new ArrayList<>();
 		aoIds.forEach(aoId -> aos.add(accountOperationService.findById(aoId)));
-
+		//checkIncompatibleAccountOperationTypes(aos);
 		if (aoIds.size() != aos.size()) {
 			throw new EntityDoesNotExistsException("One or more AccountOperations passed for matching are not found");
 		}
@@ -597,4 +597,32 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		
 		
 	}
+	
+	private void checkIncompatibleAccountOperationTypes(List<AccountOperation> accountOperations) {
+			if (accountOperations.size() <= 1) {
+				return;
+			}
+			Map<String, Set<String>> validMatches = Map.of(
+					"INV_ADV", Set.of("PAY_ADV", "CLOSED_ADV"),
+					"PAY_ADV", Set.of("INV_ADV", "REJ_ADV"),
+					"REJ_ADV", Set.of("PAY_ADV"),
+					"CLOSED_ADV", Set.of("INV_ADV")
+			);
+			
+			String firstCode = accountOperations.get(0).getCode();
+			if (firstCode == null) {
+				return;
+			}
+			Set<String> validCodes = validMatches.get(firstCode);
+			if (validCodes == null) {
+				return;
+			}
+			boolean allMatch = accountOperations.stream()
+					.skip(1)
+					.allMatch(ao -> validCodes.contains(ao.getCode()));
+			
+			if (!allMatch) {
+				throw new BusinessException("Incompatible account operation types. *_ADV account operations can only be matched with other *_ADV account operations");
+			}
+		}
 }

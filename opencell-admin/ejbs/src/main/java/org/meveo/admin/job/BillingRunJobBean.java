@@ -41,10 +41,7 @@ import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.jpa.JpaAmpNewTx;
-import org.meveo.model.billing.BillingCycle;
-import org.meveo.model.billing.BillingProcessTypesEnum;
-import org.meveo.model.billing.BillingRun;
-import org.meveo.model.billing.BillingRunStatusEnum;
+import org.meveo.model.billing.*;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
@@ -83,6 +80,10 @@ public class BillingRunJobBean extends BaseJobBean {
         Date lastTransactionDateFromCF = (Date) this.getParamOrCFValue(jobInstance, "BillingRunJob_lastTransactionDate");
         Date invoiceDateFromCF = (Date) this.getParamOrCFValue(jobInstance, "BillingRunJob_invoiceDate");
         String billingCycleTypeId = (String) this.getParamOrCFValue(jobInstance, "BillingRunJob_billingRun_Process");
+        String rejectAutoActionId = (String) this.getParamOrCFValue(jobInstance, "BillingRunJob_rejectAutoAction");
+        String suspectAutoActionId = (String) this.getParamOrCFValue(jobInstance, "BillingRunJob_suspectAutoAction");
+        Boolean generateAO = (Boolean) this.getParamOrCFValue(jobInstance, "BillingRunJob_generateAO", Boolean.FALSE);
+        Boolean computeDatesAtValidation = (Boolean) this.getParamOrCFValue(jobInstance, "BillingRunJob_computeDatesAtValidation", Boolean.FALSE);
 
         List<String> billingCyclesCode = Collections.emptyList();
         if (billingCyclesCf != null) {
@@ -158,6 +159,16 @@ public class BillingRunJobBean extends BaseJobBean {
                 billingRun.setIgnoreOrders(billingCycle.isIgnoreOrders());
                 billingRun.setIgnoreSubscriptions(billingCycle.isIgnoreSubscriptions());
                 billingRun.setAdditionalAggregationFields(new ArrayList<>(billingCycle.getAdditionalAggregationFields()));
+                
+                if (rejectAutoActionId != null) {
+                    billingRun.setRejectAutoAction(BillingRunAutomaticActionEnum.getValue(Integer.valueOf(rejectAutoActionId)));
+                }
+
+                if (suspectAutoActionId != null) {
+                    billingRun.setSuspectAutoAction(BillingRunAutomaticActionEnum.getValue(Integer.valueOf(suspectAutoActionId)));
+                }
+                billingRun.setGenerateAO(generateAO);
+                billingRun.setComputeDatesAtValidation(computeDatesAtValidation);
 
                 billingRunService.create(billingRun);
                 result.registerSucces();

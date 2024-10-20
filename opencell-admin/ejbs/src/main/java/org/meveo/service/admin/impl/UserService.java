@@ -56,6 +56,34 @@ public class UserService extends PersistenceService<User> {
 
     @Inject
     protected ParamBeanFactory paramBeanFactory;
+    
+    /**
+     * Identifies the source of user and role information
+     * 
+     * @author Andrius Karpavicius
+     */
+    public enum UserManagementMasterEnum {
+
+        /**
+         * The primary source of users and roles is Opencell
+         */
+        OPENCELL,
+
+        /**
+         * The primary source of users and roles is Keycloak.<br/>
+         * Opencell stores only custom field and secured entity information, records in adm_user nor adm_role table are not required.<br/>
+         * When Users and roles are managed from Opencell API/GUI side, and user and role information <b>is synchronized</b> to Keycloak
+         */
+        KC,
+
+        /**
+         * The <b>ONLY</b> source of users and roles is Keycloak.<br/>
+         * Opencell stores only custom field and secured entity information, records in adm_user nor adm_role table are not required.<br/>
+         * When Users and roles are managed from Opencell API/GUI side, and user and role information is <b>NOT synchronized</b> to Keycloak
+         */
+        KC_USER_READ_ONLY;
+
+    }
 
     @Override
     @RolesAllowed({ "userManagement", "userSelfManagement", "apiUserManagement", "apiUserSelfManagement" })

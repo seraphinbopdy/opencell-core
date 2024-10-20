@@ -35,6 +35,8 @@ import org.meveo.service.job.JobInstanceService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.Query;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -344,4 +346,10 @@ public class BillingRunReportService extends PersistenceService<BillingRunReport
         }
         return billingRunReport;
     }
+    
+	public void resetFinalStatus(List<Long> ids, List<BillingRunReportTypeEnum> types) {
+        Query query = getEntityManager().createNamedQuery("BillingRunReport.resetFinalStatus");
+        query.setParameter("ids", ids).setParameter("types", types).executeUpdate();
+	}
+	
 }

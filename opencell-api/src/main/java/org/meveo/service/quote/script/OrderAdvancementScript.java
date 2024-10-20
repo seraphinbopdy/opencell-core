@@ -61,6 +61,7 @@ OrderAdvancementScript extends ModuleScript {
         if(commercialOrder == null) {
             throw new BusinessException("No Commercial order is found");
         }
+	    commercialOrder.getOrderLots().size();
         // Force fetch nested entities to avoid LazyInitializationException
         // All those nested entities are not fetched : quote, orderType, invoices, orderLots, orderPrices
         log.info("Process CommericalOrder [quote='{}', orderType='{}']",
@@ -175,9 +176,9 @@ OrderAdvancementScript extends ModuleScript {
             	orderArticleLine=orderArticleLineService.findById(orderArticleLineId);
             }
             if(rateToBill!=null && orderArticleLine!=null) {
-          	  totalAmountWithoutTax = rateToBill.divide(BigDecimal.valueOf(100).setScale(8, RoundingMode.HALF_UP)).multiply(totalAmountWithoutTax);
-                totalAmountWithTax= rateToBill.divide(BigDecimal.valueOf(100).setScale(8, RoundingMode.HALF_UP)).multiply(totalAmountWithTax);
-                totalAmountTax = rateToBill.divide(BigDecimal.valueOf(100).setScale(8, RoundingMode.HALF_UP)).multiply(totalAmountTax);
+          	  totalAmountWithoutTax = isBillOver ? totalAmountWithoutTax : rateToBill.divide(BigDecimal.valueOf(100).setScale(8, RoundingMode.HALF_UP)).multiply(totalAmountWithoutTax);
+                totalAmountWithTax= isBillOver ? totalAmountWithTax : rateToBill.divide(BigDecimal.valueOf(100).setScale(8, RoundingMode.HALF_UP)).multiply(totalAmountWithTax);
+                totalAmountTax = isBillOver ? totalAmountTax : rateToBill.divide(BigDecimal.valueOf(100).setScale(8, RoundingMode.HALF_UP)).multiply(totalAmountTax);
                 if(discountedOrderPriceId!=null) {
                 	log.warn("discountedOrderPrice discountedOrderPriceId={}",discountedOrderPriceId);
                 	 OrderPrice discountedOrderPrice=orderPriceService.findById(discountedOrderPriceId);

@@ -75,7 +75,8 @@ public class CsvBuilder {
 	 * @param useQuotes the use quotes
 	 */
 	public CsvBuilder(String sep, boolean useQuotes) {
-		this.DELIMITER = sep;
+		if (sep != null && !sep.isEmpty())
+			this.DELIMITER = sep;
 		this.useQuotes = useQuotes;
 	}
 

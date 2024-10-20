@@ -446,42 +446,37 @@ public class Product extends ServiceCharge {
 
 	@Override
 	public List<ServiceChargeTemplateUsage> getServiceUsageCharges() {
-		if(this.serviceUsageCharges.isEmpty()){
-			List<ServiceChargeTemplateUsage> serviceUsageCharges= new ArrayList<>();
-			for(ProductChargeTemplateMapping pc : getProductCharges()) {
-				if(pc.getChargeTemplate() != null) {
-					ChargeTemplate ch = initializeAndUnproxy(pc.getChargeTemplate());
-					if(ch instanceof UsageChargeTemplate) {
-						ServiceChargeTemplateUsage serviceChargeTemplateUsage = new ServiceChargeTemplateUsage();
-						serviceChargeTemplateUsage.setChargeTemplate((UsageChargeTemplate)ch);
-						serviceChargeTemplateUsage.setAccumulatorCounterTemplates(pc.getAccumulatorCounterTemplates());
-						serviceChargeTemplateUsage.setCounterTemplate(pc.getCounterTemplate());
-						serviceUsageCharges.add(serviceChargeTemplateUsage);
-					}
+		List<ServiceChargeTemplateUsage> serviceUsageCharges= new ArrayList<>();
+		for(ProductChargeTemplateMapping pc : getProductCharges()) {
+			if(pc.getChargeTemplate() != null) {
+				ChargeTemplate ch = initializeAndUnproxy(pc.getChargeTemplate());
+				if(ch instanceof UsageChargeTemplate) {
+					ServiceChargeTemplateUsage serviceChargeTemplateUsage = new ServiceChargeTemplateUsage();
+					serviceChargeTemplateUsage.setChargeTemplate((UsageChargeTemplate)ch);
+					serviceChargeTemplateUsage.setAccumulatorCounterTemplates(pc.getAccumulatorCounterTemplates());
+					serviceChargeTemplateUsage.setCounterTemplate(pc.getCounterTemplate());
+					serviceUsageCharges.add(serviceChargeTemplateUsage);
 				}
 			}
-			return serviceUsageCharges;
 		}
-		return this.serviceUsageCharges;
+		return serviceUsageCharges;
 	}
 
 	@Override
 	public List<ServiceChargeTemplateSubscription> getServiceSubscriptionCharges() {
 		List<ServiceChargeTemplateSubscription> serviceSubscriptionCharges= new ArrayList<>();
-		if(this.serviceSubscriptionCharges.isEmpty()){
-			for(ProductChargeTemplateMapping pc : getProductCharges()) {
-				if(pc.getChargeTemplate() != null) {
-					ChargeTemplate ch = initializeAndUnproxy(pc.getChargeTemplate());
-					if(
-							(ch instanceof OneShotChargeTemplate) &&
-							(((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.SUBSCRIPTION || ((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.OTHER
-							|| ((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.INVOICING_PLAN)) {
-						ServiceChargeTemplateSubscription serviceChargeTemplateSubscription = new ServiceChargeTemplateSubscription();
-						serviceChargeTemplateSubscription.setChargeTemplate((OneShotChargeTemplate) ch);
-						serviceChargeTemplateSubscription.setAccumulatorCounterTemplates(pc.getAccumulatorCounterTemplates());
-						serviceChargeTemplateSubscription.setCounterTemplate(pc.getCounterTemplate());
-						serviceSubscriptionCharges.add(serviceChargeTemplateSubscription);
-					}
+		for(ProductChargeTemplateMapping pc : getProductCharges()) {
+			if(pc.getChargeTemplate() != null) {
+				ChargeTemplate ch = initializeAndUnproxy(pc.getChargeTemplate());
+				if(
+						(ch instanceof OneShotChargeTemplate) &&
+						(((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.SUBSCRIPTION || ((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.OTHER
+						|| ((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.INVOICING_PLAN)) {
+					ServiceChargeTemplateSubscription serviceChargeTemplateSubscription = new ServiceChargeTemplateSubscription();
+					serviceChargeTemplateSubscription.setChargeTemplate((OneShotChargeTemplate) ch);
+					serviceChargeTemplateSubscription.setAccumulatorCounterTemplates(pc.getAccumulatorCounterTemplates());
+					serviceChargeTemplateSubscription.setCounterTemplate(pc.getCounterTemplate());
+					serviceSubscriptionCharges.add(serviceChargeTemplateSubscription);
 				}
 			}
 		}

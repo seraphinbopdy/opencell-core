@@ -234,6 +234,12 @@ public class BillingCycleDto extends BusinessEntityDto {
     @Schema(description = "List of additional aggregation criteria")
     private List<String> additionalAggregationFields;
 
+    /**
+     * To decide if service instances will be added to invoice lines or ignored
+     */
+    @Schema(description = "Decide if service instances will be added to invoice lines or ignored", nullable = true)
+    private Boolean ignoreServiceInstances;
+
     public String getLastTransactionDateDelayEL() {
 		return lastTransactionDateDelayEL;
 	}
@@ -868,5 +874,13 @@ public class BillingCycleDto extends BusinessEntityDto {
      */
     public void setAdditionalAggregationFields(List<String> additionalAggregationFields) {
         this.additionalAggregationFields = additionalAggregationFields;
+    }
+
+    public Boolean getIgnoreServiceInstances() {
+        return ignoreServiceInstances;
+    }
+
+    public void setIgnoreServiceInstances(Boolean ignoreServiceInstances) {
+        this.ignoreServiceInstances = ignoreServiceInstances;
     }
 }

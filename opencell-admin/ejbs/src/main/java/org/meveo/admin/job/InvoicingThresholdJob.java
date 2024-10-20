@@ -48,7 +48,7 @@ public class InvoicingThresholdJob extends Job {
      */
 
     public static final String APPLIES_TO = "JobInstance_InvoicingThresholdJob";
-    public static final String BILLING_RUNS = "JobInstance_InvoicingThresholdJob";
+    public static final String BILLING_RUNS = "InvoicingThresholdJob_billingRuns";
 
     /**
      * Job bean

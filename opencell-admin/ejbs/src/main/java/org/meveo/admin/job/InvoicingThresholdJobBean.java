@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -37,11 +38,13 @@ import org.meveo.admin.job.utils.BillinRunApplicationElFilterUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingRun;
+import org.meveo.model.billing.BillingRunReportTypeEnum;
 import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.billing.ThresholdOptionsEnum;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
+import org.meveo.service.billing.impl.BillingRunReportService;
 import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.InvoicingThresholdService;
 import org.primefaces.model.SortOrder;
@@ -63,17 +66,24 @@ public class InvoicingThresholdJobBean extends BaseJobBean {
     private InvoicingThresholdService invoicingThresholdService;
     
     @Inject
+    private BillingRunReportService billingRunReportService;
+    
+    @Inject
     private BillingRunService billingRunService;
 
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
     	List<BillingRun> billingRuns = getBillingRunsToProcess(jobInstance, jobExecutionResult);
         applyThreshold(jobExecutionResult, billingRuns);
+        if (!billingRuns.isEmpty()) {
+        	billingRunReportService.resetFinalStatus(billingRuns.stream().map(BillingRun::getId).collect(Collectors.toList()), List.of(BillingRunReportTypeEnum.OPEN_INVOICE_LINES, BillingRunReportTypeEnum.OPEN_RATED_TRANSACTIONS, BillingRunReportTypeEnum.BILLED_RATED_TRANSACTIONS));
+        }
+        
     }
     
     
     private List<BillingRun> getBillingRunsToProcess(JobInstance jobInstance, JobExecutionResultImpl jobExecutionResult) {
 
-        List<EntityReferenceWrapper> billingRunWrappers = (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "InvoiceLinesJob_billingRun");
+        List<EntityReferenceWrapper> billingRunWrappers = (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, InvoicingThresholdJob.BILLING_RUNS);
         List<Long> billingRunIds = billingRunWrappers != null ? billingRunWrappers.stream().map(br -> valueOf(br.getCode().split("/")[0])).collect(toList()) : emptyList();
         List<BillingRunStatusEnum> billingRunStatus = asList(BillingRunStatusEnum.INVOICE_LINES_CREATED);
         Map<String, Object> filters = new HashMap<>();

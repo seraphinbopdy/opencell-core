@@ -66,6 +66,7 @@ import org.meveo.security.UserGroup;
 import org.meveo.security.keycloak.AuthenticationProvider;
 import org.meveo.service.admin.impl.UserService;
 import org.meveo.security.keycloak.KeycloakAdminClientConfig;
+import org.meveo.service.admin.impl.UserService.UserManagementMasterEnum;
 import org.slf4j.Logger;
 import org.wildfly.security.http.oidc.OidcPrincipal;
 import org.wildfly.security.http.oidc.OidcSecurityContext;
@@ -259,6 +260,12 @@ public class KeycloakAdminClientService implements Serializable {
     private String createOrUpdateUser(String userName, String firstName, String lastName, String email, String password, String userGroup, Collection<String> roles, String providerToOverride, boolean isUpdate, Map<String, String> pAttributes)
             throws InvalidParameterException, ElementNotFoundException, UsernameAlreadyExistsException {
 
+        // Check if user creation of update to Keycloak is disabled
+        String userManagementSource = ParamBean.getInstance().getProperty("userManagement.master", UserManagementMasterEnum.KC.name());
+        if (userManagementSource.equalsIgnoreCase(UserManagementMasterEnum.KC_USER_READ_ONLY.name())) {
+            return null;
+        }
+        
         KeycloakAdminClientConfig keycloakAdminClientConfig = AuthenticationProvider.getKeycloakConfig();
         Keycloak keycloak = getKeycloakClient(keycloakAdminClientConfig);
         boolean isMasterOC=isMasterOC();

@@ -224,35 +224,35 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                 List<TradingPricePlanVersion> listTradingPricePlanVersion = tradingPricePlanVersionService.getListTradingPricePlanVersionByPpmvId(pv.getId());
                 for (TradingPricePlanVersion cppv : listTradingPricePlanVersion) {
                     tradingPricePlanVersionService.remove(cppv);
-                }                
-                if(validity == null) {
-                    remove(pv);
-                } else {
-                    Date oldFrom = DateUtils.truncateTime(validity.getFrom());
-                    Date oldTo = DateUtils.truncateTime(validity.getTo());
+                }
+                Date oldFrom = validity != null ? DateUtils.truncateTime(validity.getFrom()) : null;
+                Date oldTo = validity != null ? DateUtils.truncateTime(validity.getTo()) : null;
 
-                    if (newFrom.compareTo(oldFrom) <= 0 && ((newTo != null && oldTo != null && newTo.compareTo(oldTo) >= 0) || newTo == null)) {
-                        remove(pv);
-                    } else if (newFrom.compareTo(oldFrom) > 0 && newTo != null && oldTo != null && newTo.compareTo(oldTo) < 0) {// Scenario 8
-                        pv.setValidity(new DatePeriod(oldFrom, newFrom));
+                if (oldFrom != null && newFrom.compareTo(oldFrom) > 0 && newTo != null && oldTo != null && newTo.compareTo(oldTo) < 0) {// Scenario 8
+                    pv.setValidity(new DatePeriod(oldFrom, newFrom));
+                    update(pv);
+                    PricePlanMatrixVersion duplicatedPv = duplicate(pv, pricePlanMatrix, new DatePeriod(newTo, oldTo), VersionStatusEnum.PUBLISHED, PriceVersionTypeEnum.FIXED, true);
+                    lastCurrentVersion = duplicatedPv.getCurrentVersion();
+                } else {
+                    boolean validityHasChanged = false;
+                    if ((oldFrom == null || newFrom.compareTo(oldFrom) > 0 ) && ((oldTo != null && newFrom.compareTo(oldTo) < 0) || oldTo == null)) {
+						if(validity == null) {
+							validity = new DatePeriod();
+						}
+                        validity.setTo(newFrom);
+                        validityHasChanged = true;
+                    }
+                    if (newTo != null && oldFrom != null &&  newTo.compareTo(oldFrom) > 0 && validity.getTo() != null && newTo.compareTo(DateUtils.truncateTime(validity.getTo())) < 0) {
+                        validity.setFrom(newTo);
+                        validityHasChanged = true;
+                    }
+                    if (validityHasChanged) {
+	                    pv.setValidity(validity);
+						pv.setStatus(VersionStatusEnum.CLOSED);
                         update(pv);
-                        PricePlanMatrixVersion duplicatedPv = duplicate(pv, pricePlanMatrix, new DatePeriod(newTo, oldTo), VersionStatusEnum.PUBLISHED, PriceVersionTypeEnum.FIXED, true);
-                        lastCurrentVersion = duplicatedPv.getCurrentVersion();
-                    } else {
-                        boolean validityHasChanged = false;
-                        if (newFrom.compareTo(oldFrom) > 0 && ((oldTo != null && newFrom.compareTo(oldTo) < 0) || oldTo == null)) {
-                            validity.setTo(newFrom);
-                            validityHasChanged = true;
-                        }
-                        if (newTo != null && newTo.compareTo(oldFrom) > 0 && validity.getTo() != null && newTo.compareTo(DateUtils.truncateTime(validity.getTo())) < 0) {
-                            validity.setFrom(newTo);
-                            validityHasChanged = true;
-                        }
-                        if (validityHasChanged) {
-                            update(pv);
-                        }
                     }
                 }
+                
             }
         }
 
@@ -995,7 +995,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             CSVLineRecords.put("label", ppv.getLabel());
             CSVLineRecords.put("amount", ppv.getPrice());
             CSVLineRecords.put("status", ppv.getStatus());
-            CSVLineRecords.put("version", ppv.getVersion());
+            CSVLineRecords.put("version", ppv.getCurrentVersion());
 
             for (Map<String, Object> ppmvMap : ppmvMaps)
             {

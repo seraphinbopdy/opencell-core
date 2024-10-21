@@ -21071,6 +21071,7 @@
     <changeSet id="#INTRD-25340_update_dunning_actions_levels" author="zelmeliani" />
     <changeSet id="#INTRD-25341_update_dunning_actions_levels_instance" author="zelmeliani" />
     <changeSet id="#INTRD-25018_20241021" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-25018_2_20241021" author="AbdelmounaimAkadid" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

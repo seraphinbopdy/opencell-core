@@ -15137,5 +15137,15 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="cf_values" type="${type.json}"></column>
         </addColumn>
     </changeSet>
+    
+    <changeSet id="#INTRD-25018_2_20241021" author="AbdelmounaimAkadid">
+        <addColumn tableName="ar_dunning_action">
+            <column name="uuid" type="varchar(60)">
+                <constraints unique="true"/>
+            </column>
+        </addColumn>
+        <sql>update ${db.schema.adapted}ar_dunning_action set uuid = 'arda'||id</sql>
+        <addNotNullConstraint tableName="ar_dunning_action" columnName="uuid" columnDataType="varchar(60)"/>
+    </changeSet>
 
 </databaseChangeLog>

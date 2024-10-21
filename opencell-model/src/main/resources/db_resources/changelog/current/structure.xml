@@ -15171,6 +15171,14 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <addNotNullConstraint tableName="dunning_level" columnName="uuid" columnDataType="varchar(60)"/>
     </changeSet>
     
+    <changeSet id="#INTRD-25018_5_20241021" author="AbdelmounaimAkadid">
+        <addColumn tableName="dunning_level_instance">
+            <column name="uuid" type="varchar(60)">
+                <constraints unique="true"/>
+            </column>
+        </addColumn>
+        <sql>update ${db.schema.adapted}dunning_level_instance set uuid = 'dunlvi'||id</sql>
+        <addNotNullConstraint tableName="dunning_level_instance" columnName="uuid" columnDataType="varchar(60)"/>
+    </changeSet>
     
-
 </databaseChangeLog>

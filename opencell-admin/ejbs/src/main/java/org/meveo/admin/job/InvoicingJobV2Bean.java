@@ -44,12 +44,13 @@ import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.BillingRunAutomaticActionEnum;
 import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.billing.InvoiceSequence;
+import org.meveo.model.billing.InvoiceStatusEnum;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.scripts.ScriptInstance;
-import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.BillingRunExtensionService;
+import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoicesToNumberInfo;
 import org.meveo.service.billing.impl.ServiceSingleton;
@@ -137,7 +138,6 @@ public class InvoicingJobV2Bean extends BaseJobBean {
 
     private void executeBillingRun(BillingRun billingRun, JobInstance jobInstance, JobExecutionResultImpl result, ScriptInstance billingRunValidationScript, boolean v11Process) {
     	boolean prevalidatedAutomaticPrevBRStatus = false;
-    	boolean firstPassAutomatic = billingRun.getStatus() == INVOICE_LINES_CREATED && billingRun.getProcessType() == AUTOMATIC;
         result.addReport((!StringUtils.isBlank(result.getReport()) ? "," : "") + "Billing run #" + billingRun.getId());
 
         if(billingRun.getStatus() == INVOICE_LINES_CREATED
@@ -163,14 +163,6 @@ public class InvoicingJobV2Bean extends BaseJobBean {
             billingRun.getBillingCycle().setBillingRunValidationScript(billingRunValidationScript);
         }
 
-		if((billingRun.getRejectAutoAction() != null && 
-		        billingRun.getRejectAutoAction().equals(BillingRunAutomaticActionEnum.MOVE)) 
-		    || (billingRun.getSuspectAutoAction() != null && 
-		        billingRun.getSuspectAutoAction().equals(BillingRunAutomaticActionEnum.MOVE))
-		    || !billingRunService.isBRValid(billingRun)) {
-            billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, REJECTED, null);
-        }
-		
 		try{
             billingRun = billingRunService.executeBillingRunValidationScript(billingRun);
 		} catch (BusinessException exception) {		    
@@ -185,9 +177,8 @@ public class InvoicingJobV2Bean extends BaseJobBean {
 		if ((billingRun.getProcessType() == BillingProcessTypesEnum.FULL_AUTOMATIC || billingRun.getProcessType() == BillingProcessTypesEnum.AUTOMATIC) 
                 && (BillingRunStatusEnum.POSTINVOICED.equals(billingRun.getStatus()) 
                         || BillingRunStatusEnum.POSTVALIDATED.equals(billingRun.getStatus())
-                        || BillingRunStatusEnum.DRAFT_INVOICES.equals(billingRun.getStatus())
                         || BillingRunStatusEnum.REJECTED.equals(billingRun.getStatus()))) {
-            billingRunService.applyAutomaticValidationActions(billingRun);
+            billingRunService.applyAutomaticValidationActions(billingRun, InvoiceStatusEnum.DRAFT);
             billingRun = billingRunService.refreshOrRetrieve(billingRun);
             
             if(!billingRunService.isBRValid(billingRun)) {
@@ -206,7 +197,7 @@ public class InvoicingJobV2Bean extends BaseJobBean {
         if(result.getInvoiceCount() == 0 && billingRun.getInvoiceNumber() != null) {
             result.setInvoiceCount(billingRun.getInvoiceNumber());
         }
-        if(!firstPassAutomatic || billingRun.getStatus() == POSTVALIDATED) {
+        if(billingRun.getStatus() == POSTVALIDATED) {
             assignInvoiceNumberAndIncrementBAInvoiceDatesAndGenerateAO(billingRun, result);
             if(!billingRunService.isBillingRunContainingRejectedInvoices(billingRun.getId())) {
                 billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, VALIDATED, null);

@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.meveo.commons.utils.NumberUtils.round;
+import static org.meveo.model.billing.BillingProcessTypesEnum.FULL_AUTOMATIC;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_BILLING_ACCOUNT;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_CUSTOMER_ACCOUNT;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_DISCOUNT_PLAN_INSTANCE;
@@ -1527,10 +1528,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
                     }
                 }
             }
-            if(billingRun!=null) {
-            	if(InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getSuspectAutoAction())
-            			||  InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getRejectAutoAction()))
+            if(billingRun!=null && billingRun.getProcessType() == FULL_AUTOMATIC) {
+            	if((InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getSuspectAutoAction()))
+            			||  (InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getRejectAutoAction())))
         		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+            	invoice.setRejectReason(null);
         	}
             if(save) {
 	            update(invoice);
@@ -3480,9 +3482,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if ((billingRun.getComputeDatesAtValidation() != null && billingRun.getComputeDatesAtValidation()) 
                 || (billingRun.getComputeDatesAtValidation() == null && billingCycle.isComputeDatesAtValidation())) {
             recalculateDate(invoice, billingRun, billingAccount, billingCycle);
-        }
-        if (!billingRun.isSkipValidationScript()) {
-            applyAutomaticInvoiceCheck(invoice, true);
         }
         if (invoice.getStatus().equals(InvoiceStatusEnum.REJECTED)) {
             return;
@@ -8306,6 +8305,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 this.getEntityManager().clear();
 			}
 		}
+	}
+
+	public void validateInvoicesOfBRByStatus(BillingRun billingRun, List<InvoiceStatusEnum> toValidate, InvoiceStatusEnum validationStatus) {
+		getEntityManager().createNamedQuery("Invoice.validateInvoicesByStatusAndBr").setParameter("status",validationStatus).setParameter("billingRun", billingRun).setParameter("toValidate", toValidate).executeUpdate();
 	}
 
 }

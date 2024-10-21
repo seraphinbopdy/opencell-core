@@ -161,7 +161,8 @@ import org.meveo.model.shared.DateUtils;
 		@NamedQuery(name = "Invoice.xmlWithStatusForUBL", query = "select inv.id from Invoice inv where inv.status in(:statusList) and inv.ublReference = false"),
         @NamedQuery(name = "Invoice.SUM_VALIDATED_LINKED_INVOICES", query = "SELECT SUM(i.amountWithTax) FROM Invoice i" +
                 " WHERE i.id in (SELECT li.linkedInvoiceValue.id FROM LinkedInvoice li WHERE li.id.id = :SRC_INVOICE_ID) AND i.status = 'VALIDATED'"),
-		@NamedQuery(name = "Invoice.sendToLitigation", query = "UPDATE Invoice inv SET inv.paymentStatus = 'DISPUTED' WHERE inv.id in (:ids)"),
+        @NamedQuery(name = "Invoice.validateInvoicesByStatusAndBr", query = "UPDATE Invoice inv SET inv.status = :status, inv.statusDate= NOW(), inv.rejectReason=null WHERE inv.billingRun=:billingRun AND inv.status in (:toValidate)"),
+        @NamedQuery(name = "Invoice.sendToLitigation", query = "UPDATE Invoice inv SET inv.paymentStatus = 'DISPUTED' WHERE inv.id in (:ids)"),
 		@NamedQuery(name = "Invoice.abandoneInvoices", query = "UPDATE Invoice inv SET inv.paymentStatus = 'ABANDONED' WHERE inv.id in (:ids)"),
 })
 @NamedNativeQueries({

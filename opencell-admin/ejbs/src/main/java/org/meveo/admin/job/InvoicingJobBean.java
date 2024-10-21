@@ -254,7 +254,7 @@ public class InvoicingJobBean extends BaseJobBean {
         }
 
         if (billingRun.getProcessType() == BillingProcessTypesEnum.FULL_AUTOMATIC && (BillingRunStatusEnum.POSTINVOICED.equals(billingRun.getStatus()) || BillingRunStatusEnum.REJECTED.equals(billingRun.getStatus()))) {
-            billingRunService.applyAutomaticValidationActions(billingRun);
+            billingRunService.applyAutomaticValidationActions(billingRun, InvoiceStatusEnum.DRAFT);
             billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null, null, BillingRunStatusEnum.POSTVALIDATED, null);
         }
 

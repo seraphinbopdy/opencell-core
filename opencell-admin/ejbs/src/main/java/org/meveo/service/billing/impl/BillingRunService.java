@@ -26,6 +26,7 @@ import static org.meveo.commons.utils.ParamBean.getInstance;
 import static org.meveo.model.billing.BillingRunAutomaticActionEnum.CANCEL;
 import static org.meveo.model.billing.BillingRunAutomaticActionEnum.CANCEL_RT;
 import static org.meveo.model.billing.BillingRunAutomaticActionEnum.MOVE;
+import static org.meveo.model.billing.BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION;
 import static org.meveo.model.billing.BillingRunStatusEnum.DRAFT_INVOICES;
 import static org.meveo.model.billing.BillingRunStatusEnum.POSTVALIDATED;
 import static org.meveo.model.billing.BillingRunStatusEnum.REJECTED;
@@ -851,13 +852,14 @@ public class BillingRunService extends PersistenceService<BillingRun> {
      * @param billingRun the billing run to process
      * @return billingRun
      */
-    public BillingRun applyAutomaticValidationActions(BillingRun billingRun) {
+    public BillingRun applyAutomaticValidationActions(BillingRun billingRun, InvoiceStatusEnum validationStatus) {
         if (REJECTED.equals(billingRun.getStatus()) ||
                 DRAFT_INVOICES.equals(billingRun.getStatus()) ||
                 POSTVALIDATED.equals(billingRun.getStatus())) {
             List<InvoiceStatusEnum> toMove = new ArrayList<>();
             List<InvoiceStatusEnum> toQuarantine = new ArrayList<>();
             List<InvoiceStatusEnum> toCancel = new ArrayList<>();
+            List<InvoiceStatusEnum> toValidate = new ArrayList<>();
             RatedTransactionAction action = REOPEN;
 
             if (billingRun.getRejectAutoAction() != null
@@ -866,6 +868,8 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 action = CANCEL_RT.equals(billingRun.getRejectAutoAction()) ? RatedTransactionAction.CANCEL : REOPEN;
             } else if (billingRun.getRejectAutoAction() != null && billingRun.getRejectAutoAction().equals(MOVE)){
             	toQuarantine.add(InvoiceStatusEnum.REJECTED);
+            } else if (billingRun.getRejectAutoAction() != null && billingRun.getRejectAutoAction().equals(AUTOMATIC_VALIDATION)){
+            	toValidate.add(InvoiceStatusEnum.REJECTED);
             }
 
             if (billingRun.getSuspectAutoAction() != null
@@ -874,6 +878,8 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 action = CANCEL_RT.equals(billingRun.getSuspectAutoAction()) ? RatedTransactionAction.CANCEL : REOPEN;
             } else if(billingRun.getSuspectAutoAction() != null && billingRun.getSuspectAutoAction().equals(MOVE)){
                 toMove.add(InvoiceStatusEnum.SUSPECT);
+            } else if(billingRun.getSuspectAutoAction() != null && billingRun.getSuspectAutoAction().equals(AUTOMATIC_VALIDATION)){
+                toValidate.add(InvoiceStatusEnum.SUSPECT);
             }
             
             if (isNotEmpty(toMove)) {
@@ -884,6 +890,9 @@ public class BillingRunService extends PersistenceService<BillingRun> {
             }
             if (isNotEmpty(toCancel)) {
                 billingRun = invoiceService.cancelInvoicesByStatus(billingRun, toCancel, action);
+            }
+            if (isNotEmpty(toValidate)) {
+                invoiceService.validateInvoicesOfBRByStatus(billingRun, toValidate, validationStatus);
             }
         }
         

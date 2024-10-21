@@ -1532,6 +1532,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             	if((InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getSuspectAutoAction()))
             			||  (InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getRejectAutoAction())))
         		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+            	invoice.setRejectReason(null);
         	}
             if(save) {
 	            update(invoice);

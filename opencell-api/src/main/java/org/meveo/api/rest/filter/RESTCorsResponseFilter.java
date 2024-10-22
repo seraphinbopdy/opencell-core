@@ -19,12 +19,17 @@
 package org.meveo.api.rest.filter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
+
+import org.meveo.commons.utils.ParamBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
@@ -33,20 +38,40 @@ import javax.ws.rs.ext.Provider;
  **/
 @Provider
 public class RESTCorsResponseFilter implements ContainerResponseFilter {
-//    private final static Logger log = LoggerFactory.getLogger(RESTCorsResponseFilter.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(RESTCorsResponseFilter.class.getName());
+
+    private static final List<String> ALLOWED_ORIGINS = Arrays.asList(ParamBean.getInstance()
+            .getProperty("cors.config.allowed.origin", "").split(","));
 
     @Override
     public void filter(ContainerRequestContext requestCtx, ContainerResponseContext responseCtx) throws IOException {
 
-        MultivaluedMap<String, Object> headers = responseCtx.getHeaders();
-        if (!headers.containsKey("Access-Control-Allow-Headers")) {
-//            log.debug("Adding CORS to the response.");
-            responseCtx.getHeaders().add("Access-Control-Allow-Origin", "*");
-            responseCtx.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH");
-            responseCtx.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
-            responseCtx.getHeaders().add("Access-Control-Allow-Credentials", true);
-        }
+        // Check if the request is a CORS request by looking for the Origin header
+        String originHeader = requestCtx.getHeaderString("Origin");
 
+        if (originHeader != null && !originHeader.isEmpty()) {
+            if (ALLOWED_ORIGINS.isEmpty()) {
+                // If no cors config is defined in properties then allow all origins
+                responseCtx.getHeaders().add("Access-Control-Allow-Origin", "*");
+                // add others necessary CORS headers to the response
+                addOthersCORSHeaders(responseCtx);
+
+            } else if (ALLOWED_ORIGINS.contains(originHeader)) {
+                // If the origin is allowed,
+                responseCtx.getHeaders().add("Access-Control-Allow-Origin", originHeader);
+                responseCtx.getHeaders().add("Vary", "Origin");
+                // add others necessary CORS headers to the response
+                addOthersCORSHeaders(responseCtx);
+
+            } else {
+                log.warn("Request CORS Origin {} doesn't exist in the configured CORS white list!", originHeader);
+            }
+        }
     }
 
+    private void addOthersCORSHeaders(ContainerResponseContext responseCtx) {
+        responseCtx.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH");
+        responseCtx.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        responseCtx.getHeaders().add("Access-Control-Allow-Credentials", true);
+    }
 }

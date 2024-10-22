@@ -603,5 +603,16 @@ public class BillingAccountService extends AccountService<BillingAccount> {
     public void removePriceListLink(Long priceListId) {
         getEntityManager().createNamedQuery("BillingAccount.unlinkPriceList").setParameter("priceListId", priceListId).executeUpdate();
     }
-	
+
+    /**
+     * Updates the Monthly Recurring Revenue (MRR) for all BillingAccounts.
+     *
+     * This method calculates the MRR for each BillingAccount by summing the MRR of all 
+     * Subscriptions associated with the BillingAccount's UserAccounts. The calculated MRR 
+     * is then updated in the BillingAccount.
+     */
+    public void massCalculateMRR() {
+        Query query = getEntityManager().createQuery("update BillingAccount ba set ba.mrr = (select sum(sub.mrr) from Subscription sub where sub.userAccount.billingAccount.id = ba.id and sub.mrr is not null)");
+        query.executeUpdate();
+    }
 }

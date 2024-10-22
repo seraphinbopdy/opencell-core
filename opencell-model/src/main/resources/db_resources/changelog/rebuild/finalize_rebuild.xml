@@ -3,11 +3,6 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <!--  !!! THIS CHANGESET MUST BE THE LAST TO EXECUTE !!! -->
-    <changeSet id="#INTRD-26018_20241021" author="TarikFA.">
-        <update tableName="meveo_job_instance">
-            <column name="disabled" valueNumeric="1" />
-        </update>
-    </changeSet>
     <changeSet id="#liquibase_hack_structure" author="AbdelmounaimAkadid">
         <createTable tableName="db_migration_status" remarks="Tracks if DB was migrated for a given OC build number">
             <column name="id" type="bigint" autoIncrement="true" >

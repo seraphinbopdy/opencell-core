@@ -6258,7 +6258,7 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="meveo_job_instance_pkey" />
             </column>
             <column name="version" type="int4" />
-            <column name="disabled" type="${type.boolean}" defaultValueNumeric="0">
+            <column name="disabled" type="${type.boolean}" defaultValueNumeric="1">
                 <constraints nullable="false" />
             </column>
             <column name="created" type="datetime">

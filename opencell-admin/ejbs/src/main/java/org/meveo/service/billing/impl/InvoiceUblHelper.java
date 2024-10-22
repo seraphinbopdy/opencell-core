@@ -82,6 +82,7 @@ import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.InvoiceTypeEnum;
+import org.meveo.model.billing.IsoIcd;
 import org.meveo.model.billing.LinkedInvoice;
 import org.meveo.model.billing.SubCategoryInvoiceAgregate;
 import org.meveo.model.billing.Tax;
@@ -820,7 +821,18 @@ public class InvoiceUblHelper {
 		}
 
 		//AccountingCustomerParty/Party/ServiceProviderParty
-		partyType.getServiceProviderParties().add(getServiceProviderParty(billingAccount));
+		var icd00225Exist = billingAccount.getCustomerAccount().getCustomer().getRegistrationNumbers().stream().anyMatch(rn -> {
+			if(rn.getIsoIcd() != null) {
+				var isoIcd = (IsoIcd) Hibernate.unproxy(rn.getIsoIcd());
+				if(isoIcd.getCode().equals("0225")) {
+					return true;
+				}
+			}
+			return false;
+		});
+		if(icd00225Exist){
+			partyType.getServiceProviderParties().add(getServiceProviderParty(billingAccount));
+		}
 
 		customerPartyType.setParty(partyType);
 		if(creditNote == null)

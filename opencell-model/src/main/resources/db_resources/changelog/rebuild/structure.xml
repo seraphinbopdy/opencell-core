@@ -21075,6 +21075,7 @@
     <changeSet id="#INTRD-25018_3_20241021" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-25018_4_20241021" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-25018_5_20241021" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-26037_fix_updated_cf" author="a.rouaguebe" />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

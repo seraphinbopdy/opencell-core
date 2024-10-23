@@ -15181,4 +15181,10 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <addNotNullConstraint tableName="dunning_level_instance" columnName="uuid" columnDataType="varchar(60)"/>
     </changeSet>
     
+    <changeSet id="#INTRD-26057_20241023" author="TarikFA.">
+        <addColumn tableName="electronic_invoice_settings">
+            <column name="customization_id" type="varchar(200)" defaultValue="urn:cen.eu:en16931:2017" />
+        </addColumn>
+    </changeSet>
+    
 </databaseChangeLog>

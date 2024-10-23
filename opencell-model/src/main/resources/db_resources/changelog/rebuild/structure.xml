@@ -13960,6 +13960,7 @@
             <column name= "pdf_generation_job" type="varchar(50)" />
             <column name= "ubl_generation_job" type="varchar(50)" />
             <column name="vat_date_code" type="int4" defaultValueNumeric="432"/>
+            <column name="customization_id" type="varchar(200)" defaultValue="urn:cen.eu:en16931:2017" />
         </createTable>
 
         <createTable tableName="pdp_status_and_history">
@@ -21075,6 +21076,7 @@
     <changeSet id="#INTRD-25018_3_20241021" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-25018_4_20241021" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-25018_5_20241021" author="AbdelmounaimAkadid" />
+    <changeSet id="#INTRD-26057_20241023" author="TarikFA." />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

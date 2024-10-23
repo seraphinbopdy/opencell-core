@@ -21,6 +21,7 @@ package org.meveo.api.rest.filter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -28,6 +29,7 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
 
 import org.meveo.commons.utils.ParamBean;
+import org.meveo.commons.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +42,9 @@ import org.slf4j.LoggerFactory;
 public class RESTCorsResponseFilter implements ContainerResponseFilter {
     private final static Logger log = LoggerFactory.getLogger(RESTCorsResponseFilter.class.getName());
 
-    private static final List<String> ALLOWED_ORIGINS = Arrays.asList(ParamBean.getInstance()
-            .getProperty("cors.config.allowed.origin", "").split(","));
+    private static final List<String> ALLOWED_ORIGINS = Arrays.stream(ParamBean.getInstance()
+            .getProperty("cors.config.allowed.origin", "").split(","))
+            .filter(StringUtils::isNotBlank).collect(Collectors.toList());
 
     @Override
     public void filter(ContainerRequestContext requestCtx, ContainerResponseContext responseCtx) throws IOException {

@@ -15180,6 +15180,28 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <sql>update ${db.schema.adapted}dunning_level_instance set uuid = 'dunlvi'||id</sql>
         <addNotNullConstraint tableName="dunning_level_instance" columnName="uuid" columnDataType="varchar(60)"/>
     </changeSet>
+
+
+
+    <changeSet id="#INTRD-26037_fix_updated_cf" author="a.rouaguebe">
+        <update tableName="meveo_job_instance">
+            <column name="cf_values"><![CDATA[{
+                "nbRuns":[{"long":-1}],
+                "waitingMillis":[{"long":0}],
+                "targetJob":[{"string":"reopenEDRZeroJob"}],
+                "entityClassName":[{"string": "org.meveo.model.rating.EDR"}],
+                "fieldsToUpdate":[{"string": "status='OPEN', zeroWoDropped=false"}],
+                "defaultFilter":[{"string": "{ \"filters\": { \"zeroWoDropped\":true}}"}],
+                "selectFetchSize":[{"long":1000000}],
+                "isUsingView":[{"boolean":false}],
+                "isOpenCursor":[{"boolean":false}],
+                "emailTemplate": [{"entity": {"code": "MASS_REOPEN_EDR_ZERO", "classname": "org.meveo.model.communication.email.EmailTemplate"}}],
+                "preUpdateEl": [{"string": "#{mv:validateAndCancelDerivedWosEdrsAndRts(edr)}"}]
+                }]]>
+            </column>
+            <where>code = 'reopenEDRZeroJob'</where>
+        </update>
+    </changeSet>
     
     <changeSet id="#INTRD-26057_20241023" author="TarikFA.">
         <addColumn tableName="electronic_invoice_settings">

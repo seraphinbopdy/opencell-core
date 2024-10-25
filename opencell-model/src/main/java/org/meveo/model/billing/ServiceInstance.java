@@ -113,6 +113,7 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "ServiceInstance.findBySubscriptionIdLoadAttributes", query = "select distinct(s) from ServiceInstance s left join fetch s.attributeInstances sai where s.subscription.id = :subscriptionId"),
         @NamedQuery(name = "ServiceInstance.findByIdAndFetchProduct", query = "select s from ServiceInstance s left join fetch s.attributeInstances ai where s.id = :id "),
         @NamedQuery(name = "ServiceInstance.getPendingToActivate", query = "select s.id from ServiceInstance s where s.subscription.status in (:subscriptionStatuses) AND s.subscriptionDate is not null and s.subscriptionDate<:date and s.status in (:statuses)"),
+        @NamedQuery(name = "ServiceInstance.listActiveRecurrentServiceInstances", query = "select s from ServiceInstance s where s.status = org.meveo.model.billing.InstanceStatusEnum.ACTIVE and s.serviceRenewal.initialTermType =  org.meveo.model.billing.SubscriptionRenewal$InitialTermTypeEnum.RECURRING"),
 })
 public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinimumApplicable,IWFEntity, ICounterEntity, IDiscountable  {
 
@@ -371,6 +372,11 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     @JoinColumn(name = "order_product_id")
     private OrderProduct orderProduct;
 
+    
+    /** MRR. */
+    @Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal mrr;
+    
     /**
      * Gets the end agreement date.
      *
@@ -1335,6 +1341,8 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
 	public void setOrderProduct(OrderProduct orderProduct) {
 		this.orderProduct = orderProduct;
 	}
+    
+    
 
 	@Override
     public List<DiscountPlanInstance> getAllDiscountPlanInstances() {
@@ -1355,6 +1363,14 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     		return null;
     	}
     	return subscription.getSeller();
+    }
+
+    public BigDecimal getMrr() {
+        return mrr;
+    }
+
+    public void setMrr(BigDecimal mrr) {
+        this.mrr = mrr;
     }
 
     @SuppressWarnings("rawtypes")

@@ -572,4 +572,9 @@ public class OfferTemplateService extends GenericProductOfferingService<OfferTem
                 .setParameter("flag", flag)
                 .executeUpdate();
     }
+
+    public void massCalculateARR() {
+        Query query = getEntityManager().createQuery("update OfferTemplate offer set offer.arr = (select sum(sub.mrr) * 12 from Subscription sub where sub.offer = offer and sub.mrr is not null)");
+        query.executeUpdate();
+    }
 }

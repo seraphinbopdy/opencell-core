@@ -2747,6 +2747,7 @@
             <column name="legal_entity_type_id" type="bigint" />
             <column name="exemption_reason" type="varchar(2000)" />
             <column name="price_list_id" type="bigint" />
+            <column name="mrr" type="numeric(23, 12)" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-165">
@@ -3702,6 +3703,7 @@
             <column name="price_version_date_setting" type="varchar(255)" />
             <column name="price_version_date" type="datetime" />
             <column name="order_product_id" type="bigint" />
+            <column name="mrr" type="numeric(23, 12)" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-192">
@@ -3833,6 +3835,7 @@
             <column name="sales_person_name" type="varchar(52)" />
     		<column name="contract_id" type="bigint" />
             <column name="price_list_id" type="bigint" />
+            <column name="mrr" type="numeric(23, 12)" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-194">
@@ -4693,6 +4696,7 @@
             <column name="sequence" type="INT4" defaultValue="0" />
 			<column name="display" type="${type.boolean}" defaultValueNumeric="0"/>
             <column name="document_id" type="bigint"/>
+            <column name="arr" type="numeric(23, 12)" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-217">
@@ -9689,6 +9693,7 @@
             <column name="product_action_type" type="varchar(10)" />
 	        <column name="termination_date" type="datetime" />
 	        <column name="sub_termin_reason_id" type="bigint" />
+            <column name="mrr" type="numeric(23, 12)" />
         </createTable>
     </changeSet>
 
@@ -10196,6 +10201,7 @@
             <column name="quote_number" type="varchar(50)" />
             <column name="invoice_type_id" type="bigint" />
             <column name="user_account_id" type="bigint" />
+            <column name="mrr" type="numeric(23, 12)" />
 
         </createTable>
     </changeSet>
@@ -10545,6 +10551,7 @@
             <column name="billing_cycle_id" type="bigint" />
             <column name="billing_run_id" type="bigint" />
             <column name="price_list_id" type="bigint" />
+            <column name="mrr" type="numeric(23, 12)" />
         </createTable>
     </changeSet>
     <changeSet id="rebuild-str-tbl-475" author="NabilOUACHI">
@@ -10688,6 +10695,7 @@
             <column name="sub_termin_reason_id" type="bigint" />
             <column name="instance_status" type="varchar(10)" />
             <column name="service_instance_id" type="bigint"/>
+            <column name="mrr" type="numeric(23, 12)" />
         </createTable>
         <addForeignKeyConstraint baseColumnNames="service_instance_id" baseTableName="cpq_order_product"
                                  constraintName="fk_cpq_order_product_service_instance_id"
@@ -21078,7 +21086,8 @@
     <changeSet id="#INTRD-25018_5_20241021" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-26037_fix_updated_cf" author="a.rouaguebe" />
     <changeSet id="#INTRD-26057_20241023" author="TarikFA." />
-
+    <changeSet id="#INTRD-25749_add_mrr_arr" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25838_calc_mrr_quote_order" author="a.rouaguebe" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

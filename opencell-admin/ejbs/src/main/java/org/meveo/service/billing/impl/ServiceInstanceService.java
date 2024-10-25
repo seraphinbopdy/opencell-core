@@ -18,13 +18,17 @@
 package org.meveo.service.billing.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 
@@ -35,14 +39,17 @@ import org.meveo.admin.exception.IncorrectServiceInstanceException;
 import org.meveo.admin.exception.IncorrectSusbcriptionException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.admin.exception.ValidationException;
+import org.meveo.api.dto.CalendarTypeEnum;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.api.exception.MissingParameterException;
+import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.IEntity;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ChargeApplicationModeEnum;
@@ -62,6 +69,9 @@ import org.meveo.model.billing.SubscriptionTerminationReason;
 import org.meveo.model.billing.TerminationChargeInstance;
 import org.meveo.model.billing.UsageChargeInstance;
 import org.meveo.model.billing.WalletOperation;
+import org.meveo.model.catalog.Calendar;
+import org.meveo.model.catalog.CalendarPeriod;
+import org.meveo.model.catalog.CalendarYearly;
 import org.meveo.model.catalog.ChargeTemplateStatusEnum;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
@@ -1372,5 +1382,118 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
     
     public ServiceInstance findAndFetchProductById(Long id) {
         return id == null ? null : (ServiceInstance)getEntityManager().createNamedQuery("ServiceInstance.findByIdAndFetchProduct").setParameter("id", id).getSingleResult();
+    }
+
+    public List<ServiceInstance> listActiveRecurrentServiceInstances() {
+        return getEntityManager().createNamedQuery("ServiceInstance.listActiveRecurrentServiceInstances", ServiceInstance.class).getResultList();
+    }
+
+    @Inject
+    private MethodCallingUtils methodCallingUtils;
+
+    /**
+     * Calculate MRR for a service instance
+     * 
+     * @param si - Targeted Service instance
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void calculateMRR(ServiceInstance si) {
+        BigDecimal mrr = BigDecimal.ZERO;
+        ServiceInstance serviceInstance = findById(si.getId());
+        if (serviceInstance.getRecurringChargeInstances() != null) {
+            AtomicReference<RatingResult> ratingResult = new AtomicReference<>();
+            boolean keepNull = true;
+            for (RecurringChargeInstance chargeInstance : serviceInstance.getRecurringChargeInstances()) {
+
+                if((!chargeInstance.getCalendar().getCalendarType().equals("PERIOD") || !isCalendarPeriodSupported(chargeInstance.getCalendar()))  && !chargeInstance.getCalendar().getCalendarType().equals("YEARLY")) {
+                    continue;
+                }
+
+                keepNull = false;
+                if (chargeInstance.getStatus() == InstanceStatusEnum.ACTIVE) {
+
+                    try {
+                        methodCallingUtils.callMethodInNewTx(() -> {
+                            RecurringChargeInstance rci = recurringChargeInstanceService.findById(chargeInstance.getId());
+                            rci.setChargeDate(new Date());
+                            rci.setChargedToDate(new Date());
+                            ratingResult.set(recurringChargeInstanceService.applyRecurringCharge(rci, new Date(), true, true, null));
+                        });
+                    } catch (Exception e) {
+                        log.error("Failed to apply recurring charge {}: {}", chargeInstance, e.getMessage(), e);
+                        throw new RuntimeException(e);
+                    }
+                    BigDecimal chargeAmount = ratingResult.get()
+                                                          .getWalletOperations()
+                                                          .stream()
+                                                          .map(WalletOperation::getAmountWithTax)
+                                                          .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    
+                    mrr = mrr.add(calculateMRRBasedOnCalendar(chargeAmount, chargeInstance.getCalendar()));
+                }
+            }
+            
+            if(!keepNull) {
+                serviceInstance.setMrr(mrr);
+                update(serviceInstance);
+            }
+        }
+    }
+
+    /**
+     * Check if the calendar period is supported for MRR calculation
+     * 
+     * (Only DAY_OF_MONTH and MONTH are supported)
+     * 
+     * @param calendar - Targeted calendar
+     * @return true if the calendar period is supported
+     */
+    private boolean isCalendarPeriodSupported(Calendar calendar) {
+        CalendarPeriod period = (CalendarPeriod) PersistenceUtils.initializeAndUnproxy(calendar);
+        if (period.getPeriodUnit() == java.util.Calendar.DAY_OF_MONTH || period.getPeriodUnit() == java.util.Calendar.MONTH) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Calculate MRR based on calendar
+     * 
+     * @param woAmount - Wallet operation amount
+     * @param calendar - Charge instance calendar
+     * @return calculated amount
+     */
+    private BigDecimal calculateMRRBasedOnCalendar(BigDecimal woAmount, Calendar calendar) {
+        BigDecimal mrr = BigDecimal.ZERO;
+        int rounding = appProvider.getInvoiceRounding() != 0 ? appProvider.getInvoiceRounding() : 2 ;
+        RoundingMode roundingMode = appProvider.getRoundingMode().getRoundingMode();
+        Calendar lCalendar = PersistenceUtils.initializeAndUnproxy(calendar);
+        if (CalendarTypeEnum.PERIOD.toString().equals(lCalendar.getCalendarType())) {
+            mrr = mrr.add(calculatePeriodBasedMRR(woAmount, ((CalendarPeriod) lCalendar).getPeriodUnit(), ((CalendarPeriod) lCalendar).getPeriodLength()));
+        } else if (CalendarTypeEnum.YEARLY.toString().equals(lCalendar.getCalendarType())) {
+            mrr = woAmount.multiply(BigDecimal.valueOf(((CalendarYearly)lCalendar).getDays().size())).divide(BigDecimal.valueOf(12), rounding, roundingMode);
+        }
+        return mrr;
+    }
+
+    /**
+     * Calculate MRR for Period Calendars
+     * @param woAmount - Wallet operation amount
+     * @param calendarPeriodUnit - Calendar period unit
+     * @param periodLength - Calendar period length
+     * @return calculated amount
+     */
+    private BigDecimal calculatePeriodBasedMRR(BigDecimal woAmount, Integer calendarPeriodUnit, Integer periodLength) {
+        int rounding = appProvider.getInvoiceRounding() != 0 ? appProvider.getInvoiceRounding() : 2 ;
+        RoundingMode roundingMode = appProvider.getRoundingMode().getRoundingMode();
+        switch (calendarPeriodUnit) {
+            case java.util.Calendar.DAY_OF_MONTH:
+                return woAmount.multiply(BigDecimal.valueOf(365))
+                               .divide(BigDecimal.valueOf(12).multiply(BigDecimal.valueOf(periodLength)), rounding, roundingMode);
+            case java.util.Calendar.MONTH:
+                return woAmount.divide(BigDecimal.valueOf(periodLength), rounding, roundingMode);
+            default:
+                return BigDecimal.ZERO;
+        }
     }
 }

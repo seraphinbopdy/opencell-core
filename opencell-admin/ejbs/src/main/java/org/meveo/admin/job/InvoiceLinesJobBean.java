@@ -345,7 +345,8 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
     	}
         Map<String, Object> jobParams = new HashMap<>();
         jobParams.put("billingRuns", billingRunsToReport.stream()
-        									   .map(idBr -> new EntityReferenceWrapper("org.meveo.model.billing.BillingRun", "BillingRun", idBr.toString()))
+        									   .map(billingRun -> new EntityReferenceWrapper("org.meveo.model.billing.BillingRun",
+                                                       "BillingRun", billingRun.getId().toString()))
         									   .collect(toList()));
         Map<String, Object> filters = new HashMap<>();
         filters.put("status", RatedTransactionStatusEnum.BILLED.toString());

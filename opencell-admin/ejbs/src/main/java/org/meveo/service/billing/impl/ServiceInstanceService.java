@@ -1465,11 +1465,13 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
      */
     private BigDecimal calculateMRRBasedOnCalendar(BigDecimal woAmount, Calendar calendar) {
         BigDecimal mrr = BigDecimal.ZERO;
+        int rounding = appProvider.getInvoiceRounding() != 0 ? appProvider.getInvoiceRounding() : 2 ;
+        RoundingMode roundingMode = appProvider.getRoundingMode().getRoundingMode();
         Calendar lCalendar = PersistenceUtils.initializeAndUnproxy(calendar);
         if (CalendarTypeEnum.PERIOD.toString().equals(lCalendar.getCalendarType())) {
             mrr = mrr.add(calculatePeriodBasedMRR(woAmount, ((CalendarPeriod) lCalendar).getPeriodUnit(), ((CalendarPeriod) lCalendar).getPeriodLength()));
         } else if (CalendarTypeEnum.YEARLY.toString().equals(lCalendar.getCalendarType())) {
-            mrr = woAmount.multiply(BigDecimal.valueOf(((CalendarYearly)lCalendar).getDays().size())).divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP);
+            mrr = woAmount.multiply(BigDecimal.valueOf(((CalendarYearly)lCalendar).getDays().size())).divide(BigDecimal.valueOf(12), rounding, roundingMode);
         }
         return mrr;
     }
@@ -1482,12 +1484,14 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
      * @return calculated amount
      */
     private BigDecimal calculatePeriodBasedMRR(BigDecimal woAmount, Integer calendarPeriodUnit, Integer periodLength) {
+        int rounding = appProvider.getInvoiceRounding() != 0 ? appProvider.getInvoiceRounding() : 2 ;
+        RoundingMode roundingMode = appProvider.getRoundingMode().getRoundingMode();
         switch (calendarPeriodUnit) {
             case java.util.Calendar.DAY_OF_MONTH:
                 return woAmount.multiply(BigDecimal.valueOf(365))
-                               .divide(BigDecimal.valueOf(12).multiply(BigDecimal.valueOf(periodLength)), RoundingMode.HALF_UP);
+                               .divide(BigDecimal.valueOf(12).multiply(BigDecimal.valueOf(periodLength)), rounding, roundingMode);
             case java.util.Calendar.MONTH:
-                return woAmount.divide(BigDecimal.valueOf(periodLength), RoundingMode.HALF_UP);
+                return woAmount.divide(BigDecimal.valueOf(periodLength), rounding, roundingMode);
             default:
                 return BigDecimal.ZERO;
         }

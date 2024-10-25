@@ -21087,6 +21087,7 @@
     <changeSet id="#INTRD-26037_fix_updated_cf" author="a.rouaguebe" />
     <changeSet id="#INTRD-26057_20241023" author="TarikFA." />
     <changeSet id="#INTRD-25749_add_mrr_arr" author="a.rouaguebe" />
+    <changeSet id="#INTRD-25838_calc_mrr_quote_order" author="a.rouaguebe" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

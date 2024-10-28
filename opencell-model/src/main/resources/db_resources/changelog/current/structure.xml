@@ -14980,7 +14980,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
 	        <column name="creator" value="applicationInitializer"/>
 	        <column name="gui_position" value="tab:Configuration:0;field:7"/>
 	    </insert>
-	</changeSet>    
+	</changeSet>
 
     <changeSet id="#INTRD-25118_2024_09_24" author="ZakariaB">
         <addColumn tableName="billing_cycle">
@@ -15235,7 +15235,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="arr" type="numeric(23, 12)" />
         </addColumn>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25838_calc_mrr_quote_order" author="a.rouaguebe">
         <sql>
             UPDATE cpq_quote_product product
@@ -15330,6 +15330,23 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
                 ) subquery
             WHERE ord.id = subquery.order_id;
         </sql>
+    </changeSet>
+
+    <changeSet id="INTRD-25951_20241022" author="ZakariaB">
+        <addColumn tableName="ar_account_operation">
+            <column name="exclude_from_default_balance" type="${type.boolean}" valueNumeric="0"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="INTRD-25809_20241023" author="ZakariaB">
+        <update tableName="ar_account_operation">
+            <column name="exclude_from_default_balance" value="1" />
+            <where>code = 'DEB_SD' AND matching_status = 'L'</where>
+        </update>
+        <update tableName="ar_customer_balance">
+            <column name="balance_el" value="#{ accountOperation.excludeFromDefaultBalance==false }" />
+            <where>code = 'default_customer_balance'</where>
+        </update>
     </changeSet>
         
 </databaseChangeLog>

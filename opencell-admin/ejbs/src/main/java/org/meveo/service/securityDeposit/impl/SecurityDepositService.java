@@ -294,7 +294,8 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
     }
 
     public void createSecurityDepositTransaction(SecurityDeposit securityDepositToUpdate, BigDecimal amountToCredit,
-                                                 SecurityDepositOperationEnum securityDepositOperationEnum, OperationCategoryEnum operationCategoryEnum, AccountOperation accountOperation) {
+                                                 SecurityDepositOperationEnum securityDepositOperationEnum,
+                                                 OperationCategoryEnum operationCategoryEnum, AccountOperation accountOperation) {
         SecurityDepositTransaction securityDepositTransaction = new SecurityDepositTransaction();
         securityDepositTransaction.setAmount(amountToCredit);
         securityDepositTransaction.setTransactionCategory(operationCategoryEnum);
@@ -302,7 +303,9 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
         securityDepositTransaction.setOperation(securityDepositOperationEnum);
         securityDepositTransaction.setSecurityDeposit(securityDepositToUpdate);
         securityDepositTransaction.setAccountOperation(accountOperation);
+        accountOperation.setExcludeFromDefaultBalance(true);
         securityDepositTransactionService.create(securityDepositTransaction);
+        accountOperationService.update(accountOperation);
     }
     
     

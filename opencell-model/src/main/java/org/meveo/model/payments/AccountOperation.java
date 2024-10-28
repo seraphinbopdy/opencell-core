@@ -532,6 +532,13 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
 	@ManyToOne(fetch = FetchType.LAZY)
 	private AccountOperation originPayment;
 
+    /**
+     * Exclude from default balance
+     */
+    @Type(type = "numeric_boolean")
+    @Column(name = "exclude_from_default_balance")
+    private Boolean excludeFromDefaultBalance = false;
+
     public Date getDueDate() {
         return dueDate;
     }
@@ -1252,4 +1259,12 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
 	public void setOriginPayment(AccountOperation originPayment) {
 		this.originPayment = originPayment;
 	}
+
+    public Boolean getExcludeFromDefaultBalance() {
+        return excludeFromDefaultBalance;
+    }
+
+    public void setExcludeFromDefaultBalance(Boolean excludeFromDefaultBalance) {
+        this.excludeFromDefaultBalance = excludeFromDefaultBalance;
+    }
 }

@@ -2203,6 +2203,7 @@
             <column name="origin_call_for_payment_id" type="bigint" />
             <column name="origin_payment_id" type="bigint" />
             <column name="is_manual_payment" type="${type.boolean}" valueNumeric="0" />
+            <column name="exclude_from_default_balance" type="${type.boolean}" valueNumeric="0"/>
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-146">
@@ -21088,6 +21089,7 @@
     <changeSet id="#INTRD-26057_20241023" author="TarikFA." />
     <changeSet id="#INTRD-25749_add_mrr_arr" author="a.rouaguebe" />
     <changeSet id="#INTRD-25838_calc_mrr_quote_order" author="a.rouaguebe" />
+    <changeSet id="INTRD-25951_20241022" author="ZakariaB" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

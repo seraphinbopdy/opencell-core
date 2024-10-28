@@ -691,6 +691,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         getTransactionalMatchingAmount().subtract(ofNullable(matchingAmount.getTransactionalMatchingAmount()).orElse(ZERO)));
                 if (ZERO.compareTo(operation.getMatchingAmount()) == 0) {
                     operation.setMatchingStatus(MatchingStatusEnum.O);
+                    operation.setExcludeFromDefaultBalance(false);
                     List<JournalEntry> byAoAndDirection = journalEntryService.findByAoAndDirection(operation.getId(), JournalEntryDirectionEnum.getValue(operation.getTransactionCategory()
                                                                                                                                                                   .getId()));
                     

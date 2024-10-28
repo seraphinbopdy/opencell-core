@@ -26,11 +26,9 @@ import static jakarta.ws.rs.HttpMethod.PATCH;
 import static jakarta.ws.rs.HttpMethod.POST;
 import static jakarta.ws.rs.HttpMethod.PUT;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.meveo.api.BaseCrudApi;
 import org.meveo.api.dto.metrics.configuration.MetricsConfigurationDto;
@@ -42,6 +40,8 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.metrics.configuration.MetricsConfiguration;
 import org.meveo.service.metrics.configuration.MetricsConfigurationService;
 
+import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 
@@ -57,9 +57,8 @@ public class MetricsConfigurationApi extends BaseCrudApi<MetricsConfiguration, M
     @Inject
     MetricsConfigurationCacheContainerProvider metricsConfigurationCacheContainerProvider;
 
-//    @Inject
-//    @RegistryScope(scope = MetricRegistry.APPLICATION_SCOPE)
-//    MetricRegistry registry; // AKK migrate me
+    @Inject
+    private MeterRegistry meterRegistry;
 
     @Override
     public MetricsConfiguration create(MetricsConfigurationDto dataDto) {
@@ -69,7 +68,8 @@ public class MetricsConfigurationApi extends BaseCrudApi<MetricsConfiguration, M
             throw new EntityAlreadyExistsException(MetricsConfigurationDto.class, dataDto.getCode());
         }
         metricsConfigurationService.create(MetricsConfigurationDto.fromDto(dataDto));
-        // reset cache
+        // Flush changes and refresh cache
+        metricsConfigurationService.commit();
         metricsConfigurationCacheContainerProvider.clearAndUpdateCache();
         return metricsConfigurationService.findByCode(dataDto.getCode());
     }
@@ -95,7 +95,9 @@ public class MetricsConfigurationApi extends BaseCrudApi<MetricsConfiguration, M
         oldMetricsConfiguration.setMethod(dataDto.getMethod());
         oldMetricsConfiguration.setMetricsType(dataDto.getMetricsType());
         MetricsConfiguration updatedMetric = metricsConfigurationService.update(oldMetricsConfiguration);
-        // reset cache
+
+        // Flush changes and refresh cache
+        metricsConfigurationService.commit();
         metricsConfigurationCacheContainerProvider.clearAndUpdateCache();
 
         return updatedMetric;
@@ -108,17 +110,29 @@ public class MetricsConfigurationApi extends BaseCrudApi<MetricsConfiguration, M
             throw new EntityDoesNotExistsException(MetricsConfigurationDto.class, code);
         }
         metricsConfigurationService.remove(oldMetricsConfiguration.getId());
-        // reset cache
+
+        // Flush changes and refresh cache
+        metricsConfigurationService.commit();
         metricsConfigurationCacheContainerProvider.clearAndUpdateCache();
 
         // remove metric history
-        String name = oldMetricsConfiguration.getFullPath().replace("/", "_");
-        log.debug("Removed metrics {}", name);
-//        if ("*.jsf".equals(name)) { // AKK migrate me
-//            registry.removeMatching((metricsID, metrics) -> metricsID.getName().endsWith("jsf"));
-//        } else {
-//            registry.removeMatching((metricsID, metrics) -> metricsID.getName().contains(name));
-//        }
+        String name = oldMetricsConfiguration.getFullPath().replace("/", ".");
+        log.debug("Removed metrics history for {}", name);
+
+        List<Meter.Id> meterIdsToRemove = new ArrayList<Meter.Id>();
+
+        meterRegistry.forEachMeter(meter -> {
+
+            if ("*.jsf".equals(name) && meter.getId().getName().endsWith("jsf")) {
+                meterIdsToRemove.add(meter.getId());
+            } else if (meter.getId().getName().equalsIgnoreCase(name)) {
+                meterIdsToRemove.add(meter.getId());
+            }
+        });
+
+        for (Meter.Id id : meterIdsToRemove) {
+            meterRegistry.remove(id);
+        }
     }
 
     private void validate(MetricsConfigurationDto dataDto) {
@@ -134,7 +148,7 @@ public class MetricsConfigurationApi extends BaseCrudApi<MetricsConfiguration, M
         if (StringUtils.isBlank(dataDto.getMetricsType())) {
             missingParameters.add("metricType");
         }
-        List<String> metrics = Arrays.asList("counter", "timer", "gauge", "histogram", "meter");
+        List<String> metrics = Arrays.asList("counter", "timer", "gauge"); // , "histogram", "meter");
         if (!metrics.contains(dataDto.getMetricsType())) {
             throw new InvalidParameterException(" Invalid metrics type " + dataDto.getMetricsType() + ", allowed metrics values : " + metrics + " ");
         }

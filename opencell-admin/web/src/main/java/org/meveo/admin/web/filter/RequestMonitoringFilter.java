@@ -19,15 +19,21 @@
 package org.meveo.admin.web.filter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.meveo.cache.MetricsConfigurationCacheContainerProvider;
+import org.meveo.commons.utils.EjbUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.Timer;
 import jakarta.inject.Inject;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -41,10 +47,8 @@ public class RequestMonitoringFilter extends HttpFilter {
 
     private Logger log = LoggerFactory.getLogger(RequestMonitoringFilter.class);
 
-//    @Inject
-//    @RegistryScope(scope = MetricRegistry.APPLICATION_SCOPE)
-//    MetricRegistry registry;
- // Akk migrate me
+    @Inject
+    private MeterRegistry meterRegistry;
 
     @Inject
     MetricsConfigurationCacheContainerProvider metricsConfigCache;
@@ -56,7 +60,7 @@ public class RequestMonitoringFilter extends HttpFilter {
         registerMetricsForRequest(req, millis);
     }
 
-    private void registerMetricsForRequest(HttpServletRequest req, long millis) {
+    private void registerMetricsForRequest(HttpServletRequest req, long startTime) {
         try {
             if (req.getRequestURI() != null) {
                 String uri = req.getRequestURI();
@@ -75,8 +79,8 @@ public class RequestMonitoringFilter extends HttpFilter {
                         String metricsType = metrics.get("metrics_type");
                         String unit = metrics.get("metrics_unit");
 
-                        log.info("Register {} metrics for {} in {}", metricsType, req.getMethod(), name);
-                        registerMetricsForMethod(name, metricsType, millis, unit);
+                        log.debug("Register {} metrics for {} in {}", metricsType, req.getMethod(), name);
+                        registerMetricsForMethod(name, metricsType, startTime, unit);
                     }
                 } else {
                     log.debug("Name {} in uri {} not found ", name, uri);
@@ -87,35 +91,41 @@ public class RequestMonitoringFilter extends HttpFilter {
         }
     }
 
-    private void registerMetricsForMethod(String name, String metrics, long start, String unit) {
-        name = metrics + name.replace("/", "_");
+    private void registerMetricsForMethod(String name, String metrics, long startTime, String unit) {
+        name = metrics + name.replace("/", ".");
 
-//        if ("counter".equalsIgnoreCase(metrics)) {
-//            registry.counter(name).inc();
-////        } else if ("gauge".equalsIgnoreCase(metrics)) { 
-////            Gauge gauge =registry.gauge(name, () -> 1);
-////            // gauge.getValue()+1;  // AKK migrate me
-//        } else if ("histogram".equalsIgnoreCase(metrics)) {
-//            Histogram histogram = registry.histogram(name);
-//            long count = histogram.getCount();
-//            histogram.update(count + 1);
-////        } else if ("meter".equalsIgnoreCase(metrics)) { // AKK migrate me
-////            registry.meter(name).mark();
-//        } else if ("timer".equalsIgnoreCase(metrics)) {
-//            createTimerMetrics(name, start, unit);
-//        } else {
-//            log.debug("unknown metrics {} , must from list [counter, gauge, histogram, meter, timer]", metrics);
-//        }
-     // Akk migrate me
+        if ("counter".equalsIgnoreCase(metrics)) {
+            meterRegistry.counter(name, "node", EjbUtils.getCurrentClusterNode()).increment();
+
+        } else if ("gauge".equalsIgnoreCase(metrics)) {
+            AtomicInteger value = meterRegistry.gauge(name, Tags.of("node", EjbUtils.getCurrentClusterNode()), new AtomicInteger(0));
+            value.set(value.get() + 1);
+
+            // Akk migrate me
+
+            // } else if ("histogram".equalsIgnoreCase(metrics)) {
+
+            // Histogram histogram = registry.histogram(name);
+            // long count = histogram.getCount();
+            // histogram.update(count + 1);
+
+            // } else if ("meter".equalsIgnoreCase(metrics)) {
+
+            // registry.meter(name).mark();
+
+        } else if ("timer".equalsIgnoreCase(metrics)) {
+            createTimerMetrics(name, startTime, unit);
+        } else {
+            log.debug("unknown metrics {} , must from list [counter, gauge, histogram, meter, timer]", metrics);
+        }
     }
 
-    private void createTimerMetrics(String name, long start, String unit) {
-//        long end = System.currentTimeMillis();
-//        long duration = end - start;
-//        Metadata metadata = new MetadataBuilder().withName(name).withUnit(unit).build();
-//        Timer timer = registry.timer(metadata);
-//
-//        timer.update(Duration.ofMillis(duration));
-     // Akk migrate me
+    private void createTimerMetrics(String name, long startTime, String unit) {
+
+        long end = System.currentTimeMillis();
+        long duration = end - startTime;
+        Timer timer = meterRegistry.timer(name, "node", EjbUtils.getCurrentClusterNode());
+        // .withUnit(unit) Akk migrate me
+        timer.record(Duration.ofMillis(duration));
     }
 }

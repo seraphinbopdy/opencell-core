@@ -714,10 +714,11 @@
 			<artifactId>httpasyncclient</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<!--		<dependency>-->
-		<!--			<groupId>org.eclipse.microprofile.metrics</groupId>-->
-		<!--			<artifactId>microprofile-metrics-api</artifactId>-->
-		<!--		</dependency>-->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.github.mifmif</groupId>
 			<artifactId>generex</artifactId>

@@ -427,6 +427,11 @@
 			<artifactId>resteasy-client</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- End of libraries included in Jboss -->
 		<dependency>
 			<groupId>org.omnifaces</groupId>
@@ -503,10 +508,10 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- Micro profile dependencies not supported in WF 33 -->
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.microprofile.metrics</groupId>-->
-<!--			<artifactId>microprofile-metrics-api</artifactId>-->
-<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>org.eclipse.microprofile.metrics</groupId>-->
+		<!--			<artifactId>microprofile-metrics-api</artifactId>-->
+		<!--		</dependency>-->
 	</dependencies>
 	<profiles>
 		<profile>

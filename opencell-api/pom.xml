@@ -131,6 +131,11 @@
 			<artifactId>jakarta.jms-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- End of libraries provided in Jboss -->
 		<dependency>
 			<groupId>org.hibernate.orm</groupId>
@@ -176,61 +181,61 @@
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-jaxrs2-jakarta</artifactId>
-<!--			<exclusions>-->
-<!--				<exclusion>-->
-<!--					<groupId>com.fasterxml.jackson.jaxrs</groupId>-->
-<!--					<artifactId>jackson-jaxrs-json-provider</artifactId>-->
-<!--				</exclusion>-->
-<!--			</exclusions>-->
+			<!--			<exclusions>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>com.fasterxml.jackson.jaxrs</groupId>-->
+			<!--					<artifactId>jackson-jaxrs-json-provider</artifactId>-->
+			<!--				</exclusion>-->
+			<!--			</exclusions>-->
 		</dependency>
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
-<!--			<exclusions>-->
-<!--				<exclusion>-->
-<!--					<groupId>org.yaml</groupId>-->
-<!--					<artifactId>snakeyaml</artifactId>-->
-<!--				</exclusion>-->
-<!--				<exclusion>-->
-<!--					<groupId>com.fasterxml.jackson.dataformat</groupId>-->
-<!--					<artifactId>jackson-dataformat-yaml</artifactId>-->
-<!--				</exclusion>-->
-<!--				<exclusion>-->
-<!--					<groupId>jakarta.activation</groupId>-->
-<!--					<artifactId>jakarta.activation-api</artifactId>-->
-<!--				</exclusion>-->
-<!--				<exclusion>-->
-<!--					<groupId>jakarta.xml.bind</groupId>-->
-<!--					<artifactId>jakarta.xml.bind-api</artifactId>-->
-<!--				</exclusion>-->
-<!--			</exclusions>-->
+			<!--			<exclusions>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>org.yaml</groupId>-->
+			<!--					<artifactId>snakeyaml</artifactId>-->
+			<!--				</exclusion>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>com.fasterxml.jackson.dataformat</groupId>-->
+			<!--					<artifactId>jackson-dataformat-yaml</artifactId>-->
+			<!--				</exclusion>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>jakarta.activation</groupId>-->
+			<!--					<artifactId>jakarta.activation-api</artifactId>-->
+			<!--				</exclusion>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>jakarta.xml.bind</groupId>-->
+			<!--					<artifactId>jakarta.xml.bind-api</artifactId>-->
+			<!--				</exclusion>-->
+			<!--			</exclusions>-->
 		</dependency>
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-jaxrs2-servlet-initializer-jakarta</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>io.springfox</groupId>-->
-<!--			<artifactId>springfox-swagger2</artifactId>-->
-<!--			<exclusions>-->
-<!--				<exclusion>-->
-<!--					<groupId>org.springframework</groupId>-->
-<!--					<artifactId>spring-core</artifactId>-->
-<!--				</exclusion>-->
-<!--				<exclusion>-->
-<!--					<groupId>net.bytebuddy</groupId>-->
-<!--					<artifactId>byte-buddy</artifactId>-->
-<!--				</exclusion>-->
-<!--			</exclusions>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework</groupId>-->
-<!--			<artifactId>spring-core</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>io.springfox</groupId>-->
-<!--			<artifactId>springfox-swagger-ui</artifactId>-->
-<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>io.springfox</groupId>-->
+		<!--			<artifactId>springfox-swagger2</artifactId>-->
+		<!--			<exclusions>-->
+		<!--				<exclusion>-->
+		<!--					<groupId>org.springframework</groupId>-->
+		<!--					<artifactId>spring-core</artifactId>-->
+		<!--				</exclusion>-->
+		<!--				<exclusion>-->
+		<!--					<groupId>net.bytebuddy</groupId>-->
+		<!--					<artifactId>byte-buddy</artifactId>-->
+		<!--				</exclusion>-->
+		<!--			</exclusions>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>org.springframework</groupId>-->
+		<!--			<artifactId>spring-core</artifactId>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>io.springfox</groupId>-->
+		<!--			<artifactId>springfox-swagger-ui</artifactId>-->
+		<!--		</dependency>-->
 		<dependency>
 			<groupId>jakarta.jws</groupId>
 			<artifactId>jakarta.jws-api</artifactId>
@@ -250,10 +255,10 @@
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.eclipse.microprofile.metrics</groupId>-->
-<!--			<artifactId>microprofile-metrics-api</artifactId>-->
-<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>org.eclipse.microprofile.metrics</groupId>-->
+		<!--			<artifactId>microprofile-metrics-api</artifactId>-->
+		<!--		</dependency>-->
 		<dependency>
 			<groupId>org.immutables</groupId>
 			<artifactId>value</artifactId>

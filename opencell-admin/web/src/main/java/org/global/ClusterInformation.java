@@ -20,8 +20,11 @@ package org.global;
 
 import org.meveo.commons.utils.EjbUtils;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 @Named
@@ -29,19 +32,14 @@ import jakarta.inject.Named;
 public class ClusterInformation {
     private String clusterNodeName;
 
-//    @Inject
-//    @RegistryScope(scope = MetricRegistry.APPLICATION_SCOPE)
-//    MetricRegistry registry;
- // Akk migrate me
+    @Inject
+    private MeterRegistry meterRegistry;
 
     @PostConstruct
     public void init() {
         this.clusterNodeName = EjbUtils.isRunningInClusterMode() ? EjbUtils.getCurrentClusterNode() : "";
 
-//        Metadata metadata = new MetadataBuilder().withName("node_uname_info").withDescription("Displays the cluster node name").build();
-//        Tag tgNode = new Tag("nodename", clusterNodeName);
-//        registry.gauge(metadata, () -> 1L, tgNode);
-     // Akk migrate me
+        meterRegistry.gauge("node.uname.info", Tags.of("nodename", clusterNodeName), 1L);
     }
 
     public String getClusterNodeName() {

@@ -1,9 +1,16 @@
 package org.meveo.service.job;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.meveo.commons.utils.EjbUtils;
 import org.meveo.model.jobs.JobExecutionResultImpl;
+import org.meveo.model.jobs.JobInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
+import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.InvocationContext;
 
@@ -20,10 +27,8 @@ public class JobExecutionResultInterceptor {
      */
     private static final Logger log = LoggerFactory.getLogger(JobExecutionResultInterceptor.class);
 
-//    @Inject
-//    @RegistryScope(scope = MetricRegistry.APPLICATION_SCOPE)
-//    MetricRegistry registry;
-    // Akk migrate me
+    @Inject
+    private MeterRegistry meterRegistry;
 
     /**
      * Update metrics for Prometheus a method on an entity
@@ -43,10 +48,10 @@ public class JobExecutionResultInterceptor {
         long numberOfRemainingValues = (result.getNbItemsToProcess() - numberOfOKs - numberOfKOs);
         long numberOfWarnings = result.getNbItemsProcessedWithWarning();
 
-        counterInc(result, "number_of_OKs", numberOfOKs);
-        counterInc(result, "number_of_KOs", numberOfKOs);
-        counterInc(result, "number_of_Remaining_Items", numberOfRemainingValues);
-        counterInc(result, "number_of_Warnings", numberOfWarnings);
+        updateMetrics(result, "number_of_OKs", numberOfOKs);
+        updateMetrics(result, "number_of_KOs", numberOfKOs);
+        updateMetrics(result, "number_of_Remaining_Items", numberOfRemainingValues);
+        updateMetrics(result, "number_of_Warnings", numberOfWarnings);
 
         try {
             return context.proceed();
@@ -57,21 +62,19 @@ public class JobExecutionResultInterceptor {
     }
 
     /**
-     * Increment counter metric for JobExecutionResultImpl
+     * Update gauge metrics for Job execution result statistics
      *
-     * @param value
+     * @param jobExecutionResultImpl Job execution result
      * @param name the name of metric
+     * @param value Absolute value to set gauge to.
      */
-    private void counterInc(JobExecutionResultImpl jobExecutionResultImpl, String name, Long value) {
-//        JobInstance jobInstance = jobExecutionResultImpl.getJobInstance();
-//        Metadata metadata = new MetadataBuilder().withName(name + "_" + jobInstance.getJobTemplate() + "_" + jobInstance.getCode()).build();
-//        Tag tgName = new Tag("name", jobInstance.getCode());
-//        Counter counter = registry.counter(metadata, tgName);
-//        if (value != null) {
-//            counter.inc(value - counter.getCount());
-//        } else {
-//            counter.inc();
-//        }
-     // Akk migrate me
+    private void updateMetrics(JobExecutionResultImpl jobExecutionResultImpl, String name, Long value) {
+
+        JobInstance jobInstance = jobExecutionResultImpl.getJobInstance();
+
+        AtomicInteger gaugeValue = meterRegistry.gauge(name + "." + jobInstance.getJobTemplate() + "." + jobInstance.getCode(), Tags.of("name", jobInstance.getCode(), "node", EjbUtils.getCurrentClusterNode()),
+            new AtomicInteger(0));
+
+        gaugeValue.set(value.intValue());
     }
 }

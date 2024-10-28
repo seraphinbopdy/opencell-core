@@ -89,7 +89,7 @@ public class MetricsConfigurationCacheContainerProvider implements CacheContaine
 
         if (cacheName == null || cacheName.equals(metricsConfigCache.getName())) {
             clear();
-            populateJobCache();
+            populateMetricsConfigCache();
         }
     }
 
@@ -98,7 +98,7 @@ public class MetricsConfigurationCacheContainerProvider implements CacheContaine
      */
     public void clearAndUpdateCache() {
         clear();
-        populateJobCache();
+        populateMetricsConfigCache();
     }
 
     /**
@@ -110,7 +110,7 @@ public class MetricsConfigurationCacheContainerProvider implements CacheContaine
     public void populateCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(metricsConfigCache.getName())) {
-            populateJobCache();
+            populateMetricsConfigCache();
         }
     }
 
@@ -171,7 +171,7 @@ public class MetricsConfigurationCacheContainerProvider implements CacheContaine
     /**
      * Initialize cache for all metrics
      */
-    private void populateJobCache() {
+    private void populateMetricsConfigCache() {
         log.debug("Start to pre-populate metrics cache of provider {}.", currentUser.getProviderCode());
         List<MetricsConfiguration> list = metricsConfigurationService.findAllForCache();
         Map<String, Map<String, Map<String, String>>> entries = new HashMap<>();

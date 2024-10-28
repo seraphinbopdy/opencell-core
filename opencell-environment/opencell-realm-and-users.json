@@ -10244,6 +10244,46 @@
             ]
           },
           {
+            "name": "Api Custom Endpoints",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "_id": "c806908f-9450-40f3-a973-c4413026de0b",
+            "uris": [
+              "/api/rest/customization/endpoint/*"
+            ],
+            "scopes": [
+              {
+                "name": "DELETE"
+              },
+              {
+                "name": "GET"
+              },
+              {
+                "name": "POST"
+              },
+              {
+                "name": "PUT"
+              },
+              {
+                "name": "HEAD"
+              }
+            ]
+          },
+          {
+            "name": "Api Custom Endpoints - read via post",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "_id": "c806908f-9450-40f3-a973-c4413026de0c",
+            "uris": [
+              "/api/rest/customization/endpoint/filtering"
+            ],
+            "scopes": [
+              {
+                "name": "POST"
+              }
+            ]
+          },
+          {
             "name": "Default Unprotected Resource",
             "type": "urn:opencell-web:resources:default",
             "ownerManagedAccess": false,
@@ -15828,6 +15868,41 @@
             "config": {
               "resources": "[\"Api V1 Configuration - Files\"]",
               "scopes": "[\"PUT\",\"GET\",\"POST\"]",
+              "applyPolicies": "[\"Role apiAdministrationManagement\"]"
+            }
+          },
+          {
+            "id": "e8fae236-68cb-45e6-8303-1270d5b7e703",
+            "name": "Api Custom Endpoints - read",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "resources": "[\"Api Custom Endpoints\"]",
+              "scopes": "[\"GET\",\"HEAD\"]",
+              "applyPolicies": "[\"Role apiAdministrationVisualization\"]"
+            }
+          },
+          {
+            "id": "98b93861-4329-464b-a691-f3f047199543",
+            "name": "Api Custom Endpoints - read via post - read",
+            "type": "resource",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "resources": "[\"Api Custom Endpoints - read via post\"]",
+              "applyPolicies": "[\"Role apiAdministrationVisualization\"]"
+            }
+          },
+          {
+            "id": "b6a34354-b86b-4eeb-aaad-1e3b15035842",
+            "name": "Api Custom Endpoints - update",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "resources": "[\"Api Custom Endpoints\"]",
+              "scopes": "[\"PUT\",\"POST\",\"DELETE\"]",
               "applyPolicies": "[\"Role apiAdministrationManagement\"]"
             }
           },

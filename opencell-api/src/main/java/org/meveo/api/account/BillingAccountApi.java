@@ -225,7 +225,6 @@ public class BillingAccountApi extends AccountEntityApi {
         if(StringUtils.isBlank(postData.getCode())) {
             String genericEntityCode = customGenericEntityCodeService.getGenericEntityCode(new BillingAccount());
             postData.setCode(genericEntityCode);
-            // addGenericCodeIfAssociated(BillingAccount.class.getName(), postData);
         }
         if (StringUtils.isBlank(postData.getCustomerAccount())) {
             missingParameters.add("customerAccount");

@@ -270,6 +270,7 @@ public class InvoicingApi extends BaseApi {
         }
 
         billingRunService.update(billingRun);
+        billingRunService.getEntityManager().flush();
         billingRunReportService.generateBillingRunReport(billingRun);
         
         return billingRun.getId();

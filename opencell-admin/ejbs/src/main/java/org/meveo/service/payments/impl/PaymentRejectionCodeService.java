@@ -139,7 +139,7 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         List<String> dataToExport = prepareLines(list(new PaginationConfiguration(filters)), languagesDetails, fieldsSeparator);
         try {
             String exportFile = buildExportFilePath(exportFileName, "exports", fileNameExtension);
-            List<String> fields = List.of("Payment gateway", "Rejection code", "Description", getAvailableTradingLanguages(languagesDetails));
+            List<String> fields = List.of("Payment gateway", "Rejection code", "Description", getAvailableTradingLanguages(languagesDetails, fieldsSeparator));
             String header = String.join(fieldsSeparator, fields);
             try (PrintWriter writer = new PrintWriter(exportFile)) {
                 writer.println(header);
@@ -200,12 +200,12 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         return join(DELIMITER, data);
     }
 
-    private String getAvailableTradingLanguages(List<Object[]> languagesDetails) {
+    private String getAvailableTradingLanguages(List<Object[]> languagesDetails, String fieldSeparator) {
         String tradingLanguages = "";
         if (languagesDetails != null) {
             tradingLanguages = languagesDetails.stream()
                     .map(language -> "Description " + language[2])
-                    .collect(joining(";"));
+                    .collect(joining(fieldSeparator));
         }
         return tradingLanguages;
     }

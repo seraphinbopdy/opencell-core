@@ -29,6 +29,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -465,7 +466,7 @@ public class GenericFileExportManager {
 
         // If the map is not empty then save As Record to export - CSV, EXCEL or PDF
         if (!map.isEmpty()) {
-            String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).orElse(";");
+            String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).map(Pattern::quote).orElse(";");
             String decimalSeparator = advancedSettingsApiService.findByCode("standardExports.decimalSeparator").map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).orElse(".");
             String fileNameExtension = advancedSettingsApiService.findByCode("standardExports.fileNameExtension").map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).orElse(null);
             Path filePath = saveAsRecord(filename, map, fileType, fieldDetails, orderedColumn, locale, fieldsSeparator, decimalSeparator, fileNameExtension);

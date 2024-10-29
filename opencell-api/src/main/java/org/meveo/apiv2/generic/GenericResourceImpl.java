@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -228,7 +229,7 @@ public class GenericResourceImpl implements GenericResource {
             locale = "EN"; // default value EN
         }
         if (StringUtils.isBlank(fieldsSeparator)) {
-        	fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).orElse(null);
+        	fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).map(Pattern::quote).orElse(null);
         }
         if (StringUtils.isBlank(decimalSeparator)) {
         	decimalSeparator = advancedSettingsApiService.findByCode("standardExports.decimalSeparator").map(AdvancedSettings::getValue).orElse(null); 

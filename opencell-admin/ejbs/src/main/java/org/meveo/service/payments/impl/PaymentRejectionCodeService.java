@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Stateless
 public class PaymentRejectionCodeService extends BusinessService<PaymentRejectionCode> {
@@ -135,11 +136,12 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                                                                                                                       .orElse("csv");
         String fieldsSeparator = ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator")).map(AdvancedSettings::getValue)
                                                                                                                   .filter(value -> !value.isEmpty())
+                                                                                                                  .map(Pattern::quote)
                                                                                                                   .orElse(";");
         List<String> dataToExport = prepareLines(list(new PaginationConfiguration(filters)), languagesDetails, fieldsSeparator);
         try {
             String exportFile = buildExportFilePath(exportFileName, "exports", fileNameExtension);
-            List<String> fields = List.of("Payment gateway", "Rejection code", "Description", getAvailableTradingLanguages(languagesDetails));
+            List<String> fields = List.of("Payment gateway", "Rejection code", "Description", getAvailableTradingLanguages(languagesDetails, fieldsSeparator));
             String header = String.join(fieldsSeparator, fields);
             try (PrintWriter writer = new PrintWriter(exportFile)) {
                 writer.println(header);
@@ -167,11 +169,11 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         return rejectionCodes.stream()
                 .map(rejectionCode -> String.join(fieldsSeparator, rejectionCode.getPaymentGateway().getCode(),
                         rejectionCode.getCode(), rejectionCode.getDescription(),
-                        buildI18nDescription(rejectionCode.getDescriptionI18n(), languagesDetails)))
+                        buildI18nDescription(rejectionCode.getDescriptionI18n(), languagesDetails, fieldsSeparator)))
                 .collect(toList());
     }
 
-    private String buildI18nDescription(Map<String, String> descriptionI18n, List<Object[]> languagesDetails) {
+    private String buildI18nDescription(Map<String, String> descriptionI18n, List<Object[]> languagesDetails, String fieldsSeparator) {
         if(languagesDetails == null) {
             return EMPTY;
         }
@@ -184,7 +186,7 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                         return ofNullable(descriptionI18n.get(languageCode)).orElse(EMPTY);
                     }
                 })
-                .collect(joining(";"));
+                .collect(joining(fieldsSeparator));
     }
 
     private String buildExportFilePath(String fileName, String directoryName, String fileNameExtension) {
@@ -200,12 +202,12 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         return join(DELIMITER, data);
     }
 
-    private String getAvailableTradingLanguages(List<Object[]> languagesDetails) {
+    private String getAvailableTradingLanguages(List<Object[]> languagesDetails, String fieldsSeparator) {
         String tradingLanguages = "";
         if (languagesDetails != null) {
             tradingLanguages = languagesDetails.stream()
                     .map(language -> "Description " + language[2])
-                    .collect(joining(";"));
+                    .collect(joining(fieldsSeparator));
         }
         return tradingLanguages;
     }

@@ -38,6 +38,7 @@ import static org.meveo.service.payments.impl.PaymentRejectionCodeService.FILE_P
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -889,14 +890,14 @@ public class PaymentApi extends BaseApi {
 		}
 
 		String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator")
-										 .map(AdvancedSettings::getValue).filter(value -> !value.isEmpty())
+										 .map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).map(Pattern::quote)
 										 .orElse(";");
 
 		ImportRejectionCodeConfig config =
 				new ImportRejectionCodeConfig(importRejectionCodeInput.getBase64csv(),
 						importRejectionCodeInput.getIgnoreLanguageErrors(),
 						importRejectionCodeInput.getMode(),
-						fieldsSeparator);
+						Pattern.quote(fieldsSeparator));
 		return rejectionCodeService.importRejectionCodes(config);
 	}
 

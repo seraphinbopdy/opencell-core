@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -975,7 +974,7 @@ public class AccountOperationApi extends BaseApi {
     public String exportCustomerBalance(String fileFormat, CustomerBalanceExportDto exportConfig) {
 
         String locale = "EN"; // default value EN
-        String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).map(Pattern::quote).orElse(null);
+        String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).orElse(null);
         String decimalSeparator = advancedSettingsApiService.findByCode("standardExports.decimalSeparator").map(AdvancedSettings::getValue).orElse(null);
         String fileNameExtension = advancedSettingsApiService.findByCode("standardExports.fileNameExtension").map(AdvancedSettings::getValue).orElse(null);
 

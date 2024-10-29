@@ -211,7 +211,6 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
         String fieldSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator"))
                                         .map(AdvancedSettings::getValue)
                                         .filter(StringUtils::isNotBlank)
-                                        .map(Pattern::quote)
                                         .orElse(",");
 
         Integer lastCurrentVersion = null;
@@ -685,7 +684,6 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             String fieldSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator"))
                                             .map(AdvancedSettings::getValue)
                                             .filter(StringUtils::isNotBlank)
-                                            .map(Pattern::quote)
                                             .orElse(",");
             
             String fileNameExtension = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fileNameExtension"))

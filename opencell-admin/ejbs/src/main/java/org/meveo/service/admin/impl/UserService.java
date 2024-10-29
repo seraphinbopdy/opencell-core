@@ -272,12 +272,12 @@ public class UserService extends PersistenceService<User> {
         } else {
 
             lUser = keycloakAdminClientService.findUser(username, extendedInfo, extendedClientRoles);
-            lUser = getOrCreateDbUserFromKCUser(lUser);
+            if (lUser != null) {
+                lUser = getOrCreateDbUserFromKCUser(lUser);
+            }
         }
         return lUser;
     }
-
-    
 
     /**
      * Lookup additional information from a user in database. If user is not found in the database, create a new with information from a keycloak user
@@ -287,7 +287,7 @@ public class UserService extends PersistenceService<User> {
      */
     private User getOrCreateDbUserFromKCUser(User kcUser) {
         User user = null;
-        
+
         // Look up a used
         try {
             user = getEntityManager().createNamedQuery("User.getByUsername", User.class).setParameter("username", kcUser.getUserName().toLowerCase()).getSingleResult();
@@ -302,14 +302,13 @@ public class UserService extends PersistenceService<User> {
 
         user.setEmail(kcUser.getEmail());
         user.setName(kcUser.getName());
-        
+
         user.setRolesByClient(kcUser.getRolesByClient());
         user.setUserLevel(kcUser.getUserLevel());
         user.setAttributes(kcUser.getAttributes());
         return user;
     }
-    
-    
+
     public User getUserFromDatabase(String pUserName) {
         User lUser = null;
         try {

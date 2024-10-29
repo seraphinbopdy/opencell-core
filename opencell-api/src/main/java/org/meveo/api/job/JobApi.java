@@ -127,7 +127,13 @@ public class JobApi extends BaseApi {
             jobCacheContainerProvider.resetJobRunningStatus(jobInstance);
         }
 
-        Long executionId = jobExecutionService.executeJob(jobInstance, getJobRunTimeJobValues(jobExecution, jobInstance), JobLauncherEnum.API);
+        Long executionId = null;
+        if (jobExecution.isWaitToComplete()) {
+            executionId = jobExecutionService.executeJobWithWait(jobInstance, getJobRunTimeJobValues(jobExecution, jobInstance), JobLauncherEnum.API);
+
+        } else {
+            executionId = jobExecutionService.executeJob(jobInstance, getJobRunTimeJobValues(jobExecution, jobInstance), JobLauncherEnum.API);
+        }
 
         return findJobExecutionResult(null, executionId);
     }

@@ -815,6 +815,11 @@ public class DateUtils {
             if ((periodEnd.compareTo(checkEnd) <= 0 && periodEnd.compareTo(checkStart) > 0) || (periodStart.compareTo(checkEnd) < 0 && periodStart.compareTo(checkStart) >= 0)) {
                 return true;
             }
+            
+            // Periods are exactly equals
+            if (periodStart.compareTo(checkStart) == 0 && periodEnd.compareTo(checkEnd) == 0) {
+                return true;
+            }
         }
         return false;
     }

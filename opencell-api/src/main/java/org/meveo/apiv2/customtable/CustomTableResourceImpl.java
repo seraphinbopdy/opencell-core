@@ -4,7 +4,6 @@ import static java.util.Optional.ofNullable;
 
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -53,7 +52,7 @@ public class CustomTableResourceImpl implements CustomTableResource {
 		List<Map<String, Object>> data = ofNullable(customTableService.exportCustomTable(cet)).orElseThrow(
 				() -> new NotFoundException("The custom table code " + customTableCode + " is empty"));
 		
-        String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).map(Pattern::quote).orElse(",");
+        String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).orElse(",");
         String decimalSeparator = advancedSettingsApiService.findByCode("standardExports.decimalSeparator").map(AdvancedSettings::getValue).orElse("."); 
         String fileNameExtension = advancedSettingsApiService.findByCode("standardExports.fileNameExtension").map(AdvancedSettings::getValue).orElse("csv"); 
 

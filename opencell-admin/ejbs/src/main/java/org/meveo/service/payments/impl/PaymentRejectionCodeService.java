@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Stateless
 public class PaymentRejectionCodeService extends BusinessService<PaymentRejectionCode> {
@@ -136,7 +135,6 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                                                                                                                       .orElse("csv");
         String fieldsSeparator = ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator")).map(AdvancedSettings::getValue)
                                                                                                                   .filter(value -> !value.isEmpty())
-                                                                                                                  .map(Pattern::quote)
                                                                                                                   .orElse(";");
         List<String> dataToExport = prepareLines(list(new PaginationConfiguration(filters)), languagesDetails, fieldsSeparator);
         try {
@@ -169,11 +167,11 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         return rejectionCodes.stream()
                 .map(rejectionCode -> String.join(fieldsSeparator, rejectionCode.getPaymentGateway().getCode(),
                         rejectionCode.getCode(), rejectionCode.getDescription(),
-                        buildI18nDescription(rejectionCode.getDescriptionI18n(), languagesDetails, fieldsSeparator)))
+                        buildI18nDescription(rejectionCode.getDescriptionI18n(), languagesDetails)))
                 .collect(toList());
     }
 
-    private String buildI18nDescription(Map<String, String> descriptionI18n, List<Object[]> languagesDetails, String fieldsSeparator) {
+    private String buildI18nDescription(Map<String, String> descriptionI18n, List<Object[]> languagesDetails) {
         if(languagesDetails == null) {
             return EMPTY;
         }
@@ -186,7 +184,7 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                         return ofNullable(descriptionI18n.get(languageCode)).orElse(EMPTY);
                     }
                 })
-                .collect(joining(fieldsSeparator));
+                .collect(joining(";"));
     }
 
     private String buildExportFilePath(String fileName, String directoryName, String fileNameExtension) {
@@ -202,12 +200,12 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         return join(DELIMITER, data);
     }
 
-    private String getAvailableTradingLanguages(List<Object[]> languagesDetails, String fieldsSeparator) {
+    private String getAvailableTradingLanguages(List<Object[]> languagesDetails, String fieldSeparator) {
         String tradingLanguages = "";
         if (languagesDetails != null) {
             tradingLanguages = languagesDetails.stream()
                     .map(language -> "Description " + language[2])
-                    .collect(joining(fieldsSeparator));
+                    .collect(joining(fieldSeparator));
         }
         return tradingLanguages;
     }

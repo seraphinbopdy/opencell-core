@@ -40,7 +40,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.ejb.*;
@@ -217,7 +216,6 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
 	    var columnHeader = findColumnHeaderForReportQuery(reportQuery);
         String fieldsSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator"))
                                          .map(AdvancedSettings::getValue).filter(value -> !value.isEmpty())
-                                         .map(Pattern::quote)
                                          .orElse(DELIMITER);
         
         String decimalSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.decimalSeparator"))

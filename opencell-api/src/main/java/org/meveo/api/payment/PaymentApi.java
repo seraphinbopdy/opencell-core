@@ -897,7 +897,7 @@ public class PaymentApi extends BaseApi {
 				new ImportRejectionCodeConfig(importRejectionCodeInput.getBase64csv(),
 						importRejectionCodeInput.getIgnoreLanguageErrors(),
 						importRejectionCodeInput.getMode(),
-						Pattern.quote(fieldsSeparator));
+						fieldsSeparator);
 		return rejectionCodeService.importRejectionCodes(config);
 	}
 

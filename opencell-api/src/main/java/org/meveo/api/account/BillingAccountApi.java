@@ -223,7 +223,9 @@ public class BillingAccountApi extends AccountEntityApi {
                                  CustomerAccount associatedCA, Version versioning) throws MeveoApiException, BusinessException {
 
         if(StringUtils.isBlank(postData.getCode())) {
-            addGenericCodeIfAssociated(BillingAccount.class.getName(), postData);
+            String genericEntityCode = customGenericEntityCodeService.getGenericEntityCode(new BillingAccount());
+            postData.setCode(genericEntityCode);
+            // addGenericCodeIfAssociated(BillingAccount.class.getName(), postData);
         }
         if (StringUtils.isBlank(postData.getCustomerAccount())) {
             missingParameters.add("customerAccount");

@@ -355,7 +355,7 @@ public class DiscountPlanInstance extends BaseEntity implements ICustomFieldEnti
             this.status = DiscountPlanInstanceStatusEnum.ACTIVE;
             return;
         }
-        if (( start == null || now.before(start) ) && ( end == null || now.after(end))) {
+        if (( start == null || now.before(start) ) && ( end != null)) {
             this.status = DiscountPlanInstanceStatusEnum.APPLIED;
             return;
         }

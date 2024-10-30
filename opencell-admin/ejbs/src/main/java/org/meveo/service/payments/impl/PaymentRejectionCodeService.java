@@ -167,11 +167,11 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
         return rejectionCodes.stream()
                 .map(rejectionCode -> String.join(fieldsSeparator, rejectionCode.getPaymentGateway().getCode(),
                         rejectionCode.getCode(), rejectionCode.getDescription(),
-                        buildI18nDescription(rejectionCode.getDescriptionI18n(), languagesDetails)))
+                        buildI18nDescription(rejectionCode.getDescriptionI18n(), languagesDetails, fieldsSeparator)))
                 .collect(toList());
     }
 
-    private String buildI18nDescription(Map<String, String> descriptionI18n, List<Object[]> languagesDetails) {
+    private String buildI18nDescription(Map<String, String> descriptionI18n, List<Object[]> languagesDetails, String fieldsSeparator) {
         if(languagesDetails == null) {
             return EMPTY;
         }
@@ -184,7 +184,7 @@ public class PaymentRejectionCodeService extends BusinessService<PaymentRejectio
                         return ofNullable(descriptionI18n.get(languageCode)).orElse(EMPTY);
                     }
                 })
-                .collect(joining(";"));
+                .collect(joining(fieldsSeparator));
     }
 
     private String buildExportFilePath(String fileName, String directoryName, String fileNameExtension) {

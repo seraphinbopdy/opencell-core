@@ -21090,6 +21090,7 @@
     <changeSet id="#INTRD-25749_add_mrr_arr" author="a.rouaguebe" />
     <changeSet id="#INTRD-25838_calc_mrr_quote_order" author="a.rouaguebe" />
     <changeSet id="INTRD-25951_20241022" author="ZakariaB" />
+    <changeSet id="#INTRD-26159_20241029" author="TarikFA." />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

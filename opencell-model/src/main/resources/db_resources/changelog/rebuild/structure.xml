@@ -513,6 +513,7 @@
         <createSequence sequenceName="ar_payment_rejection_codes_group_seq" startValue="1" />
         <createSequence sequenceName="ar_payment_rejection_action_report_seq" startValue="1" />
         <createSequence sequenceName="payment_term_seq" startValue="1"/>
+        <createSequence sequenceName="billing_purchase_order_seq" startValue="1" />
 
     </changeSet>
 
@@ -14172,6 +14173,35 @@
             <column name="search_id" />
         </createIndex>
     </changeSet>
+    <changeSet id="#INTRD-26054_20241101_build" author="TarikFA.">
+        <createTable tableName="billing_purchase_order">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="billing_purchase_order_pkey" />
+            </column>
+            <column name="version" type="int4" />
+            <column name="creator" type="varchar(100)" />
+            <column name="created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="updater" type="varchar(100)" />
+            <column name="updated" type="datetime" />
+            <column name="code" type="varchar(255)" />
+            <column name="description" type="varchar(255)" />
+            <column name="number" type="varchar(100)" >
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="start_date" type="datetime"/>
+            <column name="end_date" type="datetime"/>
+            <column name="delivery_date" type="datetime"/>
+            <column name="account_level" type="varchar(50)" >
+                <constraints nullable="false" />
+            </column>
+            <column name="seller_id" type="bigint" />
+            <column name="customer_id" type="bigint"/>
+            <column name="customer_account_id" type="bigint"/>
+            <column name="billing_account_id" type="bigint" />
+        </createTable>
+    </changeSet>
     <!-- end tables -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-def-val-1">
@@ -19456,6 +19486,24 @@
                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
                 onUpdate="NO ACTION" />
     </changeSet>
+
+    <changeSet id="#INTRD-26054_20241101_fk" author="TarikFA.">
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="seller_id" constraintName="billing_purchase_order_seller_id_fk"
+                                 referencedTableName="crm_seller"
+                                 referencedColumnNames="id" />
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="customer_id" constraintName="billing_purchase_order_customer_id_fk"
+                                 referencedTableName="crm_customer"
+                                 referencedColumnNames="id" />
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="customer_account_id" constraintName="billing_purchase_order_customer_account_id_fk"
+                                 referencedTableName="ar_customer_account"
+                                 referencedColumnNames="id" />
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="billing_account_id" constraintName="billing_purchase_order_billing_account_id_fk"
+                                 referencedTableName="billing_billing_account"
+                                 referencedColumnNames="id" />
+    </changeSet>
     
     <!-- end fk -->
 
@@ -21090,6 +21138,7 @@
     <changeSet id="#INTRD-25749_add_mrr_arr" author="a.rouaguebe" />
     <changeSet id="#INTRD-25838_calc_mrr_quote_order" author="a.rouaguebe" />
     <changeSet id="INTRD-25951_20241022" author="ZakariaB" />
+    <changeSet id="#INTRD-26054_20241101" author="TarikFA." />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

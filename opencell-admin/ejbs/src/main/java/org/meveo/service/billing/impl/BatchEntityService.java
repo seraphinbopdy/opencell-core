@@ -597,10 +597,10 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
                         batchEntities.add(batchEntity);
                     } else {
                         if (!targetJob.equals(batchEntity.getTargetJob())) {
-                            log.warn(resourceMessages.getString("batchEntityService.targetJob.warning", batchEntity.getId(), batchEntity.getTargetJob(), jobInstanceCode));
+                            jobExecutionResult.registerWarning(resourceMessages.getString("batchEntityService.targetJob.warning", batchEntity.getId(), batchEntity.getTargetJob(), jobInstanceCode));
                         }
                         if (batchEntity.getStatus() != BatchEntityStatusEnum.OPEN) {
-                            log.warn(resourceMessages.getString("batchEntityService.status.warning", batchEntity.getId(), batchEntity.getStatus()));
+                            jobExecutionResult.registerWarning(resourceMessages.getString("batchEntityService.status.warning", batchEntity.getId(), batchEntity.getStatus()));
                         }
                     }
                 }

@@ -46,7 +46,6 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -216,6 +215,7 @@ public class PaymentApi extends BaseApi {
 		paymentService.calculateAmountsByTransactionCurrency(payment, customerAccount,
 				paymentDto.getAmount(), paymentDto.getTransactionalCurrency(), payment.getTransactionDate());
 
+		final Date today = new Date();
 		payment.setJournal(occTemplate.getJournal());
         payment.setPaymentMethod(paymentDto.getPaymentMethod());
         payment.setAccountingCode(occTemplate.getAccountingCode());
@@ -225,8 +225,8 @@ public class PaymentApi extends BaseApi {
         payment.setAccountCodeClientSide(occTemplate.getAccountCodeClientSide());
         payment.setCustomerAccount(customerAccount);
         payment.setReference(paymentDto.getReference());
-        payment.setDueDate(paymentDto.getDueDate() == null ? new Date() : paymentDto.getDueDate());
-        payment.setTransactionDate(paymentDto.getTransactionDate() == null ? new Date() : paymentDto.getTransactionDate());
+        payment.setDueDate(paymentDto.getDueDate() == null ? today : paymentDto.getDueDate());
+        payment.setTransactionDate(today);
         payment.setMatchingStatus(O);
         payment.setPaymentOrder(paymentDto.getPaymentOrder());
         payment.setFees(paymentDto.getFees());
@@ -241,7 +241,7 @@ public class PaymentApi extends BaseApi {
         payment.setPaymentInfo6(paymentDto.getPaymentInfo6());
         payment.setBankCollectionDate(paymentDto.getBankCollectionDate());
 		payment.setCollectionDate(paymentDto.getCollectionDate() == null ? paymentDto.getBankCollectionDate() : paymentDto.getCollectionDate());
-		payment.setAccountingDate(new Date());
+		payment.setAccountingDate(today);
 		payment.setIsManualPayment(true);
 		accountOperationService.handleAccountingPeriods(payment);
 

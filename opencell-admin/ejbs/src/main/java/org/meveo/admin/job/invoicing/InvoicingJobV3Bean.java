@@ -25,6 +25,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import org.meveo.jpa.MeveoJpa;
 import javax.interceptor.Interceptors;
+import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.collections4.ListUtils;
@@ -37,7 +38,6 @@ import org.meveo.admin.job.IteratorBasedJobProcessing;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.admin.job.utils.BillinRunApplicationElFilterUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
-import org.meveo.commons.utils.StringUtils;
 import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.JpaAmpNewTx;
@@ -183,6 +183,16 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 		if (billingRunValidationScript != null && billingRun.getBillingCycle() != null) {
 			billingRun.getBillingCycle().setBillingRunValidationScript(billingRunValidationScript);
 		}
+		try {
+			billingRunService.executeBillingRunValidationScript(billingRun);
+		} catch (BusinessException exception) {
+			if(billingRunService.isBillingRunContainingRejectedInvoices(billingRun.getId())) {
+				billingRun.setStatus(REJECTED);
+				billingRunService.update(billingRun);
+				throw new BadRequestException(exception.getMessage());
+			}
+		}
+		billingRun = billingRunService.refreshOrRetrieve(billingRun);
 		if ((isFullAutomatic || billingRun.getProcessType() == BillingProcessTypesEnum.AUTOMATIC)
 				&& (BillingRunStatusEnum.POSTINVOICED.equals(billingRun.getStatus())
 						|| BillingRunStatusEnum.POSTVALIDATED.equals(billingRun.getStatus())

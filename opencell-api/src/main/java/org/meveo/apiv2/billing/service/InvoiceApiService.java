@@ -8,12 +8,14 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
+import static org.meveo.model.jobs.JobLauncherEnum.API;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +31,13 @@ import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.job.UpdateHugeEntityJob;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.BaseApi;
@@ -58,11 +63,16 @@ import org.meveo.model.billing.InvoiceStatusEnum;
 import org.meveo.model.billing.LinkedInvoice;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.RatedTransactionAction;
+import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.DiscountPlan;
+import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.filter.Filter;
+import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.service.billing.impl.*;
 import org.meveo.service.filter.FilterService;
+import org.meveo.service.job.JobExecutionService;
+import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
 
@@ -104,6 +114,12 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 	@Inject
 	private AdvancedSettingsService advancedSettingsService;
+	
+	@Inject
+	private JobInstanceService jobInstanceService;
+
+	@Inject
+	private JobExecutionService jobExecutionService;
 
 	@Override
 	public List<Invoice> list(Long offset, Long limit, String sort, String orderBy, String filter) {
@@ -492,6 +508,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 		return filter;
 	}
 	
+	@Transactional
 	public Invoice createAdjustment(Invoice invoice, InvoiceLinesToReplicate invoiceLinesToReplicate) {
 	    Invoice adjInvoice = null;
 
@@ -543,6 +560,29 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
     	        invoice.setLinkedInvoices(new HashSet<>());
     	    }
     	    invoiceService.update(invoice);
+
+			if(Boolean.TRUE.equals(invoiceLinesToReplicate.getRerate())) {
+				JobInstance markWOToRerateJob = jobInstanceService.findByCode("MarkWOToRerateJob");
+				if(markWOToRerateJob == null) {
+					throw new EntityDoesNotExistsException(JobInstance.class, "MarkWOToRerateJob");
+				}
+
+				if(markWOToRerateJob.getCfValues() == null) {
+					markWOToRerateJob.setCfValues(new CustomFieldValues());
+				}
+
+				markWOToRerateJob.setParamValue(UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME, WalletOperation.class.getName());
+
+				Map<String, Map<String, Object>> filters = new HashMap<>();
+				filters.put("filters", Map.of("ratedTransaction.invoiceLine.invoice.id", invoice.getId()));
+				try {
+					markWOToRerateJob.setParamValue(UpdateHugeEntityJob.CF_DEFAULT_FILTER, new ObjectMapper().writeValueAsString(filters));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+
+				jobExecutionService.executeJob(markWOToRerateJob, markWOToRerateJob.getRunTimeValues(), API);
+			}
 	    }
 	    catch (Exception e) {
 	        throw new BusinessApiException(e.getMessage());

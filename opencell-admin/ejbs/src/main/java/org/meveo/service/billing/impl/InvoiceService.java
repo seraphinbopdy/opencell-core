@@ -7273,12 +7273,16 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
             invoiceType = invoiceTypeService.findByCode(invoiceLinesToReplicate.getAdjType());
         }
+        
+        Invoice adj;
 
         if (invoiceLineRTs != null && !invoiceLineRTs.isEmpty()) {
-            return createAdjustmentFromRatedTransactions(invoice, invoiceLineRTs, invoiceType);
+            adj = createAdjustmentFromRatedTransactions(invoice, invoiceLineRTs, invoiceType);
         } else {
-            return createAdjustment(invoice, invoiceLinesToReplicate.getInvoiceLinesIds(), invoiceType);
+            adj = createAdjustment(invoice, invoiceLinesToReplicate.getInvoiceLinesIds(), invoiceType);
         }
+        adj.setComment(invoiceLinesToReplicate.getComment());
+        return adj;
     }
 
     private Invoice createAdjustmentFromRatedTransactions(Invoice invoice, List<InvoiceLineRTs> invoiceLineRTs, InvoiceType type) {

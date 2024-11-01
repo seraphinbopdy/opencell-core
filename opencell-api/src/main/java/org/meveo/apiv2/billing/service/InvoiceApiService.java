@@ -39,6 +39,7 @@ import org.meveo.api.BaseApi;
 import org.meveo.api.dto.FilterDto;
 import org.meveo.api.dto.billing.QuarantineBillingRunDto;
 import org.meveo.api.dto.invoice.GenerateInvoiceRequestDto;
+import org.meveo.api.exception.AccessDeniedException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
@@ -523,6 +524,14 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	    if (invoiceLinesToReplicate.getGlobalAdjustment() == null) {
             throw new MissingParameterException("globalAdjustment");
         }
+		
+		if(Boolean.TRUE.equals(invoiceLinesToReplicate.getRerate())) {
+			if(!Boolean.TRUE.equals(advancedSettingsService.getParameter("rating.allowBilledItemsRerating"))) {
+				throw new ForbiddenException(resourceMessages.getString("error.adjustment.action.forbidden"));
+			} else if(!Boolean.TRUE.equals(invoiceLinesToReplicate.getGlobalAdjustment())) {
+				throw new ForbiddenException(resourceMessages.getString("error.adjustment.action.incompatible"));
+			}
+		}
 
 	    try {
 	        adjInvoice = invoiceService.createAdjustment(invoice, invoiceLinesToReplicate);

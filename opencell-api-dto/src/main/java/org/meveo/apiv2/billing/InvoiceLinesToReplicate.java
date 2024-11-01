@@ -27,4 +27,12 @@ public interface InvoiceLinesToReplicate {
 
     @Schema(description = "Containing list of invoice line Ids to replicate in the new adjustment.")
     List<InvoiceLineRTs> getInvoiceLinesRTs();
+
+    @Schema(description = "Flag to indicate if rerating is needed. Default value : false")
+    @Nullable
+    Boolean getRerate();
+    
+    @Schema(description = "Comment to be added to the adjustment.")
+    @Nullable
+    String getComment();
 }

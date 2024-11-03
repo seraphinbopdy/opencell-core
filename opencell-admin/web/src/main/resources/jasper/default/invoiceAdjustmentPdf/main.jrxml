@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="main" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryNewPage="true" uuid="801855a9-548e-443b-81d5-d27d42b5df88">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="dev.xml"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="pdf\DataAdapter.jrdax"/>
 	<style name="table">
 		<box>
 			<pen lineWidth="1.0" lineColor="#000000"/>
@@ -154,7 +154,10 @@
 		<fieldDescription><![CDATA[/invoice/header/invoiceDate]]></fieldDescription>
 	</field>
 	<field name="country" class="java.lang.String">
-		<fieldDescription><![CDATA[ancestor::invoice/@country]]></fieldDescription>
+		<fieldDescription><![CDATA[/invoice/@country]]></fieldDescription>
+	</field>
+	<field name="language" class="java.lang.String">
+		<fieldDescription><![CDATA[/invoice/@language]]></fieldDescription>
 	</field>
 	<field name="baQuality" class="java.lang.String">
 		<fieldDescription><![CDATA[/invoice/header/billingAccount/name/quality]]></fieldDescription>
@@ -400,18 +403,18 @@
 							<property name="ShowOutOfBoundContent" value="true"/>
 						</reportElement>
 						<rectangle radius="10">
-							<reportElement isPrintRepeatedValues="false" x="16" y="3" width="216" height="217" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ab33f039-d780-4304-9a78-c8a1b32b72e4"/>
+							<reportElement x="16" y="3" width="216" height="217" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="ab33f039-d780-4304-9a78-c8a1b32b72e4"/>
 							<graphicElement>
 								<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 							</graphicElement>
 						</rectangle>
-						<staticText>
+						<textField>
 							<reportElement mode="Opaque" x="20" y="7" width="199" height="23" forecolor="#030303" backcolor="#F2F4F5" uuid="33273ffd-d898-4044-89d9-fdafc14d9d26">
 								<property name="com.jaspersoft.studio.unit.x" value="px"/>
 								<property name="com.jaspersoft.studio.unit.y" value="px"/>
 								<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							</reportElement>
-							<box topPadding="0" leftPadding="7" bottomPadding="0" rightPadding="0">
+							<box topPadding="0" leftPadding="5" bottomPadding="0" rightPadding="0">
 								<pen lineWidth="5.0" lineColor="#FF8C00"/>
 								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								<leftPen lineWidth="1.5" lineStyle="Solid" lineColor="#FF0000"/>
@@ -421,21 +424,21 @@
 							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="SansSerif" size="14" isBold="true"/>
 							</textElement>
-							<text><![CDATA[Customer]]></text>
-						</staticText>
+							<textFieldExpression><![CDATA[($F{language}=="FRA" ? "Client" : "Customer")]]></textFieldExpression>
+						</textField>
 						<rectangle radius="0">
-							<reportElement isPrintRepeatedValues="false" x="16" y="206" width="216" height="104" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="62eca460-82c3-42a2-8462-a8e3a4f60aee"/>
+							<reportElement x="16" y="206" width="216" height="104" forecolor="#FFFFFF" backcolor="#F2F4F5" uuid="62eca460-82c3-42a2-8462-a8e3a4f60aee"/>
 							<graphicElement>
 								<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 							</graphicElement>
 						</rectangle>
-						<staticText>
+						<textField>
 							<reportElement mode="Opaque" x="20" y="209" width="159" height="22" forecolor="#000000" backcolor="#F2F4F5" uuid="72e88def-ea91-49d3-a5ef-bb4ee290a66f">
 								<property name="com.jaspersoft.studio.unit.x" value="px"/>
 								<property name="com.jaspersoft.studio.unit.y" value="px"/>
 								<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							</reportElement>
-							<box topPadding="0" leftPadding="7" bottomPadding="0" rightPadding="0">
+							<box topPadding="0" leftPadding="5" bottomPadding="0" rightPadding="0">
 								<pen lineWidth="5.0" lineColor="#FF8C00"/>
 								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								<leftPen lineWidth="1.5" lineStyle="Solid" lineColor="#FF0000"/>
@@ -445,27 +448,30 @@
 							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="SansSerif" size="14" isBold="true"/>
 							</textElement>
-							<text><![CDATA[Your references]]></text>
-						</staticText>
+							<textFieldExpression><![CDATA[($F{language}==("FRA") ? "Votre référence" : "Your references")]]></textFieldExpression>
+						</textField>
 						<textField>
-							<reportElement x="24" y="232" width="202" height="78" uuid="23c38d61-db6a-4396-b5fd-a345c9469a0e">
+							<reportElement x="25" y="232" width="202" height="78" uuid="23c38d61-db6a-4396-b5fd-a345c9469a0e">
 								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<property name="com.jaspersoft.studio.unit.x" value="px"/>
 							</reportElement>
 							<textElement verticalAlignment="Top" markup="styled">
 								<font fontName="SansSerif" size="10" isBold="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[(($F{subCode}!=null && !String.valueOf($F{subCode}).isEmpty() && !String.valueOf($F{subCode}).equals("null")) ? "<style isBold='true'>Customer ref: </style>" + $F{subCode}+ "\n" : "")
+							<textFieldExpression><![CDATA[(($F{subCode}!=null && !String.valueOf($F{subCode}).isEmpty() && !String.valueOf($F{subCode}).equals("null")) ? "<style isBold='true'>"+($F{language}=="FRA" ? "Réf Client: " : "Customer ref: ") +"</style>" + $F{subCode}+ "\n" : "")
 +
-(($F{openOrderNumber}!=null && !String.valueOf($F{openOrderNumber}).isEmpty() && !String.valueOf($F{openOrderNumber}).equals("null")) ? "<style isBold='true'>Open order: </style>" + $F{openOrderNumber}+ "\n" : "")
+(($F{openOrderNumber}!=null && !String.valueOf($F{openOrderNumber}).isEmpty() && !String.valueOf($F{openOrderNumber}).equals("null")) ? "<style isBold='true'>"+ ($F{language}=="FRA" ? "Commande ouverte: " : "Open order: ") +"</style>" + $F{openOrderNumber}+ "\n" : "")
 +
-(($F{contracts}!=null && !String.valueOf($F{contracts}).isEmpty() && !String.valueOf($F{contracts}).equals("null")) ? "<style isBold='true'>Contract: </style>" + $F{contracts}+ "\n" : "")
+(($F{contracts}!=null && !String.valueOf($F{contracts}).isEmpty() && !String.valueOf($F{contracts}).equals("null")) ? "<style isBold='true'>"+ ($F{language}=="FRA" ? "Contrat: " : "Contract: ") +"</style>" + $F{contracts}+ "\n" : "")
 +
-(($F{orderNumber}!=null && !String.valueOf($F{orderNumber}).isEmpty() && !String.valueOf($F{orderNumber}).equals("null")) ? "<style isBold='true'>Order: </style>" + $F{orderNumber}+ "\n" : "")
+(($F{orderNumber}!=null && !String.valueOf($F{orderNumber}).isEmpty() && !String.valueOf($F{orderNumber}).equals("null")) ? "<style isBold='true'>"+ ($F{language}=="FRA" ? "Commande: " : "Order: ") +"</style>" + $F{orderNumber}+ "\n" : "")
 +
-(($F{subCode}!=null && !String.valueOf($F{subCode}).isEmpty() && !String.valueOf($F{subCode}).equals("null")) ? "<style isBold='true'>Subscription: </style>" + $F{subCode}+ "\n" : "")]]></textFieldExpression>
+(($F{subCode}!=null && !String.valueOf($F{subCode}).isEmpty() && !String.valueOf($F{subCode}).equals("null")) ? "<style isBold='true'>"+ ($F{language}=="FRA" ? "Abonnement: " : "Subscription: ") +"</style>" + $F{subCode}+ "\n" : "")]]></textFieldExpression>
 						</textField>
 						<textField>
-							<reportElement x="24" y="31" width="201" height="97" uuid="37417c6f-aeec-4768-8e5e-5aedbb77505a"/>
+							<reportElement x="25" y="31" width="201" height="97" uuid="37417c6f-aeec-4768-8e5e-5aedbb77505a">
+								<property name="com.jaspersoft.studio.unit.x" value="px"/>
+							</reportElement>
 							<textElement textAlignment="Left" verticalAlignment="Top" markup="styled">
 								<font fontName="SansSerif" size="10" isBold="false"/>
 							</textElement>
@@ -483,13 +489,13 @@
 + (($F{baRegNo}!=null && !String.valueOf($F{baRegNo}).isEmpty() && !String.valueOf($F{baRegNo}).equals("null")) ? "<style isBold='true'>Reg.nr.: </style>" + $F{baRegNo}+ "\n" : "")
 + (($F{baVatNo}!=null && !String.valueOf($F{baVatNo}).isEmpty() && !String.valueOf($F{baVatNo}).equals("null")) ? "<style isBold='true'>VAT: </style>" + $F{baVatNo}+ "\n" : "")]]></textFieldExpression>
 						</textField>
-						<staticText>
+						<textField>
 							<reportElement mode="Opaque" x="20" y="123" width="205" height="23" forecolor="#000000" backcolor="#F2F4F5" uuid="041d8407-dc27-421c-8369-535a303ef668">
 								<property name="com.jaspersoft.studio.unit.x" value="px"/>
 								<property name="com.jaspersoft.studio.unit.y" value="px"/>
 								<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							</reportElement>
-							<box topPadding="0" leftPadding="7" bottomPadding="0" rightPadding="0">
+							<box topPadding="0" leftPadding="5" bottomPadding="0" rightPadding="0">
 								<pen lineWidth="5.0" lineColor="#FF8C00"/>
 								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								<leftPen lineWidth="1.5" lineStyle="Solid" lineColor="#FF0000"/>
@@ -499,10 +505,12 @@
 							<textElement textAlignment="Left" verticalAlignment="Middle">
 								<font fontName="SansSerif" size="14" isBold="true"/>
 							</textElement>
-							<text><![CDATA[Delivery address]]></text>
-						</staticText>
+							<textFieldExpression><![CDATA[($F{language}=="FRA" ? "Adresse de livraison" : "Delivery address")]]></textFieldExpression>
+						</textField>
 						<textField>
-							<reportElement x="24" y="146" width="202" height="73" uuid="f5ff75b6-07d3-4380-a507-85c8544fcf35"/>
+							<reportElement x="25" y="146" width="202" height="73" uuid="f5ff75b6-07d3-4380-a507-85c8544fcf35">
+								<property name="com.jaspersoft.studio.unit.x" value="px"/>
+							</reportElement>
 							<textElement textAlignment="Left" verticalAlignment="Top">
 								<font fontName="SansSerif" size="10" isBold="false"/>
 							</textElement>
@@ -613,7 +621,9 @@
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+"/"]]></textFieldExpression>
 			</textField>
 			<image scaleImage="RealSize" hAlign="Left" vAlign="Middle">
-				<reportElement x="0" y="-1" width="189" height="85" uuid="919a6ccd-01f3-46e8-a5b8-9cfbfb50364b"/>
+				<reportElement x="-6" y="-1" width="189" height="85" uuid="919a6ccd-01f3-46e8-a5b8-9cfbfb50364b">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
 				<imageExpression><![CDATA[$P{logoPath}+"Pictos/opensoft.jpg"]]></imageExpression>
 			</image>
 			<image>
@@ -627,7 +637,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{invoiceStatus}=="VALIDATED" ? ($F{invoiceCodeTypeLabel} != null && !$F{invoiceCodeTypeLabel}.isEmpty() ? $F{invoiceCodeTypeLabel} : "Invoice") + ": "+ $F{invoiceNumber} : "Draft " + ($F{invoiceCodeTypeLabel} != null ? $F{invoiceCodeTypeLabel} : "Invoice")]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{invoiceStatus}=="VALIDATED" ? ($F{invoiceCodeTypeLabel} != null && !$F{invoiceCodeTypeLabel}.isEmpty() ? $F{invoiceCodeTypeLabel} : ($F{language}=="FRA" ? "Facture" : "Invoice")) + ": "+ $F{invoiceNumber} : ($F{language}=="FRA" ? "Brouillon " : "Draft ") + ($F{invoiceCodeTypeLabel} != null ? $F{invoiceCodeTypeLabel} : ($F{language}=="FRA" ? "Facture" : "Invoice"))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="18" y="86" width="190" height="20" uuid="f9f73956-b4a2-41c9-9fea-f0e4e3956d22"/>
@@ -641,7 +651,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Due Date: " + ($F{country}=="US" ? java.time.LocalDate.parse($F{dueDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{dueDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{language}=="FRA" ? "Date d'échéance" : "Due Date") + ": " + ($F{country}=="US" ? java.time.LocalDate.parse($F{dueDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{dueDate}, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="410" y="60" width="184" height="80" uuid="ec6e4a89-edc8-445f-a3cb-8827a5725e9b">
@@ -691,9 +701,9 @@
 					</textElement>
 					<textFieldExpression><![CDATA[(($F{sellerDescription}!=null && !String.valueOf($F{sellerDescription}).isEmpty() && !String.valueOf($F{sellerDescription}).equals("null")) ? "<style isBold='true'>" + $F{sellerDescription} + "</style> " : "") +
 (($F{sellerLegalForm}!=null && !String.valueOf($F{sellerLegalForm}).isEmpty() && !String.valueOf($F{sellerLegalForm}).equals("null")) ? " - " + $F{sellerLegalForm} : "") + 
-(($F{sellerRegNo}!=null && !String.valueOf($F{sellerRegNo}).isEmpty() && !String.valueOf($F{sellerRegNo}).equals("null")) ? "<style isBold='true'> - Reg.nr.: </style>" + $F{sellerRegNo} : "")
+(($F{sellerRegNo}!=null && !String.valueOf($F{sellerRegNo}).isEmpty() && !String.valueOf($F{sellerRegNo}).equals("null")) ? "<style isBold='true'>" + ($F{language}=="FRA" ? " - N° enrg.: " : " - Reg.nr.: ") + "</style>" + $F{sellerRegNo} : "")
 +
-(($F{sellerVatNo}!=null && !String.valueOf($F{sellerVatNo}).isEmpty() && !String.valueOf($F{sellerVatNo}).equals("null")) ? "<style isBold='true'> - VAT Number </style>" + $F{sellerVatNo} : "")
+(($F{sellerVatNo}!=null && !String.valueOf($F{sellerVatNo}).isEmpty() && !String.valueOf($F{sellerVatNo}).equals("null")) ? "<style isBold='true'>" + ($F{language}=="FRA" ? " - N° TVA " : " - VAT Number ")+ "</style>" + $F{sellerVatNo} : "")
 + (($F{sellerSiren}!=null && !String.valueOf($F{sellerSiren}).isEmpty() && !String.valueOf($F{sellerSiren}).equals("null")) ? "<style isBold='true'> - Siren </style>" + $F{sellerSiren} : "")
 + (($F{sellerSiret}!=null && !String.valueOf($F{sellerSiret}).isEmpty() && !String.valueOf($F{sellerSiret}).equals("null")) ? "<style isBold='true'> - Siret </style>" + $F{sellerSiret} : "")
 +  " - "

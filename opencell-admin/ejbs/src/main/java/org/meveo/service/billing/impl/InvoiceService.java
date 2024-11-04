@@ -2802,9 +2802,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void generateRecordedInvoiceAO(Long invoiceId) throws InvoiceExistException, ImportInvoiceException, BusinessException {
 
-        Invoice invoice = findById(invoiceId);
-        recordedInvoiceService.generateRecordedInvoice(invoice, null);
-        update(invoice);
+        recordedInvoiceService.generateRecordedInvoice(invoiceId, null);
     }
 
     /**

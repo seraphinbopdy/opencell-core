@@ -132,7 +132,7 @@ public class PaymentGatewayService extends BusinessService<PaymentGateway> {
             if( paymentMethod instanceof CardPaymentMethod) {
             	cardTypeToCheck = ((CardPaymentMethod) paymentMethod).getCardType();
             }           
-            String queryStr = "select * from " + PaymentGateway.class.getSimpleName()
+            String queryStr = "from " + PaymentGateway.class.getSimpleName()
                     + " where paymentMethodType =:paymenTypeValueIN and disabled=false and (country is null or country =:countryValueIN) and "
                     + " (cardType is null or cardType =:cardTypeValueIN) and "
                     + " (seller is null or seller =:sellerIN) ";

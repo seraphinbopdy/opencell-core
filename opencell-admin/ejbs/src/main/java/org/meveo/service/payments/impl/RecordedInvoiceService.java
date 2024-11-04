@@ -158,10 +158,10 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
     public RecordedInvoice getRecordedInvoice(String invoiceNumber, InvoiceType invoiceType){
         RecordedInvoice recordedInvoice = null;
         try {
-            String qlString = "select * from " + RecordedInvoice.class.getSimpleName() + " where reference =:reference  and invoice.invoiceType=:invoiceType";
+            String qlString = "select ri from " + RecordedInvoice.class.getSimpleName() + " ri where reference =:reference  and invoice.invoiceType=:invoiceType";
 			Query query = getEntityManager().createQuery(qlString).setParameter("reference", invoiceNumber).setParameter("invoiceType", invoiceType);
 			recordedInvoice = (RecordedInvoice) query.getSingleResult();
-        } catch (Exception e) {
+        } catch (NoResultException e) {
         }
         return recordedInvoice;
     }
@@ -172,12 +172,10 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
      */
 	public List<RecordedInvoice> getRecordedInvoice(String invoiceNumber) {
     	List<RecordedInvoice> recordedInvoices = null;
-        try {
-            String qlString = "select * from " + RecordedInvoice.class.getSimpleName() + " where reference =:reference";
-            recordedInvoices = (List<RecordedInvoice>)getEntityManager().createQuery(qlString).setParameter("reference", invoiceNumber).getResultList();
-        } catch (Exception e) {
-        	log.warn("exception trying to get recordedInvoice for reference "+invoiceNumber+": "+e.getMessage());
-        }
+
+        String qlString = "select ri from " + RecordedInvoice.class.getSimpleName() + " ri where reference =:reference";
+        recordedInvoices = (List<RecordedInvoice>)getEntityManager().createQuery(qlString).setParameter("reference", invoiceNumber).getResultList();
+  
         return recordedInvoices;
 	}
 
@@ -266,6 +264,26 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         return userMap;
     }
 
+    
+    /**
+     * Generate recorded invoice
+     * 
+     * @param invoiceId If of invoice used to generate
+     * @throws InvoiceExistException invoice exist exception
+     * @throws ImportInvoiceException import invoice exception
+     * @throws BusinessException business exception.
+     */
+    public RecordedInvoice generateRecordedInvoice(Long invoiceId, OCCTemplate givenOccTemplate) throws InvoiceExistException, ImportInvoiceException, BusinessException {
+
+        Invoice invoice = invoiceService.findById(invoiceId);
+
+        RecordedInvoice recInvoice = generateRecordedInvoice(invoice, givenOccTemplate, true);
+
+        invoiceService.update(invoice);
+
+        return recInvoice;
+    }
+
     /**
      * @param invoice invoice used to generate
      * @throws InvoiceExistException invoice exist exception
@@ -299,8 +317,9 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 			boolean allowMultipleAOperInvoice = "true".equalsIgnoreCase(ParamBean.getInstance().getProperty("ao.generateMultipleAOperInvoice", "true"));
 			//cannot dispatch invoiceBalance between categories, if this is needed by a client, we will have to decide how to change all amounts according to invoiceBalance.
 			if (allowMultipleAOperInvoice && !useInvoiceBalance) {
-				@SuppressWarnings("unchecked")
+
 				List<CategoryInvoiceAgregate> cats = invoiceAgregateService.listByInvoiceAndType(invoice, CategoryInvoiceAgregate.class);
+				                
 				for (CategoryInvoiceAgregate catAgregate : cats) {
 					BigDecimal remainingAmountWithoutTaxForCat = BigDecimal.ZERO;
 					BigDecimal remainingAmountWithTaxForCat = BigDecimal.ZERO;
@@ -310,6 +329,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 					BigDecimal remainingTransactionalAmountWithTaxForCat = BigDecimal.ZERO;
 					BigDecimal remainingTransactionalAmountTaxForCat = BigDecimal.ZERO;
 					for (SubCategoryInvoiceAgregate subCategoryInvoiceAgregate : catAgregate.getSubCategoryInvoiceAgregates()) {
+
 						BigDecimal subCatInvAgrTransAmountWithoutTax = (subCategoryInvoiceAgregate.getTransactionalAmountWithoutTax() == null)?BigDecimal.ZERO : subCategoryInvoiceAgregate.getTransactionalAmountWithoutTax();
 						BigDecimal subCatInvAgrTransAmountWithTax = (subCategoryInvoiceAgregate.getTransactionalAmountWithTax() == null)?BigDecimal.ZERO : subCategoryInvoiceAgregate.getTransactionalAmountWithTax();
 						BigDecimal subCatInvAgrTransAmountTax = (subCategoryInvoiceAgregate.getTransactionalAmountTax() == null)?BigDecimal.ZERO : subCategoryInvoiceAgregate.getTransactionalAmountTax();
@@ -404,8 +424,8 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 				}
 			} else {
 				occTemplate = givenOccTemplate;
-			}
-			
+            }
+
 			OCCTemplate occTransactionalTemplate = null;
 			if (givenOccTemplate == null) {
 				if (remainingTransactionalAmountWithTaxForRecordedIncoice != null && remainingTransactionalAmountWithTaxForRecordedIncoice.compareTo(BigDecimal.ZERO) < 0) {
@@ -435,8 +455,8 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 			} else {
 				occTransactionalTemplate = givenOccTemplate;
 			}
-			
-			RecordedInvoice recordedInvoice =
+
+            RecordedInvoice recordedInvoice =
 					createRecordedInvoice(remainingAmountWithoutTaxForRecordedIncoice, remainingTransactionalAmountWithoutTaxForRecordedIncoice,
 							remainingAmountWithTaxForRecordedIncoice, remainingTransactionalAmountWithTaxForRecordedIncoice,
 							remainingAmountTaxForRecordedIncoice, remainingTransactionalAmountTaxForRecordedIncoice,
@@ -718,7 +738,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
     public Long getCountAgedReceivables(String customerAccountCode, String customerAccountDescription, String sellerCode, String sellerDescription, String invoiceNumber, String tradingCurrency,
     										Date startDueDate, Date endDueDate, Date startDate) {
         String select = "select count (distinct concat(concat(ao.amount, ao.due_date), ao.customer_account_id)) ";
-        String from = "select * from ar_account_operation ao " +
+        String from = "from ar_account_operation ao " +
                 "inner join billing_invoice inv on ao.invoice_id=inv.id " +
                 "inner join billing_invoice_type invt on inv.invoice_type_id=invt.id ";
         String where = " where ao.transaction_type='I' ";

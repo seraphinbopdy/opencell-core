@@ -25,11 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.Resource;
-import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-
 import org.jboss.seam.international.status.builder.BundleKey;
 import org.jgroups.Address;
 import org.jgroups.JChannel;
@@ -42,6 +37,7 @@ import org.meveo.cache.JobCacheContainerProvider;
 import org.meveo.cache.JobExecutionStatus;
 import org.meveo.cache.JobRunningStatusEnum;
 import org.meveo.commons.utils.EnumBuilder;
+import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IEntity;
@@ -62,6 +58,11 @@ import org.meveo.service.job.JobInstanceService;
 import org.meveo.util.view.ServiceBasedLazyDataModel;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
+
+import jakarta.annotation.Resource;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Edward P. Legaspi
@@ -151,6 +152,8 @@ public class JobInstanceBean extends CustomFieldBean<JobInstance> {
     @ActionMethod
     public String execute() {
 
+        PersistenceUtils.initializeAndUnproxy(entity);
+        
         entity.setRunTimeCfValues(entity.getCfValuesNullSafe() != null ? entity.getCfValuesNullSafe().clone() : null);
         jobExecutionService.executeJob(entity, null, JobLauncherEnum.GUI);
         messages.info(new BundleKey("messages", "jobInstance.job.laucnhed"), entity.getJobTemplate());

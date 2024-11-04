@@ -173,7 +173,7 @@ public abstract class Job {
         if (jobRunningStatus == JobRunningStatusEnum.RUNNING_THIS) {
 
             log.info("Starting Job {} of type {}  with currentUser {}. Processors available {}, paralel procesors requested {}. Job parameters {}", jobInstance.getCode(), jobInstance.getJobTemplate(), currentUser,
-                Runtime.getRuntime().availableProcessors(), customFieldInstanceService.getCFValue(jobInstance, "nbRuns", false), jobInstance.getParametres());
+                Runtime.getRuntime().availableProcessors(), jobInstance.getCfValue("nbRuns"), jobInstance.getParametres());
 
             if (executionResult == null) {
                 executionResult = new JobExecutionResultImpl(jobInstance, jobLauncher != null ? jobLauncher : JobLauncherEnum.TRIGGER, EjbUtils.getCurrentClusterNode());

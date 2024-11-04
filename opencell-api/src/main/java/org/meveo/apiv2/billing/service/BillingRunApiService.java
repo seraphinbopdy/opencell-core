@@ -148,52 +148,47 @@ public class BillingRunApiService implements ApiService<BillingRun> {
         	throw new BusinessException(String.format("Billing run %d has been disabled by application EL. It cannot be processed.", billingRun.getId()));
         }
 
-        if (billingRun.getStatus() == NEW || billingRun.getStatus() == INVOICE_LINES_CREATED
-                || billingRun.getStatus() == DRAFT_INVOICES || billingRun.getStatus() == REJECTED
-                || billingRun.getStatus() == OPEN) {
-
-            if ((billingRun.getStatus() == NEW || billingRun.getStatus() == OPEN) && executeInvoicingJob) {
-                JobInstance invoiceLineJob = jobInstanceService.findByCode(INVOICE_LINES_JOB_CODE);
-                if (invoiceLineJob != null) {
-                    Map<String, Object> invoiceLineJobParams = new HashMap<>();
-                    invoiceLineJobParams.put(INVOICE_LIENS_JOB_PARAMETERS,
+        if ((billingRun.getStatus() == NEW || billingRun.getStatus() == OPEN) && executeInvoicingJob) {
+            JobInstance invoiceLineJob = jobInstanceService.findByCode(INVOICE_LINES_JOB_CODE);
+            if (invoiceLineJob != null) {
+                Map<String, Object> invoiceLineJobParams = new HashMap<>();
+                invoiceLineJobParams.put(INVOICE_LIENS_JOB_PARAMETERS,
+                        asList(new EntityReferenceWrapper(BillingRun.class.getName(),
+                                null, billingRun.getReferenceCode())));
+                JobInstance invoicingJob = invoiceLineJob.getFollowingJob() != null
+                        ? jobInstanceService.refreshOrRetrieve(invoiceLineJob.getFollowingJob())
+                        : jobInstanceService.findByCode(INVOICING_JOB_CODE);
+                if (invoicingJob != null) {
+                    invoicingJob.setCfValue(INVOICING_JOB_PARAMETERS,
                             asList(new EntityReferenceWrapper(BillingRun.class.getName(),
                                     null, billingRun.getReferenceCode())));
-                    JobInstance invoicingJob = invoiceLineJob.getFollowingJob() != null
-                            ? jobInstanceService.refreshOrRetrieve(invoiceLineJob.getFollowingJob())
-                            : jobInstanceService.findByCode(INVOICING_JOB_CODE);
-                    if (invoicingJob != null) {
-                        invoicingJob.setCfValue(INVOICING_JOB_PARAMETERS,
-                                asList(new EntityReferenceWrapper(BillingRun.class.getName(),
-                                        null, billingRun.getReferenceCode())));
-                        invoiceLineJob.setFollowingJob(invoicingJob);
-                        jobInstanceService.update(invoiceLineJob);
-                        jobInstanceService.update(invoicingJob);
-                    }
-                    executeJob(invoiceLineJob, invoiceLineJobParams);
+                    invoiceLineJob.setFollowingJob(invoicingJob);
+                    jobInstanceService.update(invoiceLineJob);
+                    jobInstanceService.update(invoicingJob);
                 }
-            } else {
+                executeJob(invoiceLineJob, invoiceLineJobParams);
+            }
+        } else {
 
-                BillingRunStatusEnum initialStatus = billingRun.getStatus();
-                if (billingRun.getStatus() == INVOICE_LINES_CREATED) {
-                    billingRun.setStatus(PREVALIDATED);
-                }
-                if (billingRun.getStatus() == DRAFT_INVOICES
-                        || (billingRun.getStatus() == REJECTED && billingRunService.isBRValid(billingRun))) {
-                    billingRun.setStatus(POSTVALIDATED);
-                }
-         
-                if (initialStatus != billingRun.getStatus()) {
-                    billingRun.setXmlJobExecutionResultId(null);
-                    billingRun.setPdfJobExecutionResultId(null);
-                    billingRun = billingRunService.update(billingRun);
-                }
-                if (executeInvoicingJob) {
-                    Map<String, Object> jobParams = new HashMap<>();
-                    jobParams.put(INVOICING_JOB_PARAMETERS,
-                            asList(new EntityReferenceWrapper(BillingRun.class.getName(), null, billingRun.getReferenceCode())));
-                    executeJob(jobInstanceService.findByCode(INVOICING_JOB_CODE), jobParams);
-                }
+            BillingRunStatusEnum initialStatus = billingRun.getStatus();
+            if (billingRun.getStatus() == INVOICE_LINES_CREATED) {
+                billingRun.setStatus(PREVALIDATED);
+            }
+            if (billingRun.getStatus() == DRAFT_INVOICES
+                    || (billingRun.getStatus() == REJECTED && billingRunService.isBRValid(billingRun))) {
+                billingRun.setStatus(POSTVALIDATED);
+            }
+     
+            if (initialStatus != billingRun.getStatus()) {
+                billingRun.setXmlJobExecutionResultId(null);
+                billingRun.setPdfJobExecutionResultId(null);
+                billingRun = billingRunService.update(billingRun);
+            }
+            if (executeInvoicingJob) {
+                Map<String, Object> jobParams = new HashMap<>();
+                jobParams.put(INVOICING_JOB_PARAMETERS,
+                        asList(new EntityReferenceWrapper(BillingRun.class.getName(), null, billingRun.getReferenceCode())));
+                executeJob(jobInstanceService.findByCode(INVOICING_JOB_CODE), jobParams);
             }
         }
         return of(billingRun);

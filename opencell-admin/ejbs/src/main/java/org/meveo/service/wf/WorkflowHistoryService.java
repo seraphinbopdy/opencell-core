@@ -34,7 +34,7 @@ public class WorkflowHistoryService extends PersistenceService<WorkflowHistory> 
 	@SuppressWarnings("unchecked")
 	public List<WorkflowHistory> findByEntityCode(String entityInstanceCode, List<Workflow> workflows) {
 
-		String queryStr = "select * from " + WorkflowHistory.class.getSimpleName() + " where entityInstanceCode=:entityInstanceCode ";
+		String queryStr = "from " + WorkflowHistory.class.getSimpleName() + " where entityInstanceCode=:entityInstanceCode ";
 
 		if (workflows != null && !workflows.isEmpty()) {
 			queryStr += " and workflow in (:workflows)";

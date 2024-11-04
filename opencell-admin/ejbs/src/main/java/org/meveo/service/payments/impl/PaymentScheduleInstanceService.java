@@ -346,7 +346,7 @@ public class PaymentScheduleInstanceService extends BusinessService<PaymentSched
      */
 	public List<PaymentScheduleInstance> findByService(ServiceInstance serviceInstance, PaymentScheduleStatusEnum status) {
 		try {
-			String strQuery = "select * from " + PaymentScheduleInstance.class.getSimpleName() + " where serviceInstance.id =:serviceInstanceID";
+			String strQuery = "from " + PaymentScheduleInstance.class.getSimpleName() + " where serviceInstance.id =:serviceInstanceID";
 			if (status != null) {
 				strQuery += " and status =:statusIN";
 			}

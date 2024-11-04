@@ -137,6 +137,10 @@ public class JobInstanceApi extends BaseCrudApi<JobInstance, JobInstanceDto> {
                 throw new MeveoApiException(MeveoApiErrorCodeEnum.BUSINESS_API_EXCEPTION, "Invalid next job=" + postData.getFollowingJob());
             }
         }
+        
+        if (postData.getProcessNextJobOnError()!=null) {
+            jobInstance.setProcessNextJobOnError(postData.getProcessNextJobOnError());
+        }
 
         if (postData.getVerboseReport() != null) {
             jobInstance.setVerboseReport(postData.getVerboseReport());
@@ -245,6 +249,9 @@ public class JobInstanceApi extends BaseCrudApi<JobInstance, JobInstanceDto> {
             } else {
                 jobInstance.setFollowingJob(null);
             }
+        }
+        if (postData.getProcessNextJobOnError()!=null) {
+            jobInstance.setProcessNextJobOnError(postData.getProcessNextJobOnError());
         }
 
         if (postData.getJobStatusReportFrequency() != null) {

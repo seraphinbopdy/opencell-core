@@ -236,11 +236,16 @@ public class JobExecutionService extends BaseService {
             }
 
             if (jobResultStatus == JobExecutionResultStatusEnum.COMPLETED && jobInstance.getFollowingJob() != null) {
-                JobInstance nextJob = jobInstanceService.refreshOrRetrieve(jobInstance.getFollowingJob());
-                nextJob = PersistenceUtils.initializeAndUnproxy(nextJob);
-                log.info("Executing next job {} for {}", nextJob.getCode(), jobInstance.getCode());
-                nextJob.setRunTimeCfValues(nextJob.getCfValuesNullSafe() != null ? nextJob.getCfValuesNullSafe().clone() : null);
-                executeJob(nextJob, null, JobLauncherEnum.TRIGGER, true);
+            	JobInstance nextJob = jobInstanceService.refreshOrRetrieve(jobInstance.getFollowingJob());
+            	long totalErrors = jobExecutionResult.getCumulativeNbItemsProcessedWithError();
+				if(totalErrors==0 || jobInstance.isProcessNextJobOnError()) {
+	                nextJob = PersistenceUtils.initializeAndUnproxy(nextJob);
+	                log.info("Executing next job {} for {}", nextJob.getCode(), jobInstance.getCode());
+	                nextJob.setRunTimeCfValues(nextJob.getCfValuesNullSafe() != null ? nextJob.getCfValuesNullSafe().clone() : null);
+	                executeJob(nextJob, null, JobLauncherEnum.TRIGGER, true);
+				} else {
+					log.info("Will not execute next job {} for {}. (Job completed, but {} errors raised)", nextJob.getCode(), jobInstance.getCode(), totalErrors);
+				}
             }
         }
     }

@@ -152,13 +152,21 @@ public class JobInstance extends EnableBusinessCFEntity {
     private boolean verboseReport = true;
 
     /**
-     * Whether a verbose error log will be kept.
+     * If job should stop on error.
      */
     @Type(type = "numeric_boolean")
     @Column(name = "stop_on_error")
     private boolean stopOnError = false;
-
+    
     /**
+     * If the next job should be started on error.
+     */
+    @NotNull
+    @Type(type = "numeric_boolean")
+    @Column(name = "process_next_job_on_error")
+    private boolean processNextJobOnError = true;
+
+	/**
      * How often (in seconds) the job progress should be stored to DB
      */
     @Column(name = "status_report_freq", nullable = false)
@@ -580,4 +588,12 @@ public class JobInstance extends EnableBusinessCFEntity {
     public void setDescriptionI18n(Map<String, String> descriptionI18n) {
         this.descriptionI18n = descriptionI18n;
     }
+    
+    public boolean isProcessNextJobOnError() {
+		return processNextJobOnError;
+	}
+
+	public void setProcessNextJobOnError(boolean processNextJobOnError) {
+		this.processNextJobOnError = processNextJobOnError;
+	}
 }

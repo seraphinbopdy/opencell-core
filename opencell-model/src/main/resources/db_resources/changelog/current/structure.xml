@@ -15348,6 +15348,12 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>code = 'default_customer_balance'</where>
         </update>
     </changeSet>
+    
+    <changeSet id="INTRD-26317_20241031" author="Mohammed_ElAzzouzi">
+        <addColumn tableName="meveo_job_instance">
+            <column name="process_next_job_on_error" type="${type.boolean}" defaultValueNumeric="0"/>
+        </addColumn>
+    </changeSet>
 
 
 

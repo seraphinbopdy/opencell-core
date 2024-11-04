@@ -11,8 +11,11 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.apiv2.ordering.resource.oo.ImmutableAvailableOpenOrder;
+import org.meveo.apiv2.quote.QuoteEmailInput;
 import org.meveo.commons.utils.ListUtils;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.cpq.Product;
@@ -20,6 +23,7 @@ import org.meveo.model.ordering.OpenOrder;
 import org.meveo.model.quote.QuoteArticleLine;
 import org.meveo.model.quote.QuoteProduct;
 import org.meveo.model.quote.QuoteVersion;
+import org.meveo.service.cpq.CpqQuoteService;
 import org.meveo.service.cpq.QuoteProductService;
 import org.meveo.service.cpq.QuoteVersionService;
 import org.meveo.service.order.OpenOrderService;
@@ -35,7 +39,9 @@ public class CpqQuoteApiService {
 
 	@Inject
 	private QuoteProductService quoteProductService;
-
+	@Inject
+	private CpqQuoteService cpqQuoteService;
+	
 	public List<ImmutableAvailableOpenOrder> findAvailableOpenOrders(String quoteCode) {
 		List<QuoteVersion> quoteVersion = quoteVersionService.findLastVersionByCode(quoteCode);
 		
@@ -85,6 +91,23 @@ public class CpqQuoteApiService {
 
 		return lResult;
 		
+	}
+	
+	public void sendByEmail(QuoteEmailInput quoteEmailInput) {
+		if(StringUtils.isBlank(quoteEmailInput.getQuoteCode())) {
+			throw new BusinessException("quote code is required");
+		}
+		if(quoteEmailInput.getQuoteVersion() == null) {
+			throw new BusinessException("quote version is required");
+		}
+		if(CollectionUtils.isEmpty(quoteEmailInput.getFrom())){
+			throw new BusinessException("from email can not be empty");
+		}
+		
+		if(CollectionUtils.isEmpty(quoteEmailInput.getTo())){
+			throw new BusinessException("to email can not be empty");
+		}
+		cpqQuoteService.sendQuoteByEmail(quoteEmailInput.getQuoteCode(), quoteEmailInput.getQuoteVersion(), quoteEmailInput.getFrom(), quoteEmailInput.getTo(), quoteEmailInput.getCc());
 	}
 	
 }

@@ -14623,4 +14623,36 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 	        <column name="gui_position" value="tab:Configuration:0;field:7"/>
 	    </insert>
 	</changeSet>
+	<changeSet id="#INTRD-26159_20241029-data" author="TarikFA.">
+		<insert tableName="com_message_template">
+			<column name="media" value="EMAIL" />
+			<column name="id" valueSequenceNext="com_msg_tmpl_seq" />
+			<column name="version" value="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="code" value="SEND_QUOTE_EMAIL" />
+			<column name="description" value="" />
+			<column name="tag_start" value="#{" />
+			<column name="tag_end" value="}" />
+			<column name="subject">
+				<![CDATA[
+                    Quote #{cpqQuote.quoteNumber}
+                ]]>
+			</column>
+			<column name="subject_i18n">
+				<![CDATA[
+                    {"FRA":"Devis #{cpqQuote.quoteNumber}","ENG":"Quote #{cpqQuote.quoteNumber}"}
+                ]]>
+			</column>
+			<column name="htmlcontent">
+				<![CDATA[
+                    <p>Hello,</p><p>Please find attached the detailed quotation.</p><p>Best regards,</p> <p>#{currentUser.fullName}</p>
+                 ]]>
+			</column>
+			<column name="htmlcontent_i18n">
+				<![CDATA[
+                    {"FRA":"<p>Bonjour,</p><p>Veuillez trouvez ci-joint les détails concernant votre devis.</p><p>Bien cordialement,</p><p>#{currentUser.fullName}</p>","ENG":"<p>Hello,</p><p>Please find attached the detailed quotation.</p><p>Best regards,</p> <p>#{currentUser.fullName}</p>"}
+                ]]>
+			</column>
+		</insert>
+	</changeSet>
 </databaseChangeLog>

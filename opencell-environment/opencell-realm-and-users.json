@@ -2619,12 +2619,22 @@
           "attributes": {}
         },
         {
+          "id": "8dd28938-e607-4516-bdc8-fd718f40f0b2",
+          "name": "NEWUI_OFFER",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
+          "attributes": {}
+        },
+        {
           "id": "bed02301-69cf-4799-a981-d9f1218173bb",
           "name": "NEWUI",
           "composite": true,
           "composites": {
             "client": {
               "opencell-web": [
+                "NEWUI_OFFER",
                 "NEWUI_BILLING_ACCOUNT",
                 "NEWUI_QUOTE",
                 "NEWUI_ORDER",

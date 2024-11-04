@@ -15348,7 +15348,48 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>code = 'default_customer_balance'</where>
         </update>
     </changeSet>
-    
+
+    <changeSet id="INTRD-26317_20241031" author="Mohammed_ElAzzouzi">
+        <addColumn tableName="meveo_job_instance">
+            <column name="process_next_job_on_error" type="${type.boolean}" defaultValueNumeric="0"/>
+        </addColumn>
+    </changeSet>
+
+
+
+    <changeSet id="#INTRD-26159_20241029" author="TarikFA.">
+        <insert tableName="com_message_template">
+            <column name="media" value="EMAIL" />
+            <column name="id" valueSequenceNext="com_msg_tmpl_seq" />
+            <column name="version" value="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="SEND_QUOTE_EMAIL" />
+            <column name="description" value="" />
+            <column name="tag_start" value="#{" />
+            <column name="tag_end" value="}" />
+            <column name="subject">
+                <![CDATA[
+                    Quote #{cpqQuote.quoteNumber}
+                ]]>
+            </column>
+            <column name="subject_i18n">
+                <![CDATA[
+                    {"FRA":"Devis #{cpqQuote.quoteNumber}","ENG":"Quote #{cpqQuote.quoteNumber}"}
+                ]]>
+            </column>
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello,</p><p>Please find attached the detailed quotation.</p><p>Best regards,</p> <p>#{currentUser.fullName}</p>
+                 ]]>
+            </column>
+            <column name="htmlcontent_i18n">
+                <![CDATA[
+                    {"FRA":"<p>Bonjour,</p><p>Veuillez trouvez ci-joint les détails concernant votre devis.</p><p>Bien cordialement,</p><p>#{currentUser.fullName}</p>","ENG":"<p>Hello,</p><p>Please find attached the detailed quotation.</p><p>Best regards,</p> <p>#{currentUser.fullName}</p>"}
+                ]]>
+            </column>
+        </insert>
+    </changeSet>
+
     <changeSet id="#INTRD-26054_20241101" author="TarikFA.">
         <createSequence sequenceName="billing_purchase_order_seq" startValue="1" />
         <createTable tableName="billing_purchase_order">
@@ -15416,5 +15457,5 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
                     valueComputed="(SELECT id from generic_sequence where code = 'billing_cycle_sequence')"/>
         </insert>
     </changeSet>
-        
+
 </databaseChangeLog>

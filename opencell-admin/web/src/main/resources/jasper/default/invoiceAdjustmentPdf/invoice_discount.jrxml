@@ -223,6 +223,9 @@
 	<field name="customerID" class="java.lang.String">
 		<fieldDescription><![CDATA[/invoice/@customerAccountCode]]></fieldDescription>
 	</field>
+	<field name="language" class="java.lang.String">
+		<fieldDescription><![CDATA[/invoice/@language]]></fieldDescription>
+	</field>
 	<field name="invoiceDate" class="java.lang.String">
 		<fieldDescription><![CDATA[/invoice/header/invoiceDate]]></fieldDescription>
 	</field>
@@ -490,14 +493,14 @@
 						</jr:column>
 					</jr:table>
 				</componentElement>
-				<staticText>
+				<textField>
 					<reportElement x="-2" y="-1" width="194" height="21" forecolor="#000000" uuid="7d5c0eb6-5bba-4eb0-a030-9906e068f959"/>
 					<box leftPadding="16"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font fontName="SansSerif" size="10"/>
 					</textElement>
-					<text><![CDATA[Customer Discount]]></text>
-				</staticText>
+					<textFieldExpression><![CDATA[($F{language}=="FRA" ? "Remise client" : "Customer Discount")]]></textFieldExpression>
+				</textField>
 			</band>
 		</groupHeader>
 	</group>

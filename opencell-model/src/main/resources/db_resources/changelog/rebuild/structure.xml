@@ -6299,6 +6299,7 @@
             <column name="status_report_freq" type="int" defaultValueNumeric="60" />
             <column name="limit_to_nr_of_nodes" type="int" />
             <column name="description_i18n" type="${type.json}" />
+            <column name="process_next_job_on_error" type="${type.boolean}" defaultValueNumeric="0"/>
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-278">
@@ -19504,7 +19505,7 @@
                                  referencedTableName="billing_billing_account"
                                  referencedColumnNames="id" />
     </changeSet>
-    
+
     <!-- end fk -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-constr-995">
@@ -21138,6 +21139,8 @@
     <changeSet id="#INTRD-25749_add_mrr_arr" author="a.rouaguebe" />
     <changeSet id="#INTRD-25838_calc_mrr_quote_order" author="a.rouaguebe" />
     <changeSet id="INTRD-25951_20241022" author="ZakariaB" />
+    <changeSet id="#INTRD-26159_20241029" author="TarikFA." />
+    <changeSet id="INTRD-26317_20241031" author="Mohammed_ElAzzouzi"/>
     <changeSet id="#INTRD-26054_20241101" author="TarikFA." />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

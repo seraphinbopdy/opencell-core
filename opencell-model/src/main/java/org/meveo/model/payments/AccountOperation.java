@@ -535,8 +535,7 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
     /**
      * Exclude from default balance
      */
-    @Type(type = "numeric_boolean")
-    @Column(name = "exclude_from_default_balance")
+    @Transient
     private Boolean excludeFromDefaultBalance = false;
 
     public Date getDueDate() {

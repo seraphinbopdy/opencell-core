@@ -25,6 +25,7 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.meveo.commons.utils.NumberUtils.computeDerivedAmounts;
 import static org.meveo.model.BaseEntity.NB_DECIMALS;
+import static org.meveo.model.billing.RatedTransactionStatusEnum.CANCELED;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -208,9 +209,6 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 
     @Inject
     private MediationSettingService mediationsettingService;
-
-    @Inject
-    private DiscountPlanInstanceService discountPlanInstanceService;
 	
 	@Inject
 	private FinanceSettingsService financeSettingsService;
@@ -226,7 +224,10 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 	
 	@Inject
 	protected CurrencyService currencyService;
-    
+
+    @Inject
+    private RatedTransactionService ratedTransactionService;
+
     /**
      * @param level level enum
      * @param chargeCode charge's code
@@ -1480,8 +1481,12 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             operation.setUnitAmountWithTax(null);
             operation.setUnitAmountTax(null);
             operation.setChargeMode(ChargeApplicationModeEnum.RERATING);
-            
+
             ChargeInstance chargeInstance = operation.getChargeInstance();
+            if (walletOperationToRerate.getRatedTransaction() != null) {
+                walletOperationToRerate.getRatedTransaction().setStatus(CANCELED);
+                ratedTransactionService.update(walletOperationToRerate.getRatedTransaction());
+            }
 			ratingResult=rateBareWalletOperation(operation, chargeInstance.getAmountWithoutTax(), chargeInstance.getAmountWithTax(), priceplan == null || priceplan.getTradingCountry() == null ? null : priceplan.getTradingCountry().getId(),
                 priceplan != null ? priceplan.getTradingCurrency() : null, false);
 	        applyDiscount(ratingResult, operation, false);

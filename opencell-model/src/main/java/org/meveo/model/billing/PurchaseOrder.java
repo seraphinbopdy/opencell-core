@@ -17,6 +17,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -29,6 +31,8 @@ import java.util.Objects;
 @ObservableEntity
 @Table(name = "billing_purchase_order", uniqueConstraints = @UniqueConstraint(columnNames = { "number", "code" }))
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "billing_purchase_order_seq"), })
+@NamedQueries({
+		@NamedQuery(name = "PurchaseOrder.findByNumber", query = "SELECT po FROM PurchaseOrder po WHERE po.number = :number") })
 public class PurchaseOrder extends BusinessEntity {
 	
 	@Column(name = "number", length = 100)

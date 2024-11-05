@@ -89,7 +89,7 @@ public class ReportingApiService implements ApiService<AccountOperation> {
 		if(codeOrLabel != null && !codeOrLabel.isEmpty()){
 			filters.put("SQL", "(a.accountingCode.code like '" + codeOrLabel + "%' OR a.accountingCode.description like '" + codeOrLabel + "%')");
 		}
-
+		filters.put("SQL", "(a.code not like '%_FAE%')");
 		String initalBalanceDebit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDate, "DEBIT");
 		String initalBalanceCredit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDate, "CREDIT");
 		String currentBalanceDebit = String.format(BALANCE_CRITERIA, reportStartDate, reportEndDateInclusive, "DEBIT");

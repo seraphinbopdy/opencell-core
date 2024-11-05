@@ -180,6 +180,7 @@ public class AccountOperationApiServiceTest {
         AccountOperation aoP1 = init("P", 3L, new BigDecimal(2000), BigDecimal.ZERO, MatchingStatusEnum.O, new BigDecimal(2000), AccountOperationStatus.POSTED);
 
         Mockito.when(accountOperationService.findById(2L)).thenReturn(aoInvoice);
+        Mockito.when(accountOperationService.findById(1L)).thenReturn(aoP1);
 
         Exception exception = assertThrows(BusinessApiException.class, () -> {
             accountOperationApiService.matchOperations(operationAndSequence);
@@ -198,6 +199,7 @@ public class AccountOperationApiServiceTest {
         AccountOperation aoP1 = init("P", 3L, new BigDecimal(2000), BigDecimal.ZERO, MatchingStatusEnum.O, new BigDecimal(2000), AccountOperationStatus.POSTED);
 
         Mockito.when(accountOperationService.findById(2L)).thenReturn(aoInvoice);
+        Mockito.when(accountOperationService.findById(1L)).thenReturn(aoP1);
         Mockito.when(customerAccountService.findCustomerAccount(anyLong(), anyString())).thenReturn(aoInvoice.getCustomerAccount());
         
         Exception exception = assertThrows(BusinessApiException.class, () -> {
@@ -387,6 +389,7 @@ public class AccountOperationApiServiceTest {
         AccountOperation ao = new AccountOperation();
         ao.setType(typeOperation);
         ao.setId(idAp);
+        ao.setCode("AO_CODE");
         ao.setAmount(amount);
         ao.setMatchingAmount(matchingAmount);
         ao.setMatchingStatus(matchingStatus);

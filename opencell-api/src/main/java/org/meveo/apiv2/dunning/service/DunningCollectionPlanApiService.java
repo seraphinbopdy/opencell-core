@@ -503,6 +503,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     if (remainingActionsAreDone) {
                         // 3.1- Update the dunningLevelInstance status also to
                         dunningLevelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
+                        dunningLevelInstance.setExecutionDate(new Date());
                         dunningLevelInstanceService.update(dunningLevelInstance);
                         // 3.2- Update DunningCollectionPlan : currentDunningLevelSequence / lastAction / lastActionDate / nextAction /nextActionDate
                         updateCollectionPlanActions(dunningLevelInstance);
@@ -551,6 +552,11 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
 
             if (dunningLevelInstanceInput.getLevelStatus() != null) {
                 newDunningLevelInstance.setLevelStatus(dunningLevelInstanceInput.getLevelStatus());
+                if (dunningLevelInstanceInput.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || dunningLevelInstanceInput.getLevelStatus() == DunningLevelInstanceStatusEnum.IN_PROGRESS) {
+                    newDunningLevelInstance.setExecutionDate(new Date());
+                } else if (dunningLevelInstanceInput.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED) {
+                    newDunningLevelInstance.setExecutionDate(null);
+                }
             }
 
             // 2- set sequence
@@ -638,6 +644,11 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     fields.add("levelStatus");
                 }
                 levelInstanceToUpdate.setLevelStatus(updateLevelInstanceInput.getLevelStatus());
+                if (levelInstanceToUpdate.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || levelInstanceToUpdate.getLevelStatus() == DunningLevelInstanceStatusEnum.IN_PROGRESS) {
+                    levelInstanceToUpdate.setExecutionDate(new Date());
+                } else if (levelInstanceToUpdate.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED) {
+                    levelInstanceToUpdate.setExecutionDate(null);
+                }
             }
 
             if (collectionPlan != null) {
@@ -865,10 +876,12 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     if (remainingActionsAreDone) {
                         // Update the dunningLevelInstance status also to
                         dunningLevelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
+                        dunningLevelInstance.setExecutionDate(new Date());
                         // Update DunningCollectionPlan : currentDunningLevelSequence / lastAction / lastActionDate / nextAction /nextActionDate
                         updateCollectionPlanActions(dunningLevelInstance);
                     } else {
                         dunningLevelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+                        dunningLevelInstance.setExecutionDate(new Date());
                     }
                     dunningLevelInstanceService.update(dunningLevelInstance);
                 }

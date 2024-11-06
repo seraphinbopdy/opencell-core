@@ -249,6 +249,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                                         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
                                         if (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
                                             levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+                                            levelInstance.setExecutionDate(new Date());
                                             levelInstanceService.update(levelInstance);
                                         }
                                         collectionPlan.setLastActionDate(new Date());
@@ -310,9 +311,11 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                         long countActions = levelInstance.getActions().stream().filter(action -> action.getActionStatus() == DONE).count();
                         if (countActions > 0 && countActions < levelInstance.getActions().size()) {
                             levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+                            levelInstance.setExecutionDate(new Date());
                         }
                         if (countActions == levelInstance.getActions().size()) {
                             levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
+                            levelInstance.setExecutionDate(new Date());
                         }
                     }
 
@@ -320,6 +323,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             && collectionPlan.getRelatedInvoice().getRecordedInvoice().getUnMatchingAmount().compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0
                             && levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
                         levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IGNORED);
+                        levelInstance.setExecutionDate(null);
                         levelInstanceService.update(levelInstance);
                         levelInstance.getActions().stream()
                                 .filter(action -> action.getActionStatus() == TO_BE_DONE)
@@ -424,6 +428,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                                         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
                                         if (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
                                             levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+                                            levelInstance.setExecutionDate(new Date());
                                             levelInstanceService.update(levelInstance);
                                         }
                                         collectionPlan.setLastActionDate(new Date());
@@ -485,9 +490,11 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                         long countActions = levelInstance.getActions().stream().filter(action -> action.getActionStatus() == DONE).count();
                         if (countActions > 0 && countActions < levelInstance.getActions().size()) {
                             levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+                            levelInstance.setExecutionDate(new Date());
                         }
                         if (countActions == levelInstance.getActions().size()) {
                             levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
+                            levelInstance.setExecutionDate(new Date());
                         }
                     }
 
@@ -495,6 +502,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0)
                             && levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
                         levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IGNORED);
+                        levelInstance.setExecutionDate(null);
                         levelInstanceService.update(levelInstance);
                         levelInstance.getActions().stream()
                                 .filter(action -> action.getActionStatus() == TO_BE_DONE)

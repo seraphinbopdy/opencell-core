@@ -310,6 +310,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
      */
     private void updateDunningLevelInstance(DunningLevelInstance pDunningLevelInstance) {
         pDunningLevelInstance.setLevelStatus(DONE);
+        pDunningLevelInstance.setExecutionDate(new Date());
         dunningLevelInstanceService.update(pDunningLevelInstance);
     }
 }

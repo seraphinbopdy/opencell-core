@@ -2,6 +2,7 @@ package org.meveo.model.dunning;
 
 import static javax.persistence.FetchType.LAZY;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -69,6 +70,9 @@ public class DunningLevelInstance extends AuditableCFEntity {
     @Enumerated(EnumType.STRING)
     @NotNull
     private DunningLevelInstanceStatusEnum levelStatus = DunningLevelInstanceStatusEnum.TO_BE_DONE;
+
+    @Column(name = "execution_date")
+    private Date executionDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dunning_level_id")
@@ -159,5 +163,13 @@ public class DunningLevelInstance extends AuditableCFEntity {
     public DunningLevelInstance setCustomerAccount(CustomerAccount customerAccount) {
         this.customerAccount = customerAccount;
         return this;
+    }
+
+    public Date getExecutionDate() {
+        return executionDate;
+    }
+
+    public void setExecutionDate(Date executionDate) {
+        this.executionDate = executionDate;
     }
 }

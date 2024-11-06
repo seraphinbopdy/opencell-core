@@ -15389,5 +15389,11 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             </column>
         </insert>
     </changeSet>
+
+    <changeSet id="INTRD-26199_20241105" author="zelmeliani">
+        <addColumn tableName="dunning_level_instance">
+            <column name="execution_date" type="datetime" />
+        </addColumn>
+    </changeSet>
         
 </databaseChangeLog>

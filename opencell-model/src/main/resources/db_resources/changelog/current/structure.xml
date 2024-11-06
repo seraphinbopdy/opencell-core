@@ -15348,7 +15348,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>code = 'default_customer_balance'</where>
         </update>
     </changeSet>
-    
+
     <changeSet id="INTRD-26317_20241031" author="Mohammed_ElAzzouzi">
         <addColumn tableName="meveo_job_instance">
             <column name="process_next_job_on_error" type="${type.boolean}" defaultValueNumeric="0"/>
@@ -15389,5 +15389,73 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             </column>
         </insert>
     </changeSet>
-        
+
+    <changeSet id="#INTRD-26054_20241101" author="TarikFA.">
+        <createSequence sequenceName="billing_purchase_order_seq" startValue="1" />
+        <createTable tableName="billing_purchase_order">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="billing_purchase_order_pkey" />
+            </column>
+            <column name="version" type="int4" />
+            <column name="creator" type="varchar(100)" />
+            <column name="created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="updater" type="varchar(100)" />
+            <column name="updated" type="datetime" />
+            <column name="code" type="varchar(255)" />
+            <column name="description" type="varchar(255)" />
+            <column name="number" type="varchar(100)" >
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="start_date" type="datetime"/>
+            <column name="end_date" type="datetime"/>
+            <column name="delivery_date" type="datetime"/>
+            <column name="account_level" type="varchar(50)" >
+                <constraints nullable="false" />
+            </column>
+            <column name="seller_id" type="bigint" />
+            <column name="customer_id" type="bigint"/>
+            <column name="customer_account_id" type="bigint"/>
+            <column name="billing_account_id" type="bigint" />
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="seller_id" constraintName="billing_purchase_order_seller_id_fk"
+                                 referencedTableName="crm_seller"
+                                 referencedColumnNames="id" />
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="customer_id" constraintName="billing_purchase_order_customer_id_fk"
+                                 referencedTableName="crm_customer"
+                                 referencedColumnNames="id" />
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="customer_account_id" constraintName="billing_purchase_order_customer_account_id_fk"
+                                 referencedTableName="ar_customer_account"
+                                 referencedColumnNames="id" />
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="billing_account_id" constraintName="billing_purchase_order_billing_account_id_fk"
+                                 referencedTableName="billing_billing_account"
+                                 referencedColumnNames="id" />
+
+        <insert tableName="generic_sequence">
+            <column name="id" valueSequenceNext="bill_seq_invoice_seq"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="code" value="purchase_order_sequence"/>
+            <column name="description" value="purchase order sequence"/>
+            <column name="sequence_type" value="SEQUENCE"/>
+            <column name="sequence_size" valueNumeric="6"/>
+            <column name="current_number" valueNumeric="1"/>
+        </insert>
+        <insert tableName="adm_custom_generic_entity_code">
+            <column name="id" valueSequenceNext="adm_custom_generic_entity_code_seq"/>
+            <column name="entity_class" value="org.meveo.model.billing.PurchaseOrder"/>
+            <column name="format_el" value="#{'PO-'.concat((mv:formatDate(null, 'YYMM'))).concat(generatedCode)}"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="sequence_id"
+                    valueComputed="(SELECT id from generic_sequence where code = 'billing_cycle_sequence')"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

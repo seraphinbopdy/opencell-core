@@ -14655,4 +14655,27 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			</column>
 		</insert>
 	</changeSet>
+
+    <changeSet id="#INTRD-26054_20241101_data" author="TarikFA.">
+        <insert tableName="generic_sequence">
+            <column name="id" valueSequenceNext="bill_seq_invoice_seq"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="code" value="purchase_order_sequence"/>
+            <column name="description" value="purchase order sequence"/>
+            <column name="sequence_type" value="SEQUENCE"/>
+            <column name="sequence_size" valueNumeric="6"/>
+            <column name="current_number" valueNumeric="1"/>
+        </insert>
+        <insert tableName="adm_custom_generic_entity_code">
+            <column name="id" valueSequenceNext="adm_custom_generic_entity_code_seq"/>
+            <column name="entity_class" value="org.meveo.model.billing.PurchaseOrder"/>
+            <column name="format_el" value="#{'PO-'.concat((mv:formatDate(null, 'YYMM'))).concat(generatedCode)}"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="sequence_id"
+                    valueComputed="(SELECT id from generic_sequence where code = 'billing_cycle_sequence')"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

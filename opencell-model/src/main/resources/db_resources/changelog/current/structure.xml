@@ -15458,4 +15458,85 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD-26402_20241107_add_column" author="zelmeliani">
+        <addColumn tableName="dunning_pause_reasons">
+            <column name="description_i18n" type="${type.json}">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+
+        <addColumn tableName="dunning_stop_reasons">
+            <column name="description_i18n" type="${type.json}">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="#INTRD-26402_20241107_update" author="zelmeliani">
+        <update tableName="dunning_pause_reasons">
+            <column name="pause_reason" value="PAUSE_5J"/>
+            <column name="description" value="Client requested a 5-day delay in payment"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a sollicité un délai supplémentaire de 5 jours ouvrés pour procéder au paiement","ENG":"Client requested a 5-day delay in payment"}]]>
+            </column>
+            <where>pause_reason = '5 jours (ouvrés) avant paiement'</where>
+        </update>
+        <update tableName="dunning_pause_reasons">
+            <column name="pause_reason" value="PAUSE_10J"/>
+            <column name="description" value="Client requested a 10-day delay in payment"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a sollicité un délai supplémentaire de 10 jours ouvrés pour procéder au paiement","ENG":"Client requested a 10-day delay in payment"}]]>
+            </column>
+            <where>pause_reason = '10 jours (ouvrés) avant paiement'</where>
+        </update>
+        <update tableName="dunning_pause_reasons">
+            <column name="pause_reason" value="PAUSE_30J"/>
+            <column name="description" value="Client requested a 30-day delay in payment"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a sollicité un délai supplémentaire de 30 jours ouvrés pour procéder au paiement","ENG":"Client requested a 30-day delay in payment"}]]>
+            </column>
+            <where>pause_reason = '30 jours (ouvrés) avant paiement'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_CONTEST" />
+			<column name="description" value="Client is disputing the invoice" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client conteste les éléments de la facture","ENG":"Client is disputing the invoice"}]]>
+            </column>
+            <where>stop_reason = 'Client conteste la facture'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_INSOLV"/>
+			<column name="description" value="Client has declared insolvency"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client s'est déclaré en situation d'insolvabilité","ENG":"Client has declared insolvency"}]]>
+            </column>
+            <where>stop_reason = 'Client insolvable'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_BILAN"/>
+			<column name="description" value="The client&apos;s company has initiated bankruptcy proceedings"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"L'entreprise du client a entamé une procédure de dépôt de bilan","ENG":"The client's company has initiated bankruptcy proceedings"}]]>
+            </column>
+            <where>stop_reason = 'Entreprise dépose le bilan'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_EXCLUSION" />
+        	<column name="description" value="Client has been excluded from the recovery plan for legitimate reasons" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a été exclu du plan de recouvrement pour des raisons légitimes (à préciser)","ENG":"Client has been excluded from the recovery plan for legitimate reasons"}]]>
+            </column>
+            <where>stop_reason = 'Exclusion'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_POLITIQUE" />
+        	<column name="description" value="A change in internal recovery policy has led to the termination of the current recovery plan" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Un changement de politique interne a entraîné l'arrêt du plan de recouvrement en cours","ENG":"A change in internal recovery policy has led to the termination of the current recovery plan"}]]>
+            </column>
+            <where>stop_reason = 'Changement de politique de recouvrement'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "2315a7b4-61e7-44c7-95a1-83a5b873e9e2",
-		"name": "00_OPENCELL_V16.X - V2",
+		"name": "00_OPENCELL_V17.X - V1",
 		"description": "# Introduction\n\nThis configuration file is designed to be a basis for all configurations provided by Opencell.  \nIt merely contains most common general settings and a catalog of services implementing various rating models.\n\n# Configuring Opencell\n\nThere are 2 main ways for configuring _**Opencell**_:\n\n- GUI (_Administration GUI_ and _Marketing Manager_)\n    \n- API (all Opencell configuration and operations can be performed using our extensive API library)\n    \n\nThe most flexible way is using APIs which currently are available as **Rest** and **Soap**.  \nThe **Soap** API are deprecated, so will won't mention them anymore.\n\n## Tools\n\nAny tools able to send HTTP requests will do.  \nOne could even just script _curl_ calls using shell script.  \nBut of course, a more user friendly tool will make things easier.\n\nHere at _**Opencell**_, we prefer **Postman** ([https://getpostman.com](https://getpostman.com)):\n\n- it has a modern, friendly interface\n    \n- Sets of API request can be organized into collections, themselves structured into a folder tree.\n    \n- Collections can be exported as _JSON_ files or shared with other team members using collaboration features (payed version)\n    \n- it allows to uses variables at different levels (collection, environement, global) and to execute _Javascript_ scripts before and after executing API calls which allows great flexibility and API response testing.\n    \n\n# Configuration documentation guidelines\n\nIn order to document our configuration, we make full used of the internal documentation capabilities of the Markdown fields on Postman Objects\n\n## Default template for _Collection_ documentation\n\n## Default template for _Folder_ documentation\n\n## Default template for _Request_ documentation\n\n# Tips & guidelines\n\nHere follow a few tips for understanding this collection.\n\n## Collection pre-request script\n\n``` javascript\npm.globals.set(\"timestamp.iso\", (new Date()).toISOString());\npm.globals.set(\"request.label\", pm.info.requestName);\nvar parts = pm.info.requestName.split(\"|\");\nfor(let i=0; i    pm.globals.set(\"request.label.\"+i, parts[i]);\n}\n\n ```\n\n## Configuration guidelines\n\n## Entities\n\n__XXX\n\n### Custom Fields\n\nCF___ XXX\n\nwill be discarded for inherited\n\n#### Custom field visibility\n\nSE____XXX\n\nare used in CFT.applicableOnEl to show CFT on entities\n\n## Entity abbreviation\n\n| code | entity |\n| --- | --- |\n| P | Provider |\n| S | Seller |\n| C | Customer |\n| CA | Customer Account |\n| BA | Billing Account |\n| UA | User Account |\n| SU | Subscription |\n| AP | Access Point |\n| OF | Offer Template |\n| SE | Service Template and Instance |\n| CH | Charge Template |\n| PP | Price Plan |\n| CN | Counter |\n| ICAT | Invoice Category |\n| ISCAT | Invoice SubCategory |\n| CAL | Calendar |\n| BC | Billing Cycle |",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "10527021"
@@ -33037,7 +33037,8 @@
 													"}",
 													""
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										},
 										{
@@ -33046,7 +33047,8 @@
 												"exec": [
 													"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -33060,7 +33062,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n  \"code\":\"{{request.label.1}}\"\n}"
+											"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"waitToComplete\": true\n}"
 										},
 										"url": {
 											"raw": "{{opencell.url}}/job/execute",
@@ -33748,13 +33750,10 @@
 													"    var jsonData = JSON.parse(responseBody);",
 													"    pm.globals.set(\"jobRun.id\", jsonData.actionStatus.message);",
 													"}",
-													"",
-													"  setTimeout(function(){",
-													"          console.log(\"Sleeping for 1 seconds before next request.\");",
-													"  }, 1000);",
 													""
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										},
 										{
@@ -33763,7 +33762,8 @@
 												"exec": [
 													"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -33777,7 +33777,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n  \"code\":\"{{request.label.1}}\"\n}"
+											"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"waitToComplete\": true\n}"
 										},
 										"url": {
 											"raw": "{{opencell.url}}/job/execute",
@@ -33803,13 +33803,10 @@
 													"    var jsonData = JSON.parse(responseBody);",
 													"    pm.globals.set(\"jobRun.id\", jsonData.actionStatus.message);",
 													"}",
-													"",
-													"  setTimeout(function(){",
-													"          console.log(\"Sleeping for 1 seconds before next request.\");",
-													"  }, 1000);",
 													""
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										},
 										{
@@ -33818,7 +33815,8 @@
 												"exec": [
 													"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -33832,7 +33830,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n  \"code\":\"{{request.label.1}}\"\n}"
+											"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"waitToComplete\": true\n}"
 										},
 										"url": {
 											"raw": "{{opencell.url}}/job/execute",
@@ -33860,7 +33858,8 @@
 													"}",
 													""
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										},
 										{
@@ -33869,7 +33868,8 @@
 												"exec": [
 													"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -33883,7 +33883,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n  \"code\":\"{{request.label.1}}\"\n}"
+											"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"waitToComplete\": true\n}"
 										},
 										"url": {
 											"raw": "{{opencell.url}}/job/execute",
@@ -34749,7 +34749,8 @@
 											"}",
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -34758,7 +34759,8 @@
 										"exec": [
 											"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -34772,7 +34774,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"code\":\"{{request.label.1}}\"\n}"
+									"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"waitToComplete\": true\n}"
 								},
 								"url": {
 									"raw": "{{opencell.url}}/job/execute",
@@ -34827,7 +34829,8 @@
 											"}",
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -34836,7 +34839,8 @@
 										"exec": [
 											"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -34850,7 +34854,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"code\":\"{{request.label.1}}\"\n}"
+									"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"waitToComplete\": true\n}"
 								},
 								"url": {
 									"raw": "{{opencell.url}}/job/execute",
@@ -34880,14 +34884,10 @@
 											"if( pm.response.code === 200) {",
 											"    var jsonData = JSON.parse(responseBody);",
 											"    pm.globals.set(\"jobRun.id\", jsonData.actionStatus.message);",
-											"}",
-											"",
-											"  setTimeout(function(){",
-											"          console.log(\"Sleeping for 1 seconds before next request.\");",
-											"  }, 1000);",
-											""
+											"}"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								},
 								{
@@ -34896,7 +34896,8 @@
 										"exec": [
 											"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -34910,7 +34911,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"code\":\"{{request.label.1}}\"\n}"
+									"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"waitToComplete\": true\n}"
 								},
 								"url": {
 									"raw": "{{opencell.url}}/job/execute",

@@ -20523,7 +20523,6 @@
     <changeSet id="#INTRD-21626_20240227" author="ZBariki" />
     <changeSet id="#INTRD-18587_20230925" author="aelmalki" />
     <changeSet id="#INTRD-16102_priceliststatusjob" author="a.rouaguebe" />
-    <changeSet id="#INTRD-5882__23-03-2022" author="Mohammed_ELAZZOUZI" />
     <changeSet id="#INTRD-13978_20230407" author="HOudad" />
     <changeSet id="INTRD-15458_2023_04_17" author="ZBariki" />
     <changeSet id="INTRD-15467_2023_04_17" author="ZBariki" />
@@ -20651,7 +20650,6 @@
     <changeSet id="#INTRD-23916_20240625" author="a.rouaguebe" />
     <changeSet id="INTRD-24031_20240626" author="ZakariaB" />
     <changeSet id="INTRD-24051_ReRateV2" author="a.rouaguebe" />
-    <changeSet id="INTRD-24052_ReRateV2_filter" author="a.rouaguebe" />
     <changeSet id="INTRD-23882_20240702" author="TarikFA." />
     <changeSet id="#INTRD-23732_20240715" author="TarikFA." />
     <changeSet id="INTRD-22955_20240521" author="ZBariki" />
@@ -20692,7 +20690,6 @@
     <changeSet id="#INTRD-25724-increase-param-size" author="a.rouaguebe" />
     <changeSet id="#INTRD-25754_vat_status" author="a.rouaguebe" />
     <changeSet id="#INTRD-25744_add_desci18n" author="a.rouaguebe" />
-    <changeSet id="#INTRD-25415_20240919" author="zelmeliani" />
     <changeSet id="#INTRD-25118_2024_09_24" author="ZakariaB" />
     <changeSet id="#INTRD-25340_update_dunning_actions_levels" author="zelmeliani" />
     <changeSet id="#INTRD-25341_update_dunning_actions_levels_instance" author="zelmeliani" />

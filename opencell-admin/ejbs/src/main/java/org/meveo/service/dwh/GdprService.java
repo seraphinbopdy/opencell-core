@@ -93,7 +93,7 @@ public class GdprService extends BaseService {
 					anonymizeCustomFields(ua);
 					for (Subscription sub : ua.getSubscriptions()) {
 						anonymizeCustomFields(sub);
-						subscriptionService.update(sub);
+						//subscriptionService.update(sub);
 					}
 				}
 			}

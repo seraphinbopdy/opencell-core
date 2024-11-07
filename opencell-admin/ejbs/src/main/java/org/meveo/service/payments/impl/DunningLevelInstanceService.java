@@ -204,6 +204,7 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
         levelInstance.setDunningLevel(policyLevel.getDunningLevel());
         levelInstance.setCfValues(policyLevel.getDunningLevel().getCFValuesCopy());
         levelInstance.setDaysOverdue(policyLevel.getDunningLevel().getDaysOverdue());
+        levelInstance.setExecutionDate(addDaysToDate(collectionPlan.getStartDate(), policyLevel.getDunningLevel().getDaysOverdue()));
 
         // Check the related invoice and set it to the level instance
         if (collectionPlan.getRelatedInvoice() != null) {
@@ -258,6 +259,7 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
         DunningLevelInstance dunningLevelInstanceWithoutCollectionPlan = createDunningLevelInstanceWithoutCollectionPlan(pCustomerAccount, pInvoice, pDunningPolicyLevel, DunningLevelInstanceStatusEnum.IGNORED);
         dunningLevelInstanceWithoutCollectionPlan.getActions().forEach(action -> {
             action.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
+            action.setExecutionDate(null);
             dunningActionInstanceService.update(action);
         });
         return dunningLevelInstanceWithoutCollectionPlan;
@@ -398,6 +400,7 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
         DunningLevelInstance dunningLevelInstanceWithoutCollectionPlan = createDunningLevelInstanceWithoutCollectionPlanForCustomerLevel(pCustomerAccount, pDunningPolicyLevel, DunningLevelInstanceStatusEnum.IGNORED);
         dunningLevelInstanceWithoutCollectionPlan.getActions().forEach(action -> {
             action.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
+            action.setExecutionDate(null);
             dunningActionInstanceService.update(action);
         });
         return dunningLevelInstanceWithoutCollectionPlan;

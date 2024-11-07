@@ -6,6 +6,7 @@ import org.meveo.service.base.PersistenceService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -94,6 +95,7 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
 
         if (pDunningLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE) {
             dunningActionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
+            dunningActionInstance.setExecutionDate(new Date());
         } else {
             dunningActionInstance.setActionStatus(DunningActionInstanceStatusEnum.TO_BE_DONE);
         }

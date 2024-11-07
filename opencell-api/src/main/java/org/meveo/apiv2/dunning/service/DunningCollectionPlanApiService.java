@@ -762,6 +762,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         dunningActionInstance.setActionMode(dunningActionInstanceInput.getMode());
         if (dunningActionInstanceInput.getActionStatus() != null) {
             dunningActionInstance.setActionStatus(dunningActionInstanceInput.getActionStatus());
+            updateDunningActionInstanceExecutionDate(dunningActionInstanceInput, dunningActionInstance);
         }
         dunningActionInstance.setActionRestult(dunningActionInstanceInput.getActionRestult());
 
@@ -858,6 +859,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     fields.add("actionStatus");
                 }
                 dunningActionInstanceToUpdate.setActionStatus(dunningActionInstanceInput.getActionStatus());
+                updateDunningActionInstanceExecutionDate(dunningActionInstanceInput, dunningActionInstanceToUpdate);
 
                 // 2- If the DunningActionInstance status is changed to DONE:
                 if (dunningActionInstanceInput.getActionStatus() == DunningActionInstanceStatusEnum.DONE) {
@@ -901,6 +903,20 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             throw e;
         } catch (Exception e) {
             throw new MeveoApiException(e);
+        }
+    }
+
+    /**
+     * Update dunning action instance execution date based on the action status
+     * @param dunningActionInstanceInput Dunning action instance input {@link DunningActionInstanceInput}
+     * @param dunningActionInstanceToUpdate Dunning action instance to update {@link DunningActionInstance}
+     */
+    private void updateDunningActionInstanceExecutionDate(DunningActionInstanceInput dunningActionInstanceInput, DunningActionInstance dunningActionInstanceToUpdate) {
+        // Update dunning action instance execution date
+        if (dunningActionInstanceInput.getActionStatus() == DunningActionInstanceStatusEnum.DONE) {
+            dunningActionInstanceToUpdate.setExecutionDate(new Date());
+        } else if (dunningActionInstanceInput.getActionStatus() == DunningActionInstanceStatusEnum.IGNORED) {
+            dunningActionInstanceToUpdate.setExecutionDate(null);
         }
     }
 
@@ -953,8 +969,10 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             dunningActionInstance.setActionRestult(actionInput.getActionRestult());
             if (dunningLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE) {
                 dunningActionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
+                dunningLevelInstance.setExecutionDate(new Date());
             } else {
                 dunningActionInstance.setActionStatus(actionInput.getActionStatus());
+                updateDunningActionInstanceExecutionDate(actionInput, dunningActionInstance);
             }
             dunningActionInstance.setCollectionPlan(dunningLevelInstance.getCollectionPlan());
             dunningActionInstance.setDunningLevelInstance(dunningLevelInstance);

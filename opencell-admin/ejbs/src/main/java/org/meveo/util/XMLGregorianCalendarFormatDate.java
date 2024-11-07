@@ -1,15 +1,16 @@
 package org.meveo.util;
 
-import org.meveo.admin.exception.BusinessException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
+
+import org.meveo.admin.exception.BusinessException;
 
 public final class XMLGregorianCalendarFormatDate {
 	

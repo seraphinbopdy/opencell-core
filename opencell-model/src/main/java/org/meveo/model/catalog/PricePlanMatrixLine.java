@@ -86,7 +86,7 @@ public class PricePlanMatrixLine extends AuditableCFEntity {
     public PricePlanMatrixLine(PricePlanMatrixLine copy) {
         this.pricePlanMatrixVersion = copy.pricePlanMatrixVersion;
         this.description = copy.description;
-        this.priceWithoutTax = copy.priceWithoutTax;
+        this.priceWithoutTax = copy.value;
         this.pricePlanMatrixValues = new HashSet<PricePlanMatrixValue>();
         this.priority = copy.priority;
         this.ratingAccuracy = copy.ratingAccuracy;
@@ -112,12 +112,13 @@ public class PricePlanMatrixLine extends AuditableCFEntity {
 
     @Deprecated
     public BigDecimal getPriceWithoutTax() {
-        return value;
+		return this.priceWithoutTax;
     }
 
     @Deprecated
     public void setPriceWithoutTax(BigDecimal priceWithoutTax) {
         this.value = priceWithoutTax;
+		this.priceWithoutTax = priceWithoutTax;
     }
 
     public Set<PricePlanMatrixValue> getPricePlanMatrixValues() {

@@ -423,9 +423,6 @@ public class SubscriptionApi extends BaseApi {
         if (StringUtils.isBlank(postData.getCode())) {
             missingParameters.add("code");
         }
-        if (StringUtils.isBlank(postData.getSubscriptionDate())) {
-            missingParameters.add("subscriptionDate");
-        }
         if (postData.getElectronicBilling() != null && postData.getElectronicBilling()) {
             if (StringUtils.isBlank(postData.getEmail())) {
                 missingParameters.add("email");

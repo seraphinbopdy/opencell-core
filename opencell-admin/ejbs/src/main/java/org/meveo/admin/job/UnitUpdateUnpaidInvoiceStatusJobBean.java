@@ -18,15 +18,18 @@
 
 package org.meveo.admin.job;
 
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNREFUNDED;
+
+import java.util.Date;
+
 import org.meveo.event.qualifier.Updated;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.BaseEntity;
-import org.meveo.model.billing.*;
+import org.meveo.model.billing.Invoice;
+import org.meveo.model.billing.InvoicePaymentStatusEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
-import org.meveo.service.billing.impl.AggregatedWalletOperation;
 import org.meveo.service.billing.impl.InvoiceService;
-import org.meveo.service.billing.impl.RatedTransactionService;
-import org.meveo.service.billing.impl.WalletOperationService;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;
@@ -34,11 +37,6 @@ import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
-
-import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
-import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNREFUNDED;
-
-import java.util.Date;
 
 /**
  * @author Mounir BOUKAYOUA

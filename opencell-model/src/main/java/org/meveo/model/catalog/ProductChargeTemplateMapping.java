@@ -18,6 +18,7 @@
 
 package org.meveo.model.catalog;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -103,6 +104,17 @@ public class ProductChargeTemplateMapping<T extends ChargeTemplate> extends Base
         this.counterTemplate = counterTemplate;
     }
 
+	public ProductChargeTemplateMapping(ProductChargeTemplateMapping copy) {
+		this.product = copy.product;
+		this.chargeTemplate = (T) copy.chargeTemplate;
+		this.counterTemplate = copy.counterTemplate;
+		this.walletTemplates = new ArrayList<>();
+		this.accumulatorCounterTemplates  = new ArrayList<>();
+	}
+	
+	public ProductChargeTemplateMapping() {
+	}
+	
     /**
      * @return the product
      */

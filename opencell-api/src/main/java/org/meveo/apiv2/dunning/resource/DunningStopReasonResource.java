@@ -14,7 +14,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
-@Path("/dunning/stopReason")
+@Path("/v2/dunning/stopReason")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface DunningStopReasonResource {

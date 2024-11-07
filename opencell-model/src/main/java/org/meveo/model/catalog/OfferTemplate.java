@@ -17,6 +17,7 @@
  */
 package org.meveo.model.catalog;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.IWFEntity;
 import org.meveo.model.WorkflowedEntity;
@@ -66,6 +68,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @WorkflowedEntity
 @CustomFieldEntity(cftCodePrefix = "OfferTemplate")
 @DiscriminatorValue("OFFER")
@@ -219,6 +222,10 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
     @JoinColumn(name = "document_id")
     private Document document;
 
+    /** MRR. */
+    @Column(name = "arr", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal arr;
+    
     /**
      * @return the display
      */
@@ -671,4 +678,11 @@ public class OfferTemplate extends ProductOffering implements IWFEntity, ISearch
         this.document = document;
     }
 
+    public BigDecimal getArr() {
+        return arr;
+    }
+
+    public void setArr(BigDecimal arr) {
+        this.arr = arr;
+    }
 }

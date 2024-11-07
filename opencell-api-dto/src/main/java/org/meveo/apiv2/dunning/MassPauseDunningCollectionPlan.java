@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.immutables.value.Value;
+import org.immutables.value.Value.Default;
 import org.meveo.apiv2.models.Resource;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -27,4 +28,9 @@ public interface MassPauseDunningCollectionPlan {
     @Schema(description = "Pause until date")
 	Date getPauseUntil();
 
+    @Default
+    @Schema(description = "flag to retry a payment on the resume date")
+    default boolean getRetryPaymentOnResumeDate() {
+        return false;
+    }
 }

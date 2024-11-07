@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
+import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.apiv2.models.Resource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -77,5 +78,9 @@ public interface DunningLevel extends Resource {
 	@Schema(description = "Dunning level actions")
 	@JsonProperty("dunningActions")
 	List<String> getDunningActions();
+
+	@Nullable
+	@Schema(description = "custom field associated to dunning action")
+	CustomFieldsDto getCustomFields();
 
 }

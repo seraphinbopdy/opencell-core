@@ -13,21 +13,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-import jakarta.persistence.NoResultException;
-import jakarta.ws.rs.NotFoundException;
 
 import org.hibernate.SessionFactory;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
-import org.meveo.api.dto.catalog.TradingPricePlanMatrixLineDto;
 import org.meveo.api.dto.catalog.PricePlanMatrixLineDto;
 import org.meveo.api.dto.catalog.PricePlanMatrixValueDto;
 import org.meveo.api.dto.catalog.TradingCurrencyDto;
+import org.meveo.api.dto.catalog.TradingPricePlanMatrixLineDto;
 import org.meveo.api.dto.response.catalog.PricePlanMatrixLinesDto;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BaseEntity;
@@ -40,6 +34,11 @@ import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.cpq.AttributeService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.ws.rs.NotFoundException;
 
 @Stateless
 public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatrixColumn> {
@@ -240,7 +239,16 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
 			
 			line = scanner.nextLine();
 			if(line.isEmpty()) continue;
-			String[] nextLine = line.substring(1, line.length() - 1).split("\";\"");
+			var startValue = 0;
+			var endValue = line.length() - 1;
+			if(line.startsWith(";\"")){
+				if(line.endsWith("\"\"")){
+					endValue = line.length() - 2;
+				}
+			}else {
+				startValue = 1;
+			}
+			String[] nextLine = line.substring(startValue, endValue).split(";\"");
 			
 			for(var columnIndex=0; columnIndex < columns.size() ; columnIndex++ ) {
 				PricePlanMatrixValueDto pricePlanMatrixValueDto = new PricePlanMatrixValueDto();

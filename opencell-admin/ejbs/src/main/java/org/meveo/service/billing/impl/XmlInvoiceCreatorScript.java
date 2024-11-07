@@ -1714,7 +1714,13 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         invoiceTag.setAttribute("invoiceCounter", invoice.getAlias());
         invoiceTag.setAttribute("id", invoice.getId() != null ? invoice.getId().toString() : "");
         invoiceTag.setAttribute("invoiceCodeType", invoice.getInvoiceType().getUntdidInvoiceCodeType() != null ? invoice.getInvoiceType().getUntdidInvoiceCodeType().getCode() : "");
-        invoiceTag.setAttribute("invoiceCodeTypeLabel", invoice.getInvoiceType().getUntdidInvoiceCodeType() != null ? invoice.getInvoiceType().getUntdidInvoiceCodeType().getInterpretation16931() : "");
+        String invoiceLanguageCode = invoice.getBillingAccount().getTradingLanguage().getLanguage().getLanguageCode();
+		String invoiceCodeTypeLabel = invoice.getInvoiceType().getDescription();
+		if (invoice.getInvoiceType().getDescriptionI18n() != null && invoice.getInvoiceType().getDescriptionI18n().get(invoiceLanguageCode) != null) {
+			invoiceCodeTypeLabel = invoice.getInvoiceType().getDescriptionI18n().get(invoiceLanguageCode);
+		}
+        invoiceTag.setAttribute("invoiceCodeTypeLabel", invoiceCodeTypeLabel);
+        invoiceTag.setAttribute("language", invoiceLanguageCode);
         invoiceTag.setAttribute("country", invoice.getTradingCountry() != null ? invoice.getTradingCountry().getCode() : "");
         invoiceTag.setAttribute("currency", (invoice.getTradingCurrency() != null && invoice.getTradingCurrency().getCurrency() != null) ? invoice.getTradingCurrency().getCurrency().getCurrencyCode() : "");
         invoiceTag.setAttribute("customerId", invoice.getBillingAccount().getCustomerAccount().getCustomer().getCode());

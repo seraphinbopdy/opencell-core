@@ -413,7 +413,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> imple
      */
     public Map<String, Object> executePooled(String scriptCode, Map<String, Object> context) throws BusinessException {
 
-        log.trace("Script (pooled) {} to be executed with parameters {}", scriptCode, context);
+        
+        log.trace("Script (pooled) {} to be executed", scriptCode); // INTRD-24801 with parameters {}", scriptCode, context);
 
         if (context == null) {
             context = new HashMap<String, Object>();
@@ -444,7 +445,7 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> imple
 
         returnScriptInstanceToPool(scriptCode, classInstance);
 
-        log.trace("Script (pooled) {} executed with parameters {}", scriptCode, context);
+        log.trace("Script (pooled) {} executed", scriptCode); // INTRD-24801 with parameters {}", scriptCode, context);
         return context;
     }
 
@@ -566,7 +567,7 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> imple
         context.put(Script.CONTEXT_CURRENT_USER, currentUser);
         context.put(Script.CONTEXT_APP_PROVIDER, appProvider);
 
-        log.trace("Script {} to be executed with parameters {}", classInstance.getClass(), context);
+        log.trace("Script {} to be executed",  classInstance.getClass()); // INTRD-24801 with parameters {}", classInstance.getClass(), context);
 
         applyParametersToScriptInstance(classInstance, context);
 
@@ -585,7 +586,7 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> imple
         if (getterValues != null && !getterValues.isEmpty()) {
             context.put(Script.CONTEXT_RESULT_GETTER_VALUES, getterValues);
         }
-        log.trace("Script {} executed with parameters {}", classInstance.getClass(), context);
+        log.trace("Script {} executed", classInstance.getClass()); // INTRD-24801 with parameters {}", classInstance.getClass(), context);
         return context;
     }
 

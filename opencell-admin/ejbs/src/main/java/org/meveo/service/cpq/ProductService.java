@@ -15,10 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-import jakarta.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -37,6 +33,10 @@ import org.meveo.service.catalog.impl.CatalogHierarchyBuilderService;
 import org.meveo.service.catalog.impl.PricePlanMatrixColumnService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * @author Mbarek-Ay

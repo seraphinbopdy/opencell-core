@@ -31,7 +31,7 @@ import org.meveo.apiv2.models.Resource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
-@Path("/customAction")
+@Path("/v2/customAction")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface CustomActionResource {

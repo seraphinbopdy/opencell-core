@@ -26,18 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import jakarta.ejb.AsyncResult;
-import jakarta.ejb.Asynchronous;
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.IEvent;
-import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.CustomTableEvent;
 import org.meveo.model.IEntity;
 import org.meveo.model.notification.EmailNotification;
@@ -60,6 +51,12 @@ import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
 
 /**
  * Basically an extension of {@link DefaultObserver} to call notification asychronously.
@@ -286,7 +283,6 @@ public class DefaultNotificationService {
                 MeveoUser lastCurrentUser = currentUser.unProxy();
                 EmailNotification  emailNotification = (EmailNotification) notif;
                 context.put("EMAIL_FROM", evaluateExpression(emailNotification.getEmailFrom(), userMap, String.class));
-                context.put("EMAIL_TO_LIST", evaluateExpression(emailNotification.getEmailToEl(), userMap, String.class));
                 addParamsTo(context, emailNotification.getParams(), userMap);
                 if(notif.getScriptInstance() != null) {
                     // script context overwrite

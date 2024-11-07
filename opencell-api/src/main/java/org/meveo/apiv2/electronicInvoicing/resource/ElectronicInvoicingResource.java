@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/electronicInvoicing")
+@Path("/v2/electronicInvoicing")
 @Produces({APPLICATION_JSON})
 @Consumes({APPLICATION_JSON})
 public interface ElectronicInvoicingResource {

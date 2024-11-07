@@ -386,6 +386,13 @@ public class FilesApi extends BaseApi {
      * @throws BusinessApiException business exception.
      */
     public void downloadFile(String filePath, HttpServletResponse response) throws BusinessApiException {
+        
+        if(StringUtils.isBlank(filePath)) {
+            missingParameters.add("file");
+        }
+        
+        handleMissingParameters();
+        
         File file = checkAndGetExistingFile(filePath);
 
         try (InputStream fis = StorageFactory.getInputStream(file)) {

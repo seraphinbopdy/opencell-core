@@ -1,7 +1,9 @@
 package org.meveo.apiv2;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.meveo.apiv2.generic.core.mapper.module.GenericModule;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
 
@@ -14,6 +16,7 @@ public class GenericJacksonProvider implements ContextResolver<ObjectMapper> {
         mapper = new ObjectMapper();
         GenericModule genericModule = GenericModule.Builder.getBuilder().build();
         mapper.registerModule(genericModule);
+//        mapper.registerModule(new JaxbAnnotationModule());
     }
 
     @Override

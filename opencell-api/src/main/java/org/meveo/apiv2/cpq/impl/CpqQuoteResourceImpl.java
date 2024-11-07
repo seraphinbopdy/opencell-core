@@ -8,6 +8,7 @@ import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.cpq.resource.CpqQuoteResource;
 import org.meveo.apiv2.cpq.service.CpqQuoteApiService;
 import org.meveo.apiv2.ordering.resource.oo.ImmutableAvailableOpenOrder;
+import org.meveo.apiv2.quote.QuoteEmailInput;
 
 import jakarta.inject.Inject;
 import jakarta.interceptor.Interceptors;
@@ -31,5 +32,11 @@ public class CpqQuoteResourceImpl implements CpqQuoteResource {
 		
 		return Response.ok(response).build();
 	}
-
+	
+	@Override
+	public Response sendByEmail(QuoteEmailInput quoteEmailInput) {
+		cpqQuoteApiService.sendByEmail(quoteEmailInput);
+		return Response.ok().build();
+	}
+	
 }

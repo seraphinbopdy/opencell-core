@@ -44,8 +44,6 @@ import org.meveo.service.base.PersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ctc.wstx.shaded.msv_core.datatype.xsd.LongType;
-
 import jakarta.annotation.Resource;
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
@@ -73,7 +71,7 @@ public class MassUpdaterOpenCursorJobBean extends MassUpdaterJobBean {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::processUpdateQueries, null, null, this::finalize, null);
+        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::processUpdateQueries, null, null, this::terminate, null);
     }
 
     /**
@@ -166,11 +164,11 @@ public class MassUpdaterOpenCursorJobBean extends MassUpdaterJobBean {
     }
 
     /**
-     * Finalize function
+     * Terminate function
      *
      * @param jobExecutionResult Job execution result
      */
-    protected void finalize(JobExecutionResultImpl jobExecutionResult) {
+    protected void terminate(JobExecutionResultImpl jobExecutionResult) {
         if (scrollableResults != null) {
             scrollableResults.close();
         }

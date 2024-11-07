@@ -328,11 +328,13 @@ public class CatalogHierarchyBuilderService {
     		productCharge.forEach(pct -> { 
     			ProductChargeTemplateMapping duplicat = new ProductChargeTemplateMapping();
     			duplicat.setCounterTemplate(pct.getCounterTemplate());
-                duplicat.setChargeTemplate(chargeTemplateServiceAll.duplicateCharge(PersistenceUtils.initializeAndUnproxy(pct.getChargeTemplate())));
+                duplicat.setChargeTemplate(chargeTemplateServiceAll.duplicateCharge(PersistenceUtils.initializeAndUnproxy(pct.getChargeTemplate()), true));
+			    duplicat.getChargeTemplate().setProductCharges(new ArrayList<>());
     			duplicat.setProduct(entity);
     			duplicat.setAccumulatorCounterTemplates(new ArrayList<>());
     			duplicat.setWalletTemplates(new ArrayList<>());
     			productChargeTemplateMappingService.create(duplicat);
+			    chargeTemplateServiceAll.getEntityManager().flush();
     			entity.getProductCharges().add(duplicat);
     		});
     	}

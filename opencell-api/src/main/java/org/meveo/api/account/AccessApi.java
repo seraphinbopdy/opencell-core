@@ -158,13 +158,6 @@ public class AccessApi extends BaseApi {
         if (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate)) {
             startDate = usageDate;
             endDate = usageDate;
-        } else {
-            if (StringUtils.isBlank(startDate)) {
-                missingParameters.add("startDate");
-            }
-            if (StringUtils.isBlank(endDate)) {
-                missingParameters.add("endDate");
-            }
         }
 
         handleMissingParameters();

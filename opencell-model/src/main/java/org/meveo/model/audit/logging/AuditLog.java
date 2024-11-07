@@ -25,6 +25,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
+import org.meveo.model.HugeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,6 +41,7 @@ import jakarta.persistence.TemporalType;
  * @author Edward P. Legaspi
  **/
 @Entity
+@HugeEntity
 @Table(name = "audit_log")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "audit_log_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "AuditLog.purgeAuditLog", query = "delete from AuditLog a where a.created < :purgeDate") })

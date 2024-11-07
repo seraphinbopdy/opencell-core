@@ -19,8 +19,6 @@ package org.meveo.admin.job;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;

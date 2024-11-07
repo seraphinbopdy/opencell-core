@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.meveo.apiv2.models.ApiException;
 
-@Path("/billing/ratedTransaction")
+@Path("/v2/billing/ratedTransaction")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface RatedTransactionResource {

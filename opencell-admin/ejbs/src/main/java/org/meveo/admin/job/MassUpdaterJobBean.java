@@ -64,11 +64,11 @@ public abstract class MassUpdaterJobBean extends IteratorBasedJobBean<List<Long>
     protected abstract void processUpdateQueries(List<Long> interval, JobExecutionResultImpl jobExecutionResult);
 
     /**
-     * Finalize function
+     * Terminate function
      *
      * @param jobExecutionResult Job execution result
      */
-    protected abstract void finalize(JobExecutionResultImpl jobExecutionResult);
+    protected abstract void terminate(JobExecutionResultImpl jobExecutionResult);
 
     /**
      * Execute job

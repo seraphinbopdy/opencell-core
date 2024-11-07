@@ -14,7 +14,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
-@Path("/dunning/paymentRetry")
+@Path("/v2/dunning/paymentRetry")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface DunningPaymentRetryResource {

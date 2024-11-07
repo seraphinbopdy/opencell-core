@@ -44,6 +44,7 @@ import org.meveo.cache.CacheKeyStr;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
+import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.scripts.ScriptInstanceError;
 import org.meveo.model.scripts.ScriptSourceTypeEnum;
@@ -54,6 +55,8 @@ import jakarta.annotation.Resource;
 import jakarta.ejb.Lock;
 import jakarta.ejb.LockType;
 import jakarta.ejb.Singleton;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 
@@ -86,8 +89,11 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
     /**
      * Compile and initialize all scriptInstances.
      */
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void compileAndInitializeAll() {
 
+        // Initialize reusable scripts that are based on compiled and included JAVA class in the project 
         List<ScriptInstance> scriptInstances = findByType(ScriptSourceTypeEnum.JAVA_CLASS);
 
         // Initialize scripts that are defined as java classe
@@ -110,6 +116,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
             }
         }
 
+        // Compile JAVA type classes
         scriptInstances = findByType(ScriptSourceTypeEnum.JAVA);
         compile(scriptInstances);
 
@@ -293,11 +300,12 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
                         log.warn("Failed to initialize script for a cached script instance", e);
                     }
                 }
+
+                log.info("Adding compiled script {} into compiled script cache with key {}", scriptCode, cacheKey);                
+
                 compiledScripts.put(cacheKey, compiledScript);
                 InitialContext ic = new InitialContext();
                 ic.rebind("java:global/" + ParamBean.getInstance().getProperty("opencell.moduleName", "opencell") + "/" + scriptCode, scriptInstance);
-
-                log.debug("Compiled script {} added to compiled interface map", scriptCode);
             }
 
             return null;
@@ -427,6 +435,8 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
         Class<ScriptInterface> compiledScript = compiledScripts.get(cacheKey);
         if (compiledScript == null) {
 
+            log.warn("Script {} with cache key {} was NOT found in compiled script cache. Currently cache contains {}", scriptCode, cacheKey.toString(), compiledScripts.keySet());
+            
             ScriptInstance script = findByCode(scriptCode);
             if (script == null) {
                 log.debug("ScriptInstance with {} does not exist", scriptCode);
@@ -454,7 +464,12 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
      * @param scriptCode Script code
      */
     public void clearCompiledScripts(String scriptCode) {
-        compiledScripts.remove(new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode));
+        
+        CacheKeyStr cacheKey = new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode);
+        
+        log.debug("Script {} with cache key {} will be removed from compiled script cache.", scriptCode, cacheKey.toString());
+        
+        compiledScripts.remove(cacheKey);
     }
 
     /**
@@ -463,8 +478,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
     public void clearCompiledScripts() {
 
         String currentProvider = currentUser.getProviderCode();
-        log.info("Clear CFTS cache for {}/{} ", currentProvider, currentUser);
-        // cftsByAppliesTo.keySet().removeIf(key -> (key.getProvider() == null) ? currentProvider == null : key.getProvider().equals(currentProvider));
+        log.info("Clear compiled scripts cache for {}/{} ", currentProvider, currentUser);
         Iterator<Entry<CacheKeyStr, Class<ScriptInterface>>> iter = compiledScripts.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).entrySet().iterator();
         ArrayList<CacheKeyStr> itemsToBeRemoved = new ArrayList<>();
         while (iter.hasNext()) {
@@ -475,9 +489,9 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
             }
         }
 
-        for (CacheKeyStr elem : itemsToBeRemoved) {
-            log.debug("Remove element Provider:" + elem.getProvider() + " Key:" + elem.getKey() + ".");
-            compiledScripts.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).remove(elem);
+        for (CacheKeyStr cacheKey : itemsToBeRemoved) {
+            log.debug("Script with cache key {} will be removed from compiled script cache.", cacheKey.toString());
+            compiledScripts.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).remove(cacheKey);
         }
     }
 }

@@ -70,10 +70,12 @@ import org.meveo.model.payments.CreditCategory;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.shared.Title;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.billing.impl.AccountingCodeService;
 import org.meveo.service.billing.impl.TradingLanguageService;
+import org.meveo.service.catalog.impl.TitleService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.intcrm.impl.AddressBookService;
@@ -110,6 +112,9 @@ public class CustomerAccountApi extends AccountEntityApi {
     @Inject
     private PaymentMethodApi paymentMethodApi;
 
+    @Inject
+    private TitleService titleService;
+
     @EJB
     private AccountHierarchyApi accountHierarchyApi;
 
@@ -128,8 +133,13 @@ public class CustomerAccountApi extends AccountEntityApi {
     @Inject
     private AccountingCodeService accountingCodeService;
 
+
     public CustomerAccount create(CustomerAccountDto postData) throws MeveoApiException, BusinessException {
-        return create(postData, true);
+        return create(postData, Version.V1);
+    }
+    
+    public CustomerAccount create(CustomerAccountDto postData, Version version) throws MeveoApiException, BusinessException {
+        return create(postData, true, null, null, version);
     }
 
     public CustomerAccount create(CustomerAccountDto postData, boolean checkCustomFields) throws MeveoApiException, BusinessException {
@@ -138,6 +148,11 @@ public class CustomerAccountApi extends AccountEntityApi {
 
     public CustomerAccount create(CustomerAccountDto postData, boolean checkCustomFields,
                                   BusinessAccountModel businessAccountModel, Customer associatedCustomer) throws MeveoApiException, BusinessException {
+        return create(postData, checkCustomFields, businessAccountModel, associatedCustomer, Version.V1);
+    }
+    
+    public CustomerAccount create(CustomerAccountDto postData, boolean checkCustomFields,
+                                  BusinessAccountModel businessAccountModel, Customer associatedCustomer, Version version) throws MeveoApiException, BusinessException {
 
         if (StringUtils.isBlank(postData.getCode())) {
             addGenericCodeIfAssociated(CustomerAccount.class.getName(), postData);
@@ -153,6 +168,21 @@ public class CustomerAccountApi extends AccountEntityApi {
         }
         if (postData.getName() != null && !StringUtils.isBlank(postData.getName().getTitle()) && StringUtils.isBlank(postData.getName().getLastName())) {
             missingParameters.add("name.lastName");
+        }
+
+        if(Boolean.TRUE.equals(postData.getIsCompany()) && Version.V2.equals(version)) {
+
+            if(postData.getLegalEntityType() == null || StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                missingParameters.add("legalEntityType.code");
+            }
+
+            if(StringUtils.isBlank(postData.getDescription())) {
+                missingParameters.add("description");
+            }
+
+            if(org.apache.commons.collections.CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
+                missingParameters.add("registrationNumbers");
+            }
         }
 
         handleMissingParameters(postData);
@@ -200,19 +230,29 @@ public class CustomerAccountApi extends AccountEntityApi {
 
         return customerAccount;
     }
-
+    
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = CustomerAccount.class))
     public CustomerAccount update(CustomerAccountDto postData) throws MeveoApiException, BusinessException {
-        return update(postData, true);
+        return update(postData, Version.V1);
+    }
+
+    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = CustomerAccount.class))
+    public CustomerAccount update(CustomerAccountDto postData, Version version) throws MeveoApiException, BusinessException {
+        return update(postData, true, null, version);
     }
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = CustomerAccount.class))
     public CustomerAccount update(CustomerAccountDto postData, boolean checkCustomFields) throws MeveoApiException, BusinessException {
-        return update(postData, true, null);
+        return update(postData, true, null, Version.V1);
     }
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = CustomerAccount.class))
     public CustomerAccount update(CustomerAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel) throws MeveoApiException, BusinessException {
+        return update(postData, checkCustomFields, businessAccountModel, Version.V1);
+    }
+    
+    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = CustomerAccount.class))
+    public CustomerAccount update(CustomerAccountDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel, Version version) throws MeveoApiException, BusinessException {
 
         if (StringUtils.isBlank(postData.getCode())) {
             missingParameters.add("code");
@@ -220,6 +260,20 @@ public class CustomerAccountApi extends AccountEntityApi {
 
         if (postData.getName() != null && !StringUtils.isBlank(postData.getName().getTitle()) && StringUtils.isBlank(postData.getName().getLastName())) {
             missingParameters.add("name.lastName");
+        }
+        
+        if(Boolean.TRUE.equals(postData.getIsCompany()) && Version.V2.equals(version)) {
+            if(postData.getLegalEntityType() == null || StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                missingParameters.add("legalEntityType.code");
+            }
+
+            if(StringUtils.isBlank(postData.getDescription())) {
+                missingParameters.add("description");
+            }
+
+            if(org.apache.commons.collections.CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
+                missingParameters.add("registrationNumbers");
+            }
         }
 
         handleMissingParametersAndValidate(postData);
@@ -275,6 +329,18 @@ public class CustomerAccountApi extends AccountEntityApi {
                 throw new EntityDoesNotExistsException(TradingLanguage.class, postData.getLanguage());
             }
             customerAccount.setTradingLanguage(tradingLanguage);
+        }
+
+        if(postData.getLegalEntityType() != null && postData.getLegalEntityType().getCode() != null) {
+            if(StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                customerAccount.setLegalEntityType(null);
+            } else {
+                Title title = titleService.findByCode(postData.getLegalEntityType().getCode());
+                if(title == null) {
+                    throw new EntityDoesNotExistsException(Title.class, postData.getLegalEntityType().getCode());
+                }
+                customerAccount.setLegalEntityType(title);
+            }
         }
 
         updateAccount(customerAccount, postData, checkCustomFields);
@@ -425,6 +491,16 @@ public class CustomerAccountApi extends AccountEntityApi {
 				} else {
 					PaymentMethod paymentMethod = customerAccount.getPaymentMethods().get(index);
 					paymentMethod.updateWith(paymentMethodFromDto);
+                    try {
+                        populateCustomFields(paymentMethodDto.getCustomFields(), paymentMethod, false, true);
+
+                    } catch (MissingParameterException | InvalidParameterException e) {
+                        log.error("Failed to associate custom field instance to an entity: {}", e.getMessage());
+                        throw e;
+                    } catch (Exception e) {
+                        log.error("Failed to associate custom field instance to an entity", e);
+                        throw e;
+                    }
 					paymentMethodsFromDto.add(paymentMethod);
 					customerAccount.addPaymentMethodToAudit(new Object() {
 					}.getClass().getEnclosingMethod().getName(), paymentMethod);
@@ -615,10 +691,15 @@ public class CustomerAccountApi extends AccountEntityApi {
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = CustomerAccount.class))
     public CustomerAccount createOrUpdate(CustomerAccountDto postData) throws MeveoApiException, BusinessException {
+        return createOrUpdate(postData, Version.V1);
+    }
+    
+    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = CustomerAccount.class))
+    public CustomerAccount createOrUpdate(CustomerAccountDto postData, Version version) throws MeveoApiException, BusinessException {
         if (!StringUtils.isBlank(postData.getCode()) && customerAccountService.findByCode(postData.getCode()) != null) {
-            return update(postData);
+            return update(postData, version);
         } else {
-            return create(postData);
+            return create(postData, version);
         }
     }
 
@@ -696,6 +777,9 @@ public class CustomerAccountApi extends AccountEntityApi {
             if (customerAccountDto.getPaymentMethods() != null && !customerAccountDto.getPaymentMethods().isEmpty()) {
             	existedCustomerAccountDto.setPaymentMethods(customerAccountDto.getPaymentMethods());
             }
+            if(customerAccountDto.getLegalEntityType() != null) {
+                existedCustomerAccountDto.setLegalEntityType(customerAccountDto.getLegalEntityType());
+            }
             update(existedCustomerAccountDto);
         }
     }
@@ -765,5 +849,9 @@ public class CustomerAccountApi extends AccountEntityApi {
         }
 
         return new ArrayList<>(customerAccountService.filterCountersByPeriod(customerAccount.getCounters(), date).values());
+    }
+    
+    public enum Version {
+        V1, V2
     }
 }

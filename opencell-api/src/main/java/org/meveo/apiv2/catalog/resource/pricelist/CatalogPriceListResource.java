@@ -19,7 +19,7 @@ import jakarta.ws.rs.core.Response;
  * @since 15.0
  *
  */
-@Path("/catalog")
+@Path("/v2/catalog")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface CatalogPriceListResource {

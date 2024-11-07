@@ -6,7 +6,7 @@ import java.util.List;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.type.NumericBooleanConverter;
-import org.meveo.model.BusinessEntity;
+import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.admin.Currency;
 
 import jakarta.persistence.CascadeType;
@@ -20,6 +20,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -33,7 +35,11 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Table(name = "dunning_level")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_level_seq"), @Parameter(name = "increment_size", value = "1") })
-public class DunningLevel extends BusinessEntity {
+@NamedQueries({
+        @NamedQuery(name = "DunningLevel.activateByDunningMode", query = "UPDATE DunningLevel SET isActive = TRUE WHERE type = :dunningMode"),
+        @NamedQuery(name = "DunningLevel.deactivateByDunningMode", query = "UPDATE DunningLevel SET isActive = FALSE WHERE type != :dunningMode")
+})
+public class DunningLevel extends BusinessCFEntity {
 
     private static final long serialVersionUID = 8092970257735394941L;
 
@@ -43,7 +49,7 @@ public class DunningLevel extends BusinessEntity {
      */
     @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "reminder")
-    private Boolean isReminder = Boolean.FALSE;
+    private Boolean reminder = Boolean.FALSE;
 
     /**
      * A level can be activated or deactivate at any time, it means it is triggered or not within a policy
@@ -120,11 +126,11 @@ public class DunningLevel extends BusinessEntity {
     private List<DunningPolicyLevel> relatedPolicies;
 
     public Boolean isReminder() {
-        return isReminder;
+        return reminder;
     }
 
     public void setReminder(Boolean reminder) {
-        isReminder = reminder;
+        this.reminder = reminder;
     }
 
     public Boolean isActive() {

@@ -27,6 +27,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.PartitionKey;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.custom.CustomFieldValues;
 
@@ -53,6 +54,7 @@ import jakarta.validation.constraints.Size;
  * @since 9.1
  */
 @Entity
+@HugeEntity
 @Table(name = "rating_cdr")
 @CustomFieldEntity(cftCodePrefix = "CDR")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "rating_cdr_seq"),

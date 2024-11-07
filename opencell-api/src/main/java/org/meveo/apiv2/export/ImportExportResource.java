@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.Response;
 
 import static jakarta.ws.rs.core.MediaType.*;
 
-@Path("/importExport")
+@Path("/v2/importExport")
 @Consumes({ MULTIPART_FORM_DATA, APPLICATION_JSON })
 @Produces({ APPLICATION_JSON, APPLICATION_XML })
 public interface ImportExportResource {

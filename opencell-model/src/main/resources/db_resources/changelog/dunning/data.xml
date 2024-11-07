@@ -1259,7 +1259,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL1" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Dunning level 1 for individual customer" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1274,7 +1274,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Email B2C LVL1" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Automatic level 1 email to individual customer" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="AUTOMATIC" />
@@ -1302,7 +1302,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL2" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Dunning level 2 for individual customer" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1317,7 +1317,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Email B2C LVL2" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Automatic level 2 email to individual customer" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="AUTOMATIC" />
@@ -1345,7 +1345,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL3" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Dunning level 3 for individual customer" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1360,7 +1360,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Call B2C LVL3" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Manual level 3 call to individual customer" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />
@@ -1387,7 +1387,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL4" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Dunning level 4 for individual customer" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="1" />
             <column name="active" valueNumeric="1" />
@@ -1402,7 +1402,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Letter B2C LVL4" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Manual level 4 postal mail to individual customer" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />
@@ -1467,7 +1467,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL1B2B" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Dunning level 1 for enterprise customer" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1482,7 +1482,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Email B2B LVL1" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Automatic level 1 email to enterprise customer" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="AUTOMATIC" />
@@ -1510,7 +1510,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL2B2B" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Dunning level 2 for enterprise customer" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1525,7 +1525,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Call B2B LVL2" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Automatic level 2 email to enterprise customer" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />
@@ -1552,7 +1552,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL3B2B" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Dunning level 3 for enterprise customer" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1567,7 +1567,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Call B2B LVL3" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Manual level 3 call to enterprise customer" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />
@@ -1594,7 +1594,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL4B2B" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Dunning level 4 for enterprise customer" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="1" />
             <column name="active" valueNumeric="1" />
@@ -1609,7 +1609,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Letter B2B LVL4" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Manual level 4 postal mail to enterprise customer" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />
@@ -1676,7 +1676,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL1-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Niveau de relance 1 pour client particulier" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1691,7 +1691,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Email B2C LVL1-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Courriel automatique de niveau 1 vers client particulier" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="AUTOMATIC" />
@@ -1719,7 +1719,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL2-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Niveau de relance 2 pour client particulier" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1734,7 +1734,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Email B2C LVL2-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Courriel automatique de niveau 2 vers client particulier" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="AUTOMATIC" />
@@ -1762,7 +1762,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL3-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Niveau de relance 3 pour client particulier" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1777,7 +1777,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Call B2C LVL3-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Appel manuel de niveau 3 vers client particulier" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />
@@ -1819,7 +1819,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Letter B2C LVL4-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Courrier postal de niveau 4 vers client particulier" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />
@@ -1884,7 +1884,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL1B2B-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Niveau de relance 1 pour client entreprise" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1899,7 +1899,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Email B2B LVL1-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Courriel automatique de niveau 1 vers client entreprise" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="AUTOMATIC" />
@@ -1927,7 +1927,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL2B2B-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Niveau de relance 2 pour client entreprise" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1942,7 +1942,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Call B2B LVL2-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Courriel automatique de niveau 2 vers client entreprise" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />
@@ -1969,7 +1969,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="LVL3B2B-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Niveau de relance 3 pour client entreprise" />
             <column name="reminder" valueNumeric="0" />
             <column name="end_dunning_level" valueNumeric="0" />
             <column name="active" valueNumeric="1" />
@@ -1984,7 +1984,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Call B2B LVL3-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Appel manuel de niveau 3 vers client entreprise" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />
@@ -2026,7 +2026,7 @@ public class SimpleDunning extends org.meveo.service.script.Script {
             <column name="created" valueDate="${db.current.time}" />
             <column name="creator" value="applicationInitializer" />
             <column name="code" value="Letter B2B LVL4-FR" />
-            <column name="description" value="N/A" />
+            <column name="description" value="Courrier postal de niveau 4 vers client entreprise" />
             <column name="is_action_active" valueNumeric="1" />
             <column name="action_type" value="SEND_NOTIFICATION" />
             <column name="action_mode" value="MANUAL" />

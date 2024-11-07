@@ -31,7 +31,10 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Table(name = "billing_run_report")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "bill_run_report_seq"), @Parameter(name = "increment_size", value = "1") })
-@NamedQueries({ @NamedQuery(name = "BillingRunReport.findAssociatedReportToBillingRun", query = "select report from BillingRunReport report where report.billingRun.id=:billingRunId ORDER BY report.id ASC") })
+@NamedQueries({
+        @NamedQuery(name = "BillingRunReport.findAssociatedReportToBillingRun", query = "select report from BillingRunReport report where report.billingRun.id=:billingRunId ORDER BY report.id ASC"),
+        @NamedQuery(name = "BillingRunReport.resetFinalStatus", query = "update BillingRunReport set reportFinal=false where billingRun.id in (:ids) and type in(:types)")
+})
 public class BillingRunReport extends AuditableEntity {
 
     @OneToOne(fetch = LAZY)

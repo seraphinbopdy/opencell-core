@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/dunning/collectionPlan")
+@Path("/v2/dunning/collectionPlan")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 public interface DunningCollectionPlanResource {

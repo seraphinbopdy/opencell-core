@@ -18,20 +18,6 @@
 
 package org.meveo.service.custom;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.assertj.core.api.Assertions;
-import org.junit.Assert;
-import org.junit.Test;
-import org.meveo.model.admin.Seller;
-import org.meveo.model.billing.BillingAccount;
-import org.meveo.model.billing.Subscription;
-import org.meveo.model.catalog.OfferTemplate;
-import org.meveo.model.crm.CustomFieldTemplate;
-import org.meveo.model.crm.Customer;
-import org.meveo.model.crm.Provider;
-
 /**
  * @author Abdellatif BARI
  * @lastModifiedVersion 7.0

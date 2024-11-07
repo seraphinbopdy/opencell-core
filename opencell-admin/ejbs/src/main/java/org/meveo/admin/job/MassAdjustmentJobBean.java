@@ -61,13 +61,13 @@ public class MassAdjustmentJobBean extends BaseJobBean {
         int totalImpactedBA = impactedInvoices.stream().map(Invoice::getBillingAccount).distinct().mapToInt(i -> 1).sum();
         
         for (Invoice invoice : impactedInvoices) {
-        	Invoice adjustment = invoiceService.createAdjustment(invoice, invoiceLinesToAdjustIds, null);
+        	Invoice adjustment = invoiceService.createAdjustmentForJob(invoice, invoiceLinesToAdjustIds, null);
         	invoiceService.validateInvoice(adjustment.getId());
         	adjustment.setInvoiceLines(invoiceLineService.listInvoiceLinesByInvoice(adjustment.getId()));
         	totalLinesProcessed += adjustment.getInvoiceLines().size();
         	totalAWoTProcessed = totalAWoTProcessed.add(adjustment.getInvoiceLines().stream().map(InvoiceLine::getAmountWithoutTax).reduce(BigDecimal.ZERO, BigDecimal::add));
         	totalAWTProcessed = totalAWTProcessed.add(adjustment.getInvoiceLines().stream().map(InvoiceLine::getAmountWithTax).reduce(BigDecimal.ZERO, BigDecimal::add));
-        };
+        }
         
         BigDecimal totalAmountWoT = BigDecimal.ZERO;
         BigDecimal totalAmountWT = BigDecimal.ZERO;

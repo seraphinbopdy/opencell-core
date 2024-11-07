@@ -815,6 +815,11 @@ public class DateUtils {
             if ((periodEnd.compareTo(checkEnd) <= 0 && periodEnd.compareTo(checkStart) > 0) || (periodStart.compareTo(checkEnd) < 0 && periodStart.compareTo(checkStart) >= 0)) {
                 return true;
             }
+            
+            // Periods are exactly equals
+            if (periodStart.compareTo(checkStart) == 0 && periodEnd.compareTo(checkEnd) == 0) {
+                return true;
+            }
         }
         return false;
     }
@@ -1013,7 +1018,8 @@ public class DateUtils {
      */
     public static BigDecimal calculateProrataRatio(Date partFrom, Date partTo, Date overallFrom, Date overallTo, boolean ignoreEmptyPeriod) {
 
-        double part1 = DateUtils.daysBetween(partFrom, partTo);
+        
+        double part1 = DateUtils.daysBetween(DateUtils.setMilliSecondsToDate(DateUtils.setDateToStartOfDay(partFrom), 0), partTo);
         double part2 = DateUtils.daysBetween(overallFrom, overallTo);
 
         if (part2 == 0) {

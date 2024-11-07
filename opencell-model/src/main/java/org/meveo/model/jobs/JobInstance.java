@@ -22,10 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.commons.utils.JobCategoryEnumCoverter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
@@ -153,18 +154,33 @@ public class JobInstance extends EnableBusinessCFEntity {
     private boolean verboseReport = true;
 
     /**
-     * Whether a verbose error log will be kept.
+     * If job should stop on error.
      */
     @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "stop_on_error")
     private boolean stopOnError = false;
-
+    
     /**
+     * If the next job should be started on error.
+     */
+    @NotNull
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "process_next_job_on_error")
+    private boolean processNextJobOnError = true;
+
+	/**
      * How often (in seconds) the job progress should be stored to DB
      */
     @Column(name = "status_report_freq", nullable = false)
     @NotNull
     private int jobStatusReportFrequency = 60;
+    
+    /**
+     * Description of the job in different languages
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "description_i18n", columnDefinition = "jsonb")
+    private Map<String, String> descriptionI18n;
 
     /** Code of provider, that job belongs to. */
     @Transient
@@ -566,4 +582,20 @@ public class JobInstance extends EnableBusinessCFEntity {
     public void setRunTimeCfValues(CustomFieldValues runTimeCfValues) {
         this.runTimeCfValues = runTimeCfValues;
     }
+
+    public Map<String, String> getDescriptionI18n() {
+        return descriptionI18n;
+    }
+
+    public void setDescriptionI18n(Map<String, String> descriptionI18n) {
+        this.descriptionI18n = descriptionI18n;
+    }
+    
+    public boolean isProcessNextJobOnError() {
+		return processNextJobOnError;
+	}
+
+	public void setProcessNextJobOnError(boolean processNextJobOnError) {
+		this.processNextJobOnError = processNextJobOnError;
+	}
 }

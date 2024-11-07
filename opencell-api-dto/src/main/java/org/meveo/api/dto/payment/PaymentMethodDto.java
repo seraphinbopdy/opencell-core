@@ -313,6 +313,9 @@ public class PaymentMethodDto extends BaseEntityDto implements IEnableDto, IEnti
         }
         if (paymentMethod instanceof WirePaymentMethod) {
             this.setPaymentMethodType(PaymentMethodEnum.WIRETRANSFER);
+            this.mandateDate = ((WirePaymentMethod) paymentMethod).getMandateDate();
+            this.mandateIdentification = ((WirePaymentMethod) paymentMethod).getMandateIdentification();
+            this.bankCoordinates = new BankCoordinatesDto(((WirePaymentMethod) paymentMethod).getBankCoordinates());
         }
         if (paymentMethod instanceof PaypalPaymentMethod) {
             this.setPaymentMethodType(PaymentMethodEnum.PAYPALPAYMENTLINK);
@@ -383,7 +386,8 @@ public class PaymentMethodDto extends BaseEntityDto implements IEnableDto, IEnti
             break;
 
         case WIRETRANSFER:
-            pmEntity = new WirePaymentMethod(disabledBool, alias, preferred, customerAccount);
+            pmEntity = new WirePaymentMethod(customerAccount, disabledBool, getAlias(), isPreferred(), getMandateDate(), getMandateIdentification(),
+                    getBankCoordinates() != null ? getBankCoordinates().fromDto() : null);
             break;
         case PAYPALPAYMENTLINK:
             pmEntity = new PaypalPaymentMethod(disabledBool, alias, preferred, customerAccount,userId);
@@ -499,8 +503,27 @@ public class PaymentMethodDto extends BaseEntityDto implements IEnableDto, IEnti
             	if (!StringUtils.isBlank(getIssueNumber())) {
             		((CardPaymentMethod) paymentMethod).setIssueNumber(getIssueNumber());
                 }
-            	
-            break; 	
+                break;
+            case WIRETRANSFER:
+                if (getBankCoordinates() != null) {
+                    if (!StringUtils.isBlank(getBankCoordinates().getAccountOwner())) {
+                        ((WirePaymentMethod) paymentMethod).getBankCoordinates().setAccountOwner(getBankCoordinates().getAccountOwner());
+                    }
+
+                    if (!StringUtils.isBlank(getBankCoordinates().getBankName())) {
+                        ((WirePaymentMethod) paymentMethod).getBankCoordinates().setBankName(getBankCoordinates().getBankName());
+                    }
+
+                    if (!StringUtils.isBlank(getBankCoordinates().getBranchCode())) {
+                        ((WirePaymentMethod) paymentMethod).getBankCoordinates().setBranchCode(getBankCoordinates().getBranchCode());
+                    }
+
+                    if (!StringUtils.isBlank(getBankCoordinates().getIban())) {
+                        ((WirePaymentMethod) paymentMethod).getBankCoordinates().setIban(getBankCoordinates().getIban());
+                    }
+                }
+            	break;
+
             default:
                 break;
         }

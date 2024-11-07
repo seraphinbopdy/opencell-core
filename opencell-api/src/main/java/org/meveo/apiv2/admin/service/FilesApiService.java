@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 /**
  * Paging and filtering interface for files.
@@ -226,22 +228,29 @@ public class FilesApiService extends BaseApi {
         long count = 0;
         AtomicLong size = new AtomicLong(0);
         List<org.meveo.apiv2.admin.File> files = new ArrayList<>();
-        try {
-            count = Files.walk(path, 1).filter(filter).peek(p -> {
-                size.set(size.get() + p.toFile().length());
-            }).count();
-            if (count > 0) {
-                files = Files.walk(path, 1)
+
+        try (Stream<Path> pathStream = Files.walk(path, 1)) {
+            count = pathStream.filter(filter)
+                    .peek(p -> size.set(size.get() + p.toFile().length()))
+                    .count();
+        } catch (IOException e) {
+            log.error("Failed to search files from directory {}", dir, e);
+        }
+
+        if (count > 0) {
+            try (Stream<Path> pathStream = Files.walk(path, 1)) {
+                files = pathStream
                         .sorted(comparator)
                         .filter(filter)
                         .skip(searchConfig.getOffset())
                         .limit(searchConfig.getLimit())
                         .map(p -> fileMapper.toResource(p.toFile()))
                         .collect(Collectors.toList());
+            } catch (IOException e) {
+                log.error("Failed to search files from directory {}", dir, e);
             }
-        } catch (IOException e) {
-            log.error("Failed to search files from directory {}", dir, e);
         }
+
         Map<String, Object> results = new LinkedHashMap<>();
         results.put("total", count);
         results.put("limit", searchConfig.getLimit());
@@ -250,4 +259,5 @@ public class FilesApiService extends BaseApi {
         results.put("data", files);
         return results;
     }
+
 }

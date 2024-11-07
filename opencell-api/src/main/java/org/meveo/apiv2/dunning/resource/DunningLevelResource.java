@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/dunning/dunningLevel")
+@Path("/v2/dunning/dunningLevel")
 @Produces({ "application/json" })
 @Consumes({ "application/json" })
 public interface DunningLevelResource {

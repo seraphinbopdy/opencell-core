@@ -27,14 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.ejb.EJBTransactionRolledbackException;
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
-import jakarta.enterprise.event.Event;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
@@ -66,6 +58,14 @@ import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.catalog.impl.UsageChargeTemplateService;
 import org.meveo.service.medina.impl.CDRService;
+
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 /**
  * Usage charge related rating
@@ -461,6 +461,8 @@ public class UsageRatingService extends RatingService implements Serializable {
 	                checkDiscountedWalletOpertion(wo, ratingResult.getWalletOperations());
                     walletOperationService.chargeWalletOperation(wo);
                 }
+                
+                
             }
 
         } catch (EJBTransactionRolledbackException e) {

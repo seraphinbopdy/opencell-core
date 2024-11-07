@@ -56,8 +56,10 @@ import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.offer.QuoteOffer;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.quote.QuoteProduct;
+import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.billing.impl.CounterPeriodService;
+import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.cpq.AttributeService;
 import org.meveo.service.cpq.QuoteProductService;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
@@ -314,6 +316,8 @@ public class MeveoFunctionMapper extends FunctionMapper {
             addFunction("mv", "getProductElAttributeValue", MeveoFunctionMapper.class.getMethod("getProductElAttributeValue", ServiceInstance.class,String.class, WalletOperation.class));
             
             addFunction("mv", "parseJSON", MeveoFunctionMapper.class.getMethod("parseJSON", String.class, String.class));
+            
+            addFunction("mv", "validateAndCancelDerivedWosEdrsAndRts", MeveoFunctionMapper.class.getMethod("validateAndCancelDerivedWosEdrsAndRts", EDR.class));
 
             //adding all Math methods with 'math' as prefix
             for (Method method : Math.class.getMethods()) {
@@ -2018,18 +2022,24 @@ public class MeveoFunctionMapper extends FunctionMapper {
     	
     	if(attribute.getAttributeType()!=null && attributInstance.isPresent()) {
 			Object defaultValue = getDefaultValue(attributeCode, attribute, attribute.getAttributeType());
-    		switch (attribute.getAttributeType()) {
+            AttributeValue attributeValue = attributInstance.get();
+            switch (attribute.getAttributeType()) {
 			case TOTAL :
 			case COUNT :
 			case NUMERIC :
 			case INTEGER:
 			case LIST_NUMERIC:
-				if(attributInstance.get().getDoubleValue()!=null) {
-					return attributInstance.get().getDoubleValue(); 
+				if(attributeValue.getDoubleValue()!=null) {
+					return attributeValue.getDoubleValue(); 
 				}
-				if(NumberUtils.isCreatable(attributInstance.get().toString().trim())) {
-					return Double.valueOf(attributInstance.get().toString().trim());
+				if(NumberUtils.isCreatable(attributeValue.toString().trim())) {
+					return Double.valueOf(attributeValue.toString().trim());
 				}
+				
+				if(attributeValue.getStringValue() != null && NumberUtils.isCreatable(attributeValue.getStringValue().trim())) {
+					return Double.valueOf(attributeValue.getStringValue().trim());
+				}
+				
 				// from attribute product version attribute loop from attribute product attribute
 				if (defaultValue != null) return defaultValue;
 				break;
@@ -2037,8 +2047,8 @@ public class MeveoFunctionMapper extends FunctionMapper {
 			case LIST_MULTIPLE_TEXT:
 			case LIST_TEXT:
 			case TEXT:	
-				if(!StringUtils.isBlank(attributInstance.get().getStringValue())) {
-					return attributInstance.get().getStringValue();  
+				if(!StringUtils.isBlank(attributeValue.getStringValue())) {
+					return attributeValue.getStringValue();  
 				}
 				if (defaultValue != null) return defaultValue;
 				break;
@@ -2046,9 +2056,9 @@ public class MeveoFunctionMapper extends FunctionMapper {
 			case EXPRESSION_LANGUAGE :
 				String value=null;
 				if(walletOperation!=null) {
-					 value = ValueExpressionWrapper.evaluateExpression(attributInstance.get().getStringValue(), String.class, serviceInstance,walletOperation);
+					 value = ValueExpressionWrapper.evaluateExpression(attributeValue.getStringValue(), String.class, serviceInstance,walletOperation);
 				}else {
-					 value  = ValueExpressionWrapper.evaluateExpression(attributInstance.get().getStringValue(), String.class, serviceInstance);
+					 value  = ValueExpressionWrapper.evaluateExpression(attributeValue.getStringValue(), String.class, serviceInstance);
 				}
 				if(NumberUtils.isCreatable(value.toString().trim())) {
 					return Double.valueOf(value.toString().trim());
@@ -2058,14 +2068,14 @@ public class MeveoFunctionMapper extends FunctionMapper {
 				 
 				
 			case DATE:
-				if(attributInstance.get().getDateValue()!=null) {
-					return attributInstance.get().getDateValue();  
+				if(attributeValue.getDateValue()!=null) {
+					return attributeValue.getDateValue();  
 				}
 				if (defaultValue != null) return defaultValue;
 				break;
 			case BOOLEAN:
-				if(attributInstance.get().getBooleanValue()!=null) {
-					return attributInstance.get().getBooleanValue();  
+				if(attributeValue.getBooleanValue()!=null) {
+					return attributeValue.getBooleanValue();  
 				}
 				if (defaultValue != null) return defaultValue;
 				break;
@@ -2224,8 +2234,28 @@ public class MeveoFunctionMapper extends FunctionMapper {
     	Object result = JsonPath.using(conf).parse(textJson).read(jsonPath);
     	return result != null ? result.toString() : null;
     }
-      
+ 
+    private static ReratingService reratingService;
     
-    
-    
+    public static boolean validateAndCancelDerivedWosEdrsAndRts(EDR edr) {
+        
+        if(edr == null) {
+            throw new IllegalArgumentException("EDR cannot be null");
+        }
+        if(reratingService == null) {
+            try {
+                InitialContext initialContext = new InitialContext();
+                BeanManager beanManager = (BeanManager) initialContext.lookup("java:comp/BeanManager");
+                Bean<ReratingService> bean = (Bean<ReratingService>) beanManager.resolve(beanManager.getBeans(ReratingService.class));
+                reratingService = (ReratingService) beanManager.getReference(bean, bean.getBeanClass(), beanManager.createCreationalContext(bean));
+            } catch (NamingException e) {
+                Logger log = LoggerFactory.getLogger(MeveoFunctionMapper.class);
+                log.error("Unable to access QuoteOffertService", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+         return reratingService.validateAndCancelDerivedWosEdrsAndRts(edr);
+
+    }
 }

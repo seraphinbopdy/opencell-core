@@ -1097,7 +1097,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
     }
 
     public List<Subscription> findListByCode(String code) {
-        TypedQuery<Subscription> query = getEntityManager().createQuery("select be from " + entityClass.getSimpleName() + " be where lower(code)=:code", entityClass)
+        TypedQuery<Subscription> query = getEntityManager().createQuery("select be from Subscription be where lower(code)=:code", entityClass)
                 .setParameter("code", code.toLowerCase());
         try {
             return query.getResultList();
@@ -1525,4 +1525,19 @@ public class SubscriptionService extends BusinessService<Subscription> {
 		qb.addSqlCriterion("c.code in (:codes)", "codes", codes);
 		return (List<Subscription>) qb.getQuery(getEntityManager()).getResultList();
 	}
+
+    /**
+     * Updates the Monthly Recurring Revenue (MRR) for all Subscriptions.
+     *
+     * This method calculates the MRR for each Subscription by summing the MRR of all
+     * active ServiceInstances associated with the Subscription. The calculated MRR
+     * is then updated in the Subscription.
+     */
+    public void massCalculateMRR() {
+        
+        Query query = getEntityManager().createQuery("update Subscription s set s.mrr = (select sum(si.mrr) from ServiceInstance si where si.subscription.id = s.id and si.status = :status and si.mrr is not null)");
+        query.setParameter("status", InstanceStatusEnum.ACTIVE);
+        query.executeUpdate();
+        
+    }
 }

@@ -276,7 +276,7 @@ public class DiscountPlanInstance extends CFEntity {
             this.status = DiscountPlanInstanceStatusEnum.ACTIVE;
             return;
         }
-        if ((start == null || now.before(start)) && (end == null || now.after(end))) {
+        if (( start == null || now.before(start) ) && ( end != null)) {
             this.status = DiscountPlanInstanceStatusEnum.APPLIED;
             return;
         }

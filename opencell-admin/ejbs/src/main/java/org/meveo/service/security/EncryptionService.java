@@ -1,5 +1,9 @@
 package org.meveo.service.security;
 
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Objects;
+
 import org.meveo.commons.encryption.EncryptionFactory;
 import org.meveo.service.crm.impl.AccountEntitySearchService;
 import org.slf4j.Logger;
@@ -8,9 +12,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.Query;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Objects;
 
 @Stateless
 public class EncryptionService {

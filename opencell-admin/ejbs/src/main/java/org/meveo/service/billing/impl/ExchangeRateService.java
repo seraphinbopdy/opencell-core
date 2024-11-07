@@ -1,11 +1,11 @@
 package org.meveo.service.billing.impl;
 
 import java.math.BigDecimal;
-import java.util.*;
-
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-import jakarta.persistence.NoResultException;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.api.MeveoApiErrorCodeEnum;
@@ -20,7 +20,9 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 
-import static java.math.BigDecimal.ONE;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class ExchangeRateService extends PersistenceService<ExchangeRate> {

@@ -1,13 +1,16 @@
 package org.meveo.admin.job;
 
+import static jakarta.ejb.TransactionAttributeType.NEVER;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toMap;
-import static jakarta.ejb.TransactionAttributeType.NEVER;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 import static org.meveo.model.crm.custom.CustomFieldStorageTypeEnum.LIST;
-import static org.meveo.model.crm.custom.CustomFieldTypeEnum.*;
 import static org.meveo.model.crm.custom.CustomFieldTypeEnum.CHECKBOX_LIST;
+import static org.meveo.model.crm.custom.CustomFieldTypeEnum.LONG;
 import static org.meveo.model.jobs.MeveoJobCategoryEnum.INVOICING;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
@@ -23,8 +26,6 @@ import org.meveo.service.job.Job;
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
 import jakarta.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
 
 @Stateless
 public class XMLInvoiceGenerationJobV2 extends Job {

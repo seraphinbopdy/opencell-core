@@ -7,7 +7,7 @@ import jakarta.ws.rs.Path;
  *
  * @author Thang Nguyen
  */
-@Path("/openapi.{type:json|yaml}")
+@Path("/v2/openapi.{type:json|yaml}")
 public class Apiv2SwaggerGeneration { 
 //extends BaseOpenApiResource {
 //

@@ -18,9 +18,16 @@
 
 package org.meveo.service.billing.impl;
 
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.ZERO;
+import static java.math.BigDecimal.valueOf;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +61,7 @@ import org.meveo.model.billing.WalletOperationStatusEnum;
 import org.meveo.model.catalog.Calendar;
 import org.meveo.model.catalog.RecurringChargeTemplate;
 import org.meveo.model.catalog.ServiceTemplate;
+import org.meveo.model.cpq.AttributeValue;
 import org.meveo.model.cpq.CpqQuote;
 import org.meveo.model.quote.QuoteVersion;
 import org.meveo.model.rating.EDR;
@@ -288,15 +296,23 @@ public class RecurringRatingService extends RatingService implements Serializabl
                 // The counter will be decremented by charge quantity
                 CounterInstance counterInstance = chargeInstance.getCounter();
                 if (!isVirtual && counterInstance != null) {
+                    BigDecimal inputQuantity = chargeInstance.getQuantity();
+                    if (recurringChargeTemplate.getQuantityAttribute() != null) {
+                        BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
+                                recurringChargeTemplate.getQuantityAttribute().getCode());
+                        if(quantityAttribute.compareTo(ZERO) >= 0) {
+                            inputQuantity = inputQuantity.multiply(quantityAttribute);
+                        }
+                    }
+                	CounterValueChangeInfo counterValueChangeInfo =
+                            counterInstanceService.deduceCounterValue_noLock(counterInstance, chargeInstance.getChargeDate(),
+                                    chargeInstance.getServiceInstance().getSubscriptionDate(), chargeInstance, inputQuantity, isVirtual);
                 	
-                	CounterValueChangeInfo counterValueChangeInfo = counterInstanceService.deduceCounterValue_noLock(counterInstance, chargeInstance.getChargeDate(), chargeInstance.getServiceInstance().getSubscriptionDate(),
-                				chargeInstance, chargeInstance.getQuantity(), isVirtual);
                 	
-
                     boolean isApplyInAdvance = isApplyInAdvance(chargeInstance);
 
                     // If the counter was not deducted, then the charge is not applied (but next activation date is updated).
-                    if (counterValueChangeInfo.getDeltaValue().equals(BigDecimal.ZERO)) {
+                    if (counterValueChangeInfo.getDeltaValue().equals(ZERO)) {
                         chargeInstance.advanceChargeDates(applyChargeFromDate, applyChargeToDate, isApplyInAdvance ? applyChargeToDate : applyChargeFromDate);
                         return new RatingResult();
                     }
@@ -404,10 +420,19 @@ public class RecurringRatingService extends RatingService implements Serializabl
 
                     boolean alreadyInvoiced = false;
                     BigDecimal inputQuantity = chargeMode.isReimbursement() ? chargeInstance.getQuantity().negate() : chargeInstance.getQuantity();
+                    if(recurringChargeTemplate.getQuantityAttribute() != null) {
+                        BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
+                                recurringChargeTemplate.getQuantityAttribute().getCode());
+                        if(quantityAttribute.compareTo(ZERO) >= 0) {
+                            inputQuantity = inputQuantity.multiply(quantityAttribute);
+                        } else {
+                            log.info("Quantity attribute is set to zero it will be ignored");
+                        }
+                    }
 
                     if (chargeInstance != null && chargeInstance.getSubscription() != null
                             && chargeInstance.getSubscription().getSubscribedTillDate() != null
-                            && chargeInstance.getRecurringChargeTemplate().getTerminationProrata()) {
+                            && chargeInstance.getChargeToDateOnTermination() != null) {
                         prorate = true;
                         if(chargeInstance.getWalletOperations() != null && !chargeInstance.getWalletOperations().isEmpty()) {
                             final int lastIndex = chargeInstance.getWalletOperations().size() - 1;
@@ -442,9 +467,15 @@ public class RecurringRatingService extends RatingService implements Serializabl
                         }
                     }
                     // Apply prorating if needed
-                    if (prorate || prorateLastPeriod) {
-                        BigDecimal prorata = DateUtils.calculateProrataRatio(effectiveChargeFromDate, effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, false);
-                        if (prorata == null) {
+                    if ((prorate || prorateLastPeriod)
+                            && ((chargeInstance.getServiceInstance() != null
+                            && chargeInstance.getServiceInstance().getQuoteProduct() == null)
+                            || (chargeInstance.getServiceInstance() != null
+                            && chargeInstance.getServiceInstance().getOrderNumber() != null))) {
+                        //inputQuantity = DateUtils.calculateProrataRatio(effectiveChargeFromDate, effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, false);
+	                    inputQuantity = computeProrate(chargeInstance, effectiveChargeFromDate,
+	                            effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, inputQuantity);
+                        if (inputQuantity == null) {
                             throw new RatingException("Failed to calculate prorating for charge id=" + chargeInstance.getId() + " : periodFrom=" + currentPeriodFromDate + ", periodTo=" + currentPeriodToDate
                                     + ", proratedFrom=" + effectiveChargeFromDate + ", proratedTo=" + effectiveChargeToDate);
                         }
@@ -598,6 +629,37 @@ public class RecurringRatingService extends RatingService implements Serializabl
                 && walletOperation.getRatedTransaction().getStatus().equals(RatedTransactionStatusEnum.BILLED)
                 && (walletOperation.getRatedTransaction().getInvoiceLine() != null
                 && walletOperation.getRatedTransaction().getInvoiceLine().getStatus().equals(InvoiceLineStatusEnum.BILLED));
+    }
+
+    private BigDecimal getQuantityAttribute(ServiceInstance serviceInstance, String quantityAttribute) {
+        BigDecimal quantityAttributeValue = ONE;
+        Map<String, Object> attributeValues = fromAttributeValue(fromAttributeInstances(serviceInstance));
+        Object quantityObject = attributeValues.get(quantityAttribute);
+        if (quantityObject != null) {
+            try {
+                quantityAttributeValue = valueOf(Double.parseDouble(quantityObject.toString()));
+            } catch (NumberFormatException e) {
+                log.debug("wrong value format when formating quantity attribute cannot cast '{}' to double value", quantityObject);
+            }
+        }
+        return quantityAttributeValue;
+    }
+
+    private List<AttributeValue> fromAttributeInstances(ServiceInstance serviceInstance) {
+        if (serviceInstance == null) {
+            return Collections.emptyList();
+        }
+        return serviceInstance.getAttributeInstances().stream()
+                .map(attributeInstance -> (AttributeValue) attributeInstance)
+                .collect(toList());
+    }
+
+    private Map<String, Object> fromAttributeValue(List<AttributeValue> attributeValues) {
+        return attributeValues
+                .stream()
+                .filter(attributeValue -> attributeValue.getAttribute().getAttributeType().getValue(attributeValue) != null)
+                .collect(toMap(key -> key.getAttribute().getCode(),
+                        value -> value.getAttribute().getAttributeType().getValue(value)));
     }
 
     /**

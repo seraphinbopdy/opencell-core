@@ -39,7 +39,10 @@ import jakarta.inject.Inject;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Edward P. Legaspi
@@ -346,6 +349,8 @@ public class BillingCycleApi extends BaseCrudApi<BillingCycle, BillingCycleDto> 
         if(dto.getAdditionalAggregationFields() != null) {
             entity.setAdditionalAggregationFields(dto.getAdditionalAggregationFields());
         }
+
+        ofNullable(dto.getIgnoreServiceInstances()).ifPresent(entity::setIgnoreServiceInstances);
 
        	// populate customFields
         try {

@@ -24,13 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import jakarta.ejb.AsyncResult;
-import jakarta.ejb.Asynchronous;
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
-import jakarta.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.UnitSepaDirectDebitJobBean;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -45,6 +38,13 @@ import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.DDRequestItemService;
 import org.meveo.service.payments.impl.DDRequestLOTService;
+
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * The Class SepaDirectDebitAsync.

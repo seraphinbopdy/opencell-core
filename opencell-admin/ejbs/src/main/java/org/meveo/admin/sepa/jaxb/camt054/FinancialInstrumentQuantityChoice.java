@@ -27,6 +27,7 @@
 package org.meveo.admin.sepa.jaxb.camt054;
 
 import java.math.BigDecimal;
+
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;

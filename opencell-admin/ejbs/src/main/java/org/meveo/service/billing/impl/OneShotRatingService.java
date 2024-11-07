@@ -1,10 +1,17 @@
 package org.meveo.service.billing.impl;
 
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.ZERO;
+import static java.math.BigDecimal.valueOf;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.meveo.admin.exception.BusinessException;
@@ -14,10 +21,12 @@ import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ChargeApplicationModeEnum;
 import org.meveo.model.billing.InstanceStatusEnum;
 import org.meveo.model.billing.OneShotChargeInstance;
+import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplate;
+import org.meveo.model.cpq.AttributeValue;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.DateUtils;
@@ -78,6 +87,14 @@ public class OneShotRatingService extends RatingService implements Serializable 
         if (!RatingService.isORChargeMatch(chargeInstance)) {
             log.debug("Not rating oneshot chargeInstance {}/{}, filter expression or service attributes evaluated to FALSE", chargeInstance.getId(), chargeInstance.getCode());
             return new RatingResult();
+        }
+        if (chargeInstance.getChargeTemplate() != null
+                && chargeInstance.getChargeTemplate().getQuantityAttribute() != null) {
+            BigDecimal quantityAttribute = getQuantityAttribute(chargeInstance.getServiceInstance(),
+                    chargeInstance.getChargeTemplate().getQuantityAttribute().getCode());
+            if (quantityAttribute.compareTo(ZERO) >= 0) {
+                inputQuantity = chargeInstance.getQuantity().multiply(quantityAttribute);
+            }
         }
 
         Subscription subscription = chargeInstance.getSubscription();
@@ -182,6 +199,46 @@ public class OneShotRatingService extends RatingService implements Serializable 
                 throw e;
             }
         }
+    }
+
+    /**
+     * Get quantity attribute value from service instance.
+     *
+     * @param serviceInstance Service instance
+     * @param quantityAttribute Quantity attribute code
+     * @return Quantity attribute value
+     */
+    private BigDecimal getQuantityAttribute(ServiceInstance serviceInstance, String quantityAttribute) {
+        BigDecimal quantityAttributeValue = ONE;
+        Map<String, Object> attributeValues = fromAttributeValue(fromAttributeInstances(serviceInstance));
+        Object quantityObject = attributeValues.get(quantityAttribute);
+
+        if (quantityObject != null) {
+            try {
+                quantityAttributeValue = valueOf(Double.parseDouble(quantityObject.toString()));
+            } catch (NumberFormatException e) {
+                log.debug("wrong value format when formating quantity attribute cannot cast '{}' to double value", quantityObject);
+            }
+        }
+
+        return quantityAttributeValue;
+    }
+
+    private List<AttributeValue> fromAttributeInstances(ServiceInstance serviceInstance) {
+        if (serviceInstance == null) {
+            return Collections.emptyList();
+        }
+        return serviceInstance.getAttributeInstances().stream()
+                .map(attributeInstance -> (AttributeValue) attributeInstance)
+                .collect(toList());
+    }
+
+    private Map<String, Object> fromAttributeValue(List<AttributeValue> attributeValues) {
+        return attributeValues
+                .stream()
+                .filter(attributeValue -> attributeValue.getAttribute().getAttributeType().getValue(attributeValue) != null)
+                .collect(toMap(key -> key.getAttribute().getCode(),
+                        value -> value.getAttribute().getAttributeType().getValue(value)));
     }
 
 }

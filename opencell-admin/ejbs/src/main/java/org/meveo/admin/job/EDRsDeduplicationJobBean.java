@@ -80,7 +80,7 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Ob
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::applyDeduplication, null, null, this::finalize, null);
+        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::applyDeduplication, null, null, this::terminate, null);
     }
 
     /**
@@ -174,6 +174,7 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Ob
                             + " FROM RATING_EDR "
                             + " WHERE STATUS <> 'CANCELLED'"
                             + dateCondition
+                            + "	AND ORIGIN_BATCH <>'EDR_TABLE'"
                             + "	AND (EVENT_KEY IS NOT NULL)"
                             + " GROUP BY EVENT_KEY"
                             + " HAVING COUNT(ID) > 1";
@@ -220,11 +221,11 @@ public class EDRsDeduplicationJobBean extends IteratorBasedScopedJobBean<List<Ob
     }
 
     /**
-     * Finalize function
+     * Terminate function
      *
      * @param jobExecutionResult Job execution result
      */
-    protected void finalize(JobExecutionResultImpl jobExecutionResult) {
+    protected void terminate(JobExecutionResultImpl jobExecutionResult) {
         if (scrollableResults != null) {
             scrollableResults.close();
         }

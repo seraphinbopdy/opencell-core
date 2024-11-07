@@ -5,6 +5,7 @@ import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.billing.EinvoiceSetting;
 import org.meveo.apiv2.billing.resource.EinvoiceResource;
+import org.meveo.model.billing.CustomizationIDEnum;
 import org.meveo.model.billing.ElectronicInvoiceSetting;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.EinvoiceSettingService;
@@ -50,6 +51,9 @@ public class EinvoiceResourceImpl implements EinvoiceResource {
 		
 		if(einvoiceSettingInput.getVatDateCode() != null)
 			einvoiceSetting.setVatDateCode(einvoiceSettingInput.getVatDateCode());
+
+		if(StringUtils.isNotEmpty(einvoiceSettingInput.getCustomizationID()))
+			einvoiceSetting.setCustomizationID(CustomizationIDEnum.getFromValue(einvoiceSettingInput.getCustomizationID()).getValue());
 		
 		einvoiceSettingService.update(einvoiceSetting);
 		

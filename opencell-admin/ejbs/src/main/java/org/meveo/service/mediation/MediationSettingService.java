@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.model.mediation.EdrVersioningRule;
@@ -22,6 +19,9 @@ import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.ReratingService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class MediationSettingService extends PersistenceService<MediationSetting> {

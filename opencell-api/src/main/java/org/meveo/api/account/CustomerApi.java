@@ -44,7 +44,7 @@ import jakarta.inject.Inject;
 import jakarta.interceptor.Interceptors;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -99,11 +99,13 @@ import org.meveo.model.intcrm.AdditionalDetails;
 import org.meveo.model.intcrm.AddressBook;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.sequence.GenericSequence;
+import org.meveo.model.shared.Title;
 import org.meveo.model.tax.TaxCategory;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
 import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.billing.impl.AccountingCodeService;
 import org.meveo.service.billing.impl.InvoiceService;
+import org.meveo.service.catalog.impl.TitleService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.crm.impl.CustomerBrandService;
 import org.meveo.service.crm.impl.CustomerCategoryService;
@@ -144,6 +146,9 @@ public class CustomerApi extends AccountEntityApi {
     @Inject
     private CustomerBrandService customerBrandService;
 
+    @Inject
+    private TitleService titleService;
+
     @EJB
     private AccountHierarchyApi accountHierarchyApi;
 
@@ -179,23 +184,46 @@ public class CustomerApi extends AccountEntityApi {
 
     @Inject
     private CustomFieldTemplateService customFieldTemplateService;
+    
 
-
+    public Customer create(CustomerDto postData, Version version) {
+        return create(postData, true, null, null, version);
+    }
+    
     public Customer create(CustomerDto postData) throws MeveoApiException, BusinessException {
-        return create(postData, true);
+        return create(postData, Version.V1);
     }
 
     public Customer create(CustomerDto postData, boolean checkCustomFields) throws MeveoApiException, BusinessException {
-        return create(postData, true, null, null);
+        return create(postData, true, null, null, Version.V1);
     }
 
     public Customer create(CustomerDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel, Seller associatedSeller) throws MeveoApiException, BusinessException {
+        return create(postData, checkCustomFields, businessAccountModel, associatedSeller, Version.V1);
+    }
+
+    public Customer create(CustomerDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel, Seller associatedSeller, Version version) throws MeveoApiException, BusinessException {
 
         if (StringUtils.isBlank(postData.getCustomerCategory())) {
             missingParameters.add("customerCategory");
         }
         if (postData.getName() != null && !StringUtils.isBlank(postData.getName().getTitle()) && StringUtils.isBlank(postData.getName().getLastName())) {
             missingParameters.add("name.lastName");
+        }
+        
+        if(Boolean.TRUE.equals(postData.getIsCompany()) && Version.V2.equals(version)) {
+
+            if(postData.getLegalEntityType() == null || StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                missingParameters.add("legalEntityType.code");
+            }
+
+            if(StringUtils.isBlank(postData.getDescription())) {
+                missingParameters.add("description");
+            }
+
+            if(CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
+                missingParameters.add("registrationNumbers");
+            }
         }
 
         Customer customer = new Customer();
@@ -232,8 +260,13 @@ public class CustomerApi extends AccountEntityApi {
     }
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = Customer.class))
+    public Customer update(CustomerDto postData, Version version) throws MeveoApiException, BusinessException {
+        return update(postData, true, null, version);
+    }
+
+    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = Customer.class))
     public Customer update(CustomerDto postData) throws MeveoApiException, BusinessException {
-        return update(postData, true);
+        return update(postData, Version.V1);
     }
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = Customer.class))
@@ -243,12 +276,31 @@ public class CustomerApi extends AccountEntityApi {
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = Customer.class))
     public Customer update(CustomerDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel) throws MeveoApiException, BusinessException {
+        return update(postData, checkCustomFields, businessAccountModel, Version.V1);
+    }
+    
+    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = Customer.class))
+    public Customer update(CustomerDto postData, boolean checkCustomFields, BusinessAccountModel businessAccountModel, Version version) throws MeveoApiException, BusinessException {
 
         if (StringUtils.isBlank(postData.getCode())) {
             missingParameters.add("code");
         }
         if (postData.getName() != null && !StringUtils.isBlank(postData.getName().getTitle()) && StringUtils.isBlank(postData.getName().getLastName())) {
             missingParameters.add("name.lastName");
+        }
+
+        if(Boolean.TRUE.equals(postData.getIsCompany()) && Version.V2.equals(version)) {
+            if(postData.getLegalEntityType() == null || StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                missingParameters.add("legalEntityType.code");
+            }
+
+            if(StringUtils.isBlank(postData.getDescription())) {
+                missingParameters.add("description");
+            }
+
+            if(CollectionUtils.isEmpty(postData.getRegistrationNumbers())) {
+                missingParameters.add("registrationNumbers");
+            }
         }
 
         handleMissingParametersAndValidate(postData);
@@ -300,6 +352,18 @@ public class CustomerApi extends AccountEntityApi {
                     throw new EntityDoesNotExistsException(CustomerBrand.class, postData.getCustomerBrand());
                 }
                 customer.setCustomerBrand(customerBrand);
+            }
+        }
+
+        if(postData.getLegalEntityType() != null && postData.getLegalEntityType().getCode() != null) {
+            if(StringUtils.isBlank(postData.getLegalEntityType().getCode())) {
+                customer.setLegalEntityType(null);
+            } else {
+                Title title = titleService.findByCode(postData.getLegalEntityType().getCode());
+                if(title == null) {
+                    throw new EntityDoesNotExistsException(Title.class, postData.getLegalEntityType().getCode());
+                }
+                customer.setLegalEntityType(title);
             }
         }
 
@@ -812,10 +876,15 @@ public class CustomerApi extends AccountEntityApi {
 
     @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = Customer.class))
     public Customer createOrUpdate(CustomerDto postData) throws MeveoApiException, BusinessException {
+        return createOrUpdate(postData, Version.V1);
+    }
+
+    @SecuredBusinessEntityMethod(validate = @SecureMethodParameter(parser = ObjectPropertyParser.class, property = "code", entityClass = Customer.class))
+    public Customer createOrUpdate(CustomerDto postData, Version version) throws MeveoApiException, BusinessException {
         if (!StringUtils.isBlank(postData.getCode()) && customerService.findByCode(postData.getCode()) != null) {
-            return update(postData);
+            return update(postData, version);
         } else {
-            return create(postData);
+            return create(postData, version);
         }
     }
 
@@ -897,6 +966,10 @@ public class CustomerApi extends AccountEntityApi {
             accountHierarchyApi.populateNameAddress(existedCustomerDto, customerDto);
             if (!StringUtils.isBlank(customerDto.getCustomFields())) {
                 existedCustomerDto.setCustomFields(customerDto.getCustomFields());
+            }
+            
+            if (customerDto.getLegalEntityType() != null) {
+                existedCustomerDto.setLegalEntityType(customerDto.getLegalEntityType());
             }
             update(existedCustomerDto);
         }
@@ -1054,4 +1127,8 @@ public class CustomerApi extends AccountEntityApi {
 		}
 		return getRootParent(parent);
 	}
+
+    public enum Version {
+        V1, V2
+    }
 }

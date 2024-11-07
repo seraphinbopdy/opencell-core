@@ -16,7 +16,6 @@ import org.meveo.model.AuditableField;
 import org.meveo.model.audit.AuditCrudActionEnum;
 import org.meveo.model.audit.AuditDataLog;
 import org.meveo.model.audit.AuditDataLogRecord;
-import org.meveo.model.audit.AuditTarget;
 import org.meveo.service.audit.AuditDataConfigurationService;
 import org.meveo.service.audit.AuditDataHierarchy;
 import org.meveo.service.audit.AuditFieldInfo;

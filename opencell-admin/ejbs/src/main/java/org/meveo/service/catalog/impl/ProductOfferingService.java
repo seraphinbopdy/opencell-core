@@ -18,9 +18,9 @@
 
 package org.meveo.service.catalog.impl;
 
-import jakarta.ejb.Stateless;
-
 import org.meveo.model.catalog.ProductOffering;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Edward P. Legaspi

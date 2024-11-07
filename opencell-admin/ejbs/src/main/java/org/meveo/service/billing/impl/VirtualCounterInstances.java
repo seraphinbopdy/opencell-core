@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.enterprise.context.RequestScoped;
-
 import org.meveo.model.billing.CounterPeriod;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * Tracks virtual counter period values for the time of request

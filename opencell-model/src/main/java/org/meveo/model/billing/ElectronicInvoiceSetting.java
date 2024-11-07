@@ -45,6 +45,11 @@ public class ElectronicInvoiceSetting extends AuditableEntity {
     @Convert(converter = VatDateCodeEnumConverter.class)
     private VatDateCodeEnum vatDateCode = VatDateCodeEnum.PAID_TO_DATE;
 
+	@Column(name = "customization_id")
+	//@Convert(converter = CustomizationIdConverter.class)
+	private String customizationID = CustomizationIDEnum.URN_CEN_EU.getValue();
+	
+	
     public boolean isForceXmlGeneration() {
         return forceXmlGeneration;
     }
@@ -109,22 +114,25 @@ public class ElectronicInvoiceSetting extends AuditableEntity {
         this.vatDateCode = vatDateCode;
     }
 
+	public String getCustomizationID() {
+		return customizationID;
+	}
+
+	public void setCustomizationID(String customizationID) {
+		this.customizationID = customizationID;
+	}
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof ElectronicInvoiceSetting))
-            return false;
-        if (!super.equals(o))
-            return false;
-        ElectronicInvoiceSetting that = (ElectronicInvoiceSetting) o;
-        return isForceXmlGeneration() == that.isForceXmlGeneration() && isForcePDFGeneration() == that.isForcePDFGeneration() && isForceUBLGeneration() == that.isForceUBLGeneration()
-                && Objects.equals(getInvoicingJob(), that.getInvoicingJob()) && Objects.equals(getPdfGenerationJob(), that.getPdfGenerationJob()) && Objects.equals(getUblGenerationJob(), that.getUblGenerationJob())
-                && Objects.equals(getXmlGenerationJob(), that.getXmlGenerationJob());
-    }
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+		ElectronicInvoiceSetting that = (ElectronicInvoiceSetting) o;
+		return forceXmlGeneration == that.forceXmlGeneration && forcePDFGeneration == that.forcePDFGeneration && forceUBLGeneration == that.forceUBLGeneration && Objects.equals(invoicingJob, that.invoicingJob) && Objects.equals(pdfGenerationJob, that.pdfGenerationJob) && Objects.equals(ublGenerationJob, that.ublGenerationJob) && Objects.equals(xmlGenerationJob, that.xmlGenerationJob) && vatDateCode == that.vatDateCode && customizationID == that.customizationID;
+	}
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), isForceXmlGeneration(), isForcePDFGeneration(), isForceUBLGeneration(), getInvoicingJob(), getPdfGenerationJob(), getUblGenerationJob(), getXmlGenerationJob());
+		return Objects.hash(super.hashCode(), forceXmlGeneration, forcePDFGeneration, forceUBLGeneration, invoicingJob, pdfGenerationJob, ublGenerationJob, xmlGenerationJob, vatDateCode, customizationID);
     }
 }

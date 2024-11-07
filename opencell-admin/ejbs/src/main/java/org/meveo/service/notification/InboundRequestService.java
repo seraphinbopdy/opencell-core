@@ -19,15 +19,14 @@
 package org.meveo.service.notification;
 
 import java.util.Date;
-import java.util.List;
+
+import org.meveo.model.notification.InboundRequest;
+import org.meveo.service.base.BusinessService;
 
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
 import jakarta.persistence.EntityManager;
-
-import org.meveo.model.notification.InboundRequest;
-import org.meveo.service.base.BusinessService;
 
 @Stateless
 public class InboundRequestService extends BusinessService<InboundRequest> {

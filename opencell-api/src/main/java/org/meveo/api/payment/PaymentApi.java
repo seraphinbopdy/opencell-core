@@ -37,12 +37,8 @@ import static org.meveo.service.payments.impl.PaymentRejectionCodeService.EXPORT
 import static org.meveo.service.payments.impl.PaymentRejectionCodeService.FILE_PATH_RESULT_LABEL;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
@@ -69,12 +65,7 @@ import org.meveo.api.dto.payment.PaymentResponseDto;
 import org.meveo.api.dto.response.CustomerPaymentsResponse;
 import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
-import org.meveo.api.exception.BusinessApiException;
-import org.meveo.api.exception.EntityAlreadyExistsException;
-import org.meveo.api.exception.EntityDoesNotExistsException;
-import org.meveo.api.exception.InvalidParameterException;
-import org.meveo.api.exception.MeveoApiException;
-import org.meveo.api.exception.MissingParameterException;
+import org.meveo.api.exception.*;
 import org.meveo.api.security.Interceptor.SecuredBusinessEntityMethodInterceptor;
 import org.meveo.api.security.config.annotation.FilterProperty;
 import org.meveo.api.security.config.annotation.FilterResults;
@@ -83,21 +74,11 @@ import org.meveo.api.security.config.annotation.SecuredBusinessEntityMethod;
 import org.meveo.api.security.filter.ListFilter;
 import org.meveo.apiv2.generic.exception.ConflictException;
 import org.meveo.apiv2.models.Resource;
-import org.meveo.apiv2.payments.ClearingResponse;
-import org.meveo.apiv2.payments.ImmutableClearingResponse;
-import org.meveo.apiv2.payments.ImmutableRejectionCodesExportResult;
-import org.meveo.apiv2.payments.ImportRejectionCodeInput;
-import org.meveo.apiv2.payments.PaymentGatewayInput;
-import org.meveo.apiv2.payments.RejectionAction;
-import org.meveo.apiv2.payments.RejectionCode;
-import org.meveo.apiv2.payments.RejectionCodeClearInput;
-import org.meveo.apiv2.payments.RejectionCodesExportResult;
-import org.meveo.apiv2.payments.RejectionGroup;
-import org.meveo.apiv2.payments.RejectionPayment;
-import org.meveo.apiv2.payments.SequenceAction;
+import org.meveo.apiv2.payments.*;
 import org.meveo.apiv2.payments.resource.RejectionActionMapper;
 import org.meveo.apiv2.payments.resource.RejectionCodeMapper;
 import org.meveo.apiv2.payments.resource.RejectionGroupMapper;
+import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.ExchangeRate;
 import org.meveo.model.billing.TradingCurrency;
@@ -105,6 +86,8 @@ import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.payments.*;
 import org.meveo.model.scripts.ScriptInstance;
+import org.meveo.model.settings.AdvancedSettings;
+import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
@@ -179,6 +162,11 @@ public class PaymentApi extends BaseApi {
 	
 	@Inject
 	private RejectedPaymentService rejectedPaymentService;
+	@Inject
+	private InvoiceService invoiceService;
+
+	@Inject
+	private AdvancedSettingsApiService advancedSettingsApiService;
 
 	private static final String PAYMENT_GATEWAY_NOT_FOUND_ERROR_MESSAGE = "Payment gateway not found";
 	private static final String PAYMENT_REJECTION_CODE_NOT_FOUND_ERROR_MESSAGE = "Payment rejection code not found";
@@ -220,11 +208,15 @@ public class PaymentApi extends BaseApi {
         if (!occTemplate.isManualCreationEnabled()) {
             throw new BusinessException(format("Creation is prohibited; occTemplate %s is not allowed for manual creation", paymentDto.getOccTemplateCode()));
         }
+		if(ZERO.compareTo(paymentDto.getAmount()) > 0) {
+			throw new InvalidParameterException("The operation amount should not be a negative value");
+		}
 
         Payment payment = new Payment();
 		paymentService.calculateAmountsByTransactionCurrency(payment, customerAccount,
 				paymentDto.getAmount(), paymentDto.getTransactionalCurrency(), payment.getTransactionDate());
 
+		final Date today = new Date();
 		payment.setJournal(occTemplate.getJournal());
         payment.setPaymentMethod(paymentDto.getPaymentMethod());
         payment.setAccountingCode(occTemplate.getAccountingCode());
@@ -234,8 +226,8 @@ public class PaymentApi extends BaseApi {
         payment.setAccountCodeClientSide(occTemplate.getAccountCodeClientSide());
         payment.setCustomerAccount(customerAccount);
         payment.setReference(paymentDto.getReference());
-        payment.setDueDate(paymentDto.getDueDate() == null ? new Date() : paymentDto.getDueDate());
-        payment.setTransactionDate(paymentDto.getTransactionDate() == null ? new Date() : paymentDto.getTransactionDate());
+        payment.setDueDate(paymentDto.getDueDate() == null ? today : paymentDto.getDueDate());
+        payment.setTransactionDate(today);
         payment.setMatchingStatus(O);
         payment.setPaymentOrder(paymentDto.getPaymentOrder());
         payment.setFees(paymentDto.getFees());
@@ -250,7 +242,8 @@ public class PaymentApi extends BaseApi {
         payment.setPaymentInfo6(paymentDto.getPaymentInfo6());
         payment.setBankCollectionDate(paymentDto.getBankCollectionDate());
 		payment.setCollectionDate(paymentDto.getCollectionDate() == null ? paymentDto.getBankCollectionDate() : paymentDto.getCollectionDate());
-		payment.setAccountingDate(new Date());
+		payment.setAccountingDate(today);
+		payment.setIsManualPayment(true);
 		accountOperationService.handleAccountingPeriods(payment);
 
         // populate customFields
@@ -303,14 +296,6 @@ public class PaymentApi extends BaseApi {
 		return exchangeRate;
 	}
 
-	private void checkTransactionalCurrency(String transactionalcurrency, TradingCurrency tradingCurrency) {
-		if (tradingCurrency == null || isBlank(tradingCurrency)) {
-			throw new InvalidParameterException("Currency " + transactionalcurrency +
-					" is not recorded a trading currency in Opencell. Only currencies declared as trading currencies can be used to record account operations.");
-		}
-	}
-
-
 	private void matchPayment(PaymentDto paymentDto, CustomerAccount customerAccount, Payment payment)
 			throws BusinessApiException, BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException {
 		List<Long> listReferenceToMatch = new ArrayList<>();
@@ -336,7 +321,7 @@ public class PaymentApi extends BaseApi {
 			aosToPaid.add(ao);
 		}
 		 Collections.sort(aosToPaid, comparing(AccountOperation::getDueDate));
-		if(checkAccountOperationCurrency(aosToPaid, paymentDto.getTransactionalCurrency())) {
+		if(paymentService.checkAccountOperationCurrency(aosToPaid, paymentDto.getTransactionalCurrency())) {
 			throw new BusinessApiException("Transaction currency is different from account operation currency");
 		}
 		for(AccountOperation ao :aosToPaid ) {
@@ -348,12 +333,6 @@ public class PaymentApi extends BaseApi {
 			aosIdsToMatch.add(payment.getId());
 			matchingCodeService.matchOperations(null, customerAccount.getCode(), aosIdsToMatch, payment.getId(), MatchingTypeEnum.A);
 		}
-	}
-
-	private boolean checkAccountOperationCurrency(List<AccountOperation> aosToPaid, String transactionalCurrency) {
-		return aosToPaid.stream()
-				.anyMatch(accountOperation -> ! accountOperation.getCode().endsWith("_SD") &&
-						!accountOperation.getTransactionalCurrency().getCurrencyCode().equalsIgnoreCase(transactionalCurrency));
 	}
 
 
@@ -471,21 +450,23 @@ public class PaymentApi extends BaseApi {
 	 */
 	@SecuredBusinessEntityMethod(validate = @SecureMethodParameter(entityClass = CustomerAccount.class))
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void retryRejectedPayment(Long id) throws Exception {
+	public void retryRejectedPayment(Long id, RetryPayment retryPayment) throws Exception {
 		// Get rejected payment
 		Payment payment = ofNullable(paymentService.findById(id))
-				.orElseThrow(() -> new NotFoundException("Payment not found for id=" + id));
+				.orElseThrow(() -> new ActionForbiddenException("Payment not found for id=" + id));
 
 		// Get rejected payment history
 		PaymentHistory paymentHistory = ofNullable(paymentHistoryService.findPaymentHistoryByPaymentIdAndPaymentStatus(payment.getId(), PaymentStatusEnum.REJECTED))
-				.orElseThrow(() -> new NotFoundException("Rejected payment not found for id=" + id));
+				.orElseThrow(() -> new ActionForbiddenException("Only rejected payments can be retried"));
 
+		List<Long> idsToPay = new ArrayList<>();
+		paymentHistory.getListAoPaid().forEach(invoice -> idsToPay.add(invoice.getId()));
+
+		if (Boolean.TRUE.equals(payment.getIsManualPayment())) {
+			paymentService.createManualPaymentFromRejectedPayment(payment, retryPayment.getCollectionDate(), idsToPay);
+		} else {
 		// Get customer account
 		CustomerAccount customerAccount = payment.getCustomerAccount();
-		// Get rejected payment invoices
-		List<Long> ids = new ArrayList<>();
-		paymentHistory.getListAoPaid().forEach(invoice -> ids.add(invoice.getId()));
-
 		// Get preferred payment method
 		PaymentMethod preferredPaymentMethod = customerAccount
 				.getPaymentMethods()
@@ -500,16 +481,17 @@ public class PaymentApi extends BaseApi {
 
 		if (payment.getPaymentMethod().equals(CARD) && preferredPaymentMethod.getPaymentType().equals(CARD)) {
 			CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
-			paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), ids,
+				paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), idsToPay,
 					Boolean.TRUE, Boolean.TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
 					paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
 					paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-					Boolean.TRUE, preferredPaymentMethod.getPaymentType());
+						Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false, retryPayment.getCollectionDate());
 		} else {
-			paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), ids,
+				paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), idsToPay,
 					Boolean.TRUE, Boolean.TRUE, paymentGateway, null, null,
-					null, null, null, Boolean.TRUE, preferredPaymentMethod.getPaymentType());
+						null, null, null, Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false, retryPayment.getCollectionDate());
 		}
+	}
 	}
 	
 	
@@ -907,10 +889,16 @@ public class PaymentApi extends BaseApi {
 		if (isBlank(importRejectionCodeInput.getBase64csv())) {
 			throw new BusinessApiException("Encoded file should not be null or empty");
 		}
+
+		String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator")
+										 .map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).map(Pattern::quote)
+										 .orElse(";");
+
 		ImportRejectionCodeConfig config =
 				new ImportRejectionCodeConfig(importRejectionCodeInput.getBase64csv(),
 						importRejectionCodeInput.getIgnoreLanguageErrors(),
-						importRejectionCodeInput.getMode());
+						importRejectionCodeInput.getMode(),
+						fieldsSeparator);
 		return rejectionCodeService.importRejectionCodes(config);
 	}
 
@@ -1292,22 +1280,20 @@ public class PaymentApi extends BaseApi {
 	 * @return RejectionPayment
 	 */
 	public RejectionPayment createRejectionPayment(RejectionPayment rejectionPayment) {
-		if (rejectionPayment.getId() == null
-				&& StringUtils.isBlank(rejectionPayment.getExternalPaymentId())) {
+		if (rejectionPayment.getId() == null && StringUtils.isBlank(rejectionPayment.getExternalPaymentId())) {
 			throw new MissingParameterException("Id or externalId are required");
 		}
-		Payment payment = rejectionPayment.getId() != null
-				? loadRejectionPaymentById(rejectionPayment) : loadRejectionPaymentByExternalId(rejectionPayment);
+
+		Payment payment = rejectionPayment.getId() != null ? loadRejectionPaymentById(rejectionPayment) : loadRejectionPaymentByExternalId(rejectionPayment);
 		if(payment.getRejectedPayment() != null) {
-			throw new ForbiddenException(format("Payment[id=%d, reference=%s] has already been rejected by RejectedPayment[id=%d]",
+			throw new ActionForbiddenException(format("Payment[id=%d, reference=%s] has already been rejected by RejectedPayment[id=%d]",
 					payment.getId(), payment.getReference(), payment.getRejectedPayment().getId()));
 		}
 		if (payment.getPaymentGateway() == null && isBlank(rejectionPayment.getPaymentGatewayCode())) {
-			throw new BadRequestException("Payment has no gateway. Please provide a paymentGatewayCode");
+			throw new ActionForbiddenException("Payment has no gateway. Please provide a paymentGatewayCode");
 		}
 		PaymentRejectionCode paymentRejectionCode = rejectionCodeService.findByCode(rejectionPayment.getRejectionCode());
-		ofNullable(paymentRejectionCode)
-				.orElseThrow(() -> new NotFoundException("Provided rejection code not found"));
+		ofNullable(paymentRejectionCode).orElseThrow(() -> new ActionForbiddenException("Provided rejection code not found"));
 		PaymentGateway paymentGateway = null;
 		if(rejectionPayment.getPaymentGatewayCode() != null) {
 			paymentGateway = paymentGatewayService.findByCode(rejectionPayment.getPaymentGatewayCode());
@@ -1316,15 +1302,15 @@ public class PaymentApi extends BaseApi {
 			paymentGateway = payment.getPaymentGateway();
 		}
 		if(paymentGateway == null && rejectionPayment.getPaymentGatewayCode() != null) {
-			throw new BadRequestException("Payment has no gateway. Please provide a valid paymentGateway");
+			throw new ActionForbiddenException("Payment has no gateway. Please provide a valid paymentGateway");
 		}
 		if(paymentRejectionCode.getPaymentGateway() != null
 				&& !paymentGateway.getId().equals(paymentRejectionCode.getPaymentGateway().getId())) {
-			throw new BadRequestException("Rejection code " + rejectionPayment.getRejectionCode()
+			throw new ActionForbiddenException("Rejection code " + rejectionPayment.getRejectionCode()
 					+ " not found for gateway[code=" + payment.getPaymentGateway().getCode() + "]");
 		}
 		try {
-
+			invoiceService.rejectAdv(payment);
 			OCCTemplate occTemplate = paymentService.getOCCTemplateRejectPayment(payment);
 			matchingCodeService.unmatchingByAOid(payment.getId());
 
@@ -1349,8 +1335,7 @@ public class PaymentApi extends BaseApi {
 			aos.add(rejectedPayment.getId());
 			matchingCodeService.matchOperations(payment.getCustomerAccount().getId(),
 					null, aos, null);
-			paymentHistoryService.rejectPaymentHistory(payment.getReference(),
-					rejectionPayment.getRejectionCode(), rejectionPayment.getComment());
+			paymentHistoryService.rejectPaymentHistory(payment.getId(), rejectionPayment.getRejectionCode(), rejectionPayment.getComment());
 			accountOperationService.update(payment);
 			return RejectionPayment.from(rejectedPayment);
 		} catch (Exception exception) {
@@ -1390,10 +1375,9 @@ public class PaymentApi extends BaseApi {
 	}
 
 	private Payment loadRejectionPaymentById(RejectionPayment rejectionPayment) {
-		AccountOperation accountOperation
-				= accountOperationService.findById(rejectionPayment.getId());
+		AccountOperation accountOperation = accountOperationService.findById(rejectionPayment.getId());
 		if (accountOperation == null) {
-			throw new NotFoundException("Payment[id=" + rejectionPayment.getId() + "] does not exist");
+			throw new ActionForbiddenException("Payment[id=" + rejectionPayment.getId() + "] does not exist");
 		}
 		if (!(accountOperation instanceof Payment)) {
 			throw new BadRequestException("AccountOperation[id=" + rejectionPayment.getId() + "] is not a payment");
@@ -1428,4 +1412,8 @@ public class PaymentApi extends BaseApi {
 			return (Payment) accountOperations.get(0);
 		}
 	}
+
+
+
+
 }

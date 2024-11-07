@@ -10,7 +10,7 @@ import org.meveo.apiv2.billing.ExceptionalBillingRun;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
-@Path("/billing/invoicing")
+@Path("/v2/billing/invoicing")
 @Produces({APPLICATION_JSON})
 @Consumes({APPLICATION_JSON})
 public interface InvoicingResource {

@@ -15,9 +15,9 @@ public class SequenceService extends BusinessService<Sequence> {
      * @return Sequence
      */
     public Sequence generateSequence(Sequence sequence) {
-        Sequence entity = refreshOrRetrieve(sequence);
-        entity.setCurrentNumber(sequence.getCurrentNumber() != null ? sequence.getCurrentNumber() + 1 : 0);
-        update(entity);
-        return entity;
+	    sequence.setCurrentNumber(sequence.getCurrentNumber() != null ? sequence.getCurrentNumber() + 1 : 0);
+        return sequence;
     }
+	
+
 }

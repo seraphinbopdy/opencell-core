@@ -44,6 +44,7 @@ import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.DatePeriod;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.IBillableEntity;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.ICustomFieldEntity;
@@ -112,6 +113,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @WorkflowedEntity
 @ObservableEntity
 @CustomFieldEntity(cftCodePrefix = "Subscription", inheritCFValuesFrom = { "offer", "userAccount" })
@@ -504,6 +506,10 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     @JoinColumn(name = "price_list_id")
     private PriceList priceList;
 
+    /** MRR. */
+    @Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal mrr;
+    
     /**
      * This method is called implicitly by hibernate, used to enable encryption for custom fields of this entity
      */
@@ -1363,5 +1369,13 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
      */
     public void setPriceList(PriceList priceList) {
         this.priceList = priceList;
+    }
+
+    public BigDecimal getMrr() {
+        return mrr;
+    }
+
+    public void setMrr(BigDecimal mrr) {
+        this.mrr = mrr;
     }
 }

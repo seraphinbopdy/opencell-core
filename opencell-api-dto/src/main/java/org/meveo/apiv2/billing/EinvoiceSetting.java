@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
+import org.meveo.model.billing.CustomizationIDEnum;
 import org.meveo.model.billing.VatDateCodeEnum;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -46,6 +47,9 @@ public interface EinvoiceSetting extends Resource {
 	@Nullable
 	@Schema(description = "the vat date code")
 	VatDateCodeEnum getVatDateCode();
-	
+
+	@Nullable
+	@Schema(description = "customization ID")
+	String getCustomizationID();
 	
 }

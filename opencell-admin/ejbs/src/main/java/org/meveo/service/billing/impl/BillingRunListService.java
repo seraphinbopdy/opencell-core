@@ -17,10 +17,10 @@
  */
 package org.meveo.service.billing.impl;
 
-import jakarta.ejb.Stateless;
-
 import org.meveo.model.billing.BillingRunList;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class BillingRunListService extends PersistenceService<BillingRunList> {

@@ -14,6 +14,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.article.ArticleMappingLine;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.DiscountPlan;
@@ -68,6 +69,7 @@ import jakarta.validation.constraints.Size;
  *
  */
 @Entity
+@HugeEntity
 @CustomFieldEntity(cftCodePrefix = "Product")
 @Table(name = "cpq_product", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_product_seq"), @Parameter(name = "increment_size", value = "1") })
@@ -405,44 +407,42 @@ public class Product extends ServiceCharge {
     // AKK migrate me - check if this product/serviceTemplate charges make sense
     @Override
     public List<ServiceChargeTemplateUsage> getServiceUsageCharges() {
+		List<ServiceChargeTemplateUsage> serviceUsageCharges= new ArrayList<>();
 
-        List<ServiceChargeTemplateUsage> serviceUsageCharges = new ArrayList<>();
-
-        for (ProductChargeTemplateMapping pc : getProductCharges()) {
-            if (pc.getChargeTemplate() != null) {
-                ChargeTemplate ch = initializeAndUnproxy(pc.getChargeTemplate());
-                if (ch instanceof UsageChargeTemplate) {
-                    ServiceChargeTemplateUsage serviceChargeTemplateUsage = new ServiceChargeTemplateUsage();
-                    serviceChargeTemplateUsage.setChargeTemplate((UsageChargeTemplate) ch);
-                    serviceChargeTemplateUsage.setAccumulatorCounterTemplates(pc.getAccumulatorCounterTemplates());
-                    serviceChargeTemplateUsage.setCounterTemplate(pc.getCounterTemplate());
-                    serviceUsageCharges.add(serviceChargeTemplateUsage);
-                }
-            }
-        }
-        return serviceUsageCharges;
-    }
+		for(ProductChargeTemplateMapping pc : getProductCharges()) {
+			if(pc.getChargeTemplate() != null) {
+				ChargeTemplate ch = initializeAndUnproxy(pc.getChargeTemplate());
+				if(ch instanceof UsageChargeTemplate) {
+					ServiceChargeTemplateUsage serviceChargeTemplateUsage = new ServiceChargeTemplateUsage();
+					serviceChargeTemplateUsage.setChargeTemplate((UsageChargeTemplate)ch);
+					serviceChargeTemplateUsage.setAccumulatorCounterTemplates(pc.getAccumulatorCounterTemplates());
+					serviceChargeTemplateUsage.setCounterTemplate(pc.getCounterTemplate());
+					serviceUsageCharges.add(serviceChargeTemplateUsage);
+				}
+			}
+		}
+		return serviceUsageCharges;
+	}
 
     // AKK migrate me - check if this product/serviceTemplate charges make sense
     @Override
     public List<ServiceChargeTemplateSubscription> getServiceSubscriptionCharges() {
         
         List<ServiceChargeTemplateSubscription> serviceSubscriptionCharges = new ArrayList<>();
-        
-        for (ProductChargeTemplateMapping pc : getProductCharges()) {
-            if (pc.getChargeTemplate() != null) {
-                ChargeTemplate ch = initializeAndUnproxy(pc.getChargeTemplate());
+		for(ProductChargeTemplateMapping pc : getProductCharges()) {
+			if(pc.getChargeTemplate() != null) {
+				ChargeTemplate ch = initializeAndUnproxy(pc.getChargeTemplate());
                 if ((ch instanceof OneShotChargeTemplate) && (((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.SUBSCRIPTION
                         || ((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.OTHER
-                        || ((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.INVOICING_PLAN)) {
-                    ServiceChargeTemplateSubscription serviceChargeTemplateSubscription = new ServiceChargeTemplateSubscription();
-                    serviceChargeTemplateSubscription.setChargeTemplate((OneShotChargeTemplate) ch);
-                    serviceChargeTemplateSubscription.setAccumulatorCounterTemplates(pc.getAccumulatorCounterTemplates());
-                    serviceChargeTemplateSubscription.setCounterTemplate(pc.getCounterTemplate());
-                    serviceSubscriptionCharges.add(serviceChargeTemplateSubscription);
-                }
-            }
-        }
+						|| ((OneShotChargeTemplate) ch).getOneShotChargeTemplateType() == OneShotChargeTemplateTypeEnum.INVOICING_PLAN)) {
+					ServiceChargeTemplateSubscription serviceChargeTemplateSubscription = new ServiceChargeTemplateSubscription();
+					serviceChargeTemplateSubscription.setChargeTemplate((OneShotChargeTemplate) ch);
+					serviceChargeTemplateSubscription.setAccumulatorCounterTemplates(pc.getAccumulatorCounterTemplates());
+					serviceChargeTemplateSubscription.setCounterTemplate(pc.getCounterTemplate());
+					serviceSubscriptionCharges.add(serviceChargeTemplateSubscription);
+				}
+			}
+		}
         return serviceSubscriptionCharges;
     }
 

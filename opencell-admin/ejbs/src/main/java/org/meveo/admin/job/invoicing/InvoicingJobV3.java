@@ -1,5 +1,9 @@
 package org.meveo.admin.job.invoicing;
 import static org.meveo.model.jobs.MeveoJobCategoryEnum.INVOICING;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -11,8 +15,6 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.ScopedJob;
 
-import java.util.HashMap;
-import java.util.Map;
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;

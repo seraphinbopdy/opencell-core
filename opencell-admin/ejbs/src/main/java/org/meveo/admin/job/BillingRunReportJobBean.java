@@ -34,9 +34,9 @@ public class BillingRunReportJobBean extends BaseJobBean {
     private List<Long> billingRunIds;
 
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        billingRunIds = jobInstance.getRunTimeValues() != null
-                && jobInstance.getRunTimeValues().get("billingRuns") != null
-                ? extractBRIds((List<EntityReferenceWrapper>) jobInstance.getRunTimeValues().get("billingRuns")) : emptyList();
+        List<EntityReferenceWrapper> billingRunWrappers =
+                (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "billingRuns");
+        billingRunIds = billingRunWrappers != null ? extractBRIds(billingRunWrappers) : emptyList();
         try {
             List<BillingRun> billingRuns = initJobAndGetDataToProcess();
             jobExecutionResult.setNbItemsToProcess(billingRuns.size());
@@ -50,14 +50,13 @@ public class BillingRunReportJobBean extends BaseJobBean {
         }
     }
 
-    private List<Long> extractBRIds(List<EntityReferenceWrapper> billingRuns) {
-        if(billingRuns == null || billingRuns.isEmpty()) {
+    private List<Long> extractBRIds(List<EntityReferenceWrapper> billingRunWrappers) {
+    	if(billingRunWrappers == null || billingRunWrappers.isEmpty()) {
             return emptyList();
         }
-        return billingRuns.stream()
-        		.map(EntityReferenceWrapper::getCode)
-                .map(Long::valueOf)
-                .collect(toList());
+        return billingRunWrappers.stream()
+                    .map(br -> Long.valueOf(br.getCode().split("/")[0]))
+                    .collect(toList());
     }
 
     private List<BillingRun> initJobAndGetDataToProcess() {

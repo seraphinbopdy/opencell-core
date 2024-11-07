@@ -27,9 +27,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,6 +45,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -73,6 +77,7 @@ import org.meveo.model.report.query.QueryScheduler;
 import org.meveo.model.report.query.QueryStatusEnum;
 import org.meveo.model.report.query.QueryVisibilityEnum;
 import org.meveo.model.report.query.ReportQuery;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.security.MeveoUser;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.NativePersistenceService;
@@ -82,6 +87,7 @@ import org.meveo.service.communication.impl.EmailSender;
 import org.meveo.service.communication.impl.EmailTemplateService;
 import org.meveo.service.communication.impl.InternationalSettingsService;
 import org.meveo.service.job.JobInstanceService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.meveo.util.ApplicationProvider;
 
 import jakarta.ejb.AsyncResult;
@@ -119,6 +125,9 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
 
     @Inject
     private InternationalSettingsService internationalSettingsService;
+
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
 
     @Inject
     @ApplicationProvider
@@ -166,9 +175,13 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
         return filters;
     }
 
+    private List<String> executeQuery(ReportQuery reportQuery, Class<?> targetEntity) {
+        return this.executeQuery(reportQuery, targetEntity, null, null);
+    }
+    
     @Transactional
 	@SuppressWarnings("unchecked")
-	private List<String> executeQuery(ReportQuery reportQuery, Class<?> targetEntity) {
+	private List<String> executeQuery(ReportQuery reportQuery, Class<?> targetEntity, String decimalSeparator, String fieldSeparator) {
     	List<Object> result = execute(reportQuery, targetEntity, false);
     	List<String> response = new ArrayList<>();
     	Map<String, String> aliases = reportQuery.getAliases() != null ? reportQuery.getAliases() : new HashMap<>();
@@ -179,10 +192,32 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
 				fields = (List<String>) reportQuery.getAdvancedQuery().getOrDefault("genericFields", new ArrayList<String>());
 			}
 			
-			var line = fields.stream().map(f -> aliases.getOrDefault(f, f)).map(e -> entries.getOrDefault((String) e, "") != null ? entries.getOrDefault((String) e, "").toString() : "").collect(Collectors.joining(";"));
+			var line = fields.stream()
+                             .map(f -> aliases.getOrDefault(f, f))
+                             .map(e -> formatResult(entries.get(e), ofNullable(decimalSeparator).orElse(",")))
+                             .collect(Collectors.joining(ofNullable(fieldSeparator).orElse(";")));
     		response.add(line);
 		}
     	return response;
+    }
+
+    String formatResult(Object input, String decimalSeparator) {
+
+        if(input == null) {
+            return "";
+        } else if (decimalSeparator == null) {
+            return input.toString();
+        }
+
+        if (input instanceof BigDecimal || input instanceof Double || input instanceof Float) {
+            DecimalFormatSymbols symbols = ",".equals(decimalSeparator) ? new DecimalFormatSymbols(Locale.FRENCH) : new DecimalFormatSymbols(Locale.ENGLISH);
+            DecimalFormat formatter = new DecimalFormat("0.00", symbols);
+            formatter.setGroupingUsed(false);
+            return formatter.format(input);
+        }
+
+        return input.toString();
+
     }
     
 
@@ -195,48 +230,63 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
     }
 	
 	@Transactional
-	private byte[] generateFileByExtension(ReportQuery reportQuery, String fileName, QueryExecutionResultFormatEnum format, Class<?> targetEntity) throws IOException, BusinessException  {
-		var columnnHeader = findColumnHeaderForReportQuery(reportQuery);
-    	List<String> selectResult = executeQuery(reportQuery, targetEntity);
-    	if(selectResult == null || selectResult.isEmpty())
-    		throw new BusinessException(RESULT_EMPTY_MSG);
-    	Path tempFile = Files.createTempFile(fileName, format.getExtension());
-    	try(FileWriter fw = new FileWriter(tempFile.toFile(), true); BufferedWriter bw = new BufferedWriter(fw)){
-    		if(format == QueryExecutionResultFormatEnum.CSV) {
-	    		bw.write(String.join(";", columnnHeader));
-		    	for (String line : selectResult) {
-		    		bw.newLine();
-		    		bw.write(line);
-				}
-		    	bw.close();
-		    	fw.close();
-    		}else if (format == QueryExecutionResultFormatEnum.EXCEL) {
-    			var wb = new XSSFWorkbook();
-                    XSSFSheet sheet = wb.createSheet(reportQuery.getTargetEntity());
-                    int i = 0;
-                    int j = 0;
-                    var rowHeader = sheet.createRow(i++);
-                    for (String header : columnnHeader) {
-                        Cell cell = rowHeader.createCell(j++);
-                        cell.setCellValue(header);
-                    }
-                    for (String rowSelect : selectResult) {
-                        rowHeader = sheet.createRow(i++);
-                        j = 0;
-                        var splitLine = rowSelect.split(";");
-                        for (String field : splitLine) {
-                            Cell cell = rowHeader.createCell(j++);
-                            cell.setCellValue(field);
-                        }
-                    }
+	private byte[] generateFileByExtension(ReportQuery reportQuery, String fileName, QueryExecutionResultFormatEnum format, Class<?> targetEntity) throws IOException, BusinessException {
+	    var columnHeader = findColumnHeaderForReportQuery(reportQuery);
+        String fieldsSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator"))
+                                         .map(AdvancedSettings::getValue).filter(value -> !value.isEmpty())
+                                         .orElse(DELIMITER);
+        
+        String decimalSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.decimalSeparator"))
+                                         .map(AdvancedSettings::getValue).filter(value -> !value.isEmpty())
+                                         .orElse(",");
 
-                    FileOutputStream fileOut = new FileOutputStream(tempFile.toFile());
-                    wb.write(fileOut);
-                    fileOut.close();
-    			wb.close();
-            }
-    	}
-    	return Files.readAllBytes(tempFile);
+	    List<String> selectResult = executeQuery(reportQuery, targetEntity, decimalSeparator, fieldsSeparator);
+
+	    if (selectResult.isEmpty()) {
+	        throw new BusinessException(RESULT_EMPTY_MSG);
+	    }
+	    
+	    Path tempFile = Files.createTempFile(fileName, format.getExtension());
+	    
+	    if (format == QueryExecutionResultFormatEnum.CSV) {
+	        try (FileWriter fw = new FileWriter(tempFile.toFile(), true); 
+	             BufferedWriter bw = new BufferedWriter(fw)) {
+
+	            bw.write(String.join(fieldsSeparator, columnHeader));
+	            for (String line : selectResult) {
+	                bw.newLine();
+	                bw.write(line);
+	            }
+	        }
+	    } else if (format == QueryExecutionResultFormatEnum.EXCEL) {
+	        try (XSSFWorkbook wb = new XSSFWorkbook(); 
+	             FileOutputStream fileOut = new FileOutputStream(tempFile.toFile())) {
+
+	            XSSFSheet sheet = wb.createSheet(reportQuery.getTargetEntity());
+	            int i = 0;
+	            int j = 0;
+
+	            var rowHeader = sheet.createRow(i++);
+	            for (String header : columnHeader) {
+	                Cell cell = rowHeader.createCell(j++);
+	                cell.setCellValue(header);
+	            }
+
+	            for (String rowSelect : selectResult) {
+	                rowHeader = sheet.createRow(i++);
+	                j = 0;
+	                var splitLine = rowSelect.split(";");
+	                for (String field : splitLine) {
+	                    Cell cell = rowHeader.createCell(j++);
+	                    cell.setCellValue(field);
+	                }
+	            }
+
+	            wb.write(fileOut);
+	        }
+	    }
+
+	    return Files.readAllBytes(tempFile);
 	}
     
     /**
@@ -280,38 +330,41 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
         queryResult.setFilePath(outputFile.getParentFile().getName() +  File.separator + outputFile.getName());
     }
 
-    private void writeOutputFile(File file, QueryExecutionResultFormatEnum format, Set<String> columnnHeader, List<String> selectResult) throws IOException {
+    private void writeOutputFile(File file, QueryExecutionResultFormatEnum format, Set<String> columnHeader, List<String> selectResult) throws IOException {
 
-        try (FileWriter fw = new FileWriter(file, true); BufferedWriter bw = new BufferedWriter(fw)) {
-            if (format == QueryExecutionResultFormatEnum.CSV) {
-                bw.write(String.join(";", columnnHeader));
+        if (format == QueryExecutionResultFormatEnum.CSV) {
+            try (FileWriter fw = new FileWriter(file, true); BufferedWriter bw = new BufferedWriter(fw)) {
+                bw.write(String.join(";", columnHeader));
                 for (String line : selectResult) {
                     bw.newLine();
                     bw.write(line);
                 }
-            } else if (format == QueryExecutionResultFormatEnum.EXCEL) {
-                var wb = new XSSFWorkbook();
-                    XSSFSheet sheet = wb.createSheet();
-                    int i = 0;
-                    int j = 0;
-                    var rowHeader = sheet.createRow(i++);
-                    for (String header : columnnHeader) {
+            }
+        } else if (format == QueryExecutionResultFormatEnum.EXCEL) {
+            try (XSSFWorkbook wb = new XSSFWorkbook(); 
+                 FileOutputStream fileOut = new FileOutputStream(file)) {
+
+                XSSFSheet sheet = wb.createSheet();
+                int i = 0;
+                int j = 0;
+
+                var rowHeader = sheet.createRow(i++);
+                for (String header : columnHeader) {
+                    Cell cell = rowHeader.createCell(j++);
+                    cell.setCellValue(header);
+                }
+
+                for (String rowSelect : selectResult) {
+                    rowHeader = sheet.createRow(i++);
+                    j = 0;
+                    var splitLine = rowSelect.split(";");
+                    for (String field : splitLine) {
                         Cell cell = rowHeader.createCell(j++);
-                        cell.setCellValue(header);
+                        cell.setCellValue(field);
                     }
-                    for (String rowSelect : selectResult) {
-                        rowHeader = sheet.createRow(i++);
-                        j = 0;
-                        var splitLine = rowSelect.split(";");
-                        for (String field : splitLine) {
-                            Cell cell = rowHeader.createCell(j++);
-                            cell.setCellValue(field);
-                        }
-                    }
-                    FileOutputStream fileOut = new FileOutputStream(file);
-                    wb.write(fileOut);
-                    fileOut.close();
-                wb.close();
+                }
+
+                wb.write(fileOut);
             }
         }
     }

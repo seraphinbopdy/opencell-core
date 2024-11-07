@@ -29,6 +29,7 @@ import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.billing.UntdidAllowanceCode;
@@ -68,6 +69,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @ObservableEntity
 @Cacheable
 @ExportIdentifier({ "code" })

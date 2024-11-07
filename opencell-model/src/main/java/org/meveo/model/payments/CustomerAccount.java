@@ -34,6 +34,7 @@ import org.meveo.model.AccountEntity;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IWFEntity;
@@ -51,7 +52,6 @@ import org.meveo.model.billing.TradingLanguage;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.IInvoicingMinimumApplicable;
-import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.dunning.DunningDocument;
 import org.meveo.model.intcrm.AddressBook;
 import org.meveo.model.payments.plan.PaymentPlan;
@@ -87,6 +87,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @WorkflowedEntity
 @CustomFieldEntity(cftCodePrefix = "CustomerAccount", inheritCFValuesFrom = "customer")
 @ExportIdentifier({ "code" })
@@ -100,8 +101,9 @@ import jakarta.validation.constraints.Size;
                 + "                   pm.paymentType =:paymentMethodIN   and pm.preferred is true and ao.dueDate >=:fromDueDateIN and ao.dueDate <:toDueDateIN group by ca.id having sum(ao.unMatchingAmount) <> 0"),
         @NamedQuery(name = "CustomerAccount.getMinimumAmountUsed", query = "select ca.minimumAmountEl from CustomerAccount ca where ca.minimumAmountEl is not null"),
         @NamedQuery(name = "CustomerAccount.getCustomerAccountsWithMinAmountELNotNullByBA", query = "select ca from CustomerAccount ca where ca.minimumAmountEl is not null AND ca.status = 'ACTIVE' AND ca=:customerAccount"),
-        @NamedQuery(name = "CustomerAccount.getCountByParent", query = "select count(*) from CustomerAccount ca where ca.customer=:parent") })
-public class CustomerAccount extends AccountEntity implements IInvoicingMinimumApplicable, IWFEntity, ICounterEntity {
+        @NamedQuery(name = "CustomerAccount.getCountByParent", query = "select count(*) from CustomerAccount ca where ca.customer=:parent"),
+		@NamedQuery(name = "CustomerAccount.getCustomerAccountNotExistOnDunningCollectionPlan", query = "select ca from CustomerAccount ca where ca.status = 'ACTIVE' and ca.id not in (select distinct dcp.customerAccount.id from DunningCollectionPlan dcp where dcp.customerAccount.id = ca.id and dcp.status.status = ('ACTIVE'))"),
+})public class CustomerAccount extends AccountEntity implements IInvoicingMinimumApplicable, IWFEntity, ICounterEntity {
 
     private static final long serialVersionUID = 1L;
 

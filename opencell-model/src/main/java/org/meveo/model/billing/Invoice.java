@@ -33,6 +33,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableCFEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.ObservableEntity;
@@ -92,6 +93,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @ObservableEntity
 @Table(name = "billing_invoice", uniqueConstraints = @UniqueConstraint(columnNames = { "invoice_number", "invoice_type_id" }))
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_seq"),
@@ -156,8 +158,10 @@ import jakarta.validation.constraints.Size;
         @NamedQuery(name = "Invoice.xmlWithStatusForUBL", query = "select inv.id from Invoice inv where inv.status in(:statusList) and inv.ublReference = false"),
         @NamedQuery(name = "Invoice.SUM_VALIDATED_LINKED_INVOICES", query = "SELECT SUM(i.amountWithTax) FROM Invoice i"
                 + " WHERE i.id in (SELECT li.linkedInvoiceValue.id FROM LinkedInvoice li WHERE li.id.id = :SRC_INVOICE_ID) AND i.status = 'VALIDATED'"),
-        @NamedQuery(name = "Invoice.findByBillingCycle", query = "SELECT i FROM Invoice i LEFT JOIN BillingAccount ba on ba.id = i.billingAccount.id WHERE ba.billingCycle.type = :billingCycleType and i.id !=:currentInvoiceId order by i.auditable.created DESC "),
-        @NamedQuery(name = "Invoice.sendToLitigation", query = "UPDATE Invoice inv SET inv.paymentStatus = 'DISPUTED' WHERE inv.id in (:ids)"), })
+        @NamedQuery(name = "Invoice.validateInvoicesByStatusAndBr", query = "UPDATE Invoice inv SET inv.status = :status, inv.statusDate= function('NOW'), inv.rejectReason=null WHERE inv.billingRun=:billingRun AND inv.status in (:toValidate)"),
+        @NamedQuery(name = "Invoice.sendToLitigation", query = "UPDATE Invoice inv SET inv.paymentStatus = 'DISPUTED' WHERE inv.id in (:ids)"),
+		@NamedQuery(name = "Invoice.abandoneInvoices", query = "UPDATE Invoice inv SET inv.paymentStatus = 'ABANDONED' WHERE inv.id in (:ids)"),
+})
 @NamedNativeQueries({
         @NamedNativeQuery(name = "Invoice.rollbackAdvance", query = "update billing_invoice set invoice_balance = invoice_balance + li.amount from (select bli.linked_invoice_id, bli.amount from billing_linked_invoices bli join billing_invoice i on i.id = bli.id where i.billing_run_id = :billingRunId and bli.type = 'ADVANCEMENT_PAYMENT') li where li.linked_invoice_id = id"),
         @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
@@ -352,7 +356,7 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     /**
      * Linked invoices
      */
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "id", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LinkedInvoice> linkedInvoices = new HashSet<>();
 
     /**
@@ -655,6 +659,7 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "dunning_collection_plan_triggered")
     private boolean dunningCollectionPlanTriggered;
+    
     @Transient
     private Set<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates;
 
@@ -670,6 +675,7 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_applied_rate_date")
     private Date lastAppliedRateDate = new Date();
+    
     @Transient
     private Date nextInvoiceDate;
 
@@ -782,6 +788,7 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     public Invoice(Invoice copy) {
         this.billingAccount = copy.billingAccount;
         this.paymentMethodType = copy.paymentMethodType;
+        this.paymentMethod = copy.paymentMethod;
         this.dueDate = copy.dueDate;
         this.invoiceDate = copy.invoiceDate;
         this.discountPlan = copy.discountPlan;
@@ -1946,6 +1953,9 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
         this.amountTax = BigDecimal.ZERO;
         this.amountWithTax = BigDecimal.ZERO;
         this.amountWithoutTax = BigDecimal.ZERO;
+		this.transactionalAmountTax=BigDecimal.ZERO;
+		this.transactionalAmountWithTax=BigDecimal.ZERO;
+		this.transactionalAmountWithoutTax=BigDecimal.ZERO;
     }
 
     public BigDecimal getInvoiceBalance() {

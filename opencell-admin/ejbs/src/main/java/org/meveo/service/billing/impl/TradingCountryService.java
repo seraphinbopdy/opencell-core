@@ -17,11 +17,11 @@
  */
 package org.meveo.service.billing.impl;
 
-import jakarta.ejb.Stateless;
-import jakarta.persistence.NoResultException;
-
 import org.meveo.model.billing.TradingCountry;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class TradingCountryService extends PersistenceService<TradingCountry> {

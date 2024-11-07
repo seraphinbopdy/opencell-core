@@ -24,7 +24,7 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
  * @author Abdellatif BARI
  * @since 15.1.0
  */
-@Path("/jobs/BatchEntity")
+@Path("/v2/jobs/BatchEntity")
 @Produces({APPLICATION_JSON})
 @Consumes({APPLICATION_JSON})
 public interface BatchEntityResource {

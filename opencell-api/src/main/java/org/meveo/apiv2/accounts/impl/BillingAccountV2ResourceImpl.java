@@ -1,0 +1,65 @@
+package org.meveo.apiv2.accounts.impl;
+
+import org.meveo.api.account.BillingAccountApi;
+import org.meveo.api.dto.ActionStatus;
+import org.meveo.api.dto.ActionStatusEnum;
+import org.meveo.api.dto.account.BillingAccountDto;
+import org.meveo.api.rest.impl.BaseRs;
+import org.meveo.apiv2.accounts.resource.BillingAccountV2Resource;
+import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.billing.BillingAccount;
+
+import jakarta.inject.Inject;
+
+public class BillingAccountV2ResourceImpl extends BaseRs implements BillingAccountV2Resource {
+    
+    @Inject
+    private BillingAccountApi billingAccountApi;
+    
+    public ActionStatus create(BillingAccountDto postData) {
+
+        ActionStatus result = new ActionStatus(ActionStatusEnum.SUCCESS, "");
+
+        try {
+            BillingAccount billingAccount = billingAccountApi.create(postData, BillingAccountApi.Version.V2);
+            result.setEntityCode(billingAccount.getCode());
+            result.setEntityId(billingAccount.getId());
+        } catch (Exception e) {
+            processException(e, result);
+        }
+
+        return result;
+    }
+
+    @Override
+    public ActionStatus update(BillingAccountDto postData) {
+
+        ActionStatus result = new ActionStatus(ActionStatusEnum.SUCCESS, "");
+
+        try {
+            BillingAccount billingAccount = billingAccountApi.update(postData, BillingAccountApi.Version.V2);
+            result.setEntityCode(billingAccount.getCode());
+            result.setEntityId(billingAccount.getId());
+        } catch (Exception e) {
+            processException(e, result);
+        }
+
+        return result;
+    }
+
+    @Override
+    public ActionStatus createOrUpdate(BillingAccountDto postData) {
+        ActionStatus result = new ActionStatus(ActionStatusEnum.SUCCESS, "");
+
+        try {
+            BillingAccount billingAccount = billingAccountApi.createOrUpdate(postData, BillingAccountApi.Version.V2);
+            if (StringUtils.isBlank(postData.getCode())) {
+                result.setEntityCode(billingAccount.getCode());
+            }
+        } catch (Exception e) {
+            processException(e, result);
+        }
+
+        return result;
+    }
+}

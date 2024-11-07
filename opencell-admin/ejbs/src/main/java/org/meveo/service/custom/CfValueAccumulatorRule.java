@@ -19,16 +19,6 @@
 package org.meveo.service.custom;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.meveo.model.catalog.Calendar;
-import org.meveo.model.crm.CustomFieldTemplate;
-import org.meveo.model.crm.Provider;
-import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 
 /**
  * Defines how CF value changes should be propagated downwards in case of custom field value inheritance

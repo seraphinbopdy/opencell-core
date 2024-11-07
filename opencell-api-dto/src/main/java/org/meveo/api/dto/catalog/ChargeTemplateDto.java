@@ -261,6 +261,9 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
     @Schema(description = "Is Business Key Hidden?")
     private Boolean businessKeyIsHidden;
 
+    @Schema(description = "Code of quantity attribute")
+    private String quantityAttribute;
+
     /**
      * Instantiates a new charge template dto.
      */
@@ -320,7 +323,7 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
         	status=chargeTemplate.getStatus();
         }
         internalNote = chargeTemplate.getInternalNote();
-        
+
         // New Fields for Parameters
         parameter1Description = chargeTemplate.getParameter1Description();
         parameter1TranslatedDescriptions = LanguageDescriptionDto.convertMultiLanguageFromMapOfValues(chargeTemplate.getParameter1TranslatedDescriptions());
@@ -358,7 +361,8 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
         businessKeyFormat = chargeTemplate.getBusinessKeyFormat();
         businessKeyIsMandatory = chargeTemplate.isBusinessKeyIsMandatory();
         businessKeyIsHidden = chargeTemplate.isBusinessKeyIsHidden();
-        
+        quantityAttribute =
+                chargeTemplate.getQuantityAttribute() != null ? chargeTemplate.getQuantityAttribute().getCode() : null;
     }
      
 
@@ -1007,4 +1011,11 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
 		this.businessKeyIsHidden = businessKeyIsHidden;
 	}
     
+    public String getQuantityAttribute() {
+        return quantityAttribute;
+    }
+
+    public void setQuantityAttribute(String quantityAttribute) {
+        this.quantityAttribute = quantityAttribute;
+    }
 }

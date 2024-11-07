@@ -192,6 +192,13 @@ public class CreateBillingRunDto extends BaseEntityDto {
     @Size(max = 2000)
     private String applicationEl;
 
+    /**
+     * To decide if service instances will be added to invoice lines or ignored
+     */
+    @Schema(description = "Decide if service instances will be added to invoice lines or ignored", nullable = true)
+    private Boolean ignoreServiceInstances;
+
+
     public Long getId() {
         return id;
     }
@@ -540,7 +547,15 @@ public class CreateBillingRunDto extends BaseEntityDto {
 		this.ignoreUserAccounts = ignoreUserAccounts;
 	}
 
-	@Override
+    public Boolean getIgnoreServiceInstances() {
+        return ignoreServiceInstances;
+    }
+
+    public void setIgnoreServiceInstances(Boolean ignoreServiceInstances) {
+        this.ignoreServiceInstances = ignoreServiceInstances;
+    }
+
+    @Override
     public String toString() {
         return "CreateBillingRunDto{" + "billingCycleCode='" + billingCycleCode + '\'' + ", billingRunTypeEnum=" + billingRunTypeEnum + ", startDate=" + startDate + ", endDate="
                 + endDate + ", invoiceDate=" + invoiceDate + ", lastTransactionDate=" + lastTransactionDate + ", referenceDate=" + referenceDate

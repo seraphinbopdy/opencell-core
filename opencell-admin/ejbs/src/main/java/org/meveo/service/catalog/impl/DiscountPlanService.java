@@ -19,7 +19,6 @@
 package org.meveo.service.catalog.impl;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -238,8 +237,8 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     				discountedAmount=walletOperation.getDiscountedAmount()!=null && walletOperation.getDiscountedAmount().compareTo(BigDecimal.ZERO)>0 ?walletOperation.getDiscountedAmount():unitAmountWithoutTax;
     			}
     			 
-			    walletOperationDiscountAmount = discountPlanItemService.getDiscountAmount(unitAmountWithoutTax, discountPlanItem,product,null,null,serviceInstance!=null?new ArrayList<>(serviceInstance.getAttributeInstances()):Collections.emptyList());
-    			discountValue=discountPlanItemService.getDiscountAmountOrPercent(null,null, null, unitAmountWithoutTax, discountPlanItem,product, serviceInstance!=null?new HashSet<>(serviceInstance.getAttributeInstances()):Collections.emptySet());
+			    walletOperationDiscountAmount = discountPlanItemService.getDiscountAmount(unitAmountWithoutTax, discountPlanItem,product,null,null,serviceInstance!=null?new ArrayList<>(serviceInstance.getAttributeInstances()):Collections.emptyList(), walletOperation);
+    			discountValue=discountPlanItemService.getDiscountAmountOrPercent(null,null, null, unitAmountWithoutTax, discountPlanItem,product, serviceInstance!=null?new HashSet<>(serviceInstance.getAttributeInstances()):Collections.emptySet(), walletOperation);
 
 				// Unit prices and unit taxes are with higher precision
 				unitAmounts = NumberUtils.computeDerivedAmounts(walletOperationDiscountAmount, walletOperationDiscountAmount, taxPercent, appProvider.isEntreprise(), BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
@@ -250,10 +249,10 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     			
     		    discountWalletOperation.setUnitAmountTax(walletOperationDiscountAmount);
 				if (discountPlanItem.getDiscountPlanItemType() == DiscountPlanItemTypeEnum.PERCENTAGE) {
-					discountWalletOperation.setAmountWithoutTax(amounts[0].multiply(walletOperation.getQuantity()));
-					discountWalletOperation.setAmountWithTax(amounts[1].multiply(walletOperation.getQuantity()));
-					discountWalletOperation.setAmountTax(amounts[2].multiply(walletOperation.getQuantity()));
-					discountWalletOperation.setDiscountValue(discountValue.multiply(walletOperation.getQuantity()));
+					discountWalletOperation.setAmountWithoutTax(amounts[0].multiply(walletOperation.getQuantity().abs()));
+					discountWalletOperation.setAmountWithTax(amounts[1].multiply(walletOperation.getQuantity().abs()));
+					discountWalletOperation.setAmountTax(amounts[2].multiply(walletOperation.getQuantity().abs()));
+					discountWalletOperation.setDiscountValue(discountValue.multiply(walletOperation.getQuantity().abs()));
 				} else {
 					discountWalletOperation.setAmountWithoutTax(amounts[0]);
 					discountWalletOperation.setAmountWithTax(amounts[1]);

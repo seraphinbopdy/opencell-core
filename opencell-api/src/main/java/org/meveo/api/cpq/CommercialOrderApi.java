@@ -196,11 +196,21 @@ public class CommercialOrderApi extends BaseApi {
 			order.setDiscountPlan(loadEntityByCode(discountPlanService, orderDto.getDiscountPlanCode(), DiscountPlan.class));
         }
 		order.setLabel(orderDto.getLabel());
+		
+		String code = null;
+		
 		if(!Strings.isEmpty(orderDto.getCode())){
-			order.setCode(orderDto.getCode());
+			code = orderDto.getCode();
 		} else {
-			order.setCode(customGenericEntityCodeService.getGenericEntityCode(order));
+			code = customGenericEntityCodeService.getGenericEntityCode(order);
 		}
+
+		AdvancedSettings uniqueOrderCode = advancedSettingsService.findByCode("uniqueOrderCode");
+		if (uniqueOrderCode != null && "true".equalsIgnoreCase(uniqueOrderCode.getValue()) && commercialOrderService.findByCodeOrExternalId(code) != null) {
+			throw new BusinessException(String.format("Order with code:%s already exists. Order code duplication is forbidden by configuration.", code));
+		}
+		order.setCode(code);
+		
 		if(!Strings.isEmpty(orderDto.getDescription())){
 			order.setDescription(orderDto.getDescription());
 		}
@@ -223,6 +233,10 @@ public class CommercialOrderApi extends BaseApi {
 		}
 		
 		if(!Strings.isEmpty(orderDto.getOrderNumber())) {
+			AdvancedSettings uniqueOrderNumber = advancedSettingsService.findByCode("uniqueOrderNumber");
+			if (uniqueOrderNumber != null && "true".equalsIgnoreCase(uniqueOrderNumber.getValue()) && commercialOrderService.findByOrderNumer(orderDto.getOrderNumber())!= null) {
+				throw new BusinessException(String.format("Order with number:%s already exists. Order number duplication is forbidden by configuration.", orderDto.getOrderNumber()));
+			}
 			order.setOrderNumber(orderDto.getOrderNumber());
 		}
 
@@ -359,6 +373,12 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		order.setSalesPersonName(orderDto.getSalesPersonName());
 		        
 		if(!Strings.isEmpty(orderDto.getCode())){
+			if(!order.getCode().equals(orderDto.getCode())) {
+				AdvancedSettings uniqueOrderCode = advancedSettingsService.findByCode("uniqueOrderCode");
+				if (uniqueOrderCode != null && "true".equalsIgnoreCase(uniqueOrderCode.getValue()) && commercialOrderService.findByCode(orderDto.getCode()) != null) {
+					throw new BusinessException(String.format("Order with code:%s already exists. Order code duplication is forbidden by configuration.", orderDto.getCode()));
+				}
+			}
 			order.setCode(orderDto.getCode());
 		}
 		if(!Strings.isEmpty(orderDto.getDescription())){
@@ -990,7 +1010,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		createOrderProduct(orderOfferDto.getOrderProducts(),orderOffer);
 		Optional.ofNullable(orderOffer.getProducts()).orElse(Collections.emptyList())
 				.forEach(orderProduct -> attributeService.validateAttributes(
-						orderOffer.getProducts().get(0).getProductVersion().getAttributes(),
+						orderProduct.getProductVersion().getAttributes(),
 						orderProduct.getOrderAttributes()));
 		createOrderAttribute(orderOfferDto.getOrderAttributes(),null,orderOffer);
 		if (isQuickOrder && orderOfferDto.getOrderLineType() == OfferLineTypeEnum.APPLY_ONE_SHOT){
@@ -1107,9 +1127,9 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
         }
         
     	List<OrderProduct> products = processOrderProductFromOffer(orderOfferDto, orderOffer);
-		Optional.ofNullable(products).orElse(Collections.emptyList())
+		Optional.ofNullable(orderOffer.getProducts()).orElse(Collections.emptyList())
 				.forEach(orderProduct -> attributeService.validateAttributes(
-						products.get(0).getProductVersion().getAttributes(),
+						orderProduct.getProductVersion().getAttributes(),
 						orderProduct.getOrderAttributes()));
         processOrderAttribute(orderOfferDto,  orderOffer);
         if (orderOfferDto.getCustomFields() != null) {
@@ -1250,6 +1270,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 
 		OrderProduct orderProduct = orderProductDTO.getOrderProductId()!= null  ?
 					orderProductService.findById(orderProductDTO.getOrderProductId()) : null;
+	    checkDeliveryDate(orderProductDTO.getDeliveryDate());
         if (orderProduct == null) {  
         	orderProduct= populateOrderProduct(orderProductDTO, orderOffer,orderProduct);
         	orderProductService.create(orderProduct);
@@ -1344,6 +1365,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		for (OrderProductDto orderProductDto : orderProductDtos) {  
 		    if(orderProductDto.getQuantity() == null || orderProductDto.getQuantity().equals(BigDecimal.ZERO) )
 		        throw new BusinessApiException("The quantity for product code " + orderProductDto.getProductCode() + " must be great than 0" );
+			checkDeliveryDate(orderProductDto.getDeliveryDate());
 			OrderProduct orderProduct=populateOrderProduct(orderProductDto,orderOffer,null);  
 			orderProductService.create(orderProduct);
 			//create order attributes linked to orderProduct
@@ -1406,6 +1428,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
         orderAttribute.setStringValue(orderAttributeDTO.getStringValue());
         orderAttribute.setDoubleValue(orderAttributeDTO.getDoubleValue());
         orderAttribute.setDateValue(orderAttributeDTO.getDateValue());
+		orderAttribute.setBooleanValue(orderAttributeDTO.getBooleanValue());
 		orderAttributeDTO.setAttributeType(attribute.getAttributeType());
         orderAttribute.updateAudit(currentUser);
         if(orderProduct != null) {
@@ -1465,7 +1488,7 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		Boolean allowPastDeliveryDate = (Boolean) advancedSettingsService.getParameter("order.allowPastDeliveryDate");
 		if(deliveryDate != null && ( allowPastDeliveryDate == null && deliveryDate.before(new Date()))) {
 			throw new MeveoApiException("Delivery date should be in the future");
-		}else if(deliveryDate != null && !allowPastDeliveryDate && deliveryDate.before(new Date())) {
+		}else if(deliveryDate != null &&  Boolean.FALSE.equals(allowPastDeliveryDate) && (!org.apache.commons.lang3.time.DateUtils.isSameDay(deliveryDate, new Date()) && deliveryDate.before(new Date()))) {
 			throw new MeveoApiException(resourceMessages.getString("order.allowPastDeliveryDate.false"));
 		}
 	}

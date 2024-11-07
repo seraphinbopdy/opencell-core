@@ -30,6 +30,7 @@ import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.DatePeriod;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.IWFEntity;
 import org.meveo.model.WorkflowedEntity;
 import org.meveo.model.billing.Invoice;
@@ -67,6 +68,7 @@ import jakarta.validation.constraints.Size;
  * @lastModiedVersion 10.0
  */
 @Entity
+@HugeEntity
 @WorkflowedEntity
 @ExportIdentifier({ "code" })
 @CustomFieldEntity(cftCodePrefix = "Quote")

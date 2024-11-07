@@ -16,14 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.enterprise.event.Event;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.FlushModeType;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.Parameter;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.TypedQuery;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +36,14 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
+import jakarta.enterprise.event.Event;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Parameter;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.TypedQuery;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuditDataLogServiceTest {

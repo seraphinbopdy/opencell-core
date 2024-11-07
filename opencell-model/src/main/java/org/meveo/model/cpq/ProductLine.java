@@ -8,6 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.admin.Seller;
 
 import jakarta.persistence.Column;
@@ -29,6 +30,7 @@ import jakarta.persistence.UniqueConstraint;
  *
  */
 @Entity
+@HugeEntity
 @CustomFieldEntity(cftCodePrefix = "ProductLine")
 @Table(name = "cpq_product_line", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_product_line_seq"), @Parameter(name = "increment_size", value = "1") })

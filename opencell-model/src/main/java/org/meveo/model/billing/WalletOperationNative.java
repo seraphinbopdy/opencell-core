@@ -26,7 +26,6 @@ import org.hibernate.type.NumericBooleanConverter;
 import org.hibernate.type.SqlTypes;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
-import org.meveo.model.crm.custom.CustomFieldValues;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

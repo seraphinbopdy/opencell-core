@@ -100,6 +100,24 @@ public class CustomGenericEntityCodeService extends PersistenceService<CustomGen
                 }
             }
         }
+		while (((PersistenceService) getServiceInterface(entity.getClass())).findBusinessEntityByCode(customGenericCode) != null) {
+			customGenericEntityCode.getSequence().setCurrentNumber(customGenericEntityCode.getSequence().getCurrentNumber() + 1);
+			customGenericCode = serviceSingleton.getGenericCode(customGenericEntityCode);
+		}
         return customGenericCode;
     }
+	
+	public String getNewGenericEntityCode(BaseEntity entity) throws BusinessException {
+		String customGenericCode = null;
+		customGenericCode = randomUUID().toString();
+			Optional<Parameter> parameter = stream(entity.getClass()
+					.getAnnotation(GenericGenerator.class).parameters())
+					.findFirst();
+			if(parameter.isPresent()) {
+				customGenericCode += persistenceService.findNextSequenceId(parameter.get().value()).toString();
+			} else {
+				customGenericCode += now().getNano();
+			}
+		return customGenericCode;
+	}
 }

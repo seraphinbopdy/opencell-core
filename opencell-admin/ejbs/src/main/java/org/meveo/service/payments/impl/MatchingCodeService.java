@@ -27,10 +27,12 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -96,6 +98,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
     private static final String XCH_LOSS = "XCH_LOSS";
     private static final String XCH_GAIN = "XCH_GAIN";
     private static final String CAN_SD = "CAN_SD";
+    private static final String DEFAULT_CUSTOMER_CODE = "DEFAULT_CUSTOMER_CODE";
 
     @Inject
     private CustomerAccountService customerAccountService;
@@ -458,8 +461,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         (accountOperation.getAmount().multiply(accountOperation.getTransactionalMatchingAmount()))
                                 .divide(accountOperation.getTransactionalAmount(),
                                         appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
-                accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(amountToMatch)).abs());
-                accountOperation.setMatchingAmount(amountToMatch);
+                accountOperation.setMatchingAmount(computedMatchingAmount);
+	            accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(computedMatchingAmount)).abs());
                 matchingAmount.setMatchingAmount((matchedAmount.subtract(accountOperation.getMatchingAmount())).abs());
                 matchingAmount.setTransactionalMatchingAmount((transactionMatchedAmount
                         .subtract(accountOperation.getTransactionalMatchingAmount()).abs()));
@@ -636,7 +639,11 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
         }
         List<MatchingAmount> matchingAmounts = accountOperation.getMatchingAmounts();
         if (matchingAmounts != null && !matchingAmounts.isEmpty()) {
-            unmatching(matchingAmounts.get(0).getMatchingCode().getId());
+            List<Long> matchingCodes = accountOperation.getMatchingAmounts()
+                                                 .stream()
+                                                 .map(ma -> ma.getMatchingCode().getId())
+                                                 .collect(toList());
+            matchingCodes.forEach(this::unmatching);
         }
     }
 
@@ -682,6 +689,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                         getTransactionalMatchingAmount().subtract(ofNullable(matchingAmount.getTransactionalMatchingAmount()).orElse(ZERO)));
                 if (ZERO.compareTo(operation.getMatchingAmount()) == 0) {
                     operation.setMatchingStatus(MatchingStatusEnum.O);
+                    operation.setExcludeFromDefaultBalance(false);
                     List<JournalEntry> byAoAndDirection = journalEntryService.findByAoAndDirection(operation.getId(), JournalEntryDirectionEnum.getValue(operation.getTransactionCategory()
                                                                                                                                                                   .getId()));
                     
@@ -712,7 +720,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 if(matchingAmount.getAccountOperation() != null
                         && (XCH_LOSS.equalsIgnoreCase(matchingAmount.getAccountOperation().getCode())
                         || XCH_GAIN.equalsIgnoreCase(matchingAmount.getAccountOperation().getCode()))) {
-                    accountOperationService.remove(matchingAmount.getAccountOperation());
+                    AccountOperation accountOperationToRemove = matchingAmount.getAccountOperation();
+                    matchingAmount.setAccountOperation(null);
+                    accountOperationService.remove(accountOperationToRemove);
                 } else {
                     operation.getMatchingAmounts().remove(matchingAmount);
                     accountOperationService.update(operation);
@@ -834,6 +844,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
 			PaymentHistory paymentHistory = paymentHistoryService.findHistoryByPaymentId(payment.getReference());
 			if (paymentHistory != null) {
 				List<Long> aoIdsToPay = operationIds.stream().filter(aoId -> !aoId.equals(payment.getId())).collect(toList());
+                if(org.apache.commons.lang3.StringUtils.isBlank(paymentHistory.getCustomerAccountCode())
+                        || DEFAULT_CUSTOMER_CODE.equals(paymentHistory.getCustomerAccountCode())) {
+                    setCustomerAccount(aoIdsToPay, paymentHistory);
+                }
 				if (paymentHistory.getListAoPaid() == null || paymentHistory.getListAoPaid().isEmpty()) {
 					List<AccountOperation> aoToPay = new ArrayList<>();
 					for (Long aoId : aoIdsToPay) {
@@ -920,7 +934,20 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
         return matchingReturnObject;
     }
 
-        public MatchingReturnObject matchOperations(Long customerAccountId, String customerAccountCode, List<Long> operationIds, Long aoToMatchLast, MatchingTypeEnum matchingTypeEnum, BigDecimal amount)
+    private void setCustomerAccount(List<Long> accountOperations, PaymentHistory paymentHistory) {
+        AccountOperation invoice = accountOperations.stream()
+                .map(accountOperationId -> accountOperationService.findById(accountOperationId))
+                .filter(accountOperation -> "I".equals(accountOperation.getType()))
+                .findFirst()
+                .orElse(null);
+        if(invoice != null && invoice.getCustomerAccount() != null) {
+            paymentHistory.setCustomerAccountCode(invoice.getCustomerAccount().getCode());
+            paymentHistory.setCustomerAccountName(invoice.getCustomerAccount().getName() == null ? null
+                    : invoice.getCustomerAccount().getName().getFullName());
+        }
+    }
+
+    public MatchingReturnObject matchOperations(Long customerAccountId, String customerAccountCode, List<Long> operationIds, Long aoToMatchLast, MatchingTypeEnum matchingTypeEnum, BigDecimal amount)
             throws BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException {
 
         log.info("matchOperations   customerAccountId:{}  customerAccountCode:{} operationIds:{} ", new Object[] { customerAccountId, customerAccountCode, operationIds });
@@ -969,7 +996,6 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             throw new BusinessException(resourceMessages.getString("matchingService.noDebitOps"));
         }
             BigDecimal balance = amount.subtract(amoutCredit);
-            balance = balance.abs();
 
 
             log.info("matchOperations  balance: {}", balance);
@@ -984,6 +1010,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 if (paymentHistory != null) {
                     List<Long> aoIdsToPay = operationIds.stream().filter(aoId -> !aoId.equals(payment.getId())).collect(toList());
                     List<AccountOperation> aoToPay = new ArrayList<>();
+                    if(org.apache.commons.lang3.StringUtils.isBlank(paymentHistory.getCustomerAccountCode())
+                            || DEFAULT_CUSTOMER_CODE.equals(paymentHistory.getCustomerAccountCode())) {
+                        setCustomerAccount(aoIdsToPay, paymentHistory);
+                    }
                     for (Long aoId : aoIdsToPay) {
                         aoToPay.add(accountOperationService.findById(aoId));
                     }
@@ -1006,12 +1036,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             return matchingReturnObject;
         }
 
-        if (amount.compareTo(amoutCredit) > 0) {
-            amount = amoutCredit;
-        }
 
-        if (aoToMatchLast != null) {
-            matching(listOcc, amount, accountOperationService.findById(aoToMatchLast), matchingTypeEnum);
+        if (aoToMatchLast != null && amount.compareTo(amoutCredit) > 0) {
+            matching(listOcc, amoutCredit, accountOperationService.findById(aoToMatchLast), matchingTypeEnum);
             matchingReturnObject.setOk(true);
             log.info("matchOperations successful :  partial ok (idPartial recu)");
             return matchingReturnObject;
@@ -1045,6 +1072,7 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             matching(listOcc, amount, accountOperationForPartialMatching, matchingTypeEnum);
             matchingReturnObject.setOk(true);
             log.info("matchOperations successful :  partial ok (un idPartial possible)");
+			//throw new BusinessApiException("matchingService.matchingImpossible");
             return matchingReturnObject;
         }
 
@@ -1074,6 +1102,17 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
             return null;
         }
     }
+	/**
+	 * @param code code of finding matching code
+	 * @return found matching code.
+	 */
+	public List<MatchingCode> findByCodes(Set<String> codes) {
+		if(CollectionUtils.isEmpty(codes)) return Collections.EMPTY_LIST;
+		QueryBuilder qb = new QueryBuilder(MatchingCode.class, "m", null);
+		qb.addCriterion("code", "in", codes, false);
+		return  qb.getQuery(getEntityManager()).getResultList();
+		
+	}
 
     /**
      * unmatching operation account

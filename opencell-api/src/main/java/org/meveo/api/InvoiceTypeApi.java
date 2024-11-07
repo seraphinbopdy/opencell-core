@@ -181,7 +181,14 @@ public class InvoiceTypeApi extends BaseCrudApi<InvoiceType, InvoiceTypeDto> {
         } else if (!StringUtils.isBlank(dto.getUpdatedCode())) {
             entity.setCode(dto.getUpdatedCode());
         }
-        
+	    if ((isNew || entity.getUntdidInvoiceCodeType() == null) && StringUtils.isBlank(dto.getInvoiceCodeType())) {
+		    missingParameters.add("invoiceCodeType");
+		    handleMissingParameters();
+	    }
+	    if ((isNew || entity.getUntdidVatPaymentOption() == null) && StringUtils.isBlank(dto.getVatPaymentOption())) {
+		    missingParameters.add("vatPaymentOption");
+		    handleMissingParameters();
+	    }
         if (!StringUtils.isBlank(dto.getInvoiceValidationScriptCode())) {
         	ScriptInstance invoiceValidationScript = scriptInstanceService.findByCode(dto.getInvoiceValidationScriptCode());
         	if (invoiceValidationScript == null) {
@@ -377,27 +384,22 @@ public class InvoiceTypeApi extends BaseCrudApi<InvoiceType, InvoiceTypeDto> {
         if(dto.getExcludeFromAgedTrialBalance() != null) {
         	entity.setExcludeFromAgedTrialBalance(dto.getExcludeFromAgedTrialBalance());
         }
-        if (!StringUtils.isBlank(dto.getInvoiceCodeType())) {
+        if(StringUtils.isNotBlank(dto.getInvoiceCodeType())) {
             UntdidInvoiceCodeType untdidInvoiceCodeType = untdidInvoiceCodeTypeService.getByCode(dto.getInvoiceCodeType());
             if (untdidInvoiceCodeType == null) {
                 throw new EntityDoesNotExistsException(UntdidInvoiceCodeType.class, dto.getInvoiceCodeType());
             }
             entity.setUntdidInvoiceCodeType(untdidInvoiceCodeType);
         }
-        if (!StringUtils.isBlank(dto.getVatPaymentOption())) {
+	    
+        if (StringUtils.isNotBlank(dto.getVatPaymentOption())) {
             UntdidVatPaymentOption untdidVatPaymentOption = untdidVatPaymentOptionService.getByCode(dto.getVatPaymentOption());
             if (untdidVatPaymentOption == null) {
                 throw new EntityDoesNotExistsException(UntdidVatPaymentOption.class, dto.getVatPaymentOption());
             }
             entity.setUntdidVatPaymentOption(untdidVatPaymentOption);
-        }else {
-        	UntdidVatPaymentOption untdidVatPaymentOption = untdidVatPaymentOptionService.getByCode("3");
-        	entity.setUntdidVatPaymentOption(
-        	    Optional.ofNullable(untdidVatPaymentOption)
-        	        .orElseGet(() -> untdidVatPaymentOptionService.list().stream().findFirst()
-        	            .orElseThrow(() -> new EntityNotFoundException("No UntdidVatPaymentOption entities found.")))
-        	);
         }
+        
         
         if (!StringUtils.isBlank(dto.getCustomUblScript())) {
         	ScriptInstance customUblScript = scriptInstanceService.findByCode(dto.getCustomUblScript());

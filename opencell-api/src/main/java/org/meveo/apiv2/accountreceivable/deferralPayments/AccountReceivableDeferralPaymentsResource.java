@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.Response;
 import java.util.Map;
 import java.util.Set;
 
-@Path("/accountReceivable/deferralPayments")
+@Path("/v2/accountReceivable/deferralPayments")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface AccountReceivableDeferralPaymentsResource {

@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/standardReports")
+@Path("/v2/standardReports")
 @Consumes(APPLICATION_JSON)
 @Produces(APPLICATION_JSON)
 public interface StandardReportResource {

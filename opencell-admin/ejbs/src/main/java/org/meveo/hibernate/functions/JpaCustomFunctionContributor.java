@@ -40,6 +40,7 @@ public class JpaCustomFunctionContributor implements FunctionContributor {
 
             // functionRegistry.namedDescriptorBuilder("string_agg").setMinArgumentCount(1).setArgumentTypeResolver(StandardFunctionArgumentTypeResolvers.ARGUMENT_OR_IMPLIED_RESULT_TYPE).register();
             functionRegistry.register("string_agg_long", new PostgreSQLStringAggLongFunction(basicTypeRegistry.resolve(StandardBasicTypes.STRING)));
+            functionRegistry.register("string_agg_distinct", new PostgreSQLStringAggDistinctFunction(basicTypeRegistry.resolve(StandardBasicTypes.STRING)));
             functionRegistry.register("numericFromJson", new PostgreSQLCustomFieldJsonSearchFunction("numericFromJson", basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE), "double", "numeric(23,12)", null, false));
             functionRegistry.register("varcharFromJson", new PostgreSQLCustomFieldJsonSearchFunction("varcharFromJson", basicTypeRegistry.resolve(StandardBasicTypes.STRING), "string", null, null, false));
             functionRegistry.register("bigIntFromJson", new PostgreSQLCustomFieldJsonSearchFunction("bigIntFromJson", basicTypeRegistry.resolve(StandardBasicTypes.BIG_INTEGER), "long", "bigInt", null, false));

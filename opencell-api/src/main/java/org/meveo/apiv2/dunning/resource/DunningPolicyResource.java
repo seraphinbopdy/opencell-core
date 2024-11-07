@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-@Path("/dunning/dunningPolicy")
+@Path("/v2/dunning/dunningPolicy")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 public interface DunningPolicyResource {

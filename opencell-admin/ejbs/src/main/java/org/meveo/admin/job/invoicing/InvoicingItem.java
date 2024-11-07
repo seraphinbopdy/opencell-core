@@ -18,6 +18,10 @@ public class InvoicingItem {
 	private List<Long> ilIDs = new ArrayList<>();
 	private String invoiceCategoryId;
 	private String invoiceKey;
+	private boolean useSpecificTransactionalAmount;
+	private BigDecimal transactionalAmountWithoutTax = BigDecimal.ZERO;
+	private BigDecimal transactionalAmountTax = BigDecimal.ZERO;
+	private BigDecimal transactionalAmountWithTax = BigDecimal.ZERO;
 	
 	public InvoicingItem(Object[] fields) {
 		int i = 0;
@@ -31,7 +35,12 @@ public class InvoicingItem {
 		this.count = (Long) fields[i++];
 		this.ilIDs = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
 		this.invoiceKey = (String) fields[i++];
+		this.useSpecificTransactionalAmount = (boolean) fields[i++];
+		this.transactionalAmountWithoutTax = (BigDecimal) fields[i++];
+		this.transactionalAmountTax = (BigDecimal) fields[i++];
+		this.transactionalAmountWithTax = (BigDecimal) fields[i++];
 	}
+
 	/**
 	 * @param items
 	 */
@@ -42,6 +51,9 @@ public class InvoicingItem {
 			this.amountTax = this.amountTax.add(item.getAmountTax());
 			this.amountWithTax = this.amountWithTax.add(item.getAmountWithTax());
 			this.amountWithoutTax = this.amountWithoutTax.add(item.getAmountWithoutTax());
+			this.transactionalAmountTax = this.transactionalAmountTax.add(item.getTransactionalAmountTax());
+			this.transactionalAmountWithoutTax = this.transactionalAmountWithoutTax.add(item.getTransactionalAmountWithoutTax());
+			this.transactionalAmountWithTax = this.transactionalAmountWithTax.add(item.getTransactionalAmountWithTax());
 		}
 	}
 	public List<Long> getilIDs() {
@@ -89,11 +101,39 @@ public class InvoicingItem {
 	public void setTaxId(Long taxId) {
 		this.taxId = taxId;
 	}
+	public boolean isUseSpecificTransactionalAmount() {
+		return useSpecificTransactionalAmount;
+	}
+	public void setUseSpecificTransactionalAmount(boolean useSpecificTransactionalAmount) {
+		this.useSpecificTransactionalAmount = useSpecificTransactionalAmount;
+	}
+	public BigDecimal getTransactionalAmountWithoutTax() {
+		return transactionalAmountWithoutTax;
+	}
+	public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
+		this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
+	}
+	public BigDecimal getTransactionalAmountTax() {
+		return transactionalAmountTax;
+	}
+	public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
+		this.transactionalAmountTax = transactionalAmountTax;
+	}
+	public BigDecimal getTransactionalAmountWithTax() {
+		return transactionalAmountWithTax;
+	}
+	public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
+		this.transactionalAmountWithTax = transactionalAmountWithTax;
+	}
+	
 	public void addAmounts(InvoiceAgregate discountAggregate) {
 		this.count = this.count + discountAggregate.getItemNumber();
 		this.amountTax = this.amountTax.add(discountAggregate.getAmountTax());
 		this.amountWithoutTax = this.amountWithoutTax.add(discountAggregate.getAmountWithoutTax());
 		this.amountWithTax = this.amountWithTax.add(discountAggregate.getAmountWithTax());
+		this.transactionalAmountTax = this.transactionalAmountTax.add(discountAggregate.getTransactionalAmountTax());
+		this.transactionalAmountWithoutTax = this.transactionalAmountWithoutTax.add(discountAggregate.getTransactionalAmountWithoutTax());
+		this.transactionalAmountWithTax = this.transactionalAmountWithTax.add(discountAggregate.getTransactionalAmountWithTax());
 	}
 	public BigDecimal getAmount(boolean isEnterprise) {
 		return isEnterprise ? getAmountWithoutTax() : getAmountWithTax();

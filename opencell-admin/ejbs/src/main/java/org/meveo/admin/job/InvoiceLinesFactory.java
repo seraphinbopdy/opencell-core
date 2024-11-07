@@ -8,11 +8,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.NumberUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.DatePeriod;
+import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.BillingRun;
@@ -31,6 +33,7 @@ import org.meveo.model.cpq.commercial.OrderLot;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.shared.DateUtils;
+import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.InvoiceLineService;
@@ -52,8 +55,7 @@ public class InvoiceLinesFactory {
     private BillingAccountService billingAccountService = (BillingAccountService) getServiceInterface(BillingAccountService.class.getSimpleName());
     private RatedTransactionService ratedTransactionService = (RatedTransactionService) getServiceInterface(RatedTransactionService.class.getSimpleName());
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private InvoiceLineService invoiceLineService =
-            (InvoiceLineService) getServiceInterface(InvoiceLineService.class.getSimpleName());
+    private InvoiceLineService invoiceLineService = (InvoiceLineService) getServiceInterface(InvoiceLineService.class.getSimpleName());
     private AccountingArticleService accountingArticleService = (AccountingArticleService) getServiceInterface(AccountingArticleService.class.getSimpleName());
     private OfferTemplateService offerTemplateService = (OfferTemplateService) getServiceInterface(OfferTemplateService.class.getSimpleName());
     private ServiceInstanceService instanceService = (ServiceInstanceService) getServiceInterface(ServiceInstanceService.class.getSimpleName());
@@ -63,7 +65,7 @@ public class InvoiceLinesFactory {
     private OrderLotService orderLotService = (OrderLotService) getServiceInterface(OrderLotService.class.getSimpleName());
     private UserAccountService userAccountService = (UserAccountService) getServiceInterface(UserAccountService.class.getSimpleName());
     private TaxService taxService = (TaxService) getServiceInterface(TaxService.class.getSimpleName());
-    
+    private SellerService sellerService = (SellerService) getServiceInterface(SellerService.class.getSimpleName());
     private BillingRunService billingRunService = (BillingRunService) getServiceInterface(BillingRunService.class.getSimpleName());
     
 
@@ -101,7 +103,7 @@ public class InvoiceLinesFactory {
         ofNullable(data.get("discount_plan_type"))
             .ifPresent(dpt -> invoiceLine.setDiscountPlanType(dpt instanceof DiscountPlanItemTypeEnum ? (DiscountPlanItemTypeEnum) dpt : DiscountPlanItemTypeEnum.valueOf((String) dpt)));
         ofNullable(data.get("discount_value")).ifPresent(id -> invoiceLine.setDiscountValue((BigDecimal) data.get("discount_value")));
-        ofNullable(data.get("seller_id")).ifPresent(id -> invoiceLine.setSellerId(((Number)id).longValue()));
+        ofNullable(data.get("seller_id")).ifPresent(id -> invoiceLine.setSeller(sellerService.getEntityManager().getReference(Seller.class, ((Number)id).longValue())));
         ofNullable(data.get("invoice_type_id")).ifPresent(id -> invoiceLine.setInvoiceTypeId(((Number)id).longValue()));
         ofNullable(data.get("method_payment_id")).ifPresent(id -> invoiceLine.setPaymentMethodId(((Number)id).longValue()));
         if(data.get("discounted_ratedtransaction_id")!=null) {
@@ -149,13 +151,13 @@ public class InvoiceLinesFactory {
         if(billingRun != null
                 && billingRun.isDisableAggregation()
                 && billingRun.isAggregateUnitAmounts()) {
-            BigDecimal unitAmount = (BigDecimal) data.getOrDefault("sum_without_tax", ZERO);
+            BigDecimal unitAmount = Optional.ofNullable((BigDecimal) data.get("sum_without_tax")).orElse(ZERO);
             BigDecimal quantity = (BigDecimal) data.getOrDefault("quantity", ZERO);
             BigDecimal unitPrice = quantity.compareTo(ZERO) == 0 ? unitAmount : unitAmount.divide(quantity,
                     appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
             invoiceLine.setUnitPrice(unitPrice);
         } else {
-            invoiceLine.setUnitPrice((BigDecimal) data.getOrDefault("unit_amount_without_tax", ZERO));
+            invoiceLine.setUnitPrice(Optional.ofNullable((BigDecimal) data.get("unit_amount_without_tax")).orElse(ZERO));
         }
         invoiceLine.setRawAmount(isEnterprise ? amountWithoutTax : amountWithTax);
         

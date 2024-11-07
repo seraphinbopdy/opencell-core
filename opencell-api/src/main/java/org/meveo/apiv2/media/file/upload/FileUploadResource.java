@@ -11,7 +11,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/media/files")
+@Path("/v2/media/files")
 public interface FileUploadResource {
 
     @POST

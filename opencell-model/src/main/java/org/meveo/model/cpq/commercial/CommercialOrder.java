@@ -12,6 +12,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.IBillableEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.ObservableEntity;
@@ -57,6 +58,7 @@ import jakarta.validation.constraints.Size;
 @ObservableEntity
 @WorkflowedEntity
 @Entity
+@HugeEntity
 @Table(name = "cpq_commercial_order")
 @CustomFieldEntity(cftCodePrefix = "CommercialOrder", inheritCFValuesFrom = { "quoteVersion" })
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_commercial_order_seq"), @Parameter(name = "increment_size", value = "1") })
@@ -100,6 +102,7 @@ public class CommercialOrder extends BusinessCFEntity implements IBillableEntity
         this.totalInvoicingAmountWithTax = copy.totalInvoicingAmountWithTax;
         this.totalInvoicingAmountTax = copy.totalInvoicingAmountTax;
         this.minInvoiceLines = copy.minInvoiceLines;
+		this.mrr = copy.mrr;
     }
 
     /**
@@ -249,6 +252,10 @@ public class CommercialOrder extends BusinessCFEntity implements IBillableEntity
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "price_list_id")
     private PriceList priceList;
+
+	/** MRR. */
+	@Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+	private BigDecimal mrr;
 
     /**
      * Rated transactions to reach minimum amount per invoice
@@ -790,4 +797,12 @@ public class CommercialOrder extends BusinessCFEntity implements IBillableEntity
     public void setPriceList(PriceList priceList) {
         this.priceList = priceList;
     }
+
+	public BigDecimal getMrr() {
+		return mrr;
+}
+
+	public void setMrr(BigDecimal mrr) {
+		this.mrr = mrr;
+	}
 }

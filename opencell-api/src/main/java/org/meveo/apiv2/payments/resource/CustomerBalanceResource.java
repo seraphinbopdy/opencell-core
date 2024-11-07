@@ -17,7 +17,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
-@Path("/customerBalance")
+@Path("/v2/customerBalance")
 @Produces({APPLICATION_JSON})
 @Consumes({APPLICATION_JSON})
 public interface CustomerBalanceResource {
@@ -51,7 +51,7 @@ public interface CustomerBalanceResource {
             @ApiResponse(responseCode = "403", description = "Default customer balance can not be deleted"),
             @ApiResponse(responseCode = "404", description = "Customer balance doesn't exist") })
     Response delete(@PathParam("id") Long id);
-
+    
     @POST
     @Path("/accountOperationsDetails")
     @Operation(summary = "Get account operation details for a customer balance",

@@ -29,7 +29,6 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ImportInvoiceException;
 import org.meveo.admin.exception.InvoiceExistException;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.model.billing.Invoice;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;

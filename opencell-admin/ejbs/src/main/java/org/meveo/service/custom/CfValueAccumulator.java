@@ -18,43 +18,6 @@
 
 package org.meveo.service.custom;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.meveo.commons.utils.MethodCallingUtils;
-import org.meveo.commons.utils.ParamBeanFactory;
-import org.meveo.commons.utils.ReflectionUtils;
-import org.meveo.jpa.EntityManagerWrapper;
-import org.meveo.jpa.MeveoJpa;
-import org.meveo.model.CustomFieldEntity;
-import org.meveo.model.ICustomFieldEntity;
-import org.meveo.model.IEntity;
-import org.meveo.model.admin.Seller;
-import org.meveo.model.crm.CustomFieldTemplate;
-import org.meveo.model.crm.Provider;
-import org.meveo.model.crm.custom.CustomFieldValues;
-import org.meveo.security.CurrentUser;
-import org.meveo.security.MeveoUser;
-import org.meveo.service.base.ValueExpressionWrapper;
-import org.meveo.service.crm.impl.CustomFieldTemplateService;
-import org.meveo.util.ApplicationProvider;
-import org.slf4j.Logger;
-
-import jakarta.ejb.Asynchronous;
-import jakarta.ejb.EJB;
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.Query;
-
 /**
  * Handles CF value accumulation rules
  * 

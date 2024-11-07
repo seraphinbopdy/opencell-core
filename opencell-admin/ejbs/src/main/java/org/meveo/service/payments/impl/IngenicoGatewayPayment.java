@@ -90,12 +90,14 @@ import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.BrowserD
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.CardPaymentMethodSpecificInput;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.CardPaymentMethodSpecificInputBase;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.CardRecurrenceDetails;
+import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.ContactDetails;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.Customer;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.CustomerDevice;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.Order;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.OrderReferences;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.Payment;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.PaymentStatusOutput;
+import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.PersonalInformation;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.PersonalName;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.RedirectionData;
 import com.ingenico.connect.gateway.sdk.java.domain.payment.definitions.SepaDirectDebitPaymentMethodSpecificInput;
@@ -144,6 +146,8 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
     private ScriptInstanceService scriptInstanceService = null;
 
     private ProviderService providerService = null;
+    
+    private CustomerAccountService customerAccountService;
 
     /**
      * Connect.
@@ -857,6 +861,31 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
             }
 
 			String redirectionUrl;
+			CustomerAccount ca = customerAccountService().findById(hostedCheckoutInput.getCustomerAccountId());
+			String firstName = null;
+			String lastName = null;
+			if(ca.getName() != null) {
+				firstName = ca.getName().getFirstName();
+				lastName = ca.getName().getLastName();
+			}
+			
+			if(StringUtils.isBlank(firstName)) {
+				throw new BusinessException("Missing firstName");
+			}
+			if(StringUtils.isBlank(lastName)) {
+				throw new BusinessException("Missing lastName");
+			}
+			
+			String phone=ca.getContactInformationNullSafe().getMobile();
+			String email=ca.getContactInformationNullSafe().getEmail();
+			
+			if(StringUtils.isBlank(phone)) {
+				throw new BusinessException("Missing Phone");
+			}
+			
+			if(StringUtils.isBlank(email)) {
+				throw new BusinessException("Missing Email");
+			}			
 
 			HostedCheckoutSpecificInput hostedCheckoutSpecificInput = new HostedCheckoutSpecificInput();
 			hostedCheckoutSpecificInput.setLocale(hostedCheckoutInput.getLocale());
@@ -880,6 +909,18 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
 			Customer customer = new Customer();
 			customer.setBillingAddress(billingAddress);
 			customer.setDevice(getDeviceData());
+			customer.setMerchantCustomerId("CA_ID_"+id);
+			
+			PersonalInformation personalInformation = new PersonalInformation();
+			PersonalName personalName = new PersonalName();
+			personalName.setFirstName(firstName);
+			personalName.setSurname(lastName);
+			personalInformation.setName(personalName);
+			customer.setPersonalInformation(personalInformation);
+			ContactDetails contactDetails = new ContactDetails();
+			contactDetails.setEmailAddress(email);
+			contactDetails.setPhoneNumber(phone);
+			customer.setContactDetails(contactDetails);
 			
 
 			OrderReferences orderReferences = new OrderReferences();
@@ -982,5 +1023,13 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
             log.error("Error on getHostedCheckoutStatus:",e);
             throw new BusinessException(e.getMessage());
         }
+    }
+    
+    private CustomerAccountService customerAccountService() {
+        if (customerAccountService == null) {
+            customerAccountService = (CustomerAccountService) EjbUtils.getServiceInterface(CustomerAccountService.class.getSimpleName());
+        }
+
+        return customerAccountService;
     }
 }

@@ -40,6 +40,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.exception.RatingException;
 import org.meveo.admin.job.MediationJobBean;
 import org.meveo.api.dto.billing.CdrErrorDto;
 import org.meveo.api.dto.billing.ChargeCDRResponseDto;
@@ -422,33 +423,34 @@ public class MediationApiService {
                         if (isDuplicateCheckOn) {
                             cdrParser.deduplicate(cdr);
                         }
-
-                        if (cdrProcessingResult.getMode() == ROLLBACK_ON_ERROR) {
-                            mediationsettingService.applyEdrVersioningRule(edrs, cdr, false);
-                            cdrParsingService.createEdrs(edrs, cdr);
-
-                        } else {
-                            final List<EDR> edrsFinal = edrs;
-                            methodCallingUtils.callMethodInNewTx(() -> {
-                                mediationsettingService.applyEdrVersioningRule(edrsFinal, cdr, false);
-                                cdrParsingService.createEdrs(edrsFinal, cdr);
-                            });
-                        }
-
                     }
+
                     // Convert CDR to EDR and create a reservation
                     if (reserve) {
 
                         // TODO this could be a problem if one CDR results in multiple EDRs and some fail to rate, while others are rated successfully
-                        for (EDR edr : edrs) {
+                        for (int i = 0; i < edrs.size(); i++) {
+
+                            int finalI = i;
+                            EDR edr = edrs.get(i);
+
                             Reservation reservation = null;
                             // For ROLLBACK_ON_ERROR mode, processing is called within TX, so when error is thrown up, everything will rollback
                             if (cdrProcessingResult.getMode() == ROLLBACK_ON_ERROR) {
 
+                                mediationsettingService.applyEdrVersioningRule(Arrays.asList(edr), cdr, false);
+                                cdrParsingService.createEdr(edr, i == 0 ? cdr : null); // CDR is persisted and related to the first EDR only
+
                                 reservation = usageRatingService.reserveUsageWithinTransaction(edr);
+
                                 // For other cases, rate each EDR in a separate TX
                             } else {
-                                reservation = methodCallingUtils.callCallableInNewTx(() -> usageRatingService.reserveUsageWithinTransaction(edr));
+                                reservation = methodCallingUtils.callCallableInNewTx(() -> {
+
+                                    mediationsettingService.applyEdrVersioningRule(Arrays.asList(edr), cdr, false);
+                                    cdrParsingService.createEdr(edr, finalI == 0 ? cdr : null); // CDR is persisted and related to the first EDR only
+                                    return usageRatingService.reserveUsageWithinTransaction(edr);
+                                });
                             }
 
                             if (edr.getRejectReason() != null) {
@@ -462,6 +464,7 @@ public class MediationApiService {
                             TimerConfig timerConfig = new TimerConfig();
                             Object[] objs = { reservation.getId(), currentUser };
                             timerConfig.setInfo(objs);
+                            @SuppressWarnings("unused")
                             Timer timer = timerService.createSingleActionTimer(appProvider.getPrepaidReservationExpirationDelayinMillisec(), timerConfig);
                             // timers.put(reservation.getId(), timer);
 
@@ -471,13 +474,21 @@ public class MediationApiService {
 
                         // Convert CDR to EDR and rate them
                     } else if (rate) {
-                        for (EDR edr : edrs) {
+
+                        for (int i = 0; i < edrs.size(); i++) {
+                            int finalI = i;
+                            EDR edr = edrs.get(i);
+
                             if (edr.getStatus() == EDRStatusEnum.RATED) {
                                 continue;
                             }
                             RatingResult ratingResult = null;
                             // For ROLLBACK_ON_ERROR mode, processing is called within TX, so when error is thrown up, everything will rollback
                             if (cdrProcessingResult.getMode() == ROLLBACK_ON_ERROR) {
+
+                                mediationsettingService.applyEdrVersioningRule(Arrays.asList(edr), cdr, false);
+                                cdrParsingService.createEdr(edr, i == 0 ? cdr : null); // CDR is persisted and related to the first EDR only
+
                                 ratingResult = usageRatingService.rateUsage(edr, isVirtual, rateTriggeredEdrs, maxDepth, 0, null, true);
                                 if (ratingResult.getRatingException() != null) {
                                     throw ratingResult.getRatingException();
@@ -485,9 +496,14 @@ public class MediationApiService {
                                 if (ratingResult.getWalletOperations() != null) {
                                     walletOperations.addAll(ratingResult.getWalletOperations());
                                 }
+
                                 // For STOP_ON_FIRST_FAIL or PROCESS_ALL model if no rollback is needed (no additional unforeseen data can be created/updated during rating)
                                 // when rating fails, error is not thrown but is simply handled
                             } else if (noNeedToRollback) {
+
+                                mediationsettingService.applyEdrVersioningRule(Arrays.asList(edr), cdr, false);
+                                cdrParsingService.createEdr(edr, i == 0 ? cdr : null); // CDR is persisted and related to the first EDR only
+
                                 ratingResult = usageRatingService.rateUsage(edr, isVirtual, rateTriggeredEdrs, maxDepth, 0, null, noNeedToRollback);
                                 if (ratingResult.getRatingException() != null) {
                                     throw ratingResult.getRatingException();
@@ -499,9 +515,21 @@ public class MediationApiService {
                                 // For STOP_ON_FIRST_FAIL or PROCESS_ALL model if rollback is needed, rating is called in a new TX and will rollback
                             } else {
                                 ratingResult = methodCallingUtils.callCallableInNewTx(() -> {
-                                    RatingResult ratingResultLocal = usageRatingService.rateUsage(edr, isVirtual, rateTriggeredEdrs, maxDepth, 0, null, false);
-                                    edrService.update(edr);
-                                    return ratingResultLocal;
+
+                                    mediationsettingService.applyEdrVersioningRule(Arrays.asList(edr), cdr, false);
+                                    cdrParsingService.createEdr(edr, finalI == 0 ? cdr : null); // CDR is persisted and related to the first EDR only
+
+                                    try {
+                                        RatingResult ratingResultLocal = usageRatingService.rateUsage(edr, isVirtual, rateTriggeredEdrs, maxDepth, 0, null, false);
+                                        edrService.update(edr);
+
+                                        return ratingResultLocal;
+
+                                        // Rethrow Rating exception (does not rollback TX) as BusinessException (does rollback TX)
+                                    } catch (RatingException e) {
+                                        throw new BusinessException(e);
+                                    }
+
                                 });
 
                                 if (ratingResult.getWalletOperations() != null) {
@@ -559,7 +587,7 @@ public class MediationApiService {
 
                 if (cdrProcessingResult.getMode() == ROLLBACK_ON_ERROR) {
                     if (cdr.getRejectReasonException() != null && cdr.getRejectReasonException() instanceof BusinessException) {
-                        throw (BusinessException) cdr.getRejectReasonException();
+                        throw new BusinessException(cdr.getRejectReasonException());
                     } else {
                         throw new BusinessException(cdr.getRejectReason());
                     }
@@ -584,18 +612,18 @@ public class MediationApiService {
 
             // Generate automatically RTs
             if (generateRTs && !walletOperations.isEmpty()) {
-	            Collections.sort(walletOperations, (wo1, wo2) -> wo2.getAmountWithoutTax().compareTo(wo1.getAmountWithoutTax()));
-				Map<Long, RatedTransaction> discountedRated = new HashMap<>();
+                Collections.sort(walletOperations, (wo1, wo2) -> wo2.getAmountWithoutTax().compareTo(wo1.getAmountWithoutTax()));
+                Map<Long, RatedTransaction> discountedRated = new HashMap<>();
                 for (WalletOperation walletOperation : walletOperations) {
                     // cdrParsingService.getEntityManager().persist(walletOperation.getEdr());
                     if (walletOperation.getId() == null || walletOperation.getStatus() != WalletOperationStatusEnum.OPEN) {
                         continue;
                     }
                     RatedTransaction ratedTransaction = ratedTransactionService.createRatedTransaction(walletOperation, false);
-					if (discountedRated.get(walletOperation.getDiscountedWalletOperation()) != null) {
-						ratedTransaction.setDiscountedRatedTransaction(discountedRated.get(walletOperation.getDiscountedWalletOperation()).getId());
-					}
-					discountedRated.put(walletOperation.getId(), ratedTransaction);
+                    if (discountedRated.get(walletOperation.getDiscountedWalletOperation()) != null) {
+                        ratedTransaction.setDiscountedRatedTransaction(discountedRated.get(walletOperation.getDiscountedWalletOperation()).getId());
+                    }
+                    discountedRated.put(walletOperation.getId(), ratedTransaction);
                 }
             }
         }
@@ -772,7 +800,7 @@ public class MediationApiService {
     }
 
     public CdrDtoResponse updateCDR(Long cdrId, CDR toBeUpdated) {
-	    Builder cdrDtoResponse = ImmutableCdrDtoResponse.builder();
+        Builder cdrDtoResponse = ImmutableCdrDtoResponse.builder();
         CDR cdr = Optional.ofNullable(cdrService.findById(cdrId)).orElseThrow(() -> new EntityDoesNotExistsException(CDR.class, cdrId));
         // OPEN, PROCESSED, CLOSED, DISCARDED, ERROR,TO_REPROCESS
         CDRStatusEnum statusToUpdated = toBeUpdated.getStatus();
@@ -832,14 +860,14 @@ public class MediationApiService {
             throw new MissingParameterException(error);
 
         }
-	    fillCdr(toBeUpdated, cdr, statusToUpdated);
-	    cdrDtoResponse.addAllCdrs(List.of(ImmutableResource.builder().id(cdr.getId()).build()));
+        fillCdr(toBeUpdated, cdr, statusToUpdated);
+        cdrDtoResponse.addAllCdrs(List.of(ImmutableResource.builder().id(cdr.getId()).build()));
         if (CollectionUtils.isEmpty(accessService.getActiveAccessByUserId(toBeUpdated.getAccessCode()))) {
-			cdr.setRejectReason("Invalid Access for " + toBeUpdated.getAccessCode());
-	        cdrDtoResponse.addAllErrors(List.of(new CdrErrorDto(cdr.toCsv(), cdr.getRejectReason())));
+            cdr.setRejectReason("Invalid Access for " + toBeUpdated.getAccessCode());
+            cdrDtoResponse.addAllErrors(List.of(new CdrErrorDto(cdr.toCsv(), cdr.getRejectReason())));
         }
         cdrService.update(cdr);
-		return cdrDtoResponse.build();
+        return cdrDtoResponse.build();
     }
 
     public CdrDtoResponse updateCDRs(List<CDR> cdrs, ProcessingModeEnum mode, boolean returnCDRs, boolean returnError) {

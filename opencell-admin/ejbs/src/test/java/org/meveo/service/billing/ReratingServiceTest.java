@@ -16,8 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.persistence.EntityManager;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +38,8 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
+import jakarta.persistence.EntityManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReratingServiceTest {

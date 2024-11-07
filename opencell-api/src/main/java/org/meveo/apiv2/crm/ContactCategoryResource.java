@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/account/contactCategory")
+@Path("/v2/account/contactCategory")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public interface ContactCategoryResource {

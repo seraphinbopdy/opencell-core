@@ -18,7 +18,6 @@
 package org.meveo.service.payments.impl;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -31,13 +30,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.account.TransferAccountOperationDto;
 import org.meveo.api.dto.account.TransferCustomerAccountDto;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
@@ -61,6 +63,7 @@ import org.meveo.model.payments.OtherCreditAndCharge;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentActionEnum;
 import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.Refund;
 import org.meveo.model.payments.RejectedPayment;
 import org.meveo.model.payments.RejectionActionStatus;
@@ -68,6 +71,7 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.accounting.impl.AccountingPeriodService;
 import org.meveo.service.accounting.impl.SubAccountingPeriodService;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,6 +120,11 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 
     @Inject
     private SubAccountingPeriodService subAccountingPeriodService;
+
+	@Inject
+	private InvoiceService invoiceService;
+	@Inject
+	private OtherCreditAndChargeService otherCreditAndChargeService;
 
     public AccountOperation createDeferralPayments(AccountOperation accountOperation, PaymentMethodEnum selectedPaymentMethod, Date paymentDate) {
         if(!appProvider.isPaymentDeferral()) {
@@ -187,7 +196,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
      */
     @SuppressWarnings("unchecked")
     public List<AccountOperation> getAccountOperations(Date date, String operationCode) {
-        Query query = getEntityManager().createQuery("from " + getEntityClass().getSimpleName() + " a where a.occCode=:operationCode and  a.transactionDate=:date")
+        Query query = getEntityManager().createQuery("from AccountOperation a where a.occCode=:operationCode and  a.transactionDate=:date")
             .setParameter("date", date).setParameter("operationCode", operationCode);
 
         return query.getResultList();
@@ -205,7 +214,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
     public AccountOperation getAccountOperation(BigDecimal amount, CustomerAccount customerAccount, String transactionType) {
 
         Query query = getEntityManager()
-            .createQuery("from " + getEntityClass().getSimpleName() + " a where a.amount=:amount and  a.customerAccount=:customerAccount and  a.type=:transactionType")
+            .createQuery("from AccountOperation a where a.amount=:amount and  a.customerAccount=:customerAccount and  a.type=:transactionType")
             .setParameter("amount", amount).setParameter("transactionType", transactionType).setParameter("customerAccount", customerAccount);
         List<AccountOperation> accountOperations = query.getResultList();
 
@@ -932,6 +941,9 @@ public class AccountOperationService extends PersistenceService<AccountOperation
             queryString.append(" AND ao.transactionalCurrency.id = :transactionalCurrencyId");
             parameters.put("transactionalCurrencyId", transactionalCurrencyId);
         }
+        // execlude account operation with status closed
+	    queryString.append(" AND ao.status != :status");
+		parameters.put("status", AccountOperationStatus.CLOSED);
 
         // Creating the query
         Query query = getEntityManager().createQuery(queryString.toString());
@@ -972,4 +984,49 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 				.setParameter("matchingCodeId", matchingCodeId)
 				.getResultList();
 	}
+	public List<AccountOperation> findByMatchingIdAndType(Set<Long> matchingCodeId, String type) {
+		StringBuilder query = new StringBuilder("SELECT ao FROM AccountOperation ao left join ao.matchingAmounts mas " +
+				"left join mas.matchingCode mc " +
+				"WHERE  ao.matchingStatus in (org.meveo.model.payments.MatchingStatusEnum.L, org.meveo.model.payments.MatchingStatusEnum.P) " +
+				"and mc.id in (:matchingCodeId) ");
+		if(StringUtils.isNotBlank(type)){
+			query.append(" and ao.type = :type");
+}
+		var sqlQuery = getEntityManager().createQuery("SELECT ao FROM AccountOperation ao left join ao.matchingAmounts mas " +
+						"left join mas.matchingCode mc " +
+						"WHERE  ao.matchingStatus in (org.meveo.model.payments.MatchingStatusEnum.L, org.meveo.model.payments.MatchingStatusEnum.P) " +
+						"and mc.id in (:matchingCodeId) " +
+						"and ao.type = :type", AccountOperation.class)
+				.setParameter("matchingCodeId", matchingCodeId);
+		if(StringUtils.isNotBlank(type)){
+			sqlQuery.setParameter("type", type);
+		}
+		return sqlQuery.getResultList();
+	}
+	
+	public void closeAccountOperations(List<Long> aoIdToBeClosed) {
+		List<AccountOperation> accountOperations = findByIds(aoIdToBeClosed, List.of("matchingAmounts", "customerAccount"));
+		// get all partially matched account operations and create ClOSED_ADV2 account operation
+		for (AccountOperation accountOperation : accountOperations) {
+			matchingCodeService.unmatchingOperationAccount(accountOperation);
+			if(accountOperation instanceof  RecordedInvoice) {
+				var customer = accountOperation.getCustomerAccount();
+				AccountOperation closedAdv = otherCreditAndChargeService.addOCC("CLOSED_ADV", "Closed Advance", customer, accountOperation.getUnMatchingAmount(), new Date());
+				try {
+					matchingCodeService.matchOperations(customer.getId(), customer.getCode(),
+							new ArrayList<>(List.of(accountOperation.getId())), closedAdv.getId(), accountOperation.getUnMatchingAmount());
+				} catch (Exception e) {
+					throw new BusinessApiException(e.getMessage());
+				}
+			}
+		}
+		this.getEntityManager().flush();
+		var invoiceIds = accountOperations.stream().flatMap(ao -> ao.getInvoices().stream()).map(Invoice::getId).filter(Objects::nonNull).collect(Collectors.toList());
+		invoiceService.abandoneInvoices(invoiceIds);
+		getEntityManager().createQuery("UPDATE AccountOperation ao SET ao.status = :status WHERE ao.id in (:ids)")
+				.setParameter("status", AccountOperationStatus.CLOSED)
+				.setParameter("ids", aoIdToBeClosed)
+				.executeUpdate();
+	}
+	
 }

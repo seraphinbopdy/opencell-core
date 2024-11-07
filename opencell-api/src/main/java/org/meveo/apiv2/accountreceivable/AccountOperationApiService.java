@@ -18,18 +18,22 @@ import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.model.MatchingReturnObject;
 import org.meveo.model.PartialMatchingOccToSelect;
 import org.meveo.model.billing.AccountingCode;
+import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.AccountOperationStatus;
+import org.meveo.model.payments.MatchingAmount;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.OtherCreditAndCharge;
 import org.meveo.model.payments.RecordedInvoice;
+import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.MatchingCodeService;
 import org.meveo.service.payments.impl.OCCTemplateService;
+import org.meveo.service.payments.impl.OtherCreditAndChargeService;
 import org.meveo.service.payments.impl.PaymentPlanService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.securityDeposit.impl.SecurityDepositTransactionService;
@@ -86,7 +90,8 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 	
 	@Inject
 	private OCCTemplateService occTemplateService;
-
+	
+	
 	@Override
 	public List<AccountOperation> list(Long offset, Long limit, String sort, String orderBy, String filter) {
 		// TODO Auto-generated method stub
@@ -194,7 +199,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		// Check existence of all passed accountOperation
 		List<AccountOperation> aos = new ArrayList<>();
 		aoIds.forEach(aoId -> aos.add(accountOperationService.findById(aoId)));
-
+		//checkIncompatibleAccountOperationTypes(aos);
 		if (aoIds.size() != aos.size()) {
 			throw new EntityDoesNotExistsException("One or more AccountOperations passed for matching are not found");
 		}
@@ -450,13 +455,13 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 			// create a OCC of type  DEB_TRS on source Customer Account and match it with the OCC of type CREDIT
 			// create a OCC of type  CRD_TRS on target Customer Account and match it with the OCC of type DEBIT
 			if (OperationCategoryEnum.CREDIT == accountOperation.getTransactionCategory()) {
-				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.DEBIT, occTemplateDebTrs, amountToTransferDto.getAmount());
+				createAccountOperation(accountOperation, accountOperation.getCustomerAccount(), OperationCategoryEnum.DEBIT, occTemplateDebTrs, amountToTransferDto.getAmount());
 				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.CREDIT, occTemplateCrdTrs, amountToTransferDto.getAmount());
 			} else {
 				// if account operation is DEBIT
 				// create a OCC of type  CRD_TRS on source Customer Account and match it with the OCC of type DEBIT
 				// create a OCC of type  DEB_TRS on target Customer Account and match it with the OCC of type CREDIT
-				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.CREDIT, occTemplateCrdTrs, amountToTransferDto.getAmount());
+				createAccountOperation(accountOperation, accountOperation.getCustomerAccount(), OperationCategoryEnum.CREDIT, occTemplateCrdTrs, amountToTransferDto.getAmount());
 				createAccountOperation(accountOperation, customerAccountTarget, OperationCategoryEnum.DEBIT, occTemplateDebTrs, amountToTransferDto.getAmount());
 			}
 		});
@@ -473,7 +478,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		Date currentDate = new Date();
 		OtherCreditAndCharge accountOperationToTransfer = new OtherCreditAndCharge();
 		accountOperationToTransfer.setCode(occTemplate.getCode());
-		accountOperationToTransfer.setDescription(occTemplate.getAccountingCode() != null ? occTemplate.getAccountingCode().getDescription(): null);
+		accountOperationToTransfer.setDescription(occTemplate.getDescription());
 		accountOperationToTransfer.setAccountingCode(accountOperation.getAccountingCode());
 		accountOperationToTransfer.setAccountingDate(currentDate);
 		accountOperationToTransfer.setAmount(amountToTransfer);
@@ -484,25 +489,30 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		accountOperationToTransfer.setTransactionCategory(operationCategoryEnum);
 		accountOperationToTransfer.setTransactionDate(currentDate);
 		accountOperationToTransfer.setUnMatchingAmount(amountToTransfer);
-		accountOperationToTransfer.setReference(operationCategoryEnum.toString().substring(0, 1) + "_" + accountOperation.getId() + "_" + accountOperation.getReference()) ;
+		accountOperationToTransfer.setReference(operationCategoryEnum.toString().charAt(0) + "_" + accountOperation.getId() + "_" + accountOperation.getReference()) ;
 		accountOperationToTransfer.setSourceAccountOperation(accountOperation);
 		accountOperationToTransfer.setUuid(UUID.randomUUID().toString());
 		accountOperationToTransfer.setSeller(accountOperation.getSeller());
 		accountOperationToTransfer.setJournal(occTemplate.getJournal());
+		accountOperationToTransfer.setTransactionalCurrency(accountOperation.getTransactionalCurrency());
+		accountOperationToTransfer.setTransactionalAmount(amountToTransfer);
 		
 		accountOperationService.create(accountOperationToTransfer);
 		
-		/*if((accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT && occTemplate.getCode().equals("DBT_TRS") ) ||
+		if((accountOperation.getTransactionCategory() == OperationCategoryEnum.CREDIT && occTemplate.getCode().equals("DBT_TRS") ) ||
 				(accountOperation.getTransactionCategory() == OperationCategoryEnum.DEBIT && occTemplate.getCode().equals("CRD_TRS")) ) {
 			try {
 				List<Long> operationIds = new ArrayList<>();
 				operationIds.add(accountOperation.getId());
 				operationIds.add(accountOperationToTransfer.getId());
-				matchingCodeService.matchOperations(accountOperation.getCustomerAccount().getId(), null, operationIds, null);
+				//matchingCodeService.matchOperations(accountOperation.getCustomerAccount().getId(), null, operationIds, null);
+				var customerId = accountOperation.getCustomerAccount().getId();
+				var cosutomerCode = accountOperation.getCustomerAccount().getCode();
+				matchingCodeService.matchOperations(customerId, cosutomerCode, operationIds, accountOperationToTransfer.getId(), amountToTransfer);
 			} catch (Exception e) {
 				throw new BusinessException(e.getMessage(), e);
 			}
-		}*/
+		}
 	}
 	/**
 	 * Check that sum of amount are lower of equal to source’s unmatched amount
@@ -534,7 +544,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 					org.meveo.model.payments.CustomerAccount customerAccountToTransfer = getCustomerAccount(amountToTransferDto.getCustomerAccount());
 					if (customerAccountToTransfer == null) {
 						log.error("check if all customer exist : rollback ");
-						throw new EntityDoesNotExistsException(CustomerAccount.class, amountToTransferDto.getCustomerAccount().getId());
+						throw new EntityDoesNotExistsException(CustomerAccount.class, amountToTransferDto.getCustomerAccount().getCode());
 					}
 				}else {
 					throw new BadRequestException("Customer account is required");
@@ -563,4 +573,56 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		}
 		log.info("check if all customer have same currency : all customer have same currency");
 	}
+	
+	public void closeOperations(List<Long> aoIdToBeClosed) {
+		List<AccountOperation> accountOperations = accountOperationService.findByIds(aoIdToBeClosed, List.of("matchingAmounts", "customerAccount"));
+		if(CollectionUtils.isEmpty(accountOperations)) {
+			throw new EntityDoesNotExistsException("No entity found with ids : " + aoIdToBeClosed);
+		}
+		// check if all account has code INT_ADV
+		List<AccountOperation> accountOperationsWithCode = accountOperations.stream()
+				.filter(accountOperation -> accountOperation.getCode().contentEquals("INV_ADV"))
+				.collect(Collectors.toList());
+		if(CollectionUtils.isEmpty(accountOperationsWithCode)) {
+			throw new BusinessApiException("Only Account Operation having the code INV_ADV can be closed");
+		}
+		// check if all account operations have INT_ADV and its matching status are OPEN or PARTIAL
+		List<AccountOperation> accountOperationsToBeClosed = accountOperationsWithCode.stream()
+				.filter(accountOperation -> accountOperation.getMatchingStatus() == MatchingStatusEnum.O || accountOperation.getMatchingStatus() == MatchingStatusEnum.P)
+				.collect(Collectors.toList());
+		if(CollectionUtils.isEmpty(accountOperationsToBeClosed)) {
+			throw new BusinessApiException("Only Account Operation having matchingStatus = Open or partially matched can be closed");
+		}
+		accountOperationService.closeAccountOperations(accountOperationsToBeClosed.stream().map(AccountOperation::getId).collect(Collectors.toList()));
+		
+		
+	}
+	
+	private void checkIncompatibleAccountOperationTypes(List<AccountOperation> accountOperations) {
+			if (accountOperations.size() <= 1) {
+				return;
+			}
+			Map<String, Set<String>> validMatches = Map.of(
+					"INV_ADV", Set.of("PAY_ADV", "CLOSED_ADV"),
+					"PAY_ADV", Set.of("INV_ADV", "REJ_ADV"),
+					"REJ_ADV", Set.of("PAY_ADV"),
+					"CLOSED_ADV", Set.of("INV_ADV")
+			);
+			
+			String firstCode = accountOperations.get(0).getCode();
+			if (firstCode == null) {
+				return;
+			}
+			Set<String> validCodes = validMatches.get(firstCode);
+			if (validCodes == null) {
+				return;
+			}
+			boolean allMatch = accountOperations.stream()
+					.skip(1)
+					.allMatch(ao -> validCodes.contains(ao.getCode()));
+			
+			if (!allMatch) {
+				throw new BusinessException("Incompatible account operation types. *_ADV account operations can only be matched with other *_ADV account operations");
+			}
+		}
 }

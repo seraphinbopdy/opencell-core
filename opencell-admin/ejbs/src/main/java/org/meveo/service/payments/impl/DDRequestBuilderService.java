@@ -21,10 +21,10 @@
  */
 package org.meveo.service.payments.impl;
 
-import jakarta.ejb.Stateless;
-
 import org.meveo.model.payments.DDRequestBuilder;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * The Class DDRequestBuilderService.

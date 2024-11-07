@@ -41,7 +41,7 @@ import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 
-@Path("ordering/orders")
+@Path("v2/ordering/orders")
 @Produces({ "application/json"})
 @Consumes({ "application/json"})
 public interface OrderResource {

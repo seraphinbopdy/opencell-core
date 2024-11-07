@@ -11,7 +11,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
 
-@Path("/admin/providers")
+@Path("/v2/admin/providers")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface ProviderResource {

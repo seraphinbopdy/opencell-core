@@ -15,6 +15,7 @@ import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.tags.Tag;
@@ -46,6 +47,7 @@ import jakarta.persistence.UniqueConstraint;
  *
  */
 @Entity
+@HugeEntity
 @Cacheable
 @CustomFieldEntity(cftCodePrefix = "Attribute")
 @Table(name = "cpq_attribute", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))

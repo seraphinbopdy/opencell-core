@@ -24,6 +24,7 @@ import org.hibernate.annotations.Parameter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableCFEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.billing.Subscription;
@@ -49,6 +50,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @ObservableEntity
 @CustomFieldEntity(cftCodePrefix = "Access", inheritCFValuesFrom = "subscription")
 @ExportIdentifier({ "accessUserId", "subscription.code" })

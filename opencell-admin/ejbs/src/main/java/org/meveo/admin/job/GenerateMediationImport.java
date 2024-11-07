@@ -25,10 +25,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import jakarta.inject.Inject;
-
 import org.meveo.commons.utils.StringUtils;
 import org.slf4j.Logger;
+
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi

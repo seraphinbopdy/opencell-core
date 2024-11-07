@@ -1,5 +1,8 @@
 package org.meveo.admin.job.accountingscheme;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -14,8 +17,6 @@ import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
 import jakarta.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @since 13

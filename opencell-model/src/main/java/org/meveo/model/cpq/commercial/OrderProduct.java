@@ -125,6 +125,10 @@ public class OrderProduct extends AuditableCFEntity {
     @OneToMany(mappedBy = "orderProduct", fetch = FetchType.LAZY)
     private List<OrderArticleLine> orderArticleLines;
 
+	/** MRR. */
+	@Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+	private BigDecimal mrr;
+
     public void update(OrderProduct other) {
         this.orderOffer = other.orderOffer;
         this.order = other.order;
@@ -140,6 +144,7 @@ public class OrderProduct extends AuditableCFEntity {
         this.terminationDate = other.terminationDate;
         this.terminationReason = other.terminationReason;
         this.serviceInstance = other.serviceInstance;
+		this.mrr = other.mrr;
     }
 
     @Override
@@ -324,4 +329,12 @@ public class OrderProduct extends AuditableCFEntity {
     public void setOrderArticleLines(List<OrderArticleLine> orderArticleLines) {
         this.orderArticleLines = orderArticleLines;
     }
+
+	public BigDecimal getMrr() {
+		return mrr;
+	}
+
+	public void setMrr(BigDecimal mrr) {
+		this.mrr = mrr;
+	}
 }

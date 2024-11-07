@@ -12,7 +12,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
-@Path("/accounting")
+@Path("/v2/accounting")
 @Consumes(APPLICATION_JSON)
 @Produces(APPLICATION_JSON)
 public interface AccountingResource {

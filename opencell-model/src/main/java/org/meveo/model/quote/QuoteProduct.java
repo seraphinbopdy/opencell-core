@@ -117,6 +117,10 @@ public class QuoteProduct extends AuditableCFEntity {
     @JoinColumn(name = "sub_termin_reason_id")
     private SubscriptionTerminationReason terminationReason;
 
+	/** MRR. */
+	@Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+	private BigDecimal mrr;
+
     public QuoteProduct() {
     }
 
@@ -132,6 +136,7 @@ public class QuoteProduct extends AuditableCFEntity {
         this.productActionType = copy.productActionType;
         this.terminationDate = copy.terminationDate;
         this.terminationReason = copy.terminationReason;
+		this.mrr = copy.mrr;
     }
 
     public void update(QuoteProduct other) {
@@ -147,6 +152,7 @@ public class QuoteProduct extends AuditableCFEntity {
         this.productActionType = other.productActionType;
         this.terminationDate = other.terminationDate;
         this.terminationReason = other.terminationReason;
+		this.mrr = other.mrr;
     }
 
     public DiscountPlan getDiscountPlan() {
@@ -309,4 +315,12 @@ public class QuoteProduct extends AuditableCFEntity {
     public void setTerminationReason(SubscriptionTerminationReason terminationReason) {
         this.terminationReason = terminationReason;
     }
+
+	public BigDecimal getMrr() {
+		return mrr;
+}
+
+	public void setMrr(BigDecimal mrr) {
+		this.mrr = mrr;
+	}
 }

@@ -38,6 +38,7 @@ import org.meveo.model.BaseEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ModuleItem;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.billing.InvoiceSubCategory;
@@ -78,6 +79,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @ModuleItem
 @ObservableEntity
 @Cacheable
@@ -169,8 +171,8 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     /**
      * Rating unit description
      */
-    @Column(name = "rating_unit_description", length = 20)
-    @Size(max = 20)
+    @Column(name = "rating_unit_description", length = 255)
+    @Size(max = 255)
     protected String ratingUnitDescription;
 
     /**
@@ -430,6 +432,10 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     @Column(name = "business_key_is_hidden")
     private boolean businessKeyIsHidden = false;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quantity_attribute_id")
+    private Attribute quantityAttribute;
+    
     public String getInputUnitEL() {
         return inputUnitEL;
     }
@@ -1038,6 +1044,14 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
 
     public void setBusinessKeyIsHidden(boolean businessKeyIsHidden) {
         this.businessKeyIsHidden = businessKeyIsHidden;
+    }
+
+    public Attribute getQuantityAttribute() {
+        return quantityAttribute;
+    }
+
+    public void setQuantityAttribute(Attribute quantityAttribute) {
+        this.quantityAttribute = quantityAttribute;
     }
 
     private Map<String, String> initParameterTranslatedDescriptions(String parameterNumber) {

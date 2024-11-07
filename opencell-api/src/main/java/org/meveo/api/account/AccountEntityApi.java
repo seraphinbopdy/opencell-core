@@ -24,11 +24,11 @@ import org.meveo.admin.util.ResourceBundle;
 import org.meveo.api.BaseApi;
 import org.meveo.api.dto.account.AccountDto;
 import org.meveo.api.dto.account.RegistrationNumberDto;
-import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.model.AccountEntity;
 import org.meveo.model.RegistrationNumber;
+import org.meveo.model.VatStatusEnum;
 import org.meveo.model.billing.Country;
 import org.meveo.model.billing.IsoIcd;
 import org.meveo.model.catalog.OneShotChargeTemplate;
@@ -41,6 +41,7 @@ import org.meveo.service.admin.impl.RegistrationNumberService;
 import org.meveo.service.billing.impl.IsoIcdService;
 import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
 import org.meveo.service.catalog.impl.TitleService;
+import org.meveo.service.validation.ValidationByNumberCountryService;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -73,6 +74,9 @@ public class AccountEntityApi extends BaseApi {
 	protected IsoIcdService isoIcdService;
 	@Inject
 	private ResourceBundle resourceBundle;
+
+    @Inject
+    private ValidationByNumberCountryService validationByNumberCountryService;
 
     public void populate(AccountDto postData, AccountEntity accountEntity) throws MeveoApiException {
         Address address = new Address();
@@ -228,6 +232,12 @@ public class AccountEntityApi extends BaseApi {
         }
         if (postData.getVatNo() != null) {
             accountEntity.setVatNo(StringUtils.isEmpty(postData.getVatNo()) ? null : postData.getVatNo());
+            // check of the vatNo is valid and set the status
+            boolean valid = false;
+            if(postData.getVatNo().length() > 2) {
+                valid = validationByNumberCountryService.getValByValNbCountryCode(postData.getVatNo() .substring(2), postData.getVatNo().substring(0, 2));
+            }
+            accountEntity.setVatStatus(valid ? VatStatusEnum.VALID : VatStatusEnum.INVALID);
         }
          if (CollectionUtils.isNotEmpty(postData.getRegistrationNumbers())) {
         }

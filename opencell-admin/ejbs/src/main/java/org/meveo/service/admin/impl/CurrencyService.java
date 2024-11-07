@@ -17,15 +17,15 @@
  */
 package org.meveo.service.admin.impl;
 
-import jakarta.ejb.Stateless;
-import jakarta.persistence.NoResultException;
-import jakarta.ws.rs.BadRequestException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.Currency;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.ws.rs.BadRequestException;
 
 /**
  * Currency service implementation.

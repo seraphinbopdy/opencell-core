@@ -1,5 +1,8 @@
 package org.meveo.service.script.accountingscheme;
 
+import java.util.List;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.accountingScheme.JournalEntry;
 import org.meveo.model.payments.AccountOperation;
@@ -7,9 +10,6 @@ import org.meveo.model.payments.OCCTemplate;
 import org.meveo.service.accountingscheme.JournalEntryService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.script.Script;
-
-import java.util.List;
-import java.util.Map;
 
 public class DefaultAccountingSchemeScript extends Script {
 

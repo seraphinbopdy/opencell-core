@@ -30,7 +30,6 @@ import org.hibernate.query.sqm.sql.internal.BasicValuedPathInterpretation;
 import org.hibernate.sql.ast.SqlAstTranslator;
 import org.hibernate.sql.ast.spi.SqlAppender;
 import org.hibernate.sql.ast.tree.SqlAstNode;
-import org.hibernate.sql.ast.tree.expression.ColumnReference;
 import org.hibernate.sql.ast.tree.expression.QueryLiteral;
 import org.hibernate.type.BasicType;
 import org.meveo.commons.utils.StringUtils;

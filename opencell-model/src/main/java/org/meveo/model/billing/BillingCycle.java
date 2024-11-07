@@ -358,6 +358,13 @@ public class BillingCycle extends BusinessCFEntity {
     @Column(name = "ignore_user_accounts")
     private boolean ignoreUserAccounts = true;
 
+    /**
+     * Billing cycle aggregation setting for service instance
+     */
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "ignore_service_instances")
+    private boolean ignoreServiceInstances = true;
+
     public boolean isThresholdPerEntity() {
         return thresholdPerEntity;
     }
@@ -827,4 +834,11 @@ public class BillingCycle extends BusinessCFEntity {
         this.additionalAggregationFields = additionalAggregationFields;
     }
 
+    public boolean isIgnoreServiceInstances() {
+        return ignoreServiceInstances;
+    }
+
+    public void setIgnoreServiceInstances(boolean ignoreServiceInstances) {
+        this.ignoreServiceInstances = ignoreServiceInstances;
+    }
 }

@@ -96,7 +96,7 @@ public class MassUpdaterOfflineJobBean extends MassUpdaterJobBean {
             } while (hasMore);
             dropView();
         } finally {
-            finalize(jobExecutionResult);
+            terminate(jobExecutionResult);
         }
     }
 
@@ -135,11 +135,11 @@ public class MassUpdaterOfflineJobBean extends MassUpdaterJobBean {
     }
 
     /**
-     * Finalize function
+     * Terminate function
      *
      * @param jobExecutionResult Job execution result
      */
-    protected void finalize(JobExecutionResultImpl jobExecutionResult) {
+    protected void terminate(JobExecutionResultImpl jobExecutionResult) {
         if (statelessSession != null) {
             statelessSession.close();
         }

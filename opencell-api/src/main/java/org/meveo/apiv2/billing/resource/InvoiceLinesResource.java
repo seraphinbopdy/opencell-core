@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/billing/invoiceLines")
+@Path("/v2/billing/invoiceLines")
 @Consumes(APPLICATION_JSON)
 @Produces(APPLICATION_JSON)
 public interface InvoiceLinesResource {

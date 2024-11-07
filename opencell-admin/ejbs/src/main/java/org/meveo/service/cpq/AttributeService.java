@@ -110,7 +110,7 @@ public class AttributeService extends BusinessService<Attribute>{
         Set<Long> checkedAttributs = new HashSet<>();
 
         attributeInstances.forEach(attributeInstance -> {
-            Optional<ProductVersionAttribute> productVersionAttribute = productVersionAttributes.stream().filter(pva -> pva.getAttribute().getId().equals(attributeInstance.getAttribute().getId()))
+            Optional<ProductVersionAttribute> productVersionAttribute = productVersionAttributes.stream().filter(pva -> pva.getAttribute().getCode().equals(attributeInstance.getAttribute().getCode()))
                     .findFirst();
             if (productVersionAttribute.isEmpty()) {
                 throw new BusinessApiException("No ProductVersionAttribute found for Attribute '" + attributeInstance.getAttribute().getCode() + "'");
@@ -222,7 +222,7 @@ public class AttributeService extends BusinessService<Attribute>{
     private void checkListAttribute(ProductVersionAttribute pvAttribute, AttributeValue<?> attributeValue) {
         // Check value content
         // List values
-        if (attributeValue.getValue() == null) {
+        if (StringUtils.isBlank(attributeValue.getValue())) {
             return;
         }
 
@@ -238,7 +238,7 @@ public class AttributeService extends BusinessService<Attribute>{
                 boolean valueExist = Optional.ofNullable(pvAttribute.getAttribute().getAllowedValues())
                                              .orElse(Collections.emptyList())
                                              .stream()
-                                             .anyMatch(value -> new BigDecimal(value).compareTo(BigDecimal.valueOf((double)attributeValue.getValue())) == 0);
+                                             .anyMatch(value -> new BigDecimal(value).compareTo(new BigDecimal(Objects.requireNonNullElse(attributeValue.getRealValue(), "0").toString())) == 0);
 			   if(!valueExist){
 				   throw new BusinessApiException("The value '" + attributeValue.getRealValue() + "' is not part of allowed values " + pvAttribute.getAttribute().getAllowedValues());
 			   }

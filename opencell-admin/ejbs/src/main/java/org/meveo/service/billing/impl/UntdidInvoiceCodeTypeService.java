@@ -1,7 +1,5 @@
 package org.meveo.service.billing.impl;
 
-import java.util.List;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.commons.utils.QueryBuilder;

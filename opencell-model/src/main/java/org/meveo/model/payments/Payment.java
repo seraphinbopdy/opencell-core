@@ -19,9 +19,11 @@ package org.meveo.model.payments;
 
 import java.math.BigDecimal;
 
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.dunning.DunningDocument;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -65,6 +67,13 @@ public class Payment extends AccountOperation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_gateway_id")
     private PaymentGateway paymentGateway;
+
+    /**
+     * Is payment done manually
+     */
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "is_manual_payment")
+    private Boolean isManualPayment = false;
 
     /**
      * get the associated dunning doc if exists
@@ -132,5 +141,13 @@ public class Payment extends AccountOperation {
 
     public void setPaymentGateway(PaymentGateway paymentGateway) {
         this.paymentGateway = paymentGateway;
+    }
+
+    public Boolean getIsManualPayment() {
+        return isManualPayment;
+}
+
+    public void setIsManualPayment(Boolean isManualPayment) {
+        this.isManualPayment = isManualPayment;
     }
 }

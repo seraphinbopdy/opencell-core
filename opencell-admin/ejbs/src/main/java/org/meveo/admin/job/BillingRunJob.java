@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.BillingProcessTypesEnum;
+import org.meveo.model.billing.BillingRunAutomaticActionEnum;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
@@ -112,6 +113,58 @@ public class BillingRunJob extends Job {
         billingCycleType.setValueRequired(false);
         billingCycleType.setGuiPosition("tab:Configuration:0;field:3");
         result.put("BillingRunJob_billingRun_Process", billingCycleType);
+        
+        CustomFieldTemplate rejectAutoAction = new CustomFieldTemplate();
+        rejectAutoAction.setCode("BillingRunJob_rejectAutoAction");
+        rejectAutoAction.setAppliesTo("JobInstance_BillingRunJob");
+        rejectAutoAction.setActive(true);
+        rejectAutoAction.setDescription(resourceMessages.getString("billingRun.rejectAutoAction"));
+        rejectAutoAction.setFieldType(CustomFieldTypeEnum.LIST);
+        billingCycleType.setStorageType(CustomFieldStorageTypeEnum.SINGLE);
+        Map<String, String> billingRunAutomaticActionValues = new HashMap<>();
+        for(BillingRunAutomaticActionEnum type : BillingRunAutomaticActionEnum.values()){
+            billingRunAutomaticActionValues.put(""+type.getId(), resourceMessages.getString(type.getLabel()));
+        }
+        billingCycleType.setListValues(billingRunAutomaticActionValues);
+        rejectAutoAction.setValueRequired(false);
+        rejectAutoAction.setGuiPosition("tab:Configuration:0;field:4");
+        result.put("BillingRunJob_rejectAutoAction", rejectAutoAction);
+
+        CustomFieldTemplate suspectAutoAction = new CustomFieldTemplate();
+        suspectAutoAction.setCode("BillingRunJob_suspectAutoAction");
+        suspectAutoAction.setAppliesTo("JobInstance_BillingRunJob");
+        suspectAutoAction.setActive(true);
+        suspectAutoAction.setDescription(resourceMessages.getString("billingRun.suspectAutoAction"));
+        suspectAutoAction.setFieldType(CustomFieldTypeEnum.LIST);
+        billingCycleType.setStorageType(CustomFieldStorageTypeEnum.SINGLE);
+        Map<String, String> suspectAutoActionValues = new HashMap<>();
+        for(BillingRunAutomaticActionEnum type : BillingRunAutomaticActionEnum.values()){
+            suspectAutoActionValues.put(""+type.getId(), resourceMessages.getString(type.getLabel()));
+        }
+        billingCycleType.setListValues(suspectAutoActionValues);
+        suspectAutoAction.setValueRequired(false);
+        suspectAutoAction.setGuiPosition("tab:Configuration:0;field:5");
+        result.put("BillingRunJob_suspectAutoAction", suspectAutoAction);
+
+        CustomFieldTemplate generateAO = new CustomFieldTemplate();
+        generateAO.setCode("BillingRunJob_generateAO");
+        generateAO.setAppliesTo("JobInstance_BillingRunJob");
+        generateAO.setActive(true);
+        generateAO.setDescription(resourceMessages.getString("invoiceType.invoiceAccountable"));
+        generateAO.setFieldType(CustomFieldTypeEnum.BOOLEAN);
+        generateAO.setValueRequired(false);
+        suspectAutoAction.setGuiPosition("tab:Configuration:0;field:6");
+        result.put("BillingRunJob_generateAO", generateAO);
+
+        CustomFieldTemplate computeDatesAtValidation = new CustomFieldTemplate();
+        computeDatesAtValidation.setCode("BillingRunJob_computeDatesAtValidation");
+        computeDatesAtValidation.setAppliesTo("JobInstance_BillingRunJob");
+        computeDatesAtValidation.setActive(true);
+        computeDatesAtValidation.setDescription(resourceMessages.getString("billingRun.computeDatesAtValidation"));
+        computeDatesAtValidation.setFieldType(CustomFieldTypeEnum.BOOLEAN);
+        computeDatesAtValidation.setValueRequired(false);
+        computeDatesAtValidation.setGuiPosition("tab:Configuration:0;field:7");
+        result.put("BillingRunJob_computeDatesAtValidation", computeDatesAtValidation);
 
         return result;
     }

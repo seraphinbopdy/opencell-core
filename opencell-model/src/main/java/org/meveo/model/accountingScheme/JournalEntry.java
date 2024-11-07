@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.ChartOfAccountTypeEnum;
@@ -42,6 +43,7 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 
 @Entity
+@HugeEntity
 @Table(name = "accounting_journal_entry")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {
         @org.hibernate.annotations.Parameter(name = "sequence_name", value = "accounting_journal_entry_seq"), @Parameter(name = "increment_size", value = "1") })

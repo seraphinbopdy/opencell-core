@@ -46,6 +46,8 @@ import org.meveo.service.catalog.impl.CalendarService;
 import org.meveo.service.catalog.impl.RecurringChargeTemplateService;
 import org.meveo.service.cpq.AttributeService;
 
+import static java.util.Optional.ofNullable;
+
 /**
  * @author Edward P. Legaspi
  **/
@@ -186,7 +188,11 @@ public class RecurringChargeTemplateApi extends ChargeTemplateApi<RecurringCharg
         if (postData.getAnticipateEndOfSubscription() != null) {
             chargeTemplate.setAnticipateEndOfSubscription(postData.getAnticipateEndOfSubscription());
         }
-
+        if (postData.getQuantityAttribute() != null) {
+            Attribute quantityAttribute = ofNullable(attributeService.findByCode(postData.getQuantityAttribute()))
+                    .orElseThrow(() -> new EntityDoesNotExistsException(Attribute.class, postData.getQuantityAttribute()));
+            chargeTemplate.setQuantityAttribute(quantityAttribute);
+        }
         return chargeTemplate;
     }
 

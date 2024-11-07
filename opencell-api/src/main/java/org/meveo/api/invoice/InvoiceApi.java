@@ -618,7 +618,7 @@ public class InvoiceApi extends BaseApi {
 	        if(advList.isEmpty()) {
 		        invoiceService.generateRecordedInvoiceAO(invoice.getId());
 	        }else{
-		        invoiceService.generateAoFromAdv(invoice, advList) ;
+		        invoiceService.generateAoFromAdv(invoice.getId(), advList) ;
 	        }
         }
         invoiceService.recalculateDatesForValidated(invoiceId);

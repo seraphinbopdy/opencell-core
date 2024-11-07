@@ -17,28 +17,31 @@
  */
 package org.meveo.service.billing.impl;
 
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toSet;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.billing.BatchEntity;
 import org.meveo.model.billing.BillingAccount;
-import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingRun;
-import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.billing.ThresholdOptionsEnum;
 import org.meveo.model.crm.Provider;
-import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.util.ApplicationProvider;
 
 import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 import jakarta.inject.Inject;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * A class for invoicing threshold persistence services.
@@ -54,9 +57,6 @@ public class InvoicingThresholdService extends PersistenceService<BatchEntity> {
     protected Provider appProvider;
 
     @Inject
-    private BillingRunService billingRunService;
-
-    @Inject
     private InvoiceLineService invoiceLineService;
 
     @Inject
@@ -65,78 +65,14 @@ public class InvoicingThresholdService extends PersistenceService<BatchEntity> {
     @Inject
     private RatedTransactionService ratedTransactionService;
 
-    /**
-     * Apply threshold
-     *
-     * @param jobExecutionResult the job execution result
-     */
-    public void applyThreshold(JobExecutionResultImpl jobExecutionResult) {
-        List<BillingRun> billingRuns = billingRunService.getBillingRuns(BillingRunStatusEnum.INVOICE_LINES_CREATED);
-        for (BillingRun billingRun : billingRuns) {
-            applyThreshold(jobExecutionResult, billingRun);
-        }
-    }
-
-
-    /**
-     * Apply threshold
-     *
-     * @param jobExecutionResult he job execution result
-     * @param billingRun         the billingRun
-     */
-    private void applyThreshold(JobExecutionResultImpl jobExecutionResult, BillingRun billingRun) {
-        try {
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void applyThresholdByInvoice(BillingRun billingRun, Set<Long> billingAccountsIds,
+			BigDecimal invoicingThreshold, ThresholdOptionsEnum checkThreshold) {
             List<Object[]> ids; // List of array of billingAccountsIds and invoiceLinesIds
-            Set<Long> billingAccountsIds = new HashSet<>();
+		ids = invoiceLineService.checkThreshold(billingRun.getId(), invoicingThreshold, checkThreshold, appProvider.isEntreprise());
+		String billingAccountReason = "Billing account did not reach invoicing threshold";
             Set<Long> invoiceLinesIds = new HashSet<>();
-            BillingCycle billingCycle = billingRun.getBillingCycle();
-            BigDecimal invoicingThreshold = billingCycle != null ? billingCycle.getInvoicingThreshold() : null;
-            ThresholdOptionsEnum checkThreshold = billingCycle != null ? billingCycle.getCheckThreshold() : null;
-            String billingAccountReason = "Billing account did not reach invoicing threshold";
-
-            // Provider is in B2B mode
-            if (appProvider.isEntreprise()) {
-                // Check the threshold by invoice
-                ids = invoiceLineService.checkThresholdB2B(billingRun.getId(), invoicingThreshold, checkThreshold);
-                // Check the threshold by billing account
-                billingAccountsIds.addAll(invoiceLineService.checkThresholdB2BByBA(billingRun.getId()));
-                // Check the threshold by customer account
-                String baIds = invoiceLineService.checkThresholdB2BByCA(billingRun.getId());
-                if (!StringUtils.isBlank(baIds)) {
-                    billingAccountsIds.addAll(stream((baIds).split(",")).map(Long::parseLong).collect(toSet()));
-                }
-                // Check the threshold by customer
-                baIds = invoiceLineService.checkThresholdB2BByC(billingRun.getId());
-                if (!StringUtils.isBlank(baIds)) {
-                    billingAccountsIds.addAll(stream((baIds).split(",")).map(Long::parseLong).collect(toSet()));
-                }
-            } else { // Provider is in B2C mode
-                // Check the threshold by invoice
-                ids = invoiceLineService.checkThresholdB2C(billingRun.getId(), invoicingThreshold, checkThreshold);
-                // Check the threshold by billing account
-                billingAccountsIds.addAll(invoiceLineService.checkThresholdB2CByBA(billingRun.getId()));
-                // Check the threshold by customer account
-                String baIds = invoiceLineService.checkThresholdB2CByCA(billingRun.getId());
-                if (!StringUtils.isBlank(baIds)) {
-                    billingAccountsIds.addAll(stream((baIds).split(",")).map(Long::parseLong).collect(toSet()));
-                }
-                // Check the threshold by customer
-                baIds = invoiceLineService.checkThresholdB2CByC(billingRun.getId());
-                if (!StringUtils.isBlank(baIds)) {
-                    billingAccountsIds.addAll(stream((baIds).split(",")).map(Long::parseLong).collect(toSet()));
-                }
-            }
-
-            /* 1- applyThreshold by entity (BA, CA, C) */
-            if (!billingAccountsIds.isEmpty()) {
-                // reopen billing accounts RTs
-                ratedTransactionService.reopenRTs(billingRun.getId(), billingAccountsIds);
-                // cancel invoice lines by billing accounts and billing run
-                invoiceLineService.cancelInvoiceLines(billingRun.getId(), billingAccountsIds);
-            }
-
-
-            /* 2- applyThreshold by invoice */
             ids.forEach(item -> {
                 BigInteger billingAccountId = (BigInteger) item[0];
                 String ilIds = (String) item[1];
@@ -153,18 +89,36 @@ public class InvoicingThresholdService extends PersistenceService<BatchEntity> {
                 // cancel invoice lines
                 invoiceLineService.cancelInvoiceLines(invoiceLinesIds);
             }
-
-            /* 3- Create rejected billing accounts for invoice and each entity (BA, CA, C) */
-            // Create rejected billing accounts
+		/* Create rejected billing accounts for invoice and each entity (BA, CA, C) */
             billingAccountsIds.forEach(baIdToReject -> {
                 BillingAccount ba = getEntityManager().getReference(BillingAccount.class, baIdToReject);
                 rejectedBillingAccountService.create(ba, getEntityManager().getReference(BillingRun.class, billingRun.getId()), billingAccountReason);
             });
-            jobExecutionResult.registerSucces(billingAccountsIds.size());
-        } catch (Exception e) {
-            log.error("Failed to apply threshold for the billingRun id : {}", billingRun.getId(), e);
-            jobExecutionResult.registerError(e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
         }
+
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void applyThresholdByEntity(BillingRun billingRun, Set<Long> billingAccountsIds, String entityLevel) {
+		// Check the threshold by billing account
+		List<Object> idsListAsString=invoiceLineService.checkThreshold(billingRun.getId(), appProvider.isEntreprise(), entityLevel);
+		
+		Set<Long> currentBillingAccountsIds = "ByBA".equals(entityLevel) ? new HashSet<>((List<Long>) (List<?>) idsListAsString)
+			    : idsListAsString.stream().flatMap(str -> Arrays.stream(((String) str).split(","))).map(Long::valueOf).collect(Collectors.toSet());
+		
+		String billingAccountReason = "Billing account did not reach invoicing threshold "+entityLevel;
+		//applyThreshold by entity (BA, CA, C) 
+		if (!currentBillingAccountsIds.isEmpty()) {
+		    // reopen billing accounts RTs
+		    ratedTransactionService.reopenRTs(billingRun.getId(), currentBillingAccountsIds);
+		    // cancel invoice lines by billing accounts and billing run
+		    invoiceLineService.cancelInvoiceLines(billingRun.getId(), currentBillingAccountsIds);
+		    currentBillingAccountsIds.removeAll(billingAccountsIds);
+		    currentBillingAccountsIds.forEach(baIdToReject -> {
+                BillingAccount ba = getEntityManager().getReference(BillingAccount.class, baIdToReject);
+                rejectedBillingAccountService.create(ba, getEntityManager().getReference(BillingRun.class, billingRun.getId()), billingAccountReason);
+            });
+		    billingAccountsIds.addAll(currentBillingAccountsIds);
     }
+	}
 
 }

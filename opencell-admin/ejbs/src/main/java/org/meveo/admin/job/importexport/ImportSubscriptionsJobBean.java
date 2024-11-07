@@ -23,13 +23,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
-import jakarta.inject.Inject;
-import jakarta.interceptor.Interceptors;
-import jakarta.xml.bind.JAXBException;
-
 import org.meveo.admin.job.BaseJobBean;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.commons.utils.FileUtils;
@@ -55,6 +48,13 @@ import org.meveo.service.crm.impl.CheckedSubscription;
 import org.meveo.service.crm.impl.ImportIgnoredException;
 import org.meveo.service.crm.impl.SubscriptionImportService;
 import org.meveo.service.crm.impl.SubscriptionServiceException;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * @author Wassim Drira

@@ -126,8 +126,11 @@ public class ChargeTemplateServiceAll extends BusinessService<ChargeTemplate> {
 			throw new BusinessApiException(e.getMessage());
 		}
 	}
-
+	
 	public ChargeTemplate duplicateCharge(ChargeTemplate chargeTemplate) {
+		return duplicateCharge(chargeTemplate, false);
+	}
+	public ChargeTemplate duplicateCharge(ChargeTemplate chargeTemplate, boolean excludeProductChargeTemplateMapping) {
 		//charge Template to be duplicated
 		ChargeTemplate duplicateChargeTemplate = null;
 		ChargeTemplateStatusEnum statusChargeTemplate = chargeTemplate.getStatus();
@@ -136,21 +139,25 @@ public class ChargeTemplateServiceAll extends BusinessService<ChargeTemplate> {
 			//set status to null to bypass the validation used in the setStatus method
 			chargeTemplate.setStatus(null);
 			duplicateChargeTemplate = (ChargeTemplate) BeanUtils.cloneBean(chargeTemplate);
+			
 			chargeTemplate.setStatus(statusChargeTemplate);
 			
-			if(chargeTemplate.getProductCharges() != null) {
-			    List<ProductChargeTemplateMapping> listProductChargeTemplateMapping = new ArrayList<ProductChargeTemplateMapping>();
-                for(ProductChargeTemplateMapping pCTMapping : chargeTemplate.getProductCharges()) {
-                    listProductChargeTemplateMapping.add(pCTMapping);
-                }
-                duplicateChargeTemplate.setProductCharges(listProductChargeTemplateMapping);
-            }
+			if(!excludeProductChargeTemplateMapping){
+				if(chargeTemplate.getProductCharges() != null) {
+					List<ProductChargeTemplateMapping> listProductChargeTemplateMapping = new ArrayList<ProductChargeTemplateMapping>();
+					for(ProductChargeTemplateMapping pCTMapping : chargeTemplate.getProductCharges()) {
+						listProductChargeTemplateMapping.add(pCTMapping);
+					}
+					duplicateChargeTemplate.setProductCharges(listProductChargeTemplateMapping);
+				}
+				
+			}
 			
 			duplicateChargeTemplate.setId(null);
 			duplicateChargeTemplate.setCode(findDuplicateCode(chargeTemplate));
 			duplicateChargeTemplate.setStatus(ChargeTemplateStatusEnum.DRAFT);
 			duplicateChargeTemplate.setPricePlans(new HashSet<>());
-
+			
 			if(chargeTemplate.getAttributes() != null) {
 				Set<Attribute> attributes = new HashSet<Attribute>();
 				for(Attribute attribute:chargeTemplate.getAttributes()) {
@@ -172,59 +179,59 @@ public class ChargeTemplateServiceAll extends BusinessService<ChargeTemplate> {
 			Set<PricePlanMatrix> duplicatedPricePlanMatrixes = new HashSet<>();
 			create(duplicateChargeTemplate);
 			
-	        List<PricePlanMatrix> pricePlanMatrixes = pricePlanMatrixService.listByChargeCode(chargeTemplate.getCode());
-	        
-	        //Duplicate Price Plan Matrix
-	        if(pricePlanMatrixes != null && !pricePlanMatrixes.isEmpty()) {
-	        	for(PricePlanMatrix pricePlanMatrix:pricePlanMatrixes) {
-
-	        		@SuppressWarnings("unchecked")
-	            	List<PricePlanMatrixVersion> pricesVersions = this.getEntityManager().createNamedQuery("PricePlanMatrixVersion.lastVersion")
+			List<PricePlanMatrix> pricePlanMatrixes = pricePlanMatrixService.listByChargeCode(chargeTemplate.getCode());
+			
+			//Duplicate Price Plan Matrix
+			if(pricePlanMatrixes != null && !pricePlanMatrixes.isEmpty()) {
+				for(PricePlanMatrix pricePlanMatrix:pricePlanMatrixes) {
+					
+					@SuppressWarnings("unchecked")
+					List<PricePlanMatrixVersion> pricesVersions = this.getEntityManager().createNamedQuery("PricePlanMatrixVersion.lastVersion")
 							.setParameter("pricePlanMatrixCode", pricePlanMatrix.getCode()).getResultList();
-	            	
-	        		PricePlanMatrix pricePlanMatrixNew = (PricePlanMatrix) BeanUtils.cloneBean(pricePlanMatrix);
-
-	        		pricePlanMatrixNew.setId(null);
-	        		pricePlanMatrixNew.setCode(pricePlanMatrixService.findDuplicateCode(pricePlanMatrix));
-
-	        		List<PricePlanMatrixVersion> versionsNew = new ArrayList<PricePlanMatrixVersion>();
-	        		pricePlanMatrixNew.setVersions(versionsNew);
-	        		pricePlanMatrixNew.setContractItems(null);
-	        		pricePlanMatrixNew.setDiscountPlanItems(null);
-	        		pricePlanMatrixNew.setChargeTemplates(new HashSet<>());
-	        		
-	        		pricePlanMatrixService.create(pricePlanMatrixNew);
-
-	        		if(pricesVersions != null && !pricesVersions.isEmpty()) {
-		        		for(PricePlanMatrixVersion priceVersion:pricesVersions) {
-		            		PricePlanMatrixVersion priceVersionNew = (PricePlanMatrixVersion) BeanUtils.cloneBean(priceVersion);
-		            		
-		            		priceVersionNew.setId(null);
-		            		priceVersionNew.setStatus(VersionStatusEnum.DRAFT);
-		            		priceVersionNew.setPricePlanMatrix(pricePlanMatrixNew);
-		            		priceVersionNew.setColumns(null);
-
-		            		if(priceVersion.getColumns() != null) {
-			            		Set<PricePlanMatrixColumn> pricePlanColumns = new HashSet<>();
-			            		for(PricePlanMatrixColumn pricePlanColumn:priceVersion.getColumns()){
-			            			PricePlanMatrixColumn pricePlanColumnNew = pricePlanMatrixColumnService.findByCode(pricePlanColumn.getCode());
-			            			pricePlanColumns.add(pricePlanColumnNew);
-			            		}
-			            		priceVersionNew.setColumns(pricePlanColumns);
-		            		}
-		            		
-		            		if(priceVersion.getLines() != null) {
-		            			Set<PricePlanMatrixLine> lines = new HashSet<>();
-			            		for(PricePlanMatrixLine pricePlanMatrixLine:priceVersion.getLines()){
-			            			PricePlanMatrixLine pricePlanMatrixLineNew = pricePlanMatrixLineService.findById(pricePlanMatrixLine.getId());
-			            			lines.add(pricePlanMatrixLineNew);
-			            		}
-			            		priceVersionNew.setLines(lines);
-		            		}
-
-		            		priceVersionNew.setPricePlanMatrix(pricePlanMatrixNew);
-		            		pricePlanMatrixVersionService.create(priceVersionNew);
-
+					
+					PricePlanMatrix pricePlanMatrixNew = (PricePlanMatrix) BeanUtils.cloneBean(pricePlanMatrix);
+					
+					pricePlanMatrixNew.setId(null);
+					pricePlanMatrixNew.setCode(pricePlanMatrixService.findDuplicateCode(pricePlanMatrix));
+					
+					List<PricePlanMatrixVersion> versionsNew = new ArrayList<PricePlanMatrixVersion>();
+					pricePlanMatrixNew.setVersions(versionsNew);
+					pricePlanMatrixNew.setContractItems(null);
+					pricePlanMatrixNew.setDiscountPlanItems(null);
+					pricePlanMatrixNew.setChargeTemplates(new HashSet<>());
+					
+					pricePlanMatrixService.create(pricePlanMatrixNew);
+					
+					if(pricesVersions != null && !pricesVersions.isEmpty()) {
+						for(PricePlanMatrixVersion priceVersion:pricesVersions) {
+							PricePlanMatrixVersion priceVersionNew = (PricePlanMatrixVersion) BeanUtils.cloneBean(priceVersion);
+							
+							priceVersionNew.setId(null);
+							priceVersionNew.setStatus(VersionStatusEnum.DRAFT);
+							priceVersionNew.setPricePlanMatrix(pricePlanMatrixNew);
+							priceVersionNew.setColumns(null);
+							
+							if(priceVersion.getColumns() != null) {
+								Set<PricePlanMatrixColumn> pricePlanColumns = new HashSet<>();
+								for(PricePlanMatrixColumn pricePlanColumn:priceVersion.getColumns()){
+									PricePlanMatrixColumn pricePlanColumnNew = pricePlanMatrixColumnService.findByCode(pricePlanColumn.getCode());
+									pricePlanColumns.add(pricePlanColumnNew);
+								}
+								priceVersionNew.setColumns(pricePlanColumns);
+							}
+							
+							if(priceVersion.getLines() != null) {
+								Set<PricePlanMatrixLine> lines = new HashSet<>();
+								for(PricePlanMatrixLine pricePlanMatrixLine:priceVersion.getLines()){
+									PricePlanMatrixLine pricePlanMatrixLineNew = pricePlanMatrixLineService.findById(pricePlanMatrixLine.getId());
+									lines.add(pricePlanMatrixLineNew);
+								}
+								priceVersionNew.setLines(lines);
+							}
+							
+							priceVersionNew.setPricePlanMatrix(pricePlanMatrixNew);
+							pricePlanMatrixVersionService.create(priceVersionNew);
+							
 							if(priceVersion.getTradingPricePlanVersions() != null) {
 								Set<TradingPricePlanVersion> tradingPricePlanVersions = new HashSet<>();
 								for (TradingPricePlanVersion tradingPricePlanVersion : priceVersion.getTradingPricePlanVersions()) {
@@ -235,17 +242,17 @@ public class ChargeTemplateServiceAll extends BusinessService<ChargeTemplate> {
 								}
 								priceVersionNew.setTradingPricePlanVersions(tradingPricePlanVersions);
 							}
-		            	}
-	        		}
-	        		pricePlanMatrixNew.getChargeTemplates().add(duplicateChargeTemplate);
-	        		duplicatedPricePlanMatrixes.add(pricePlanMatrixNew);
-	        	}
-	        	duplicateChargeTemplate.setPricePlans(duplicatedPricePlanMatrixes);
-	        }
+						}
+					}
+					pricePlanMatrixNew.getChargeTemplates().add(duplicateChargeTemplate);
+					duplicatedPricePlanMatrixes.add(pricePlanMatrixNew);
+				}
+				duplicateChargeTemplate.setPricePlans(duplicatedPricePlanMatrixes);
+			}
 		} catch (Exception e) {
-            log.error("Error when trying to cloneBean chargeTemplate : ", e);
+			log.error("Error when trying to cloneBean chargeTemplate : ", e);
 			throw new BusinessApiException(e.getMessage());
-        }
+		}
 		return duplicateChargeTemplate;
 	}
 

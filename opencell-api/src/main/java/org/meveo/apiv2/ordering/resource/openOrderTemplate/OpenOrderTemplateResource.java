@@ -30,7 +30,7 @@ import org.meveo.apiv2.ordering.resource.order.Order;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
-@Path("ordering/openOrderTemplates")
+@Path("v2/ordering/openOrderTemplates")
 @Produces({ "application/json"})
 @Consumes({ "application/json"})
 public interface OpenOrderTemplateResource {

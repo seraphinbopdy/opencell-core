@@ -5,10 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.inject.Inject;
-
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.admin.partitioning.EdrPartitionLog;
@@ -20,6 +16,10 @@ import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.service.tech.EdrPartitionLogService;
 import org.meveo.service.tech.RtPartitionLogService;
 import org.meveo.service.tech.WoPartitionLogService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.inject.Inject;
 
 @Stateless
 public class PartitionPurgeJobBean extends BaseJobBean {

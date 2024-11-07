@@ -30,7 +30,6 @@ import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
-import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.User;
 import org.meveo.security.client.KeycloakAdminClientService;
 import org.meveo.service.base.PersistenceService;

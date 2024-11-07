@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.hibernate.collection.spi.PersistentCollection;
+import org.meveo.api.BaseApi;
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
@@ -20,17 +21,16 @@ import org.meveo.api.exception.MissingParameterException;
 import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.Currency;
-import org.meveo.model.dunning.DunningAction;
-import org.meveo.model.dunning.DunningLevel;
-import org.meveo.model.dunning.DunningLevelChargeTypeEnum;
+import org.meveo.model.dunning.*;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.service.admin.impl.CurrencyService;
 import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.payments.impl.DunningActionService;
 import org.meveo.service.payments.impl.DunningLevelService;
+import org.meveo.service.payments.impl.DunningSettingsService;
 
-public class DunningLevelApiService implements ApiService<DunningLevel> {
+public class DunningLevelApiService extends BaseApi implements ApiService<DunningLevel> {
 
     @Inject
     private GlobalSettingsVerifier globalSettingsVerifier;
@@ -46,6 +46,9 @@ public class DunningLevelApiService implements ApiService<DunningLevel> {
 
     @Inject
     private AuditLogService auditLogService;
+
+    @Inject
+    private DunningSettingsService dunningSettingsService;
 
     @Inject
     @CurrentUser
@@ -83,6 +86,19 @@ public class DunningLevelApiService implements ApiService<DunningLevel> {
         if (dunningLevelService.findByCode(newDunningLevel.getCode()) != null) {
             throw new EntityAlreadyExistsException(DunningLevel.class, newDunningLevel.getCode());
         }
+
+        DunningSettings dunningSettings = dunningSettingsService.findLastOne();
+
+        if(dunningSettings != null) {
+            newDunningLevel.setType(dunningSettings.getDunningMode());
+        }
+
+        newDunningLevel.setSoftDecline(Boolean.FALSE);
+
+        if(newDunningLevel.getType().equals(DunningModeEnum.CUSTOMER_LEVEL)) {
+            newDunningLevel.setMinBalanceCurrency(null);
+        }
+
 
         setDefaultValues(newDunningLevel);
         validateParameters(newDunningLevel);
@@ -267,11 +283,6 @@ public class DunningLevelApiService implements ApiService<DunningLevel> {
         }
         if (newDunningLevel.isEndOfDunningLevel() == null) {
             newDunningLevel.setEndOfDunningLevel(Boolean.FALSE);
-        }
-        if (newDunningLevel.getMinBalanceCurrency() == null) {
-            Currency minBalanceCurrency = new Currency();
-            minBalanceCurrency.setCurrencyCode("EUR");
-            newDunningLevel.setMinBalanceCurrency(minBalanceCurrency);
         }
     }
 

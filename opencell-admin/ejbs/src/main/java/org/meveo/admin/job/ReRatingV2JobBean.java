@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -24,6 +25,7 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.job.Job;
+import org.meveo.service.job.TablesPartitioningService;
 
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
@@ -41,6 +43,9 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	@MeveoJpa
 	private EntityManagerWrapper emWrapper;
 	
+	@Inject
+	TablesPartitioningService tablesPartitioningService;
+	
 	private EntityManager entityManager;
 
 	private StatelessSession statelessSession;
@@ -53,6 +58,8 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	
     @Inject
     private ReratingService reratingService;
+
+    private String lastEDRPartition;
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -77,7 +84,9 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 			nbThreads = (long) Runtime.getRuntime().availableProcessors();
 		}
 
-		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_NR_ITEMS_PER_TX, 10000);
+		lastEDRPartition = getOperationDate(jobInstance);
+		
+		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_NR_ITEMS_PER_TX, 10000L);
 		
 		entityManager = emWrapper.getEntityManager();
 		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();
@@ -131,7 +140,19 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	private void rerateByGroup(List<Long> reratingTree, JobExecutionResultImpl jobExecutionResult) {
     	final int maxValue = ParamBean.getInstance().getPropertyAsInteger("database.number.of.inlist.limit", reratingService.SHORT_MAX_VALUE);
     	List<List<Long>> subList = partition(reratingTree, maxValue);
-    	subList.forEach(ids -> reratingService.applyMassRerate(ids, useSamePricePlan, jobExecutionResult));
+    	
+		String edrDateCondition = lastEDRPartition != null ? " AND edr.eventDate>'" + lastEDRPartition+"'" : "";
+		subList.forEach(ids -> reratingService.applyMassRerate(ids, useSamePricePlan, jobExecutionResult, edrDateCondition));
+	}
+
+	private String getOperationDate(JobInstance jobInstance) {
+		String operationDateConfig = (String) this.getParamOrCFValue(jobInstance,
+				ReRatingV2Job.CF_OPERATIONS_STARTING_DATE, ReRatingV2Job.NO_DATE_LIMITE);
+		boolean useLimitDate = !operationDateConfig.equals(ReRatingV2Job.NO_DATE_LIMITE)
+				&& CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate("edr"));
+		return useLimitDate ? 
+				(ReRatingV2Job.USE_LAST_PARTITION.equals(operationDateConfig) ? tablesPartitioningService.getLastPartitionStartingDateAsString("edr") : operationDateConfig)
+				: null;
 	}
 
 
@@ -172,5 +193,10 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		Object[] count = (Object[]) entityManager.createNativeQuery("select sum(count_wo), count(rr.id) from " + RatingCancellationJobBean.MAIN_VIEW_NAME +" rr LEFT JOIN "+RatingCancellationJobBean.BILLED_VIEW_NAME+" bil ON rr.id = bil.id WHERE bil.id IS NULL").getSingleResult();
 		nrOfInitialWOs = count[0] != null ? ((Number) count[0]).longValue() : 0;
 	}
+
+	@Override
+    protected boolean isProcessItemInNewTx() {
+        return false;
+    }
 
 }

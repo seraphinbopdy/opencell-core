@@ -28,6 +28,7 @@ import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableCFEntity;
 import org.meveo.model.ExportIdentifier;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.billing.InvoiceCategory;
@@ -63,6 +64,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @Cacheable
 @CustomFieldEntity(cftCodePrefix = "DiscountPlanItem", inheritCFValuesFrom = { "discountPlan" })
 @ExportIdentifier({ "discountPlan.code", "code" })

@@ -14,6 +14,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.logging.WsRestApiInterceptor;
@@ -24,6 +25,7 @@ import org.meveo.apiv2.dunning.service.DunningPolicyLevelApiService;
 import org.meveo.apiv2.generic.common.LinkGenerator;
 import org.meveo.apiv2.report.ImmutableSuccessResponse;
 import org.meveo.apiv2.report.SuccessResponse;
+import org.meveo.model.dunning.DunningModeEnum;
 import org.meveo.model.dunning.DunningPolicyLevel;
 import org.meveo.model.dunning.DunningPolicyRule;
 import org.meveo.service.audit.logging.AuditLogService;
@@ -72,15 +74,22 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
                     .entity("Policy name is missing")
                     .build();
         }
-        if (dunningPolicy.getDunningPolicyLevels() == null || dunningPolicy.getDunningPolicyLevels().isEmpty()) {
+		var dunningSetting = dunningSettingsService.findLastOne();
+        if (CollectionUtils.isEmpty(dunningPolicy.getDunningPolicyLevels()) && ( dunningSetting == null || dunningSetting.getDunningMode() == DunningModeEnum.INVOICE_LEVEL)) {
             throw new BadRequestException("Policy levels are missing");
         }
 
         // Check the maximum number of dunning levels per dunning policy
-        Integer maxNumberOfDunningLevelsByDunningPolicy = dunningSettingsService.getMaxNumberOfDunningLevels();
-        if(maxNumberOfDunningLevelsByDunningPolicy != null && dunningPolicy.getDunningPolicyLevels().size() > maxNumberOfDunningLevelsByDunningPolicy) {
-            throw new NotFoundException("The maximum number of dunning levels per policy is exceeded - The maximum number is " + maxNumberOfDunningLevelsByDunningPolicy);
-        }
+	    if(dunningSetting == null || dunningSetting.getDunningMode() == DunningModeEnum.INVOICE_LEVEL) {
+		    Integer maxNumberOfDunningLevelsByDunningPolicy = dunningSettingsService.getMaxNumberOfDunningLevels();
+		    if (maxNumberOfDunningLevelsByDunningPolicy != null && dunningPolicy.getDunningPolicyLevels().size() > maxNumberOfDunningLevelsByDunningPolicy) {
+			    throw new NotFoundException("The maximum number of dunning levels per policy is exceeded - The maximum number is " + maxNumberOfDunningLevelsByDunningPolicy);
+		    }
+	    }
+		
+		if(dunningSetting != null &&  dunningSetting.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL && CollectionUtils.isNotEmpty(dunningPolicy.getDunningPolicyLevels())) {
+			throw  new BadRequestException("No reminder can be configured or executed on this dunning mode");
+		}
 
         org.meveo.model.dunning.DunningPolicy savedEntity = dunningPolicyApiService.create(mapper.toEntity(dunningPolicy));
         int totalDunningLevels = 0;
@@ -120,7 +129,7 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
             actionStatus.setStatus(ActionStatusEnum.SUCCESS);
             actionStatus.setMessage("Entity successfully created");
             actionStatus.setEntityId(savedEntity.getId());
-            return Response.ok(LinkGenerator.getUriBuilderFromResource(DunningPolicyResource.class, dunningPolicy.getId())
+            return Response.created(LinkGenerator.getUriBuilderFromResource(DunningPolicyResource.class, dunningPolicy.getId())
                     .build())
                     .entity(actionStatus)
                     .build();
@@ -137,7 +146,10 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
         if (dunningPolicyEntity == null) {
             throw new NotFoundException("Dunning policy with id " + dunningPolicyId + " does not exits");
         }
-
+		var dunningSetting = dunningSettingsService.findLastOne();
+		if(dunningSetting != null &&  dunningSetting.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL && CollectionUtils.isNotEmpty(dunningPolicyInput.getDunningPolicyLevels())) {
+			throw  new BadRequestException("No reminder can be configured or executed on this dunning mode");
+		}
         // Check the maximum number of dunning levels per dunning policy
         Integer maxNumberOfDunningLevelsByDunningPolicy = dunningSettingsService.getMaxNumberOfDunningLevels();
         if(dunningPolicyInput.getDunningPolicyLevels().size() > maxNumberOfDunningLevelsByDunningPolicy) {

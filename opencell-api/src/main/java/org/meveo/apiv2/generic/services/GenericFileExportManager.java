@@ -375,7 +375,7 @@ public class GenericFileExportManager {
         } else if (StringUtils.isNotBlank(decimalSeparator)) {
         	if (value instanceof Long || value instanceof BigDecimal || value instanceof Double || value instanceof Float || value instanceof Integer) {
                 DecimalFormatSymbols symbols = ",".equals(decimalSeparator) ? new DecimalFormatSymbols(Locale.FRENCH) : new DecimalFormatSymbols(Locale.ENGLISH);
-                DecimalFormat formatter = new DecimalFormat("#.##", symbols);
+                DecimalFormat formatter = new DecimalFormat("0.00", symbols);
                 formatter.setGroupingUsed(false);
                 return formatter.format(value);
             }
@@ -472,7 +472,9 @@ public class GenericFileExportManager {
         // If the map is not empty then save As Record to export - CSV, EXCEL or PDF
         if (!map.isEmpty()) {
             String fieldsSeparator = advancedSettingsApiService.findByCode("standardExports.fieldsSeparator").map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).orElse(";");
-            Path filePath = saveAsRecord(filename, map, fileType, fieldDetails, orderedColumn, locale, fieldsSeparator, null, null);
+            String decimalSeparator = advancedSettingsApiService.findByCode("standardExports.decimalSeparator").map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).orElse(".");
+            String fileNameExtension = advancedSettingsApiService.findByCode("standardExports.fileNameExtension").map(AdvancedSettings::getValue).filter(value -> !value.isEmpty()).orElse(null);
+            Path filePath = saveAsRecord(filename, map, fileType, fieldDetails, orderedColumn, locale, fieldsSeparator, decimalSeparator, fileNameExtension);
             return filePath == null ? null : filePath.toString();
         }
 

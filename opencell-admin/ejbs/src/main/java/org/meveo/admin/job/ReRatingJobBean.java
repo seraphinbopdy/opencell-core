@@ -24,11 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
-import jakarta.inject.Inject;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.model.crm.EntityReferenceWrapper;
@@ -36,6 +31,11 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.billing.impl.WalletOperationService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job implementation to rerate wallet operations

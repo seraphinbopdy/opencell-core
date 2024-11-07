@@ -24,11 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.TypedQuery;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.customEntities.CustomEntityInstance;
@@ -38,9 +33,14 @@ import org.meveo.model.generic.wf.WFStatus;
 import org.meveo.model.generic.wf.WorkflowInstance;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.filter.FilterService;
+import org.meveo.service.wf.WorkflowService;
 
 import com.google.common.collect.Maps;
-import org.meveo.service.wf.WorkflowService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
 @Stateless
 public class WorkflowInstanceService extends PersistenceService<WorkflowInstance> {
@@ -59,7 +59,7 @@ public class WorkflowInstanceService extends PersistenceService<WorkflowInstance
 
     public WorkflowInstance findByEntityIdAndGenericWorkflow(Long entityInstanceId, GenericWorkflow genericWorkflow) throws BusinessException {
         TypedQuery<WorkflowInstance> query = getEntityManager()
-            .createQuery("select wi from " + entityClass.getSimpleName() + " wi where wi.entityInstanceId = :entityInstanceId and wi.genericWorkflow = :genericWorkflow",
+            .createQuery("select wi from WorkflowInstance wi where wi.entityInstanceId = :entityInstanceId and wi.genericWorkflow = :genericWorkflow",
                 WorkflowInstance.class)
             .setParameter("entityInstanceId", entityInstanceId).setParameter("genericWorkflow", genericWorkflow).setMaxResults(1);
 

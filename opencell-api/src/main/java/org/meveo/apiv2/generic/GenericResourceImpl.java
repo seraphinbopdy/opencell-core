@@ -33,6 +33,7 @@ import org.meveo.apiv2.generic.services.PersistenceServiceHelper;
 import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
@@ -146,10 +147,11 @@ public class GenericResourceImpl implements GenericResource {
     }
 
     @Override
-    public Response getFullListEntities(boolean onlyBusinessEntities, boolean withFullName) {
+    public Response getFullListEntities(boolean onlyBusinessEntities, boolean withFullName, boolean onlyHugeEntities) {
 
-        List<String> entities = JaxRsActivatorApiV2.ENTITIES_LIST.stream().filter(aClass ->
-                (!onlyBusinessEntities || BusinessEntity.class.isAssignableFrom(aClass)))
+        List<String> entities = JaxRsActivatorApiV2.ENTITIES_LIST.stream()
+                                                                    .filter(aClass -> (!onlyBusinessEntities || BusinessEntity.class.isAssignableFrom(aClass))
+                                                                                        && (!onlyHugeEntities || aClass.isAnnotationPresent(HugeEntity.class)))
                 . map(aClass -> withFullName ? aClass.getCanonicalName(): aClass.getSimpleName()).collect(Collectors.toList());
 
         return Response.ok().entity(Map.of("entities", entities)).type(MediaType.APPLICATION_JSON_TYPE).build();

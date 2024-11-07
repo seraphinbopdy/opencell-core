@@ -7,12 +7,19 @@ public class ImportRejectionCodeConfig {
     private final String base64Csv;
     private final boolean ignoreLanguageErrors;
     private final RejectionCodeImportMode mode;
+    private String fieldSeparator;
 
     public ImportRejectionCodeConfig(String base64Csv,
                                      boolean ignoreLanguageErrors, RejectionCodeImportMode mode) {
         this.base64Csv = base64Csv;
         this.ignoreLanguageErrors = ignoreLanguageErrors;
         this.mode = mode;
+    }
+    
+    public ImportRejectionCodeConfig(String base64Csv,
+                                     boolean ignoreLanguageErrors, RejectionCodeImportMode mode, String fieldSeparator) {
+        this(base64Csv, ignoreLanguageErrors, mode);
+        this.fieldSeparator = fieldSeparator;
     }
 
     public String getBase64Csv() {
@@ -25,5 +32,9 @@ public class ImportRejectionCodeConfig {
 
     public RejectionCodeImportMode getMode() {
         return mode;
+    }
+    
+    public String getFieldSeparator() {
+        return fieldSeparator;
     }
 }

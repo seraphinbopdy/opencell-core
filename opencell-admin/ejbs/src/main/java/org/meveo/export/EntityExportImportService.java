@@ -2338,38 +2338,42 @@ public class EntityExportImportService implements Serializable {
     private File actualizeVersionOfExportFile(File sourceFile, String sourceFilename, String sourceVersion) throws IOException, TransformerException {
         log.debug("Actualizing the version of export file {}. Current version is {}", sourceFilename, sourceVersion);
 
-        Source source = null;
-        ZipInputStream zis = null;
-        // Handle zip file
-        if (sourceFilename.endsWith(".zip")) {
-            zis = new ZipInputStream(new FileInputStream(sourceFile));
-            zis.getNextEntry();
-            source = new StreamSource(zis);
-        } else {
-            source = new StreamSource(sourceFile);
-        }
-
+        Source source;
         File finalFile = null;
         String finalVersion = null;
-        List<File> tempFiles = new ArrayList<File>();
+        List<File> tempFiles = new ArrayList<>();
         TransformerFactory factory = TransformerFactory.newInstance();
-        for (Entry<String, String> changesetInfo : getApplicableExportModelVersionChangesets(sourceVersion).entrySet()) {
-            String changesetVersion = changesetInfo.getKey();
-            String changesetFile = changesetInfo.getValue();
-            File tempFile = File.createTempFile(FilenameUtils.getBaseName(sourceFilename) + "_" + changesetVersion, ".xml");
-            tempFiles.add(tempFile);
-            log.trace("Transforming {} to version {}, targetFileName {}", sourceFilename, changesetVersion, tempFile.getAbsolutePath());
-            try {
-                Transformer transformer = factory.newTransformer(new StreamSource(this.getClass().getResourceAsStream("/" + changesetFile)));
-                transformer.setParameter("version", changesetVersion);
-                transformer.transform(source, new StreamResult(tempFile));
-            } catch (TransformerException e) {
-                log.error("Failed to transform {} to version {}, targetFileName {}", sourceFilename, changesetVersion, tempFile.getAbsolutePath(), e);
-                throw e;
+        factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true);
+        factory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
+        factory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalStylesheet", "");
+
+        // Handle zip file with try-with-resources
+        try (ZipInputStream zis = sourceFilename.endsWith(".zip") ? new ZipInputStream(new FileInputStream(sourceFile)) : null) {
+            if (zis != null) {
+                zis.getNextEntry();
+                source = new StreamSource(zis);
+            } else {
+                source = new StreamSource(sourceFile);
             }
-            source = new StreamSource(tempFile);
-            finalFile = tempFile;
-            finalVersion = changesetVersion;
+
+            for (Entry<String, String> changesetInfo : getApplicableExportModelVersionChangesets(sourceVersion).entrySet()) {
+                String changesetVersion = changesetInfo.getKey();
+                String changesetFile = changesetInfo.getValue();
+                File tempFile = File.createTempFile(FilenameUtils.getBaseName(sourceFilename) + "_" + changesetVersion, ".xml");
+                tempFiles.add(tempFile);
+                log.trace("Transforming {} to version {}, targetFileName {}", sourceFilename, changesetVersion, tempFile.getAbsolutePath());
+                try {
+                    Transformer transformer = factory.newTransformer(new StreamSource(this.getClass().getResourceAsStream("/" + changesetFile)));
+                    transformer.setParameter("version", changesetVersion);
+                    transformer.transform(source, new StreamResult(tempFile));
+                } catch (TransformerException e) {
+                    log.error("Failed to transform {} to version {}, targetFileName {}", sourceFilename, changesetVersion, tempFile.getAbsolutePath(), e);
+                    throw e;
+                }
+                source = new StreamSource(tempFile);
+                finalFile = tempFile;
+                finalVersion = changesetVersion;
+            }
         }
 
         // Remove intermediary temp files except the final one
@@ -2381,10 +2385,8 @@ public class EntityExportImportService implements Serializable {
                 log.error("Failed to delete a temp file {}", file.getAbsolutePath(), e);
             }
         }
-        if (zis != null)
-            zis.close();
-        log.info("Actualized the version of export file {} from {} to {} version", sourceFilename, sourceVersion, finalVersion);
 
+        log.info("Actualized the version of export file {} from {} to {} version", sourceFilename, sourceVersion, finalVersion);
         return finalFile;
     }
 

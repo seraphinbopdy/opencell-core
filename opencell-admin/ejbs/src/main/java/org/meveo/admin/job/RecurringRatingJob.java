@@ -21,11 +21,6 @@ package org.meveo.admin.job;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
-import jakarta.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.RecurringChargeInstance;
@@ -37,6 +32,11 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.job.Job;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job definition to apply recurring charges for next billing cycle

@@ -1,5 +1,11 @@
 package org.meveo.api.generics.filter.filtermapper;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
 import org.meveo.api.generics.filter.FilterMapper;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.EntityReferenceWrapper;
@@ -10,12 +16,6 @@ import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 public class CustomFieldMapper extends FilterMapper {
     private final Function<Class, PersistenceService> serviceFunction;

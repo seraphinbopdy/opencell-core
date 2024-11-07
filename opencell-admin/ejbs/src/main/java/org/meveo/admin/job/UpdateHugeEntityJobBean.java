@@ -17,6 +17,17 @@
  */
 package org.meveo.admin.job;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.meveo.admin.async.SynchronizedIterator;
+import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.IEntity;
+import org.meveo.model.billing.BatchEntity;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.BatchEntityService;
@@ -31,16 +42,45 @@ import jakarta.inject.Inject;
  * @since 15.1.0
  */
 @Stateless
-public class UpdateHugeEntityJobBean extends BaseJobBean {
+public class UpdateHugeEntityJobBean extends IteratorBasedScopedJobBean<Map.Entry<BatchEntity, IEntity>> {
 
     private static final long serialVersionUID = 1L;
 
     @Inject
     private BatchEntityService batchEntityService;
 
+    private Set<BatchEntity> processedBatchEntities;
+
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
+        String paramOrCFValue = (String) getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_PRE_UPDATE_EL);
         initJob(jobExecutionResult, jobInstance);
-        batchEntityService.updateHugeEntity(jobExecutionResult);
+        if (!StringUtils.isBlank(paramOrCFValue)) {
+            super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, this::updateWithCheck, null, null, this::finalizeProcess);
+        } else {
+            batchEntityService.checkAndUpdateHugeEntity(jobExecutionResult);
+    }
+    }
+
+    private void finalizeProcess(JobExecutionResultImpl jobExecutionResult) {
+
+        log.info("Finalizing process for job {}", jobExecutionResult.getJobInstance().getId());
+        processedBatchEntities.forEach(be -> batchEntityService.finalizeProcess(jobExecutionResult, be));
+        processedBatchEntities.clear();
+
+    }
+
+    private void updateWithCheck(Map.Entry<BatchEntity, IEntity> entry, JobExecutionResultImpl jobExecutionResult) {
+        try {
+            IEntity iEntity = entry.getValue();
+            if (!batchEntityService.checkAndUpdateHugeEntity(iEntity, jobExecutionResult)) {
+                jobExecutionResult.unRegisterSucces();
+                jobExecutionResult.registerError(iEntity.getId(), "Entity " + iEntity.getId() + " was not updated because the pre update EL returned false");
+            }
+        } catch (Exception e) {
+            log.error(String.format("Failed to update entity %s", entry.getValue().getId()), e);
+            jobExecutionResult.unRegisterSucces();
+            jobExecutionResult.registerError(entry.getValue().getId(), e.getMessage());
+        }
     }
 
     /**
@@ -62,5 +102,49 @@ public class UpdateHugeEntityJobBean extends BaseJobBean {
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_USING_VIEW, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_USING_VIEW));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_OPEN_CURSOR, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_OPEN_CURSOR));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_PRE_UPDATE_EL, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_PRE_UPDATE_EL));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.BATCHES_TO_PROCESS, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.BATCHES_TO_PROCESS));
     }
+
+    private Optional<Iterator<Map.Entry<BatchEntity, IEntity>>> initJobAndGetDataToProcess(JobExecutionResultImpl jobExecutionResult) {
+        // pretreatment
+
+        // fetch entities to process based batch entities waiting for processing
+        return getIterator(jobExecutionResult);
+    }
+
+    /**
+     * Get data to process from the batch entities
+     *
+     * @param jobExecutionResult the job execution result
+     * @param jobItemsLimit      the job items limit
+     * @return An iterator over a list of entities to process
+     */
+    @Override
+    Optional<Iterator<Map.Entry<BatchEntity, IEntity>>> getSynchronizedIteratorWithLimit(JobExecutionResultImpl jobExecutionResult, int jobItemsLimit) {
+
+        List<BatchEntity> batchEntitiesToProcess = batchEntityService.getBatchEntitiesToProcess(jobExecutionResult);
+        Class<? extends IEntity> hugeEntityClass = batchEntityService.getHugeEntityClass(jobExecutionResult);
+
+        String defaultFilter = (String) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER);
+        boolean isCaseSensitive = Boolean.TRUE.equals(jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE));
+
+
+        // Get IEntity to process from each BatchEntity and merge them in a unique list to process
+        List<Map.Entry<BatchEntity, IEntity>> entitiesToProcess = batchEntitiesToProcess.stream()
+                .flatMap(be -> batchEntityService.getDataToProcessByBatchEntity(be, hugeEntityClass, defaultFilter, isCaseSensitive)
+                        .stream()
+                        .map(ie -> Map.entry(be, ie)))
+                .collect(Collectors.toList());
+
+        processedBatchEntities = entitiesToProcess.stream().map(Map.Entry::getKey).collect(Collectors.toSet());
+
+        return Optional.of(new SynchronizedIterator<>(entitiesToProcess));
+    }
+
+    @Override
+    Optional<Iterator<Map.Entry<BatchEntity, IEntity>>> getSynchronizedIterator(JobExecutionResultImpl jobExecutionResult) {
+        return getSynchronizedIteratorWithLimit(jobExecutionResult, 0);
+    }
+
 }

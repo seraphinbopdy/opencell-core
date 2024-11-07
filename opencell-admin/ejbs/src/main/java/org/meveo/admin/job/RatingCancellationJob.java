@@ -1,11 +1,11 @@
 package org.meveo.admin.job;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-
+import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.model.billing.BatchEntity;
@@ -17,7 +17,12 @@ import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
+import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.job.Job;
+import org.meveo.service.job.TablesPartitioningService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class RatingCancellationJob extends Job {
@@ -27,6 +32,15 @@ public class RatingCancellationJob extends Job {
 	public static final String CF_INVOICE_LINES_NR_RTS_PER_TX = "JobInstance_RatingCancellationJob_MaxRTsPerTransaction";
 
 	public static final String CF_USE_EXISTING_VIEWS = "JobInstance_RatingCancellationJob_UseExistingViews";
+	
+	public static final String CF_OPERATIONS_STARTING_DATE="CF_OPERATIONS_STARTING_DATE";
+	
+	public static final String USE_LAST_PARTITION="LAST PARTITION DATE";
+	
+	public static final String NO_DATE_LIMITE="NO DATE LIMITE";
+	
+	@Inject
+	private TablesPartitioningService tablesPartitioningService; 
 
     /**
      * To limit the scope of wallet operations to rerate.
@@ -64,6 +78,9 @@ public class RatingCancellationJob extends Job {
                 "tab:Configuration:0;fieldGroup:Configuration:0;field:2", "100000", true, JOB_INSTANCE_RATING_CANCELLATION_JOB));
         result.put(CF_USE_EXISTING_VIEWS, CustomFieldTemplateUtils.buildCF(CF_USE_EXISTING_VIEWS, resourceMessages.getString("jobExecution.useExistingViews"), CustomFieldTypeEnum.BOOLEAN,
                 "tab:Configuration:0;fieldGroup:Configuration:0;field:3", "true", JOB_INSTANCE_RATING_CANCELLATION_JOB));
+		buildOperationDateCF(result,"wo",4);
+		buildOperationDateCF(result,"rt",5);
+		buildOperationDateCF(result,"edr",6);
 
         CustomFieldTemplate reratingTargetCFTemplate = CustomFieldTemplateUtils.buildCF(CF_RERATING_TARGET,
                 resourceMessages.getString("jobExecution.reratingTarget"), CustomFieldTypeEnum.LIST,
@@ -88,4 +105,27 @@ public class RatingCancellationJob extends Job {
 
         return result;
     }
+
+	private void buildOperationDateCF(Map<String, CustomFieldTemplate> result, String alias, int i) {
+		String cfName = getOperationDateCFName(alias);
+		CustomFieldTemplate cft = CustomFieldTemplateUtils.buildCF(cfName,
+                resourceMessages.getString("jobExecution.operation.starting.date",alias), CustomFieldTypeEnum.LIST,
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:"+i, NO_DATE_LIMITE, false,
+                JOB_INSTANCE_RATING_CANCELLATION_JOB);
+		List<String> values=tablesPartitioningService.listPartitionsStartDate(alias);
+		Map<String, String> options = new LinkedHashMap<>(Map.of(
+                NO_DATE_LIMITE, NO_DATE_LIMITE,
+                USE_LAST_PARTITION, USE_LAST_PARTITION));
+		if(CollectionUtils.isNotEmpty(values)) {
+			values.stream().forEach(item->options.put(item, item));
+		}
+		cft.setListValues(options);
+		cft.setTags(CustomFieldTemplateService.UPDATE_EXISTING);
+        result.put(cfName, cft);
+	}
+
+	public static String getOperationDateCFName(String alias) {
+		String cfName=CF_OPERATIONS_STARTING_DATE+"_"+alias.toUpperCase();
+		return cfName;
+	}
 }

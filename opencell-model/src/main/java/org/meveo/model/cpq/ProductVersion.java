@@ -14,6 +14,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.DatePeriod;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
 import org.meveo.model.cpq.tags.Tag;
 
@@ -48,6 +49,7 @@ import jakarta.validation.constraints.Size;
  * @version 10.0
  */
 @Entity
+@HugeEntity
 @Table(name = "cpq_product_version", uniqueConstraints = @UniqueConstraint(columnNames = { "product_id", "current_version" }))
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_product_version_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "ProductVersion.findByProductAndVersion", query = "SELECT pv FROM ProductVersion pv left join pv.product where pv.product.code=:productCode and pv.currentVersion=:currentVersion"),

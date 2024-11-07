@@ -180,7 +180,7 @@ public class CustomTableApi extends BaseApi {
      * @param cet : CustomEntityTemplate instance
      */
     private void checkCustomEntityUpdatePermissions(CustomEntityTemplate cet) {
-        if (!currentUser.hasRoles(cet.getModifyPermission())) {
+        if (!currentUser.isForcedAuthentication() && !currentUser.hasRoles(cet.getModifyPermission(), "ModifyAllCE")) {
             throw new ActionForbiddenException("User does not have permission to update data on '" + cet.getModifyPermission() + "'");
         }
     }

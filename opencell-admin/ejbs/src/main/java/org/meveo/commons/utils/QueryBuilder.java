@@ -128,6 +128,9 @@ public class QueryBuilder {
 
     private boolean prependSelect = Boolean.TRUE;
 
+    private Random random = new Random();
+
+
     public JoinType getJoinType() {
         return joinType;
     }
@@ -824,19 +827,6 @@ public class QueryBuilder {
      * @param field Field name
      * @param listValue List value to compare to
      * @param condition Comparison type
-     * @return instance of QueryBuilder.
-     */
-    @SuppressWarnings("rawtypes")
-    public QueryBuilder addCriterionInList(String field, List listValue, String condition) {
-        return addCriterionInList(field, listValue, condition);
-    }
-
-    /**
-     * Add a criteria to check field value is in a list passed
-     * 
-     * @param field Field name
-     * @param listValue List value to compare to
-     * @param condition Comparison type
      * @param isFieldValueOptional Is field value optional - a "(field is NULL or ...)" will be added to the criteria
      * @return instance of QueryBuilder.
      */
@@ -1360,6 +1350,12 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder addFieldInSubQuery(String field, String sqlSubQuery) {
+        field = createExplicitInnerJoins(field);
+        addSql(String.format("lower(%s) IN (%s)", field, sqlSubQuery));
+        return this;
+    }
+
     /**
      * Add a criteria to check field value is/not equal to a value e.g. fieldValue=value
      * 
@@ -1705,10 +1701,10 @@ public class QueryBuilder {
      */
     public String convertFieldToParam(String fieldname) {
         fieldname = fieldname.replace(".", "_").replace("(", "_").replace(")", "_").replace(",", "_").replace(" ", "").replace("'", "");
-        StringBuilder newField = new StringBuilder(fieldname);
-        while (params.containsKey(newField.toString())) {
-            newField = new StringBuilder(fieldname).append("_" + String.valueOf(new Random().nextInt(100)));
-        }
+        StringBuilder newField;
+        do {
+            newField = new StringBuilder(fieldname).append("_" + String.valueOf(random.nextInt(100)));
+        } while (params.containsKey(newField.toString()));
         return newField.toString();
     }
 

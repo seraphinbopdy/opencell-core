@@ -54,7 +54,6 @@ import org.meveo.api.security.config.annotation.SecuredBusinessEntityMethod;
 import org.meveo.api.security.filter.ListFilter;
 import org.meveo.api.security.parameter.ObjectPropertyParser;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.model.billing.UntdidPaymentMeans;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.model.document.Document;
 import org.meveo.model.payments.CreditCardTypeEnum;
@@ -384,6 +383,16 @@ public class PaymentMethodApi extends BaseApi {
             validateBankCoordinates(paymentMethodDto);
             return;
         }
+        
+        if(type == PaymentMethodEnum.WIRETRANSFER) {
+            if (paymentMethodDto.getBankCoordinates() != null && StringUtils.isBlank(paymentMethodDto.getBankCoordinates().getAccountOwner())) {
+                missingParameters.add("bankCoordinates.accountOwner");
+            }
+            if (paymentMethodDto.getBankCoordinates() != null && StringUtils.isBlank(paymentMethodDto.getBankCoordinates().getIban())) {
+                missingParameters.add("bankCoordinates.iban");
+            }
+        }
+        handleMissingParameters();
 
     }
 

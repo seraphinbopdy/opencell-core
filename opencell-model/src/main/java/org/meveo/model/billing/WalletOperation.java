@@ -32,6 +32,7 @@ import org.meveo.model.BaseEntity;
 import org.meveo.model.CFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.DatePeriod;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
@@ -89,6 +90,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @CustomFieldEntity(cftCodePrefix = "WalletOperation")
 @Table(name = "billing_wallet_operation")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_wallet_operation_seq"),
@@ -187,7 +189,7 @@ import jakarta.validation.constraints.Size;
         @NamedNativeQuery(name = "WalletOperation.discountWoSummaryForRerating", query = "select wo.id, wo.status, wo.rated_transaction_id from {h-schema}billing_wallet_operation wo where wo.status<>'CANCELED' and wo.discounted_wallet_operation_id in :woIds"),
         @NamedNativeQuery(name = "WalletOperation.woSummaryForRerating", query = "select wo.id as woid, wo.status as wostatus, wo.rated_transaction_id from {h-schema}billing_wallet_operation wo where wo.edr_id in :edrIds and wo.status<>'CANCELED'"),
 
-        @NamedNativeQuery(name = "WalletOperation.massUpdateWithRTInfoFromPendingTable", query = "update {h-schema}billing_wallet_operation wo set status='TREATED', updated=now(), rated_transaction_id=pending.rated_transaction_id from {h-schema}billing_wallet_operation_pending pending where status='OPEN' and wo.id=pending.id"),
+        @NamedNativeQuery(name = "WalletOperation.massUpdateWithRTInfoFromPendingTable", query = "update {h-schema}billing_wallet_operation wo set status='TREATED', updated=NOW(), rated_transaction_id=pending.rated_transaction_id from {h-schema}billing_wallet_operation_pending pending where status='OPEN' and wo.id=pending.id"),
         @NamedNativeQuery(name = "WalletOperation.massUpdateWithRTInfoFromPendingTableOracle", query = "UPDATE (SELECT wo.status, wo.updated, wo.id wo_id, wo.rated_transaction_id rt_id, pending.rated_transaction_id pending_rt_id FROM {h-schema}billing_wallet_operation wo, {h-schema}billing_wallet_operation_pending pending WHERE wo.status = 'OPEN' AND wo.id = pending.id) SET status = 'TREATED', updated = now (), rt_id = pending_rt_id"),
         @NamedNativeQuery(name = "WalletOperation.deletePendingTable", query = "delete from {h-schema}billing_wallet_operation_pending") })
 public class WalletOperation extends CFEntity {
@@ -614,7 +616,8 @@ public class WalletOperation extends CFEntity {
     @Column(name = "sequence")
     private Integer sequence;
 
-    @Transient
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "overrode_price")
     private boolean overrodePrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -1248,6 +1251,7 @@ public class WalletOperation extends CFEntity {
         result.setReratingBatch(reratingBatch);
         result.setOrderInfo(orderInfo);
         result.setAccountingArticle(accountingArticle);
+        result.setOverrodePrice(overrodePrice);
         return result;
     }
 

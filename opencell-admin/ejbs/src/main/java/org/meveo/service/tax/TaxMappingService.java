@@ -18,7 +18,11 @@
 
 package org.meveo.service.tax;
 
-import org.hibernate.Hibernate;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
@@ -55,10 +59,6 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.NoResultException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Tax mapping service implementation.

@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/queryManagement/reportQueries")
+@Path("/v2/queryManagement/reportQueries")
 @Consumes(APPLICATION_JSON)
 @Produces(APPLICATION_JSON)
 public interface ReportQueryResource {

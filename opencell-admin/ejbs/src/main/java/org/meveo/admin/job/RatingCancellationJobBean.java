@@ -28,6 +28,7 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.BatchEntityService;
 import org.meveo.service.job.Job;
+import org.meveo.service.job.TablesPartitioningService;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
@@ -54,6 +55,9 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	@EJB
 	RatingCancellationJobBean cancellationJobBean;
 	
+	@Inject
+	TablesPartitioningService tablesPartitioningService;
+	
 	private EntityManager entityManager;
 
 	private StatelessSession statelessSession;
@@ -62,6 +66,9 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 
 	private Long nrOfInitialWOs = null;
 	
+	private String lastWOPartition;
+	private String lastRTPartition;
+	private String lastEDRPartition;
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -92,9 +99,12 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, RatingCancellationJob.CF_INVOICE_LINES_NR_RTS_PER_TX, 100000L);
 		
 		entityManager = emWrapper.getEntityManager();
-		boolean useExistingViews = (boolean) getParamOrCFValue(jobInstance, RatingCancellationJob.CF_USE_EXISTING_VIEWS, true);
+		boolean useExistingViews = (boolean) getParamOrCFValue(jobInstance, RatingCancellationJob.CF_USE_EXISTING_VIEWS, false);
 
-
+		lastWOPartition = getOperationDate(jobInstance, "wo");
+		lastRTPartition = getOperationDate(jobInstance, "rt");
+		lastEDRPartition = getOperationDate(jobInstance, "edr");
+		
 		String reRatingTarget = (String) this.getParamOrCFValue(jobInstance, ReRatingJob.CF_RERATING_TARGET);
 		List<EntityReferenceWrapper> batchEntityWrappers = (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, ReRatingJob.CF_TARGET_BATCHES);
 		List<Long> targetBatches = CollectionUtils.isNotEmpty(batchEntityWrappers) ? batchEntityWrappers.stream()
@@ -134,6 +144,16 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 						return true;
 					}
 				});
+	}
+
+	private String getOperationDate(JobInstance jobInstance, String alias) {
+		String operationDateConfig = (String) this.getParamOrCFValue(jobInstance,
+				RatingCancellationJob.getOperationDateCFName(alias), RatingCancellationJob.NO_DATE_LIMITE);
+		boolean useLimitDate = !operationDateConfig.equals(RatingCancellationJob.NO_DATE_LIMITE)
+				&& CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate(alias));
+		return useLimitDate ? 
+				( RatingCancellationJob.USE_LAST_PARTITION.equals(operationDateConfig) ? tablesPartitioningService.getLastPartitionStartingDateAsString(alias) : operationDateConfig)
+				: null;
 	}
 
 	private void applyRatingCancellation(List<Object[]> reratingTree, JobExecutionResultImpl jobExecutionResult) {
@@ -220,10 +240,10 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 				+ "	    SUM(CASE WHEN drt.status = 'BILLED' THEN drt.amount_with_tax ELSE 0 END) AS drt_amount_with_tax, SUM(CASE WHEN drt.status = 'BILLED' THEN drt.amount_tax ELSE 0 END) AS drt_amount_tax, SUM(CASE WHEN drt.status = 'BILLED' THEN drt.quantity ELSE 0 END) AS drt_quantity,\n"
 				+ "	    wo.billing_account_id AS ba_id, wo.id/ "+configuredNrPerTx+" as lot, COUNT(1) AS count_WO, ROW_NUMBER() OVER (ORDER BY COUNT(1) / "+configuredNrPerTx+" DESC, wo.billing_account_id) AS id, CASE WHEN il.status = 'BILLED' THEN il.id WHEN dil.status = 'BILLED' THEN dil.id ELSE NULL END AS billed_il\n"
 				+ "	FROM billing_wallet_operation wo\n"
-				+ "		LEFT JOIN billing_rated_transaction rt ON rt.id = wo.rated_transaction_id and rt.status<>'CANCELED'\n"
+				+ "		LEFT JOIN billing_rated_transaction rt ON rt.id = wo.rated_transaction_id "+getRTDateCondition("rt")+" and rt.status<>'CANCELED'\n"
 				+ "		LEFT JOIN billing_invoice_line il ON il.id = rt.invoice_line_id\n"
-				+ "		LEFT JOIN billing_wallet_operation dwo ON wo.id = dwo.discounted_wallet_operation_id\n"
-				+ "		LEFT JOIN billing_rated_transaction drt ON drt.id = dwo.rated_transaction_id  and drt.status<>'CANCELED'\n"
+				+ "		LEFT JOIN billing_wallet_operation dwo ON wo.id = dwo.discounted_wallet_operation_id "+getWODateCondition("dwo")+"\n"
+				+ "		LEFT JOIN billing_rated_transaction drt ON drt.id = dwo.rated_transaction_id "+getRTDateCondition("drt")+" and drt.status<>'CANCELED'\n"
 				+ "		LEFT JOIN billing_invoice_line dil ON dil.id = drt.invoice_line_id\n"
 				+ "	WHERE wo.status = 'TO_RERATE'\n"
 				+ filterSubQuery.toString()
@@ -243,12 +263,12 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 				+ "	    SUM(CASE WHEN tdrt.status = 'BILLED' THEN tdrt.amount_with_tax ELSE 0 END) AS tdrt_amount_with_tax, SUM(CASE WHEN tdrt.status = 'BILLED' THEN tdrt.amount_tax ELSE 0 END) AS tdrt_amount_tax, SUM(CASE WHEN tdrt.status = 'BILLED' THEN tdrt.quantity ELSE 0 END) AS tdrt_quantity,\n"
 				+ "	    CASE WHEN til.status = 'BILLED' THEN til.id WHEN tdil.status = 'BILLED' THEN tdil.id ELSE null END AS billed_il\n"
 				+ "	FROM " + MAIN_VIEW_NAME + " mrt\n"
-				+ "		JOIN rating_edr edr on mrt.billed_il is null and edr.wallet_operation_id = ANY(string_to_array(CASE WHEN mrt.dwo_id IS NULL THEN mrt.wo_id ELSE mrt.wo_id || ',' || mrt.dwo_id END, ',')::bigint[])\n"
-				+ "		LEFT JOIN billing_wallet_operation two ON two.edr_id = edr.id and edr.status<>'CANCELLED'\n"
-				+ "		LEFT JOIN billing_rated_transaction trt ON trt.id = two.rated_transaction_id and trt.status<>'CANCELED'\n"
+				+ "		JOIN rating_edr edr on mrt.billed_il is null "+getEDRDateCondition("edr")+" and edr.wallet_operation_id = ANY(string_to_array(CASE WHEN mrt.dwo_id IS NULL THEN mrt.wo_id ELSE mrt.wo_id || ',' || mrt.dwo_id END, ',')::bigint[])\n"
+				+ "		LEFT JOIN billing_wallet_operation two ON two.edr_id = edr.id "+getWODateCondition("two")+" and edr.status<>'CANCELLED'\n"
+				+ "		LEFT JOIN billing_rated_transaction trt ON trt.id = two.rated_transaction_id "+getRTDateCondition("trt")+" and trt.status<>'CANCELED'\n"
 				+ "		LEFT JOIN billing_invoice_line til ON til.id = trt.invoice_line_id\n"
-				+ "		LEFT JOIN billing_wallet_operation tdwo ON two.id = tdwo.discounted_wallet_operation_id\n"
-				+ "		LEFT JOIN billing_rated_transaction tdrt ON tdrt.id = tdwo.rated_transaction_id  and tdrt.status<>'CANCELED'\n"
+				+ "		LEFT JOIN billing_wallet_operation tdwo ON two.id = tdwo.discounted_wallet_operation_id "+getWODateCondition("tdwo")+"\n"
+				+ "		LEFT JOIN billing_rated_transaction tdrt ON tdrt.id = tdwo.rated_transaction_id "+getRTDateCondition("tdrt")+" and tdrt.status<>'CANCELED'\n"
 				+ "		LEFT JOIN billing_invoice_line tdil ON tdil.id = tdrt.invoice_line_id\n"
 				+ "GROUP BY mrt.id, til.id, tdil.id";
 		
@@ -306,7 +326,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 		String updateQuery = "UPDATE billing_wallet_operation wo\n"
 				+ "	SET status='F_TO_RERATE', updated = CURRENT_TIMESTAMP, reject_reason = 'failed to rerate operation because invoiceLine ' || bil.billed_il || ' already billed' "
 				+ "		FROM " + MAIN_VIEW_NAME + " rr CROSS JOIN unnest(string_to_array(wo_id, ',')) AS to_update JOIN " + BILLED_VIEW_NAME + " bil ON rr.id = bil.id "
-				+ "			WHERE rr.id BETWEEN :min AND :max and wo.id = CAST(to_update AS bigint)";
+				+ "			WHERE rr.id BETWEEN :min AND :max and wo.id = CAST(to_update AS bigint) AND wo.status='TO_RERATE'";
 		cancellationJobBean.runInNewTransaction(min, max, updateQuery, null);
 	}
 	
@@ -315,7 +335,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	            "SET status='CANCELLED', last_updated = CURRENT_TIMESTAMP, reject_Reason='Origin wallet operation has been rerated' " +
 	            "	FROM " + TRIGGERED_VIEW_NAME + " rr CROSS JOIN unnest(string_to_array(edr_id, ',')) AS to_update " +
 	            "		WHERE rr.id BETWEEN :min AND :max " +
-	            "			AND rr.id NOT IN (SELECT id FROM " + BILLED_VIEW_NAME + ") " +
+	            "			AND rr.id NOT IN (SELECT id FROM " + BILLED_VIEW_NAME + ") " +getEDRDateCondition("edr")+
 	            "			AND edr.id = CAST(to_update AS bigint)";
 	    
 	    cancellationJobBean.runInNewTransaction(min, max, updateQuery, null);
@@ -361,4 +381,16 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 		}
 	}
 	
+	private String getWODateCondition(String alias) {
+		return lastWOPartition == null ? "" : " AND " + alias + ".operation_date>'" + lastWOPartition + "'";
+	}
+
+	private String getRTDateCondition(String alias) {
+		return lastRTPartition == null ? "" : " AND " + alias + ".usage_date>'" + lastRTPartition + "'";
+	}
+
+	private String getEDRDateCondition(String alias) {
+		return lastEDRPartition == null ? "" : " AND " + alias + ".event_date>'" + lastEDRPartition + "'";
+	}
+
 }

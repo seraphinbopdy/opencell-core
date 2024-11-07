@@ -20,8 +20,17 @@ package org.meveo.service.billing.impl;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.stream.Collectors.joining;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.meveo.commons.utils.ParamBean.getInstance;
+import static org.meveo.model.billing.BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION;
+import static org.meveo.model.billing.BillingRunAutomaticActionEnum.CANCEL;
+import static org.meveo.model.billing.BillingRunAutomaticActionEnum.CANCEL_RT;
+import static org.meveo.model.billing.BillingRunAutomaticActionEnum.MOVE;
+import static org.meveo.model.billing.BillingRunStatusEnum.DRAFT_INVOICES;
+import static org.meveo.model.billing.BillingRunStatusEnum.POSTVALIDATED;
+import static org.meveo.model.billing.BillingRunStatusEnum.REJECTED;
+import static org.meveo.model.billing.RatedTransactionAction.REOPEN;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -41,18 +50,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import jakarta.ejb.AsyncResult;
-import jakarta.ejb.Asynchronous;
-import jakarta.ejb.EJB;
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
-import jakarta.inject.Inject;
-import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
-
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.async.AmountsToInvoice;
 import org.meveo.admin.async.SubListCreator;
 import org.meveo.admin.exception.BusinessException;
@@ -76,7 +74,6 @@ import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingEntityTypeEnum;
 import org.meveo.model.billing.BillingProcessTypesEnum;
 import org.meveo.model.billing.BillingRun;
-import org.meveo.model.billing.BillingRunAutomaticActionEnum;
 import org.meveo.model.billing.BillingRunList;
 import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.billing.BillingRunTypeEnum;
@@ -87,6 +84,7 @@ import org.meveo.model.billing.MinAmountForAccounts;
 import org.meveo.model.billing.PostInvoicingReportsDTO;
 import org.meveo.model.billing.PreInvoicingReportsDTO;
 import org.meveo.model.billing.RatedTransaction;
+import org.meveo.model.billing.RatedTransactionAction;
 import org.meveo.model.billing.RejectedBillingAccount;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.ThresholdOptionsEnum;
@@ -115,6 +113,16 @@ import org.meveo.service.order.OrderService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
+
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 /**
  * The Class BillingRunService.
@@ -598,7 +606,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
             // Can try canceling again if got stuck in Canceling status for over 5 minutes
         } else if (BillingRunStatusEnum.CANCELLING.equals(billingRun.getStatus()) && (new Date().getTime() - billingRun.getAuditable().getUpdated().getTime()) < 300000) {
             throw new ValidationException("BillingRun #" + billingRunId + " in still in a process of cancelling");
-        } else if (BillingRunStatusEnum.POSTVALIDATED.equals(billingRun.getStatus()) || BillingRunStatusEnum.VALIDATED.equals(billingRun.getStatus())) {
+        } else if (POSTVALIDATED.equals(billingRun.getStatus()) || BillingRunStatusEnum.VALIDATED.equals(billingRun.getStatus())) {
             throw new ValidationException("Cannot cancel a POSTVALIDATED or VALIDATED billingRun #" + billingRunId);
         }
         billingRun.setStatus(BillingRunStatusEnum.CANCELLING);
@@ -842,36 +850,49 @@ public class BillingRunService extends PersistenceService<BillingRun> {
      * Invoicing process for the billingRun, launched by invoicingJob.
      *
      * @param billingRun the billing run to process
-     * @throws Exception the exception
+     * @return billingRun
      */
-    public BillingRun applyAutomaticValidationActions(BillingRun billingRun) {
-        if (BillingRunStatusEnum.REJECTED.equals(billingRun.getStatus()) || 
-                BillingRunStatusEnum.DRAFT_INVOICES.equals(billingRun.getStatus()) ||
-                BillingRunStatusEnum.POSTVALIDATED.equals(billingRun.getStatus())) {
+    public BillingRun applyAutomaticValidationActions(BillingRun billingRun, InvoiceStatusEnum validationStatus) {
+        if (REJECTED.equals(billingRun.getStatus()) ||
+                DRAFT_INVOICES.equals(billingRun.getStatus()) ||
+                POSTVALIDATED.equals(billingRun.getStatus())) {
             List<InvoiceStatusEnum> toMove = new ArrayList<>();
             List<InvoiceStatusEnum> toQuarantine = new ArrayList<>();
             List<InvoiceStatusEnum> toCancel = new ArrayList<>();
-            
-            if (billingRun.getRejectAutoAction() != null && billingRun.getRejectAutoAction().equals(BillingRunAutomaticActionEnum.CANCEL)) {
+            List<InvoiceStatusEnum> toValidate = new ArrayList<>();
+            RatedTransactionAction action = REOPEN;
+
+            if (billingRun.getRejectAutoAction() != null
+                    && (CANCEL.equals(billingRun.getRejectAutoAction()) || CANCEL_RT.equals(billingRun.getRejectAutoAction()))) {
                 toCancel.add(InvoiceStatusEnum.REJECTED);
-            } else if (billingRun.getRejectAutoAction() != null && billingRun.getRejectAutoAction().equals(BillingRunAutomaticActionEnum.MOVE)){
+                action = CANCEL_RT.equals(billingRun.getRejectAutoAction()) ? RatedTransactionAction.CANCEL : REOPEN;
+            } else if (billingRun.getRejectAutoAction() != null && billingRun.getRejectAutoAction().equals(MOVE)){
             	toQuarantine.add(InvoiceStatusEnum.REJECTED);
+            } else if (billingRun.getRejectAutoAction() != null && billingRun.getRejectAutoAction().equals(AUTOMATIC_VALIDATION)){
+            	toValidate.add(InvoiceStatusEnum.REJECTED);
             }
 
-            if (billingRun.getSuspectAutoAction() != null && billingRun.getSuspectAutoAction().equals(BillingRunAutomaticActionEnum.CANCEL)) {
+            if (billingRun.getSuspectAutoAction() != null
+                    && (CANCEL.equals(billingRun.getSuspectAutoAction()) || CANCEL_RT.equals(billingRun.getSuspectAutoAction()))) {
                 toCancel.add(InvoiceStatusEnum.SUSPECT);
-            } else if(billingRun.getSuspectAutoAction() != null && billingRun.getSuspectAutoAction().equals(BillingRunAutomaticActionEnum.MOVE)){
+                action = CANCEL_RT.equals(billingRun.getSuspectAutoAction()) ? RatedTransactionAction.CANCEL : REOPEN;
+            } else if(billingRun.getSuspectAutoAction() != null && billingRun.getSuspectAutoAction().equals(MOVE)){
                 toMove.add(InvoiceStatusEnum.SUSPECT);
+            } else if(billingRun.getSuspectAutoAction() != null && billingRun.getSuspectAutoAction().equals(AUTOMATIC_VALIDATION)){
+                toValidate.add(InvoiceStatusEnum.SUSPECT);
             }
             
-            if (CollectionUtils.isNotEmpty(toMove)) {
+            if (isNotEmpty(toMove)) {
                 billingRun = invoiceService.quarantineSuspectedInvoicesByBR(billingRun);
             }
-            if (CollectionUtils.isNotEmpty(toQuarantine)) {
+            if (isNotEmpty(toQuarantine)) {
                 billingRun = invoiceService.quarantineRejectedInvoicesByBR(billingRun);
             }
-            if (CollectionUtils.isNotEmpty(toCancel)) {
-                billingRun = invoiceService.cancelInvoicesByStatus(billingRun, toCancel);
+            if (isNotEmpty(toCancel)) {
+                billingRun = invoiceService.cancelInvoicesByStatus(billingRun, toCancel, action);
+            }
+            if (isNotEmpty(toValidate)) {
+                invoiceService.validateInvoicesOfBRByStatus(billingRun, toValidate, validationStatus);
             }
         }
         
@@ -882,7 +903,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         if(validationStatus == BillingRunStatusEnum.INVOICES_GENERATED || BillingRunStatusEnum.INVOICES_GENERATED.equals(billingRun.getStatus()) || BillingRunStatusEnum.POSTINVOICED.equals(billingRun.getStatus())) {
             BillingRunStatusEnum status = validationStatus != null ? validationStatus : BillingRunStatusEnum.POSTINVOICED;
             if(!isBillingRunValid(billingRun)) {
-                status = BillingRunStatusEnum.REJECTED;
+                status = REJECTED;
             }
             return status;
         }
@@ -937,7 +958,6 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         if (!billingRun.isSkipValidationScript()) {
             //Not Billing Run Exceptionnel
             if (billingRun.getBillingCycle() != null) {
-                billingRun = refreshOrRetrieve(billingRun);
                 final ScriptInstance billingRunValidationScript = billingRun.getBillingCycle().getBillingRunValidationScript();
                 if(billingRunValidationScript!=null) {
                     ScriptInterface script = scriptInstanceService.getScriptInstance(billingRunValidationScript.getCode());
@@ -1461,7 +1481,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
 
         billingRun = refreshOrRetrieve(billingRun);
 
-        if (billingRun.getStatus() == BillingRunStatusEnum.POSTINVOICED || billingRun.getStatus() == BillingRunStatusEnum.POSTVALIDATED) {
+        if (billingRun.getStatus() == BillingRunStatusEnum.POSTINVOICED || billingRun.getStatus() == POSTVALIDATED) {
             walletOperationService.markToRerateByBR(billingRun);
             cleanBillingRun(billingRun);
         }
@@ -1484,7 +1504,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
 
         BillingRun billingRun = findById(billingRunId);
 
-        if (billingRun.getStatus() == BillingRunStatusEnum.POSTINVOICED || billingRun.getStatus() == BillingRunStatusEnum.POSTVALIDATED || billingRun.getStatus() == BillingRunStatusEnum.CANCELLING) {
+        if (billingRun.getStatus() == BillingRunStatusEnum.POSTINVOICED || billingRun.getStatus() == POSTVALIDATED || billingRun.getStatus() == BillingRunStatusEnum.CANCELLING) {
             cleanBillingRun(billingRun);
         }
 
@@ -1546,7 +1566,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                 quarantineBillingRun.setPrAmountWithTax(BigDecimal.ZERO);
                 quarantineBillingRun.setInvoiceNumber(0);
 
-                quarantineBillingRun.setStatus(BillingRunStatusEnum.REJECTED);
+                quarantineBillingRun.setStatus(REJECTED);
                 quarantineBillingRun.setIsQuarantine(Boolean.TRUE);
                 quarantineBillingRun.setOriginBillingRun(billingRun);
                 quarantineBillingRun.setId(null);

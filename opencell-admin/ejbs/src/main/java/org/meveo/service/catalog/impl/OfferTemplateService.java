@@ -420,7 +420,7 @@ public class OfferTemplateService extends GenericProductOfferingService<OfferTem
 
                 }
             }
-            if(commercialRulesHeader != null) {
+            if(commercialRulesHeader != null && commercialRulesHeader.size() > 0) {
                 offer.setCommercialRules(duplicateCommercialRules(offer, commercialRulesHeader));
             }
 
@@ -571,5 +571,10 @@ public class OfferTemplateService extends GenericProductOfferingService<OfferTem
                 .setParameter("ids", offerTemplateIds)
                 .setParameter("flag", flag)
                 .executeUpdate();
+    }
+
+    public void massCalculateARR() {
+        Query query = getEntityManager().createQuery("update OfferTemplate offer set offer.arr = (select sum(sub.mrr) * 12 from Subscription sub where sub.offer = offer and sub.mrr is not null)");
+        query.executeUpdate();
     }
 }

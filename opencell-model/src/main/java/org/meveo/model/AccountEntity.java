@@ -20,6 +20,7 @@ package org.meveo.model;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.type.NumericBooleanConverter;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.catalog.OneShotChargeTemplate;
 import org.meveo.model.crm.BusinessAccountModel;
@@ -35,6 +36,8 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -52,6 +55,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 5.2
  */
 @Entity
+@HugeEntity
 @ObservableEntity
 @Table(name = "account_entity", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "account_entity_seq"), @Parameter(name = "increment_size", value = "1") })
@@ -134,6 +138,13 @@ public abstract class AccountEntity extends BusinessCFEntity {
      */
     @Column(name = "vat_no", length = 100)
     private String vatNo;
+
+    /**
+     * VAT Validation status
+      */ 
+    @Column(name = "vat_status")
+    @Enumerated(EnumType.STRING)
+    private VatStatusEnum vatStatus = VatStatusEnum.UNKNOWN;
 
     /**
      * Registration number
@@ -248,6 +259,9 @@ public abstract class AccountEntity extends BusinessCFEntity {
     }
 
     public void anonymize(String code) {
+        if (!StringUtils.isBlank(description)) {
+            setDescription(code);
+        }
         if (name != null) {
             name.anonymize(code);
         }
@@ -263,6 +277,14 @@ public abstract class AccountEntity extends BusinessCFEntity {
 
     public void setVatNo(String vatNo) {
         this.vatNo = vatNo;
+    }
+
+    public VatStatusEnum getVatStatus() {
+        return vatStatus;
+    }
+
+    public void setVatStatus(VatStatusEnum vatStatus) {
+        this.vatStatus = vatStatus;
     }
 
     /*

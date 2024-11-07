@@ -14,18 +14,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
 import org.meveo.api.dto.response.PagingAndFiltering;
-import org.meveo.apiv2.payments.ImportRejectionCodeInput;
-import org.meveo.apiv2.payments.PaymentGatewayInput;
-import org.meveo.apiv2.payments.RejectionAction;
-import org.meveo.apiv2.payments.RejectionCode;
-import org.meveo.apiv2.payments.RejectionCodeClearInput;
-import org.meveo.apiv2.payments.RejectionCodeDeleteInput;
-import org.meveo.apiv2.payments.RejectionGroup;
-import org.meveo.apiv2.payments.RejectionPayment;
-import org.meveo.apiv2.payments.SequenceAction;
+import org.meveo.apiv2.payments.*;
 import org.meveo.apiv2.refund.CardRefund;
 
-@Path("/payment")
+@Path("/v2/payment")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface PaymentResource {
@@ -273,5 +265,7 @@ public interface PaymentResource {
 
     @POST
     @Path("/{id}/retry")
-    Response retryRejectedPayment(@PathParam("id") Long paymentId) throws Exception;
+    Response retryRejectedPayment(
+            @PathParam("id") Long paymentId,
+            @Parameter(required = true) RetryPayment retryPayment) throws Exception;
 }

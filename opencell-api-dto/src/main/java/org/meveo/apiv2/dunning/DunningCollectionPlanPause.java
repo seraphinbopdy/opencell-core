@@ -3,6 +3,7 @@ package org.meveo.apiv2.dunning;
 import java.util.Date;
 
 import org.immutables.value.Value;
+import org.immutables.value.Value.Default;
 import org.meveo.apiv2.models.Resource;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -23,5 +24,9 @@ public interface DunningCollectionPlanPause extends Resource {
     @Schema(description = "Pause until date")
 	Date getPauseUntil();
     
-    
+    @Default
+    @Schema(description = "flag to retry a payment on the resume date")
+    default boolean getRetryPaymentOnResumeDate() {
+        return false;
+    }
 }

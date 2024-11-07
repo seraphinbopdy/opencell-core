@@ -764,8 +764,7 @@ public class CommercialRuleHeaderService extends BusinessService<CommercialRuleH
                             stringFieldName = "dateValue";
                             break;
                     }
-                    Query attributeQuery = getEntityManager().createQuery("select a.id from " + QuoteAttribute.class.getName() + " a where a.attribute.code=:attributeCode "
-                            + " and quoteProduct.productVersion.product.code=:productCode");
+                    Query attributeQuery = getEntityManager().createQuery("select a.id from QuoteAttribute a where a.attribute.code=:attributeCode and quoteProduct.productVersion.product.code=:productCode");
                     attributeQuery.setParameter("attributeCode", attributeCode).setParameter("productCode", productCode);
                     List<Long> resultList = (List<Long>) attributeQuery.getResultList();
                     if (!resultList.isEmpty()) {
@@ -787,7 +786,7 @@ public class CommercialRuleHeaderService extends BusinessService<CommercialRuleH
     }
 
     private void updateField(String fieldName, Object sourceAttributeValue, Long id) {
-        Query quoteQuery = getEntityManager().createQuery("update " + QuoteAttribute.class.getName() + " SET " + fieldName + "=:attributeValue where id=:id");
+        Query quoteQuery = getEntityManager().createQuery("update QuoteAttribute SET " + fieldName + "=:attributeValue where id=:id");
         quoteQuery.setParameter("attributeValue", sourceAttributeValue).setParameter("id", id);
         quoteQuery.executeUpdate();
     }

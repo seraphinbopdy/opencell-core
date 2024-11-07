@@ -31,7 +31,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
-@Path("ordering/open-order-quote")
+@Path("v2/ordering/open-order-quote")
 @Produces({"application/json"})
 @Consumes({"application/json"})
 public interface OpenOrderQuoteResource {

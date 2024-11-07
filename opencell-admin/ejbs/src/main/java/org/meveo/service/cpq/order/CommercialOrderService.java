@@ -238,9 +238,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 		        }
 				subscription.setSubscriptionRenewal(offerTemplate != null ? offerTemplate.getSubscriptionRenewal().copy() : null);
 				subscription.setSalesPersonName(order.getSalesPersonName());
-				if(offer.getOfferTemplate() != null) {
-					subscription.setAutoEndOfEngagement(offer.getOfferTemplate().getAutoEndOfEngagement());
-				}
+				subscription.setAutoEndOfEngagement(offerTemplate.getAutoEndOfEngagement());
 				subscription.setPriceList(order.getPriceList());
 				if(offer.getTerminationDate() != null) {
 					subscription.setRenewed(false);
@@ -787,6 +785,13 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 
 	public List<CommercialOrder> findWithInvoicingPlanNotNull() {
 		TypedQuery<CommercialOrder> query = getEntityManager().createNamedQuery("CommercialOrder.findWithInvoicingPlan", CommercialOrder.class);
+		return query.getResultList();
+	}
+	
+	public List<CommercialOrder> findByBillingAccount(Long billingAccountId) {
+		QueryBuilder queryBuilder = new QueryBuilder(CommercialOrder.class, "co");
+		queryBuilder.addCriterionEntity("co.billingAccount.id", billingAccountId);
+		Query query = queryBuilder.getQuery(getEntityManager());
 		return query.getResultList();
 	}
 }

@@ -10,6 +10,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.cpq.trade.CommercialRuleHeader;
 
 import jakarta.persistence.Cacheable;
@@ -34,6 +35,7 @@ import jakarta.validation.constraints.NotNull;
  *
  */
 @Entity
+@HugeEntity
 @CustomFieldEntity(cftCodePrefix = "GroupedAttributes")
 @Table(name = "cpq_grouped_attributes", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_grouped_attributes_seq"), @Parameter(name = "increment_size", value = "1") })

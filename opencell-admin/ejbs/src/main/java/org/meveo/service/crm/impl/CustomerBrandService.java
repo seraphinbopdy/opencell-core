@@ -17,10 +17,10 @@
  */
 package org.meveo.service.crm.impl;
 
-import jakarta.ejb.Stateless;
-
 import org.meveo.model.crm.CustomerBrand;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Customer brand service implementation.

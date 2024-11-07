@@ -25,10 +25,11 @@
 
 package org.meveo.model.jaxb.subscription;
 
+import javax.xml.namespace.QName;
+
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.annotation.XmlElementDecl;
 import jakarta.xml.bind.annotation.XmlRegistry;
-import javax.xml.namespace.QName;
 
 
 /**

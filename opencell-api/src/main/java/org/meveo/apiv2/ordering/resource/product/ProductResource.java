@@ -42,7 +42,7 @@ import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 
-@Path("ordering/products")
+@Path("v2/ordering/products")
 @Produces({ "application/json"})
 @Consumes({ "application/json"})
 public interface ProductResource {

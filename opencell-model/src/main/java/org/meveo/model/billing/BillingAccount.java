@@ -33,6 +33,7 @@ import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AccountEntity;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.IBillableEntity;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.ICustomFieldEntity;
@@ -85,6 +86,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @Cacheable
 @WorkflowedEntity
 @CustomFieldEntity(cftCodePrefix = "BillingAccount", inheritCFValuesFrom = "customerAccount")
@@ -396,6 +398,10 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     @JoinColumn(name = "billing_account_id")
     private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
 
+    /** MRR. */
+    @Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
+    private BigDecimal mrr;
+	
     public List<RegistrationNumber> getRegistrationNumbers() {
         return registrationNumbers;
     }
@@ -895,6 +901,14 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
      */
     public void setPriceList(PriceList priceList) {
         this.priceList = priceList;
+    }
+
+    public BigDecimal getMrr() {
+        return mrr;
+    }
+
+    public void setMrr(BigDecimal mrr) {
+        this.mrr = mrr;
     }
 
     // check if the list of registration numbers is not empty

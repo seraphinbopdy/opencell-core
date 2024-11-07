@@ -37,10 +37,13 @@ import jakarta.ws.rs.core.Application;
 
 /**
  * @author Edward P. Legaspi
+ * 
+ * @deprecated
  **/
-@ApplicationPath("/api/rest")
+// @ApplicationPath("/api/rest")
 @OpenAPIDefinition(security = @SecurityRequirement(name = "auth"))
 @SecurityScheme(type = SecuritySchemeType.HTTP, scheme = "basic", paramName = "auth")
+@Deprecated(since = "17.0.0", forRemoval = true)
 public class JaxRsActivator extends Application {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

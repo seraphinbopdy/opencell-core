@@ -9,6 +9,12 @@ import static org.meveo.commons.utils.StringUtils.isNotBlank;
 import static org.meveo.model.catalog.OneShotChargeTemplateTypeEnum.OTHER;
 import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.account.ApplyOneShotChargeInstanceRequestDto;
 import org.meveo.apiv2.accounts.ApplyOneShotChargeListInput;
@@ -30,12 +36,6 @@ import org.meveo.service.payments.impl.PaymentHistoryService;
 import org.meveo.service.payments.impl.PaymentRejectionActionReportService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.RejectedPaymentService;
-
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public class ApplyChargePaymentScript extends Script {
 

@@ -25,6 +25,7 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.meveo.commons.utils.NumberUtils.computeDerivedAmounts;
 import static org.meveo.model.BaseEntity.NB_DECIMALS;
+import static org.meveo.model.billing.RatedTransactionStatusEnum.CANCELED;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -119,6 +120,8 @@ import org.meveo.model.rating.EDR;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.securityDeposit.ArticleSelectionModeEnum;
 import org.meveo.model.securityDeposit.FinanceSettings;
+import org.meveo.service.admin.impl.CurrencyService;
+import org.meveo.service.admin.impl.SellerService;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
@@ -206,9 +209,6 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 
     @Inject
     private MediationSettingService mediationsettingService;
-
-    @Inject
-    private DiscountPlanInstanceService discountPlanInstanceService;
 	
 	@Inject
 	private FinanceSettingsService financeSettingsService;
@@ -218,7 +218,16 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 
     @Inject
     protected ServiceInstanceService serviceInstanceService;
-    
+	
+	@Inject
+	protected SellerService sellerService;
+	
+	@Inject
+	protected CurrencyService currencyService;
+
+    @Inject
+    private RatedTransactionService ratedTransactionService;
+
     /**
      * @param level level enum
      * @param chargeCode charge's code
@@ -370,12 +379,19 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         Integer sortIndex = getSortIndex(walletOperation);
         walletOperation.setSortIndex(sortIndex);
         walletOperation.setEdr(edr);
-        walletOperation.setTradingCurrency(walletOperation.getBillingAccount() != null ? walletOperation.getBillingAccount().getTradingCurrency() : null);
+		if(walletOperation.getBillingAccount() != null) {
+			walletOperation.setTradingCurrency(tradingCurrencyService.findById(walletOperation.getBillingAccount().getTradingCurrency().getId()));
+		}
+		if(chargeInstance.getUserAccount() != null) {
+			var userAccount = userAccountService.findById(chargeInstance.getUserAccount().getId(), Arrays.asList("wallet"));
+			walletOperation.setWallet(userAccount.getWallet());
+		}
+		if(chargeInstance.getCurrency() != null) {
+			var tradingCurrency = tradingCurrencyService.findById(chargeInstance.getCurrency().getId());
+			walletOperation.setCurrency(tradingCurrency.getCurrency());
+		}
 
         RatingResult ratedEDRResult = rateBareWalletOperation(walletOperation, chargeInstance.getAmountWithoutTax(), chargeInstance.getAmountWithTax(), chargeInstance.getCountry().getId(), chargeInstance.getCurrency(), isVirtual);
-	    if(edr != null) {
-		    edr.setWalletOperation(walletOperation);
-	    }
         ChargeTemplate chargeTemplate = chargeInstance.getChargeTemplate();
 
         if (walletOperation.getInputUnitDescription() == null) {
@@ -388,7 +404,9 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             walletOperation.setInvoiceSubCategory(chargeTemplate.getInvoiceSubCategory());
         }
 
-    	applyDiscount(ratedEDRResult, walletOperation, isVirtual);
+        if(BigDecimal.ZERO.compareTo(walletOperation.getAmountWithTax()) < 0 || BigDecimal.ZERO.compareTo(walletOperation.getAmountWithoutTax()) < 0) {
+            applyDiscount(ratedEDRResult, walletOperation, isVirtual);
+        }
         
         return ratedEDRResult;
 
@@ -441,7 +459,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                 fullRatingPeriod, chargeMode, edr, reservation, isVirtual, commercialOrder);
 
         // Do not trigger EDRs for virtual or Scheduled operations
-        if (forSchedule || isVirtual) {
+        if (forSchedule) {
             return ratedEDRResult;
         }
 
@@ -559,7 +577,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                 }
             }
         }
-        if (evaluatEdrVersioning && !triggredEDRs.isEmpty()) {
+        if (evaluatEdrVersioning && !triggredEDRs.isEmpty() && !isVirtual) {
             mediationsettingService.applyEdrVersioningRule(triggredEDRs, null, true);
         }
         return triggredEDRs;
@@ -658,6 +676,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             Seller seller=bareWalletOperation.getSeller()!=null?bareWalletOperation.getSeller():customer.getSeller();
           //Get the list of seller (current and parents)
             List<Seller> sellers = new ArrayList<>();
+			seller = sellerService.findById(seller.getId(), Arrays.asList("seller"));
 			getSeller(seller, sellers);
 			List<Long> sellerIds = sellers.stream().map(Seller::getId).collect(Collectors.toList());
             List<Long> ids = customers.stream().map(Customer::getId).collect(Collectors.toList());
@@ -1207,11 +1226,12 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                     wo.setUnitAmountWithoutTax(priceWithoutTax);
                 }
                 if (ppmVersion.getPriceEL() != null) {
-	                var priceTemp = elUtils.evaluateAmountExpression(ppmVersion.getPriceEL(), wo, wo.getChargeInstance().getUserAccount(), null, priceWithoutTax).setScale(BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
+	                var priceTemp = elUtils.evaluateAmountExpression(ppmVersion.getPriceEL(), wo, wo.getChargeInstance().getUserAccount(), null, priceWithoutTax);
 	                if (priceTemp == null) {
 		                throw new PriceELErrorException("Can't evaluate price for price plan " + pricePlan.getId() + " EL:" + pricePlan.getAmountWithoutTaxEL());
 	                }
-                    if(appProvider.isEntreprise()) {
+	                priceTemp.setScale(BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP);
+	                if(appProvider.isEntreprise()) {
 						priceWithoutTax = priceTemp;
 					} else {
 						priceWithTax = priceTemp;
@@ -1462,7 +1482,12 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             operation.setUnitAmountTax(null);
             operation.setChargeMode(ChargeApplicationModeEnum.RERATING);
 
-            ratingResult=rateBareWalletOperation(operation, null, null, priceplan == null || priceplan.getTradingCountry() == null ? null : priceplan.getTradingCountry().getId(),
+            ChargeInstance chargeInstance = operation.getChargeInstance();
+            if (walletOperationToRerate.getRatedTransaction() != null) {
+                walletOperationToRerate.getRatedTransaction().setStatus(CANCELED);
+                ratedTransactionService.update(walletOperationToRerate.getRatedTransaction());
+            }
+			ratingResult=rateBareWalletOperation(operation, chargeInstance.getAmountWithoutTax(), chargeInstance.getAmountWithTax(), priceplan == null || priceplan.getTradingCountry() == null ? null : priceplan.getTradingCountry().getId(),
                 priceplan != null ? priceplan.getTradingCurrency() : null, false);
 	        applyDiscount(ratingResult, operation, false);
         }

@@ -210,7 +210,7 @@ public class RecurringChargeInstanceService extends BusinessService<RecurringCha
             create(chargeInstance);
         }
 
-        if ((serviceChargeTemplateRecurring.getAccumulatorCounterTemplates() != null && !serviceChargeTemplateRecurring.getAccumulatorCounterTemplates().isEmpty())
+        if (((serviceChargeTemplateRecurring.getAccumulatorCounterTemplates() != null && !serviceChargeTemplateRecurring.getAccumulatorCounterTemplates().isEmpty()) && serviceInstance.getId() != null)
                 || serviceChargeTemplateRecurring.getCounterTemplate() != null) {
             for (CounterTemplate counterTemplate : serviceChargeTemplateRecurring.getAccumulatorCounterTemplates()) {
                 CounterInstance counterInstance = counterInstanceService.counterInstanciation(serviceInstance, counterTemplate, chargeInstance, isVirtual);
@@ -422,6 +422,9 @@ public class RecurringChargeInstanceService extends BusinessService<RecurringCha
             if (recurringChargeInstance.getNextChargeDate() == null) {
                 log.warn("Rating RecurringChargeInstance {} updates its next charge date to null. " +
                         "It'll be no longer rated even is active!", recurringChargeInstance.getId());
+            }
+            if(isVirtual && recurringChargeInstance.getId() != null) {
+                getEntityManager().refresh(recurringChargeInstance);
             }
             return ratingResult;
 

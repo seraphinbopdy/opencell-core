@@ -18,7 +18,10 @@
 
 package org.meveo.service.billing.impl;
 
+import java.util.List;
+
 import org.meveo.model.billing.ChargeInstance;
+import org.meveo.model.billing.CounterInstance;
 import org.meveo.service.base.BusinessService;
 
 import jakarta.ejb.Stateless;
@@ -26,4 +29,7 @@ import jakarta.ejb.Stateless;
 @Stateless
 public class GenericChargeInstanceService extends BusinessService<ChargeInstance> {
 
+    public List<ChargeInstance> findAccumulatorChargeInstances(CounterInstance counterInstance) {
+        return getEntityManager().createNamedQuery("ChargeInstance.listByAccumulatorCounterInstance", ChargeInstance.class).setParameter("counterInstance", counterInstance).getResultList();
+    }
 }

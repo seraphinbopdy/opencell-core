@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.meveo.admin.async.SubListCreator;
@@ -731,7 +734,7 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
 
             ratedTransaction.setRulesContract(contractWithRules);
         }
-
+        ratedTransaction.setInvoicingDate(aggregatedWo.getInvoicingDate());
         applyInvoicingRules(ratedTransaction);
 
         return ratedTransaction;
@@ -1872,6 +1875,7 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 "   order by rt.unitAmountWithoutTax desc";
         List<Map<String, Object>> groupedRTsWithAggregation = getSelectQueryAsMap(query, params);
         groupedRTsWithAggregation.addAll(getNoAggregationRTs(ratedTransactionIds));
+	    sortPositiveGroupedRTsWithAggregation(groupedRTsWithAggregation);
         return groupedRTsWithAggregation;
     }
 
@@ -2392,5 +2396,30 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 .executeUpdate();
     }
 
+	private void sortPositiveGroupedRTsWithAggregation(List<Map<String, Object>> list) {
+		if (CollectionUtils.isNotEmpty(list)) {
+			Collections.sort(list, new Comparator<Map<String, Object>>() {
+				@Override
+				public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+					BigDecimal sum1 = (BigDecimal) o1.get("sum_without_tax");
+					BigDecimal sum2 = (BigDecimal) o2.get("sum_without_tax");
+					var sumwithoutTaxComapre = sum2.compareTo(sum1);
+					if (sumwithoutTaxComapre == 0) {
+						Long discountedRT1 = (Long) o1.get("discounted_ratedtransaction_id");
+						Long discountedRT2 = (Long) o2.get("discounted_ratedtransaction_id");
+						if (discountedRT1 != null && discountedRT2 != null) {
+							return 0;
+						} else if (discountedRT1 != null) {
+							return 1;
+						} else if (discountedRT2 != null) {
+							return -1;
+}
+						return 0;
+					}
+					return sumwithoutTaxComapre;
+				}
+			});
+		}
+	}
 }
 

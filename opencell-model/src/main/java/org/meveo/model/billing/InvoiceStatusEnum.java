@@ -66,11 +66,11 @@ public enum InvoiceStatusEnum {
 
         SUSPECT.id = 2;
         SUSPECT.label = "invoiceStatusEnum.suspect";
-        SUSPECT.previousStats = Arrays.asList(new InvoiceStatusEnum[] { NEW, DRAFT });
+        SUSPECT.previousStats = Arrays.asList(new InvoiceStatusEnum[]{NEW, DRAFT, VALIDATED});
 
         REJECTED.id = 3;
         REJECTED.label = "invoiceStatusEnum.rejected";
-        REJECTED.previousStats = Arrays.asList(new InvoiceStatusEnum[] { DRAFT, NEW, SUSPECT });
+        REJECTED.previousStats = Arrays.asList(new InvoiceStatusEnum[]{DRAFT, NEW, SUSPECT, VALIDATED});
 
         DRAFT.id = 4;
         DRAFT.label = "invoiceStatusEnum.draft";

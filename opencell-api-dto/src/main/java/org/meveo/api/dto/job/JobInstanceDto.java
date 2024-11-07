@@ -55,8 +55,12 @@ public class JobInstanceDto extends EnableBusinessDto {
     /** Following job to execute. */
     @Schema(description = "Following job to execute")
     private String followingJob;
+    
+    /** process next job on error */
+    @Schema(description = "process next job on error")
+    private Boolean processNextJobOnError;
 
-    /** Parameter to job execution. */
+	/** Parameter to job execution. */
     @Schema(description = "Parameter to job execution")
     private String parameter;
 
@@ -143,6 +147,8 @@ public class JobInstanceDto extends EnableBusinessDto {
         if (jobInstance.getFollowingJob() != null) {
             setFollowingJob(jobInstance.getFollowingJob().getCode());
         }
+        
+        setProcessNextJobOnError(jobInstance.isProcessNextJobOnError());
         verboseReport = jobInstance.isVerboseReport();
         jobStatusReportFrequency = jobInstance.getJobStatusReportFrequency();
         limitToNrOfNodes = jobInstance.getLimitToNrOfNodes();
@@ -365,4 +371,12 @@ public class JobInstanceDto extends EnableBusinessDto {
     public void setLimitToNrOfNodes(Integer limitToNrOfNodes) {
         this.limitToNrOfNodes = limitToNrOfNodes;
     }
+    
+    public Boolean getProcessNextJobOnError() {
+		return processNextJobOnError;
+	}
+
+	public void setProcessNextJobOnError(Boolean processNextJobOnError) {
+		this.processNextJobOnError = processNextJobOnError;
+	}
 }

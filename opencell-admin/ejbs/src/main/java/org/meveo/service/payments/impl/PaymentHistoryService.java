@@ -3,6 +3,7 @@
  */
 package org.meveo.service.payments.impl;
 
+import static java.util.Optional.ofNullable;
 import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
 
 import java.util.ArrayList;
@@ -94,7 +95,7 @@ public class PaymentHistoryService extends PersistenceService<PaymentHistory> {
 		paymentHistory.setErrorType(errorType);
 		paymentHistory.setExternalPaymentId(externalPaymentId);
 		paymentHistory.setOperationCategory(payment != null ? OperationCategoryEnum.CREDIT : OperationCategoryEnum.DEBIT );
-		paymentHistory.setSyncStatus(status);
+		paymentHistory.setSyncStatus(ofNullable(status).orElse(PaymentStatusEnum.PENDING));
 		paymentHistory.setPaymentGatewayCode(paymentGatewayCode);
 		paymentHistory.setLastUpdateDate(paymentHistory.getOperationDate());
 		if (payment != null) {
@@ -147,16 +148,16 @@ public class PaymentHistoryService extends PersistenceService<PaymentHistory> {
         }
     }
 
-	public PaymentHistory rejectPaymentHistory(String paymentReference, String rejectionCode, String rejectionComment) {
-		PaymentHistory paymentHistory = findHistoryByPaymentId(paymentReference);
-		if (paymentHistory != null) {
+	public void rejectPaymentHistory(Long paymentId, String rejectionCode, String rejectionComment) {
+		Optional<PaymentHistory> paymentHistoryOptional = findByPaymentId(paymentId);
+		if (paymentHistoryOptional.isPresent()) {
+			PaymentHistory paymentHistory = paymentHistoryOptional.get();
 			paymentHistory.setAsyncStatus(REJECTED);
 			paymentHistory.setLastUpdateDate(new Date());
 			paymentHistory.setErrorCode(rejectionCode);
 			paymentHistory.setErrorMessage(rejectionComment);
 			update(paymentHistory);
 		}
-		return paymentHistory;
 	}
 
 	/**

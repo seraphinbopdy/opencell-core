@@ -30,6 +30,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.SchemaOutputResolver;
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -37,11 +43,6 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-import javax.xml.transform.Result;
-import javax.xml.transform.stream.StreamResult;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 

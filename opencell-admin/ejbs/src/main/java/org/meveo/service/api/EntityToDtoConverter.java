@@ -35,7 +35,6 @@ import org.meveo.api.dto.CustomFieldValueDto;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.EntityReferenceDto;
 import org.meveo.api.dto.LanguageDescriptionDto;
-import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -52,7 +51,6 @@ import org.meveo.service.custom.CustomEntityInstanceService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 
@@ -352,13 +350,25 @@ public class EntityToDtoConverter {
     private String getFormattedValue(CustomFieldTemplate cft, Object value) {
         String formattedValue = null;
         if (cft.getFieldType() == CustomFieldTypeEnum.LONG) {
-            formattedValue = getFormattedDecimalValue((Long) value, cft.getDisplayFormat());
+        	if (value instanceof Long) {
+        		formattedValue = getFormattedDecimalValue((Long) value, cft.getDisplayFormat());
+        	} else {
+                logger.warn("Expected value to be of type Long but got " + value.getClass().getSimpleName());
+            }
         }
         if (cft.getFieldType() == CustomFieldTypeEnum.DOUBLE) {
-            formattedValue = getFormattedDecimalValue((Double) value, cft.getDisplayFormat());
+        	if (value instanceof Double) {
+                formattedValue = getFormattedDecimalValue((Double) value, cft.getDisplayFormat());
+            } else {
+                logger.warn("Expected value to be of type Double but got " + value.getClass().getSimpleName());
+            }
         }
         if (cft.getFieldType() == CustomFieldTypeEnum.DATE) {
-            formattedValue = getFormattedDateValue((Date) value, cft.getDisplayFormat());
+        	if (value instanceof Date) {
+                formattedValue = getFormattedDateValue((Date) value, cft.getDisplayFormat());
+        	} else {
+                logger.warn("Expected value to be of type Date but got " + value.getClass().getSimpleName());
+            }
         }
         return formattedValue;
     }

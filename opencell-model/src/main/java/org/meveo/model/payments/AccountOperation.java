@@ -33,6 +33,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.HugeEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.IWFEntity;
 import org.meveo.model.ObservableEntity;
@@ -79,6 +80,7 @@ import jakarta.validation.constraints.Size;
  * @lastModifiedVersion 7.0
  */
 @Entity
+@HugeEntity
 @WorkflowedEntity
 @ObservableEntity
 @Table(name = "ar_account_operation")
@@ -315,7 +317,7 @@ public class AccountOperation extends BusinessCFEntity implements ISearchable, I
     /**
      * Associated invoices
      */
-    @OneToMany(mappedBy = "recordedInvoice", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @OneToMany(mappedBy = "recordedInvoice", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
     private List<Invoice> invoices;
 
     /**
@@ -377,19 +379,19 @@ public class AccountOperation extends BusinessCFEntity implements ISearchable, I
     /**
      * DD request item
      */
-    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "ddrequest_item_id")
     private DDRequestItem ddRequestItem;
 
-    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "rejected_payment_id")
     private RejectedPayment rejectedPayment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
-    @OneToOne(mappedBy = "accountOperation")
+    @OneToOne(mappedBy = "accountOperation", fetch = FetchType.LAZY)
     private PaymentVentilation paymentVentilation;
 
     /**
@@ -399,7 +401,7 @@ public class AccountOperation extends BusinessCFEntity implements ISearchable, I
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "ar_ao_payment_histories", joinColumns = @JoinColumn(name = "ao_id"), inverseJoinColumns = @JoinColumn(name = "history_id"))
     private List<PaymentHistory> paymentHistories = new ArrayList<>();
 
@@ -495,6 +497,12 @@ public class AccountOperation extends BusinessCFEntity implements ISearchable, I
     @JoinColumn(name = "origin_payment_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private AccountOperation originPayment;
+
+    /**
+     * Exclude from default balance
+     */
+    @Transient
+    private Boolean excludeFromDefaultBalance = false;
 
     public Date getDueDate() {
         return dueDate;
@@ -1164,5 +1172,13 @@ public class AccountOperation extends BusinessCFEntity implements ISearchable, I
 
     public void setOriginPayment(AccountOperation originPayment) {
         this.originPayment = originPayment;
+    }
+
+    public Boolean getExcludeFromDefaultBalance() {
+        return excludeFromDefaultBalance;
+}
+
+    public void setExcludeFromDefaultBalance(Boolean excludeFromDefaultBalance) {
+        this.excludeFromDefaultBalance = excludeFromDefaultBalance;
     }
 }

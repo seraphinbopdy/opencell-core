@@ -479,7 +479,7 @@ public class StorageFactory {
      */
     public static boolean exists(File file) {
         if (storageType.equals(NFS)) {
-            return file.exists();
+            return file.exists() && file.isFile() && file.length()>0;
         }
         else if (storageType.equalsIgnoreCase(S3)) {
             String objectKey = formatObjectKey(file.getPath());
@@ -789,7 +789,7 @@ public class StorageFactory {
             }
         }
         else if (storageType.equals(S3)) {
-            OutputStream outStream;
+            OutputStream outStream = null;
             String fullObjectKey = formatFullObjectKey(path.toString());
 
             Path bucketPath = getObjectPath(fullObjectKey);
@@ -798,11 +798,19 @@ public class StorageFactory {
                 outStream = Files.newOutputStream(bucketPath);
 
                 outStream.write(bytes);
-
+                
                 outStream.close();
             }
             catch (IOException e) {
                 log.error("IOException message in write : {}", e.getMessage());
+            } finally {
+            	if(outStream != null) {
+            		try {
+                        outStream.close();
+                    } catch (IOException e) {
+                        log.error("Failed to close OutputStream: {}", e.getMessage());
+                    }
+            	}
             }
 
         }

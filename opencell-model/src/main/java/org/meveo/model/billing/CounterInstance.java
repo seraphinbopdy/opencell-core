@@ -32,8 +32,6 @@ import org.meveo.model.shared.DateUtils;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
@@ -47,7 +45,8 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "billing_counter")
-@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_counter_instance_seq"), @Parameter(name = "increment_size", value = "1") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_counter_instance_seq"),
+        @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "CounterInstance.findByCounterAndCustomer", query = "SELECT ci FROM CounterInstance ci left join ci.customer ca where ci.counterTemplate.code=:counterTemplateCode"),
         @NamedQuery(name = "CounterInstance.findByCounterAndCustomerAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.customerAccount cust where cust.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
         @NamedQuery(name = "CounterInstance.findByCounterAndBillingAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.billingAccount ba where ba.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
@@ -119,13 +118,6 @@ public class CounterInstance extends BusinessEntity {
      */
     @OneToMany(mappedBy = "counter", fetch = FetchType.LAZY)
     private List<UsageChargeInstance> usageChargeInstances = new ArrayList<>();
-
-    /**
-     * charge instances related as accumulator counters
-     */
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "billing_chrg_inst_counter", joinColumns = @JoinColumn(name = "counter_instance_id"), inverseJoinColumns = @JoinColumn(name = "chrg_instance_id"))
-    private List<ChargeInstance> chargeInstances = new ArrayList<>();
 
     public CounterTemplate getCounterTemplate() {
         return counterTemplate;
@@ -254,13 +246,4 @@ public class CounterInstance extends BusinessEntity {
     public void setUsageChargeInstances(List<UsageChargeInstance> usageChargeInstances) {
         this.usageChargeInstances = usageChargeInstances;
     }
-
-    public List<ChargeInstance> getChargeInstances() {
-        return chargeInstances;
-    }
-
-    public void setChargeInstances(List<ChargeInstance> chargeInstances) {
-        this.chargeInstances = chargeInstances;
-    }
-
 }

@@ -15394,6 +15394,9 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <addColumn tableName="dunning_level_instance">
             <column name="execution_date" type="datetime" />
         </addColumn>
+        <addColumn tableName="dunning_action_instance">
+            <column name="execution_date" type="datetime" />
+        </addColumn>
     </changeSet>
         
 </databaseChangeLog>

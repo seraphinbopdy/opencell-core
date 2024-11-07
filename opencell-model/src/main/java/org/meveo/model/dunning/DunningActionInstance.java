@@ -20,6 +20,8 @@ import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.payments.ActionModeEnum;
 import org.meveo.model.payments.ActionTypeEnum;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "dunning_action_instance")
 @CustomFieldEntity(cftCodePrefix = "DunningActionInstance", inheritCFValuesFrom = "dunningAction")
@@ -51,6 +53,9 @@ public class DunningActionInstance extends BusinessCFEntity {
     @Enumerated(EnumType.STRING)
     @NotNull
     private DunningActionInstanceStatusEnum actionStatus = DunningActionInstanceStatusEnum.TO_BE_DONE;
+
+    @Column(name = "execution_date")
+    private Date executionDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dunning_collection_plan_id")
@@ -132,4 +137,11 @@ public class DunningActionInstance extends BusinessCFEntity {
         this.dunningAction = dunningAction;
     }
 
+    public Date getExecutionDate() {
+        return executionDate;
+    }
+
+    public void setExecutionDate(Date executionDate) {
+        this.executionDate = executionDate;
+    }
 }

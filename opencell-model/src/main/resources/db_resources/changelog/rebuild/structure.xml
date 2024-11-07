@@ -12120,6 +12120,7 @@
                 <column name="uuid" type="varchar(60)" defaultValueComputed="${uuid_function}">
                     <constraints nullable="false" />
                 </column>
+                <column name="execution_date" type="datetime" />
 			</createTable>
         </changeSet>
 

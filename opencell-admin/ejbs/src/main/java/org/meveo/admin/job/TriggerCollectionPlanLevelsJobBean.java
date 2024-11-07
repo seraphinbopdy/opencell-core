@@ -15,6 +15,7 @@ import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
 import static org.meveo.model.shared.DateUtils.daysBetween;
 
+import liquibase.pro.packaged.D;
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.jpa.JpaAmpNewTx;
@@ -247,6 +248,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                                         triggerAction(actionInstance, collectionPlan);
                                         collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
                                         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
+                                        actionInstance.setExecutionDate(new Date());
                                         if (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
                                             levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
                                             levelInstance.setExecutionDate(new Date());
@@ -329,6 +331,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                                 .filter(action -> action.getActionStatus() == TO_BE_DONE)
                                 .forEach(action -> {
                                     action.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
+                                    action.setExecutionDate(null);
                                     actionInstanceService.update(action);
                         });
                     }
@@ -426,6 +429,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                                         triggerAction(actionInstance, collectionPlan);
                                         collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
                                         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
+                                        actionInstance.setExecutionDate(new Date());
                                         if (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
                                             levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
                                             levelInstance.setExecutionDate(new Date());
@@ -508,6 +512,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                                 .filter(action -> action.getActionStatus() == TO_BE_DONE)
                                 .forEach(action -> {
                                     action.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
+                                    action.setExecutionDate(null);
                                     actionInstanceService.update(action);
                                 });
                     }

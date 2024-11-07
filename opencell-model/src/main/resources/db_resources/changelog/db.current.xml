@@ -45,4 +45,7 @@
     <property name="migration" value="true" />
     
     <include file="current/structure.xml" relativeToChangelogFile="true" />
+    <include file="current/overlay.xml" relativeToChangelogFile="true" />
+    <include file="current/custom.xml" relativeToChangelogFile="true" />
+    
 </databaseChangeLog>

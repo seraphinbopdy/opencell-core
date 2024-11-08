@@ -268,7 +268,7 @@ public class UsageRatingService extends RatingService implements Serializable {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void ratePostpaidUsage(List<Long> edrIds) throws BusinessException, RatingException {
         try {
-            List<EDR> edrs = findEdrsListByIdsandSubscription(edrIds);
+            List<EDR> edrs = findEdrsListByIds(edrIds);
 
             for (EDR edr : edrs) {
                 rateUsage(edr, false, false, 0, 0, null, false);
@@ -308,6 +308,16 @@ public class UsageRatingService extends RatingService implements Serializable {
         EntityManager em = getEntityManager();
         List<EDR> edrsList = em.createNamedQuery("EDR.findByIdsWithSubscription", EDR.class).setParameter("ids", edrIds).getResultList();
         return edrsList;
+    }
+    
+    /**
+     * Find a list of EDRs by Ids.
+     *
+     * @param edrIds EDR list of ids
+     * @return A list of EDRs
+     */
+    public List<EDR> findEdrsListByIds(List<Long> edrIds) {
+        return edrService.findByIds(edrIds);
     }
 
     /**
@@ -374,11 +384,12 @@ public class UsageRatingService extends RatingService implements Serializable {
             currentRatingDepth = currentRatingDepth != null ? currentRatingDepth : 0;
             // Charges should be already ordered by priority and id (why id??)
             Long subscriptionId = edr.getSubscription().getId();
+            boolean paramsAlreadyFiltered = false;
             if (subscriptionId != null) {
                 
                 boolean isSubscriptionInitialized = Hibernate.isInitialized(edr.getSubscription());
                 
-                usageChargeInstances = usageChargeInstanceService.getUsageChargeInstancesValidForDateBySubscriptionId(edr.getSubscription(), edr.getEventDate());
+                usageChargeInstances = usageChargeInstanceService.getUsageChargeInstancesValidForDateBySubscriptionIdAndParams(edr);
                 if (usageChargeInstances == null || usageChargeInstances.isEmpty()) {
                     throw new NoChargeException("No active usage charges are associated with subscription " + subscriptionId);
                 }
@@ -401,7 +412,7 @@ public class UsageRatingService extends RatingService implements Serializable {
             for (UsageChargeInstance usageChargeInstance : usageChargeInstances) {
           
                 log.trace("Try to rate EDR {} with charge {}", edr.getId(), usageChargeInstance.getCode());
-                if (!isChargeMatch(usageChargeInstance, edr)) {
+                if (!isChargeMatch(usageChargeInstance, edr, paramsAlreadyFiltered)) {
                     continue;
                 }
 
@@ -520,30 +531,33 @@ public class UsageRatingService extends RatingService implements Serializable {
      * @return true if charge is matched
      * @throws InvalidELException Failed to evaluate EL expression
      */
-    private boolean isChargeMatch(UsageChargeInstance chargeInstance, EDR edr) throws InvalidELException {
+    private boolean isChargeMatch(UsageChargeInstance chargeInstance, EDR edr, boolean paramsAlreadyFiltered) throws InvalidELException {
 
         UsageChargeTemplate chargeTemplate = chargeInstance.getUsageChargeTemplate();
         
-        String filter1 = chargeTemplate.getFilterParam1();
-
-        if (filter1 == null || filter1.equals(edr.getParameter1())) {
-            String filter2 = chargeTemplate.getFilterParam2();
-            if (filter2 == null || filter2.equals(edr.getParameter2())) {
-                String filter3 = chargeTemplate.getFilterParam3();
-                if (filter3 == null || filter3.equals(edr.getParameter3())) {
-                    String filter4 = chargeTemplate.getFilterParam4();
-                    if (filter4 == null || filter4.equals(edr.getParameter4())) {
-                        String filterExpression = chargeTemplate.getFilterExpression();
-                        if (filterExpression == null || matchExpression(chargeInstance, filterExpression, edr)) {
-                            // Check if there is any attribute with value FALSE, indicating that service instance is not active
-                            if (anyFalseAttributeMatch(chargeInstance)) {
-                                return false;
-                            }
-                            return true;
+        if(!paramsAlreadyFiltered) {
+        	String filter1 = chargeTemplate.getFilterParam1();
+        	if (filter1 == null || filter1.equals(edr.getParameter1())) {
+                String filter2 = chargeTemplate.getFilterParam2();
+                if (filter2 == null || filter2.equals(edr.getParameter2())) {
+                    String filter3 = chargeTemplate.getFilterParam3();
+                    if (filter3 == null || filter3.equals(edr.getParameter3())) {
+                        String filter4 = chargeTemplate.getFilterParam4();
+                        if (!(filter4 == null || filter4.equals(edr.getParameter4()))) {
+                        	return false;
                         }
                     }
                 }
             }
+        }
+            
+		String filterExpression = chargeTemplate.getFilterExpression();
+		if (filterExpression == null || matchExpression(chargeInstance, filterExpression, edr)) {
+		    // Check if there is any attribute with value FALSE, indicating that service instance is not active
+		    if (anyFalseAttributeMatch(chargeInstance)) {
+		        return false;
+		    }
+		    return true;
         }
         return false;
     }

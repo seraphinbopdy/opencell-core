@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.security.auth.Subject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -534,7 +535,7 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 			return true;
 		}
 	
-	public void sendQuoteByEmail(String quoteCode, Integer currentVersion, List<String> from, List<String> to, List<String> cc) {
+	public void sendQuoteByEmail(String quoteCode, Integer currentVersion, List<String> from, List<String> to, List<String> cc, String subject, String content) {
 		var quoteVersion = quoteVersionService.findByQuoteAndVersion(quoteCode, currentVersion);
 		if(quoteVersion == null) {
 			throw new EntityDoesNotExistsException(QuoteVersion.class, "(" + quoteCode + "," + currentVersion + ")");
@@ -545,10 +546,6 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 		}
 		if(quoteVersion.getStatus() != VersionStatusEnum.PUBLISHED) {
 			throw new BusinessException("The quote version status is not published");
-		}
-		var emailTemplate = emailTemplateService.findByCode("SEND_QUOTE_EMAIL");
-		if(emailTemplate == null) {
-			throw new EntityDoesNotExistsException(EmailTemplate.class, "SEND_QUOTE_EMAIL");
 		}
 		BillingAccount billableAccount = quote.getBillableAccount();
 		String languageCode = billableAccount.getCustomerAccount().getTradingLanguage().getLanguage().getLanguageCode();
@@ -566,14 +563,25 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 		List<File> files = List.of(file);
 		Map<Object, Object> params = Map.of("cpqQuote", quote, "currentUser", currentUser);
 		
-		String emailSubject = internationalSettingsService.resolveSubject(emailTemplate,languageCode);
-		String htmlContent = internationalSettingsService.resolveHtmlContent(emailTemplate,languageCode);
-		
-		String subject = ValueExpressionWrapper.evaluateExpression(emailSubject, params, String.class);
-		String contentHtml = ValueExpressionWrapper.evaluateExpression(htmlContent, params, String.class);
+		if(StringUtils.isBlank(subject) || StringUtils.isBlank(content)) {
+			var emailTemplate = emailTemplateService.findByCode("SEND_QUOTE_EMAIL");
+			if(emailTemplate == null) {
+				throw new EntityDoesNotExistsException(EmailTemplate.class, "SEND_QUOTE_EMAIL");
+			}
+			if(StringUtils.isBlank(subject)) {
+				subject = internationalSettingsService.resolveSubject(emailTemplate,languageCode);
+			}
+			subject = ValueExpressionWrapper.evaluateExpression(subject, params, String.class);
+			if(StringUtils.isBlank(content)) {
+				content = internationalSettingsService.resolveHtmlContent(emailTemplate,languageCode);
+			}
+			content = ValueExpressionWrapper.evaluateExpression(content, params, String.class);
+		}
+		final String finalSubject = subject;
+		final String finalContent = content;
 		
 		from.forEach(f -> {
-			emailSender.send(f, null, to, cc, null, subject, null, contentHtml, files, null, false);
+			emailSender.send(f, null, to, cc, null, finalSubject, null, finalContent, files, null, false);
 		});
 		
 	}

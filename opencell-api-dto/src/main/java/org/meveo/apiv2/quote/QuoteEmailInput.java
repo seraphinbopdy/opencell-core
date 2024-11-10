@@ -37,4 +37,12 @@ public interface QuoteEmailInput {
 	@Schema(description = "list cc users to send email")
 	@Nullable
 	List<String> getCc();
+	
+	@Schema(description = "subject of email if not provided default subject will be used")
+	@Nullable
+	String getSubject();
+	
+	@Schema(description = "body of email if not provided default body will be used")
+	@Nullable
+	String getContent();
 }

@@ -72,6 +72,9 @@ public class DunningStopReasonApiService implements ApiService<DunningStopReason
 		if (dunningStopReason.getStopReason() != null) {
 			dunningStopReasonUpdate.setStopReason(dunningStopReason.getStopReason());
 		}
+		if (dunningStopReason.getDescriptionI18n() != null) {
+			dunningStopReasonUpdate.setDescriptionI18n(dunningStopReason.getDescriptionI18n());
+		}
 		dunningStopReasonUpdate = dunningStopReasonsService.update(dunningStopReasonUpdate);
 		return Optional.of(dunningStopReasonUpdate);
 	}

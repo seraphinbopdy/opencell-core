@@ -13,7 +13,10 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import org.meveo.model.AuditableEntity;
+
+import java.util.Map;
 
 /**
  * @author Mbarek-Ay
@@ -56,6 +59,13 @@ public class DunningStopReason extends AuditableEntity {
 	@Column(name = "description", length = 255)
 	@Size(max = 255)
 	private String description;
+
+	/**
+	 * description i18n: internationalization of the description
+	 */
+	@Type(type = "json")
+	@Column(name = "description_i18n", columnDefinition = "jsonb")
+	private Map<String, String> descriptionI18n;
 	 
 	/**
 	 * dunning settings associated to the entity
@@ -79,6 +89,14 @@ public class DunningStopReason extends AuditableEntity {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Map<String, String> getDescriptionI18n() {
+		return descriptionI18n;
+	}
+
+	public void setDescriptionI18n(Map<String, String> descriptionI18n) {
+		this.descriptionI18n = descriptionI18n;
 	}
 
 	public DunningSettings getDunningSettings() {

@@ -390,6 +390,7 @@ public class UsageRatingService extends RatingService implements Serializable {
                 boolean isSubscriptionInitialized = Hibernate.isInitialized(edr.getSubscription());
                 
                 usageChargeInstances = usageChargeInstanceService.getUsageChargeInstancesValidForDateBySubscriptionIdAndParams(edr);
+                paramsAlreadyFiltered=true;
                 if (usageChargeInstances == null || usageChargeInstances.isEmpty()) {
                     throw new NoChargeException("No active usage charges are associated with subscription " + subscriptionId);
                 }
@@ -536,6 +537,7 @@ public class UsageRatingService extends RatingService implements Serializable {
         UsageChargeTemplate chargeTemplate = chargeInstance.getUsageChargeTemplate();
         
         if(!paramsAlreadyFiltered) {
+        	boolean allParamsMatched=false;
         	String filter1 = chargeTemplate.getFilterParam1();
         	if (filter1 == null || filter1.equals(edr.getParameter1())) {
                 String filter2 = chargeTemplate.getFilterParam2();
@@ -543,11 +545,14 @@ public class UsageRatingService extends RatingService implements Serializable {
                     String filter3 = chargeTemplate.getFilterParam3();
                     if (filter3 == null || filter3.equals(edr.getParameter3())) {
                         String filter4 = chargeTemplate.getFilterParam4();
-                        if (!(filter4 == null || filter4.equals(edr.getParameter4()))) {
-                        	return false;
+                        if (filter4 == null || filter4.equals(edr.getParameter4())) {
+                        	allParamsMatched=true;
                         }
                     }
                 }
+            }
+        	if(!allParamsMatched) {
+            	return false;
             }
         }
             

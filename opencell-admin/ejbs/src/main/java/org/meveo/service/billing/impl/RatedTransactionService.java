@@ -734,7 +734,7 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
 
             ratedTransaction.setRulesContract(contractWithRules);
         }
-
+        ratedTransaction.setInvoicingDate(aggregatedWo.getInvoicingDate());
         applyInvoicingRules(ratedTransaction);
 
         return ratedTransaction;

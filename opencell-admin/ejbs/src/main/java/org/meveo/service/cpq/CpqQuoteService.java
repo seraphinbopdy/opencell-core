@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.security.auth.Subject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,7 +43,9 @@ import org.meveo.admin.exception.ConfigurationException;
 import org.meveo.admin.exception.InvoiceJasperNotFoundException;
 import org.meveo.admin.job.PdfGeneratorConstants;
 import org.meveo.admin.storage.StorageFactory;
+import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
+import org.meveo.apiv2.models.Resource;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
@@ -52,6 +55,7 @@ import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.cpq.CpqQuote;
+import org.meveo.model.cpq.enums.VersionStatusEnum;
 import org.meveo.model.quote.QuoteStatusEnum;
 import org.meveo.model.quote.QuoteVersion;
 import org.meveo.service.base.BusinessService;
@@ -59,6 +63,7 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.InvoiceTypeService;
 import org.meveo.service.catalog.impl.CatalogHierarchyBuilderService;
 import org.meveo.service.communication.impl.EmailSender;
+import org.meveo.service.communication.impl.EmailTemplateService;
 import org.meveo.service.communication.impl.InternationalSettingsService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -102,6 +107,9 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
     
     /** date format. */
     private String DATE_PATERN = "yyyy.MM.dd";
+	
+	@Inject
+	private EmailTemplateService emailTemplateService;
 	
 	public CpqQuote duplicate(CpqQuote quote, QuoteVersion quoteVersion, boolean preserveCode, boolean duplicateHierarchy) {
 		
@@ -526,5 +534,55 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 
 			return true;
 		}
-
+	
+	public void sendQuoteByEmail(String quoteCode, Integer currentVersion, List<String> from, List<String> to, List<String> cc, String subject, String content) {
+		var quoteVersion = quoteVersionService.findByQuoteAndVersion(quoteCode, currentVersion);
+		if(quoteVersion == null) {
+			throw new EntityDoesNotExistsException(QuoteVersion.class, "(" + quoteCode + "," + currentVersion + ")");
+		}
+		var quote = quoteVersion.getQuote();
+		if(!quote.getStatus().equals(QuoteStatusEnum.APPROVED.name())) {
+			throw new BusinessException("The quote status is not approved");
+		}
+		if(quoteVersion.getStatus() != VersionStatusEnum.PUBLISHED) {
+			throw new BusinessException("The quote version status is not published");
+		}
+		BillingAccount billableAccount = quote.getBillableAccount();
+		String languageCode = billableAccount.getCustomerAccount().getTradingLanguage().getLanguage().getLanguageCode();
+		
+		if (StringUtils.isBlank(quoteVersion.getPdfFilename())) {
+			throw new BusinessException("No Pdf file exists for the quote " + quote.getQuoteNumber());
+		}
+		
+		String fullPdfFilePath = getFullPdfFilePath(quoteVersion, false);
+		File file = new File(fullPdfFilePath);
+		
+		if (!file.exists()) {
+			throw new BusinessException("No Pdf file exists for the quote " + quote.getQuoteNumber());
+		}
+		List<File> files = List.of(file);
+		Map<Object, Object> params = Map.of("cpqQuote", quote, "currentUser", currentUser);
+		
+		if(StringUtils.isBlank(subject) || StringUtils.isBlank(content)) {
+			var emailTemplate = emailTemplateService.findByCode("SEND_QUOTE_EMAIL");
+			if(emailTemplate == null) {
+				throw new EntityDoesNotExistsException(EmailTemplate.class, "SEND_QUOTE_EMAIL");
+			}
+			if(StringUtils.isBlank(subject)) {
+				subject = internationalSettingsService.resolveSubject(emailTemplate,languageCode);
+			}
+			subject = ValueExpressionWrapper.evaluateExpression(subject, params, String.class);
+			if(StringUtils.isBlank(content)) {
+				content = internationalSettingsService.resolveHtmlContent(emailTemplate,languageCode);
+			}
+			content = ValueExpressionWrapper.evaluateExpression(content, params, String.class);
+		}
+		final String finalSubject = subject;
+		final String finalContent = content;
+		
+		from.forEach(f -> {
+			emailSender.send(f, null, to, cc, null, finalSubject, null, finalContent, files, null, false);
+		});
+		
+	}
 }

@@ -210,7 +210,8 @@ public class AggregatedWalletOperation {
 	private String businessKey;
 	private Contract contract;
 	private ContractItem contractLine;
-	
+
+	private Date invoicingDate;
 
 	public AggregatedWalletOperation(String walletOpsIds, Long sellerId, Integer year, Integer month, Integer day, Tax tax, InvoiceSubCategory invoiceSubCategory, Object id,
 									 BigDecimal amountWithTax, BigDecimal amountWithoutTax, BigDecimal amountTax, TaxClass taxClass, BigDecimal quantity, BigDecimal unitAmountWithoutTax,
@@ -784,4 +785,11 @@ public class AggregatedWalletOperation {
 		this.contractLine = contractLine;
 	}
 	
+	public Date getInvoicingDate() {
+		return invoicingDate;
+	}
+
+	public void setInvoicingDate(Date invoicingDate) {
+		this.invoicingDate = invoicingDate;
+	}
 }

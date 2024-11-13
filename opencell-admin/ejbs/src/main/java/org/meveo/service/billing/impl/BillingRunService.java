@@ -958,7 +958,6 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         if (!billingRun.isSkipValidationScript()) {
             //Not Billing Run Exceptionnel
             if (billingRun.getBillingCycle() != null) {
-                billingRun = refreshOrRetrieve(billingRun);
                 final ScriptInstance billingRunValidationScript = billingRun.getBillingCycle().getBillingRunValidationScript();
                 if(billingRunValidationScript!=null) {
                     ScriptInterface script = scriptInstanceService.getScriptInstance(billingRunValidationScript.getCode());

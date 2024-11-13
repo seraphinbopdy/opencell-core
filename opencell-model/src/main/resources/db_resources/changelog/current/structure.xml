@@ -791,7 +791,7 @@
         <alterSequence sequenceName="billing_rated_transaction_seq" incrementBy="5000"/>
     </changeSet>
 
-    <changeSet id="#INTRD-15146_20230406" author="ZBariki">
+    <changeSet id="#INTRD-15146_20230406" author="ZBariki" failOnError="false">
         <dropForeignKeyConstraint baseTableName="billing_accounting_article"
                                   constraintName="billing_accounting_article_open_order_id_fk"/>
         <dropColumn tableName="billing_accounting_article" columnName="open_order_id" />
@@ -15348,5 +15348,290 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>code = 'default_customer_balance'</where>
         </update>
     </changeSet>
-        
+
+    <changeSet id="INTRD-26317_20241031" author="Mohammed_ElAzzouzi">
+        <addColumn tableName="meveo_job_instance">
+            <column name="process_next_job_on_error" type="${type.boolean}" defaultValueNumeric="0"/>
+        </addColumn>
+    </changeSet>
+
+
+
+    <changeSet id="#INTRD-26159_20241029" author="TarikFA.">
+        <insert tableName="com_message_template">
+            <column name="media" value="EMAIL" />
+            <column name="id" valueSequenceNext="com_msg_tmpl_seq" />
+            <column name="version" value="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="SEND_QUOTE_EMAIL" />
+            <column name="description" value="" />
+            <column name="tag_start" value="#{" />
+            <column name="tag_end" value="}" />
+            <column name="subject">
+                <![CDATA[
+                    Quote #{cpqQuote.quoteNumber}
+                ]]>
+            </column>
+            <column name="subject_i18n">
+                <![CDATA[
+                    {"FRA":"Devis #{cpqQuote.quoteNumber}","ENG":"Quote #{cpqQuote.quoteNumber}"}
+                ]]>
+            </column>
+            <column name="htmlcontent">
+                <![CDATA[
+                    <p>Hello,</p><p>Please find attached the detailed quotation.</p><p>Best regards,</p> <p>#{currentUser.fullName}</p>
+                 ]]>
+            </column>
+            <column name="htmlcontent_i18n">
+                <![CDATA[
+                    {"FRA":"<p>Bonjour,</p><p>Veuillez trouvez ci-joint les détails concernant votre devis.</p><p>Bien cordialement,</p><p>#{currentUser.fullName}</p>","ENG":"<p>Hello,</p><p>Please find attached the detailed quotation.</p><p>Best regards,</p> <p>#{currentUser.fullName}</p>"}
+                ]]>
+            </column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="#INTRD-26054_20241101" author="TarikFA.">
+        <createSequence sequenceName="billing_purchase_order_seq" startValue="1" />
+        <createTable tableName="billing_purchase_order">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="billing_purchase_order_pkey" />
+            </column>
+            <column name="version" type="int4" />
+            <column name="creator" type="varchar(100)" />
+            <column name="created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="updater" type="varchar(100)" />
+            <column name="updated" type="datetime" />
+            <column name="code" type="varchar(255)" />
+            <column name="description" type="varchar(255)" />
+            <column name="number" type="varchar(100)" >
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="start_date" type="datetime"/>
+            <column name="end_date" type="datetime"/>
+            <column name="delivery_date" type="datetime"/>
+            <column name="account_level" type="varchar(50)" >
+                <constraints nullable="false" />
+            </column>
+            <column name="seller_id" type="bigint" />
+            <column name="customer_id" type="bigint"/>
+            <column name="customer_account_id" type="bigint"/>
+            <column name="billing_account_id" type="bigint" />
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="seller_id" constraintName="billing_purchase_order_seller_id_fk"
+                                 referencedTableName="crm_seller"
+                                 referencedColumnNames="id" />
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="customer_id" constraintName="billing_purchase_order_customer_id_fk"
+                                 referencedTableName="crm_customer"
+                                 referencedColumnNames="id" />
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="customer_account_id" constraintName="billing_purchase_order_customer_account_id_fk"
+                                 referencedTableName="ar_customer_account"
+                                 referencedColumnNames="id" />
+
+        <addForeignKeyConstraint baseTableName="billing_purchase_order" baseColumnNames="billing_account_id" constraintName="billing_purchase_order_billing_account_id_fk"
+                                 referencedTableName="billing_billing_account"
+                                 referencedColumnNames="id" />
+
+        <insert tableName="generic_sequence">
+            <column name="id" valueSequenceNext="bill_seq_invoice_seq"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="code" value="purchase_order_sequence"/>
+            <column name="description" value="purchase order sequence"/>
+            <column name="sequence_type" value="SEQUENCE"/>
+            <column name="sequence_size" valueNumeric="6"/>
+            <column name="current_number" valueNumeric="1"/>
+        </insert>
+        <insert tableName="adm_custom_generic_entity_code">
+            <column name="id" valueSequenceNext="adm_custom_generic_entity_code_seq"/>
+            <column name="entity_class" value="org.meveo.model.billing.PurchaseOrder"/>
+            <column name="format_el" value="#{'PO-'.concat((mv:formatDate(null, 'YYMM'))).concat(generatedCode)}"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="sequence_id"
+                    valueComputed="(SELECT id from generic_sequence where code = 'billing_cycle_sequence')"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="#INTRD-26402_20241107_add_column" author="zelmeliani">
+        <addColumn tableName="dunning_pause_reasons">
+            <column name="description_i18n" type="${type.json}">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+
+        <addColumn tableName="dunning_stop_reasons">
+            <column name="description_i18n" type="${type.json}">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="#INTRD-26402_20241107_update" author="zelmeliani">
+        <update tableName="dunning_pause_reasons">
+            <column name="pause_reason" value="PAUSE_5J"/>
+            <column name="description" value="Client requested a 5-day delay in payment"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a sollicité un délai supplémentaire de 5 jours ouvrés pour procéder au paiement","ENG":"Client requested a 5-day delay in payment"}]]>
+            </column>
+            <where>pause_reason = '5 jours (ouvrés) avant paiement'</where>
+        </update>
+        <update tableName="dunning_pause_reasons">
+            <column name="pause_reason" value="PAUSE_10J"/>
+            <column name="description" value="Client requested a 10-day delay in payment"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a sollicité un délai supplémentaire de 10 jours ouvrés pour procéder au paiement","ENG":"Client requested a 10-day delay in payment"}]]>
+            </column>
+            <where>pause_reason = '10 jours (ouvrés) avant paiement'</where>
+        </update>
+        <update tableName="dunning_pause_reasons">
+            <column name="pause_reason" value="PAUSE_30J"/>
+            <column name="description" value="Client requested a 30-day delay in payment"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a sollicité un délai supplémentaire de 30 jours ouvrés pour procéder au paiement","ENG":"Client requested a 30-day delay in payment"}]]>
+            </column>
+            <where>pause_reason = '30 jours (ouvrés) avant paiement'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_CONTEST" />
+			<column name="description" value="Client is disputing the invoice" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client conteste les éléments de la facture","ENG":"Client is disputing the invoice"}]]>
+            </column>
+            <where>stop_reason = 'Client conteste la facture'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_INSOLV"/>
+			<column name="description" value="Client has declared insolvency"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client s'est déclaré en situation d'insolvabilité","ENG":"Client has declared insolvency"}]]>
+            </column>
+            <where>stop_reason = 'Client insolvable'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_BILAN"/>
+			<column name="description" value="The client&apos;s company has initiated bankruptcy proceedings"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"L'entreprise du client a entamé une procédure de dépôt de bilan","ENG":"The client's company has initiated bankruptcy proceedings"}]]>
+            </column>
+            <where>stop_reason = 'Entreprise dépose le bilan'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_EXCLUSION" />
+        	<column name="description" value="Client has been excluded from the recovery plan for legitimate reasons" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a été exclu du plan de recouvrement pour des raisons légitimes (à préciser)","ENG":"Client has been excluded from the recovery plan for legitimate reasons"}]]>
+            </column>
+            <where>stop_reason = 'Exclusion'</where>
+        </update>
+        <update tableName="dunning_stop_reasons">
+            <column name="stop_reason" value="STOP_POLITIQUE" />
+        	<column name="description" value="A change in internal recovery policy has led to the termination of the current recovery plan" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Un changement de politique interne a entraîné l'arrêt du plan de recouvrement en cours","ENG":"A change in internal recovery policy has led to the termination of the current recovery plan"}]]>
+            </column>
+            <where>stop_reason = 'Changement de politique de recouvrement'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="INTRD-24480_20241031" author="AbdellatifBARI">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="performance"/>
+            <column name="property_group" value="rating"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="rating.allowBilledItemsRerating"/>
+            <column name="description" value="Allow rerating of billed items"/>
+            <column name="description_i18n" value='{"FRA":"Autoriser la revalorisation des éléments facturés","ENG":"Allow rerating of billed items"}'/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="INTRD-24480_20241104" author="AbdellatifBARI">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="org.meveo.service.script.MarkWOToReratePreScript" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Mark wallet operation to rerate pre script"/>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="script"><![CDATA[
+/*
+ * (C) Copyright 2015-2020 Opencell SAS (https://opencellsoft.com/) and contributors.
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
+ * OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS
+ * IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO
+ * THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE,
+ * YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+ *
+ * For more information on the GNU Affero General Public License, please consult
+ * <https://www.gnu.org/licenses/agpl-3.0.en.html>.
+ */
+
+package org.meveo.service.script;
+
+import java.util.Map;
+
+/**
+ * An definition script which allow to override a configuration huge entity job before run it.
+ *
+ * @author Abdellatif BARI
+ * @since 17.0.0
+ */
+public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
+
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public String getFilter(Map<String, Object> methodContext) {
+        return "{" +
+                "  \"filters\": {" +
+                "    \"inList status\": [\"OPEN\", \"F_TO_RERATE\", \"REJECTED\", \"TREATED\"]" +
+                "  }" +
+                "}";
+    }
+}
+            ]]></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="INTRD-24480_20241106" author="AbdellatifBARI">
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="job_category" value="INVOICING"/>
+            <column name="job_template" value="DuplicateBilledRTsJob"/>
+            <column name="code" value="DuplicateBilledRTsJob"/>
+            <column name="uuid" value="DuplicateBilledRTsJob"/>
+            <column name="description" value="Duplicate billed rated transactions Job"/>
+            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'ReRatingV2Job')"/>
+            <column name="cf_values">
+                <![CDATA[
+                    {"nbRuns": [{"long": -1}],"waitingMillis": [{"long": 0}],"batchSize": [{"long": 10000}]}
+                ]]>
+            </column>
+        </insert>
+        <update tableName="meveo_job_instance">
+            <column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'DuplicateBilledRTsJob')"/>
+            <where>code = 'Rerate_Job'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

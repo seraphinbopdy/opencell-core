@@ -202,6 +202,10 @@
 	<field name="currencySymbol" class="java.lang.String">
 		<fieldDescription><![CDATA[/invoice/amount/currencySymbol]]></fieldDescription>
 	</field>
+	<field name="language" class="java.lang.String">
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/invoice/@language"/>
+		<fieldDescription><![CDATA[/invoice/@language]]></fieldDescription>
+	</field>
 	<variable name="quantity" class="java.lang.Double" resetType="Group" resetGroup="2" calculation="Sum">
 		<variableExpression><![CDATA[$F{quantity}]]></variableExpression>
 	</variable>
@@ -285,7 +289,7 @@
 					<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 				</graphicElement>
 			</rectangle>
-			<staticText>
+			<textField>
 				<reportElement mode="Opaque" x="20" y="14" width="230" height="16" forecolor="#F0F7FA" backcolor="#A9ADB0" uuid="5a3c52f4-55f7-4692-b0ce-8519f23d958a">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -301,9 +305,9 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="10" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Details - recurring charges]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[($F{language}=="FRA" ? "Détails - charges récurrentes" : "Details - recurring charges")]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement mode="Opaque" x="255" y="14" width="59" height="16" forecolor="#F0F7FA" backcolor="#A9ADB0" uuid="ffa79b4f-7399-405d-964c-3df202a5ef7a">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -319,9 +323,9 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="10" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Period]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[($F{language}=="FRA" ? "Période" : "Period")]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement mode="Opaque" x="318" y="14" width="70" height="16" forecolor="#F0F7FA" backcolor="#A9ADB0" uuid="9c20d6cc-4093-4c88-af43-34ebacc90706">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -337,8 +341,8 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="10" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Quantity]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[($F{language}=="FRA" ? "Quantité" : "Quantity")]]></textFieldExpression>
+			</textField>
 			<textField>
 				<reportElement mode="Opaque" x="392" y="14" width="96" height="16" forecolor="#F0F7FA" backcolor="#A9ADB0" uuid="8b2d88cb-ee74-4a6f-a739-35ef559d97f8">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -355,7 +359,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="10" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Price w/o tax ("+$F{currencySymbol}+")"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{language}=="FRA" ? "Prix HT (" : "Price w/o tax (" + $F{currencySymbol} + ")"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement mode="Opaque" x="492" y="14" width="93" height="16" forecolor="#F0F7FA" backcolor="#A9ADB0" uuid="d68c9472-c664-45e7-a06c-552efe879a1b">
@@ -373,7 +377,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="10" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Total with tax ("+$F{currencySymbol}+")"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{language}=="FRA" ? "Prix TTC (" : "Price with tax (" + $F{currencySymbol} + ")"]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>

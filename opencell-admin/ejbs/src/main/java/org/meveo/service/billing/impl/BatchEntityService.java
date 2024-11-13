@@ -576,7 +576,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @return the batch entity ids to process
      */
     public Set<BatchEntity> getBatchEntities(JobExecutionResultImpl jobExecutionResult, String targetJob) {
-        List<EntityReferenceWrapper> batchEntityWrappers = (List<EntityReferenceWrapper>) jobExecutionResult.getJobParam(UpdateHugeEntityJob.BATCHES_TO_PROCESS);
+        List<EntityReferenceWrapper> batchEntityWrappers = (List<EntityReferenceWrapper>) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_BATCHES_TO_PROCESS);
         if (CollectionUtils.isEmpty(batchEntityWrappers)) {
             return null;
         }

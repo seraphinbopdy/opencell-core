@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.TablesPartitioningService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 @Stateless
 public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
@@ -45,6 +47,9 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	
 	@Inject
 	TablesPartitioningService tablesPartitioningService;
+
+	@Inject
+	private AdvancedSettingsService advancedSettingsService;
 	
 	private EntityManager entityManager;
 
@@ -90,7 +95,10 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		
 		entityManager = emWrapper.getEntityManager();
 		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();
-		getProcessingSummary();
+
+		Map<String, Object> advancedSettingsValues = advancedSettingsService.getAdvancedSettingsMapByGroup("rating", Object.class);
+		Boolean allowBilledItemsRerating = (Boolean) advancedSettingsValues.get("rating.allowBilledItemsRerating");
+		getProcessingSummary(allowBilledItemsRerating);
 		if (nrOfInitialWOs.intValue() == 0) {
 			dropView();
 			return Optional.empty();
@@ -99,7 +107,12 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		
 		final long nrPerTx = (nrOfInitialWOs / nbThreads) < configuredNrPerTx ? nrOfInitialWOs / nbThreads : configuredNrPerTx;
 		int fetchSize = ((Long) nrPerTx).intValue() * nbThreads.intValue();
-		NativeQuery nativeQuery = statelessSession.createNativeQuery("SELECT CAST(unnest(string_to_array(wo_id, ',')) AS bigint) as id FROM " + RatingCancellationJobBean.MAIN_VIEW_NAME + " WHERE billed_il is null order by ba_id");
+		String sql = "SELECT CAST(unnest(string_to_array(wo_id, ',')) AS bigint) as id FROM " + RatingCancellationJobBean.MAIN_VIEW_NAME;
+		if (!Boolean.TRUE.equals(allowBilledItemsRerating)) {
+			sql += " WHERE billed_il is null";
+		}
+		sql += " order by ba_id";
+		NativeQuery nativeQuery = statelessSession.createNativeQuery(sql);
 		scrollableResults = nativeQuery.setReadOnly(true).setCacheable(false).setFetchSize(fetchSize).scroll(ScrollMode.FORWARD_ONLY);
 
         return Optional.of(new SynchronizedMultiItemIterator<Object[]>(scrollableResults, nrOfInitialWOs.intValue(), true, null) {
@@ -189,8 +202,12 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		});
 	}
 
-	private void getProcessingSummary() {
-		Object[] count = (Object[]) entityManager.createNativeQuery("select sum(count_wo), count(rr.id) from " + RatingCancellationJobBean.MAIN_VIEW_NAME +" rr LEFT JOIN "+RatingCancellationJobBean.BILLED_VIEW_NAME+" bil ON rr.id = bil.id WHERE bil.id IS NULL").getSingleResult();
+	private void getProcessingSummary(Boolean allowBilledItemsRerating) {
+		String sql = "select sum(count_wo), count(rr.id) from " + RatingCancellationJobBean.MAIN_VIEW_NAME + " rr LEFT JOIN " + RatingCancellationJobBean.BILLED_VIEW_NAME + " bil ON rr.id = bil.id ";
+		if (!Boolean.TRUE.equals(allowBilledItemsRerating)) {
+			sql += " WHERE bil.id IS NULL";
+		}
+		Object[] count = (Object[]) entityManager.createNativeQuery(sql).getSingleResult();
 		nrOfInitialWOs = count[0] != null ? ((Number) count[0]).longValue() : 0;
 	}
 	

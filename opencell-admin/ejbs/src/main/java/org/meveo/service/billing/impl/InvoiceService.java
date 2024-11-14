@@ -1885,7 +1885,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         if (!destDir.exists()) {
             log.warn("PDF jasper report {} was not found. A default report will be used.", destDir.getAbsolutePath());
-            String sourcePath = Thread.currentThread().getContextClassLoader().getResource("./jasper").getPath() + File.separator + billingTemplateName + File.separator + "invoice";
+            String sourcePath = Thread.currentThread().getContextClassLoader().getResource("./jasper").getPath() + File.separator + billingTemplateName;
             File sourceFile = new File(sourcePath);
             
             if (!sourceFile.exists()) {

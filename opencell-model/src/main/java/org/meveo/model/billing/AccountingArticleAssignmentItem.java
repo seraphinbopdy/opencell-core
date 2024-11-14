@@ -16,20 +16,20 @@ public class AccountingArticleAssignmentItem implements Serializable {
     private Long serviceInstanceId;
     private List<Long> chargeInstancesIDs = new ArrayList<>();
 
-    public AccountingArticleAssignmentItem(Long chargeTemplateId, Long offerTemplateId, Long serviceInstanceId, String chargeInstances) {
+    public AccountingArticleAssignmentItem(Long chargeTemplateId, Long offerTemplateId, Long serviceInstanceId, Object chargeInstances) {
         this.chargeTemplateId = chargeTemplateId;
         this.offerTemplateId = offerTemplateId;
         this.serviceInstanceId = serviceInstanceId;
-        this.chargeInstancesIDs = StringUtils.isBlank(chargeInstances) ? null : Pattern.compile(",").splitAsStream(chargeInstances).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+        this.chargeInstancesIDs = StringUtils.isBlank((String)chargeInstances) ? null : Pattern.compile(",").splitAsStream((String)chargeInstances).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
     }
 
-    public AccountingArticleAssignmentItem(Object[] fields) {
-        int i = 0;
-        this.chargeTemplateId = (Long) fields[i++];
-        this.offerTemplateId = (Long) fields[i++];
-        this.serviceInstanceId = (Long) fields[i++];
-        this.chargeInstancesIDs = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
-    }
+//    public AccountingArticleAssignmentItem(Object[] fields) {
+//        int i = 0;
+//        this.chargeTemplateId = (Long) fields[i++];
+//        this.offerTemplateId = (Long) fields[i++];
+//        this.serviceInstanceId = (Long) fields[i++];
+//        this.chargeInstancesIDs = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+//    }
 
     public Long getChargeTemplateId() {
         return chargeTemplateId;

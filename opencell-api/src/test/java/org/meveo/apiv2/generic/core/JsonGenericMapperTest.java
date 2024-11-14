@@ -1,6 +1,23 @@
 package org.meveo.apiv2.generic.core;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static java.util.Collections.singletonList;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +28,13 @@ import org.meveo.model.IEntity;
 import org.meveo.model.admin.FileFormat;
 import org.meveo.model.admin.FileType;
 import org.meveo.model.admin.User;
-import org.meveo.model.billing.*;
+import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.Country;
+import org.meveo.model.billing.ServiceInstance;
+import org.meveo.model.billing.Subscription;
+import org.meveo.model.billing.Tax;
+import org.meveo.model.billing.TradingCountry;
+import org.meveo.model.billing.UserAccount;
 import org.meveo.model.catalog.Channel;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.ServiceTemplate;
@@ -23,17 +46,7 @@ import org.meveo.model.tax.TaxClass;
 import org.meveo.model.tax.TaxMapping;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JsonGenericMapperTest {
@@ -105,9 +118,8 @@ public class JsonGenericMapperTest {
 
     }
 
-
     @Test
-    public void should_transform_entity_by_giving_its_id_and_export_identifier() { //todo : use this UT to fix genericField
+    public void should_transform_entity_by_giving_its_id_and_export_identifier() { // todo : use this UT to fix genericField
         // Given
         TaxMapping taxMapping = new TaxMapping();
 
@@ -217,7 +229,8 @@ public class JsonGenericMapperTest {
         HashSet<String> fields = new HashSet<>();
         fields.addAll(Arrays.asList("channels"));
         String transform = jsonGenericMapper1.toJson(fields, offerTemplate.getClass(), immutableGenericPaginatedResource, null);
-        assertThat(transform).isEqualTo("{\"total\":3,\"limit\":0,\"offset\":0,\"data\":[{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]},{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]},{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]}]}");
+        assertThat(transform).isEqualTo(
+            "{\"total\":3,\"limit\":0,\"offset\":0,\"data\":[{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]},{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]},{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]}]}");
     }
 
     @Test
@@ -241,7 +254,7 @@ public class JsonGenericMapperTest {
         HashSet<String> fields = new HashSet<>();
         fields.addAll(Arrays.asList("channels"));
         String transform = jsonGenericMapper1.toJson(fields, offerTemplate.getClass(), immutableGenericPaginatedResource, null);
-        //assertThat(transform).isEqualTo("{\"total\":1,\"limit\":0,\"offset\":0,\"data\":[{\"channels\":[{\"id\":1,\"historized\":false,\"notified\":false,\"code\":\"c1\",\"appendGeneratedCode\":false,\"disabled\":false,\"active\":true,\"referenceCode\":\"c1\",\"descriptionOrCode\":\"c1\"},{\"id\":2,\"historized\":false,\"notified\":false,\"code\":\"c2\",\"appendGeneratedCode\":false,\"disabled\":false,\"active\":true,\"referenceCode\":\"c2\",\"descriptionOrCode\":\"c2\"}]}]}");
+        // assertThat(transform).isEqualTo("{\"total\":1,\"limit\":0,\"offset\":0,\"data\":[{\"channels\":[{\"id\":1,\"historized\":false,\"notified\":false,\"code\":\"c1\",\"appendGeneratedCode\":false,\"disabled\":false,\"active\":true,\"referenceCode\":\"c1\",\"descriptionOrCode\":\"c1\"},{\"id\":2,\"historized\":false,\"notified\":false,\"code\":\"c2\",\"appendGeneratedCode\":false,\"disabled\":false,\"active\":true,\"referenceCode\":\"c2\",\"descriptionOrCode\":\"c2\"}]}]}");
     }
 
     @Test
@@ -301,6 +314,7 @@ public class JsonGenericMapperTest {
         ua.setSubscriptions(singletonList(subscription));
         ba.setUsersAccounts(singletonList(ua));
         customerAccount.setBillingAccounts(singletonList(ba));
+        
 
         JsonGenericMapper jsonMapper = JsonGenericMapper.Builder.getBuilder()
                 .withNestedDepth(1L)
@@ -308,7 +322,9 @@ public class JsonGenericMapperTest {
 
         ImmutableGenericPaginatedResource immutableGenericPaginatedResource = ImmutableGenericPaginatedResource.builder().total(1l).limit(0l).offset(0l).addData(customerAccount).build();
 
-        jsonMapper.toJson(Set.of(), CustomerAccount.class, immutableGenericPaginatedResource, null);
+        String json = jsonMapper.toJson(Set.of(), CustomerAccount.class, immutableGenericPaginatedResource, null);
+        
+        assertThat(json).isNotEqualTo("{}");
     }
 
     private Date getDefaultDate() {

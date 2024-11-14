@@ -46,7 +46,7 @@ public class JsonGenericMapper extends ObjectMapper{
     private void setUpConfig() {
         setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
-        configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true);
+        configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, false); // AK Do not change to true, as it will not work with Immutable classes that have only getters.
     }
 
     public String toJson(Set<String> fields, Class entityClass, Object dtoToSerialize, Set<String> excludedFields) {

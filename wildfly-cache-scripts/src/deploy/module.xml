@@ -6,6 +6,5 @@
     <dependencies>
         <module name="org.infinispan" services="import" />
         <module name="org.infinispan.core" services="import" />
-        <module name="org.infinispan.component.annotations" />
     </dependencies>
 </module>

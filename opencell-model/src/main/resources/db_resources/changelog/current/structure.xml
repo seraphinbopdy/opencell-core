@@ -6071,7 +6071,14 @@ Your name and surname
         <!-- END Dunning Policy B2B -->
     </changeSet>
     
-    <changeSet id="#INTRD-22810_20240514" author="TarikFA." failOnError="false">
+    <changeSet id="#INTRD-22810_20240514" author="TarikFA.">
+    	<preConditions onFail="MARK_RAN">
+	        <not>
+	            <sqlCheck expectedResult="0">
+	                SELECT COUNT(*) FROM ar_occ_template WHERE code = 'PPL_CREATION'
+	            </sqlCheck>
+	        </not>
+	    </preConditions>
         <insert tableName="ar_occ_template">
             <column name="id" valueSequenceNext="ar_occ_template_seq" />
             <column name="version" valueNumeric="0" />
@@ -6088,7 +6095,14 @@ Your name and surname
         </insert>
     </changeSet>
     
-    <changeSet id="#INTRD-23038_20240515" author="TarikFA." failOnError="false">
+    <changeSet id="#INTRD-23038_20240515" author="TarikFA.">
+    	<preConditions onFail="MARK_RAN">
+	        <not>
+	            <sqlCheck expectedResult="0">
+	                SELECT COUNT(*) FROM ar_occ_template WHERE code = 'PPL_INSTALLMENT'
+	            </sqlCheck>
+	        </not>
+	    </preConditions>
         <insert tableName="ar_occ_template" >
             <column name="id" valueSequenceNext="ar_occ_template_seq" />
             <column name="version" valueNumeric="0" />
@@ -15165,6 +15179,8 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
     </changeSet>
         
     <changeSet id="#INTRD-22676" author="AndriusKarpavicius">
+     	<createSequence sequenceName="adm_endpoint_seq" startValue="1"/>                              
+
         <createTable tableName="adm_endpoint">
             <column name="id" type="bigint" autoIncrement="${id.auto}">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="adm_endpoint_pkey" />
@@ -15264,15 +15280,6 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="max_idle_time_pool" type="int4"/>
         </addColumn>                         
                               
-        <createSequence sequenceName="adm_endpoint_seq" startValue="1"/>                              
-                              
-        <createTable tableName="adm_endpoint_seq">
-            <column name="next_val" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="adm_endpoint_seq_pk" />
-            </column>
-        </createTable>
-        <sql>insert into ${db.schema.adapted}adm_endpoint_seq values(1)</sql>                              
-                                 
 	</changeSet>
 	
 	<changeSet id="INTRD-24987" author="AndriusKarpavicius">

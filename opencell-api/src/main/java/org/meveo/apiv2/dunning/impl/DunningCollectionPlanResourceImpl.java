@@ -204,6 +204,7 @@ public class DunningCollectionPlanResourceImpl implements DunningCollectionPlanR
 	@Override
 	public Response updateDunningActionInstance(DunningActionInstanceInput dunningActionInstanceInput, Long actionInstanceId) {
         DunningActionInstance updatedDunningActionInstance = dunningCollectionPlanApiService.updateDunningActionInstance(dunningActionInstanceInput, actionInstanceId).get();
+        dunningCollectionPlanApiService.updateExecutionDate(updatedDunningActionInstance);
         return Response.ok(ImmutableDunningActionInstanceSuccessResponse.builder()
             .status("SUCCESS")
             .newDunningActionInstance(actionInstanceMapper.toResource(updatedDunningActionInstance))

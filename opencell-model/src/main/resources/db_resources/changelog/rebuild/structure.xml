@@ -12095,6 +12095,7 @@
                 <column name="uuid" type="varchar(60)" defaultValueComputed="${uuid_function}">
                     <constraints nullable="false" />
                 </column>
+                <column name="execution_date" type="datetime" />
 			</createTable>
 
 			<createTable tableName="dunning_action_instance">
@@ -12126,6 +12127,7 @@
                 <column name="uuid" type="varchar(60)" defaultValueComputed="${uuid_function}">
                     <constraints nullable="false" />
                 </column>
+                <column name="execution_date" type="datetime" />
 			</createTable>
         </changeSet>
 
@@ -21153,6 +21155,7 @@
     <changeSet id="INTRD-24480_20241031" author="AbdellatifBARI" />
     <changeSet id="INTRD-24480_20241104" author="AbdellatifBARI" />
     <changeSet id="INTRD-24480_20241106" author="AbdellatifBARI" />
+    <changeSet id="INTRD-26199_20241105" author="zelmeliani" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

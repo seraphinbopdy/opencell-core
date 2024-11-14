@@ -412,7 +412,11 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         collectionPlanToStop.getDunningLevelInstances().forEach(levelInstance -> {
             if (!DONE.equals(levelInstance.getLevelStatus()) && !IGNORED.equals(levelInstance.getLevelStatus())) {
                 levelInstance.setLevelStatus(IGNORED);
-                levelInstance.getActions().forEach(actionInstance -> actionInstance.setActionStatus(DunningActionInstanceStatusEnum.IGNORED));
+                levelInstance.setExecutionDate(null); // Set execution date to null when level is ignored
+                levelInstance.getActions().forEach(actionInstance -> {
+                    actionInstance.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
+                    actionInstance.setExecutionDate(null); // Set execution date to null when action is ignored
+                });
             }
             dunningLevelInstances.add(levelInstance);
         });

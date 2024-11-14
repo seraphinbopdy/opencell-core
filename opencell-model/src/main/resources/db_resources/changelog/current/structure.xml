@@ -14698,6 +14698,11 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
     </changeSet>
     
     <changeSet id="#INTRD-25474_new_cg_20241003" author="a.rouaguebe">
+    	<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM billing_tax_category WHERE id = -3
+            </sqlCheck>
+	    </preConditions>
         <insert tableName="crm_customer_category">
             <column name="id" valueNumeric="-5" />
             <column name="version" valueNumeric="0" />

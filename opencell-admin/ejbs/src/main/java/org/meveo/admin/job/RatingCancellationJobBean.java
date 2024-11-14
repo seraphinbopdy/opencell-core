@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,7 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.BatchEntityService;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.TablesPartitioningService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 @Stateless
 public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[]>> {
@@ -57,6 +59,9 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	
 	@Inject
 	TablesPartitioningService tablesPartitioningService;
+
+	@Inject
+	private AdvancedSettingsService advancedSettingsService;
 	
 	private EntityManager entityManager;
 
@@ -170,9 +175,12 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	}
 
 	private void cancelAllObjects(long min, long max) {
-		
-		markFailedToRerate(min, max);
-		
+
+		Map<String, Object> advancedSettingsValues = advancedSettingsService.getAdvancedSettingsMapByGroup("rating", Object.class);
+		Boolean allowBilledItemsRerating = (Boolean) advancedSettingsValues.get("rating.allowBilledItemsRerating");
+		if (!Boolean.TRUE.equals(allowBilledItemsRerating)) {
+			markFailedToRerate(min, max);
+		}
 		recalculateInvoiceLinesAndCancelRTs("",MAIN_VIEW_NAME, min, max);
 		recalculateInvoiceLinesAndCancelRTs("d",MAIN_VIEW_NAME, min, max);
 		recalculateInvoiceLinesAndCancelRTs("t",TRIGGERED_VIEW_NAME, min, max);

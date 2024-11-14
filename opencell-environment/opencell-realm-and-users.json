@@ -147,7 +147,9 @@
         "composites": {
           "client": {
             "opencell-web": [
-              "uma_protection",
+              "uma_protection"
+            ], 
+            "opencell-portal": [
               "NEWUI"
             ]
           }
@@ -2569,81 +2571,6 @@
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
           "attributes": {}
-        },
-        {
-          "id": "c4ad307b-3485-4ba8-bea0-efd4567f4eb0",
-          "name": "NEWUI_BILLING_ACCOUNT",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "e77ae8c4-9aca-4682-82bc-98e9635c80ea",
-          "name": "NEWUI_QUOTE",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "cdfa4781-0d9a-43fb-bb2d-5a294d8fa664",
-          "name": "NEWUI_ORDER",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "e1b87d82-3fb2-40e6-9d80-b08946445ab6",
-          "name": "NEWUI_SUBSCRIPTION",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "4dc4bd88-ad41-450c-af78-f6218bca1671",
-          "name": "NEWUI_INVOICE",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "0065f0ea-298b-49c4-88ed-c15cca554593",
-          "name": "NEWUI_COLLECTION_PLAN",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "8dd28938-e607-4516-bdc8-fd718f40f0b2",
-          "name": "NEWUI_OFFER",
-          "description": "",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "bed02301-69cf-4799-a981-d9f1218173bb",
-          "name": "NEWUI",
-          "composite": true,
-          "composites": {
-            "client": {
-              "opencell-web": [
-                "NEWUI_OFFER",
-                "NEWUI_BILLING_ACCOUNT",
-                "NEWUI_QUOTE",
-                "NEWUI_ORDER",
-                "NEWUI_SUBSCRIPTION",
-                "NEWUI_INVOICE",
-                "NEWUI_COLLECTION_PLAN"
-              ]
-            }
-          }
         }
       ],
       "realm-management": [
@@ -3142,6 +3069,81 @@
           "clientRole": true,
           "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
           "attributes": {}
+        },
+        {
+          "id": "c4ad307b-3485-4ba8-bea0-efd4567f4eb0",
+          "name": "NEWUI_BILLING_ACCOUNT",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
+          "id": "e77ae8c4-9aca-4682-82bc-98e9635c80ea",
+          "name": "NEWUI_QUOTE",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
+          "id": "cdfa4781-0d9a-43fb-bb2d-5a294d8fa664",
+          "name": "NEWUI_ORDER",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
+          "id": "e1b87d82-3fb2-40e6-9d80-b08946445ab6",
+          "name": "NEWUI_SUBSCRIPTION",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
+          "id": "4dc4bd88-ad41-450c-af78-f6218bca1671",
+          "name": "NEWUI_INVOICE",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
+          "id": "0065f0ea-298b-49c4-88ed-c15cca554593",
+          "name": "NEWUI_COLLECTION_PLAN",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
+          "id": "8dd28938-e607-4516-bdc8-fd718f40f0b2",
+          "name": "NEWUI_OFFER",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
+          "id": "bed02301-69cf-4799-a981-d9f1218173bb",
+          "name": "NEWUI",
+          "composite": true,
+          "composites": {
+            "client": {
+              "opencell-portal": [
+                "NEWUI_OFFER",
+                "NEWUI_BILLING_ACCOUNT",
+                "NEWUI_QUOTE",
+                "NEWUI_ORDER",
+                "NEWUI_SUBSCRIPTION",
+                "NEWUI_INVOICE",
+                "NEWUI_COLLECTION_PLAN"
+              ]
+            }
+          }
         }
       ]
     }

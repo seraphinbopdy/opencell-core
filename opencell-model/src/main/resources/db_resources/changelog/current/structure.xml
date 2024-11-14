@@ -6073,11 +6073,9 @@ Your name and surname
     
     <changeSet id="#INTRD-22810_20240514" author="TarikFA.">
     	<preConditions onFail="MARK_RAN">
-	        <not>
-	            <sqlCheck expectedResult="0">
-	                SELECT COUNT(*) FROM ar_occ_template WHERE code = 'PPL_CREATION'
-	            </sqlCheck>
-	        </not>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM ar_occ_template WHERE code = 'PPL_CREATION'
+            </sqlCheck>
 	    </preConditions>
         <insert tableName="ar_occ_template">
             <column name="id" valueSequenceNext="ar_occ_template_seq" />
@@ -6097,11 +6095,9 @@ Your name and surname
     
     <changeSet id="#INTRD-23038_20240515" author="TarikFA.">
     	<preConditions onFail="MARK_RAN">
-	        <not>
-	            <sqlCheck expectedResult="0">
-	                SELECT COUNT(*) FROM ar_occ_template WHERE code = 'PPL_INSTALLMENT'
-	            </sqlCheck>
-	        </not>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM ar_occ_template WHERE code = 'PPL_INSTALLMENT'
+            </sqlCheck>
 	    </preConditions>
         <insert tableName="ar_occ_template" >
             <column name="id" valueSequenceNext="ar_occ_template_seq" />

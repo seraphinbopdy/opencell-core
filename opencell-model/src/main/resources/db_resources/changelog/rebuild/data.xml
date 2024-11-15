@@ -10469,9 +10469,12 @@
 			<column name="created" valueDate="${db.current.time}"/>
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
-			<column name="pause_reason" value="5 jours (ouvrés) avant paiement"/>
-			<column name="description" value="Client demande 5 jours (ouvrés) avant de payer"/>
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
+			<column name="pause_reason" value="PAUSE_5J"/>
+			<column name="description" value="Client requested a 5-day delay in payment"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a sollicité un délai supplémentaire de 5 jours ouvrés pour procéder au paiement","ENG":"Client requested a 5-day delay in payment"}]]>
+            </column>
+            <column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>
 
 		<insert tableName="dunning_pause_reasons">
@@ -10479,45 +10482,60 @@
 			<column name="created" valueDate="${db.current.time}"/>
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
-			<column name="pause_reason" value="10 jours (ouvrés) avant paiement"/>
-			<column name="description" value="Client demande 10 jours (ouvrés) avant de payer"/>
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
+			<column name="pause_reason" value="PAUSE_10J"/>
+			<column name="description" value="Client requested a 10-day delay in payment"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a sollicité un délai supplémentaire de 10 jours ouvrés pour procéder au paiement","ENG":"Client requested a 10-day delay in payment"}]]>
+            </column>
+            <column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>
 		<insert tableName="dunning_pause_reasons">
 			<column name="id" valueSequenceNext="dunning_pause_reasons_seq"/>
 			<column name="created" valueDate="${db.current.time}"/>
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
-			<column name="pause_reason" value="30 jours (ouvrés) avant paiement"/>
-			<column name="description" value="Client demande 30 jours (ouvrés) avant de payer"/>
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
+			<column name="pause_reason" value="PAUSE_30J"/>
+			<column name="description" value="Client requested a 30-day delay in payment"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a sollicité un délai supplémentaire de 30 jours ouvrés pour procéder au paiement","ENG":"Client requested a 30-day delay in payment"}]]>
+            </column>
+            <column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>
 		<insert tableName="dunning_stop_reasons">
 			<column name="id" valueSequenceNext="dunning_stop_reasons_seq" />
 			<column name="created" valueDate="${db.current.time}" />
 			<column name="creator" value="OPENCELL.ADMIN" />
 			<column name="version" valueNumeric="1" />
-			<column name="stop_reason" value="Client conteste la facture" />
-			<column name="description" value="Client conteste la facture. Dept comptable reprend la suite" />
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq" />
+			<column name="stop_reason" value="STOP_CONTEST" />
+			<column name="description" value="Client is disputing the invoice" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client conteste les éléments de la facture","ENG":"Client is disputing the invoice"}]]>
+            </column>
+            <column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq" />
 		</insert>
 		<insert tableName="dunning_stop_reasons">
 			<column name="id" valueSequenceNext="dunning_stop_reasons_seq"/>
 			<column name="created" valueDate="${db.current.time}"/>
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
-			<column name="stop_reason" value="Client insolvable"/>
-			<column name="description" value="Client se déclare insolvable. Renvoi au dept comptale"/>
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
+			<column name="stop_reason" value="STOP_INSOLV"/>
+			<column name="description" value="Client has declared insolvency"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client s'est déclaré en situation d'insolvabilité","ENG":"Client has declared insolvency"}]]>
+            </column>
+            <column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>
 		<insert tableName="dunning_stop_reasons">
 			<column name="id" valueSequenceNext="dunning_stop_reasons_seq"/>
 			<column name="created" valueDate="${db.current.time}"/>
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
-			<column name="stop_reason" value="Entreprise dépose le bilan"/>
-			<column name="description" value="L’entreprise a débuté une procédure de dépôt de bilan. Renvoi au dept comptable"/>
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
+			<column name="stop_reason" value="STOP_BILAN"/>
+			<column name="description" value="The client&apos;s company has initiated bankruptcy proceedings"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"L'entreprise du client a entamé une procédure de dépôt de bilan","ENG":"The client's company has initiated bankruptcy proceedings"}]]>
+            </column>
+            <column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>
 		<insert tableName="dunning_collection_plan_statuses">
 			<column name="id" valueSequenceNext="dunning_collection_plan_statuses_seq"/>
@@ -13155,18 +13173,24 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<column name="created" valueDate="${db.current.time}" />
 			<column name="creator" value="OPENCELL.ADMIN" />
 			<column name="version" valueNumeric="1" />
-        	<column name="stop_reason" value="Exclusion" />
-        	<column name="description" value="Client exclu du plan de recouvrement pour raison légitime. A expliciter par l'agent de recouvrement" />
-        	<column name="dunning_settings_id" valueNumeric="1" />
+        	<column name="stop_reason" value="STOP_EXCLUSION" />
+        	<column name="description" value="Client has been excluded from the recovery plan for legitimate reasons" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Le client a été exclu du plan de recouvrement pour des raisons légitimes (à préciser)","ENG":"Client has been excluded from the recovery plan for legitimate reasons"}]]>
+            </column>
+            <column name="dunning_settings_id" valueNumeric="1" />
        	</insert>
        	<insert tableName="dunning_stop_reasons">
        		<column name="id" valueSequenceNext="dunning_stop_reasons_seq" />
 			<column name="created" valueDate="${db.current.time}" />
 			<column name="creator" value="OPENCELL.ADMIN" />
 			<column name="version" valueNumeric="1" />
-        	<column name="stop_reason" value="Changement de politique de recouvrement" />
-        	<column name="description" value="Changement de politique de recouvrement amenant la génération d’un nouveau plan de recouvrement" />
-        	<column name="dunning_settings_id" valueNumeric="1" />
+        	<column name="stop_reason" value="STOP_POLITIQUE" />
+        	<column name="description" value="A change in internal recovery policy has led to the termination of the current recovery plan" />
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"Un changement de politique interne a entraîné l'arrêt du plan de recouvrement en cours","ENG":"A change in internal recovery policy has led to the termination of the current recovery plan"}]]>
+            </column>
+            <column name="dunning_settings_id" valueNumeric="1" />
        	</insert>
    	</changeSet>
 
@@ -14197,5 +14221,70 @@ Meaning that advances won’t be available for further invoices."/>
                 ]]>
 			</column>
 		</insert>
+	</changeSet>
+
+    <changeSet id="#INTRD-26054_20241101_data" author="TarikFA.">
+        <insert tableName="generic_sequence">
+            <column name="id" valueSequenceNext="bill_seq_invoice_seq"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="code" value="purchase_order_sequence"/>
+            <column name="description" value="purchase order sequence"/>
+            <column name="sequence_type" value="SEQUENCE"/>
+            <column name="sequence_size" valueNumeric="6"/>
+            <column name="current_number" valueNumeric="1"/>
+        </insert>
+        <insert tableName="adm_custom_generic_entity_code">
+            <column name="id" valueSequenceNext="adm_custom_generic_entity_code_seq"/>
+            <column name="entity_class" value="org.meveo.model.billing.PurchaseOrder"/>
+            <column name="format_el" value="#{'PO-'.concat((mv:formatDate(null, 'YYMM'))).concat(generatedCode)}"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="sequence_id"
+                    valueComputed="(SELECT id from generic_sequence where code = 'billing_cycle_sequence')"/>
+        </insert>
+    </changeSet>
+
+	<changeSet id="INTRD-24480_20241031-rebuild" author="AbdellatifBARI">
+		<insert tableName="advanced_settings">
+			<column name="id" valueSequenceNext="advanced_settings_seq"/>
+			<column name="version" value="0"/>
+			<column name="disabled" valueNumeric="0"/>
+			<column name="created" valueComputed="${db.current.time}"/>
+			<column name="category" value="performance"/>
+			<column name="property_group" value="rating"/>
+			<column name="property_type" value="java.lang.Boolean"/>
+			<column name="property_value" value="false"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="code" value="rating.allowBilledItemsRerating"/>
+			<column name="description" value="Allow rerating of billed items"/>
+			<column name="description_i18n" value='{"FRA":"Autoriser la revalorisation des éléments facturés","ENG":"Allow rerating of billed items"}'/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="INTRD-24480_20241106-rebuild" author="AbdellatifBARI">
+		<insert tableName="meveo_job_instance">
+			<column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="disabled" valueNumeric="1"/>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="job_category" value="INVOICING"/>
+			<column name="job_template" value="DuplicateBilledRTsJob"/>
+			<column name="code" value="DuplicateBilledRTsJob"/>
+			<column name="uuid" value="DuplicateBilledRTsJob"/>
+			<column name="description" value="Duplicate billed rated transactions Job"/>
+			<column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'ReRatingV2Job')"/>
+			<column name="cf_values">
+				<![CDATA[
+                    {"nbRuns": [{"long": -1}],"waitingMillis": [{"long": 0}],"batchSize": [{"long": 10000}]}
+                ]]>
+			</column>
+		</insert>
+		<update tableName="meveo_job_instance">
+			<column name="following_job_id" valueComputed="(SELECT id from meveo_job_instance where code = 'DuplicateBilledRTsJob')"/>
+			<where>code = 'Rerate_Job'</where>
+		</update>
 	</changeSet>
 </databaseChangeLog>

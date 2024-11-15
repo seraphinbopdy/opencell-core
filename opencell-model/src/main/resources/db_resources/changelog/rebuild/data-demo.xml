@@ -5750,6 +5750,7 @@
 		    <column name="code" value="default_customer_balance" />
 		    <column name="description" value="Default Customer Balance" />
 		    <column name="default_balance" value="1" />
+            <column name="balance_el" value="#{ accountOperation.excludeFromDefaultBalance==false }" />
 		</insert>
 		<insert tableName="ar_customer_balance_templates">
 		    <column name="template_id"          valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_ADV')" />

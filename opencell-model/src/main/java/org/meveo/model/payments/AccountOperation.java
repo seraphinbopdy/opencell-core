@@ -31,6 +31,7 @@ import java.util.Set;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.HugeEntity;
@@ -50,6 +51,7 @@ import org.meveo.model.finance.AccountingEntry;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -501,7 +503,8 @@ public class AccountOperation extends BusinessCFEntity implements ISearchable, I
     /**
      * Exclude from default balance
      */
-    @Transient
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "exclude_from_default_balance")
     private Boolean excludeFromDefaultBalance = false;
 
     public Date getDueDate() {

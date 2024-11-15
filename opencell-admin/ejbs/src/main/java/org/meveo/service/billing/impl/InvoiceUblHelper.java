@@ -862,7 +862,7 @@ public class InvoiceUblHelper {
 		}
 
 		//AccountingCustomerParty/Party/ServiceProviderParty
-		var icd00225Exist = billingAccount.getCustomerAccount().getCustomer().getRegistrationNumbers().stream().anyMatch(rn -> {
+		var icd00225Exist = billingAccount.getCustomerAccount().getRegistrationNumbers().stream().anyMatch(rn -> {
 			if(rn.getIsoIcd() != null) {
 				var isoIcd = (IsoIcd) Hibernate.unproxy(rn.getIsoIcd());
 				if(isoIcd.getCode().equals("0225")) {

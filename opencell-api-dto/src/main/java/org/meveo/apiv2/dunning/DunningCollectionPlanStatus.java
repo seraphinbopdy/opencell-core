@@ -1,8 +1,5 @@
 package org.meveo.apiv2.dunning;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
@@ -10,6 +7,8 @@ import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
 @Value.Style(jdkOnly = true, jakarta = true)
@@ -17,11 +16,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public interface DunningCollectionPlanStatus extends Resource {
 
     @Schema(description = "dunning setting id")
-    @Nonnull
+    @NotNull
     Resource getDunningSettings();
 
     @Schema(description = "indicate the status used in the collection")
-    @Nonnull
+    @NotNull
     DunningCollectionPlanStatusEnum getStatus();
 
     @Schema(description = "indicate description for the collection")

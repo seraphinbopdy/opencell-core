@@ -17,6 +17,7 @@
  */
 package org.meveo.admin.job;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +29,14 @@ import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.IEntity;
 import org.meveo.model.billing.BatchEntity;
+import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.BatchEntityService;
+import org.meveo.service.script.PreUpdateHugeEntityScript;
+import org.meveo.service.script.ScriptInstanceService;
+import org.meveo.service.script.ScriptInterface;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -48,6 +54,12 @@ public class UpdateHugeEntityJobBean extends IteratorBasedScopedJobBean<Map.Entr
 
     @Inject
     private BatchEntityService batchEntityService;
+
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
+
+    @Inject
+    private ScriptInstanceService scriptInstanceService;
 
     private Set<BatchEntity> processedBatchEntities;
 
@@ -93,7 +105,7 @@ public class UpdateHugeEntityJobBean extends IteratorBasedScopedJobBean<Map.Entr
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_TARGET_JOB, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_TARGET_JOB));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE));
-        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_DEFAULT_FILTER));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_DEFAULT_FILTER, getFilter(jobInstance));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_EMAIL_TEMPLATE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_EMAIL_TEMPLATE));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_SELECT_FETCH_SIZE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_SELECT_FETCH_SIZE));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_SELECT_MAX_RESULTS, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_SELECT_MAX_RESULTS));
@@ -103,7 +115,7 @@ public class UpdateHugeEntityJobBean extends IteratorBasedScopedJobBean<Map.Entr
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_OPEN_CURSOR, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_OPEN_CURSOR));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE));
         jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_PRE_UPDATE_EL, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_PRE_UPDATE_EL));
-        jobExecutionResult.addJobParam(UpdateHugeEntityJob.BATCHES_TO_PROCESS, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.BATCHES_TO_PROCESS));
+        jobExecutionResult.addJobParam(UpdateHugeEntityJob.CF_BATCHES_TO_PROCESS, getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_BATCHES_TO_PROCESS));
     }
 
     private Optional<Iterator<Map.Entry<BatchEntity, IEntity>>> initJobAndGetDataToProcess(JobExecutionResultImpl jobExecutionResult) {
@@ -145,6 +157,38 @@ public class UpdateHugeEntityJobBean extends IteratorBasedScopedJobBean<Map.Entr
     @Override
     Optional<Iterator<Map.Entry<BatchEntity, IEntity>>> getSynchronizedIterator(JobExecutionResultImpl jobExecutionResult) {
         return getSynchronizedIteratorWithLimit(jobExecutionResult, 0);
+    }
+
+    private String getFilter(JobInstance jobInstance) {
+        String filter = null;
+        try {
+            String preUpdateScriptCode = null;
+            EntityReferenceWrapper entityReferenceWrapper = ((EntityReferenceWrapper) this.getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_PRE_UPDATE_SCRIPT));
+            if (entityReferenceWrapper != null) {
+                preUpdateScriptCode = entityReferenceWrapper.getCode();
+            }
+            if (StringUtils.isBlank(preUpdateScriptCode)) {
+                Map<String, Object> advancedSettingsValues = advancedSettingsService.getAdvancedSettingsMapByGroup("rating", Object.class);
+                Boolean allowBilledItemsRerating = (Boolean) advancedSettingsValues.get("rating.allowBilledItemsRerating");
+                if (Boolean.TRUE.equals(allowBilledItemsRerating)) {
+                    preUpdateScriptCode = PreUpdateHugeEntityScript.MARK_WO_TO_RERATE_PRE_SCRIPT;
+                }
+            }
+
+            if (StringUtils.isNotBlank(preUpdateScriptCode)) {
+                if (log.isDebugEnabled()) {
+                    log.debug(" looking for ScriptInstance with code :  [{}] ", preUpdateScriptCode);
+                }
+                ScriptInterface si = scriptInstanceService.getScriptInstance(preUpdateScriptCode);
+                if (si instanceof PreUpdateHugeEntityScript) {
+                    Map<String, Object> methodContext = new HashMap<>();
+                    filter = ((PreUpdateHugeEntityScript) si).getFilter(methodContext);
+                }
+            }
+        } catch (Exception e) {
+            log.error(" Error on PreUpdateHugeEntityScript execution : [{}]", e.getMessage());
+        }
+        return !StringUtils.isBlank(filter) ? filter : (String) getParamOrCFValue(jobInstance, UpdateHugeEntityJob.CF_DEFAULT_FILTER);
     }
 
 }

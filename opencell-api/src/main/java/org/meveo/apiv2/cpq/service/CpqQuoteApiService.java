@@ -107,7 +107,7 @@ public class CpqQuoteApiService {
 		if(CollectionUtils.isEmpty(quoteEmailInput.getTo())){
 			throw new BusinessException("to email can not be empty");
 		}
-		cpqQuoteService.sendQuoteByEmail(quoteEmailInput.getQuoteCode(), quoteEmailInput.getQuoteVersion(), quoteEmailInput.getFrom(), quoteEmailInput.getTo(), quoteEmailInput.getCc());
+		cpqQuoteService.sendQuoteByEmail(quoteEmailInput.getQuoteCode(), quoteEmailInput.getQuoteVersion(), quoteEmailInput.getFrom(), quoteEmailInput.getTo(), quoteEmailInput.getCc(), quoteEmailInput.getSubject(), quoteEmailInput.getContent());
 	}
 	
 }

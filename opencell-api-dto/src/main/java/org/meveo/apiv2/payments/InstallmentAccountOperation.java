@@ -1,12 +1,11 @@
 package org.meveo.apiv2.payments;
 
-import jakarta.annotation.Nonnull;
-
 import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
 @Value.Style(jdkOnly = true, jakarta = true)
@@ -14,6 +13,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public interface InstallmentAccountOperation {
 
     @Schema(description = "AccountOperation Id")
-    @Nonnull
+    @NotNull
     Long getId();
 }

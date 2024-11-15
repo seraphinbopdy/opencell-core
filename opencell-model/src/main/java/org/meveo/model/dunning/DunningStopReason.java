@@ -1,7 +1,11 @@
 package org.meveo.model.dunning;
 
+import java.util.Map;
+
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.AuditableEntity;
 
 import jakarta.persistence.Column;
@@ -21,7 +25,8 @@ import jakarta.validation.constraints.Size;
  */
 @Entity
 @Table(name = "dunning_stop_reasons")
-@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_stop_reasons_seq"), @Parameter(name = "increment_size", value = "1") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_stop_reasons_seq"),
+        @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "DunningStopReason.findByStopReason", query = "select d FROM DunningStopReason d where d.stopReason = :stopReason"),
         @NamedQuery(name = "DunningStopReason.findByCodeAndDunningSettingCode", query = "select d FROM DunningStopReason d where d.stopReason = :stopReason and d.dunningSettings.code = :dunningSettingsCode") })
 public class DunningStopReason extends AuditableEntity {
@@ -55,6 +60,13 @@ public class DunningStopReason extends AuditableEntity {
     private String description;
 
     /**
+     * description i18n: internationalization of the description
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "description_i18n", columnDefinition = "jsonb")
+    private Map<String, String> descriptionI18n;
+
+    /**
      * dunning settings associated to the entity
      */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -76,6 +88,14 @@ public class DunningStopReason extends AuditableEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Map<String, String> getDescriptionI18n() {
+        return descriptionI18n;
+    }
+
+    public void setDescriptionI18n(Map<String, String> descriptionI18n) {
+        this.descriptionI18n = descriptionI18n;
     }
 
     public DunningSettings getDunningSettings() {

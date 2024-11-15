@@ -2,9 +2,6 @@ package org.meveo.apiv2.dunning;
 
 import java.math.BigDecimal;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.dunning.DunningModeEnum;
@@ -13,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
 @Value.Style(jdkOnly = true, jakarta = true)
@@ -20,7 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public interface DunningSettings extends Resource {
 
     @Schema(description = "dunning mode")
-    @Nonnull
+    @NotNull
 	DunningModeEnum getDunningMode();
 
     @Schema(description = "Max dunning level", defaultValue = "15")

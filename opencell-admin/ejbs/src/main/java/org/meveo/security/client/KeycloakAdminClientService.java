@@ -1652,8 +1652,11 @@ public class KeycloakAdminClientService implements Serializable {
         RealmResource realmResource = keycloak.realm(keycloakAdminClientConfig.getRealm());
         UsersResource usersResource = realmResource.users();
         UserRepresentation userRepresentation = getUserRepresentationByUsername(username);
-        Map<String, ClientMappingsRepresentation> all = usersResource.get(userRepresentation.getId()).roles().getAll().getClientMappings();
-        return convertClientMappingsToMap(all);
+        if (userRepresentation != null) {
+            Map<String, ClientMappingsRepresentation> all = usersResource.get(userRepresentation.getId()).roles().getAll().getClientMappings();
+            return convertClientMappingsToMap(all);
+        }
+        return null;
     }
 
     /**

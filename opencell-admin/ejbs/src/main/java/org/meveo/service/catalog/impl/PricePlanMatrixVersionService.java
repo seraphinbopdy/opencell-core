@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -818,6 +819,10 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                     fileName.append(fileNameSeparator + chargeTemplate.getId());
                     fileName.append(fileNameSeparator + chargeTemplate.getDescription()).append(fileNameSeparator + chargeTemplate.getCode());
                 } else {
+					var firstCharge = ppmv.getPricePlanMatrix().getChargeTemplates().stream().sorted(Comparator.comparing(chargeTemplate -> {
+						return chargeTemplate.getAuditable().getCreated();
+					})).findFirst().orElse(null);
+	                fileName.append(fileNameSeparator + firstCharge.getId());
                     fileName.append(fileNameSeparator + ppmv.getPricePlanMatrix().getCode());
             }
             }

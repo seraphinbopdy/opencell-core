@@ -26,10 +26,11 @@ import static java.util.Comparator.comparingInt;
 import static java.util.Optional.ofNullable;
 import static java.util.Set.of;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.meveo.commons.utils.NumberUtils.round;
+import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.model.billing.BillingProcessTypesEnum.FULL_AUTOMATIC;
+import static org.meveo.model.billing.InvoiceStatusEnum.DRAFT;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_BILLING_ACCOUNT;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_CUSTOMER_ACCOUNT;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_DISCOUNT_PLAN_INSTANCE;
@@ -682,7 +683,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             prefix = invoiceTypeSellerSequence.getPrefixEL();
         }
 
-        if (prefix != null && !StringUtils.isBlank(prefix)) {
+        if (prefix != null && !isBlank(prefix)) {
             prefix = evaluatePrefixElExpression(prefix, invoice);
         } else {
             prefix = "";
@@ -1038,7 +1039,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             if (invoiceDate == null) {
                 throw new BusinessException("invoiceDate must be set if billingRun is null");
             }
-            if (StringUtils.isBlank(lastTransactionDate) && ratedTransactionFilter == null) {
+            if (isBlank(lastTransactionDate) && ratedTransactionFilter == null) {
                 throw new BusinessException("lastTransactionDate or ratedTransactionFilter must be set if billingRun is null");
             }
         }
@@ -1393,7 +1394,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     public void setInitialCollectionDate(Invoice invoice, BillingCycle billingCycle, BillingRun billingRun) {
 
-        if (billingCycle != null && isBlank(billingCycle.getCollectionDateDelayEl())) {
+        if (billingCycle != null && org.apache.commons.lang3.StringUtils.isBlank(billingCycle.getCollectionDateDelayEl())) {
             invoice.setInitialCollectionDate(invoice.getDueDate());
             return;
         }
@@ -1421,7 +1422,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     private Integer evaluateCollectionDelayExpression(String expression, BillingAccount billingAccount, Invoice invoice, Order order) {
         Integer result = null;
-        if (StringUtils.isBlank(expression)) {
+        if (isBlank(expression)) {
             return result;
         }
         Map<Object, Object> userMap = new HashMap<>();
@@ -1600,12 +1601,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		if (InvoiceValidationStatusEnum.REJECTED.equals(failStatus)) {
 			invoice.setStatus(InvoiceStatusEnum.REJECTED);
 			invoice.setRejectedByRule(validationRule);
-			if (StringUtils.isBlank(invoice.getRejectReason()))
+			if (isBlank(invoice.getRejectReason()))
 				invoice.setRejectReason("Rejected by rule " + validationRule.getDescription());
 		} else if (InvoiceValidationStatusEnum.SUSPECT.equals(failStatus)) {
 			invoice.setStatus(InvoiceStatusEnum.SUSPECT);
 			invoice.setRejectedByRule(validationRule);
-			if (StringUtils.isBlank(invoice.getRejectReason()))
+			if (isBlank(invoice.getRejectReason()))
 				invoice.setRejectReason("Suspected by rule " + validationRule.getDescription());
 		}
 	}
@@ -2038,7 +2039,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      */
     public static <T> String evaluatePrefixElExpression(String prefix, T entity) throws BusinessException {
 
-        if (StringUtils.isBlank(prefix)) {
+        if (isBlank(prefix)) {
             return null;
         }
         Map<Object, Object> userMap = new HashMap<>();
@@ -2295,7 +2296,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         // Generate a name for xml file from EL expression
         String xmlFileName = null;
         String expression = invoice.getInvoiceType().getXmlFilenameEL();
-        if (!StringUtils.isBlank(expression)) {
+        if (!isBlank(expression)) {
             Map<Object, Object> contextMap = new HashMap<>();
             contextMap.put("invoice", invoice);
 
@@ -2310,7 +2311,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
 
         // Default to invoiceDateOrBillingRunId/invoiceNumber.xml or invoiceDateOrBillingRunId/_IA_invoiceNumber.xml for adjustment invoice
-        if (StringUtils.isBlank(xmlFileName)) {
+        if (isBlank(xmlFileName)) {
 
             boolean isInvoiceAdjustment = invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode());
 
@@ -2329,13 +2330,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
 
     private String getFileNameByStatus(Invoice invoice) {
-        if (invoice.getStatus().equals(InvoiceStatusEnum.DRAFT) || invoice.getStatus().equals(InvoiceStatusEnum.NEW)) {
+        if (invoice.getStatus().equals(DRAFT) || invoice.getStatus().equals(InvoiceStatusEnum.NEW)) {
             return invoice.getInvoiceType().getCode() + "-" + invoice.getId();
         }
         if (invoice.getStatus().equals(InvoiceStatusEnum.VALIDATED)) {
             return invoice.getInvoiceNumber();
         }
-        return (invoice.getInvoiceNumber() != null && !StringUtils.isBlank(invoice.getInvoiceNumber())) ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber();
+        return (invoice.getInvoiceNumber() != null && !isBlank(invoice.getInvoiceNumber())) ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber();
     }
 
 
@@ -2379,7 +2380,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         // Generate a name for pdf file from EL expression
         String pdfFileName = null;
         String expression = invoice.getInvoiceType().getPdfFilenameEL();
-        if (!StringUtils.isBlank(expression)) {
+        if (!isBlank(expression)) {
             Map<Object, Object> contextMap = new HashMap<>();
             contextMap.put("invoice", invoice);
 
@@ -2395,12 +2396,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
 
         // Default to invoiceDate_invoiceNumber.pdf or invoiceDate_IA_invoiceNumber.pdf for adjustment invoice
-        if (StringUtils.isBlank(pdfFileName)) {
+        if (isBlank(pdfFileName)) {
 
             boolean isInvoiceAdjustment = invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode());
 
             pdfFileName = formatInvoiceDate(invoice.getInvoiceDate()) + (isInvoiceAdjustment ? paramBeanFactory.getInstance().getProperty("invoicing.invoiceAdjustment.prefix", "_IA_") : "_")
-                    + (!StringUtils.isBlank(invoice.getInvoiceNumber()) ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber());
+                    + (!isBlank(invoice.getInvoiceNumber()) ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber());
         }
 
         if (pdfFileName != null && !pdfFileName.toLowerCase().endsWith(".pdf")) {
@@ -2515,7 +2516,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if (invoice.isPrepaid()) {
             throw new BusinessException("Invoice XML is disabled for prepaid invoice: " + invoice.getInvoiceNumber());
         }
-        if(InvoiceStatusEnum.DRAFT.equals(invoice.getStatus()) || InvoiceStatusEnum.NEW.equals(invoice.getStatus()) || InvoiceStatusEnum.DRAFT.equals(invoice.getStatus()) ){
+        if(DRAFT.equals(invoice.getStatus()) || InvoiceStatusEnum.NEW.equals(invoice.getStatus()) || DRAFT.equals(invoice.getStatus()) ){
     		produceInvoiceXmlNoUpdate(invoice, true);
     	}
         String xmlFileName = getFullXmlFilePath(invoice, false);
@@ -2681,7 +2682,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 invoice.setCfValues(customFieldValues);
             }
             try {
-                if (invoice.getStatus().equals(InvoiceStatusEnum.DRAFT)) {
+                if (invoice.getStatus().equals(DRAFT)) {
                     invoice.assignTemporaryInvoiceNumber();
                 } else if (invoice.getStatus() != InvoiceStatusEnum.REJECTED && invoice.getStatus() != InvoiceStatusEnum.SUSPECT) {
                     invoicesWNumber.add(serviceSingleton.assignInvoiceNumber(invoice));
@@ -2730,10 +2731,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
             applyMinimumModeEnum = ApplyMinimumModeEnum.valueOf(generateInvoiceRequestDto.getApplyMinimum());
         }
 
-        if (StringUtils.isBlank(entity)) {
+        if (isBlank(entity)) {
             throw new BusinessException("entity is null");
         }
-        if (StringUtils.isBlank(invoiceDate)) {
+        if (isBlank(invoiceDate)) {
             throw new BusinessException("invoicingDate is null");
         }
 
@@ -2940,7 +2941,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     public void validateInvoice(Invoice invoice, boolean save) {
         if (InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) || InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus())) {
-            invoice.setStatus(InvoiceStatusEnum.DRAFT);
+            invoice.setStatus(DRAFT);
             if (save) {
                 update(invoice);
             }
@@ -2962,7 +2963,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param invoiceIds
      */
     public void rebuildInvoices(Long billingRunId, List<Long> invoiceIds) throws BusinessException {
-        List<Invoice> invoices = extractInvalidInvoiceList(billingRunId, invoiceIds, Arrays.asList(InvoiceStatusEnum.REJECTED, InvoiceStatusEnum.SUSPECT), Arrays.asList(InvoiceStatusEnum.DRAFT));
+        List<Invoice> invoices = extractInvalidInvoiceList(billingRunId, invoiceIds, Arrays.asList(InvoiceStatusEnum.REJECTED, InvoiceStatusEnum.SUSPECT), Arrays.asList(DRAFT));
         for (Invoice invoice : invoices) {
             rebuildInvoice(invoice, true);
         }
@@ -2973,7 +2974,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param invoiceIds
      */
     public void rejectInvoices(Long billingRunId, List<Long> invoiceIds) {
-        List<Invoice> invoices = extractInvalidInvoiceList(billingRunId, invoiceIds, Arrays.asList(InvoiceStatusEnum.SUSPECT, InvoiceStatusEnum.DRAFT));
+        List<Invoice> invoices = extractInvalidInvoiceList(billingRunId, invoiceIds, Arrays.asList(InvoiceStatusEnum.SUSPECT, DRAFT));
         for (Invoice invoice : invoices) {
             rejectInvoice(invoice, null);
         }
@@ -2981,7 +2982,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     public void rejectInvoice(Invoice invoice, RejectReasonInput rejectReasonInput) {
         InvoiceStatusEnum status = invoice.getStatus();
-        if (!(InvoiceStatusEnum.SUSPECT.equals(status) || InvoiceStatusEnum.DRAFT.equals(status) || InvoiceStatusEnum.NEW.equals(status))) {
+        if (!(InvoiceStatusEnum.SUSPECT.equals(status) || DRAFT.equals(status) || InvoiceStatusEnum.NEW.equals(status))) {
             throw new BusinessException("Can only reject invoices in statuses NEW/DRAFT/SUSPECT. current invoice status is :" + status.name());
         }
         BillingRun billingRun = invoice.getBillingRun();
@@ -2991,7 +2992,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             billingRun = billingRunService.retrieveIfNotManaged(billingRun);
         }
 
-        if(InvoiceStatusEnum.DRAFT.equals(status)) {
+        if(DRAFT.equals(status)) {
             invoice.rebuildStatus(InvoiceStatusEnum.REJECTED);
         }else {
             invoice.setStatus(InvoiceStatusEnum.REJECTED);
@@ -3181,7 +3182,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     public void rebuildInvoice(Invoice invoice, boolean save) {
         invoice = findById(invoice.getId());
-        invoice.setStatus(InvoiceStatusEnum.DRAFT);
+        invoice.setStatus(DRAFT);
         applyAutomaticInvoiceCheck(Arrays.asList(invoice), true, save);
         if (save) {
             update(invoice);
@@ -3200,7 +3201,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      */
     public static Integer evaluateDueDelayExpression(String expression, BillingAccount billingAccount, Invoice invoice, Order order) throws BusinessException {
         Integer result = null;
-        if (StringUtils.isBlank(expression)) {
+        if (isBlank(expression)) {
             return result;
         }
         Map<Object, Object> userMap = new HashMap<>();
@@ -3295,7 +3296,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         } else if (isDepositInvoice) {
             invoiceType = invoiceTypeService.getDefaultDeposit();
         } else {
-            if (billingCycle != null && !isBlank(billingCycle.getInvoiceTypeEl())) {
+            if (billingCycle != null && !org.apache.commons.lang3.StringUtils.isBlank(billingCycle.getInvoiceTypeEl())) {
                 String invoiceTypeCode = evaluateInvoiceType(billingCycle.getInvoiceTypeEl(), billingRun, billingAccount);
                 invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
             }
@@ -3312,7 +3313,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public String evaluateInvoiceType(String expression, BillingRun billingRun, BillingAccount billingAccount) {
         String invoiceTypeCode = null;
 
-        if (!StringUtils.isBlank(expression)) {
+        if (!isBlank(expression)) {
             Map<Object, Object> contextMap = new HashMap<>();
             contextMap.put("br", billingRun);
             contextMap.put("ba", billingAccount);
@@ -3343,10 +3344,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
         String billingTemplateName = null;
         boolean isInvoiceAdjustment = invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode());
         
-        if (invoiceType != null && !StringUtils.isBlank(invoiceType.getBillingTemplateNameEL())) {
+        if (invoiceType != null && !isBlank(invoiceType.getBillingTemplateNameEL())) {
             billingTemplateName = evaluateBillingTemplateName(invoiceType.getBillingTemplateNameEL(), invoice);
 
-        } else if (billingCycle != null && !StringUtils.isBlank(billingCycle.getBillingTemplateNameEL())) {
+        } else if (billingCycle != null && !isBlank(billingCycle.getBillingTemplateNameEL())) {
             billingTemplateName = evaluateBillingTemplateName(billingCycle.getBillingTemplateNameEL(), invoice);
         }
         if (billingTemplateName == null) {
@@ -3478,7 +3479,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             return;
         }
         if (invoice.getStatus().equals(InvoiceStatusEnum.SUSPECT) || invoice.getStatus().equals(InvoiceStatusEnum.REJECTED)) {
-            invoice.setStatus(InvoiceStatusEnum.DRAFT);
+            invoice.setStatus(DRAFT);
         }
         if ((billingRun.getComputeDatesAtValidation() != null && billingRun.getComputeDatesAtValidation()) 
                 || (billingRun.getComputeDatesAtValidation() == null && billingCycle.isComputeDatesAtValidation())) {
@@ -3847,7 +3848,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             if (billingAccount.getContactInformation() != null) {
                 to.add(billingAccount.getContactInformation().getEmail());
             }
-            if (!StringUtils.isBlank(billingAccount.getCcedEmails())) {
+            if (!isBlank(billingAccount.getCcedEmails())) {
                 cc.addAll(Arrays.asList(billingAccount.getCcedEmails().split(",")));
             }
             if (billingAccount.getEmailTemplate() != null) {
@@ -3865,7 +3866,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 to.clear();
                 to.add(subscription.getEmail());
                 cc.clear();
-                if (!StringUtils.isBlank(subscription.getCcedEmails())) {
+                if (!isBlank(subscription.getCcedEmails())) {
                     cc.addAll(Arrays.asList(subscription.getCcedEmails().split(",")));
                 }
                 emailTemplate = (subscription.getEmailTemplate() != null) ? subscription.getEmailTemplate() : emailTemplate;
@@ -3878,7 +3879,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 to.clear();
                 to.add(order.getEmail());
                 cc.clear();
-                if (!StringUtils.isBlank(order.getCcedEmails())) {
+                if (!isBlank(order.getCcedEmails())) {
                     cc.addAll(Arrays.asList(order.getCcedEmails().split(",")));
                 }
                 emailTemplate = (order.getEmailTemplate() != null) ? order.getEmailTemplate() : emailTemplate;
@@ -3979,7 +3980,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         invoice = refreshOrRetrieve(invoice);
         userMap.put("invoice", invoice);
         String result = evaluateExpression(overrideEmailEl, userMap, String.class);
-        if (StringUtils.isBlank(result)) {
+        if (isBlank(result)) {
             return null;
         }
         return result;
@@ -4646,7 +4647,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     private boolean matchDiscountPlanItemExpression(String expression, CustomerAccount customerAccount, BillingAccount billingAccount, Invoice invoice, DiscountPlanInstance dpi) throws BusinessException {
         Boolean result = true;
 
-        if (StringUtils.isBlank(expression)) {
+        if (isBlank(expression)) {
             return result;
         }
         Map<Object, Object> userMap = new HashMap<>();
@@ -4689,7 +4690,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      */
     private BigDecimal evaluateDiscountPercentExpression(String expression, BillingAccount billingAccount, WalletInstance wallet, Invoice invoice, BigDecimal subCatTotal) throws BusinessException {
 
-        if (StringUtils.isBlank(expression)) {
+        if (isBlank(expression)) {
             return null;
         }
         Map<Object, Object> userMap = new HashMap<>();
@@ -4712,7 +4713,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         invoice.setBillingAccount(billingAccount);
         invoice.setSeller(em.getReference(Seller.class, sellerId));
-        invoice.setStatus(InvoiceStatusEnum.DRAFT);
+        invoice.setStatus(DRAFT);
         invoice.setInvoiceType(invoiceType);
         invoice.setPrepaid(isPrepaid);
         invoice.setInvoiceDate(invoiceDate);
@@ -4769,13 +4770,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public Date calculateDueDate(Invoice invoice, BillingCycle billingCycle, BillingAccount billingAccount, CustomerAccount customerAccount, Order order) {
         // Determine invoice due date delay either from Order, Customer account or Billing cycle
         Integer delay = 0;
-        if (order != null && !StringUtils.isBlank(order.getDueDateDelayEL())) {
+        if (order != null && !isBlank(order.getDueDateDelayEL())) {
             delay = evaluateDueDelayExpression(order.getDueDateDelayEL(), billingAccount, invoice, order);
 
-        } else if (!StringUtils.isBlank(customerAccount.getDueDateDelayEL())) {
+        } else if (!isBlank(customerAccount.getDueDateDelayEL())) {
             delay = evaluateDueDelayExpression(customerAccount.getDueDateDelayEL(), billingAccount, invoice, order);
 
-        } else if (!StringUtils.isBlank(billingCycle.getDueDateDelayEL())) {
+        } else if (!isBlank(billingCycle.getDueDateDelayEL())) {
             delay = evaluateDueDelayExpression(billingCycle.getDueDateDelayEL(), billingAccount, invoice, order);
         }
         if (delay == null) {
@@ -5097,7 +5098,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
 
         TaxClass taxClass = null;
-        if (!StringUtils.isBlank(ratedTransactionDto.getTaxClassCode())) {
+        if (!isBlank(ratedTransactionDto.getTaxClassCode())) {
             taxClass = taxClassService.findByCode(ratedTransactionDto.getTaxClassCode());
             if (taxClass == null) {
                 throw new EntityDoesNotExistsException(TaxClass.class, ratedTransactionDto.getTaxClassCode());
@@ -5248,7 +5249,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if (alreadySent) {
             invoice.setEmailSentDate(invoiceRessource.getEmailSentDate());
         }
-        invoice.setStatus(InvoiceStatusEnum.DRAFT);
+        invoice.setStatus(DRAFT);
         invoice.setDontSend(alreadySent);
         PaymentMethod preferedPaymentMethod = billingAccount.getCustomerAccount().getPreferredPaymentMethod();
         if (preferedPaymentMethod != null) {
@@ -5828,7 +5829,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             if (invoiceProcessTypeEnum == null || invoiceProcessTypeEnum == InvoiceProcessTypeEnum.AUTOMATIC) {
                 AccountingArticle accountingArticle = invoiceLine.getAccountingArticle();
                 accountingArticle = accountingArticleService.refreshOrRetrieve(accountingArticle);
-                if (!StringUtils.isBlank(accountingArticle.getInvoiceTypeEl())) {
+                if (!isBlank(accountingArticle.getInvoiceTypeEl())) {
                     String invoiceTypeCode = evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
                     invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
                 }
@@ -5878,7 +5879,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         String invoiceTypeCode = null;
 
-        if (!StringUtils.isBlank(expression)) {
+        if (!isBlank(expression)) {
             AccountingArticle accountingArticle = invoiceLine.getAccountingArticle();
 
             Map<Object, Object> contextMap = new HashMap<>();
@@ -6047,7 +6048,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             if (invoiceDate == null) {
                 throw new BusinessException("invoiceDate must be set if billingRun is null");
             }
-            if (StringUtils.isBlank(lastTransactionDate) && filter == null) {
+            if (isBlank(lastTransactionDate) && filter == null) {
                 throw new BusinessException("lastTransactionDate or filter must be set if billingRun is null");
             }
         }
@@ -6724,14 +6725,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     private void validateInvoiceResourceAgregates(org.meveo.apiv2.billing.Invoice invoiceResource) throws ValidationException {
         for (org.meveo.apiv2.billing.CategoryInvoiceAgregate catInvAgr : invoiceResource.getCategoryInvoiceAgregates()) {
-            if (StringUtils.isBlank(catInvAgr.getCategoryInvoiceCode())) {
+            if (isBlank(catInvAgr.getCategoryInvoiceCode())) {
                 throw new ValidationException("missing categoryInvoiceCode");
             }
             if (catInvAgr.getListSubCategoryInvoiceAgregate() == null || catInvAgr.getListSubCategoryInvoiceAgregate().isEmpty()) {
                 throw new ValidationException("missing listSubCategoryInvoiceAgregate");
             }
             for (org.meveo.apiv2.billing.SubCategoryInvoiceAgregate subCatInvAgr : catInvAgr.getListSubCategoryInvoiceAgregate()) {
-                if (StringUtils.isBlank(subCatInvAgr.getInvoiceSubCategoryCode())) {
+                if (isBlank(subCatInvAgr.getInvoiceSubCategoryCode())) {
                     throw new ValidationException("missing invoiceSubCategoryCode");
                 }
             }
@@ -6925,11 +6926,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public Invoice update(Invoice toUpdate, Invoice input, org.meveo.apiv2.billing.Invoice invoiceResource) {
         toUpdate = refreshOrRetrieve(toUpdate);
         final InvoiceStatusEnum status = toUpdate.getStatus();
-        if (!(InvoiceStatusEnum.REJECTED.equals(status) || InvoiceStatusEnum.SUSPECT.equals(status) || InvoiceStatusEnum.DRAFT.equals(status) || InvoiceStatusEnum.NEW.equals(status))) {
+        if (!(InvoiceStatusEnum.REJECTED.equals(status) || InvoiceStatusEnum.SUSPECT.equals(status) || DRAFT.equals(status) || InvoiceStatusEnum.NEW.equals(status))) {
             throw new BusinessException("Can only update invoices in statuses NEW/DRAFT/SUSPECT/REJECTED");
         }
         if (InvoiceStatusEnum.NEW.equals(status)) {            
-            toUpdate.setStatus(InvoiceStatusEnum.DRAFT);
+            toUpdate.setStatus(DRAFT);
             toUpdate.assignTemporaryInvoiceNumber();
         }
         if (input.getComment() != null) {
@@ -6970,7 +6971,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         if (invoiceResource.getSubscription() != null && invoiceResource.getSubscription().getId() != null) {
             // Subscription can only be edited for manual invoice in draft-like status (NEW, DRAFT, REJECTED, SUSPECT)
-            if (!(toUpdate.getStatus() == InvoiceStatusEnum.NEW || toUpdate.getStatus() == InvoiceStatusEnum.DRAFT ||
+            if (!(toUpdate.getStatus() == InvoiceStatusEnum.NEW || toUpdate.getStatus() == DRAFT ||
                     toUpdate.getStatus() == InvoiceStatusEnum.REJECTED ||toUpdate.getStatus() == InvoiceStatusEnum.SUSPECT)) {
                 throw new BusinessException("Subscription can only be edited for manual invoice in �draft-like� status (NEW, DRAFT, REJECTED, SUSPECT)");
             }
@@ -7231,12 +7232,29 @@ public class InvoiceService extends PersistenceService<Invoice> {
             duplicateInvoiceLine.setLinkedInvoiceLine(invoiceLine); // Add linked adjusted invoiceLine
             invoiceLinesService.createInvoiceLineWithInvoice(duplicateInvoiceLine, duplicateInvoice, true);
         }
+        if(duplicateInvoice.getInvoiceLines() != null && !duplicateInvoice.getInvoiceLines().isEmpty()) {
+            duplicateInvoice.setStatus(DRAFT);
+            update(duplicateInvoice);
+        }
+        if (!isAdjustment) {
+            assignTemporaryInvoiceNumberIfNotPresent(invoice, duplicateInvoice);
+        }
         return duplicateInvoice;
+    }
+
+    private void assignTemporaryInvoiceNumberIfNotPresent(Invoice originInvoice, Invoice newInvoice) {
+        originInvoice = refreshOrRetrieve(originInvoice);
+        if(isBlank(newInvoice.getTemporaryInvoiceNumber())
+                && DRAFT == newInvoice.getStatus()
+                && originInvoice.getInvoiceLines() != null
+                && !originInvoice.getInvoiceLines().isEmpty()) {
+            newInvoice.assignTemporaryInvoiceNumber();
+        }
     }
 
     public IBillableEntity getBillableEntity(String targetCode, String targetType, String orderNumber, String billingAccountCode) {
         IBillableEntity entity = null;
-        if (StringUtils.isBlank(billingAccountCode)) {
+        if (isBlank(billingAccountCode)) {
             if (BillingEntityTypeEnum.BILLINGACCOUNT.toString().equalsIgnoreCase(targetType)) {
                 entity = billingAccountService.findByCode(targetCode, asList("billingRun"));
             } else if (BillingEntityTypeEnum.SUBSCRIPTION.toString().equalsIgnoreCase(targetType)) {
@@ -7245,7 +7263,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 entity = commercialOrderService.findByCodeOrExternalId(targetCode);
             }
         } else {
-            if (!StringUtils.isBlank(orderNumber)) {
+            if (!isBlank(orderNumber)) {
                 entity = orderService.findByCodeOrExternalId(orderNumber);
             } else {
                 entity = billingAccountService.findByCode(billingAccountCode, asList("billingRun"));
@@ -7270,11 +7288,15 @@ public class InvoiceService extends PersistenceService<Invoice> {
             invoiceType = invoiceTypeService.findByCode(invoiceLinesToReplicate.getAdjType());
         }
 
+        Invoice adj;
+
         if (invoiceLineRTs != null && !invoiceLineRTs.isEmpty()) {
-            return createAdjustmentFromRatedTransactions(invoice, invoiceLineRTs, invoiceType);
+            adj = createAdjustmentFromRatedTransactions(invoice, invoiceLineRTs, invoiceType);
         } else {
-            return createAdjustment(invoice, invoiceLinesToReplicate.getInvoiceLinesIds(), invoiceType);
+            adj = createAdjustment(invoice, invoiceLinesToReplicate.getInvoiceLinesIds(), invoiceType);
         }
+        adj.setComment(invoiceLinesToReplicate.getComment());
+        return adj;
     }
 
     private Invoice createAdjustmentFromRatedTransactions(Invoice invoice, List<InvoiceLineRTs> invoiceLineRTs, InvoiceType type) {
@@ -7285,6 +7307,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         populateAdjustmentInvoice(adjustmentInvoice, type, invoice);
         calculateOrUpdateInvoice(invoiceLinesIds, adjustmentInvoice);
         addLinkedInvoice(invoice, adjustmentInvoice);
+        assignTemporaryInvoiceNumberIfNotPresent(invoice, adjustmentInvoice);
 
         return adjustmentInvoice;
     }
@@ -7336,6 +7359,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         addLinkedInvoice(invoice, adjustmentInvoice);
         populateAdjustmentInvoice(adjustmentInvoice, type, invoice);
         calculateOrUpdateInvoice(invoiceLinesIds, adjustmentInvoice);
+        assignTemporaryInvoiceNumberIfNotPresent(invoice, adjustmentInvoice);
 
         return adjustmentInvoice;
     }
@@ -7368,7 +7392,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     private void populateAdjustmentInvoiceForJob(Invoice duplicatedInvoice, InvoiceType type, Invoice srcInvoice) {
         duplicatedInvoice.setInvoiceDate(new Date());
         duplicatedInvoice.setInvoiceType(type != null ? type : invoiceTypeService.getDefaultAdjustement());
-        duplicatedInvoice.setStatus(InvoiceStatusEnum.DRAFT);
+        duplicatedInvoice.setStatus(DRAFT);
         duplicatedInvoice.setOpenOrderNumber(StringUtils.EMPTY);
         // Update ADJ Invoice PaymentMethod from original Invoice
         duplicatedInvoice.setPaymentMethod(srcInvoice.getPaymentMethod());
@@ -7409,7 +7433,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     private void populateAdjustmentInvoice(Invoice duplicatedInvoice, InvoiceType type, Invoice srcInvoice) {
         duplicatedInvoice.setInvoiceDate(new Date());
         duplicatedInvoice.setInvoiceType(type != null ? type : invoiceTypeService.getDefaultAdjustement());
-        duplicatedInvoice.setStatus(InvoiceStatusEnum.DRAFT);
+        duplicatedInvoice.setStatus(DRAFT);
         duplicatedInvoice.setOpenOrderNumber(StringUtils.EMPTY);
         // Update ADJ Invoice PaymentMethod from original Invoice
         duplicatedInvoice.setPaymentMethod(srcInvoice.getPaymentMethod());
@@ -8021,7 +8045,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if(org.meveo.commons.utils.ListUtils.isEmtyCollection(advs)) {
             return;
         }
-		var enabledStatus = List.of(InvoiceStatusEnum.DRAFT, InvoiceStatusEnum.NEW);
+		var enabledStatus = List.of(DRAFT, InvoiceStatusEnum.NEW);
 		var enabledPaymentStatusStatus = List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PPAID);
 		if(!allowUsingUnpaidAdvance) {
 			// in this case of invoice is DRAFT and the ADV is UNPAID and not link to ADV then we ignore the ADV
@@ -8293,7 +8317,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	
 	public void cancelUnpaidAdv(Invoice inv){
 		inv = findById(inv.getId(), List.of("linkedInvoices", "invoiceType"));
-		if(inv.getStatus() == InvoiceStatusEnum.DRAFT &&
+		if(inv.getStatus() == DRAFT &&
 				!(Boolean) advancedSettingsService.getParameter("allowUsingUnpaidAdvance") &&
 				inv.getInvoiceType() != null && !inv.getInvoiceType().getCode().equals("ADV")) {
 			List<Invoice> advList = inv.getLinkedInvoices().stream()

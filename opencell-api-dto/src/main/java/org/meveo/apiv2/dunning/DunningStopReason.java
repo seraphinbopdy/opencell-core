@@ -1,14 +1,16 @@
 package org.meveo.apiv2.dunning;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
+import java.util.List;
 
 import org.immutables.value.Value;
+import org.meveo.api.dto.LanguageDescriptionDto;
 import org.meveo.apiv2.models.Resource;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
 @Value.Style(jdkOnly = true, jakarta = true)
@@ -16,14 +18,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public interface DunningStopReason extends Resource {
 
     @Schema(description = "The stop reason")
-    @Nonnull
+    @NotNull
     String getStopReason();
 
     @Schema(description = "The stop reason's description")
     @Nullable
     String getDescription();
 
+    @Nullable
+    @Schema(description = "The pause reason's description in different languages")
+    List<LanguageDescriptionDto> getDescriptionI18n();
+
     @Schema(description = "The dunning settings associated to stop reason")
-    @Nonnull
-	Resource getDunningSettings();
+    @NotNull
+    Resource getDunningSettings();
 }

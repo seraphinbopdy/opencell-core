@@ -69,6 +69,9 @@ public class DunningPauseReasonApiService implements ApiService<DunningPauseReas
 		if (dunningPauseReason.getPauseReason() != null) {
 			dunningPauseReasonUpdate.setPauseReason(dunningPauseReason.getPauseReason());
 		}
+		if (dunningPauseReason.getDescriptionI18n() != null) {
+			dunningPauseReasonUpdate.setDescriptionI18n(dunningPauseReason.getDescriptionI18n());
+		}
 		dunningPauseReasonsService.update(dunningPauseReasonUpdate);
 		return Optional.of(dunningPauseReasonUpdate);
 	}

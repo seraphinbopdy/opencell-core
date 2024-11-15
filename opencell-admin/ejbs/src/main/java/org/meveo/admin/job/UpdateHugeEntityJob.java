@@ -35,6 +35,7 @@ import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
+import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.job.Job;
 
@@ -129,7 +130,13 @@ public class UpdateHugeEntityJob extends Job {
     /**
      * Custom field containing the list of batch entities that will be processed.
      */
-    public static final String BATCHES_TO_PROCESS = "batchesToProcess";
+    public static final String CF_BATCHES_TO_PROCESS = "batchesToProcess";
+
+    /**
+     * Custom field containing the pre update script which will be run before update the huge entity.
+     */
+    public static final String CF_PRE_UPDATE_SCRIPT = "preUpdateScript";
+
 
     /**
      * Job bean
@@ -250,19 +257,26 @@ public class UpdateHugeEntityJob extends Job {
                 CustomFieldTemplateUtils.buildCF(CF_IS_CASE_SENSITIVE,
                         resourceMessages.getString("jobExecution.updateHugeEntity.isCaseSensitive"), CustomFieldTypeEnum.BOOLEAN,
                         "tab:Configuration:0;fieldGroup:Execution configuration:0;field:8", "false", APPLIES_TO));
-        
+
         result.put(CF_PRE_UPDATE_EL,
                 CustomFieldTemplateUtils.buildCF(CF_PRE_UPDATE_EL,
                         resourceMessages.getString("jobExecution.updateHugeEntity.preUpdateEl"), CustomFieldTypeEnum.STRING,
                         "tab:Configuration:0;fieldGroup:Execution configuration:0;field:9", APPLIES_TO, 1000L));
 
-        result.put(BATCHES_TO_PROCESS,
-                CustomFieldTemplateUtils.buildCF(BATCHES_TO_PROCESS,
-                resourceMessages.getString("jobExecution.updateHugeEntity.batchesToProcess"), CustomFieldTypeEnum.ENTITY,
-                "tab:Configuration:0;fieldGroup:Execution configuration:0;field:10",
-                null, false, CustomFieldStorageTypeEnum.LIST, BatchEntity.class.getName(),
+        result.put(CF_BATCHES_TO_PROCESS,
+                CustomFieldTemplateUtils.buildCF(CF_BATCHES_TO_PROCESS,
+                        resourceMessages.getString("jobExecution.updateHugeEntity.batchesToProcess"), CustomFieldTypeEnum.ENTITY,
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:10",
+                        null, false, CustomFieldStorageTypeEnum.LIST, BatchEntity.class.getName(),
                         APPLIES_TO, null));
-        
+
+        result.put(CF_PRE_UPDATE_SCRIPT,
+                CustomFieldTemplateUtils.buildCF(CF_PRE_UPDATE_SCRIPT,
+                        resourceMessages.getString("jobExecution.updateHugeEntity.preUpdateScript"), CustomFieldTypeEnum.ENTITY,
+                        "tab:Configuration:0;fieldGroup:Execution configuration:0;field:11",
+                        null, false, null, ScriptInstance.class.getName(),
+                        APPLIES_TO, null));
+
         return result;
     }
 }

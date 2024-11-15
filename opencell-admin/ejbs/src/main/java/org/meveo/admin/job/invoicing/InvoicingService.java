@@ -542,6 +542,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		if (invoiceAgg.isUseSpecificPriceConversion()) {
 			invoice.setUseSpecificPriceConversion(true);
 		}
+		invoice.setAmountWithoutTaxBeforeDiscount(invoice.getAmountWithoutTax());
     }
     
     public void addInvoiceAggregateWithAmounts(Invoice invoice, InvoiceAgregate invoiceAgg) {

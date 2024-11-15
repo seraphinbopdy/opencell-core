@@ -10,12 +10,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableAccountOperationClose.class)
 public interface AccountOperationClose {
-	
-	@Schema(description = "List of AccountOperation to be closed")
-	@NotEmpty
-	List<AccountOperationInput> getAccountOperations();
-    
+
+    @Schema(description = "List of AccountOperation to be closed")
+    @NotEmpty
+    List<AccountOperationInput> getAccountOperations();
+
 }

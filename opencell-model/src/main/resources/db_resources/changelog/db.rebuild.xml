@@ -50,5 +50,7 @@
     <include file="rebuild/data-scripts.xml" relativeToChangelogFile="true" />
     <include file="rebuild/data-reports.xml" relativeToChangelogFile="true" />
     <include file="rebuild/finalize_rebuild.xml" relativeToChangelogFile="true" />
+    <include file="rebuild/overlay.xml" relativeToChangelogFile="true" />
+    <include file="rebuild/custom.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

@@ -1,5 +1,7 @@
 package org.meveo.model.dunning;
 
+import java.util.Date;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
@@ -47,6 +49,9 @@ public class DunningActionInstance extends BusinessCFEntity {
     @Enumerated(EnumType.STRING)
     @NotNull
     private DunningActionInstanceStatusEnum actionStatus = DunningActionInstanceStatusEnum.TO_BE_DONE;
+
+    @Column(name = "execution_date")
+    private Date executionDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dunning_collection_plan_id")
@@ -128,4 +133,11 @@ public class DunningActionInstance extends BusinessCFEntity {
         this.dunningAction = dunningAction;
     }
 
+    public Date getExecutionDate() {
+        return executionDate;
+}
+
+    public void setExecutionDate(Date executionDate) {
+        this.executionDate = executionDate;
+    }
 }

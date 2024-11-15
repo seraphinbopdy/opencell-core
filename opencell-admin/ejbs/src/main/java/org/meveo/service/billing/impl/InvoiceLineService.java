@@ -897,9 +897,11 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                     invoiceLine.getTaxRate(), appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode().getRoundingMode()).add(invoiceLine.getAmountWithoutTax()));
 		}
         if(!appProvider.isEntreprise()) {
-            BigDecimal taxAmount = NumberUtils.computeTax(invoiceLine.getAmountWithoutTax(),
-                    invoiceLine.getTaxRate(), appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode().getRoundingMode());
-            invoiceLine.setAmountWithTax(invoiceLine.getAmountWithoutTax().add(taxAmount));
+            BigDecimal[] amounts = computeAmounts(invoiceLine.getUnitPrice(),
+                    invoiceLine.getQuantity(), invoiceLine.getTaxRate(), appProvider.isEntreprise());
+            invoiceLine.setAmountWithoutTax(amounts[0]);
+            invoiceLine.setAmountWithTax(amounts[1]);
+            invoiceLine.setAmountTax(amounts[2]);
         }
 		
         /****recalculate amountWithoutTax and amountWithTax  according to tax percent and the business model (b2b or b2c)*/
@@ -937,6 +939,28 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         InvoiceLine.setRoundingConfig(appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode());
 
         return invoiceLine;
+    }
+
+    private BigDecimal[] computeAmounts(BigDecimal unitPrice,
+                                        BigDecimal quantity, BigDecimal taxRate, boolean isEnterprise) {
+        BigDecimal amountTax;
+        BigDecimal amountWithTax;
+        BigDecimal amountWithoutTax;
+        final BigDecimal hundred = new BigDecimal(100);
+        if (isEnterprise) {
+            amountWithoutTax = unitPrice.multiply(quantity);
+            amountTax = (amountWithoutTax.multiply(taxRate))
+                    .divide(hundred, appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
+            amountWithTax = amountWithoutTax.add(amountTax);
+        } else {
+            amountWithTax = unitPrice.multiply(quantity);
+            BigDecimal computeValue = (hundred.add(taxRate))
+                    .divide(hundred, appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
+            amountWithoutTax = amountWithTax
+                    .divide(computeValue, appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
+            amountTax = amountWithTax.subtract(amountWithoutTax);
+        }
+        return new BigDecimal[]{amountWithoutTax, amountWithTax, amountTax};
     }
 
 	

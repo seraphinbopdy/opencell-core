@@ -49,7 +49,6 @@ import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.model.IEntity;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ChargeApplicationModeEnum;
@@ -178,10 +177,13 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
     @Inject
     private RatedTransactionService ratedTransactionService;
-
-
+    
     @Inject
     private ProductService productService;
+
+    @Inject
+    private SubscriptionService subscriptionService;
+
     /**
      * Find a service instance list by subscription entity, service template code and service instance status list.
      * 
@@ -1032,13 +1034,17 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         entity.updateSubscribedTillAndRenewalNotifyDates();
         super.create(entity);
     }
-
-    @Override
-    public ServiceInstance update(ServiceInstance entity) throws BusinessException {
+    
+    public ServiceInstance updateAndRecalculateMrr(ServiceInstance entity, boolean recalculateMrr) throws BusinessException {
 
         boolean quantityChanged = entity.isQuantityChanged();
 
         entity.updateSubscribedTillAndRenewalNotifyDates();
+        
+        if(recalculateMrr) {
+            entity.setMrr(calculateMRR(entity));
+            subscriptionService.calculateMrr(entity.getSubscription());
+        }
 
         entity = super.update(entity);
         // update quantity in charges
@@ -1070,6 +1076,11 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
         return entity;
 
+    }
+
+    @Override
+    public ServiceInstance update(ServiceInstance entity) throws BusinessException {
+        return updateAndRecalculateMrr(entity, true);
     }
 
     /**
@@ -1391,13 +1402,18 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
     @Inject
     private MethodCallingUtils methodCallingUtils;
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void calculateMRRNewTx(ServiceInstance si) {
+        si.setMrr(this.calculateMRR(si));
+        updateAndRecalculateMrr(si, false);
+    }
+    
     /**
      * Calculate MRR for a service instance
      * 
      * @param si - Targeted Service instance
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void calculateMRR(ServiceInstance si) {
+    private BigDecimal calculateMRR(ServiceInstance si) {
         BigDecimal mrr = BigDecimal.ZERO;
         ServiceInstance serviceInstance = findById(si.getId());
         if (serviceInstance.getRecurringChargeInstances() != null) {
@@ -1434,10 +1450,10 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
             }
             
             if(!keepNull) {
-                serviceInstance.setMrr(mrr);
-                update(serviceInstance);
+                return mrr;
             }
         }
+        return null;
     }
 
     /**

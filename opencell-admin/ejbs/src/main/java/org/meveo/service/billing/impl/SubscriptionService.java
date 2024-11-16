@@ -198,6 +198,8 @@ public class SubscriptionService extends BusinessService<Subscription> {
     private SubscriptionService subscriptionService;
     @Inject
     private MethodCallingUtils methodCallingUtils;
+    @Inject
+    private BillingAccountService billingAccountService;
 
     @MeveoAudit
     @Override
@@ -1179,6 +1181,12 @@ public class SubscriptionService extends BusinessService<Subscription> {
              return null;
          }
     }
+
+    public List<Subscription> findByBA(BillingAccount billingAccount) {
+        return getEntityManager().createNamedQuery("Subscription.getBillingAccountSubscriptions", Subscription.class)
+                                 .setParameter("billingAccount", billingAccount)
+                                 .getResultList();
+    }
     
     public void removePaymentMethodLink(BillingAccount billingAccount) {
 		getEntityManager().createNamedQuery("Subscription.unlinkPaymentMehtodByBA")
@@ -1540,5 +1548,21 @@ public class SubscriptionService extends BusinessService<Subscription> {
         query.setParameter("status", InstanceStatusEnum.ACTIVE);
         query.executeUpdate();
         
+    }
+
+    public void calculateMrr(Subscription subscription) {
+        BigDecimal mrr = subscription.getServiceInstances()
+                                     .stream()
+                                     .filter(si -> InstanceStatusEnum.ACTIVE.equals(si.getStatus()) && si.getMrr() != null)
+                                     .map(ServiceInstance::getMrr)
+                                     .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        if(!mrr.equals(subscription.getMrr())) {
+            subscription.setMrr(mrr);
+            update(subscription);
+            subscriptionService.getEntityManager().flush();
+            billingAccountService.calculateMrr(subscription.getUserAccount().getBillingAccount());
+            offerTemplateService.calculateArr(subscription.getOffer());
+        }
     }
 }

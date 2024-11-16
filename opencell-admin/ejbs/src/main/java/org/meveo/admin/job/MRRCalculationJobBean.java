@@ -83,7 +83,7 @@ public class MRRCalculationJobBean extends IteratorBasedJobBean<ServiceInstance>
         // Calculate MRR for a ServiceInstance
         log.info("Calculating MRR for serviceInstance {}", serviceInstance.getCode());
         try {
-            serviceInstanceService.calculateMRR(serviceInstance);
+            serviceInstanceService.calculateMRRNewTx(serviceInstance);
         } catch (Exception e) {
             log.error("Failed to calculate MRR for serviceInstance #{}", serviceInstance.getId(), e);
             jobExecutionResult.unRegisterSucces();

@@ -271,7 +271,7 @@ public class UsageRatingService extends RatingService implements Serializable {
             List<EDR> edrs = findEdrsListByIds(edrIds);
 
             for (EDR edr : edrs) {
-                rateUsage(edr, false, false, 0, 0, null, false);
+                rateUsage(edr, false, false, 0, 0, null, true);
             }
 
         } catch (RatingException e) {
@@ -344,9 +344,15 @@ public class UsageRatingService extends RatingService implements Serializable {
      * @throws RatingException EDR rejection due to lack of funds, data validation, inconsistency or other rating related failure
      */
     public RatingResult rateUsage(Long edrId, boolean rateTriggeredEdr, int maxDeep, int currentRatingDepth) throws BusinessException, RatingException {
-
-        EDR edr = findEdrByIdandSubscription(edrId);
-        return rateUsage(edr, false, rateTriggeredEdr, maxDeep, currentRatingDepth, null, false);
+    	EDR edr = edrService.findById(edrId);
+    	if(edr==null){
+    		throw new BusinessException(" NO EDR FOUND FOR ID"+edr);
+    	}
+    	if(EDRStatusEnum.OPEN!=edr.getStatus()){
+    		log.info("EDR already processed :"+edrId);
+    	}
+		return rateUsage(edr, false, rateTriggeredEdr, maxDeep, currentRatingDepth, null, true);
+		
     }
 
     /**

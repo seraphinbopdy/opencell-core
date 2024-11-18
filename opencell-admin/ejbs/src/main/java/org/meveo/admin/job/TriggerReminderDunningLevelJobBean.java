@@ -244,10 +244,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                 && !invoice.getSeller().getContactInformation().getEmail().isBlank()) {
             Seller seller = invoice.getSeller();
             Map<Object, Object> params = new HashMap<>();
-            params.put("billingAccountDescription", billingAccount.getDescription());
-            params.put("billingAccountAddressAddress1", billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
-            params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
-            params.put("billingAccountAddressCity", billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
+            TriggerCollectionPlanLevelsJobBean.setBillingAccountInfo(params, billingAccount);
 
             ContactInformation contactInformation = billingAccount.getContactInformation();
 
@@ -277,10 +274,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                 params.put("billingAccountLegalEntityTypeCode", ofNullable(title).map(Title::getDescription).orElse(""));
             }
 
-            params.put("customerAccountAddressAddress1", customerAccount.getAddress() != null ? customerAccount.getAddress().getAddress1() : "");
-            params.put("customerAccountAddressZipCode", customerAccount.getAddress() != null ? customerAccount.getAddress().getZipCode() : "");
-            params.put("customerAccountAddressCity", customerAccount.getAddress() != null ? customerAccount.getAddress().getCity() : "");
-            params.put("customerAccountDescription", customerAccount.getDescription());
+            TriggerCollectionPlanLevelsJobBean.setCustomerAccountInfo(params, customerAccount);
             params.put("dayDate", emailDateFormatter.format(new Date()));
 
             List<File> attachments = new ArrayList<>();

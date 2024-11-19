@@ -56,7 +56,7 @@ public class UsageRatingJobBean extends IteratorBasedScopedJobBean<Long> {
     @TransactionAttribute(TransactionAttributeType.NEVER)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
 
-        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, this::rateEDR, this::rateEDRBatch, this::hasMore, null, null);
+        super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, null, null, this::rateEDRBatch, this::hasMore, null, null);
 
         rateUntilDate = null;
         ratingGroup = null;
@@ -75,23 +75,13 @@ public class UsageRatingJobBean extends IteratorBasedScopedJobBean<Long> {
     /**
      * Rate EDR usage
      * 
-     * @param edrId EDR id to rate
-     * @param jobExecutionResult Job execution result
-     */
-    private void rateEDR(Long edrId, JobExecutionResultImpl jobExecutionResult) {
-        usageRatingService.ratePostpaidUsage(edrId);
-    }
-
-    /**
-     * Rate EDR usage
-     * 
      * @param edrId A list of EDR ids to rate
      * @param jobExecutionResult Job execution result
      */
     private void rateEDRBatch(List<Long> edrIds, JobExecutionResultImpl jobExecutionResult) {
 
         // In case of no need to rollback when rating fails, an error will be recorded directly in EDR, error will never be thrown and only batch mode will be used
-        usageRatingService.ratePostpaidUsage(edrIds);
+        usageRatingService.ratePostpaidUsage(edrIds, jobExecutionResult);
     }
 
     private boolean hasMore(JobInstance jobInstance) {

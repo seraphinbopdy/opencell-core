@@ -22,10 +22,12 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.ejb.Stateless;
@@ -57,6 +59,7 @@ import org.meveo.model.billing.UsageChargeInstance;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.UsageChargeTemplate;
 import org.meveo.model.cpq.CpqQuote;
+import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.quote.QuoteVersion;
 import org.meveo.model.rating.CDR;
 import org.meveo.model.rating.CDRStatusEnum;
@@ -261,28 +264,35 @@ public class UsageRatingService extends RatingService implements Serializable {
      * Rate a a list of EDRs a a batch. Counters are used if they apply. All EDRs MUST succeed. EDR status will NOT be updated to Rejected even if exception is thrown - any changes will simply be rolledback.
      * 
      * @param edrIds A list of EDR ids to rate
+     * @param jobExecutionResult 
      * @throws BusinessException business exception.
      * @throws RatingException EDR rejection due to lack of funds, data validation, inconsistency or other rating related failure
      */
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void ratePostpaidUsage(List<Long> edrIds) throws BusinessException, RatingException {
-        try {
-            List<EDR> edrs = findEdrsListByIds(edrIds);
+    public void ratePostpaidUsage(List<Long> edrIds, JobExecutionResultImpl jobExecutionResult) throws BusinessException, RatingException {
+    	Map<String, List<Long>> errorsMap = new HashMap<>();
+    	int toProcess=edrIds.size();
+        List<EDR> edrs = findEdrsListByIds(edrIds);
 
-            for (EDR edr : edrs) {
-                rateUsage(edr, false, false, 0, 0, null, true);
+        for (EDR edr : edrs) {
+        	try {
+        		rateUsage(edr, false, false, 0, 0, null, false);
+            } catch (Exception e) {
+            	errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(edr.getId());
             }
-
-        } catch (RatingException e) {
-            log.trace("Failed to rate EDRs {}: {}", edrIds, e.getRejectionReason());
-            throw e;
-
-        } catch (Exception e) {
-            log.error("Failed to rate EDRs {}: {}", edrIds, e.getMessage(), e);
-            throw e;
         }
+
+        errorsMap.forEach((key, value) ->reportErrors(jobExecutionResult, key, value, toProcess));
     }
+    
+
+	private void reportErrors(JobExecutionResultImpl jobExecutionResult, String key, List<Long> value, int toProcess) {
+		int errorsToCompute = value.size();
+		errorsToCompute = errorsToCompute == toProcess || errorsToCompute == 0 ? 0 : errorsToCompute;
+		jobExecutionResult.registerError("" + value.size() + " errors of: " + key + " IDs: " + value.stream().map(String::valueOf).collect(Collectors.joining(", ")), errorsToCompute);
+		jobExecutionResult.addNbItemsCorrectlyProcessed(-errorsToCompute);
+	}
 
     /**
      * Find an EDR with its id and fetch subscription.
@@ -344,15 +354,8 @@ public class UsageRatingService extends RatingService implements Serializable {
      * @throws RatingException EDR rejection due to lack of funds, data validation, inconsistency or other rating related failure
      */
     public RatingResult rateUsage(Long edrId, boolean rateTriggeredEdr, int maxDeep, int currentRatingDepth) throws BusinessException, RatingException {
-    	EDR edr = edrService.findById(edrId);
-    	if(edr==null){
-    		throw new BusinessException(" NO EDR FOUND FOR ID"+edr);
-    	}
-    	if(EDRStatusEnum.OPEN!=edr.getStatus()){
-    		log.info("EDR already processed :"+edrId);
-    	}
-		return rateUsage(edr, false, rateTriggeredEdr, maxDeep, currentRatingDepth, null, true);
-		
+        EDR edr = findEdrByIdandSubscription(edrId);
+        return rateUsage(edr, false, rateTriggeredEdr, maxDeep, currentRatingDepth, null, false);
     }
 
     /**

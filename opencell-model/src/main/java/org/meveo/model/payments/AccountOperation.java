@@ -127,6 +127,11 @@ public class AccountOperation extends BusinessEntity implements ICustomFieldEnti
 
     private static final long serialVersionUID = 1L;
 
+    @Override
+    public void setVersion(Integer version) {
+        super.setVersion(version);
+    }
+
     /**
      * Operation due date
      */

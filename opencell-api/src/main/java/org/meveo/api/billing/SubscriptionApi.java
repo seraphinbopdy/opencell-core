@@ -197,7 +197,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.meveo.commons.utils.StringUtils.isNotBlank;
+import static org.meveo.model.billing.SubscriptionStatusEnum.ACTIVE;
+import static org.meveo.model.billing.SubscriptionStatusEnum.PENDING;
 
 /**
  * @author Edward P. Legaspi
@@ -433,11 +436,16 @@ public class SubscriptionApi extends BaseApi {
 
         handleMissingParametersAndValidate(postData);
 
+
         Subscription subscription = Optional.ofNullable(postData.getId())
 				.map(id -> subscriptionService.findById(id))
 				.orElse(subscriptionService.findByCodeAndValidityDate(postData.getCode(), postData.getValidityDate()));
         if (subscription == null) {
             throw new EntityDoesNotExistsException(Subscription.class, postData.getCode(), postData.getValidityDate());
+        }
+        if(isNotEmpty(postData.getProductsToInstantiate())
+                && (PENDING != subscription.getStatus() || ACTIVE != subscription.getStatus())) {
+            throw new BusinessApiException("Products can only be added to an activated or pending subscription");
         }
 
       //Get the administration roles
@@ -1332,7 +1340,7 @@ public class SubscriptionApi extends BaseApi {
             throw new EntityDoesNotExistsException(Subscription.class, postData.getSubscription(), postData.getSubscriptionValidityDate());
         }
 
-        if ((subscription.getStatus() != SubscriptionStatusEnum.ACTIVE) && (subscription.getStatus() != SubscriptionStatusEnum.CREATED)) {
+        if ((subscription.getStatus() != ACTIVE) && (subscription.getStatus() != SubscriptionStatusEnum.CREATED)) {
             throw new MeveoApiException("subscription is not ACTIVE or CREATED: [" + subscription.getStatus() + "]");
         }
 
@@ -2288,7 +2296,7 @@ public class SubscriptionApi extends BaseApi {
                 }
             }
             serviceInstanceService.update(serviceToUpdate);
-            if(CollectionUtils.isNotEmpty(serviceToUpdateDto.getDiscountPlanForTermination())){
+            if(isNotEmpty(serviceToUpdateDto.getDiscountPlanForTermination())){
                 serviceToUpdateDto.getDiscountPlanForTermination().forEach(discountPlanCode -> {
                     DiscountPlan discountPlan = discountPlanService.findByCode(discountPlanCode);
                     if(discountPlan != null) {
@@ -3045,7 +3053,7 @@ public class SubscriptionApi extends BaseApi {
             }
         }
         if (subscription.getSubscriptionDate().after(new Date())) {
-            subscription.setStatus(SubscriptionStatusEnum.PENDING);
+            subscription.setStatus(PENDING);
         } else {
             subscription.setStatus(SubscriptionStatusEnum.CREATED);
         }
@@ -3100,7 +3108,7 @@ public class SubscriptionApi extends BaseApi {
     }
     
     private void removeDiscountPlanInstanceForSubscription(Subscription subscription, List<String> discountPlanInstanceToRemove) {
-        if(CollectionUtils.isNotEmpty(discountPlanInstanceToRemove)) {
+        if(isNotEmpty(discountPlanInstanceToRemove)) {
             discountPlanInstanceToRemove.forEach(discountPlanCode -> {
                 DiscountPlanInstance discountPlanInstance = discountPlanInstanceService.findBySubscriptionAndCode(subscription, discountPlanCode);
                 if(discountPlanInstance != null) {

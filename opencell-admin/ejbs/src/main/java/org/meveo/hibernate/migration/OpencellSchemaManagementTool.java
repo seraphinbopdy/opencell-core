@@ -124,7 +124,7 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
                     String dbMigrationManual = System.getenv(ENV_FLAG_DB_MIGRATION_MANUAL);
                     boolean isDBMigrationManual = dbMigrationManual != null && Boolean.parseBoolean(dbMigrationManual);
 
-                    runLiquibaseUpdateAndValidation(metadata, executionOptions, options, true);
+                    runLiquibaseUpdateAndValidation(metadata, executionOptions, options, isDBMigrationManual);
 
                 } catch (Exception e) {
                     log.error("Failed to update DB schema with latest changes", e);

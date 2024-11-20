@@ -536,6 +536,26 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
             log.error("Email template not found");
         }
     }
+
+    public void sendNotification(String emailFrom, String customerAccountEmail, String languageCode, EmailTemplate emailTemplate,
+                                 Map<Object, Object> params) {
+        emailTemplate = emailTemplateService.refreshOrRetrieve(emailTemplate);
+        if(emailTemplate != null) {
+            String emailSubject = internationalSettingsService.resolveSubject(emailTemplate,languageCode);
+            String emailContent = internationalSettingsService.resolveEmailContent(emailTemplate,languageCode);
+            String htmlContent = internationalSettingsService.resolveHtmlContent(emailTemplate,languageCode);
+            String subject = emailTemplate.getSubject() != null
+                    ? evaluateExpression(emailSubject, params, String.class) : "";
+            String content = emailTemplate.getTextContent() != null
+                    ? evaluateExpression(emailContent, params, String.class) : "";
+            String contentHtml = emailTemplate.getHtmlContent() != null
+                    ? evaluateExpression(htmlContent, params, String.class) : "";
+            emailSender.send(emailFrom, Collections.singletonList(emailFrom), Collections.singletonList(customerAccountEmail), null, null,
+                    subject, content, contentHtml, null, null, false);
+        } else {
+            log.error("Email template not found");
+        }
+    }
     
     /**
      * Get Active or Paused DunningCollectionPlan by Dunning Settings id

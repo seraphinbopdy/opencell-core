@@ -543,7 +543,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
             if(dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.INVOICE_LEVEL) {
                 sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), collectionPlan.getRelatedInvoice(), collectionPlan.getLastActionDate());
             }else if (dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL) {
-                sendEmail(actionInstance.getCollectionPlan());
+                customerAccountService.sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), actionInstance.getCollectionPlan());
             }
         }
 

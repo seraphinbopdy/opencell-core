@@ -38,7 +38,7 @@ public class ReportingApiService implements ApiService<AccountOperation> {
 	@Inject
 	private GenericApiLoadService loadService;
 	
-	private static final String BALANCE_CRITERIA = "COALESCE(SUM(CASE WHEN (accountingDate >= '%s' AND  accountingDate < '%s' AND transactionCategory = '%s') THEN COALESCE(amountWithoutTax, amount) END), 0)";
+	private static final String BALANCE_CRITERIA = "COALESCE(SUM(CASE WHEN (accountingDate >= to_date('%s','YYYY/MM/DD') AND  accountingDate < to_date('%s','YYYY/MM/DD') AND transactionCategory = '%s') THEN COALESCE(amountWithoutTax, amount) END), 0)";
 
 	
 	public List<TrialBalance> list(ReportingPeriodEnum period, String codeOrLabel, Date startDate, Date endDate, String sortBy, SortOrderEnum sortOrder, Long offset, Long limit) {

@@ -297,6 +297,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRXmlDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.pdf.type.PdfaConformanceEnum;
 
 /**
  * The Class InvoiceService.
@@ -1838,22 +1839,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
 
             DefaultJasperReportsContext context = DefaultJasperReportsContext.getInstance();
-            JRPropertiesUtil.getInstance(context).setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.engine.util.xml.JaxenXPathExecuterFactory");
-            context.setProperty("net.sf.jasperreports.default.pdf.font.name", "net/sf/jasperreports/fonts/dejavu/DejaVuSans.ttf");    
+            context.setProperty("net.sf.jasperreports.default.pdf.font.name", "net/sf/jasperreports/fonts/dejavu/DejaVuSans.ttf");
             context.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
-            
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-//            JRPdfExporter exporter = new JRPdfExporter();
-//            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-//            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfFullFilename));
-//            
-//            SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
-//            configuration.setPdfaConformance(PdfaConformanceEnum.PDFA_1A);
-//            configuration.setIccProfilePath(resDir + File.separator + billingTemplateName +File.separator + "srgb.icc");
-//            exporter.setConfiguration(configuration);
-//            exporter.exportReport();
+            context.setProperty("net.sf.jasperreports.export.pdfa.conformance", PdfaConformanceEnum.PDFA_1A.getName());
+            context.setProperty("net.sf.jasperreports.export.pdfa.icc.profile.path", resDir + File.separator + billingTemplateName + File.separator + "srgb.icc");
 
-            JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFullFilename); // Akk migrate me
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+
+            JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFullFilename);
 
             if ("true".equals(paramBeanFactory.getInstance().getProperty("invoice.pdf.addWaterMark", "true"))) {
                 if (invoice.getInvoiceType().getCode().equals(paramBeanFactory.getInstance().getProperty("invoiceType.draft.code", "DRAFT")) || (invoice.isDraft() != null && invoice.isDraft())) {

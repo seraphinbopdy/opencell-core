@@ -396,6 +396,18 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-groovy</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-pdf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-jaxen</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
 			<scope>compile</scope>
 			<exclusions>
@@ -492,11 +504,6 @@
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>jaxen</groupId>
-			<artifactId>jaxen</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
@@ -799,7 +806,11 @@
 			<groupId>com.github.javaparser</groupId>
 			<artifactId>javaparser-core</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.sun.el</groupId>
+			<artifactId>el-ri</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>

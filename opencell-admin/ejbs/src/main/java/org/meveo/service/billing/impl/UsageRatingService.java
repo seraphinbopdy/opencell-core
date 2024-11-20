@@ -270,19 +270,26 @@ public class UsageRatingService extends RatingService implements Serializable {
      */
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void ratePostpaidUsage(List<Long> edrIds, JobExecutionResultImpl jobExecutionResult) throws BusinessException, RatingException {
+    public void ratePostpaidUsage(List<Long> edrIds, JobExecutionResultImpl jobExecutionResult, boolean multiProcessOnlyMode) throws BusinessException, RatingException {
     	Map<String, List<Long>> errorsMap = new HashMap<>();
     	int toProcess=edrIds.size();
+    	List<Long> successfullyRated= new ArrayList<Long>();
         List<EDR> edrs = findEdrsListByIds(edrIds);
 
         for (EDR edr : edrs) {
         	try {
         		rateUsage(edr, false, false, 0, 0, null, false);
             } catch (Exception e) {
+            	if(!multiProcessOnlyMode) {
+            		edrIds.removeAll(successfullyRated);
+            		jobExecutionResult.addNbItemsCorrectlyProcessed(successfullyRated.size());
+					log.error("Failed to rate EDRs {}: exception {} when rating  edr {}", edrIds, (e instanceof RatingException) ? ((RatingException) e).getRejectionReason() : e.getMessage(), edr.getId());
+            		throw e;
+            	}
             	errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(edr.getId());
             }
+        	successfullyRated.add(edr.getId());
         }
-
         errorsMap.forEach((key, value) ->reportErrors(jobExecutionResult, key, value, toProcess));
     }
     

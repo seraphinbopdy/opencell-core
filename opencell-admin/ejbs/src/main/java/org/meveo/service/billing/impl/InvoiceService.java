@@ -7299,6 +7299,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         } else {
             adj = createAdjustment(invoice, invoiceLinesToReplicate.getInvoiceLinesIds(), invoiceType);
         }
+        adj.setSubscription(invoice.getSubscription());
         adj.setComment(invoiceLinesToReplicate.getComment());
         return adj;
     }

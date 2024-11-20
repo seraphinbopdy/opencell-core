@@ -866,6 +866,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
 		this.isReminderLevelTriggered = copy.isReminderLevelTriggered;
 		this.relatedDunningCollectionPlan = copy.relatedDunningCollectionPlan;
 		this.externalPurchaseOrderNumber = copy.externalPurchaseOrderNumber;
+        this.subscription = copy.subscription;
 	}
 
 

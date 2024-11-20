@@ -33,7 +33,6 @@ import static org.meveo.model.shared.DateUtils.daysBetween;
 import static org.meveo.model.shared.DateUtils.setDateToEndOfDay;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -638,80 +637,102 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
     @SuppressWarnings("unchecked")
     public List<Object[]> getAgedReceivables(String customerAccountCode, String sellerCode, Date startDate, Date startDueDate, Date endDueDate, PaginationConfiguration paginationConfiguration,
                                              Integer stepInDays, Integer numberOfPeriods, String invoiceNumber, String customerAccountDescription, String sellerDescription, String tradingCurrency, String functionalCurrency) {
-        if(functionalCurrency != null && !functionalCurrency.equals(appProvider.getCurrency().getCurrencyCode()))
+        
+        if (functionalCurrency != null && !functionalCurrency.equals(appProvider.getCurrency().getCurrencyCode())) {
             return Collections.emptyList();
+        }
 
     	String datePattern = "yyyy-MM-dd";
-        StringBuilder query = new StringBuilder("Select ao.customerAccount.id, sum (case when ao.dueDate >= '")
-                .append(DateUtils.formatDateWithPattern(startDate, datePattern))
-                .append("'  then  ao.unMatchingAmount else 0 end ) as notYetDue,")
-                .append("sum (case when ao.dueDate >= '")
-                .append(DateUtils.formatDateWithPattern(startDate, datePattern))
-                .append("'  then  ao.transactionalUnMatchingAmount else 0 end ) as transactional_NotYetDue,");
+
+    	String datePatternDB = "YYYY-MM-DD";
+        String startDateDB = "to_date('" + DateUtils.formatDateWithPattern(startDate, datePattern) + "', '" + datePatternDB + "')";
+        
+        StringBuilder query = new StringBuilder("Select ao.customerAccount.id, sum (case when ao.dueDate >= ")
+                .append(startDateDB)
+                .append("  then  ao.unMatchingAmount else 0 end ) as notYetDue,")
+                .append("sum (case when ao.dueDate >= ")
+                .append(startDateDB)
+                .append("  then  ao.transactionalUnMatchingAmount else 0 end ) as transactional_NotYetDue,");
+        
         if(stepInDays != null && numberOfPeriods != null) {
             String alias;
-            int step;
             if(numberOfPeriods > 1) {
-                query.append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -stepInDays), datePattern)+"' then ao.amountWithoutTax else 0 end ) as sum_1_" + stepInDays + ",")
-                        .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -stepInDays), datePattern)+"' then ao.unMatchingAmount else 0 end ) as sum_1_" + stepInDays + "_awt,")
-                        .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -stepInDays), datePattern)+"' then ao.taxAmount else 0 end ) as sum_1_" + stepInDays + "_tax,")
+
+                String startDateMinusStepInDaysDB = "to_date('" + DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -stepInDays), datePattern) + "', '" + datePatternDB + "')";
+
+                query.append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinusStepInDaysDB+" then ao.amountWithoutTax else 0 end ) as sum_1_" + stepInDays + ",")
+                        .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinusStepInDaysDB+" then ao.unMatchingAmount else 0 end ) as sum_1_" + stepInDays + "_awt,")
+                        .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinusStepInDaysDB+" then ao.taxAmount else 0 end ) as sum_1_" + stepInDays + "_tax,")
 
 
-                        .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -stepInDays), datePattern)+"' then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_1_" + stepInDays + ",")
-                        .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -stepInDays), datePattern)+"' then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_1_" + stepInDays + "_awt,")
-                        .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -stepInDays), datePattern)+"' then ao.transactionalTaxAmount else 0 end ) as transactional_sum_1_" + stepInDays + "_tax,");
+                        .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinusStepInDaysDB+" then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_1_" + stepInDays + ",")
+                        .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinusStepInDaysDB+" then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_1_" + stepInDays + "_awt,")
+                        .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinusStepInDaysDB+" then ao.transactionalTaxAmount else 0 end ) as transactional_sum_1_" + stepInDays + "_tax,");
+                
                 for (int iteration = 1; iteration < numberOfPeriods - 1; iteration++) {
-                    step = iteration * stepInDays;
+                    int step = iteration * stepInDays;
                     alias = "sum_"+ (stepInDays * iteration + 1) + "_" + (step * 2);
-                    query.append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -(step + stepInDays)), datePattern)+"' then ao.amountWithoutTax else 0 end ) ")
+                    
+                    String startDateMinusStepDB = "to_date('" +DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern) + "', '" + datePatternDB + "')";
+                    String startDateMinusStepPlusStepInDaysDB = "to_date('" +DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -(step + stepInDays)), datePattern) + "', '" + datePatternDB + "')";
+
+                    query.append("sum (case when ao.dueDate <="+startDateMinusStepDB+" and ao.dueDate >"+startDateMinusStepPlusStepInDaysDB+" then ao.amountWithoutTax else 0 end ) ")
                             .append("as " + alias).append(" , ")
-                            .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -(step + stepInDays)), datePattern)+"' then ao.unMatchingAmount  else 0 end ) ")
+                            .append("sum (case when ao.dueDate <="+startDateMinusStepDB+" and ao.dueDate >"+startDateMinusStepPlusStepInDaysDB+" then ao.unMatchingAmount  else 0 end ) ")
                             .append("as " + alias).append("_awt, ")
-                            .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -(step + stepInDays)), datePattern)+"' then  ao.taxAmount else 0 end ) ")
+                            .append("sum (case when ao.dueDate <="+startDateMinusStepDB+" and ao.dueDate >"+startDateMinusStepPlusStepInDaysDB+" then  ao.taxAmount else 0 end ) ")
                             .append("as " + alias).append("_tax, ")
 
-                            .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -(step + stepInDays)), datePattern)+"' then ao.transactionalAmountWithoutTax else 0 end ) ")
+                            .append("sum (case when ao.dueDate <="+startDateMinusStepDB+" and ao.dueDate >"+startDateMinusStepPlusStepInDaysDB+" then ao.transactionalAmountWithoutTax else 0 end ) ")
                             .append("as transactional_" + alias).append(" , ")
-                            .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -(step + stepInDays)), datePattern)+"' then ao.transactionalUnMatchingAmount  else 0 end ) ")
+                            .append("sum (case when ao.dueDate <="+startDateMinusStepDB+" and ao.dueDate >"+startDateMinusStepPlusStepInDaysDB+" then ao.transactionalUnMatchingAmount  else 0 end ) ")
                             .append("as transactional_" + alias).append("_awt, ")
-                            .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -(step + stepInDays)), datePattern)+"' then  ao.transactionalTaxAmount else 0 end ) ")
+                            .append("sum (case when ao.dueDate <="+startDateMinusStepDB+" and ao.dueDate >"+startDateMinusStepPlusStepInDaysDB+" then  ao.transactionalTaxAmount else 0 end ) ")
                             .append("as transactional_" + alias).append("_tax, ");
                 }
             }
-            step = numberOfPeriods > 1  ? stepInDays * (numberOfPeriods - 1) : stepInDays;
-            query.append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"'  then ao.amountWithoutTax else 0 end ) as sum_" + step + "_up,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"'  then ao.unMatchingAmount else 0 end ) as sum_" + step + "_up_awt,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"' then ao.taxAmount else 0 end ) as sum_" + step + "_up_tax,")
+            int stepNrPeriods = numberOfPeriods > 1  ? stepInDays * (numberOfPeriods - 1) : stepInDays;
+            
+            String startDateMinusStepNrPeriodsDB = "to_date('" +DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -stepNrPeriods), datePattern) + "', '" + datePatternDB + "')";
+            
+            query.append("sum (case when ao.dueDate <="+startDateMinusStepNrPeriodsDB+"  then ao.amountWithoutTax else 0 end ) as sum_" + stepNrPeriods + "_up,")
+                    .append("sum (case when ao.dueDate <="+startDateMinusStepNrPeriodsDB+"  then ao.unMatchingAmount else 0 end ) as sum_" + stepNrPeriods + "_up_awt,")
+                    .append("sum (case when ao.dueDate <="+startDateMinusStepNrPeriodsDB+" then ao.taxAmount else 0 end ) as sum_" + stepNrPeriods + "_up_tax,")
 
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"'  then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_" + step + "_up,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"'  then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_" + step + "_up_awt,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -step), datePattern)+"' then ao.transactionalTaxAmount else 0 end ) as transactional_sum_" + step + "_up_tax,");
+                    .append("sum (case when ao.dueDate <="+startDateMinusStepNrPeriodsDB+"  then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_" + stepNrPeriods + "_up,")
+                    .append("sum (case when ao.dueDate <="+startDateMinusStepNrPeriodsDB+"  then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_" + stepNrPeriods + "_up_awt,")
+                    .append("sum (case when ao.dueDate <="+startDateMinusStepNrPeriodsDB+" then ao.transactionalTaxAmount else 0 end ) as transactional_sum_" + stepNrPeriods + "_up_tax,");
         } else {
-            query.append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' then ao.amountWithoutTax else 0 end ) as sum_1_30,")
-                    .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' then ao.unMatchingAmount else 0 end ) as sum_1_30_awt,")
-                    .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' then ao.taxAmount else 0 end ) as sum_1_30_tax,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' then ao.amountWithoutTax  else 0 end ) as sum_31_60,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' then ao.unMatchingAmount else 0 end ) as sum_31_60_awt,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' then ao.taxAmount else 0 end ) as sum_31_60_tax,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"' then ao.amountWithoutTax else 0 end ) as sum_61_90,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"' then ao.unMatchingAmount else 0 end ) as sum_61_90_awt,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"' then ao.taxAmount else 0 end ) as sum_61_90_tax,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"'  then ao.amountWithoutTax else 0 end ) as sum_90_up,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"'  then ao.unMatchingAmount else 0 end ) as sum_90_up_awt,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"'  then ao.taxAmount else 0 end ) as sum_90_up_tax,")
+            
+            String startDateMinus30DB = "to_date('" +DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern) + "', '" + datePatternDB + "')";
+            String startDateMinus60DB = "to_date('" +DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern) + "', '" + datePatternDB + "')";
+            String startDateMinus90DB = "to_date('" +DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern) + "', '" + datePatternDB + "')";
+            
+            query.append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinus30DB+" then ao.amountWithoutTax else 0 end ) as sum_1_30,")
+                    .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinus30DB+" then ao.unMatchingAmount else 0 end ) as sum_1_30_awt,")
+                    .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinus30DB+" then ao.taxAmount else 0 end ) as sum_1_30_tax,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus30DB+" and ao.dueDate >"+startDateMinus60DB+" then ao.amountWithoutTax  else 0 end ) as sum_31_60,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus30DB+" and ao.dueDate >"+startDateMinus60DB+" then ao.unMatchingAmount else 0 end ) as sum_31_60_awt,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus30DB+" and ao.dueDate >"+startDateMinus60DB+" then ao.taxAmount else 0 end ) as sum_31_60_tax,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus60DB+" and ao.dueDate >"+startDateMinus90DB+" then ao.amountWithoutTax else 0 end ) as sum_61_90,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus60DB+" and ao.dueDate >"+startDateMinus90DB+" then ao.unMatchingAmount else 0 end ) as sum_61_90_awt,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus60DB+" and ao.dueDate >"+startDateMinus90DB+" then ao.taxAmount else 0 end ) as sum_61_90_tax,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus90DB+"  then ao.amountWithoutTax else 0 end ) as sum_90_up,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus90DB+"  then ao.unMatchingAmount else 0 end ) as sum_90_up_awt,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus90DB+"  then ao.taxAmount else 0 end ) as sum_90_up_tax,")
 
-                    .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_1_30,")
-                    .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_1_30_awt,")
-                    .append("sum (case when ao.dueDate <'"+DateUtils.formatDateWithPattern(startDate, datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' then ao.transactionalTaxAmount else 0 end ) as transactional_sum_1_30_tax,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' then ao.transactionalAmountWithoutTax  else 0 end ) as transactional_sum_31_60,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_31_60_awt,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -30), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' then ao.transactionalTaxAmount else 0 end ) as transactional_sum_31_60_tax,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"' then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_61_90,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"' then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_61_90_awt,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -60), datePattern)+"' and ao.dueDate >'"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"' then ao.transactionalTaxAmount else 0 end ) as transactional_sum_61_90_tax,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"'  then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_90_up,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"'  then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_90_up_awt,")
-                    .append("sum (case when ao.dueDate <='"+DateUtils.formatDateWithPattern(DateUtils.addDaysToDate(startDate, -90), datePattern)+"'  then ao.transactionalTaxAmount else 0 end ) as transactional_sum_90_up_tax,");
+                    .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinus30DB+" then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_1_30,")
+                    .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinus30DB+" then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_1_30_awt,")
+                    .append("sum (case when ao.dueDate <"+startDateDB+" and ao.dueDate >"+startDateMinus30DB+" then ao.transactionalTaxAmount else 0 end ) as transactional_sum_1_30_tax,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus30DB+" and ao.dueDate >"+startDateMinus60DB+" then ao.transactionalAmountWithoutTax  else 0 end ) as transactional_sum_31_60,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus30DB+" and ao.dueDate >"+startDateMinus60DB+" then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_31_60_awt,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus30DB+" and ao.dueDate >"+startDateMinus60DB+" then ao.transactionalTaxAmount else 0 end ) as transactional_sum_31_60_tax,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus60DB+" and ao.dueDate >"+startDateMinus90DB+" then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_61_90,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus60DB+" and ao.dueDate >"+startDateMinus90DB+" then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_61_90_awt,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus60DB+" and ao.dueDate >"+startDateMinus90DB+" then ao.transactionalTaxAmount else 0 end ) as transactional_sum_61_90_tax,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus90DB+"  then ao.transactionalAmountWithoutTax else 0 end ) as transactional_sum_90_up,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus90DB+"  then ao.transactionalUnMatchingAmount else 0 end ) as transactional_sum_90_up_awt,")
+                    .append("sum (case when ao.dueDate <="+startDateMinus90DB+"  then ao.transactionalTaxAmount else 0 end ) as transactional_sum_90_up_tax,");
         }
         query.append(" ao.customerAccount.dunningLevel, ao.customerAccount.name, ao.customerAccount.description, ao.seller.description, ao.seller.code, ao.dueDate, ao.invoice.tradingCurrency.currency.currencyCode, ao.invoice.id, ao.invoice.invoiceNumber, ao.invoice.amountWithTax, ao.customerAccount.code, ao.invoice.transactionalAmountWithTax, ao.invoice.billingAccount.id, ao.transactionCategory ")
                 .append("from ")
@@ -729,13 +750,19 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
                 .ifPresent(fc -> qb.addSql("ao.transactionalCurrency.currency.currencyCode = '" + fc + "'"));
 
         if (startDueDate != null && endDueDate != null) {
-            qb.addSql("(ao.dueDate >= '" + DateUtils.formatDateWithPattern(startDueDate, datePattern)
-                    + "' and ao.dueDate <= '" + DateUtils.formatDateWithPattern(endDueDate, datePattern) + "')");
+
+            String startDueDateDB = "to_date('" + DateUtils.formatDateWithPattern(startDueDate, datePattern) + "', '" + datePattern + "')";
+            String endDueDateDB = "to_date('" + DateUtils.formatDateWithPattern(endDueDate, datePattern) + "', '" + datePattern + "')";
+            
+            qb.addSql("(ao.dueDate >= " + startDueDateDB
+                    + " and ao.dueDate <= " + endDueDateDB + ")");
         }
 
         if (DateUtils.compare(startDate, new Date()) < 0) {
-            qb.addSql("ao.invoice.status = '" + VALIDATED + "' and ao.invoice.invoiceDate <= '"
-                    + DateUtils.formatDateWithPattern(setDateToEndOfDay(startDate), "yyyy-MM-dd HH:mm:ss") + "'");
+
+            String startDueDateDB = "to_date('" + DateUtils.formatDateWithPattern(setDateToEndOfDay(startDate), "yyyy-MM-dd HH:mm:ss") + "', 'YYYY-MM-DD HH24:MI:SS')";
+            
+            qb.addSql("ao.invoice.status = '" + VALIDATED + "' and ao.invoice.invoiceDate <= " + startDueDateDB);
             qb.addSql("(ao.invoice.paymentStatus = '" + PENDING + "' or ao.invoice.paymentStatus = '" + PPAID + "' or ao.invoice.paymentStatus ='" + UNPAID + "' or ao.matchingStatus='"+MatchingStatusEnum.I+"' )");
         }
 
@@ -777,17 +804,23 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
             where = where.concat(" and cur.currency_code = '" + tradingCurrency +"'");
         }
         if (DateUtils.compare(startDate, new Date()) < 0) {
-            where = where.concat(" and inv.status = '" + VALIDATED + "' and inv.invoice_date <= '"
-                    + DateUtils.formatDateWithPattern(setDateToEndOfDay(startDate), "yyyy-MM-dd HH:mm:ss") + "'");
+            
+            String startDateDB = "to_date('" + DateUtils.formatDateWithPattern(setDateToEndOfDay(startDate), "yyyy-MM-dd HH:mm:ss") + "', 'YYYY-MM-DD HH24:MI:SS')";
+            
+            where = where.concat(" and inv.status = '" + VALIDATED + "' and inv.invoice_date <= "+ startDateDB);
             where = where.concat(" and (inv.payment_status = '" + PENDING + "' or inv.payment_status = '" + PPAID + "' or inv.payment_status ='" + UNPAID + "' or ao.matching_status='"+MatchingStatusEnum.I+"')");
         }
 
-        String datePattern = "yyyy-MM-dd";
         if (startDueDate != null && endDueDate != null) {
-            where = where.concat(" and (ao.due_date >= '" + DateUtils.formatDateWithPattern(startDueDate, datePattern)
-                    + "' and ao.due_date <= '" + DateUtils.formatDateWithPattern(endDueDate, datePattern) + "')");
+
+            String datePattern = "yyyy-MM-dd";            
+
+            String startDueDateDB = "to_date('" + DateUtils.formatDateWithPattern(startDueDate, datePattern) + "', 'YYYY-MM-DD')";
+            String endDueDateDB = "to_date('" + DateUtils.formatDateWithPattern(endDueDate, datePattern) + "', 'YYYY-MM-DD')";
+            
+            where = where.concat(" and (ao.due_date >= " + startDueDateDB + " and ao.due_date <= " + endDueDateDB + ")");
         }
-        return ((BigInteger) getEntityManager().createNativeQuery(select.concat(from).concat(where)).getSingleResult()).longValue();
+        return (Long) getEntityManager().createNativeQuery(select.concat(from).concat(where)).getSingleResult();
     }
 
     /**

@@ -99,7 +99,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
 
     public static final String UPDATE_EXISTING = "#updateExisting#";
 
-	@Inject
+    @Inject
     private CustomFieldsCacheContainerProvider customFieldsCache;
 
     @Inject
@@ -123,7 +123,6 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
     private void init() {
         useCFTCache = ParamBeanFactory.getAppScopeInstance().getPropertyAsBoolean("cache.cacheCFT", true);
     }
-
 
     public static void setCacheCFTAsTrue() {
         useCFTCache = true;
@@ -358,7 +357,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         }
     }
 
-    //@Override
+    // @Override
     public CustomFieldTemplate update(CustomFieldTemplate oldCft, CustomFieldTemplate cft) throws BusinessException {
         return update(oldCft, cft, true);
     }
@@ -584,7 +583,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         if (templates != null) {
             CustomFieldTemplate existingCustomField = null;
             for (CustomFieldTemplate cft : templates) {
-            	updateExisting=updateExisting || (cft.getTags()!=null && cft.getTags().contains(UPDATE_EXISTING));
+                updateExisting = updateExisting || (cft.getTags() != null && cft.getTags().contains(UPDATE_EXISTING));
                 if (!allTemplates.containsKey(cft.getCode())) {
                     log.debug("Create a missing CFT {} for {} entity", cft.getCode(), appliesTo);
                     create(cft);
@@ -822,16 +821,14 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
     public List getReferencedEntities(CustomFieldTemplate customField, String code, Class entityClass) {
 
         // Case of encrypted customfields in DB
-		if (CustomFieldJsonDataType.TRUE_STR.equalsIgnoreCase(
-						ParamBean.getInstance().getProperty(CustomFieldJsonDataType.ENCRYPT_CUSTOM_FIELDS_PROPERTY,
-						    CustomFieldJsonDataType.FALSE_STR)) && !StringUtils.isBlank(ParamBean.getInstance().getProperty(CustomFieldJsonDataType.OPENCELL_SHA_KEY_PROPERTY, null))) {
+        if (CustomFieldJsonDataType.TRUE_STR.equalsIgnoreCase(ParamBean.getInstance().getProperty(CustomFieldJsonDataType.ENCRYPT_CUSTOM_FIELDS_PROPERTY, CustomFieldJsonDataType.FALSE_STR))
+                && !StringUtils.isBlank(ParamBean.getInstance().getProperty(CustomFieldJsonDataType.OPENCELL_SHA_KEY_PROPERTY, null))) {
             QueryBuilder queryBuilder = new QueryBuilder(entityClass, "a");
             Query query = queryBuilder.getQuery(getEntityManager());
             List<BusinessCFEntity> resultList = (List<BusinessCFEntity>) query.getResultList();
 
             for (BusinessCFEntity entity : resultList) {
-				if (entity.getCfValues() != null && entity.getCfValues().getValues() != null 
-						&& entity.getCfValues().getValues().get(customField.getCode()) != null
+                if (entity.getCfValues() != null && entity.getCfValues().getValues() != null && entity.getCfValues().getValues().get(customField.getCode()) != null
                         && code.equalsIgnoreCase(((EntityReferenceWrapper) entity.getCfValues().getValues().get(customField.getCode())).getCode())) {
 
                     return resultList;
@@ -899,7 +896,21 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
 
     @Override
     public CustomFieldTemplate update(CustomFieldTemplate cft) {
-        customFieldsCache.addUpdateCustomFieldTemplate(cft);
-        return super.update(cft);
+
+        CustomEntityTemplate cet = findCETbyCFT(cft);
+
+        boolean isCustomTable = cet != null && cet.isStoreAsTable();
+        if (isCustomTable) {
+
+            CustomFieldTemplate oldCft = customFieldTemplateService.findByCodeAndAppliesToNoCache(cft.getCode(), cft.getAppliesTo());
+            oldCft = SerializationUtils.clone(oldCft);
+            
+            return update(oldCft, cft);
+
+        } else {
+            customFieldsCache.addUpdateCustomFieldTemplate(cft);
+
+            return super.update(cft);
+        }
     }
 }

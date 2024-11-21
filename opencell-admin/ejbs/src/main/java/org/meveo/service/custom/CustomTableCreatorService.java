@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.meveo.jpa.EntityManagerProvider;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -181,7 +182,7 @@ public class CustomTableCreatorService implements Serializable {
         }
         setColumnType(cft, column);
 
-        if (cft.getDefaultValue() != null) {
+        if (!StringUtils.isBlank(cft.getDefaultValue())) {
             if (cft.getFieldType() == CustomFieldTypeEnum.DATE) {
                 Date date = DateUtils.parseDate(cft.getDefaultValue());
                 if (date != null) {
@@ -189,9 +190,15 @@ public class CustomTableCreatorService implements Serializable {
                 } else {
                     column.setDefaultValueDate(cft.getDefaultValue());
                 }
+            } else if (cft.getFieldType() == CustomFieldTypeEnum.BOOLEAN) {
+                column.setDefaultValueNumeric("true".equalsIgnoreCase(cft.getDefaultValue()) ? "1" : "0");
+
             } else {
                 column.setDefaultValue(cft.getDefaultValue());
             }
+
+        } else if (cft.getFieldType() == CustomFieldTypeEnum.BOOLEAN) {
+            column.setDefaultValueNumeric("0");
         }
 
         addColumnChange.addColumn(column);
@@ -215,11 +222,14 @@ public class CustomTableCreatorService implements Serializable {
     }
 
     void setColumnType(CustomFieldTemplate cft, AddColumnConfig column) {
-        column.setType(cft.getFieldType().getDataType().replaceAll("%length", cft.getMaxValueOrDefault(CustomFieldTemplate.DEFAULT_MAX_LENGTH_STRING).toString()).replaceAll("default false", ""));
+
+        String dataType = cft.getFieldType().getDataType().replaceAll("%length", cft.getMaxValueOrDefault(CustomFieldTemplate.DEFAULT_MAX_LENGTH_STRING).toString());
+
+        column.setType(dataType.replaceAll("default 0", ""));
     }
 
     /**
-     * Add a field to a db table. Creates a liquibase changeset to add a field to a table and executes it
+     * Update a field in a db table. Creates a liquibase changeset to update a field to a table and executes it
      *
      * @param dbTableName DB Table name
      * @param cft Field definition
@@ -261,8 +271,8 @@ public class CustomTableCreatorService implements Serializable {
         // Default value does not apply to date type field
         if (cft.getFieldType() != CustomFieldTypeEnum.DATE) {
 
-            // Default value was removed or has changed
-            if ((oldCft.getDefaultValue() != null && cft.getDefaultValue() == null)) {
+            // Default value was removed. Boolean type field must be treated differently as it is stored as 0/1 in DB and thus default value must be 0.
+            if (cft.getFieldType() != CustomFieldTypeEnum.BOOLEAN && (!StringUtils.isBlank(oldCft.getDefaultValue()) && StringUtils.isBlank(cft.getDefaultValue()))) {
 
                 ChangeSet changeSet = new ChangeSet(dbTableName + "_CT_" + dbFieldname + "_RD_" + System.currentTimeMillis(), "Opencell", false, false, "opencell", "", "", dbLog);
                 changeSet.setFailOnError(false);
@@ -271,9 +281,7 @@ public class CustomTableCreatorService implements Serializable {
                 dropDefaultValueChange.setTableName(dbTableName);
                 dropDefaultValueChange.setColumnName(dbFieldname);
 
-                if (cft.getFieldType() == CustomFieldTypeEnum.BOOLEAN) {
-                    dropDefaultValueChange.setColumnDataType("boolean");
-                } else if (cft.getFieldType() == CustomFieldTypeEnum.DOUBLE) {
+                if (cft.getFieldType() == CustomFieldTypeEnum.DOUBLE) {
                     dropDefaultValueChange.setColumnDataType("numeric(23, 12)");
                 } else if (cft.getFieldType() == CustomFieldTypeEnum.LONG) {
                     dropDefaultValueChange.setColumnDataType("bigInt");
@@ -284,8 +292,9 @@ public class CustomTableCreatorService implements Serializable {
                 changeSet.addChange(dropDefaultValueChange);
                 dbLog.addChangeSet(changeSet);
 
-                // Add default value if needed
-            } else if (cft.getDefaultValue() != null && !cft.getDefaultValue().equals(oldCft.getDefaultValue())) {
+                // Default value was set or was changed. For boolean type field if default value is removed, still use 0 as default value in DB
+            } else if ((cft.getFieldType() == CustomFieldTypeEnum.BOOLEAN && !StringUtils.isBlank(oldCft.getDefaultValue()) && StringUtils.isBlank(cft.getDefaultValue()))
+                    || (!StringUtils.isBlank(cft.getDefaultValue()) && !cft.getDefaultValue().equals(oldCft.getDefaultValue()))) {
                 ChangeSet changeSet = new ChangeSet(dbTableName + "_CT_" + dbFieldname + "_AD_" + System.currentTimeMillis(), "Opencell", false, false, "opencell", "", "", dbLog);
                 AddDefaultValueChange addDefaultValueChange = new AddDefaultValueChange();
 
@@ -293,8 +302,8 @@ public class CustomTableCreatorService implements Serializable {
                 addDefaultValueChange.setColumnName(dbFieldname);
 
                 if (cft.getFieldType() == CustomFieldTypeEnum.BOOLEAN) {
-                    addDefaultValueChange.setColumnDataType("boolean");
-                    addDefaultValueChange.setDefaultValueBoolean("true".equalsIgnoreCase(cft.getDefaultValue()));
+                    addDefaultValueChange.setColumnDataType("int4");
+                    addDefaultValueChange.setDefaultValueNumeric("true".equalsIgnoreCase(cft.getDefaultValue()) ? "1" : "0");
                 } else if (cft.getFieldType() == CustomFieldTypeEnum.DOUBLE) {
                     addDefaultValueChange.setColumnDataType("numeric(23, 12)");
                     addDefaultValueChange.setDefaultValueNumeric(cft.getDefaultValue());

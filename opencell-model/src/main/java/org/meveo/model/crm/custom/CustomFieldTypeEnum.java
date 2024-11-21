@@ -86,7 +86,7 @@ public enum CustomFieldTypeEnum {
     /**
      * A boolean value
      */
-    BOOLEAN(false, Boolean.class, "boolean default false", StandardBasicTypes.BOOLEAN),
+    BOOLEAN(false, Boolean.class, "int4 default 0", StandardBasicTypes.BOOLEAN),
 
     /**
      * A reference to an entity

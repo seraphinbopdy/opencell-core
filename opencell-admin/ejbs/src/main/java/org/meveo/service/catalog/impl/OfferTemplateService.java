@@ -584,7 +584,7 @@ public class OfferTemplateService extends GenericProductOfferingService<OfferTem
     public void calculateArr(OfferTemplate offerTemplate) {
         List<Subscription> subscriptions = subscriptionService.listByOffer(offerTemplate.getCode(), "id", null);
         BigDecimal mrr = subscriptions.stream()
-                                         .filter(subscription -> SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus()) && subscription.getMrr() != null)
+                                         .filter(subscription -> /*SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus()) && */subscription.getMrr() != null)
                                          .map(Subscription::getMrr)
                                          .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal arr = mrr.multiply(BigDecimal.valueOf(12));

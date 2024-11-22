@@ -41,9 +41,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.print.attribute.standard.Media;
+import javax.transaction.Transactional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -1627,6 +1629,7 @@ public class CpqQuoteApi extends BaseApi {
         }
     }
 
+    @Transactional
     public void updateQuoteVersionStatus(String quoteCode, int currentVersion, VersionStatusEnum status) {
         QuoteVersion quoteVersion = quoteVersionService.findByQuoteAndVersion(quoteCode, currentVersion);
         if (quoteVersion == null) {
@@ -1712,6 +1715,16 @@ public class CpqQuoteApi extends BaseApi {
         Map<BigDecimal, List<QuotePrice>> pricesPerTaux = accountingArticlePrices.stream()
                 .collect(Collectors.groupingBy(QuotePrice::getTaxRate));
         
+        // Calculate MRR
+        quoteVersionService.getEntityManager().flush();
+        quoteVersion.getQuoteProducts().forEach(qp -> qp.setMrr(quoteProductService.calculateMRR(qp)));
+        quoteVersion.getQuote()
+                    .setMrr(quoteVersion.getQuoteProducts()
+                                        .stream()
+                                        .map(QuoteProduct::getMrr)
+                                        .filter(Objects::nonNull)
+                                        .reduce(BigDecimal.ZERO, BigDecimal::add));
+        
         BigDecimal quoteTotalAmount = BigDecimal.ZERO;
 
         for (BigDecimal taux: pricesPerTaux.keySet()) {
@@ -1735,6 +1748,8 @@ public class CpqQuoteApi extends BaseApi {
 //        applyFixedDiscount(quoteVersion.getDiscountPlan(), quoteTotalAmount, quote.getSeller(),
 //        		quote.getBillableAccount(), null, null,null, quoteVersion,quote.getQuoteDate());
 
+        quoteVersionService.update(quoteVersion);
+        
         //Get the updated quote version and construct the DTO
         QuoteVersion updatedQuoteVersion=quoteVersionService.findById(quoteVersion.getId());
         GetQuoteVersionDtoResponse getQuoteVersionDtoResponse = new GetQuoteVersionDtoResponse(updatedQuoteVersion,true,true,true,true);

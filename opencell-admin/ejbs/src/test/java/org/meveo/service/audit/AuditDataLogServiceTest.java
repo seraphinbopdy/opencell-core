@@ -1362,7 +1362,7 @@ public class AuditDataLogServiceTest {
         assertThat(subACreateRenewalAF.getName()).isEqualTo("subscriptionRenewal");
         assertThat(subACreateRenewalAF.getPreviousState()).isNull();
         assertThat(subACreateRenewalAF.getCurrentState()).isEqualTo(
-            "{\"subscriptionRenewal.initialTermType\":\"RECURRING\",\"subscriptionRenewal.extendAgreementPeriodToSubscribedTillDate\":\"0\",\"subscriptionRenewal.autoRenew\":\"0\",\"subscriptionRenewal.renewalTermType\":\"RECURRING\"}");
+            "{\"subscriptionRenewal.initialTermType\":\"RECURRING\",\"subscriptionRenewal.autoRenew\":\"0\",\"subscriptionRenewal.renewalTermType\":\"RECURRING\",\"subscriptionRenewal.extendAgreementPeriodToSubscribedTillDate\":\"0\"}");
 
         // Verify audit field notification
         assertThat(subACreateStatusAFN.getId()).isEqualTo(subACreateStatusAF.getId());
@@ -1403,7 +1403,7 @@ public class AuditDataLogServiceTest {
         assertThat(subBCreateRenewalAF.getName()).isEqualTo("subscriptionRenewal");
         assertThat(subBCreateRenewalAF.getPreviousState()).isNull();
         assertThat(subBCreateRenewalAF.getCurrentState()).isEqualTo(
-            "{\"subscriptionRenewal.initialTermType\":\"RECURRING\",\"subscriptionRenewal.extendAgreementPeriodToSubscribedTillDate\":\"0\",\"subscriptionRenewal.autoRenew\":\"0\",\"subscriptionRenewal.renewalTermType\":\"RECURRING\"}");
+            "{\"subscriptionRenewal.initialTermType\":\"RECURRING\",\"subscriptionRenewal.autoRenew\":\"0\",\"subscriptionRenewal.renewalTermType\":\"RECURRING\",\"subscriptionRenewal.extendAgreementPeriodToSubscribedTillDate\":\"0\"}");
 
         // Verify audit field notification
         assertThat(subBCreateStatusAFN.getId()).isEqualTo(subBCreateStatusAF.getId());
@@ -1459,8 +1459,8 @@ public class AuditDataLogServiceTest {
         assertThat(subAUpdateRenewalAF.getOriginName()).isEqualTo("/billing/subscription/createOrUpdate");
         assertThat(subAUpdateRenewalAF.getActor()).isEqualTo("opencell.admin");
         assertThat(subAUpdateRenewalAF.getName()).isEqualTo("subscriptionRenewal");
-        assertThat(subAUpdateRenewalAF.getPreviousState()).isEqualTo("{\"subscriptionRenewal.renewalTermType\":\"RECURRING\",\"subscriptionRenewal.autoRenew\":\"0\"}");
-        assertThat(subAUpdateRenewalAF.getCurrentState()).isEqualTo("{\"subscriptionRenewal.renewalTermType\":\"CALENDAR\",\"subscriptionRenewal.autoRenew\":\"1\"}");
+        assertThat(subAUpdateRenewalAF.getPreviousState()).isEqualTo("{\"subscriptionRenewal.autoRenew\":\"0\",\"subscriptionRenewal.renewalTermType\":\"RECURRING\"}");
+        assertThat(subAUpdateRenewalAF.getCurrentState()).isEqualTo("{\"subscriptionRenewal.autoRenew\":\"1\",\"subscriptionRenewal.renewalTermType\":\"CALENDAR\"}");
 
         // Verify audit field notification
         assertThat(subAUpdateStatusAFN.getId()).isEqualTo(subAUpdateStatusAF.getId());

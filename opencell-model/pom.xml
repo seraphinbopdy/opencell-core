@@ -76,10 +76,7 @@
                             <autocommit>true</autocommit>
 							<!-- drop schema instead of database to avoid
 							restarting wildfly -->
-							<sqlCommand> drop schema IF EXISTS ${db.schema}
-								cascade; create schema ${db.schema}
-								AUTHORIZATION ${db.username};
-                            </sqlCommand>
+							<sqlCommand> drop schema IF EXISTS public cascade; create schema public AUTHORIZATION ${db.username};</sqlCommand>
                         </configuration>
                     </execution>
                     <execution>

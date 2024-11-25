@@ -14,6 +14,8 @@ import org.meveo.service.base.BusinessService;
 
 @Stateless
 public class AdvancedSettingsService extends BusinessService<AdvancedSettings> {
+	
+	public static final String DISABLE_SYNC_MRR_UPDATE =  "disableSynchronousMrrUpdate";
 
 	@Override
 	public void create(AdvancedSettings entity) throws BusinessException {

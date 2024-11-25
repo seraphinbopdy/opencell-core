@@ -23,12 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 
@@ -100,6 +99,7 @@ import org.meveo.service.order.OrderHistoryService;
 import org.meveo.service.payments.impl.PaymentScheduleInstanceService;
 import org.meveo.service.payments.impl.PaymentScheduleTemplateService;
 import org.meveo.service.script.service.ServiceModelScriptService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 /**
  * ServiceInstanceService.
@@ -183,6 +183,9 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
     @Inject
     private SubscriptionService subscriptionService;
+
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
 
     /**
      * Find a service instance list by subscription entity, service template code and service instance status list.
@@ -1080,7 +1083,8 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
     @Override
     public ServiceInstance update(ServiceInstance entity) throws BusinessException {
-        return updateAndRecalculateMrr(entity, true);
+        Boolean updateMRR = (Boolean) advancedSettingsService.getParameter(AdvancedSettingsService.DISABLE_SYNC_MRR_UPDATE);
+        return updateAndRecalculateMrr(entity, Boolean.FALSE.equals(updateMRR));
     }
 
     /**
@@ -1402,10 +1406,10 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
     @Inject
     private MethodCallingUtils methodCallingUtils;
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void calculateMRRNewTx(ServiceInstance si) {
-        si.setMrr(this.calculateMRR(si));
-        updateAndRecalculateMrr(si, false);
+        ServiceInstance siToUpdate = findById(si.getId());
+        siToUpdate.setMrr(this.calculateMRR(si));
+        updateAndRecalculateMrr(siToUpdate, false);
     }
     
     /**
@@ -1429,12 +1433,17 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
                 if (chargeInstance.getStatus() == InstanceStatusEnum.ACTIVE) {
 
                     try {
+
                         methodCallingUtils.callMethodInNewTx(() -> {
                             RecurringChargeInstance rci = recurringChargeInstanceService.findById(chargeInstance.getId());
-                            rci.setChargeDate(new Date());
-                            rci.setChargedToDate(new Date());
-                            ratingResult.set(recurringChargeInstanceService.applyRecurringCharge(rci, new Date(), true, true, null));
+                            if (rci != null) {
+                                rci.setChargeDate(new Date());
+                                rci.setChargedToDate(new Date());
+                            }
+                            ratingResult.set(recurringChargeInstanceService.applyRecurringCharge(Optional.ofNullable(rci)
+                                                                                                         .orElse(chargeInstance), new Date(), true, true, null));
                         });
+                        
                     } catch (Exception e) {
                         log.error("Failed to apply recurring charge {}: {}", chargeInstance, e.getMessage(), e);
                         throw new RuntimeException(e);

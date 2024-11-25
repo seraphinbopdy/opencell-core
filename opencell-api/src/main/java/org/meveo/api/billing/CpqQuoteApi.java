@@ -177,6 +177,7 @@ import org.meveo.service.quote.QuoteOfferService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.meveo.service.settings.impl.GlobalSettingsService;
 import org.meveo.service.tax.TaxMappingService;
 import org.meveo.service.tax.TaxMappingService.TaxInfo;
@@ -299,6 +300,9 @@ public class CpqQuoteApi extends BaseApi {
 	
 	@Inject
 	private OfferTemplateAttributeService offerTemplateAttributeService;
+
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
 	
     private static final String ADMINISTRATION_VISUALIZATION = "administrationVisualization";
     
@@ -1714,16 +1718,20 @@ public class CpqQuoteApi extends BaseApi {
         
         Map<BigDecimal, List<QuotePrice>> pricesPerTaux = accountingArticlePrices.stream()
                 .collect(Collectors.groupingBy(QuotePrice::getTaxRate));
+
+        Boolean updateMrr = (Boolean) advancedSettingsService.getParameter(AdvancedSettingsService.DISABLE_SYNC_MRR_UPDATE);
         
         // Calculate MRR
         quoteVersionService.getEntityManager().flush();
-        quoteVersion.getQuoteProducts().forEach(qp -> qp.setMrr(quoteProductService.calculateMRR(qp)));
-        quoteVersion.getQuote()
-                    .setMrr(quoteVersion.getQuoteProducts()
-                                        .stream()
-                                        .map(QuoteProduct::getMrr)
-                                        .filter(Objects::nonNull)
-                                        .reduce(BigDecimal.ZERO, BigDecimal::add));
+        if (Boolean.FALSE.equals(updateMrr)) {
+            quoteVersion.getQuoteProducts().forEach(qp -> qp.setMrr(quoteProductService.calculateMRR(qp)));
+            quoteVersion.getQuote()
+                        .setMrr(quoteVersion.getQuoteProducts()
+                                            .stream()
+                                            .map(QuoteProduct::getMrr)
+                                            .filter(Objects::nonNull)
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add));
+        }
         
         BigDecimal quoteTotalAmount = BigDecimal.ZERO;
 

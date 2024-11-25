@@ -8,6 +8,8 @@ import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.ServiceInstanceService;
 import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.catalog.impl.OfferTemplateService;
+import org.meveo.service.cpq.CpqQuoteService;
+import org.meveo.service.cpq.order.CommercialOrderService;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -37,6 +39,12 @@ public class MRRCalculationJobBean extends IteratorBasedJobBean<ServiceInstance>
     
     @Inject
     private OfferTemplateService offerTemplateService;
+
+    @Inject
+    private CpqQuoteService cpqQuoteService;
+
+    @Inject
+    private CommercialOrderService commercialOrderService;
     
     /**
      * Execute the job
@@ -59,6 +67,9 @@ public class MRRCalculationJobBean extends IteratorBasedJobBean<ServiceInstance>
         subscriptionService.massCalculateMRR();
         billingAccountService.massCalculateMRR();
         offerTemplateService.massCalculateARR();
+
+        cpqQuoteService.massCalculateMRR();
+        commercialOrderService.massCalculateMRR();
         
     }
 

@@ -585,4 +585,57 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 		});
 		
 	}
+
+	/**
+	 * Calculate MRR For Quote .
+	 */
+	public void massCalculateMRR() {
+		getEntityManager().createNativeQuery("UPDATE cpq_quote_product product" +
+				"            SET mrr = subquery.total_calculated_amount" +
+				"                FROM (" +
+				"                    SELECT " +
+				"                        p.id as product_id," +
+				"                        SUM(" +
+				"                            CASE " +
+				"                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN " +
+				"                                    price.amount_with_tax / NULLIF(cal.period_length, 0)" +
+				"                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN " +
+				"                                    (price.amount_with_tax * 365 / 12) / NULLIF(cal.period_length, 0)" +
+				"                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN " +
+				"                                    price.amount_with_tax * (select count(*) from cat_calendar_days d where  d.calendar_id = cal.id) / 12" +
+				"                                ELSE price.amount_with_tax" +
+				"                            END" +
+				"                        ) AS total_calculated_amount" +
+				"                    FROM cpq_quote_product p" +
+				"                    JOIN cpq_quote_article_line art ON art.quote_product_id = p.id" +
+				"                    JOIN cpq_quote_price price ON price.quote_article_line_id = art.id" +
+				"                    JOIN cat_charge_template ch ON ch.id = price.charge_template_id" +
+				"                    JOIN cat_calendar cal ON cal.id = ch.calendar_id" +
+				"                    WHERE price.price_type = 'RECURRING'" +
+				"                    AND price.price_level = 'PRODUCT'" +
+				"                    AND (cal.period_unit IS NULL OR cal.period_unit IN (2, 5))" +
+				"                    GROUP BY p.id" +
+				"                ) subquery" +
+				"            WHERE product.id = subquery.product_id;").executeUpdate();
+		
+		getEntityManager().createNativeQuery("UPDATE cpq_quote q" +
+				"            SET mrr = subquery.total_mrr" +
+				"                FROM (" +
+				"                   SELECT " +
+				"                       cq.id as quote_id," +
+				"                       SUM(cqp.mrr) as total_mrr" +
+				"                   FROM cpq_quote cq" +
+				"                   JOIN cpq_quote_version cqv ON cqv.cpq_quote_id = cq.id" +
+				"                   JOIN (" +
+				"                       SELECT cpq_quote_id, MAX(quote_version) as max_version" +
+				"                       FROM cpq_quote_version" +
+				"                       WHERE status = 'PUBLISHED'" +
+				"                       GROUP BY cpq_quote_id" +
+				"                   ) latest ON latest.cpq_quote_id = cqv.cpq_quote_id AND latest.max_version = cqv.quote_version" +
+				"                   JOIN cpq_quote_product cqp ON cqp.quote_version_id = cqv.id" +
+				"                   WHERE cqp.mrr IS NOT NULL" +
+				"                   GROUP BY cq.id" +
+				"                ) subquery" +
+				"            WHERE q.id = subquery.quote_id;").executeUpdate();
+	}
 }

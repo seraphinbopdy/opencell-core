@@ -10,16 +10,20 @@ import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -50,6 +54,30 @@ import org.meveo.model.quote.QuoteProduct;
 @NamedQueries({
 	@NamedQuery(name = "OrderProduct.findOrderProductByOrder", query = "FROM OrderProduct op WHERE op.order.id = :commercialOrderId")
 })
+
+@NamedNativeQuery(name = "OrderProduct.calculateMrr", query = "SELECT " +
+		"                        SUM(" +
+		"                            CASE " +
+		"                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN " +
+		"                                    price.amount_with_tax / NULLIF(cal.period_length, 0)" +
+		"                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN " +
+		"                                    (price.amount_with_tax * 365 / 12) / NULLIF(cal.period_length, 0)" +
+		"                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN " +
+		"                                    price.amount_with_tax * (select count(*) from {h-schema}cat_calendar_days d where  d.calendar_id = cal.id) / 12" +
+		"                                ELSE price.amount_with_tax" +
+		"                            END" +
+		"                        ) AS amount" +
+		"                    FROM {h-schema}cpq_order_product p" +
+		"                    JOIN {h-schema}order_article_line art ON art.order_product_id = p.id" +
+		"                    JOIN {h-schema}order_price price ON price.order_article_line_id = art.id" +
+		"                    JOIN {h-schema}cat_charge_template ch ON ch.id = price.charge_template_id" +
+		"                    JOIN {h-schema}cat_calendar cal ON cal.id = ch.calendar_id" +
+		"                    WHERE price.price_type = 'RECURRING'" +
+		"                    AND price.price_level = 'PRODUCT'" +
+		"                    AND (cal.period_unit IS NULL OR cal.period_unit IN (2, 5))" +
+		"                    AND p.id = :orderProductId" +
+		"                    GROUP BY p.id",
+		resultSetMapping = "BigDecimalMapping")
 public class OrderProduct extends AuditableCFEntity {
 
 

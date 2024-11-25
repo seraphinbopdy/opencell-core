@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -72,6 +73,7 @@ import org.meveo.service.cpq.AttributeService;
 import org.meveo.service.cpq.ProductService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.PaymentMethodService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 /**
  * @author Tarik FA.
@@ -111,6 +113,9 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 
 	@Inject
 	private OrderProductService orderProductService;
+
+	@Inject
+	private AdvancedSettingsService advancedSettingsService;
 	
 	public CommercialOrder findByOrderNumer(String orderNumber) throws  BusinessException{
 		QueryBuilder queryBuilder = new QueryBuilder(CommercialOrder.class, "co");
@@ -140,6 +145,20 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 			entity.setCode(UUID.randomUUID().toString());
 		var currentOrder = entity.getOrderProgressTmp() != null ? entity.getOrderProgressTmp() : Integer.MAX_VALUE;
 		var nextOrder = entity.getOrderProgress();
+
+		Boolean updateMRR = (Boolean) advancedSettingsService.getParameter(AdvancedSettingsService.DISABLE_SYNC_MRR_UPDATE);
+		
+		if(Boolean.FALSE.equals(updateMRR)) {
+			getEntityManager().flush();
+			AtomicReference<BigDecimal> orderMRR = new AtomicReference<>(BigDecimal.ZERO);
+			orderProductService.findOrderProductsByOrder(entity.getId()).forEach(orderProduct -> {
+				BigDecimal mrr = orderProductService.calculateMRR(orderProduct);
+				orderProduct.setMrr(mrr);
+				orderMRR.accumulateAndGet(Optional.ofNullable(mrr).orElse(BigDecimal.ZERO), BigDecimal::add);
+			});
+			entity.setMrr(orderMRR.get());
+		}
+		
 		super.update(entity);
 		if(currentOrder < nextOrder) {
 			entityAdvancementRateIncreasedEventProducer.fire(entity);
@@ -787,5 +806,51 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 		queryBuilder.addCriterionEntity("co.billingAccount.id", billingAccountId);
 		Query query = queryBuilder.getQuery(getEntityManager());
 		return query.getResultList();
+	}
+
+	/**
+	 * Calculate MRR for all orders where mrr is still null
+	 */
+	public void massCalculateMRR() {
+		getEntityManager().createNativeQuery("UPDATE cpq_order_product product" +
+				"            SET mrr = subquery.total_calculated_amount" +
+				"                FROM (" +
+				"                    SELECT " +
+				"                        p.id as product_id," +
+				"                        SUM(" +
+				"                            CASE " +
+				"                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN " +
+				"                                    price.amount_with_tax / NULLIF(cal.period_length, 0)" +
+				"                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN " +
+				"                                    (price.amount_with_tax * 365 / 12) / NULLIF(cal.period_length, 0)" +
+				"                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN " +
+				"                                    price.amount_with_tax * (select count(*) from cat_calendar_days d where  d.calendar_id = cal.id) / 12" +
+				"                                ELSE price.amount_with_tax" +
+				"                            END" +
+				"                        ) AS total_calculated_amount" +
+				"                    FROM cpq_order_product p" +
+				"                    JOIN order_article_line art ON art.order_product_id = p.id" +
+				"                    JOIN order_price price ON price.order_article_line_id = art.id" +
+				"                    JOIN cat_charge_template ch ON ch.id = price.charge_template_id" +
+				"                    JOIN cat_calendar cal ON cal.id = ch.calendar_id" +
+				"                    WHERE price.price_type = 'RECURRING'" +
+				"                    AND price.price_level = 'PRODUCT'" +
+				"                    AND (cal.period_unit IS NULL OR cal.period_unit IN (2, 5))" +
+				"                    GROUP BY p.id" +
+				"                ) subquery" +
+				"            WHERE product.id = subquery.product_id").executeUpdate();
+		getEntityManager().createNativeQuery("UPDATE cpq_commercial_order ord" +
+				"            SET mrr = subquery.total_mrr" +
+				"                FROM (" +
+				"                   SELECT " +
+				"                       o.id as order_id," +
+				"                       SUM(cop.mrr) as total_mrr" +
+				"                   FROM cpq_commercial_order o" +
+				"                   JOIN cpq_order_product cop ON cop.order_id = o.id" +
+				"                   WHERE cop.mrr IS NOT NULL" +
+				"                   GROUP BY o.id" +
+				"                ) subquery" +
+				"            WHERE ord.id = subquery.order_id").executeUpdate();
+		
 	}
 }

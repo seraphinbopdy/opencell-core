@@ -199,7 +199,7 @@ public class InvoiceUblHelper {
 		BigDecimal payableAmount = invoice.getNetToPay();
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
-			//setBillingReference(invoice, creditNote);
+			setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
@@ -337,10 +337,11 @@ public class InvoiceUblHelper {
 			target.getDeliveries().add(getDeliveryType(source));
 		}
 
-		Note note = objectFactorycommonBasic.createNote();
-		note.setValue(source.getComment());
-		target.getNotes().add(note);
-		
+		if(StringUtils.isNotBlank(source.getComment())){
+			Note note = objectFactorycommonBasic.createNote();
+			note.setValue(source.getComment());
+			target.getNotes().add(note);
+		}
 		CustomizationID customizationID = objectFactorycommonBasic.createCustomizationID();
 		customizationID.setValue("urn:cen.eu:en16931:2017#conformant#urn:ubl.eu:1p0:extended-ctc-fr");
 		target.setCustomizationID(customizationID);
@@ -391,6 +392,7 @@ public class InvoiceUblHelper {
 			startDate.setValue(toXmlDate(source.getStartDate()));
 			endDate.setValue(toXmlDate(source.getEndDate()));
 			periodType.setStartDate(startDate);
+			periodType.setEndDate(endDate);
 			target.getInvoicePeriods().add(periodType);
 		}
 
@@ -400,9 +402,16 @@ public class InvoiceUblHelper {
 			target.getDeliveries().add(getDeliveryType(source));
 		}
 		
-		Note note = objectFactorycommonBasic.createNote();
-		note.setValue(source.getComment());
-		target.getNotes().add(note);
+		if(StringUtils.isNotBlank(source.getComment())){
+			Note note = objectFactorycommonBasic.createNote();
+			note.setValue(source.getComment());
+			target.getNotes().add(note);
+		}
+		
+		
+		CustomizationID customizationID = objectFactorycommonBasic.createCustomizationID();
+		customizationID.setValue("urn:cen.eu:en16931:2017#conformant#urn:ubl.eu:1p0:extended-ctc-fr");
+		target.setCustomizationID(customizationID);
 		
 		setTaxCurrencyCodeAndDocumentCurrencyCode(objectFactorycommonBasic, source, target);
 		

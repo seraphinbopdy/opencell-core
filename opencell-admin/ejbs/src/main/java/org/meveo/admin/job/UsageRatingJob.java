@@ -176,7 +176,7 @@ public class UsageRatingJob extends ScopedJob {
         result.put("parameter2", parameter2);
         
         result.put("batchProcessingOnly", CustomFieldTemplateUtils.buildCF("batchProcessingOnly", "batch processing only", CustomFieldTypeEnum.BOOLEAN,
-                "tab:Configuration:0;field:7", "false", true, null, null, USAGE_RATING_JOB));
+                "tab:Configuration:0;field:7", "false", true, null, null, USAGE_RATING_JOB, null));
 
         result.put(CF_JOB_ITEMS_LIMIT, CustomFieldTemplateUtils.buildCF(CF_JOB_ITEMS_LIMIT, resourceMessages.getString("jobExecution.jobItemsLimit"),
                 CustomFieldTypeEnum.LONG, "tab:Configuration:0;field:8", "JobInstance_UsageRatingJob"));

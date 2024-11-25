@@ -22,10 +22,12 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.ejb.Stateless;
@@ -57,6 +59,7 @@ import org.meveo.model.billing.UsageChargeInstance;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.UsageChargeTemplate;
 import org.meveo.model.cpq.CpqQuote;
+import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.quote.QuoteVersion;
 import org.meveo.model.rating.CDR;
 import org.meveo.model.rating.CDRStatusEnum;
@@ -261,28 +264,42 @@ public class UsageRatingService extends RatingService implements Serializable {
      * Rate a a list of EDRs a a batch. Counters are used if they apply. All EDRs MUST succeed. EDR status will NOT be updated to Rejected even if exception is thrown - any changes will simply be rolledback.
      * 
      * @param edrIds A list of EDR ids to rate
+     * @param jobExecutionResult 
      * @throws BusinessException business exception.
      * @throws RatingException EDR rejection due to lack of funds, data validation, inconsistency or other rating related failure
      */
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void ratePostpaidUsage(List<Long> edrIds) throws BusinessException, RatingException {
-        try {
-            List<EDR> edrs = findEdrsListByIdsandSubscription(edrIds);
+    public void ratePostpaidUsage(List<Long> edrIds, JobExecutionResultImpl jobExecutionResult, boolean multiProcessOnlyMode) throws BusinessException, RatingException {
+    	Map<String, List<Long>> errorsMap = new HashMap<>();
+    	int toProcess=edrIds.size();
+    	List<Long> successfullyRated= new ArrayList<Long>();
+        List<EDR> edrs = findEdrsListByIds(edrIds);
 
-            for (EDR edr : edrs) {
-                rateUsage(edr, false, false, 0, 0, null, false);
+        for (EDR edr : edrs) {
+        	try {
+        		rateUsage(edr, false, false, 0, 0, null, false);
+            } catch (Exception e) {
+            	if(!multiProcessOnlyMode) {
+            		edrIds.removeAll(successfullyRated);
+            		jobExecutionResult.addNbItemsCorrectlyProcessed(successfullyRated.size());
+					log.error("Failed to rate EDRs {}: exception {} when rating  edr {}", edrIds, (e instanceof RatingException) ? ((RatingException) e).getRejectionReason() : e.getMessage(), edr.getId());
+            		throw e;
+            	}
+            	errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(edr.getId());
             }
-
-        } catch (RatingException e) {
-            log.trace("Failed to rate EDRs {}: {}", edrIds, e.getRejectionReason());
-            throw e;
-
-        } catch (Exception e) {
-            log.error("Failed to rate EDRs {}: {}", edrIds, e.getMessage(), e);
-            throw e;
+        	successfullyRated.add(edr.getId());
         }
+        errorsMap.forEach((key, value) ->reportErrors(jobExecutionResult, key, value, toProcess));
     }
+    
+
+	private void reportErrors(JobExecutionResultImpl jobExecutionResult, String key, List<Long> value, int toProcess) {
+		int errorsToCompute = value.size();
+		errorsToCompute = errorsToCompute == toProcess || errorsToCompute == 0 ? 0 : errorsToCompute;
+		jobExecutionResult.registerError("" + value.size() + " errors of: " + key + " IDs: " + value.stream().map(String::valueOf).collect(Collectors.joining(", ")), errorsToCompute);
+		jobExecutionResult.addNbItemsCorrectlyProcessed(-errorsToCompute);
+	}
 
     /**
      * Find an EDR with its id and fetch subscription.
@@ -309,6 +326,16 @@ public class UsageRatingService extends RatingService implements Serializable {
         List<EDR> edrsList = em.createNamedQuery("EDR.findByIdsWithSubscription", EDR.class).setParameter("ids", edrIds).getResultList();
         return edrsList;
     }
+    
+    /**
+     * Find a list of EDRs by Ids.
+     *
+     * @param edrIds EDR list of ids
+     * @return A list of EDRs
+     */
+    public List<EDR> findEdrsListByIds(List<Long> edrIds) {
+        return edrService.findByIds(edrIds);
+    }
 
     /**
      * Rate a virtual EDR. Data will not be persisted
@@ -334,7 +361,6 @@ public class UsageRatingService extends RatingService implements Serializable {
      * @throws RatingException EDR rejection due to lack of funds, data validation, inconsistency or other rating related failure
      */
     public RatingResult rateUsage(Long edrId, boolean rateTriggeredEdr, int maxDeep, int currentRatingDepth) throws BusinessException, RatingException {
-
         EDR edr = findEdrByIdandSubscription(edrId);
         return rateUsage(edr, false, rateTriggeredEdr, maxDeep, currentRatingDepth, null, false);
     }
@@ -374,11 +400,13 @@ public class UsageRatingService extends RatingService implements Serializable {
             currentRatingDepth = currentRatingDepth != null ? currentRatingDepth : 0;
             // Charges should be already ordered by priority and id (why id??)
             Long subscriptionId = edr.getSubscription().getId();
+            boolean paramsAlreadyFiltered = false;
             if (subscriptionId != null) {
                 
                 boolean isSubscriptionInitialized = Hibernate.isInitialized(edr.getSubscription());
                 
-                usageChargeInstances = usageChargeInstanceService.getUsageChargeInstancesValidForDateBySubscriptionId(edr.getSubscription(), edr.getEventDate());
+                usageChargeInstances = usageChargeInstanceService.getUsageChargeInstancesValidForDateBySubscriptionIdAndParams(edr);
+                paramsAlreadyFiltered=true;
                 if (usageChargeInstances == null || usageChargeInstances.isEmpty()) {
                     throw new NoChargeException("No active usage charges are associated with subscription " + subscriptionId);
                 }
@@ -401,7 +429,7 @@ public class UsageRatingService extends RatingService implements Serializable {
             for (UsageChargeInstance usageChargeInstance : usageChargeInstances) {
           
                 log.trace("Try to rate EDR {} with charge {}", edr.getId(), usageChargeInstance.getCode());
-                if (!isChargeMatch(usageChargeInstance, edr)) {
+                if (!isChargeMatch(usageChargeInstance, edr, paramsAlreadyFiltered)) {
                     continue;
                 }
 
@@ -520,30 +548,37 @@ public class UsageRatingService extends RatingService implements Serializable {
      * @return true if charge is matched
      * @throws InvalidELException Failed to evaluate EL expression
      */
-    private boolean isChargeMatch(UsageChargeInstance chargeInstance, EDR edr) throws InvalidELException {
+    private boolean isChargeMatch(UsageChargeInstance chargeInstance, EDR edr, boolean paramsAlreadyFiltered) throws InvalidELException {
 
         UsageChargeTemplate chargeTemplate = chargeInstance.getUsageChargeTemplate();
         
-        String filter1 = chargeTemplate.getFilterParam1();
-
-        if (filter1 == null || filter1.equals(edr.getParameter1())) {
-            String filter2 = chargeTemplate.getFilterParam2();
-            if (filter2 == null || filter2.equals(edr.getParameter2())) {
-                String filter3 = chargeTemplate.getFilterParam3();
-                if (filter3 == null || filter3.equals(edr.getParameter3())) {
-                    String filter4 = chargeTemplate.getFilterParam4();
-                    if (filter4 == null || filter4.equals(edr.getParameter4())) {
-                        String filterExpression = chargeTemplate.getFilterExpression();
-                        if (filterExpression == null || matchExpression(chargeInstance, filterExpression, edr)) {
-                            // Check if there is any attribute with value FALSE, indicating that service instance is not active
-                            if (anyFalseAttributeMatch(chargeInstance)) {
-                                return false;
-                            }
-                            return true;
+        if(!paramsAlreadyFiltered) {
+        	boolean allParamsMatched=false;
+        	String filter1 = chargeTemplate.getFilterParam1();
+        	if (filter1 == null || filter1.equals(edr.getParameter1())) {
+                String filter2 = chargeTemplate.getFilterParam2();
+                if (filter2 == null || filter2.equals(edr.getParameter2())) {
+                    String filter3 = chargeTemplate.getFilterParam3();
+                    if (filter3 == null || filter3.equals(edr.getParameter3())) {
+                        String filter4 = chargeTemplate.getFilterParam4();
+                        if (filter4 == null || filter4.equals(edr.getParameter4())) {
+                        	allParamsMatched=true;
                         }
                     }
                 }
             }
+        	if(!allParamsMatched) {
+            	return false;
+            }
+        }
+            
+		String filterExpression = chargeTemplate.getFilterExpression();
+		if (filterExpression == null || matchExpression(chargeInstance, filterExpression, edr)) {
+		    // Check if there is any attribute with value FALSE, indicating that service instance is not active
+		    if (anyFalseAttributeMatch(chargeInstance)) {
+		        return false;
+		    }
+		    return true;
         }
         return false;
     }

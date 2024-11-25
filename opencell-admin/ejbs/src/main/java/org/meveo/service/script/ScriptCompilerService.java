@@ -60,7 +60,6 @@ import jakarta.ejb.TransactionAttributeType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 
-
 /**
  * Compiles scripts and provides compiled script classes.
  * 
@@ -93,33 +92,38 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void compileAndInitializeAll() {
 
-        // Initialize reusable scripts that are based on compiled and included JAVA class in the project 
-        List<ScriptInstance> scriptInstances = findByType(ScriptSourceTypeEnum.JAVA_CLASS);
+        try {
 
-        // Initialize scripts that are defined as java classe
-        for (ScriptInstance scriptInstance : scriptInstances) {
-            if (!scriptInstance.isUsePool()) {
-                continue;
-            }
-            try {
-                // Obtain a deployed script
-                ScriptInterface script = (ScriptInterface) EjbUtils
-                    .getServiceInterface(scriptInstance.getCode().lastIndexOf('.') > 0 ? scriptInstance.getCode().substring(scriptInstance.getCode().lastIndexOf('.') + 1) : scriptInstance.getCode());
-                if (script == null) {
-                    log.error("Script " + scriptInstance.getCode() + " was not found as a deployed script");
-                } else {
-                    log.info("Initializing script " + scriptInstance.getCode());
-                    script.init(new HashMap<String, Object>());
+            // Initialize reusable scripts that are based on compiled and included JAVA class in the project
+            List<ScriptInstance> scriptInstances = findByType(ScriptSourceTypeEnum.JAVA_CLASS);
+
+            // Initialize scripts that are defined as java classe
+            for (ScriptInstance scriptInstance : scriptInstances) {
+                if (!scriptInstance.isUsePool()) {
+                    continue;
                 }
-            } catch (Exception e) {
-                log.error("Failed to initialize a script " + scriptInstance.getCode(), e);
+                try {
+                    // Obtain a deployed script
+                    ScriptInterface script = (ScriptInterface) EjbUtils
+                        .getServiceInterface(scriptInstance.getCode().lastIndexOf('.') > 0 ? scriptInstance.getCode().substring(scriptInstance.getCode().lastIndexOf('.') + 1) : scriptInstance.getCode());
+                    if (script == null) {
+                        log.error("Script " + scriptInstance.getCode() + " was not found as a deployed script");
+                    } else {
+                        log.info("Initializing script " + scriptInstance.getCode());
+                        script.init(new HashMap<String, Object>());
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to initialize a script " + scriptInstance.getCode(), e);
+                }
             }
+
+            // Compile JAVA type classes
+            scriptInstances = findByType(ScriptSourceTypeEnum.JAVA);
+            compile(scriptInstances);
+
+        } catch (Exception e) {
+            log.error("Failed to compile and initialize scripts", e);
         }
-
-        // Compile JAVA type classes
-        scriptInstances = findByType(ScriptSourceTypeEnum.JAVA);
-        compile(scriptInstances);
-
     }
 
     /**
@@ -177,7 +181,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
             File realFile = new File(thisClassfile);
 
             log.info("Constructing class path. Current class location {}. File exists {}", thisClassfile, realFile.exists());
-            
+
             // Was deployed as exploded archive
             if (realFile.exists()) {
                 File deploymentDir = realFile.getParentFile();
@@ -196,7 +200,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
                 File deploymentDir = realFile.getParentFile().getParentFile();
 
                 log.info("Constructing class path from VFS. Location dir {}, deployment dir", realFile, deploymentDir);
-                
+
                 for (File physicalLibDir : deploymentDir.listFiles()) {
                     if (physicalLibDir.isDirectory()) {
                         for (File f : FileUtils.listFiles(physicalLibDir, "jar", "*", null)) {
@@ -305,7 +309,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
                     }
                 }
 
-                log.info("Adding compiled script {} into compiled script cache with key {}", scriptCode, cacheKey);                
+                log.info("Adding compiled script {} into compiled script cache with key {}", scriptCode, cacheKey);
 
                 compiledScripts.put(cacheKey, compiledScript);
                 InitialContext ic = new InitialContext();
@@ -440,7 +444,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
         if (compiledScript == null) {
 
             log.warn("Script {} with cache key {} was NOT found in compiled script cache. Currently cache contains {}", scriptCode, cacheKey.toString(), compiledScripts.keySet());
-            
+
             ScriptInstance script = findByCode(scriptCode);
             if (script == null) {
                 log.debug("ScriptInstance with {} does not exist", scriptCode);
@@ -468,11 +472,11 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
      * @param scriptCode Script code
      */
     public void clearCompiledScripts(String scriptCode) {
-        
+
         CacheKeyStr cacheKey = new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode);
-        
+
         log.debug("Script {} with cache key {} will be removed from compiled script cache.", scriptCode, cacheKey.toString());
-        
+
         compiledScripts.remove(cacheKey);
     }
 

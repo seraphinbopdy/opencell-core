@@ -180,8 +180,6 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
 
             File realFile = new File(thisClassfile);
 
-            log.info("Constructing class path. Current class location {}. File exists {}", thisClassfile, realFile.exists());
-
             // Was deployed as exploded archive
             if (realFile.exists()) {
                 File deploymentDir = realFile.getParentFile();
@@ -198,8 +196,6 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
                 realFile = new File(org.jboss.vfs.VFSUtils.getPhysicalURI(vFile).getPath());
 
                 File deploymentDir = realFile.getParentFile().getParentFile();
-
-                log.info("Constructing class path from VFS. Location dir {}, deployment dir", realFile, deploymentDir);
 
                 for (File physicalLibDir : deploymentDir.listFiles()) {
                     if (physicalLibDir.isDirectory()) {

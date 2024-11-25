@@ -15616,5 +15616,12 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
 		<dropColumn tableName="adm_notif_im" columnName="im_provider" />
 		<addNotNullConstraint tableName="adm_notif_im" columnName="im_provider_name" />
 	</changeSet>
+    
+    <changeSet id="INTRD-26817_20241126" author="AndriusKarpavicius">
+        <sql>update ${db.schema.adapted}meveo_script_instance set description = substring(description, 1,255)</sql>
+        <sql>update ${db.schema.adapted}batch_entity set description = substring(description, 1,255)</sql>
+        <modifyDataType tableName="meveo_script_instance" columnName="description" newDataType="varchar(255)"/>
+        <modifyDataType tableName="batch_entity" columnName="description" newDataType="varchar(255)"/>
+    </changeSet>
 
 </databaseChangeLog>

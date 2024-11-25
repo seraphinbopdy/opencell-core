@@ -127,6 +127,9 @@ public class CustomerBalanceService extends BusinessService<CustomerBalance> {
             if(template == null) {
                 throw new NotFoundException("Occ template with id " + id + " does not exists");
             }
+            if(template.getCode().endsWith("_FAE")) {
+                throw new ValidationException("FAE not allowed in balance definition");
+            }
             if(OperationCategoryEnum.DEBIT == template.getOccCategory()) {
                 debit++;
             }

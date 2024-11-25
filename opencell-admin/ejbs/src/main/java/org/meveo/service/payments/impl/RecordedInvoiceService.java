@@ -765,7 +765,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
             qb.addSql("ao.invoice.status = '" + VALIDATED + "' and ao.invoice.invoiceDate <= " + startDueDateDB);
             qb.addSql("(ao.invoice.paymentStatus = '" + PENDING + "' or ao.invoice.paymentStatus = '" + PPAID + "' or ao.invoice.paymentStatus ='" + UNPAID + "' or ao.matchingStatus='"+MatchingStatusEnum.I+"' )");
         }
-
+        qb.addSql("ao.code not like '%_FAE%'");
         qb.addGroupCriterion("ao.customerAccount.id, ao.customerAccount.dunningLevel, ao.customerAccount.name, ao.customerAccount.description, ao.seller.description, ao.seller.code, ao.dueDate, ao.amount, ao.invoice.tradingCurrency.currency.currencyCode, ao.invoice.id, ao.invoice.invoiceNumber, ao.invoice.amountWithTax, ao.customerAccount.code, ao.invoice.transactionalAmountWithTax, ao.invoice.billingAccount.id, ao.transactionCategory ");
         qb.addPaginationConfiguration(paginationConfiguration);
 

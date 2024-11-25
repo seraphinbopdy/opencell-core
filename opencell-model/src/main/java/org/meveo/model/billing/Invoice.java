@@ -833,6 +833,7 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
         this.isReminderLevelTriggered = copy.isReminderLevelTriggered;
         this.relatedDunningCollectionPlan = copy.relatedDunningCollectionPlan;
         this.externalPurchaseOrderNumber = copy.externalPurchaseOrderNumber;
+        this.subscription = copy.subscription;
     }
 
     /**

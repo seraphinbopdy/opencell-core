@@ -59,7 +59,6 @@ import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.PaymentGateway;
 import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.shared.DateUtils;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 import org.meveo.service.billing.impl.BillingAccountService;
@@ -118,9 +117,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
     private final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-    private static Date getDateOverdue(DunningLevelInstance levelInstance, DunningCollectionPlan collectionPlan) {
-        return DateUtils.addDaysToDate(collectionPlan.getStartDate(), ofNullable(collectionPlan.getPauseDuration()).orElse(0) + levelInstance.getDaysOverdue());
-    }
+    private static final String COLLECTION_PLAN_ID_MESSAGE = "Collection plan ID : ";
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
@@ -134,7 +131,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         collectionPlanToProcess.forEach(collectionPlanId -> {
             try {
                 if(dunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {
-                jobBean.process(collectionPlanId, jobExecutionResult);
+                    jobBean.processInvoiceLevel(collectionPlanId, jobExecutionResult);
                 } else if(dunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL)) {
                     jobBean.processCustomerLevel(collectionPlanId, jobExecutionResult);
                 }
@@ -215,7 +212,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
      */
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void process(Long collectionPlanId, JobExecutionResultImpl jobExecutionResult) {
+    public void processInvoiceLevel(Long collectionPlanId, JobExecutionResultImpl jobExecutionResult) {
         // Get collection plan
         DunningCollectionPlan collectionPlan = collectionPlanService.findById(collectionPlanId);
         Date dateToCompare;
@@ -226,7 +223,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
         // Check if collection plan has levels
         if (collectionPlan.getDunningLevelInstances() == null || collectionPlan.getDunningLevelInstances().isEmpty()) {
-            throw new BusinessException("Collection plan ID : " + collectionPlan.getId() + " has no levelInstances associated");
+            throw new BusinessException(COLLECTION_PLAN_ID_MESSAGE + collectionPlan.getId() + " has no levelInstances associated");
         }
 
         // Check if collection plan is active and invoice is paid
@@ -247,7 +244,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
             for (int levelsIndex = 0 ; levelsIndex < levelInstances.size(); levelsIndex++) {
                 levelInstance = levelInstances.get(levelsIndex);
-                dateToCompare = levelInstance.getExecutionDate();//getDateOverdue(levelInstance, collectionPlan);
+                dateToCompare = levelInstance.getExecutionDate();
                 DunningLevelInstance previousLevelInstance = null;
 
                 if (levelsIndex > 0) {
@@ -273,22 +270,12 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                         DunningActionInstance actionInstance = levelInstance.getActions().get(i);
                             if (actionInstance.getActionMode().equals(AUTOMATIC) && actionInstance.getActionStatus().equals(TO_BE_DONE)) {
                             try {
-                                    if (previousLevelInstance == null || (previousLevelInstance != null && (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED))) {
-                                triggerAction(actionInstance, collectionPlan);
-                                        collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
-                                actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
-                                        actionInstance.setExecutionDate(new Date());
-                                if (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
-                                    levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
-                                            levelInstance.setExecutionDate(new Date());
-                                    levelInstanceService.update(levelInstance);
-                                }
-                                collectionPlan.setLastActionDate(new Date());
-                                        collectionPlan.setLastAction(actionInstance.getDunningAction().getCode());
+                                    if (previousLevelInstance == null || (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED)) {
+                                        triggerActionAndRefreshLevelsAndActions(collectionPlan, levelInstance, actionInstance);
                                     }
                             } catch (Exception exception) {
                                 registerKO = true;
-                                jobExecutionResult.addReport("Collection plan ID : "
+                                    jobExecutionResult.addReport(COLLECTION_PLAN_ID_MESSAGE
                                         + collectionPlan.getId() + "/Level instance ID : "
                                         + levelInstance.getId() + "/Action instance ID : " + actionInstance.getId()
                                         + " : " + exception.getMessage());
@@ -298,7 +285,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                     }
                     if (!registerKO) {
                         if (levelsIndex + 1 < levelInstances.size()) {
-                                DunningLevelInstance currentLevel = levelInstances.get(levelsIndex);
                             for (int i = levelsIndex + 1; i < levelInstances.size(); i++) {
                                     if(levelInstances.get(i).getActions() != null && !levelInstances.get(i).getActions().isEmpty()) {
                                         collectionPlan.setNextAction(levelInstances.get(i).getActions().get(0).getDunningAction().getCode());
@@ -339,30 +325,13 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             collectionPlan.setNextAction(null);
                             collectionPlan.setNextActionDate(null);
                     }
-                    long countActions = levelInstance.getActions().stream().filter(action -> action.getActionStatus() == DONE).count();
-                    if (countActions > 0 && countActions < levelInstance.getActions().size()) {
-                        levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
-                            levelInstance.setExecutionDate(new Date());
+                        setLevelAndActionStatus(levelInstance);
                     }
-                    if (countActions == levelInstance.getActions().size()) {
-                        levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
-                            levelInstance.setExecutionDate(new Date());
-                    }
-                }
 
                     if (collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_AND_BALANCE_THRESHOLD)
                             && collectionPlan.getRelatedInvoice().getRecordedInvoice().getUnMatchingAmount().compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0
                             && levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
-                        levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IGNORED);
-                        levelInstance.setExecutionDate(null);
-                        levelInstanceService.update(levelInstance);
-                        levelInstance.getActions().stream()
-                                .filter(action -> action.getActionStatus() == TO_BE_DONE)
-                                .forEach(action -> {
-                                    action.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
-                                    action.setExecutionDate(null);
-                                    actionInstanceService.update(action);
-                        });
+                        ignoreLevelsAndActions(levelInstance);
                     }
                 }
                 if (levelInstance.getDunningLevel() == null) {
@@ -385,6 +354,10 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                 }
             }
         }
+
+        // Update collection plan after finishing treatment
+        updateCollectionPlan = updateCollectionPlan(collectionPlan, updateCollectionPlan);
+
         if (updateCollectionPlan) {
             collectionPlanService.update(collectionPlan);
         }
@@ -410,7 +383,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
         // Check if collection plan has levels
         if (collectionPlan.getDunningLevelInstances() == null || collectionPlan.getDunningLevelInstances().isEmpty()) {
-            throw new BusinessException("Collection plan ID : " + collectionPlan.getId() + " has no levelInstances associated");
+            throw new BusinessException(COLLECTION_PLAN_ID_MESSAGE + collectionPlan.getId() + " has no levelInstances associated");
         }
 
         CustomerBalance customerBalance = dunningSettings.getCustomerBalance();
@@ -454,22 +427,12 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             DunningActionInstance actionInstance = levelInstance.getActions().get(i);
                             if (actionInstance.getActionMode().equals(AUTOMATIC) && actionInstance.getActionStatus().equals(TO_BE_DONE)) {
                                 try {
-                                    if (previousLevelInstance == null || (previousLevelInstance != null && (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED))) {
-                                        triggerAction(actionInstance, collectionPlan);
-                                        collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
-                                        actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
-                                        actionInstance.setExecutionDate(new Date());
-                                        if (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
-                                            levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
-                                            levelInstance.setExecutionDate(new Date());
-                                            levelInstanceService.update(levelInstance);
+                                    if (previousLevelInstance == null || (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED)) {
+                                        triggerActionAndRefreshLevelsAndActions(collectionPlan, levelInstance, actionInstance);
                                         }
-                                        collectionPlan.setLastActionDate(new Date());
-                                        collectionPlan.setLastAction(actionInstance.getDunningAction().getCode());
-                                    }
                                 } catch (Exception exception) {
                                     registerKO = true;
-                                    jobExecutionResult.addReport("Collection plan ID : "
+                                    jobExecutionResult.addReport(COLLECTION_PLAN_ID_MESSAGE
                                             + collectionPlan.getId() + "/Level instance ID : "
                                             + levelInstance.getId() + "/Action instance ID : " + actionInstance.getId()
                                             + " : " + exception.getMessage());
@@ -479,7 +442,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                         }
                         if (!registerKO) {
                             if (levelsIndex + 1 < levelInstances.size()) {
-                                DunningLevelInstance currentLevel = levelInstances.get(levelsIndex);
                                 for (int i = levelsIndex + 1; i < levelInstances.size(); i++) {
                                     if(levelInstances.get(i).getActions() != null && !levelInstances.get(i).getActions().isEmpty()) {
                                         collectionPlan.setNextAction(levelInstances.get(i).getActions().get(0).getDunningAction().getCode());
@@ -520,30 +482,13 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             collectionPlan.setNextAction(null);
                             collectionPlan.setNextActionDate(null);
                         }
-                        long countActions = levelInstance.getActions().stream().filter(action -> action.getActionStatus() == DONE).count();
-                        if (countActions > 0 && countActions < levelInstance.getActions().size()) {
-                            levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
-                            levelInstance.setExecutionDate(new Date());
+                        setLevelAndActionStatus(levelInstance);
                         }
-                        if (countActions == levelInstance.getActions().size()) {
-                            levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
-                            levelInstance.setExecutionDate(new Date());
-                        }
-                    }
 
                     if (collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_AND_BALANCE_THRESHOLD)
                             && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0)
                             && levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
-                        levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IGNORED);
-                        levelInstance.setExecutionDate(null);
-                        levelInstanceService.update(levelInstance);
-                        levelInstance.getActions().stream()
-                                .filter(action -> action.getActionStatus() == TO_BE_DONE)
-                                .forEach(action -> {
-                                    action.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
-                                    action.setExecutionDate(null);
-                                    actionInstanceService.update(action);
-                                });
+                        ignoreLevelsAndActions(levelInstance);
                     }
                 }
                 if (levelInstance.getDunningLevel() == null) {
@@ -566,6 +511,9 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                 }
             }
         }
+
+        updateCollectionPlan(collectionPlan, updateCollectionPlan);
+
         if (updateCollectionPlan) {
             collectionPlanService.update(collectionPlan);
         }
@@ -632,10 +580,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
             Seller seller = invoice.getSeller();
             Map<Object, Object> params = new HashMap<>();
             BillingAccount billingAccount = billingAccountService.findById(invoice.getBillingAccount().getId(), asList("customerAccount"));
-            params.put("billingAccountDescription", billingAccount.getDescription());
-            params.put("billingAccountAddressAddress1", billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
-            params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
-            params.put("billingAccountAddressCity", billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
+            setBillingAccountInfo(params, billingAccount);
             params.put("billingAccountContactInformationPhone", billingAccount.getContactInformation() != null ? billingAccount.getContactInformation().getPhone() : "");
 
             CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
@@ -647,10 +592,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                 params.put("customerAccountLegalEntityTypeCode", ofNullable(title).map(Title::getDescription).orElse(""));
             }
 
-            params.put("customerAccountAddressAddress1", customerAccount.getAddress() != null ? customerAccount.getAddress().getAddress1() : "");
-            params.put("customerAccountAddressZipCode", customerAccount.getAddress() != null ? customerAccount.getAddress().getZipCode() : "");
-            params.put("customerAccountAddressCity", customerAccount.getAddress() != null ? customerAccount.getAddress().getCity() : "");
-            params.put("customerAccountDescription", customerAccount.getDescription());
+            setCustomerAccountInfo(params, customerAccount);
             params.put("customerAccountLastName", customerAccount.getName() != null ? customerAccount.getName().getLastName() : "");
             params.put("customerAccountFirstName", customerAccount.getName() != null ? customerAccount.getName().getFirstName() : "");
             params.put("invoiceInvoiceNumber", invoice.getInvoiceNumber());
@@ -683,24 +625,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         }
     }
 
-    /**
-     * Retrieves the OCC template codes to use based on the provided {@link CustomerBalance}.
-     *
-     * @param customerBalance The {@link CustomerBalance} from which to retrieve OCC template codes.
-     * @return A {@link List} of OCC template codes.
-     */
-    private List<String> getOccTemplateCodesToUse(CustomerBalance customerBalance) {
-        List<String> listOccTemplateCodes = Collections.emptyList();
-
-        if (customerBalance.getOccTemplates() != null && !customerBalance.getOccTemplates().isEmpty()) {
-            listOccTemplateCodes = customerBalance.getOccTemplates().stream()
-                    .map(OCCTemplate::getCode)
-                    .collect(Collectors.toList());
-            }
-
-        return listOccTemplateCodes;
-        }
-
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void doPayment(PaymentMethod preferredPaymentMethod, CustomerAccount customerAccount,
@@ -732,6 +656,24 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     }
 
     /**
+     * Retrieves the OCC template codes to use based on the provided {@link CustomerBalance}.
+     *
+     * @param customerBalance The {@link CustomerBalance} from which to retrieve OCC template codes.
+     * @return A {@link List} of OCC template codes.
+     */
+    private List<String> getOccTemplateCodesToUse(CustomerBalance customerBalance) {
+        List<String> listOccTemplateCodes = Collections.emptyList();
+
+        if (customerBalance.getOccTemplates() != null && !customerBalance.getOccTemplates().isEmpty()) {
+            listOccTemplateCodes = customerBalance.getOccTemplates().stream()
+                    .map(OCCTemplate::getCode)
+                    .collect(Collectors.toList());
+        }
+
+        return listOccTemplateCodes;
+    }
+
+    /**
      * Finalize collection plan
      *
      * @param collectionPlan Collection plan
@@ -746,5 +688,103 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         collectionPlan.setCloseDate(new Date());
         collectionPlan.setDaysOpen((int) daysBetween(collectionPlan.getCloseDate(), new Date()) + 1);
         collectionPlanService.update(collectionPlan);
+    }
+
+    /**
+     * Ignore levels and actions
+     *
+     * @param levelInstance Level instance
+     */
+    private void ignoreLevelsAndActions(DunningLevelInstance levelInstance) {
+        levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IGNORED);
+        levelInstance.setExecutionDate(null);
+        levelInstanceService.update(levelInstance);
+        levelInstance.getActions().stream()
+                .filter(action -> action.getActionStatus() == TO_BE_DONE)
+                .forEach(action -> {
+                    action.setActionStatus(DunningActionInstanceStatusEnum.IGNORED);
+                    action.setExecutionDate(null);
+                    actionInstanceService.update(action);
+                });
+    }
+
+    /**
+     * Update collection plan
+     *
+     * @param collectionPlan Collection plan
+     * @param updateCollectionPlan Update collection plan
+     * @return Update collection plan
+     */
+    private boolean updateCollectionPlan(DunningCollectionPlan collectionPlan, boolean updateCollectionPlan) {
+        if(collectionPlan.getDunningLevelInstances().get(collectionPlan.getDunningLevelInstances().size() - 1).getLevelStatus().equals(DunningLevelInstanceStatusEnum.IGNORED)) {
+            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+            collectionPlan.setNextAction(null);
+            collectionPlan.setNextActionDate(null);
+            updateCollectionPlan = true;
+        }
+
+        return updateCollectionPlan;
+    }
+
+    /**
+     * Set level and action status
+     *
+     * @param levelInstance Level instance
+     */
+    private void setLevelAndActionStatus(DunningLevelInstance levelInstance) {
+        long countActions = levelInstance.getActions().stream().filter(action -> action.getActionStatus() == DONE).count();
+        if (countActions > 0 && countActions < levelInstance.getActions().size()) {
+            levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+            levelInstance.setExecutionDate(new Date());
+        }
+        if (countActions == levelInstance.getActions().size()) {
+            levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
+            levelInstance.setExecutionDate(new Date());
+        }
+    }
+
+    /**
+     * Trigger action and refresh levels and actions
+     *
+     * @param collectionPlan Collection plan
+     * @param levelInstance Level instance
+     * @param actionInstance Action instance
+     */
+    private void triggerActionAndRefreshLevelsAndActions(DunningCollectionPlan collectionPlan, DunningLevelInstance levelInstance, DunningActionInstance actionInstance) {
+        triggerAction(actionInstance, collectionPlan);
+        collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
+        actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
+        actionInstance.setExecutionDate(new Date());
+        if (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
+            levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
+            levelInstance.setExecutionDate(new Date());
+            levelInstanceService.update(levelInstance);
+        }
+        collectionPlan.setLastActionDate(new Date());
+        collectionPlan.setLastAction(actionInstance.getDunningAction().getCode());
+    }
+
+    /**
+     * Set customer account info
+     * @param params Params
+     * @param customerAccount Customer account
+     */
+    static void setCustomerAccountInfo(Map<Object, Object> params, CustomerAccount customerAccount) {
+        params.put("customerAccountAddressAddress1", customerAccount.getAddress() != null ? customerAccount.getAddress().getAddress1() : "");
+        params.put("customerAccountAddressZipCode", customerAccount.getAddress() != null ? customerAccount.getAddress().getZipCode() : "");
+        params.put("customerAccountAddressCity", customerAccount.getAddress() != null ? customerAccount.getAddress().getCity() : "");
+        params.put("customerAccountDescription", customerAccount.getDescription());
+    }
+
+    /**
+     * Set billing account info
+     * @param params Params
+     * @param billingAccount Billing account
+     */
+    static void setBillingAccountInfo(Map<Object, Object> params, BillingAccount billingAccount) {
+        params.put("billingAccountDescription", billingAccount.getDescription());
+        params.put("billingAccountAddressAddress1", billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
+        params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
+        params.put("billingAccountAddressCity", billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
     }
 }

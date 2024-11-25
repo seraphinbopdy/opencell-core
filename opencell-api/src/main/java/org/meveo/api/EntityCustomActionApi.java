@@ -422,6 +422,7 @@ public class EntityCustomActionApi extends BaseApi {
         }
 
         Map<String, Object> context = new HashMap<String, Object>();
+        context.put(Script.CONTEXT_ACTION, actionCode);
 
         Map<String, Object> result = scriptInstanceService.execute(entity, action.getScript().getCode(), context);
 

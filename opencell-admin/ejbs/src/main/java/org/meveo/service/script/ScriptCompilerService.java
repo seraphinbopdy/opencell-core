@@ -20,6 +20,7 @@ package org.meveo.service.script;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -169,9 +170,10 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
     /**
      * Construct classpath for script compilation
      * 
-     * @throws IOException
+     * @throws IOException Failed to access library files
+     * @throws URISyntaxException Failed to access library files
      */
-    private void constructClassPath() throws IOException {
+    private void constructClassPath() throws IOException, URISyntaxException {
 
         if (classpath.length() == 0) {
 
@@ -193,17 +195,18 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
             } else {
 
                 org.jboss.vfs.VirtualFile vFile = org.jboss.vfs.VFS.getChild(thisClassfile);
-                realFile = new File(org.jboss.vfs.VFSUtils.getPhysicalURI(vFile).getPath());
 
-                File deploymentDir = realFile.getParentFile().getParentFile();
+                // This returns
+                // file:/C:/andrius/programs/wildfly-34.0.0.Final/standalone/tmp/vfs/temp/temp73e7f3d632ca2407/content-670181794bee3c03/WEB-INF/lib/opencell-admin-ejbs-17.0.0-SNAPSHOT.jar!/
+                String vfsTmpPath = org.jboss.vfs.VFSUtils.getRootURL(org.jboss.vfs.VFS.getChild(thisClassfile)).getPath();
+                vfsTmpPath = vfsTmpPath.substring(6, vfsTmpPath.lastIndexOf("lib") + 3);
 
-                for (File physicalLibDir : deploymentDir.listFiles()) {
-                    if (physicalLibDir.isDirectory()) {
-                        for (File f : FileUtils.listFiles(physicalLibDir, "jar", "*", null)) {
-                            classpath += f.getCanonicalPath() + File.pathSeparator;
-                        }
-                    }
+                File physicalLibDir = new File(vfsTmpPath);
 
+                log.info("Constructing class path from VFS. Location dir {}, deployment's lib dir {}", realFile, vfsTmpPath);
+
+                for (File f : FileUtils.listFiles(physicalLibDir, "jar", "*", null)) {
+                    classpath += f.getCanonicalPath() + File.pathSeparator;
                 }
             }
 

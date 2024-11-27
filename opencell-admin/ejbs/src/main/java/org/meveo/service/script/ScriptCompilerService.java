@@ -199,7 +199,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
                 // This returns
                 // file:/C:/andrius/programs/wildfly-34.0.0.Final/standalone/tmp/vfs/temp/temp73e7f3d632ca2407/content-670181794bee3c03/WEB-INF/lib/opencell-admin-ejbs-17.0.0-SNAPSHOT.jar!/
                 String vfsTmpPath = org.jboss.vfs.VFSUtils.getRootURL(org.jboss.vfs.VFS.getChild(thisClassfile)).getPath();
-                vfsTmpPath = vfsTmpPath.substring(6, vfsTmpPath.lastIndexOf("lib") + 3);
+                vfsTmpPath = vfsTmpPath.substring(5, vfsTmpPath.lastIndexOf("lib") + 3);
 
                 File physicalLibDir = new File(vfsTmpPath);
 

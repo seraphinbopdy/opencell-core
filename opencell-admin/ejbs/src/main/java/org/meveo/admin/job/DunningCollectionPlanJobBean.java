@@ -1,6 +1,5 @@
 package org.meveo.admin.job;
 
-import org.apache.commons.jexl3.*;
 import org.meveo.admin.job.utils.DunningUtils;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.model.billing.Invoice;
@@ -8,6 +7,7 @@ import org.meveo.model.dunning.*;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.payments.*;
+import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.DunningPolicyService;
@@ -197,20 +197,32 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
      * @return True if customer is eligible
      */
     public static Boolean checkCustomerWithCondition(CustomerAccount customerAccount, String conditions) {
-        JexlEngine jexl = new JexlBuilder().create();
-
         String creditCategoryCode = (customerAccount.getCreditCategory() != null) ? customerAccount.getCreditCategory().getCode() : null;
         String customerCategoryCode = (customerAccount.getCustomer().getCustomerCategory().getCode() != null) ? customerAccount.getCustomer().getCustomerCategory().getCode() : null;
-        String paymentMethod = (customerAccount.getPreferredPaymentMethod() != null) ? customerAccount.getPreferredPaymentMethod().getPaymentType().name() : null;
+        HashMap<Object, Object> objectObjectHashMap = getMapToCheck(customerAccount, creditCategoryCode, customerCategoryCode);
+
+        boolean result = ValueExpressionWrapper.evaluateToBoolean("#{ ".concat(conditions).concat(" }"), objectObjectHashMap);
+        log.info("Result of the condition: {} for customer account: {} is: {}", result, customerAccount.getCode(), result);
+        return result;
+    }
+
+    /**
+     * Get map of object
+     * @param customerAccount Customer account
+     * @param creditCategoryCode Credit category code
+     * @param customerCategoryCode Customer category code
+     * @return A map
+     */
+    private static HashMap<Object, Object> getMapToCheck(CustomerAccount customerAccount, String creditCategoryCode, String customerCategoryCode) {
         Boolean company = (customerAccount.getCustomer().getIsCompany() != null) ? customerAccount.getCustomer().getIsCompany() : null;
+        String paymentMethod = (customerAccount.getPreferredPaymentMethod() != null) ? customerAccount.getPreferredPaymentMethod().getPaymentType().name() : null;
 
-        JexlContext context = new MapContext();
-        context.set("creditCategory", creditCategoryCode);
-        context.set("customerCategory", customerCategoryCode);
-        context.set("paymentMethod", paymentMethod);
-        context.set("isCompany", company);
+        HashMap<Object, Object> objectObjectHashMap = new HashMap<>();
+        objectObjectHashMap.put("creditCategory", creditCategoryCode);
+        objectObjectHashMap.put("customerCategory", customerCategoryCode);
+        objectObjectHashMap.put("paymentMethod", paymentMethod);
+        objectObjectHashMap.put("isCompany", company);
 
-        JexlExpression expression = jexl.createExpression(conditions);
-        return (Boolean) expression.evaluate(context);
+        return objectObjectHashMap;
     }
 }

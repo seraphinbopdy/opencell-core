@@ -189,6 +189,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -197,9 +198,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.EnumSet.of;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.meveo.commons.utils.StringUtils.isNotBlank;
 import static org.meveo.model.billing.SubscriptionStatusEnum.ACTIVE;
+import static org.meveo.model.billing.SubscriptionStatusEnum.CREATED;
 import static org.meveo.model.billing.SubscriptionStatusEnum.PENDING;
 
 /**
@@ -223,7 +226,7 @@ public class SubscriptionApi extends BaseApi {
     private static final String DEFAULT_SORT_ORDER_ID = "id";
     private static final String ADMINISTRATION_VISUALIZATION = "administrationVisualization";
     private static final String ADMINISTRATION_MANAGEMENT = "administrationManagement";
-
+    private static final EnumSet<SubscriptionStatusEnum> VALID_STATUES = of(PENDING, ACTIVE, CREATED);
     @Inject
     private SubscriptionService subscriptionService;
 
@@ -443,9 +446,9 @@ public class SubscriptionApi extends BaseApi {
         if (subscription == null) {
             throw new EntityDoesNotExistsException(Subscription.class, postData.getCode(), postData.getValidityDate());
         }
-        if(isNotEmpty(postData.getProductsToInstantiate())
-                && (PENDING != subscription.getStatus() || ACTIVE != subscription.getStatus())) {
-            throw new BusinessApiException("Products can only be added to an activated or pending subscription");
+
+        if (isNotEmpty(postData.getProductsToInstantiate()) && !(VALID_STATUES.contains(subscription.getStatus()))) {
+            throw new BusinessApiException("Products can only be added to instantiated, activated or pending subscription");
         }
 
       //Get the administration roles

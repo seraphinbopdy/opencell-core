@@ -542,6 +542,19 @@ public class MediationApiService {
 
                         // Just convert CDR to EDR - applies to non-virtual requests only
                     } else if (!isVirtual) {
+
+                        if (cdrProcessingResult.getMode() == ROLLBACK_ON_ERROR) {
+                            mediationsettingService.applyEdrVersioningRule(edrs, cdr, false);
+                            cdrParsingService.createEdrs(edrs, cdr);
+
+                        } else {
+                            final List<EDR> edrsFinal = edrs;
+                            methodCallingUtils.callMethodInNewTx(() -> {
+                                mediationsettingService.applyEdrVersioningRule(edrsFinal, cdr, false);
+                                cdrParsingService.createEdrs(edrsFinal, cdr);
+                            });
+                        }
+
                         cdrProcessingResult.addChargedCdr(position, createChargeCDRResultDto(edrs, null, false, false, returnEDRs, null, null));
                     }
 

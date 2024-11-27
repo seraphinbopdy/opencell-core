@@ -611,42 +611,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
             throw new BusinessException("The email sending skipped because the from email is missing for the seller : " + invoice.getSeller().getCode());
         }
     }
-
-    /**
-     * Send email
-     *
-     * @param collectionPlan Collection plan
-     */
-    private void sendEmail(DunningCollectionPlan collectionPlan) {
-        Map<Object, Object> params = new HashMap<>();
-        // set these variable on email template
-        // Balance :  dunningBalanceCode, dunningBalanceDescription
-        params.put("customerAccountBalance", collectionPlan.getBalance());
-        params.put("currencySymbol", collectionPlan.getCustomerAccount().getTradingCurrency().getSymbol());
-        // get default CustomerBalance
-        CustomerBalance customerBalance = customerBalanceService.getDefaultOne();
-        List<Long> operrationIds = new ArrayList<>();
-        if(customerBalance != null){
-            params.put("dunningBalanceCode", customerBalance.getCode());
-            params.put("dunningBalanceDescription", customerBalance.getDescription());
-            operrationIds = fillBalanceOperationAndReturnListOperationsIds(collectionPlan.getCustomerAccount().getCode(), collectionPlan.getCustomerAccount().getId(), customerBalance.getId(), collectionPlan.getCustomerAccount().getTradingCurrency().getId(), params);
-        }
-         // Customer : customerAccountTitle, customerAccountFirstname, customerAccountLastname, customerAccountCode, customerAccountDescirption, customerAccountEmail
-        var customerAccount = collectionPlan.getCustomerAccount();
-        params.put("customerAccountLegalEntityTypeCode", customerAccount.getLegalEntityType() != null ? customerAccount.getLegalEntityType().getCode(): "");
-        params.put("customerAccountLastName", customerAccount.getName() != null ? customerAccount.getName().getLastName() : "");
-        params.put("customerAccountFirstName", customerAccount.getName() != null ? customerAccount.getName().getFirstName() : "");
-        params.put("customerAccountCode", customerAccount.getCode());
-        params.put("customerAccountDescription", customerAccount.getDescription());
-        params.put("customerAccountEmail", customerAccount.getContactInformation() != null ? customerAccount.getContactInformation().getEmail() : "");
-        
-        // Dunning balance invoices: dunningBalanceInvoicesList : That will be replaced at the backend by the list of all invoices of dunning balance with the bellow details for each line:
-        //invoice number, due date, billing date, unMatchingAmount, original amount, biling account code, biling account name
-        fillBalanceInvoice(operrationIds, customerAccount.getId(), params);
-        // Billing accounts list:  billingAccountsList:  That will be replaced at the backend by the list of all billingAccounts of dunning invoices with this details for each line (code, description, emails)
-        fillBillingAccountsList(customerAccount, params);
-        // Parent customer:  parentCustomerCode, parentCustomerDescription, parentCustomerEmail
-    }
     
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -834,54 +798,4 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         return accountOperationResult.accountOperationIds();
     }
 
-    private void fillBalanceInvoice(List<Long> operrationIds, Long id, Map<Object, Object> params) {
-        var operations = accountOperationService.findByIds(operrationIds, List.of("invoices"));
-        if(CollectionUtils.isEmpty(operations)) {
-            return;
-        }
-        var header = List.of("invoice number", "due date", "billing date", "unMatching amount", "original amount", "billing account code", "billing account name");
-        var rows = operations.stream()
-                .flatMap(operation -> operation.getInvoices().stream()
-                        .map(invoice -> List.of(
-                                invoice.getInvoiceNumber(),
-                                invoice.getDueDate().toString(),
-                                invoice.getDueDate().toString(),
-                                operation.getUnMatchingAmount().toString(),
-                                invoice.getAmount().toString(),
-                                invoice.getBillingAccount().getCode(),
-                                invoice.getBillingAccount().getDescription()
-                        ))
-                )
-                .collect(Collectors.toList());
-        params.put("dunningBalanceInvoicesList", createHtmlTable(header, rows));
-    }
-
-    private void fillBillingAccountsList(CustomerAccount customerAccount, Map<Object, Object> params) {
-        var billingAccounts = billingAccountService.listByCustomerAccount(customerAccount);
-        if(CollectionUtils.isEmpty(billingAccounts)) {
-            return;
-        }
-        var header = List.of("code", "description", "emails");
-        var rows = billingAccounts.stream()
-                .map(billingAccount -> List.of(
-                        billingAccount.getCode(),
-                        billingAccount.getDescription(),
-                        billingAccount.getContactInformation().getEmail()
-                ))
-                .collect(Collectors.toList());
-        params.put("billingAccountsList", createHtmlTable(header, rows));
-    }
-
-    private String createHtmlTable(List<String> header, List<List<String>> rows) {
-        StringBuilder table = new StringBuilder("<table><tr>");
-        header.forEach(h -> table.append("<th>").append(h).append("</th>"));
-        table.append("</tr>");
-        rows.forEach(row -> {
-            table.append("<tr>");
-            row.forEach(cell -> table.append("<td>").append(cell).append("</td>"));
-            table.append("</tr>");
-        });
-        table.append("</table>");
-        return table.toString();
-    }
 }

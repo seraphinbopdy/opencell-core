@@ -891,7 +891,6 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
             if(parentCustomer.getContactInformation() != null){
                 params.put("parentCustomerEmail", parentCustomer.getContactInformation().getEmail());
             }
-            params.put("parentCustomerEmail", parentCustomer.getContactInformation().getEmail());
         }
         if(customerAccount.getContactInformation() != null && StringUtils.isNotBlank(customerAccount.getContactInformation().getEmail())){
             collectionPlanService.sendNotification(customerAccount.getSeller().getContactInformation().getEmail(),customerAccount.getContactInformation().getEmail(), customerAccount.getTradingLanguage().getLanguage().getLanguageCode(), emailTemplate, params);

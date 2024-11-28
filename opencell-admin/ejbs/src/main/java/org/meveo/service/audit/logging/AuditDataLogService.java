@@ -125,60 +125,32 @@ public class AuditDataLogService extends PersistenceService<AuditDataLog> {
         Map<String, List<AuditFieldInfo>> auditableFieldsInfo = AuditableFieldConfiguration.getAuditableEntities();
 
         List<AuditDataHierarchy> dataHierarchies = auditDataConfigurationService.getAuditDataHierarchies();
-
         for (AuditDataHierarchy dataHierarchy : dataHierarchies) {
+
             // Stop trying different data hierarchies when all records are processed
             if (auditDataLogRecords.isEmpty()) {
                 break;
             }
-            List<AuditDataLogRecord> primaryRecords = new ArrayList<>();
-            AuditDataLogRecord primaryRecord = null;
-            for (AuditDataLogRecord auditDataLogRecord : auditDataLogRecords) {
-                // A primary entity table
-                if (dataHierarchy.getTableName().equalsIgnoreCase(auditDataLogRecord.getReferenceTable())) {
-                    primaryRecords.add(auditDataLogRecord);
-                    primaryRecord = auditDataLogRecord;
-                    idsToRemove.addAll(createAuditDataLogs(dataHierarchy, primaryRecords, auditableFieldsInfo));
-                    break;
+            List<AuditDataLog> auditDataLogs = aggregateAuditLogs(dataHierarchy, auditDataLogRecords);
+            for (AuditDataLog auditDataLog : auditDataLogs) {
+                idsToRemove.addAll(auditDataLog.getAuditDataLogRecords());
+
+                // Store audit data log
+                // Don't store audit log if it does not contain any changed values.
+                // A scenario is when List update happens and same entities are marked as deleted and then inserted, so both actions cancel each other.
+
+                if (!auditDataLog.getValuesChanged().isEmpty()) {
+                    create(auditDataLog);
                 }
             }
-            if (primaryRecord != null && primaryRecords.isEmpty()) {
-                auditDataLogRecords.remove(primaryRecord);
-            }
-        }
-
-        for (AuditDataHierarchy dataHierarchy : dataHierarchies) {
-            // Stop trying different data hierarchies when all records are processed
-            if (auditDataLogRecords.isEmpty()) {
-                break;
-            }
-            idsToRemove.addAll(createAuditDataLogs(dataHierarchy, auditDataLogRecords, auditableFieldsInfo));
+            // Process auditable fields
+            createAndNotifyAuditableFieldLogs(auditDataLogs, auditableFieldsInfo);
         }
 
         // Delete records that were already aggregated
         if (!idsToRemove.isEmpty()) {
             getEntityManager().createNamedQuery("AuditDataLogRecord.deleteAuditDataLogRecords").setParameter("ids", idsToRemove).executeUpdate();
         }
-    }
-
-    private List<Long> createAuditDataLogs(AuditDataHierarchy dataHierarchy, List<AuditDataLogRecord> auditDataLogRecords,
-                                           Map<String, List<AuditFieldInfo>> auditableFieldsInfo){
-        List<Long> ids = new ArrayList<Long>();
-        List<AuditDataLog> auditDataLogs = aggregateAuditLogs(dataHierarchy, auditDataLogRecords);
-        for (AuditDataLog auditDataLog : auditDataLogs) {
-            ids.addAll(auditDataLog.getAuditDataLogRecords());
-
-            // Store audit data log
-            // Don't store audit log if it does not contain any changed values.
-            // A scenario is when List update happens and same entities are marked as deleted and then inserted, so both actions cancel each other.
-
-            if (!auditDataLog.getValuesChanged().isEmpty()) {
-                create(auditDataLog);
-            }
-        }
-        // Process auditable fields
-        createAndNotifyAuditableFieldLogs(auditDataLogs, auditableFieldsInfo);
-        return ids;
     }
 
     /**
@@ -697,9 +669,11 @@ public class AuditDataLogService extends PersistenceService<AuditDataLog> {
 
         // Remove records from an original audit data record list that were processed already
         recordsProcessed.sort(Comparator.naturalOrder());
+        /*
         for (int i = recordsProcessed.size() - 1; i >= 0; i--) {
             auditDataLogRecords.remove(recordsProcessed.get(i).intValue());
         }
+        */
 
         return aggregatedLogs;
     }

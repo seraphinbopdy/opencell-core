@@ -520,12 +520,10 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
         for (Map.Entry<DunningPolicy, Map<CustomerAccount, BigDecimal>> entry : eligibleCustomerAccountsByPolicy.entrySet()) {
             // Refresh dunning policy
             DunningPolicy policy = refreshOrRetrieve(entry.getKey());
-            // Check if policy contains reminder
-            boolean policyIsReminderExists = policy.getDunningLevels().stream().anyMatch(policyLevel -> policyLevel.getDunningLevel().isReminder());
             // Get the first level
             Optional<DunningPolicyLevel> firstLevel = policy.getDunningLevels()
                     .stream()
-                    .filter(policyLevel -> ((policyIsReminderExists && policyLevel.getSequence() == 1) || ( policyLevel.getSequence() == 0)) && !policyLevel.getDunningLevel().isReminder())
+                    .filter(policyLevel -> ((policyLevel.getSequence() == 1) || ( policyLevel.getSequence() == 0)) && !policyLevel.getDunningLevel().isReminder())
                     .findFirst();
             if(firstLevel.isPresent()) {
                 entry.getValue().forEach((customerAccount, minBalance) -> {

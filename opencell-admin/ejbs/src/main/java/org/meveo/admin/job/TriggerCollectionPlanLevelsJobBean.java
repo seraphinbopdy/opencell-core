@@ -36,6 +36,11 @@ import java.util.stream.Collectors;
 
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.api.dto.CurrencyDto;
+import org.meveo.api.dto.account.CustomerAccountDto;
+import org.meveo.apiv2.payments.AccountOperationsDetails;
+import org.meveo.apiv2.payments.ImmutableAccountOperationsDetails;
+import org.meveo.apiv2.payments.ImmutableCustomerBalance;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
@@ -63,7 +68,9 @@ import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
+import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
+import org.meveo.service.payments.impl.CustomerBalanceService;
 import org.meveo.service.payments.impl.DunningActionInstanceService;
 import org.meveo.service.payments.impl.DunningCollectionPlanService;
 import org.meveo.service.payments.impl.DunningCollectionPlanStatusService;
@@ -118,6 +125,12 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     private final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final String COLLECTION_PLAN_ID_MESSAGE = "Collection plan ID : ";
+    
+    @Inject
+    private CustomerBalanceService customerBalanceService;
+
+    @Inject
+    private AccountOperationService accountOperationService;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
@@ -557,7 +570,12 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         // Send notification
         if (actionInstance.getActionType().equals(SEND_NOTIFICATION) &&
                 (actionInstance.getDunningAction().getActionChannel().equals(EMAIL) || actionInstance.getDunningAction().getActionChannel().equals(LETTER))) {
+
+            if(dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.INVOICE_LEVEL) {
                 sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), collectionPlan.getRelatedInvoice(), collectionPlan.getLastActionDate());
+            }else if (dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL) {
+                customerAccountService.sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), actionInstance.getCollectionPlan());
+        }
         }
 
         // Retry payment
@@ -787,4 +805,28 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
         params.put("billingAccountAddressCity", billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
     }
+
+    private List<Long> fillBalanceOperationAndReturnListOperationsIds(String customerAccountCode, Long customerAccountId, Long customerBalanceId, Long transactionalCurrencyId, Map<Object, Object> params){
+        var customerAccountDto = new CustomerAccountDto();
+        customerAccountDto.setCode(customerAccountCode);
+        customerAccountDto.setId(customerAccountId);
+
+        var customerBalance = ImmutableCustomerBalance.builder().id(customerBalanceId).build();
+        var transactionCurrency = new CurrencyDto();
+        transactionCurrency.setId(transactionalCurrencyId);
+
+        AccountOperationsDetails accountOperationsDetails = ImmutableAccountOperationsDetails.builder()
+                                                                                            .customerAccount(customerAccountDto)
+                                                                                            .customerBalance(customerBalance)
+                                                                                            .transactionalCurrency(transactionCurrency)
+                                                                                            .build();
+        var accountOperationResult = customerBalanceService.getAccountOperations(accountOperationsDetails);
+
+        params.put("dunningBalanceTotal", accountOperationResult.balance());
+        params.put("dunningBalanceDebit", accountOperationResult.totalDebit());
+        params.put("dunningBalanceCredit", accountOperationResult.totalCredit());
+
+        return accountOperationResult.accountOperationIds();
+    }
+
 }

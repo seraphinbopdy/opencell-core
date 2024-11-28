@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.meveo.admin.job.utils.DunningUtils;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.dunning.DunningModeEnum;
@@ -21,10 +22,13 @@ import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.CustomerBalance;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.DunningPolicyService;
 import org.meveo.service.payments.impl.DunningSettingsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
@@ -35,6 +39,8 @@ import jakarta.inject.Inject;
 public class DunningCollectionPlanJobBean extends BaseJobBean {
 
     private static final long serialVersionUID = -7992244895934530764L;
+
+    private static Logger log = LoggerFactory.getLogger(DunningCollectionPlanJobBean.class);
 
     @Inject
     private DunningPolicyService dunningPolicyService;
@@ -66,7 +72,7 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
             if (!policies.isEmpty()) {
                 if (DunningModeEnum.INVOICE_LEVEL.equals(dunningSettings.getDunningMode())) {
                     dunningCollectionPlanNumber = processCollectionPlanForInvoiceLevel(policies);
-                } else if (DunningModeEnum.CUSTOMER_LEVEL.equals(dunningSettings.getDunningMode())) {
+                } else if (DunningModeEnum.CUSTOMER_LEVEL.equals(dunningSettings.getDunningMode()) && dunningSettings.getCustomerBalance() != null) {
                     dunningCollectionPlanNumber = processCollectionPlanForCustomerLevel(dunningSettings, policies);
                 }
             }
@@ -175,12 +181,62 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
         for (DunningPolicy policy : sortedPolicies) {
             Map<CustomerAccount, BigDecimal> eligibleCustomerAccounts = new HashMap<>();
             customerAccountsBalance.forEach((customerAccount, balance) -> {
-                if (policy.getMinBalanceTrigger() != null && balance.compareTo(BigDecimal.valueOf(policy.getMinBalanceTrigger())) >= 0) {
+                // Check if the customer account is not already added in the eligibleCustomerAccountsByPolicy and if the balance is greater than the minBalanceTrigger
+                if (eligibleCustomerAccountsByPolicy.values().stream().noneMatch(accounts -> accounts.containsKey(customerAccount)) &&
+                        policy.getMinBalanceTrigger() != null &&
+                        balance.compareTo(BigDecimal.valueOf(policy.getMinBalanceTrigger())) >= 0) {
+                    String rules = DunningUtils.getRules(policy);
+                    Boolean isEligible = checkCustomerWithCondition(customerAccount, rules);
+
+                    if (Boolean.TRUE.equals(isEligible)) {
                     eligibleCustomerAccounts.put(customerAccount, balance);
+                    } else {
+                        log.info("Customer Account: {} is not eligible for policy rules: {}", customerAccount.getCode(), rules);
+                }
                 }
             });
+
+            if (!eligibleCustomerAccounts.isEmpty()) {
             eligibleCustomerAccountsByPolicy.put(policy, eligibleCustomerAccounts);
         }
+        }
+
         return eligibleCustomerAccountsByPolicy;
+    }
+
+    /**
+     * Check customer with condition
+     * @param customerAccount Customer account
+     * @param conditions Condition
+     * @return True if customer is eligible
+     */
+    public static Boolean checkCustomerWithCondition(CustomerAccount customerAccount, String conditions) {
+        String creditCategoryCode = (customerAccount.getCreditCategory() != null) ? customerAccount.getCreditCategory().getCode() : null;
+        String customerCategoryCode = (customerAccount.getCustomer().getCustomerCategory().getCode() != null) ? customerAccount.getCustomer().getCustomerCategory().getCode() : null;
+        HashMap<Object, Object> objectObjectHashMap = getMapToCheck(customerAccount, creditCategoryCode, customerCategoryCode);
+
+        boolean result = ValueExpressionWrapper.evaluateToBoolean("#{ ".concat(conditions).concat(" }"), objectObjectHashMap);
+        log.info("Result of the condition: {} for customer account: {} is: {}", result, customerAccount.getCode(), result);
+        return result;
+    }
+
+    /**
+     * Get map of object
+     * @param customerAccount Customer account
+     * @param creditCategoryCode Credit category code
+     * @param customerCategoryCode Customer category code
+     * @return A map
+     */
+    private static HashMap<Object, Object> getMapToCheck(CustomerAccount customerAccount, String creditCategoryCode, String customerCategoryCode) {
+        Boolean company = (customerAccount.getCustomer().getIsCompany() != null) ? customerAccount.getCustomer().getIsCompany() : null;
+        String paymentMethod = (customerAccount.getPreferredPaymentMethod() != null) ? customerAccount.getPreferredPaymentMethod().getPaymentType().name() : null;
+
+        HashMap<Object, Object> objectObjectHashMap = new HashMap<>();
+        objectObjectHashMap.put("creditCategory", creditCategoryCode);
+        objectObjectHashMap.put("customerCategory", customerCategoryCode);
+        objectObjectHashMap.put("paymentMethod", paymentMethod);
+        objectObjectHashMap.put("isCompany", company);
+
+        return objectObjectHashMap;
     }
 }

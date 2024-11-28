@@ -36,6 +36,10 @@ import org.meveo.service.payments.impl.DunningSettingsService;
 @Interceptors({ WsRestApiInterceptor.class })
 public class DunningPolicyResourceImpl implements DunningPolicyResource {
 
+    private static final String MESSAGE_DUNNING_POLICY_ID = "Dunning policy with id ";
+
+    private static final String SUCCESS = "SUCCESS";
+
     @Inject
     private DunningPolicyApiService dunningPolicyApiService;
 
@@ -104,10 +108,10 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
                 dunningPolicyLevelEntity.setDunningPolicy(savedEntity);
                 dunningPolicyApiService.refreshPolicyLevel(dunningPolicyLevelEntity);
                 totalDunningLevels++;
-                if (dunningPolicyLevelEntity.getDunningLevel().isReminder()) {
+                if (Boolean.TRUE.equals(dunningPolicyLevelEntity.getDunningLevel().isReminder())) {
                     countReminderLevels++;
                 }
-                if (dunningPolicyLevelEntity.getDunningLevel().isEndOfDunningLevel()) {
+                if (Boolean.TRUE.equals(dunningPolicyLevelEntity.getDunningLevel().isEndOfDunningLevel())) {
                     endOfLevelDayOverDue = dunningPolicyLevelEntity.getDunningLevel().getDaysOverdue();
                     countEndOfDunningLevel++;
                 }
@@ -141,20 +145,9 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
 
     @Override
     public Response update(Long dunningPolicyId, DunningPolicyInput dunningPolicyInput) {
-        org.meveo.model.dunning.DunningPolicy dunningPolicyEntity =
-                dunningPolicyService.findById(dunningPolicyId, asList("dunningLevels", "minBalanceTriggerCurrency"));
-        if (dunningPolicyEntity == null) {
-            throw new NotFoundException("Dunning policy with id " + dunningPolicyId + " does not exits");
-        }
-		var dunningSetting = dunningSettingsService.findLastOne();
-		if(dunningSetting != null &&  dunningSetting.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL && CollectionUtils.isNotEmpty(dunningPolicyInput.getDunningPolicyLevels())) {
-			throw  new BadRequestException("No reminder can be configured or executed on this dunning mode");
-		}
-        // Check the maximum number of dunning levels per dunning policy
-        Integer maxNumberOfDunningLevelsByDunningPolicy = dunningSettingsService.getMaxNumberOfDunningLevels();
-        if(dunningPolicyInput.getDunningPolicyLevels().size() > maxNumberOfDunningLevelsByDunningPolicy) {
-            throw new NotFoundException("The maximum number of dunning levels per policy is exceeded - The maximum number is " + maxNumberOfDunningLevelsByDunningPolicy);
-        }
+        org.meveo.model.dunning.DunningPolicy dunningPolicyEntity = validateDunningPolicyExists(dunningPolicyId);
+        validateReminderDunningLevelInPolicy(dunningPolicyEntity, dunningSettingsService.findLastOne());
+        validateNumberOfDunningLevelsInPolicy(dunningPolicyInput, dunningPolicyEntity);
 
         List<String> updatedFields = new ArrayList<>();
         if (checkIfPolicyLevelsAreChanged(dunningPolicyInput.getDunningPolicyLevels(), dunningPolicyEntity.getDunningLevels())) {
@@ -199,7 +192,14 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
                 .entity(actionStatus)
                 .build();
     }
-    
+
+    /**
+     * Check if policy levels are changed.
+     *
+     * @param policyLevelResources the policy level resources
+     * @param policyLevelEntities the policy level entities
+     * @return true, if successful
+     */
     private boolean checkIfPolicyLevelsAreChanged(List<org.meveo.apiv2.dunning.DunningPolicyLevel> policyLevelResources,
                                                   List<DunningPolicyLevel> policyLevelEntities) {
         
@@ -225,6 +225,13 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
         return true;
     }
 
+    /**
+     * Check if dunning rules are changed.
+     *
+     * @param dunningPolicyRulesJson the dunning policy rules json
+     * @param listDunningPolicyRulesDB the list dunning policy rules DB
+     * @return true, if successful
+     */
     private boolean checkIfDunningRulesAreChanged(DunningPolicyRules dunningPolicyRulesJson, List<DunningPolicyRule> listDunningPolicyRulesDB) {
         if(listDunningPolicyRulesDB!=null && dunningPolicyRulesJson.getPolicyRules() != null) {
             if (listDunningPolicyRulesDB.size() != dunningPolicyRulesJson.getPolicyRules().size()){
@@ -272,9 +279,9 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
     @Override
     public Response delete(Long dunningPolicyId) {
         org.meveo.model.dunning.DunningPolicy dunningPolicy = dunningPolicyApiService.delete(dunningPolicyId)
-                .orElseThrow(() -> new NotFoundException("Dunning policy with id " + dunningPolicyId + " does not exists"));
+                .orElseThrow(() -> new NotFoundException(MESSAGE_DUNNING_POLICY_ID + dunningPolicyId + " does not exists"));
         return Response.ok(ImmutableSuccessResponse.builder()
-                .status("SUCCESS")
+                .status(SUCCESS)
                 .message("Dunning policy with name " + dunningPolicy.getPolicyName() + " is successfully deleted")
                 .build()).build();
     }
@@ -289,7 +296,7 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
     @Override
     public Response archive(Long dunningPolicyId) {
         org.meveo.model.dunning.DunningPolicy entity = dunningPolicyApiService.findById(dunningPolicyId)
-                .orElseThrow(() -> new NotFoundException("Dunning policy with id " + dunningPolicyId + " does not exits"));
+                .orElseThrow(() -> new NotFoundException(MESSAGE_DUNNING_POLICY_ID + dunningPolicyId + " does not exits"));
         return Response
                 .ok(getUriBuilderFromResource(DunningPolicyResource.class, entity.getId()).build())
                 .entity(mapper.toResource(dunningPolicyApiService.archiveDunningPolicy(entity).get()))
@@ -300,7 +307,7 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
         int affectedDunningPolicies = dunningPolicyService.deactivatePoliciesByIds(dunningPolicyIds.getOrDefault("dunningPolicyIds", Collections.EMPTY_SET));
         return Response
                 .ok(ImmutableSuccessResponse.builder()
-                .status("SUCCESS")
+                .status(SUCCESS)
                 .message(affectedDunningPolicies + " Dunning Policies has successfully deactivated")
                 .build())
                 .build();
@@ -317,7 +324,7 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
         String origine = (dunningPolicy != null) ? dunningPolicy.getPolicyName() : "";
         auditLogService.trackOperation(operationType, new Date(), dunningPolicy, origine, updatedFields);
         return Response.ok(ImmutableSuccessResponse.builder()
-                .status("SUCCESS")
+                .status(SUCCESS)
                 .message("Policy rule with id " + dunningPolicyRule.getId() + " is successfully deleted")
                 .build()).build();
     }
@@ -328,7 +335,7 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
         updatedFields.add("PolicyRule");
         String operationType = "updatePolicyRule";
         org.meveo.model.dunning.DunningPolicy dunningPolicy = dunningPolicyApiService.findById(dunningPolicyId)
-                .orElseThrow(() -> new NotFoundException("Dunning policy with id " + dunningPolicyId + "does not exits"));
+                .orElseThrow(() -> new NotFoundException(MESSAGE_DUNNING_POLICY_ID + dunningPolicyId + "does not exits"));
         String origine = (dunningPolicy != null) ? dunningPolicy.getPolicyName() : "";
         
         List<DunningPolicyRule> listDunningPolicyRules = dunningPolicyApiService.getPolicyRuleWithPolicyId(dunningPolicy.getId());
@@ -353,7 +360,7 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
         }
 
         SuccessResponse response = ImmutableSuccessResponse.builder()
-                .status("SUCCESS")
+                .status(SUCCESS)
                 .message("Policy rules successfully added")
                 .build();        
         return Response.ok(LinkGenerator.getUriBuilderFromResource(DunningPolicyResource.class, policyRules.getId())
@@ -362,6 +369,11 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
                 .build();
     }
 
+    /**
+     * Validate policy rule.
+     *
+     * @param policyRules the policy rules
+     */
     private void validatePolicyRule(List<PolicyRule> policyRules) {
         if(policyRules != null && !policyRules.isEmpty()) {
             for(int index = 0; index < policyRules.size(); index++) {
@@ -390,6 +402,12 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
         }
     }
 
+    /**
+     * Convert dunning policy to resource order with link.
+     *
+     * @param dunningPolicy the dunning policy
+     * @return the dunning policy
+     */
     private org.meveo.apiv2.dunning.DunningPolicy toResourceOrderWithLink(org.meveo.apiv2.dunning.DunningPolicy dunningPolicy) {
         return ImmutableDunningPolicy.copyOf(dunningPolicy)
                 .withLinks(
@@ -398,5 +416,52 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
                                 .withGetAction().withPostAction().withPutAction().withPatchAction().withDeleteAction()
                                 .build()
                 );
+    }
+
+    /**
+     * Validate the dunning policy exists.
+     *
+     * @param dunningPolicyId the dunning policy id
+     * @return the dunning policy
+     */
+    private org.meveo.model.dunning.DunningPolicy validateDunningPolicyExists(Long dunningPolicyId) {
+        org.meveo.model.dunning.DunningPolicy dunningPolicyEntity =
+                dunningPolicyService.findById(dunningPolicyId, asList("dunningLevels", "minBalanceTriggerCurrency"));
+        if (dunningPolicyEntity == null) {
+            throw new NotFoundException(MESSAGE_DUNNING_POLICY_ID + dunningPolicyId + " does not exits");
+        }
+        return dunningPolicyEntity;
+    }
+
+    /**
+     * Check if dunning policy contains reminder dunning level.
+     *
+     * @param dunningPolicyEntity the dunning policy entity
+     * @param dunningSetting the dunning setting
+     */
+    private void validateReminderDunningLevelInPolicy(org.meveo.model.dunning.DunningPolicy dunningPolicyEntity, org.meveo.model.dunning.DunningSettings dunningSetting) {
+        Optional<org.meveo.model.dunning.DunningLevel> reminderDunningLevel = levelService.getReminderDunningLevel(dunningPolicyEntity.getDunningLevels().stream()
+                .map(dunningPolicyLevel -> dunningPolicyLevel.getDunningLevel().getId())
+                .collect(toList()));
+        if(dunningSetting != null &&
+                dunningSetting.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL &&
+                reminderDunningLevel.isPresent()) {
+            throw  new BadRequestException("No reminder can be configured or executed on this dunning mode");
+        }
+    }
+
+    /**
+     * Validate the number of dunning levels in the policy.
+     *
+     * @param dunningPolicyInput the dunning policy input
+     * @param dunningPolicyEntity the dunning policy entity
+     */
+    private void validateNumberOfDunningLevelsInPolicy(DunningPolicyInput dunningPolicyInput, org.meveo.model.dunning.DunningPolicy dunningPolicyEntity) {
+        // Check the maximum number of dunning levels per dunning policy
+        Integer maxNumberOfDunningLevelsByDunningPolicy = dunningSettingsService.getMaxNumberOfDunningLevels();
+        if(dunningPolicyInput != null && dunningPolicyInput.getDunningPolicyLevels() != null &&
+                dunningPolicyInput.getDunningPolicyLevels().size() > maxNumberOfDunningLevelsByDunningPolicy) {
+            throw new NotFoundException("The maximum number of dunning levels per policy is exceeded - The maximum number is " + maxNumberOfDunningLevelsByDunningPolicy);
+        }
     }
 }

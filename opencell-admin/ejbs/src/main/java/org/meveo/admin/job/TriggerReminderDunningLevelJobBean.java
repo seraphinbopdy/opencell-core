@@ -241,7 +241,12 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
 
                 if (action.getActionType().equals(SEND_NOTIFICATION) && (action.getDunningAction().getActionChannel().equals(EMAIL)
                         || action.getDunningAction().getActionChannel().equals(LETTER))) {
-                    sendReminderEmail(action.getDunningAction().getActionNotificationTemplate(), pInvoice, pBillingAccount, pCustomerAccount);
+                    var dunningSetting = dunningSettingsService.findLastOne();
+                    if(dunningSetting != null && dunningSetting.getDunningMode() == DunningModeEnum.INVOICE_LEVEL) {
+                        sendReminderEmail(action.getDunningAction().getActionNotificationTemplate(), pInvoice, pBillingAccount, pCustomerAccount);
+                    }else {
+                        customerAccountService.sendEmail(action.getDunningAction().getActionNotificationTemplate(), action.getCollectionPlan());
+                    }
                 }
 
                 action.setActionStatus(DunningActionInstanceStatusEnum.DONE);

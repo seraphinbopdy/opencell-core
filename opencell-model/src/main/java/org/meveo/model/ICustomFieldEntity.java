@@ -151,6 +151,28 @@ public interface ICustomFieldEntity {
         }
         return cfValues;
     }
+    
+    /**
+    * Retrieves the value of a custom field specified by its code.
+    * If the custom field value is a non-blank {@link String}, it is returned; otherwise, {@code null} is returned.
+    * <p>
+    * This method ensures that only meaningful values are returned, filtering out empty or blank strings.
+    * </p>
+    *
+    * @param cfCode the code of the custom field whose value is to be retrieved.
+    * @return the custom field value if it is a non-blank string, or {@code null} if the value is blank, empty, or not a string.
+    */
+    public default Object getCfValueAsNullIfBlankOrEmpty(String cfCode) {
+        CustomFieldValues cfValues = getCfValues();
+        if (cfValues != null) {
+            Object cfValue = cfValues.getValue(cfCode);
+            if(cfValue instanceof String && StringUtils.isBlank((String) cfValue)) {
+                return null;
+            }
+            return cfValue;
+        }
+        return null;
+    }
 
     /**
      * Clear custom field values

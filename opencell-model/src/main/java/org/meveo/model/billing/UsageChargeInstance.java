@@ -46,7 +46,10 @@ import jakarta.validation.constraints.Size;
         @NamedQuery(name = "UsageChargeInstance.getActiveUsageChargesBySubscriptionId", query = "SELECT c FROM UsageChargeInstance c where c.status='ACTIVE' and c.subscription.id=:subscriptionId order by c.priority ASC", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
         @NamedQuery(name = "UsageChargeInstance.getActiveUsageCharges", query = "SELECT c FROM UsageChargeInstance c where c.status='ACTIVE'  order by c.priority ASC", hints = {
-                @QueryHint(name = "org.hibernate.cacheable", value = "true") }) })
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "UsageChargeInstance.getActiveUsageChargesByDateAndSubscription", query = "SELECT c FROM UsageChargeInstance c WHERE c.subscription.id= :subscriptionId AND (c.status IN ('ACTIVE', 'TERMINATED', 'SUSPENDED') AND (c.terminationDate IS NULL OR c.terminationDate > :date))"
+        		+ " AND (c.usageChargeTemplate.filterParam1 IS NULL OR c.usageChargeTemplate.filterParam1=:param1)  AND (c.usageChargeTemplate.filterParam2 IS NULL OR c.usageChargeTemplate.filterParam2=:param2) "
+        		+ "AND (c.usageChargeTemplate.filterParam3 IS NULL OR c.usageChargeTemplate.filterParam3=:param3) AND (c.usageChargeTemplate.filterParam4 IS NULL OR c.usageChargeTemplate.filterParam4=:param4) order by c.priority")})
 public class UsageChargeInstance extends ChargeInstance {
 
     private static final long serialVersionUID = 1L;

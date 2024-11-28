@@ -46,7 +46,9 @@ import jakarta.inject.Inject;
 @Stateless
 public class UsageRatingJob extends ScopedJob {
 
-    /** The usage rating job bean when rollback IS needed when rating fails. */
+    private static final String USAGE_RATING_JOB = "JobInstance_UsageRatingJob";
+
+	/** The usage rating job bean when rollback IS needed when rating fails. */
     @Inject
     private UsageRatingJobBean usageRatingJobBean;
 
@@ -84,7 +86,7 @@ public class UsageRatingJob extends ScopedJob {
 
         CustomFieldTemplate nbRuns = new CustomFieldTemplate();
         nbRuns.setCode(CF_NB_RUNS);
-        nbRuns.setAppliesTo("JobInstance_UsageRatingJob");
+        nbRuns.setAppliesTo(USAGE_RATING_JOB);
         nbRuns.setActive(true);
         nbRuns.setDescription(resourceMessages.getString("jobExecution.nbRuns"));
         nbRuns.setFieldType(CustomFieldTypeEnum.LONG);
@@ -95,7 +97,7 @@ public class UsageRatingJob extends ScopedJob {
 
         CustomFieldTemplate waitingMillis = new CustomFieldTemplate();
         waitingMillis.setCode(Job.CF_WAITING_MILLIS);
-        waitingMillis.setAppliesTo("JobInstance_UsageRatingJob");
+        waitingMillis.setAppliesTo(USAGE_RATING_JOB);
         waitingMillis.setActive(true);
         waitingMillis.setDescription(resourceMessages.getString("jobExecution.waitingMillis"));
         waitingMillis.setFieldType(CustomFieldTypeEnum.LONG);
@@ -116,7 +118,7 @@ public class UsageRatingJob extends ScopedJob {
 
         CustomFieldTemplate rateUntilDate = new CustomFieldTemplate();
         rateUntilDate.setCode("rateUntilDate");
-        rateUntilDate.setAppliesTo("JobInstance_UsageRatingJob");
+        rateUntilDate.setAppliesTo(USAGE_RATING_JOB);
         rateUntilDate.setActive(true);
         rateUntilDate.setDescription(resourceMessages.getString("jobExecution.rateUntilDateUsage"));
         rateUntilDate.setFieldType(CustomFieldTypeEnum.DATE);
@@ -127,7 +129,7 @@ public class UsageRatingJob extends ScopedJob {
 
         CustomFieldTemplate ratingGroup = new CustomFieldTemplate();
         ratingGroup.setCode("ratingGroup");
-        ratingGroup.setAppliesTo("JobInstance_UsageRatingJob");
+        ratingGroup.setAppliesTo(USAGE_RATING_JOB);
         ratingGroup.setActive(true);
         ratingGroup.setDescription(resourceMessages.getString("subscription.ratingGroup"));
         ratingGroup.setFieldType(CustomFieldTypeEnum.STRING);
@@ -139,7 +141,7 @@ public class UsageRatingJob extends ScopedJob {
 
         CustomFieldTemplate batchSize = new CustomFieldTemplate();
         batchSize.setCode(CF_BATCH_SIZE);
-        batchSize.setAppliesTo("JobInstance_UsageRatingJob");
+        batchSize.setAppliesTo(USAGE_RATING_JOB);
         batchSize.setActive(true);
         batchSize.setDescription(resourceMessages.getString("jobExecution.batchSize"));
         batchSize.setFieldType(CustomFieldTypeEnum.LONG);
@@ -151,7 +153,7 @@ public class UsageRatingJob extends ScopedJob {
 
         CustomFieldTemplate parameter1 = new CustomFieldTemplate();
         parameter1.setCode("parameter1");
-        parameter1.setAppliesTo("JobInstance_UsageRatingJob");
+        parameter1.setAppliesTo(USAGE_RATING_JOB);
         parameter1.setActive(true);
         parameter1.setDescription("EDR Parameter 1");
         parameter1.setFieldType(CustomFieldTypeEnum.STRING);
@@ -163,7 +165,7 @@ public class UsageRatingJob extends ScopedJob {
 
         CustomFieldTemplate parameter2 = new CustomFieldTemplate();
         parameter2.setCode("parameter2");
-        parameter2.setAppliesTo("JobInstance_UsageRatingJob");
+        parameter2.setAppliesTo(USAGE_RATING_JOB);
         parameter2.setActive(true);
         parameter2.setDescription("EDR Parameter 2");
         parameter2.setFieldType(CustomFieldTypeEnum.STRING);
@@ -172,6 +174,9 @@ public class UsageRatingJob extends ScopedJob {
         parameter2.setMaxValue(200L);
         parameter2.setGuiPosition("tab:Configuration:0;field:7");
         result.put("parameter2", parameter2);
+        
+        result.put("batchProcessingOnly", CustomFieldTemplateUtils.buildCF("batchProcessingOnly", "batch processing only", CustomFieldTypeEnum.BOOLEAN,
+                "tab:Configuration:0;field:7", "false", true, null, null, USAGE_RATING_JOB, null));
 
         result.put(CF_JOB_ITEMS_LIMIT, CustomFieldTemplateUtils.buildCF(CF_JOB_ITEMS_LIMIT, resourceMessages.getString("jobExecution.jobItemsLimit"),
                 CustomFieldTypeEnum.LONG, "tab:Configuration:0;field:8", "JobInstance_UsageRatingJob"));

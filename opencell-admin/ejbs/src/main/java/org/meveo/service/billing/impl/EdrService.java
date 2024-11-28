@@ -119,7 +119,7 @@ public class EdrService extends PersistenceService<EDR> {
  	        if(parameter2!=null) {
  	        	strQuery.append(" AND lower(e.parameter2)=:parameter2");
  	        }
- 	        strQuery.append(" order by e.subscription.id");
+ 	        strQuery.append(" order by e.subscription.id, e.id");
  	        
  	        TypedQuery<Long> query = getEntityManager().createQuery(strQuery.toString(),Long.class);
  	        if(rateUntilDate != null) {

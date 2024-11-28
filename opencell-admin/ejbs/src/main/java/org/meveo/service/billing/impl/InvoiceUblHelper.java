@@ -143,6 +143,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PostalZo
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrepaidAmount;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PriceAmount;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrimaryAccountNumberID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileID;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.RegistrationName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.SalesOrderID;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.StartDate;
@@ -237,14 +238,16 @@ public class InvoiceUblHelper {
 												.stream()
 												.map(InvoiceLine::getAmountWithTax)
 												.reduce(BigDecimal.ZERO, BigDecimal::add);
+		var profileID = getProfileID(invoice.getInvoiceLines());
 		BigDecimal payableAmount = invoice.getNetToPay();
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
-			//setBillingReference(invoice, creditNote);
+			setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
 			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
+			creditNote.setProfileID(profileID);
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
 			//setBillingReference(invoice, invoiceXml);
@@ -255,6 +258,7 @@ public class InvoiceUblHelper {
 			var commercialorderIds = invoice.getInvoiceLines().stream().map(InvoiceLine::getCommercialOrder).filter(Objects::nonNull)
 					.collect(Collectors.toSet());
 			setBillingReferenceForInvoice(commercialorderIds, invoiceXml);
+			invoiceXml.setProfileID(profileID);
 		}
 		
 		
@@ -378,10 +382,11 @@ public class InvoiceUblHelper {
 			target.getDeliveries().add(getDeliveryType(source));
 		}
 
+		if(StringUtils.isNotBlank(source.getComment())){
 		Note note = objectFactorycommonBasic.createNote();
 		note.setValue(source.getComment());
 		target.getNotes().add(note);
-		
+		}
 		CustomizationID customizationID = objectFactorycommonBasic.createCustomizationID();
 		customizationID.setValue("urn:cen.eu:en16931:2017#conformant#urn:ubl.eu:1p0:extended-ctc-fr");
 		target.setCustomizationID(customizationID);
@@ -432,6 +437,7 @@ public class InvoiceUblHelper {
 			startDate.setValue(toXmlDate(source.getStartDate()));
 			endDate.setValue(toXmlDate(source.getEndDate()));
 			periodType.setStartDate(startDate);
+			periodType.setEndDate(endDate);
 			target.getInvoicePeriods().add(periodType);
 		}
 
@@ -441,9 +447,16 @@ public class InvoiceUblHelper {
 			target.getDeliveries().add(getDeliveryType(source));
 		}
 		
+		if(StringUtils.isNotBlank(source.getComment())){
 		Note note = objectFactorycommonBasic.createNote();
 		note.setValue(source.getComment());
 		target.getNotes().add(note);
+		}
+		
+		
+		CustomizationID customizationID = objectFactorycommonBasic.createCustomizationID();
+		customizationID.setValue("urn:cen.eu:en16931:2017#conformant#urn:ubl.eu:1p0:extended-ctc-fr");
+		target.setCustomizationID(customizationID);
 		
 		setTaxCurrencyCodeAndDocumentCurrencyCode(objectFactorycommonBasic, source, target);
 		
@@ -1596,5 +1609,22 @@ public class InvoiceUblHelper {
 		descriptionCode.setValue(String.valueOf(vatDateCode.getPaidToDays()));
 		periodType.getDescriptionCodes().add(descriptionCode);
 		return periodType;
+	}
+	
+	private ProfileID getProfileID(List<InvoiceLine> invoiceLines) {
+		ProfileID profileID = objectFactorycommonBasic.createProfileID();
+		if(CollectionUtils.isNotEmpty(invoiceLines)) {
+			var physicalExist = invoiceLines.stream().filter(invoiceLine -> invoiceLine.getAccountingArticle() != null)
+									.map(InvoiceLine::getAccountingArticle).map(AccountingArticle::isPhysical).collect(Collectors.toSet());
+			if(physicalExist.contains(true) && physicalExist.contains(false)) {
+				profileID.setValue("M1");
+			}else if(physicalExist.contains(true)) {
+				profileID.setValue("B1");
+			}else if (physicalExist.contains(false)){
+					profileID.setValue("S1");
+			}else return null;
+			
+}
+		return profileID;
 	}
 }

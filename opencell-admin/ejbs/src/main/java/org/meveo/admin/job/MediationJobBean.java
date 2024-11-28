@@ -23,10 +23,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.async.FlatFileProcessing;
@@ -416,12 +419,13 @@ public class MediationJobBean extends BaseJobBean {
     public void processCDRs(List<CDR> cdrs, JobExecutionResultImpl jobExecutionResult, ICdrParser cdrParserFinal, PrintWriter outputFileWriter, PrintWriter rejectFileWriter, String fileName, boolean isDuplicateCheckOn,
             boolean updateTotalCount) {
 
+    	Map<String, List<String>> errorsMap = new HashMap<>();
         for (CDR cdr : cdrs) {
 
             try {
 
                 if (!StringUtils.isBlank(cdr.getRejectReason())) {
-                    failedCDR(jobExecutionResult, fileName, cdr, CDRStatusEnum.ERROR, rejectFileWriter);
+                    failedCDR(jobExecutionResult, fileName, cdr, CDRStatusEnum.ERROR, rejectFileWriter, errorsMap);
                 } else {
 
                     List<Access> accessPoints = cdrParserFinal.accessPointLookup(cdr);
@@ -435,7 +439,7 @@ public class MediationJobBean extends BaseJobBean {
                     
                     mediationsettingService.applyEdrVersioningRule(edrs, cdr, false);
                     if (!StringUtils.isBlank(cdr.getRejectReason())) {
-                        failedCDR(jobExecutionResult, fileName, cdr, cdr.getStatus(), rejectFileWriter);
+                        failedCDR(jobExecutionResult, fileName, cdr, cdr.getStatus(), rejectFileWriter, errorsMap);
                     }
 
                     outputFileWriter.println(cdr.getLine());
@@ -463,7 +467,7 @@ public class MediationJobBean extends BaseJobBean {
 
                 rejectFileWriter.println(cdr.getLine() + "\t" + errorReason);
 
-                jobExecutionResult.registerError("file=" + fileName + ", line=" + cdr.getLine() + ": " + errorReason);
+                errorsMap.computeIfAbsent("file=" + fileName +" -> " + e.getClass().getName(), k -> new ArrayList<>()).add(cdr.getAccessCode());
                 cdr.setStatus(CDRStatusEnum.ERROR);
                 cdr.setRejectReason(e.getMessage());
 
@@ -476,12 +480,21 @@ public class MediationJobBean extends BaseJobBean {
                 jobExecutionResult.addNbItemsToProcess(1L);
             }
         }
+        errorsMap.forEach((key, value) ->reportErrors(jobExecutionResult, key, value));
     }
-    
-    private void failedCDR(JobExecutionResultImpl jobExecutionResult,String fileName, CDR cdr, CDRStatusEnum status, PrintWriter rejectFileWriter) {
+	
+
+
+	private void reportErrors(JobExecutionResultImpl jobExecutionResult, String key, List<String> value) {
+		int errorsToCompute = value.size();
+		jobExecutionResult.registerError("" + value.size() + " errors of: " + key + " AccessCodes: " + value.stream().collect(Collectors.joining(",")), errorsToCompute);
+	}
+
+
+    private void failedCDR(JobExecutionResultImpl jobExecutionResult,String fileName, CDR cdr, CDRStatusEnum status, PrintWriter rejectFileWriter, Map<String, List<String>> errorsMap) {
         log.error("Failed to process a CDR line: {} from file {}. Reason: {}", cdr.getLine(), fileName, cdr.getRejectReason());
         rejectFileWriter.println(cdr.getLine() + "\t" + cdr.getRejectReason());
-        jobExecutionResult.registerError("file=" + fileName + ", line=" + cdr.getLine() + ": " + cdr.getRejectReason());
+        errorsMap.computeIfAbsent("file=" + fileName +" -> " + cdr.getRejectReason(), k -> new ArrayList<>()).add(cdr.getAccessCode());
         jobExecutionResult.unRegisterSucces();
         cdr.setStatus(status);
         rejectededCdrEventProducer.fire(cdr);

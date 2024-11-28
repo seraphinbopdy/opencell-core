@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -551,6 +552,26 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
             log.error("Email template not found");
         }
     }
+
+    public void sendNotification(String emailFrom, String customerAccountEmail, String languageCode, EmailTemplate emailTemplate,
+                                 Map<Object, Object> params) {
+        emailTemplate = emailTemplateService.refreshOrRetrieve(emailTemplate);
+        if(emailTemplate != null) {
+            String emailSubject = internationalSettingsService.resolveSubject(emailTemplate,languageCode);
+            String emailContent = internationalSettingsService.resolveEmailContent(emailTemplate,languageCode);
+            String htmlContent = internationalSettingsService.resolveHtmlContent(emailTemplate,languageCode);
+            String subject = emailTemplate.getSubject() != null
+                    ? evaluateExpression(emailSubject, params, String.class) : "";
+            String content = emailTemplate.getTextContent() != null
+                    ? evaluateExpression(emailContent, params, String.class) : "";
+            String contentHtml = emailTemplate.getHtmlContent() != null
+                    ? evaluateExpression(htmlContent, params, String.class) : "";
+            emailSender.send(emailFrom, Collections.singletonList(emailFrom), Collections.singletonList(customerAccountEmail), null, null,
+                    subject, content, contentHtml, null, null, false);
+        } else {
+            log.error("Email template not found");
+        }
+    }
     
     /**
      * Get Active or Paused DunningCollectionPlan by Dunning Settings id
@@ -671,14 +692,17 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
             List<DunningLevelInstance> createdDunningLevelInstance = dunningLevelInstanceService.createDunningLevelInstancesWithCollectionPlanForCustomerLevel(customerAccount, policy, collectionPlan, collectionPlanStatus);
             collectionPlan.setDunningLevelInstances(createdDunningLevelInstance);
 
+            // Get the minimum sequence of the dunning levels
+            int minSequence = policy.getDunningLevels().stream().map(DunningPolicyLevel::getSequence).min(Integer::compareTo).orElse(0);
+
             // Update the collection plan with the first dunning level instance
             Optional<DunningLevelInstance> firstDunningLevelInstance = createdDunningLevelInstance.stream()
-                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == 0)
+                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == minSequence)
                     .findFirst();
 
             // Update the collection plan with the next action and next action date
             Optional<DunningLevelInstance> nextDunningLevelInstance = createdDunningLevelInstance.stream()
-                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == 1)
+                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == minSequence + 1)
                     .filter(dunningLevelInstance -> dunningLevelInstance.getLevelStatus().equals(TO_BE_DONE))
                     .findFirst();
 

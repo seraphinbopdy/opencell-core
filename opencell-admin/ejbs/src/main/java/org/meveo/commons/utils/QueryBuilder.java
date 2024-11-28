@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
@@ -128,9 +127,6 @@ public class QueryBuilder {
 
     private boolean prependSelect = Boolean.TRUE;
 
-    private Random random = new Random();
-
-
     public JoinType getJoinType() {
         return joinType;
     }
@@ -177,7 +173,7 @@ public class QueryBuilder {
         List<InnerJoin> lookForInnerJoin = new ArrayList<>(rootInnerJoins);
         for (AtomicInteger index = new AtomicInteger(); index.get() <= fields.length - 2; index.incrementAndGet()) {
             int i = index.get();
-            InnerJoin innerJoin = lookForInnerJoin.stream().filter(rij -> rij.getName().equals(fields[index.get()])).findFirst().orElse(new InnerJoin(fields[index.get()]));
+            InnerJoin innerJoin = lookForInnerJoin.stream().filter(rij -> rij.getName().equals(fields[index.get()])).findFirst().orElse(new InnerJoin(fields[index.get()], i));
             if (i == 0) {
                 rootInnerJoin = innerJoin;
             } else {
@@ -1263,8 +1259,8 @@ public class QueryBuilder {
      */
     public void addListFilters(String fieldName, Object value) {
 
-        String paramName = convertFieldToParam(fieldName);
         fieldName = createExplicitInnerJoins(fieldName);
+        String paramName = convertFieldToParam(fieldName);
         addSqlCriterion(":" + paramName + " in elements(" + fieldName + ")", paramName, value);
     }
 
@@ -1427,9 +1423,9 @@ public class QueryBuilder {
         if (concatenatedFields.contains(FROM_JSON_FUNCTION)) {
             return concatenatedFields;
         }
-        String alias = this.alias + ".";
-        if (concatenatedFields.startsWith(alias)) {
-            concatenatedFields = concatenatedFields.substring(alias.length());
+        String aliasCorrected = this.alias != null ? this.alias + "." : "";
+        if (concatenatedFields.startsWith(aliasCorrected)) {
+            concatenatedFields = concatenatedFields.substring(aliasCorrected.length());
         }
         String[] fields = concatenatedFields.split("\\.");
 
@@ -1450,7 +1446,7 @@ public class QueryBuilder {
                 concatenatedFields = concatenatedFields + ".id";
             }
         } else if (tmpFields.size() == 1) {
-            String result = this.alias + "." + String.join(".", tmpFields);
+            String result = aliasCorrected + String.join(".", tmpFields);
             if (isFilterById) {
                 result = result + ".id";
             }
@@ -1701,11 +1697,14 @@ public class QueryBuilder {
      */
     public String convertFieldToParam(String fieldname) {
         fieldname = fieldname.replace(".", "_").replace("(", "_").replace(")", "_").replace(",", "_").replace(" ", "").replace("'", "");
-        StringBuilder newField;
-        do {
-            newField = new StringBuilder(fieldname).append("_" + String.valueOf(random.nextInt(100)));
-        } while (params.containsKey(newField.toString()));
-        return newField.toString();
+        String newField = fieldname;
+        int i=0;
+        while (params.containsKey(newField)) {
+            newField = fieldname + "_" + i;
+            i++;
+        }
+
+        return newField;
     }
 
     /**
@@ -1838,7 +1837,9 @@ public class QueryBuilder {
     public String toString() {
         String result = toStringQuery();
         for (Map.Entry<String, Object> e : params.entrySet()) {
-            result = result + " Param name:" + e.getKey() + " value:" + e.getValue().toString();
+
+            String valueStr = e.getValue() instanceof Date ? DateUtils.formatAsTime((Date) e.getValue()) : e.getValue().toString();
+            result = result + " Param name:" + e.getKey() + " value:" + valueStr;
         }
         return result;
     }

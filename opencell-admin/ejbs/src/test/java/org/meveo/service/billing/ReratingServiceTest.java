@@ -29,6 +29,7 @@ import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.billing.WalletOperationStatusEnum;
 import org.meveo.model.rating.EDR;
+import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.billing.impl.WalletOperationService;
 import org.meveo.test.JPAQuerySimulation;
@@ -56,6 +57,9 @@ public class ReratingServiceTest {
 
     @Mock
     private WalletOperationService walletOperationService;
+    
+    @Mock
+    private RatedTransactionService ratedTransactionService;
 
     @Before
     public void setUp() {
@@ -151,13 +155,13 @@ public class ReratingServiceTest {
                 { 104L, "RATED", 6L, "CANCELED", null, 3L }, // EDR triggered by WO 3 and is canceled;
                 { 105L, "RATED", 9L, "TREATED", 206L, 7L } }; // EDR triggered by WO 7 that has WO and RT
 
-        // rt.id, rt.status, rt.amount_without_tax, rt.amount_with_tax, rt.amount_tax, rt.quantity, rt.invoice_line_id, il.status as ilstatus, il.billing_run_id
+        // rt.id, rt.status, rt.amount_without_tax, rt.amount_with_tax, rt.amount_tax, rt.quantity, rt.invoice_line_id, il.status as ilstatus, il.billing_run_id, il.amount_without_tax
         Object[][] rts = new Object[][] { //
-                { 201L, "OPEN", 5L, 7L, 2L, 1L, null, null, 401L }, //
-                { 203L, "BILLED", 5L, 7L, 2L, 1L, 301L, "OPEN", 401L }, //
-                { 204L, "BILLED", 5L, 7L, 2L, 1L, 302L, "OPEN", 401L }, //
-                { 205L, "BILLED", 5L, 7L, 2L, 1L, 301L, "OPEN", 401L }, //
-                { 206L, "BILLED", 5L, 7L, 2L, 1L, 304L, "OPEN", 402L } };
+                { 201L, "OPEN", 5L, 7L, 2L, 1L, null, null, 401L, null }, //
+                { 203L, "BILLED", 5L, 7L, 2L, 1L, 301L, "OPEN", 401L, 6L }, //
+                { 204L, "BILLED", 5L, 7L, 2L, 1L, 302L, "OPEN", 401L, 6L }, //
+                { 205L, "BILLED", 5L, 7L, 2L, 1L, 301L, "OPEN", 401L, 6L }, //
+                { 206L, "BILLED", 5L, 7L, 2L, 1L, 304L, "OPEN", 402L, 6L } };
 
         JPAQuerySimulation<Object[]> discountWoSummaryQuery = new JPAQuerySimulation<Object[]>() {
             @SuppressWarnings("unchecked")
@@ -241,7 +245,7 @@ public class ReratingServiceTest {
                     for (Object[] rtInfo : rts) {
                         if (rtId.equals(rtInfo[0])) {
                             values.add(new Object[] { BigInteger.valueOf((Long) rtInfo[0]), rtInfo[1], BigDecimal.valueOf((Long) rtInfo[2]), BigDecimal.valueOf((Long) rtInfo[3]), BigDecimal.valueOf((Long) rtInfo[4]),
-                                    BigDecimal.valueOf((Long) rtInfo[5]), rtInfo[6] != null ? BigInteger.valueOf((Long) rtInfo[6]) : null, rtInfo[7], rtInfo[8] != null ? BigInteger.valueOf((Long) rtInfo[8]) : null });
+                                    BigDecimal.valueOf((Long) rtInfo[5]), rtInfo[6] != null ? BigInteger.valueOf((Long) rtInfo[6]) : null, rtInfo[7], rtInfo[8] != null ? BigInteger.valueOf((Long) rtInfo[8]) : null,  rtInfo[9] != null ? BigDecimal.valueOf((Long) rtInfo[9]) : null });
                         }
                     }
                 }

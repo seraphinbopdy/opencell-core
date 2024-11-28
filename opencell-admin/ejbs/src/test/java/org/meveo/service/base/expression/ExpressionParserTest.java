@@ -14,16 +14,18 @@ public class ExpressionParserTest {
         assertThat(expressionParser.getCondition()).isEqualTo("eq");
         assertThat(expressionParser.getFieldName()).isEqualTo("");
         assertThat(expressionParser.getFieldName2()).isNull();
-        assertThat(expressionParser.getAllFields()).isEmpty();
+        assertThat(expressionParser.getAllFields().length).isEqualTo(1);
+        assertThat(expressionParser.getAllFields()).contains("");
     }
 
     @Test
     public void one_word_expression_mean_eq_condition_with_one_field() {
-        ExpressionParser expressionParser = getExpression("condition");
+        ExpressionParser expressionParser = getExpression("field");
         assertThat(expressionParser.getCondition()).isEqualTo("eq");
-        assertThat(expressionParser.getFieldName()).isEqualTo("condition");
+        assertThat(expressionParser.getFieldName()).isEqualTo("field");
         assertThat(expressionParser.getFieldName2()).isNull();
-        assertThat(expressionParser.getAllFields()).isEmpty();
+        assertThat(expressionParser.getAllFields().length).isEqualTo(1);
+        assertThat(expressionParser.getAllFields()).contains("field");
     }
 
     @Test

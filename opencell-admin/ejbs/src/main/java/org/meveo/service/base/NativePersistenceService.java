@@ -872,7 +872,6 @@ public class NativePersistenceService extends BaseService {
             }
         }
         StringBuilder sql = new StringBuilder("select " + fieldsToRetrieve + " from " + tableName + " a ");
-        sql.append(" ");
         QueryBuilder queryBuilder = new QueryBuilder(sql.toString(), "a");
         AdvancedSettings fieldSeparator = advancedSettingsService.findByCode("standardExports.fieldsSeparator");
         String listAggregationSeparator;

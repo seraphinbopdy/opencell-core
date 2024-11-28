@@ -21,7 +21,10 @@ package org.meveo.service.medina.impl;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
@@ -35,39 +38,44 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.mediation.Access;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccessServiceTest {
 
-    @Mock
+    @Spy
+    @InjectMocks
     private AccessService accessService;
+
     @Mock
     EntityManager entityManager;
+
     @Mock
-    Query query;
-    
+    TypedQuery<Access> queryTyped;
+
     private static final Logger log = LoggerFactory.getLogger(AccessServiceTest.class);
 
     @Before
     public void setUp() throws Exception {
-        when(accessService.getEntityManager()).thenReturn(entityManager);
-        when(entityManager.createQuery(anyString())).thenReturn(query);
+        doReturn(entityManager).when(accessService).getEntityManager();
+        when(entityManager.createQuery(anyString(), eq(Access.class))).thenReturn(queryTyped);
+        when(queryTyped.setParameter(anyString(), any())).thenReturn(queryTyped);
     }
 
     @Test
     public void isNotDuplicateAndOverlaps1() {
         Access access = getAccess("02/12/2019", null);
         Access dbAccess1 = getAccess("01/11/2019", "01/12/2019");
-        when(accessService.isDuplicateAndOverlaps(access)).thenCallRealMethod();
-        when(entityManager.createQuery(anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         assertFalse(accessService.isDuplicateAndOverlaps(access));
     }
@@ -76,9 +84,8 @@ public class AccessServiceTest {
     public void isNotDuplicateAndOverlaps4() {
         Access access = getAccess("01/12/2019", null);
         Access dbAccess1 = getAccess("01/11/2019", "30/11/2019");
-        when(accessService.isDuplicateAndOverlaps(access)).thenCallRealMethod();
-        when(entityManager.createQuery(anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         assertFalse(accessService.isDuplicateAndOverlaps(access));
     }
@@ -87,31 +94,28 @@ public class AccessServiceTest {
     public void isNotDuplicateAndOverlaps2() {
         Access access = getAccess("03/12/2019", null);
         Access dbAccess1 = getAccess(null, "02/12/2019");
-        when(accessService.isDuplicateAndOverlaps(access)).thenCallRealMethod();
-        when(entityManager.createQuery(anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         assertFalse(accessService.isDuplicateAndOverlaps(access));
     }
+
     @Test
     public void isNotDuplicateAndOverlaps3() {
         Access access = getAccess("01/12/2019", "30/12/2019");
         Access dbAccess1 = getAccess(null, "30/11/2019");
-        when(accessService.isDuplicateAndOverlaps(access)).thenCallRealMethod();
-        when(entityManager.createQuery(anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         assertFalse(accessService.isDuplicateAndOverlaps(access));
     }
-
 
     @Test
     public void isDuplicateAndOverlaps1() {
         Access access = getAccess(null, "03/12/2019");
         Access dbAccess1 = getAccess("02/12/2019", null);
-        when(accessService.isDuplicateAndOverlaps(access)).thenCallRealMethod();
-        when(entityManager.createQuery(anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         assertTrue(accessService.isDuplicateAndOverlaps(access));
     }
@@ -120,9 +124,8 @@ public class AccessServiceTest {
     public void isDuplicateAndOverlaps2() {
         Access access = getAccess(null, null);
         Access dbAccess1 = getAccess(null, "02/12/2019");
-        when(accessService.isDuplicateAndOverlaps(access)).thenCallRealMethod();
-        when(entityManager.createQuery(anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         assertTrue(accessService.isDuplicateAndOverlaps(access));
     }
@@ -131,9 +134,8 @@ public class AccessServiceTest {
     public void isDuplicateAndOverlaps3() {
         Access access = getAccess(null, null);
         Access dbAccess1 = getAccess(null, null);
-        when(accessService.isDuplicateAndOverlaps(access)).thenCallRealMethod();
-        when(entityManager.createQuery(anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         assertTrue(accessService.isDuplicateAndOverlaps(access));
     }
@@ -142,9 +144,8 @@ public class AccessServiceTest {
     public void isDuplicateAndOverlaps4() {
         Access access = getAccess("01/11/2019", "01/12/2019");
         Access dbAccess1 = getAccess(null, null);
-        when(accessService.isDuplicateAndOverlaps(access)).thenCallRealMethod();
-        when(entityManager.createQuery(anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         assertTrue(accessService.isDuplicateAndOverlaps(access));
     }
@@ -153,9 +154,8 @@ public class AccessServiceTest {
     public void isDuplicateAndOverlaps5() {
         Access access = getAccess("07/12/2019", null);
         Access dbAccess1 = getAccess("05/12/2019", null);
-        when(accessService.isDuplicateAndOverlaps(access)).thenCallRealMethod();
-        when(entityManager.createQuery(anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         assertTrue(accessService.isDuplicateAndOverlaps(access));
     }
@@ -164,8 +164,9 @@ public class AccessServiceTest {
     public void findByUserIdAndSubscription1() {
         Access access = getAccess("01/11/2019", "01/12/2019");
         Access dbAccess1 = getAccess("01/11/2019", "01/12/2019");
-        when(accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate())).thenCallRealMethod();
-        when(query.getResultList()).thenReturn(Arrays.asList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
         Access byUserIdAndSubscription = accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate());
         assertNotNull(byUserIdAndSubscription);
     }
@@ -174,8 +175,8 @@ public class AccessServiceTest {
     public void findByUserIdAndSubscription2() {
         Access access = getAccess("01/11/2019", null);
         Access dbAccess1 = getAccess("01/10/2019", null);
-        when(accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate())).thenCallRealMethod();
-        when(query.getResultList()).thenReturn(Arrays.asList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         Access byUserIdAndSubscription = accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate());
         assertNotNull(byUserIdAndSubscription);
@@ -184,11 +185,12 @@ public class AccessServiceTest {
     @Test
     public void findByUserIdAndSubscription3() {
         Date usageDate = parse("09/11/2019");
-        Subscription subscription= new Subscription();
+        Subscription subscription = new Subscription();
         subscription.setId(1L);
         Access dbAccess1 = getAccess("01/11/2019", "01/12/2019");
-        when(accessService.findByUserIdAndSubscription("AccessUserId", subscription, usageDate)).thenCallRealMethod();
-        when(query.getResultList()).thenReturn(Arrays.asList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
+
         Access byUserIdAndSubscription = accessService.findByUserIdAndSubscription("AccessUserId", subscription, usageDate);
         assertNotNull(byUserIdAndSubscription);
     }
@@ -197,8 +199,8 @@ public class AccessServiceTest {
     public void findByUserIdAndSubscription4() {
         Access access = getAccess("01/11/2019", null);
         Access dbAccess1 = getAccess(null, null);
-        when(accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate())).thenCallRealMethod();
-        when(query.getResultList()).thenReturn(Arrays.asList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         Access byUserIdAndSubscription = accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate());
         assertNotNull(byUserIdAndSubscription);
@@ -209,7 +211,7 @@ public class AccessServiceTest {
         Access access = getAccess(null, null);
         Access dbAccess1 = getAccess(null, null);
         when(accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate())).thenCallRealMethod();
-        when(query.getResultList()).thenReturn(Arrays.asList(dbAccess1));
+        when(queryTyped.getResultList()).thenReturn(Arrays.asList(dbAccess1));
 
         Access byUserIdAndSubscription = accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate());
         assertNotNull(byUserIdAndSubscription);
@@ -219,8 +221,8 @@ public class AccessServiceTest {
     public void findByUserIdAndSubscription6() {
         Access access = getAccess("01/11/2019", "01/12/2019");
         Access dbAccess1 = getAccess(null, null);
-        when(accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate())).thenCallRealMethod();
-        when(query.getResultList()).thenReturn(Arrays.asList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         Access byUserIdAndSubscription = accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate(), access.getEndDate());
         assertNotNull(byUserIdAndSubscription);
@@ -230,8 +232,8 @@ public class AccessServiceTest {
     public void findByUserIdAndSubscription7() {
         Access access = getAccess("01/11/2019", "01/12/2019");
         Access dbAccess1 = getAccess(null, null);
-        when(accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate())).thenCallRealMethod();
-        when(query.getResultList()).thenReturn(Arrays.asList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         Access byUserIdAndSubscription = accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate());
         assertNotNull(byUserIdAndSubscription);
@@ -241,8 +243,8 @@ public class AccessServiceTest {
     public void findByUserIdAndSubscription8() {
         Access access = getAccess("01/11/2019", "01/12/2019");
         Access dbAccess1 = getAccess("01/11/2019", null);
-        when(accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate())).thenCallRealMethod();
-        when(query.getResultList()).thenReturn(Arrays.asList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         Access byUserIdAndSubscription = accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate());
         assertNotNull(byUserIdAndSubscription);
@@ -252,15 +254,15 @@ public class AccessServiceTest {
     public void findByUserIdAndSubscription9() {
         Access access = getAccess("01/11/2019", "01/12/2019");
         Access dbAccess1 = getAccess(null, "01/12/2019");
-        when(accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate())).thenCallRealMethod();
-        when(query.getResultList()).thenReturn(Arrays.asList(dbAccess1));
+
+        when(queryTyped.getResultList()).thenReturn(Collections.singletonList(dbAccess1));
 
         Access byUserIdAndSubscription = accessService.findByUserIdAndSubscription(access.getAccessUserId(), access.getSubscription(), access.getStartDate());
         assertNotNull(byUserIdAndSubscription);
     }
 
     private Access getAccess(String startDate, String endDate) {
-        Subscription subscription= new Subscription();
+        Subscription subscription = new Subscription();
         subscription.setId(1L);
         Access access = new Access();
         access.setAccessUserId("AccessUserId");
@@ -272,7 +274,7 @@ public class AccessServiceTest {
 
     private Date parse(String date) {
         try {
-            if(date != null){
+            if (date != null) {
                 return new SimpleDateFormat("dd/MM/yyyy").parse(date);
             }
         } catch (ParseException e) {

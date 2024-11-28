@@ -9,6 +9,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.meveo.model.scripts.ScriptInstance;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -53,9 +54,14 @@ public class ScriptInstanceServiceTest {
         parameters.put("mapDoubleValue", Map.of("key", 2.0));
         parameters.put("mapLongValue", Map.of("key", 2L));
 
+        
+        ScriptInstance scriptInstance = new ScriptInstance();
+        scriptInstance.setCode("ScriptInterfaceImplForTest");
+        
         // Mock the method getScriptInstance and return the instance of ScriptInterfaceImplForTest
         // Use the form "doAnswer().when().method" instead of "when().thenAnswer()" because on spied object the later will call a real method at the setup time, which will fail because of null values being passed.
         Mockito.doReturn(scriptInterfaceImplForTest).when(scriptInstanceService).getScriptInstance(any());
+        Mockito.doReturn(scriptInstance).when(scriptInstanceService).findByCode(any());
 
         // When
         scriptInstanceService.execute("ScriptInterfaceImplForTest", parameters, false, false, false);

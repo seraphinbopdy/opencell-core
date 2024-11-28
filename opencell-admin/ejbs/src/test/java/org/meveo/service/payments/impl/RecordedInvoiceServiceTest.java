@@ -76,6 +76,9 @@ public class RecordedInvoiceServiceTest {
     @Mock
     private EntityManagerWrapper emWrapper;
 
+    @Mock
+    private DunningCollectionPlanService dunningCollectionPlanService;
+    
     @Before
     public void setUp() {
         when(entityManager.contains(any())).thenReturn(true);

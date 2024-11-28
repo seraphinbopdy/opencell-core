@@ -44,8 +44,8 @@ public class CustomFieldJsonDataType extends AbstractClassJavaType<CustomFieldVa
     /**
      * Is encryption of CF values enabled?
      */
-    public static boolean IS_ENCRYPT_CF = TRUE_STR.equalsIgnoreCase(ParamBean.getInstance().getProperty(ENCRYPT_CUSTOM_FIELDS_PROPERTY, FALSE_STR))
-            && !StringUtils.isBlank(ParamBean.getInstance().getProperty(OPENCELL_SHA_KEY_PROPERTY, null));
+    public static boolean IS_ENCRYPT_CF = ParamBean.getInstance() == null ? false
+            : (TRUE_STR.equalsIgnoreCase(ParamBean.getInstance().getProperty(ENCRYPT_CUSTOM_FIELDS_PROPERTY, FALSE_STR)) && !StringUtils.isBlank(ParamBean.getInstance().getProperty(OPENCELL_SHA_KEY_PROPERTY, null)));
 
     /**
      * Json field type in DB. To distinquish what Hibernate data type mapper should be used to interpret the value and convert from json to an object. <br/>

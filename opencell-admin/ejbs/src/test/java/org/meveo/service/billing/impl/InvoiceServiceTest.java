@@ -85,6 +85,7 @@ import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.tax.TaxClass;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
+import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.catalog.impl.InvoiceSubCategoryService;
 import org.meveo.service.tax.TaxMappingService;
 import org.meveo.service.tax.TaxMappingService.TaxInfo;
@@ -151,6 +152,12 @@ public class InvoiceServiceTest {
     @Mock
     private DiscountPlanInstanceService discountPlanInstanceService;
 
+    @Mock
+    private SubscriptionService subscriptionService;
+    
+    @Mock
+    private AccountingArticleService accountingArticleService;
+    
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 

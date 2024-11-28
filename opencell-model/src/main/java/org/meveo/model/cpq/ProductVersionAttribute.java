@@ -70,12 +70,12 @@ public class ProductVersionAttribute extends AttributeBaseEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ProductVersionAttribute))
+        }
+        if (!(o instanceof ProductVersionAttribute)) {
             return false;
-        if (!super.equals(o))
-            return false;
+        }
         ProductVersionAttribute that = (ProductVersionAttribute) o;
         return isMandatory() == that.isMandatory() && isDisplay() == that.isDisplay() && Objects.equals(getProductVersion(), that.getProductVersion()) && Objects.equals(getSequence(), that.getSequence())
                 && Objects.equals(getAttribute(), that.getAttribute()) && Objects.equals(getMandatoryWithEl(), that.getMandatoryWithEl()) && Objects.equals(getReadOnly(), that.getReadOnly())

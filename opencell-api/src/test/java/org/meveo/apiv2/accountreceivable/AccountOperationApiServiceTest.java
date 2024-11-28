@@ -8,6 +8,8 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -173,7 +175,7 @@ public class AccountOperationApiServiceTest {
 
     @Test
     public void shouldReturnBusinessExceptionForZeroAmountMatchOperationAndUseAmountFromDto() throws BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException, Exception {
-        List<AccountOperationAndSequence> operationAndSequence = List.of(ImmutableAccountOperationAndSequence.builder().id(1L).sequence(0).build(),
+        List<AccountOperationAndSequence> operationAndSequence = List.of(ImmutableAccountOperationAndSequence.builder().id(1L).sequence(0).amountToMatch(new BigDecimal(0)).build(),
             ImmutableAccountOperationAndSequence.builder().id(2L).sequence(1).amountToMatch(BigDecimal.ZERO).build());
 
         AccountOperation aoInvoice = init("I", 2L, new BigDecimal(9000), BigDecimal.ZERO, MatchingStatusEnum.O, new BigDecimal(9000), AccountOperationStatus.POSTED);
@@ -192,7 +194,7 @@ public class AccountOperationApiServiceTest {
 
     @Test
     public void shouldReturnBusinessExceptionForAmountEqualToAccountOprtation() throws BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException, Exception {
-        List<AccountOperationAndSequence> operationAndSequence = List.of(ImmutableAccountOperationAndSequence.builder().id(1L).sequence(0).build(),
+        List<AccountOperationAndSequence> operationAndSequence = List.of(ImmutableAccountOperationAndSequence.builder().id(1L).sequence(0).amountToMatch(new BigDecimal(5)).build(),
             ImmutableAccountOperationAndSequence.builder().id(2L).sequence(1).amountToMatch(new BigDecimal(9001)).build());
 
         AccountOperation aoInvoice = init("I", 2L, new BigDecimal(9000), BigDecimal.ZERO, MatchingStatusEnum.O, new BigDecimal(9000), AccountOperationStatus.POSTED);
@@ -206,7 +208,7 @@ public class AccountOperationApiServiceTest {
             accountOperationApiService.matchOperations(operationAndSequence);
         });
         
-        assertTrue(exception.getMessage().contains("The amount to match must be less than : "));
+        assertThat(exception.getMessage()).startsWith("The amount to match must be less than : ");
     }
 	
 	@Test
@@ -376,7 +378,7 @@ public class AccountOperationApiServiceTest {
 
     private List<AccountOperationAndSequence> initOperationSequence() {
         List<AccountOperationAndSequence> sequence = new ArrayList<>();
-        AccountOperationAndSequence p1 = ImmutableAccountOperationAndSequence.builder().id(2L).sequence(0).build();
+        AccountOperationAndSequence p1 = ImmutableAccountOperationAndSequence.builder().id(2L).sequence(0).amountToMatch(new BigDecimal(0)).build();
         AccountOperationAndSequence p2 = ImmutableAccountOperationAndSequence.builder().id(3L).sequence(1).amountToMatch(new BigDecimal(1000)).build();
         AccountOperationAndSequence p3 = ImmutableAccountOperationAndSequence.builder().id(4L).sequence(2).amountToMatch(new BigDecimal(2000)).build();
         sequence.add(p1);

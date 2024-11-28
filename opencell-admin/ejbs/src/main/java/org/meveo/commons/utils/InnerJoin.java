@@ -10,9 +10,9 @@ public class InnerJoin {
     private String name;
     private List<InnerJoin> nextInnerJoins = new ArrayList();
 
-    public InnerJoin(String name) {
+    public InnerJoin(String name, int index) {
         this.name = name;
-        this.alias = name + "_" + new Random().nextInt(100);
+        this.alias = name + "_" + index;
     }
 
     public String getName() {

@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.AccountingCode;
@@ -133,6 +134,7 @@ public class RatedTransactionServiceTest {
         return rts;
     }
     
+    @Test
     void testOk() {
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);
@@ -153,6 +155,7 @@ public class RatedTransactionServiceTest {
         assertNotEquals(billingAccountApres, billingAccountAvant);
     }
     
+    @Test
     void testOnlyOneRuleRedirect() {
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);
@@ -180,6 +183,7 @@ public class RatedTransactionServiceTest {
         assertNotEquals(billingAccountApres, billingAccountAvant);
     }
     
+    @Test
     void testNotEvaluateInvoicedBACodeEL() {
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);
@@ -206,6 +210,7 @@ public class RatedTransactionServiceTest {
         assertTrue(rejectReasonTest.contains("Error evaluating invoicedBillingAccountCodeEL"));
     }
     
+    @Test
     void testNotEvaluateCriteriaEL() {
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);

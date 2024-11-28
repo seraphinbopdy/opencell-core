@@ -350,7 +350,7 @@ public class AuditDataConfigurationServiceTest {
             System.out.println(procedureSimulation);
         }
 
-        assertThat(queries.size()).isEqualTo(16);
+        assertThat(queries.size()).isEqualTo(17);
         assertThat(queries.get(0).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
         assertThat(queries.get(0).getTableName()).isEqualTo("cat_offer_template");
 
@@ -379,25 +379,28 @@ public class AuditDataConfigurationServiceTest {
         assertThat(queries.get(8).getTableName()).isEqualTo("cpq_offer_template_media");
 
         assertThat(queries.get(9).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
-        assertThat(queries.get(9).getTableName()).isEqualTo("offer_template_attribute");
-
+        assertThat(queries.get(9).getTableName()).isEqualTo("cat_offer_allowed_offer_change");
+        
         assertThat(queries.get(10).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
-        assertThat(queries.get(10).getTableName()).isEqualTo("cat_product_offer_tmpl_cat");
+        assertThat(queries.get(10).getTableName()).isEqualTo("offer_template_attribute");
 
         assertThat(queries.get(11).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
-        assertThat(queries.get(11).getTableName()).isEqualTo("cat_product_offer_digital_res");
+        assertThat(queries.get(11).getTableName()).isEqualTo("cat_product_offer_tmpl_cat");
 
         assertThat(queries.get(12).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
-        assertThat(queries.get(12).getTableName()).isEqualTo("cat_product_offer_bam");
+        assertThat(queries.get(12).getTableName()).isEqualTo("cat_product_offer_digital_res");
 
         assertThat(queries.get(13).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
-        assertThat(queries.get(13).getTableName()).isEqualTo("cat_product_offer_channels");
+        assertThat(queries.get(13).getTableName()).isEqualTo("cat_product_offer_bam");
 
         assertThat(queries.get(14).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
-        assertThat(queries.get(14).getTableName()).isEqualTo("cat_product_offer_seller");
+        assertThat(queries.get(14).getTableName()).isEqualTo("cat_product_offer_channels");
 
         assertThat(queries.get(15).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
-        assertThat(queries.get(15).getTableName()).isEqualTo("cat_product_offer_customer_category");
+        assertThat(queries.get(15).getTableName()).isEqualTo("cat_product_offer_seller");
+
+        assertThat(queries.get(16).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
+        assertThat(queries.get(16).getTableName()).isEqualTo("cat_product_offer_customer_category");
     }
 
     @Test

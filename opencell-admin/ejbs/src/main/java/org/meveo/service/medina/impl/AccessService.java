@@ -73,7 +73,7 @@ public class AccessService extends PersistenceService<Access> {
     private List<Access> retrieveAccessByUserIdAndSubscription(String accessUserId, Subscription subscription) {
         String selectAccessByUserIdSubscriptionIdStartEndDateQuery ="SELECT a FROM " + Access.class.getName() +" a"
                 + " WHERE a.accessUserId=:accessUserId AND a.subscription.id=:subscriptionId";
-        Query query = getEntityManager().createQuery(selectAccessByUserIdSubscriptionIdStartEndDateQuery);
+        Query query = getEntityManager().createQuery(selectAccessByUserIdSubscriptionIdStartEndDateQuery, Access.class);
         query.setParameter("accessUserId", accessUserId);
         query.setParameter("subscriptionId", subscription.getId());
         return query.getResultList();

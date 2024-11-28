@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.meveo.api.dto.cpq.TaxDetailDTO;
 import org.meveo.api.dto.cpq.xml.AccountingArticle;
 import org.meveo.api.dto.cpq.xml.BillableAccount;
@@ -39,20 +40,26 @@ import org.meveo.model.quote.QuoteVersion;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
+import org.meveo.service.api.EntityToDtoConverter;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import jakarta.xml.bind.JAXBException;
 
+@RunWith(MockitoJUnitRunner.class)
 public class QuoteMapperTest {
 
-
+    @Spy
+    @InjectMocks
     private QuoteMapper quoteMapper;
+    
+    @Mock
     private XmlQuoteFormatter xmlQuoteFormatter;
-
-    @Before
-    public void setUp() throws Exception {
-        quoteMapper = new QuoteMapper();
-        xmlQuoteFormatter = new XmlQuoteFormatter();
-    }
+    
+    @Mock
+    public EntityToDtoConverter entityToDtoConverter;
 
     @Test
     public void createQuoteVersion() {

@@ -69,6 +69,6 @@ public class CustomTableCreatorServiceTest {
         //When
         sut.setColumnType(customFieldTemplate, addColumnConfig);
         //Then
-        assertThat(addColumnConfig.getType()).isEqualTo("boolean ");
+        assertThat(addColumnConfig.getType()).isEqualTo("int4 ");
     }
 }

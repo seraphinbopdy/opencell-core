@@ -55,6 +55,7 @@ import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.catalog.impl.TaxService;
 import org.meveo.service.script.billing.TaxScriptService;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.FlushModeType;
@@ -81,12 +82,19 @@ public class TaxMappingService extends PersistenceService<TaxMapping> {
     @Inject
     private AccountingArticleService accountingArticleService;
     
-    private static boolean IS_DETERMINE_TAX_CLASS_FROM_AA = true;
+    private static Boolean IS_DETERMINE_TAX_CLASS_FROM_AA = null;
 
-    static {
-        IS_DETERMINE_TAX_CLASS_FROM_AA = ParamBean.getInstance().getBooleanValue("taxes.determineTaxClassFromAA", true);
+    /**
+     * As for testing purpose IS_DETERMINE_TAX_CLASS_FROM_AA can not be set via static variable initiation, it has to be done in a @PostConstruct method. 
+     */
+    @PostConstruct
+    public void init() {
+        if (IS_DETERMINE_TAX_CLASS_FROM_AA == null) {
+            IS_DETERMINE_TAX_CLASS_FROM_AA = ParamBean.getInstance().getProperty("tax.determineTaxClassFromAA", "true").equals("true");
+        }
     }
-
+    
+    
     @Override
     public void create(TaxMapping entity) throws InvalidParameterException {
         validateValidityDates(entity);

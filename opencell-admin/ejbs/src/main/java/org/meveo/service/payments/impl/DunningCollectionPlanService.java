@@ -676,14 +676,17 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
             List<DunningLevelInstance> createdDunningLevelInstance = dunningLevelInstanceService.createDunningLevelInstancesWithCollectionPlanForCustomerLevel(customerAccount, policy, collectionPlan, collectionPlanStatus);
             collectionPlan.setDunningLevelInstances(createdDunningLevelInstance);
 
+            // Get the minimum sequence of the dunning levels
+            int minSequence = policy.getDunningLevels().stream().map(DunningPolicyLevel::getSequence).min(Integer::compareTo).orElse(0);
+
             // Update the collection plan with the first dunning level instance
             Optional<DunningLevelInstance> firstDunningLevelInstance = createdDunningLevelInstance.stream()
-                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == 0)
+                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == minSequence)
                     .findFirst();
 
             // Update the collection plan with the next action and next action date
             Optional<DunningLevelInstance> nextDunningLevelInstance = createdDunningLevelInstance.stream()
-                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == 1)
+                    .filter(dunningLevelInstance -> dunningLevelInstance.getSequence() == minSequence + 1)
                     .filter(dunningLevelInstance -> dunningLevelInstance.getLevelStatus().equals(TO_BE_DONE))
                     .findFirst();
 

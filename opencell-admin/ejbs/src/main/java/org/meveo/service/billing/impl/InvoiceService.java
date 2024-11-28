@@ -3493,7 +3493,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
 
     public void recalculateDatesForValidated(Long invoiceId) {
-        Invoice invoice = findById(invoiceId);
+        Invoice invoice = findById(invoiceId, true);
         BillingAccount billingAccount = invoice.getBillingAccount();
         BillingCycle billingCycle = billingAccount.getBillingCycle();
         BillingRun billingRun = invoice.getBillingRun();

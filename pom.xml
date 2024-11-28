@@ -92,22 +92,14 @@
 			<dependency>
 				<groupId>org.wildfly.bom</groupId>
 				<artifactId>wildfly-ee-with-tools</artifactId>
-				<version>34.0.0.Final</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<!-- Import micrometer dependency information -->
-			<dependency>
-				<groupId>org.wildfly.bom</groupId>
-				<artifactId>wildfly-microprofile</artifactId>
-				<version>33.0.2.Final</version>
+				<version>34.0.1.Final</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.wildfly</groupId>
 				<artifactId>wildfly-ee</artifactId>
-				<version>34.0.0.Final</version>
+				<version>34.0.1.Final</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -649,7 +641,7 @@
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-core-spi</artifactId>
-				<version>6.2.10.Final</version>
+				<version>6.2.11.Final</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -710,6 +702,11 @@
 				<groupId>io.hypersistence</groupId>
 				<artifactId>hypersistence-utils-hibernate-63</artifactId>
 				<version>3.8.2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-core</artifactId>
+				<version>1.12.4</version>
 			</dependency>
 
 

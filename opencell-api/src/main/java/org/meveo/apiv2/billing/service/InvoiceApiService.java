@@ -7,6 +7,7 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.meveo.model.billing.InvoiceStatusEnum.DRAFT;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 
 import java.math.BigDecimal;
@@ -281,6 +282,13 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 			}
 			invoice.getInvoiceLines().add(invoiceLine);
 			result.addInvoiceLines(invoiceLineResource);
+		}
+		
+		if (InvoiceStatusEnum.NEW.equals(invoice.getStatus())) {
+			invoice.setStatus(DRAFT);
+			invoice.assignTemporaryInvoiceNumber();
+			invoiceService.update(invoice);
+			invoiceService.getEntityManager().flush();
 		}
 		invoiceService.calculateInvoice(invoice, false);
 		invoiceService.updateBillingRunStatistics(invoice);

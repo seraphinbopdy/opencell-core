@@ -462,7 +462,7 @@ public class ServiceSingleton {
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Invoice validateAndAssignInvoiceNumber(Long invoiceId, boolean refreshExchangeRate) throws BusinessException {
-    	Invoice invoice = invoiceService.findById(invoiceId, List.of("linkedInvoices"), true);
+    	Invoice invoice = invoiceService.findById(invoiceId, List.of("linkedInvoices"));
     	if (invoice == null) {
     		throw new EntityDoesNotExistsException(Invoice.class, invoiceId);
     	}

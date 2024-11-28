@@ -627,15 +627,6 @@ public class InvoiceUblHelper {
 			paymentMeans.setPaymentMandate(paymentMandate);
 		}
 
-		// PaymentMeans/PartyIdentification
-		if (provider != null && (StringUtils.isNotBlank(provider.getBankCoordinates().getIban()) || StringUtils.isNotBlank(provider.getBankCoordinates().getBankId()))) {
-			PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
-			ID partyIdentificationId = objectFactorycommonBasic.createID();
-			partyIdentificationId.setValue(StringUtils.isNotBlank(provider.getBankCoordinates().getIban()) ? provider.getBankCoordinates().getIban() : provider.getBankCoordinates().getBankId());
-			partyIdentification.setID(partyIdentificationId);
-			paymentMeans.setPartyIdentification(partyIdentification);
-		}
-
 		// PaymentMeans/PayeeFinancialAccount
 		if (StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())) {
 			FinancialAccountType payerFinancialAccount = objectFactoryCommonAggrement.createFinancialAccountType();

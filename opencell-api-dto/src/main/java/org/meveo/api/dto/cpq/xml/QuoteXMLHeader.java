@@ -24,13 +24,11 @@ public class QuoteXMLHeader extends Header {
     public QuoteXMLHeader() {
     }
 
-    public QuoteXMLHeader(BillingAccount billingAccount, Contract contract, QuoteVersion quoteVersion, String quoteCode, Date startDate,
-                          Long duration, int opportunityDuration, String customerReference, String registrationNumber,
-                          Date validFromDate, Date validToDate, String comment, org.meveo.api.dto.cpq.xml.Customer customer, org.meveo.api.dto.cpq.xml.Seller seller,
-                          CurrencyDetailDto currency, TaxDetailDTO taxDetail) {
-        super(billingAccount, contract, quoteVersion.getQuoteVersion(), quoteCode, startDate,
-                duration, opportunityDuration, customerReference, registrationNumber,
-                validFromDate, validToDate, comment, quoteVersion.getStartDate(), quoteVersion.getEndDate());
+    public QuoteXMLHeader(BillingAccount billingAccount, Contract contract, QuoteVersion quoteVersion, String quoteCode, Date startDate, Long duration, Integer opportunityDuration, String customerReference,
+            String registrationNumber, Date validFromDate, Date validToDate, String comment, org.meveo.api.dto.cpq.xml.Customer customer, org.meveo.api.dto.cpq.xml.Seller seller, CurrencyDetailDto currency,
+            TaxDetailDTO taxDetail) {
+        super(billingAccount, contract, quoteVersion.getQuoteVersion(), quoteCode, startDate, duration, opportunityDuration, customerReference, registrationNumber, validFromDate, validToDate, comment,
+            quoteVersion.getStartDate(), quoteVersion.getEndDate());
         this.customer = customer;
         this.seller = seller;
         this.currency = currency;

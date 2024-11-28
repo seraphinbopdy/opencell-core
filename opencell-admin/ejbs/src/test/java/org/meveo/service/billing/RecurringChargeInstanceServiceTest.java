@@ -24,6 +24,7 @@ import org.meveo.event.qualifier.Rejected;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.RecurringChargeInstance;
 import org.meveo.model.billing.ServiceInstance;
+import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.CalendarYearly;
 import org.meveo.model.catalog.DayInYear;
@@ -142,6 +143,9 @@ public class RecurringChargeInstanceServiceTest {
         chargeInstance.setQuantity(BigDecimal.valueOf(100d));
         chargeInstance.setServiceInstance(serviceInstance);
         chargeInstance.setChargeTemplate(chargeTemplate);
+
+        Subscription subscription = new Subscription();
+        chargeInstance.setSubscription(subscription);
 
         return chargeInstance;
     }

@@ -3,12 +3,9 @@ package org.meveo.service.cpq;
 import static java.math.BigDecimal.valueOf;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.api.dto.cpq.TaxDetailDTO;
@@ -32,12 +29,15 @@ import org.meveo.model.billing.TradingLanguage;
 import org.meveo.model.cpq.CpqQuote;
 import org.meveo.model.cpq.enums.PriceTypeEnum;
 import org.meveo.model.cpq.offer.QuoteOffer;
+import org.meveo.model.crm.Customer;
+import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.quote.QuoteArticleLine;
 import org.meveo.model.quote.QuoteLot;
 import org.meveo.model.quote.QuotePrice;
 import org.meveo.model.quote.QuoteProduct;
 import org.meveo.model.quote.QuoteVersion;
 import org.meveo.model.shared.Address;
+import org.meveo.model.shared.DateUtils;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 import org.meveo.service.api.EntityToDtoConverter;
@@ -54,10 +54,10 @@ public class QuoteMapperTest {
     @Spy
     @InjectMocks
     private QuoteMapper quoteMapper;
-    
+
     @Mock
     private XmlQuoteFormatter xmlQuoteFormatter;
-    
+
     @Mock
     public EntityToDtoConverter entityToDtoConverter;
 
@@ -97,6 +97,7 @@ public class QuoteMapperTest {
 
         QuoteVersion quoteVersion = new QuoteVersion();
         quoteVersion.setQuote(quote);
+        quoteVersion.setQuoteVersion(5);
         quoteVersion.setQuoteOffers(List.of(quoteOffer));
     }
 
@@ -108,8 +109,9 @@ public class QuoteMapperTest {
 
         QuoteVersion quoteVersion = new QuoteVersion();
         quoteVersion.setQuote(quote);
+        quoteVersion.setQuoteVersion(5);
 
-        QuoteXmlDto quoteXmlDto = new QuoteMapper().map(quoteVersion, new HashMap<>(), new TaxDetailDTO());
+        QuoteXmlDto quoteXmlDto = quoteMapper.map(quoteVersion, new HashMap<>(), new TaxDetailDTO());
 
         Header header = quoteXmlDto.getHeader();
         assertThat(header).isNotNull();
@@ -147,6 +149,7 @@ public class QuoteMapperTest {
 
         QuoteVersion quoteVersion = new QuoteVersion();
         quoteVersion.setQuote(quote);
+        quoteVersion.setQuoteVersion(5);
 
         QuoteXmlDto quoteXmlDto = quoteMapper.map(quoteVersion, new HashMap<>(), new TaxDetailDTO());
 
@@ -183,6 +186,7 @@ public class QuoteMapperTest {
 
         QuoteVersion quoteVersion = new QuoteVersion();
         quoteVersion.setQuote(quote);
+        quoteVersion.setQuoteVersion(5);
         quoteVersion.setQuoteOffers(List.of(quoteOffer));
 
         QuoteXmlDto quoteXmlDto = quoteMapper.map(quoteVersion, new HashMap<>(), new TaxDetailDTO());
@@ -191,7 +195,7 @@ public class QuoteMapperTest {
         Quote quoteXml = quoteXmlDto.getDetails().getQuote();
         assertThat(quoteXml).isNotNull();
         assertThat(quoteXml.getQuoteNumber()).isEqualTo("10");
-        assertThat(quoteXml.getQuoteDate()).isEqualTo(Date.valueOf(LocalDate.of(2020, 1, 2)));
+        assertThat(quoteXml.getQuoteDate()).isEqualTo(DateUtils.parseDateWithPattern("2020-01-02", DateUtils.DATE_PATTERN));
         List<BillableAccount> billableAccounts = quoteXmlDto.getDetails().getQuote().getBillableAccounts();
         assertThat(billableAccounts).isNotEmpty();
         BillableAccount billableAccount = billableAccounts.get(0);
@@ -201,7 +205,7 @@ public class QuoteMapperTest {
         assertThat(quoteLotXml.getCode()).isEqualTo("QL_CODE");
         assertThat(quoteLotXml.getDuration()).isEqualTo(11);
         assertThat(quoteLotXml.getName()).isEqualTo("LOT1");
-        assertThat(quoteLotXml.getExecutionDate()).isEqualTo(Date.valueOf(LocalDate.of(2020, 1, 1)));
+        assertThat(quoteLotXml.getExecutionDate()).isEqualTo(DateUtils.parseDateWithPattern("2020-01-01", DateUtils.DATE_PATTERN));
         Category category = quoteLotXml.getCategories().get(0);
         assertThat(category).isNotNull();
         assertThat(category.getCode()).isEqualTo("INV_CAT");
@@ -380,6 +384,14 @@ public class QuoteMapperTest {
         country.setDescription("France");
         address.setCountry(country);
         billableAccount.setAddress(address);
+
+        CustomerAccount customerAccount = new CustomerAccount();
+        customerAccount.setCode("CA");
+        billableAccount.setCustomerAccount(customerAccount);
+
+        Customer customer = new Customer();
+        customer.setCode("C");
+        customerAccount.setCustomer(customer);
         return billableAccount;
     }
 
@@ -388,7 +400,10 @@ public class QuoteMapperTest {
         quote.setApplicantAccount(billableAccount);
         quote.setBillableAccount(null);
         quote.setQuoteNumber("10");
-        quote.setSendDate(Date.valueOf(LocalDate.of(2020, 1, 2)));
+        quote.setSendDate(DateUtils.parseDateWithPattern("2020-01-02", DateUtils.DATE_PATTERN));
+        quote.setQuoteDate(quote.getSendDate());
+        quote.getValidity().setFrom(DateUtils.parseDateWithPattern("2020-01-02", DateUtils.DATE_PATTERN));
+        quote.getValidity().setTo(DateUtils.parseDateWithPattern("2020-01-05", DateUtils.DATE_PATTERN));
         return quote;
     }
 
@@ -410,7 +425,7 @@ public class QuoteMapperTest {
     }
 
     private InvoiceCategory createInvoiceCategory() {
-        //getBillingAccount().getTradingLanguage().getLanguage().getLanguageCode()
+        // getBillingAccount().getTradingLanguage().getLanguage().getLanguageCode()
         InvoiceCategory invoiceCategory = new InvoiceCategory();
         invoiceCategory.setCode("INV_CAT");
         invoiceCategory.getDescriptionI18nNullSafe().put("Fr", "Abonnement");
@@ -422,7 +437,7 @@ public class QuoteMapperTest {
         QuoteLot quoteLot = new QuoteLot();
         quoteLot.setCode("QL_CODE");
         quoteLot.setName("LOT1");
-        quoteLot.setExecutionDate(Date.valueOf(LocalDate.of(2020, 1, 1)));
+        quoteLot.setExecutionDate(DateUtils.parseDateWithPattern("2020-01-01", DateUtils.DATE_PATTERN));
         quoteLot.setDuration(11);
         return quoteLot;
     }

@@ -81,7 +81,7 @@ public class QuoteToXmlScript extends ModuleScript {
 
     @Override
     public void execute(Map<String, Object> methodContext) throws BusinessException {
-        QuoteVersion quoteVersion= (QuoteVersion) methodContext.get("quoteVersion");
+        QuoteVersion quoteVersion = (QuoteVersion) methodContext.get("quoteVersion");
         if (quoteVersion == null) {
             throw new BusinessException("No quote version is found");
         }
@@ -116,58 +116,53 @@ public class QuoteToXmlScript extends ModuleScript {
     }
 
     public QuoteXmlDto map(QuoteVersion quoteVersion, TaxDetailDTO taxDetail) {
-    	CpqQuote quote = quoteVersion.getQuote();
-        org.meveo.model.billing.BillingAccount bac=quote.getBillableAccount() == null ? quote.getApplicantAccount() : quote.getBillableAccount();
-        
-        PaymentMethod paymentMethod=new PaymentMethod(bac.getPaymentMethod(),entityToDtoConverter.getCustomFieldsDTO(bac.getPaymentMethod()));
-        
-        BillingAccount billingAccount = new BillingAccount(bac,paymentMethod,entityToDtoConverter.getCustomFieldsDTO(bac));
-        Customer customer = new Customer(bac.getCustomerAccount().getCustomer(),
-                bac.getCustomerAccount().getTradingCurrency(),
-                bac.getCustomerAccount().getTradingLanguage());
+        CpqQuote quote = quoteVersion.getQuote();
+        org.meveo.model.billing.BillingAccount bac = quote.getBillableAccount() == null ? quote.getApplicantAccount() : quote.getBillableAccount();
+
+        PaymentMethod paymentMethod = new PaymentMethod(bac.getPaymentMethod(), entityToDtoConverter.getCustomFieldsDTO(bac.getPaymentMethod()));
+
+        BillingAccount billingAccount = new BillingAccount(bac, paymentMethod, entityToDtoConverter.getCustomFieldsDTO(bac));
+        Customer customer = new Customer(bac.getCustomerAccount().getCustomer(), bac.getCustomerAccount().getTradingCurrency(), bac.getCustomerAccount().getTradingLanguage());
         Seller seller = new Seller(bac.getSeller());
 
         org.meveo.model.cpq.contract.Contract contract = quoteVersion.getContract();
-        Contract ctr=null;
-        if(contract!=null) {
-         ctr = new Contract(contract,entityToDtoConverter.getCustomFieldsDTO(contract));
+        Contract ctr = null;
+        if (contract != null) {
+            ctr = new Contract(contract, entityToDtoConverter.getCustomFieldsDTO(contract));
         }
-        Date startDate=null; Date endDate=null;Long duration=0L;
-       if(quote.getValidity()!=null) {
-         startDate =quote.getValidity().getFrom();
-         endDate=quote.getValidity().getTo();
-         duration = startDate.getTime()-endDate.getTime();
-       }
+        Date startDate = null;
+        Date endDate = null;
+        Long duration = 0L;
+        if (quote.getValidity() != null) {
+            startDate = quote.getValidity().getFrom();
+            endDate = quote.getValidity().getTo();
+            duration = startDate.getTime() - endDate.getTime();
+        }
 
         CurrencyDetailDto currencyDetailDto = new CurrencyDetailDto();
-        if (bac.getTradingCurrency()!=null) {
+        if (bac.getTradingCurrency() != null) {
             currencyDetailDto.setBaCode(bac.getTradingCurrency().getCurrencyCode());
             currencyDetailDto.setBaSymbol(bac.getTradingCurrency().getSymbol());
             currencyDetailDto.setBaRate(bac.getTradingCurrency().getCurrentRate());
         }
 
-        QuoteXMLHeader header = new QuoteXMLHeader(billingAccount,ctr,quoteVersion,quote.getCode(),startDate,duration,
-        		quote.getQuoteLotDuration(),quote.getCustomerRef(),quote.getRegisterNumber(),startDate,endDate,quoteVersion.getComment(),
-                customer, seller, currencyDetailDto, taxDetail);
+        QuoteXMLHeader header = new QuoteXMLHeader(billingAccount, ctr, quoteVersion, quote.getCode(), startDate, duration, quote.getQuoteLotDuration(), quote.getCustomerRef(), quote.getRegisterNumber(), startDate,
+            endDate, quoteVersion.getComment(), customer, seller, currencyDetailDto, taxDetail);
 
-        Map<org.meveo.model.billing.BillingAccount, List<QuoteArticleLine>> linesByBillingAccount = getAllOffersQuoteLineStream(quoteVersion)
-                .collect(groupingBy(QuoteArticleLine::getBillableAccount));
+        Map<org.meveo.model.billing.BillingAccount, List<QuoteArticleLine>> linesByBillingAccount = getAllOffersQuoteLineStream(quoteVersion).collect(groupingBy(QuoteArticleLine::getBillableAccount));
 
-        List<BillableAccount> billableAccounts = linesByBillingAccount.keySet()
-                .stream()
-                .map(ba -> mapToBillableAccount(ba, linesByBillingAccount.get(ba)))
-                .collect(Collectors.toList());
+        List<BillableAccount> billableAccounts = linesByBillingAccount.keySet().stream().map(ba -> mapToBillableAccount(ba, linesByBillingAccount.get(ba))).collect(Collectors.toList());
 
         List<QuotePrice> allQuotesPrice = getAllOffersQuoteLineStream(quoteVersion).map(p -> p.getQuotePrices().stream()).flatMap(identity()).collect(toList());
-        Details details = new Details(new Quote(billableAccounts, quote.getQuoteNumber(), quote.getQuoteDate(),entityToDtoConverter.getCustomFieldsDTO(quoteVersion)), aggregatePricesPerType(allQuotesPrice));
+        Details details = new Details(new Quote(billableAccounts, quote.getQuoteNumber(), quote.getQuoteDate(), entityToDtoConverter.getCustomFieldsDTO(quoteVersion)), aggregatePricesPerType(allQuotesPrice));
 
         return new QuoteXmlDto(header, details);
     }
 
     protected Stream<QuoteArticleLine> getAllOffersQuoteLineStream(QuoteVersion quoteVersion) {
-    	List<QuoteArticleLine> QuoteArticleLines=quoteVersion.getQuoteArticleLines();
-    	log.info("-----------------getAllOffersQuoteLineStream---------- size={}",QuoteArticleLines.size());
-    	return QuoteArticleLines.stream();
+        List<QuoteArticleLine> QuoteArticleLines = quoteVersion.getQuoteArticleLines();
+        log.info("-----------------getAllOffersQuoteLineStream---------- size={}", QuoteArticleLines.size());
+        return QuoteArticleLines.stream();
 //        return quoteVersion.getQuoteOffers()
 //                    .stream()
 //                    .map(offer -> offer.getQuoteProduct().stream())
@@ -176,26 +171,17 @@ public class QuoteToXmlScript extends ModuleScript {
 //                    .flatMap(identity());
     }
 
-    protected org.meveo.api.dto.cpq.xml.BillableAccount mapToBillableAccount(org.meveo.model.billing.BillingAccount ba, List<QuoteArticleLine> lines){
+    protected org.meveo.api.dto.cpq.xml.BillableAccount mapToBillableAccount(org.meveo.model.billing.BillingAccount ba, List<QuoteArticleLine> lines) {
 
-        Map<QuoteLot, List<QuoteArticleLine>> linesByLot = lines.stream()
-                .filter(line -> line.getQuoteLot() != null)
-                .collect(groupingBy(line -> line.getQuoteLot()));
+        Map<QuoteLot, List<QuoteArticleLine>> linesByLot = lines.stream().filter(line -> line.getQuoteLot() != null).collect(groupingBy(line -> line.getQuoteLot()));
 
-        List<QuoteArticleLine> linesWithoutLot = lines.stream()
-                .filter(line -> line.getQuoteLot() == null)
-                .collect(toList());
+        List<QuoteArticleLine> linesWithoutLot = lines.stream().filter(line -> line.getQuoteLot() == null).collect(toList());
 
         linesByLot.put(new QuoteLot(), linesWithoutLot);
 
-        List<org.meveo.api.dto.cpq.xml.QuoteLot> quoteLots = linesByLot.keySet().stream()
-                .map(lot -> mapToLot(lot, linesByLot.get(lot), ba))
-                .collect(Collectors.toList());
+        List<org.meveo.api.dto.cpq.xml.QuoteLot> quoteLots = linesByLot.keySet().stream().map(lot -> mapToLot(lot, linesByLot.get(lot), ba)).collect(Collectors.toList());
 
-        List<QuotePrice> baPrices = lines.stream()
-                .map(line -> line.getQuotePrices().stream())
-                .flatMap(identity())
-                .collect(toList());
+        List<QuotePrice> baPrices = lines.stream().map(line -> line.getQuotePrices().stream()).flatMap(identity()).collect(toList());
 
         return new BillableAccount(ba.getCode(), quoteLots, aggregatePricesPerType(baPrices));
 
@@ -203,32 +189,24 @@ public class QuoteToXmlScript extends ModuleScript {
 
     protected org.meveo.api.dto.cpq.xml.QuoteLot mapToLot(QuoteLot lot, List<QuoteArticleLine> quoteArticleLines, org.meveo.model.billing.BillingAccount ba) {
         Map<InvoiceCategory, List<QuoteArticleLine>> linesByCategory = quoteArticleLines.stream()
-                .collect(groupingBy(quoteArticleLine -> quoteArticleLine.getAccountingArticle().getInvoiceSubCategory().getInvoiceCategory()));
-        List<Category> categories = linesByCategory.keySet().stream()
-                .map(category -> mapToCategory(category, linesByCategory.get(category), ba))
-                .collect(toList());
+            .collect(groupingBy(quoteArticleLine -> quoteArticleLine.getAccountingArticle().getInvoiceSubCategory().getInvoiceCategory()));
+        List<Category> categories = linesByCategory.keySet().stream().map(category -> mapToCategory(category, linesByCategory.get(category), ba)).collect(toList());
         return new org.meveo.api.dto.cpq.xml.QuoteLot(lot, categories);
     }
 
     protected Category mapToCategory(InvoiceCategory category, List<QuoteArticleLine> quoteArticleLines, org.meveo.model.billing.BillingAccount ba) {
-        Map<InvoiceSubCategory, List<QuoteArticleLine>> linesBySubCategory = quoteArticleLines.stream()
-                .collect(groupingBy(line -> line.getAccountingArticle().getInvoiceSubCategory()));
+        Map<InvoiceSubCategory, List<QuoteArticleLine>> linesBySubCategory = quoteArticleLines.stream().collect(groupingBy(line -> line.getAccountingArticle().getInvoiceSubCategory()));
 
-        List<SubCategory> subCategories = linesBySubCategory.keySet().stream()
-                .map(subCategory -> mapToSubCategory(subCategory, linesBySubCategory.get(subCategory), ba))
-                .collect(toList());
+        List<SubCategory> subCategories = linesBySubCategory.keySet().stream().map(subCategory -> mapToSubCategory(subCategory, linesBySubCategory.get(subCategory), ba)).collect(toList());
         return new Category(category, subCategories, getTradingLanguage(ba));
     }
 
     protected SubCategory mapToSubCategory(InvoiceSubCategory subCategory, List<QuoteArticleLine> quoteArticleLines, org.meveo.model.billing.BillingAccount ba) {
-        Map<AccountingArticle, List<QuoteArticleLine>> linesByAccountingArticle = quoteArticleLines.stream()
-                .collect(groupingBy(line -> line.getAccountingArticle()));
+        Map<AccountingArticle, List<QuoteArticleLine>> linesByAccountingArticle = quoteArticleLines.stream().collect(groupingBy(line -> line.getAccountingArticle()));
         List<org.meveo.api.dto.cpq.xml.AccountingArticle> articleLines = linesByAccountingArticle.keySet().stream()
-                .map(accountingArticle -> mapToArticleLine(accountingArticle, linesByAccountingArticle.get(accountingArticle), ba))
-                .collect(toList());
+            .map(accountingArticle -> mapToArticleLine(accountingArticle, linesByAccountingArticle.get(accountingArticle), ba)).collect(toList());
         List<org.meveo.api.dto.cpq.xml.AccountingArticle> articleLinesDiscounts = linesByAccountingArticle.keySet().stream()
-                .map(accountingArticle -> mapToArticleLineDiscount(accountingArticle, linesByAccountingArticle.get(accountingArticle), ba))
-                .collect(toList());
+            .map(accountingArticle -> mapToArticleLineDiscount(accountingArticle, linesByAccountingArticle.get(accountingArticle), ba)).collect(toList());
         return new SubCategory(subCategory, articleLines, articleLinesDiscounts, getTradingLanguage(ba));
     }
 
@@ -236,97 +214,77 @@ public class QuoteToXmlScript extends ModuleScript {
         if (accountingArticle.getAllowanceCode() != null && DISCOUNT_ALLOWANCE_CODE.equals(accountingArticle.getAllowanceCode().getCode())) {
             return null;
         }
-    	org.meveo.api.dto.cpq.xml.AccountingArticle accountingArticleDto = new  org.meveo.api.dto.cpq.xml.AccountingArticle(accountingArticle, quoteArticleLines, getTradingLanguage(ba));
+        org.meveo.api.dto.cpq.xml.AccountingArticle accountingArticleDto = new org.meveo.api.dto.cpq.xml.AccountingArticle(accountingArticle, quoteArticleLines, getTradingLanguage(ba));
 
-    	accountingArticleDto.setQuoteLines(quoteArticleLines.stream().filter(line -> line.getQuoteProduct() != null)
-    			.map(line -> {
-                    // build currency details
-                    Map<String, TradingCurrency> currencies = new HashMap<>();
-                    line.getQuotePrices().forEach(quotePrice -> {
-                        if(StringUtils.isNotBlank(quotePrice.getCurrencyCode())){
-                            currencies.put(quotePrice.getCurrencyCode(), currencyService.findByTradingCurrencyCode(quotePrice.getCurrencyCode()));
-                        }
-                    });
-                    return new QuoteLine(line,mapToOffer(line.getQuoteProduct()), currencies, new HashMap<>());
-                })
-    			.collect(Collectors.toList()));
-    	return accountingArticleDto;
+        accountingArticleDto.setQuoteLines(quoteArticleLines.stream().filter(line -> line.getQuoteProduct() != null).map(line -> {
+            // build currency details
+            Map<String, TradingCurrency> currencies = new HashMap<>();
+            line.getQuotePrices().forEach(quotePrice -> {
+                if (StringUtils.isNotBlank(quotePrice.getCurrencyCode())) {
+                    currencies.put(quotePrice.getCurrencyCode(), currencyService.findByTradingCurrencyCode(quotePrice.getCurrencyCode()));
+                }
+            });
+            return new QuoteLine(line, mapToOffer(line.getQuoteProduct()), currencies, new HashMap<>());
+        }).collect(Collectors.toList()));
+        return accountingArticleDto;
     }
 
     protected org.meveo.api.dto.cpq.xml.AccountingArticle mapToArticleLineDiscount(AccountingArticle accountingArticle, List<QuoteArticleLine> quoteArticleLines, org.meveo.model.billing.BillingAccount ba) {
         if (accountingArticle.getAllowanceCode() != null && !DISCOUNT_ALLOWANCE_CODE.equals(accountingArticle.getAllowanceCode().getCode())) {
             return null;
         }
-        org.meveo.api.dto.cpq.xml.AccountingArticle accountingArticleDto = new  org.meveo.api.dto.cpq.xml.AccountingArticle(accountingArticle, quoteArticleLines, getTradingLanguage(ba));
+        org.meveo.api.dto.cpq.xml.AccountingArticle accountingArticleDto = new org.meveo.api.dto.cpq.xml.AccountingArticle(accountingArticle, quoteArticleLines, getTradingLanguage(ba));
 
-        accountingArticleDto.setQuoteLines(quoteArticleLines.stream().filter(line -> line.getQuoteProduct() != null)
-                .map(line -> {
-                    // build currency details
-                    Map<String, TradingCurrency> currencies = new HashMap<>();
-                    line.getQuotePrices().forEach(quotePrice -> {
-                        if(StringUtils.isNotBlank(quotePrice.getCurrencyCode())){
-                            currencies.put(quotePrice.getCurrencyCode(), currencyService.findByTradingCurrencyCode(quotePrice.getCurrencyCode()));
-                        }
-                    });
-                    return new QuoteLine(line,mapToOffer(line.getQuoteProduct()), currencies, new HashMap<>());
-                })
-                .collect(Collectors.toList()));
+        accountingArticleDto.setQuoteLines(quoteArticleLines.stream().filter(line -> line.getQuoteProduct() != null).map(line -> {
+            // build currency details
+            Map<String, TradingCurrency> currencies = new HashMap<>();
+            line.getQuotePrices().forEach(quotePrice -> {
+                if (StringUtils.isNotBlank(quotePrice.getCurrencyCode())) {
+                    currencies.put(quotePrice.getCurrencyCode(), currencyService.findByTradingCurrencyCode(quotePrice.getCurrencyCode()));
+                }
+            });
+            return new QuoteLine(line, mapToOffer(line.getQuoteProduct()), currencies, new HashMap<>());
+        }).collect(Collectors.toList()));
         return accountingArticleDto;
     }
-    
+
     protected org.meveo.api.dto.cpq.xml.Offer mapToOffer(QuoteProduct quoteProduct) {
-        if(quoteProduct==null) {
+        if (quoteProduct == null) {
             return null;
         }
-        org.meveo.api.dto.cpq.xml.Offer quoteOfferDto = new  org.meveo.api.dto.cpq.xml.Offer(quoteProduct.getQuoteOffer(),entityToDtoConverter.getCustomFieldsDTO(quoteProduct.getQuoteOffer()));
-        List<Product> products=new ArrayList<Product>();
+        org.meveo.api.dto.cpq.xml.Offer quoteOfferDto = new org.meveo.api.dto.cpq.xml.Offer(quoteProduct.getQuoteOffer(), entityToDtoConverter.getCustomFieldsDTO(quoteProduct.getQuoteOffer()));
+        List<Product> products = new ArrayList<Product>();
         products.add(mapToProduct(quoteProduct));
         quoteOfferDto.setProducts(products);
-        
-        quoteOfferDto.setAttributes(quoteProduct.getQuoteOffer().getQuoteAttributes().stream()
-                .map(product ->  mapToAttribute(product))
-                .collect(Collectors.toList()));
-        
+
+        quoteOfferDto.setAttributes(quoteProduct.getQuoteOffer().getQuoteAttributes().stream().map(product -> mapToAttribute(product)).collect(Collectors.toList()));
+
         return quoteOfferDto;
     }
-    
-    
+
     protected org.meveo.api.dto.cpq.xml.Product mapToProduct(QuoteProduct quoteProduct) {
 
-        List<QuotePrice> prices = quoteProduct.getQuoteArticleLines().stream()
-                .map(line -> line.getQuotePrices().stream())
-                .flatMap(identity())
-                .collect(toList());
-        
-    	org.meveo.api.dto.cpq.xml.Product quoteProductDto = new  org.meveo.api.dto.cpq.xml.Product(quoteProduct,entityToDtoConverter.getCustomFieldsDTO(quoteProduct), aggregatePricesPerType(prices));
+        List<QuotePrice> prices = quoteProduct.getQuoteArticleLines().stream().map(line -> line.getQuotePrices().stream()).flatMap(identity()).collect(toList());
 
-    	quoteProductDto.setAttributes(quoteProduct.getQuoteAttributes().stream()
-    			.map(product ->  mapToAttribute(product))
-    			.collect(Collectors.toList()));
-    	return quoteProductDto;  
+        org.meveo.api.dto.cpq.xml.Product quoteProductDto = new org.meveo.api.dto.cpq.xml.Product(quoteProduct, entityToDtoConverter.getCustomFieldsDTO(quoteProduct), aggregatePricesPerType(prices));
+
+        quoteProductDto.setAttributes(quoteProduct.getQuoteAttributes().stream().map(product -> mapToAttribute(product)).collect(Collectors.toList()));
+        return quoteProductDto;
     }
-    
+
     protected org.meveo.api.dto.cpq.xml.Attribute mapToAttribute(QuoteAttribute quoteAttribute) {
-    	org.meveo.api.dto.cpq.xml.Attribute quoteAttributeDto = new  org.meveo.api.dto.cpq.xml.Attribute(quoteAttribute,entityToDtoConverter.getCustomFieldsDTO(quoteAttribute)); 
-    	return quoteAttributeDto; 
+        org.meveo.api.dto.cpq.xml.Attribute quoteAttributeDto = new org.meveo.api.dto.cpq.xml.Attribute(quoteAttribute, entityToDtoConverter.getCustomFieldsDTO(quoteAttribute));
+        return quoteAttributeDto;
     }
-
 
     protected String getTradingLanguage(org.meveo.model.billing.BillingAccount ba) {
         return ba.getTradingLanguage().getLanguageCode();
     }
 
     protected List<PriceDTO> aggregatePricesPerType(List<QuotePrice> baPrices) {
-        Map<PriceTypeEnum, List<QuotePrice>> pricesPerType = baPrices.stream()
-                .collect(Collectors.groupingBy(QuotePrice::getPriceTypeEnum));
+        Map<PriceTypeEnum, List<QuotePrice>> pricesPerType = baPrices.stream().collect(Collectors.groupingBy(QuotePrice::getPriceTypeEnum));
 
-        return pricesPerType
-                .keySet()
-                .stream()
-                .map(key -> reducePrices(key, pricesPerType))
-                .filter(Optional::isPresent)
-                .map(price -> new PriceDTO(price.get(), new HashMap<>()))
-                .collect(Collectors.toList());
+        return pricesPerType.keySet().stream().map(key -> reducePrices(key, pricesPerType)).filter(Optional::isPresent).map(price -> new PriceDTO(price.get(), new HashMap<>())).collect(Collectors.toList());
     }
 
     protected Optional<QuotePrice> reducePrices(PriceTypeEnum key, Map<PriceTypeEnum, List<QuotePrice>> pricesPerType) {

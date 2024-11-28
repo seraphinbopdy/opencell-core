@@ -1,6 +1,7 @@
 package org.meveo.service.billing;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -36,89 +37,89 @@ import org.mockito.stubbing.Answer;
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceInstanceServiceTest {
 
-	@Spy
-	@InjectMocks
-	private ServiceInstanceService serviceInstanceService;
+    @Spy
+    @InjectMocks
+    private ServiceInstanceService serviceInstanceService;
 
-	@Mock
-	private PaymentScheduleTemplateService paymentScheduleTemplateService;
+    @Mock
+    private PaymentScheduleTemplateService paymentScheduleTemplateService;
 
-	@Mock
-	private RecurringChargeInstanceService recurringChargeInstanceService;
+    @Mock
+    private RecurringChargeInstanceService recurringChargeInstanceService;
 
-	@Mock
-	private ServiceInstance serviceInstance;
+    @Mock
+    private ServiceInstance serviceInstance;
 
-	@Before
-	public void setUp() {
-		ServiceTemplate serviceTemplate = new ServiceTemplate();
-		doReturn(serviceTemplate).when(serviceInstance).getServiceTemplate();
-		doReturn(serviceInstance).when(serviceInstanceService).update(serviceInstance);
-		doReturn(new PaymentScheduleTemplate()).when(paymentScheduleTemplateService).findByServiceTemplate(serviceTemplate);
-	}
+    @Before
+    public void setUp() {
+        ServiceTemplate serviceTemplate = new ServiceTemplate();
+        doReturn(serviceTemplate).when(serviceInstance).getServiceTemplate();
+        doReturn(serviceInstance).when(serviceInstanceService).update(serviceInstance);
+        doReturn(new PaymentScheduleTemplate()).when(paymentScheduleTemplateService).findByServiceTemplate(serviceTemplate);
+    }
 
-	@Test
-	public void testTerminateSuspendedService() {
+    @Test
+    public void testTerminateSuspendedService() {
 
-		Date suspensionDate = DateUtils.newDate(2021, 3, 1, 0, 0, 0);
-		Date terminationDate = DateUtils.newDate(2021, 6, 22, 0, 0, 0);
-		Date subscriptionDate = DateUtils.newDate(2021, 1, 1, 0, 0, 0);
+        Date suspensionDate = DateUtils.newDate(2021, 3, 1, 0, 0, 0);
+        Date terminationDate = DateUtils.newDate(2021, 6, 22, 0, 0, 0);
+        Date subscriptionDate = DateUtils.newDate(2021, 1, 1, 0, 0, 0);
 
-		Subscription subscription = new Subscription();
-		subscription.setSubscriptionDate(subscriptionDate);
-		InstanceStatusEnum suspendedStatus = InstanceStatusEnum.SUSPENDED;
+        Subscription subscription = new Subscription();
+        subscription.setSubscriptionDate(subscriptionDate);
+        InstanceStatusEnum suspendedStatus = InstanceStatusEnum.SUSPENDED;
 
-		RecurringChargeTemplate recurringChargeTemplate = mock(RecurringChargeTemplate.class);
-		SubscriptionTerminationReason terminationReason = mock(SubscriptionTerminationReason.class);
+        RecurringChargeTemplate recurringChargeTemplate = mock(RecurringChargeTemplate.class);
+        SubscriptionTerminationReason terminationReason = mock(SubscriptionTerminationReason.class);
 
-		when(serviceInstance.getStatus()).thenReturn(suspendedStatus);
-		when(serviceInstance.getSubscription()).thenReturn(subscription);
-		when(serviceInstance.getRecurringChargeInstances()).thenAnswer(new Answer<List<RecurringChargeInstance>>() {
-			public List<RecurringChargeInstance> answer(InvocationOnMock invocation) throws Throwable {
-				RecurringChargeInstance chargeInstance = new RecurringChargeInstance();
-				chargeInstance.setServiceInstance((ServiceInstance) invocation.getMock());
-				chargeInstance.setRecurringChargeTemplate(recurringChargeTemplate);
-				chargeInstance.setChargedToDate(suspensionDate);
-				chargeInstance.setStatus(suspendedStatus);
-				return Arrays.asList(chargeInstance);
-			}
-		});
+        when(serviceInstance.getStatus()).thenReturn(suspendedStatus);
+        when(serviceInstance.getSubscription()).thenReturn(subscription);
+        when(serviceInstance.getRecurringChargeInstances()).thenAnswer(new Answer<List<RecurringChargeInstance>>() {
+            public List<RecurringChargeInstance> answer(InvocationOnMock invocation) throws Throwable {
+                RecurringChargeInstance chargeInstance = new RecurringChargeInstance();
+                chargeInstance.setServiceInstance((ServiceInstance) invocation.getMock());
+                chargeInstance.setRecurringChargeTemplate(recurringChargeTemplate);
+                chargeInstance.setChargedToDate(suspensionDate);
+                chargeInstance.setStatus(suspendedStatus);
+                return Arrays.asList(chargeInstance);
+            }
+        });
 
-		serviceInstance = serviceInstanceService.terminateService(serviceInstance, terminationDate, terminationReason, null);
-		// Do not apply a rating during the suspend period
-		verify(recurringChargeInstanceService, never()).applyRecuringChargeToEndAgreementDate(any(), any(), terminationReason.isInvoiceAgreementImmediately(), terminationDate);
-	}
+        serviceInstance = serviceInstanceService.terminateService(serviceInstance, terminationDate, terminationReason, null);
+        // Do not apply a rating during the suspend period
+        verify(recurringChargeInstanceService, never()).applyRecuringChargeToEndAgreementDate(any(), any(), eq(terminationReason.isInvoiceAgreementImmediately()), eq(terminationDate));
+    }
 
-	@Test
-	public void testTerminateSuspendedServiceWithChargeNeverRated() {
-		
-		Date terminationDate = DateUtils.newDate(2021, 6, 22, 0, 0, 0);
-		Date subscriptionDate = DateUtils.newDate(2021, 1, 1, 0, 0, 0);
-		
-		Subscription subscription = new Subscription();
-		subscription.setSubscriptionDate(subscriptionDate);
-		InstanceStatusEnum suspendedStatus = InstanceStatusEnum.SUSPENDED;
-		
-		RecurringChargeTemplate recurringChargeTemplate = mock(RecurringChargeTemplate.class);
-		SubscriptionTerminationReason terminationReason = mock(SubscriptionTerminationReason.class);
-		
-		when(serviceInstance.getStatus()).thenReturn(suspendedStatus);
-		when(serviceInstance.getSubscription()).thenReturn(subscription);
-		when(serviceInstance.getRecurringChargeInstances()).thenAnswer(new Answer<List<RecurringChargeInstance>>() {
-			public List<RecurringChargeInstance> answer(InvocationOnMock invocation) throws Throwable {
-				RecurringChargeInstance chargeInstance = new RecurringChargeInstance();
-				chargeInstance.setChargeDate(subscriptionDate);
-				chargeInstance.setChargedToDate(null);
-				chargeInstance.setApplyInAdvance(false);
-				chargeInstance.setStatus(suspendedStatus);
-				chargeInstance.setRecurringChargeTemplate(recurringChargeTemplate);
-				chargeInstance.setServiceInstance((ServiceInstance) invocation.getMock());
-				return Arrays.asList(chargeInstance);
-			}
-		});
-		
-		serviceInstance = serviceInstanceService.terminateService(serviceInstance, terminationDate, terminationReason, null);
-		// Do not apply a rating during the suspend period even with charge never been applied before (chargedToDate = null)
-		verify(recurringChargeInstanceService, never()).applyRecuringChargeToEndAgreementDate(any(), any(), terminationReason.isInvoiceAgreementImmediately(), terminationDate);
-	}
+    @Test
+    public void testTerminateSuspendedServiceWithChargeNeverRated() {
+
+        Date terminationDate = DateUtils.newDate(2021, 6, 22, 0, 0, 0);
+        Date subscriptionDate = DateUtils.newDate(2021, 1, 1, 0, 0, 0);
+
+        Subscription subscription = new Subscription();
+        subscription.setSubscriptionDate(subscriptionDate);
+        InstanceStatusEnum suspendedStatus = InstanceStatusEnum.SUSPENDED;
+
+        RecurringChargeTemplate recurringChargeTemplate = mock(RecurringChargeTemplate.class);
+        SubscriptionTerminationReason terminationReason = mock(SubscriptionTerminationReason.class);
+
+        when(serviceInstance.getStatus()).thenReturn(suspendedStatus);
+        when(serviceInstance.getSubscription()).thenReturn(subscription);
+        when(serviceInstance.getRecurringChargeInstances()).thenAnswer(new Answer<List<RecurringChargeInstance>>() {
+            public List<RecurringChargeInstance> answer(InvocationOnMock invocation) throws Throwable {
+                RecurringChargeInstance chargeInstance = new RecurringChargeInstance();
+                chargeInstance.setChargeDate(subscriptionDate);
+                chargeInstance.setChargedToDate(null);
+                chargeInstance.setApplyInAdvance(false);
+                chargeInstance.setStatus(suspendedStatus);
+                chargeInstance.setRecurringChargeTemplate(recurringChargeTemplate);
+                chargeInstance.setServiceInstance((ServiceInstance) invocation.getMock());
+                return Arrays.asList(chargeInstance);
+            }
+        });
+
+        serviceInstance = serviceInstanceService.terminateService(serviceInstance, terminationDate, terminationReason, null);
+        // Do not apply a rating during the suspend period even with charge never been applied before (chargedToDate = null)
+        verify(recurringChargeInstanceService, never()).applyRecuringChargeToEndAgreementDate(any(), any(), eq(terminationReason.isInvoiceAgreementImmediately()), eq(terminationDate));
+    }
 }

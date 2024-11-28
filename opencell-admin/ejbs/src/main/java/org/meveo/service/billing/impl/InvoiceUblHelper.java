@@ -789,13 +789,14 @@ public class InvoiceUblHelper {
 			partyType.setPostalAddress(postalAddress);
 		}
 		// AccountingCustomerParty/Party/PartyTaxScheme/CompanyID
-		if(StringUtils.isNotBlank(billingAccount.getVatNo()) || ( billingAccount.getSeller() != null && billingAccount.getVatNo() != null)){
+		if(StringUtils.isNotBlank(billingAccount.getVatNo()) || ( billingAccount.getSeller() != null && billingAccount.getSeller().getVatNo() != null)){
 			// AccountingSupplierParty/Party/PartyTaxScheme/CompanyID
+			var vatNo = StringUtils.isNotBlank(billingAccount.getVatNo()) ? billingAccount.getVatNo() : billingAccount.getSeller().getVatNo();
 			PartyTaxScheme partyTaxScheme = objectFactoryCommonAggrement.createPartyTaxScheme();
 			CompanyID companyID = objectFactorycommonBasic.createCompanyID();
 			companyID.setSchemeAgencyID("ZZZ");
 			companyID.setSchemeID(address.getCountry() != null ? address.getCountry().getCountryCode() : null );
-			companyID.setValue(billingAccount.getVatNo());
+			companyID.setValue(vatNo);
 			partyTaxScheme.setCompanyID(companyID);
 			partyTaxScheme.setTaxScheme(getTaxSheme());
 			partyType.getPartyTaxSchemes().add(partyTaxScheme);

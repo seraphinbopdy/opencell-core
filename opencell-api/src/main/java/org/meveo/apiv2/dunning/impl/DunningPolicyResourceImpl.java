@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toList;
 import static org.meveo.apiv2.ordering.common.LinkGenerator.getUriBuilderFromResource;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.inject.Inject;
 import jakarta.interceptor.Interceptors;
@@ -90,10 +91,8 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
 			    throw new NotFoundException("The maximum number of dunning levels per policy is exceeded - The maximum number is " + maxNumberOfDunningLevelsByDunningPolicy);
 		    }
 	    }
-		
-		if(dunningSetting != null &&  dunningSetting.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL && CollectionUtils.isNotEmpty(dunningPolicy.getDunningPolicyLevels())) {
-			throw  new BadRequestException("No reminder can be configured or executed on this dunning mode");
-		}
+
+        validatePolicyContainsReminder(dunningPolicy, dunningSetting);
 
         org.meveo.model.dunning.DunningPolicy savedEntity = dunningPolicyApiService.create(mapper.toEntity(dunningPolicy));
         int totalDunningLevels = 0;
@@ -140,6 +139,29 @@ public class DunningPolicyResourceImpl implements DunningPolicyResource {
         } catch (Exception exception) {
             dunningPolicyService.remove(savedEntity);
             throw new BadRequestException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Check if policy contains reminder.
+     *
+     * @param dunningPolicy the dunning policy
+     * @param dunningSetting the dunning setting
+     */
+    private void validatePolicyContainsReminder(DunningPolicy dunningPolicy, org.meveo.model.dunning.DunningSettings dunningSetting) {
+        AtomicBoolean reminderLevel = new AtomicBoolean(false);
+        if (dunningPolicy.getDunningPolicyLevels() != null && !dunningPolicy.getDunningPolicyLevels().isEmpty()) {
+            dunningPolicy.getDunningPolicyLevels().forEach(dunningPolicyLevel -> {
+                DunningPolicyLevel dunningPolicyLevelEntity = policyLevelMapper.toEntity(dunningPolicyLevel);
+                dunningPolicyApiService.refreshPolicyLevel(dunningPolicyLevelEntity);
+                if (Boolean.TRUE.equals(dunningPolicyLevelEntity.getDunningLevel().isReminder())) {
+                    reminderLevel.set(true);
+                }
+            });
+        }
+
+        if(dunningSetting != null && dunningSetting.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL && reminderLevel.get()) {
+            throw  new BadRequestException("No reminder can be configured or executed on this dunning mode");
         }
     }
 

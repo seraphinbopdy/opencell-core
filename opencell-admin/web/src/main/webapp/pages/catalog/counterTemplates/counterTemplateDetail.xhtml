@@ -36,6 +36,7 @@
                             counterTemplatId:keyElId counterTemplatId:valueElId"
                             actionListenerBean="#{counterTemplateBean}"
                             actionListenerMethod="updateCounterTypeAndCounterLevel"/>
+            <hftl:formField label="#{messages['counterTemplate.counterType.isSharedCounter']}" id="sharedCounter" field="sharedCounter"/>
             <hftl:formField label="#{messages['counterTemplate.counterType']}" id="counterType" field="counterType" required="true"/>
             <hftl:formField label="#{messages['billingCycle.calendar']}" field="calendar" valueLabelField="code" required="true" listBean="#{calendarBean}"/>
             <hftl:formField label="#{messages['counterTemplate.counterLevel']}" id="counterLevel" field="counterLevel" required="true"

@@ -17636,5 +17636,11 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="description_i18n" value='{"ENG": "Afrikaans", "FRA": "Afrikaans"}'/>
         </insert>
     </changeSet>
+    
+   	<changeSet id="#INTRD-26593_20241129" author="TarikFA.">
+        <addColumn tableName="cat_counter_template">
+            <column name="shared_counter"  type="${type.boolean}" defaultValueNumeric="0" />
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

@@ -164,6 +164,13 @@ public class CounterTemplate extends EnableBusinessEntity {
     @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "managed_byapp")
     private boolean managedByApp = true;
+	
+	/**
+	 * The field can be disable/enable accumulator counter automatic application
+	 */
+	@Type(type = "numeric_boolean")
+	@Column(name = "shared_counter")
+	private boolean sharedCounter = Boolean.FALSE;
 
     public CounterTypeEnum getCounterType() {
         return counterType;
@@ -317,4 +324,12 @@ public class CounterTemplate extends EnableBusinessEntity {
         this.managedByApp = managedByApp;
     }
 
+    public boolean isSharedCounter() {
+		return sharedCounter;
+	}
+	
+	public void setSharedCounter(boolean sharedCounter) {
+		this.sharedCounter = sharedCounter;
+	}
+    
 }

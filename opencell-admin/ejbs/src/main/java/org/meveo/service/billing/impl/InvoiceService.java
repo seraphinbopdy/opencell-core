@@ -7225,6 +7225,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             duplicateInvoiceLine.setLinkedInvoiceLine(invoiceLine); // Add linked adjusted invoiceLine
             invoiceLinesService.createInvoiceLineWithInvoice(duplicateInvoiceLine, duplicateInvoice, true);
         }
+        getEntityManager().flush();
         if(duplicateInvoice.getInvoiceLines() != null && !duplicateInvoice.getInvoiceLines().isEmpty()) {
             duplicateInvoice.setStatus(DRAFT);
             update(duplicateInvoice);

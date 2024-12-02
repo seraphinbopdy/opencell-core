@@ -1592,16 +1592,16 @@ public class NativePersistenceService extends BaseService {
 
     private Object extractString(Object value, Class targetClass, CustomFieldTemplate cft) {
         if (targetClass == String.class) {
-            if (cft.getRegExp() != null) {
+            if (!StringUtils.isBlank(cft.getRegExp())) {
                 final Pattern pattern = Pattern.compile(cft.getRegExp());
                 if (!pattern.matcher((String) value).matches()) {
-                    throw new ValidationException("value of String " + value + " not accepted for regexp" + pattern.toString());
+                    throw new ValidationException("Value of String " + value + " does not match for regexp " + pattern.toString());
                 }
             }
             if (CustomFieldTypeEnum.LIST.equals(cft.getFieldType())) {
                 Map<String, String> listValues = cft.getListValuesSorted();
                 if (!listValues.containsKey(value)) {
-                    throw new ValidationException("value " + value + " is not accepted as value for enum " + cft.getCode());
+                    throw new ValidationException("Value " + value + " is not accepted as value for enum " + cft.getCode());
                 }
             }
         } else if (value instanceof java.sql.Timestamp) {

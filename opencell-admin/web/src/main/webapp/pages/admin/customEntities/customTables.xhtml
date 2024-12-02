@@ -161,15 +161,15 @@
 				<p:dataTable id="ctSearchResults" value="#{customTableBean.dataModel}" var="entity" lazy="true" widgetVar="ctTable"
 					paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}" paginator="true" rows="10"
 					rowsPerPageTemplate="10,15,20,50" resizableColumns="true" styleClass="custom-grid" reflow="true" editable="#{customTableBean.edit}" editMode="cell"
-					selection="#{customTableBean.selectedValues}" sortBy="id">
+					selection="#{customTableBean.selectedValues}">
 					<p:ajax event="cellEdit" listener="#{customTableBean.onCellEdit}" update="@form" partialSubmit="true" partialSubmitFilter=":not([name*='addUpdateFields'])" />/>
                     <p:ajax event="cellEditCancel" partialSubmit="true" partialSubmitFilter=":not([name*='addUpdateFields'])" />/>
 
                     <p:column id="multiSelect" selectionMode="multiple" width="4%" exportable="false" toggleable="false" />
-					<p:column headerText="id" sortBy="#{id}">
+					<p:column headerText="id">
 						<h:outputText value="#{entity['id']}" />
 					</p:column>
-					<p:columns value="#{customTableBean.fields}" var="field" headerText="#{field.getDescription(customTableBean.currentLocale.ISO3Language)}" sortBy="#{field.dbFieldname}">
+					<p:columns value="#{customTableBean.fields}" var="field" headerText="#{field.getDescription(customTableBean.currentLocale.ISO3Language)}">
 						<p:cellEditor>
 							<f:facet name="output">
 								<h:outputText id="#{entity[field.dbFieldname]}_out_date" value="#{entity[field.dbFieldname]}" styleClass="field-value"

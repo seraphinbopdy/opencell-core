@@ -114,6 +114,11 @@ public class CounterTemplateDto extends EnableBusinessDto implements Serializabl
      * The field can be disable/enable accumulator counter
      */
     private Boolean managedByApp;
+	
+	/**
+	 * the field can enable shared counter
+	 */
+	private Boolean sharedCounter;
 
     /**
      * Instantiates a new counter template dto.
@@ -142,6 +147,7 @@ public class CounterTemplateDto extends EnableBusinessDto implements Serializabl
         keyEl = counterTemplate.getKeyEl();
         valueEl = counterTemplate.getValueEl();
         managedByApp=counterTemplate.isManagedByApp();
+		sharedCounter=counterTemplate.isSharedCounter();
     }
 
     /**
@@ -402,7 +408,15 @@ public class CounterTemplateDto extends EnableBusinessDto implements Serializabl
     @Override
     public String toString() {
         return String.format(
-            "CounterTemplateDto [code=%s, description=%s, calendar=%s, calendarCodeEl=%s, unity=%s, type=%s, ceiling=%s, disabled=%s, counterLevel=%s, ceilingExpressionEl=%s, notificationLevels=%s, managedByApp=%s]",
-            getCode(), getDescription(), calendar, calendarCodeEl, unity, type, ceiling, isDisabled(), counterLevel, ceilingExpressionEl, notificationLevels,managedByApp);
+            "CounterTemplateDto [code=%s, description=%s, calendar=%s, calendarCodeEl=%s, unity=%s, type=%s, ceiling=%s, disabled=%s, counterLevel=%s, ceilingExpressionEl=%s, notificationLevels=%s, managedByApp=%s, sharedCounter=%s]",
+            getCode(), getDescription(), calendar, calendarCodeEl, unity, type, ceiling, isDisabled(), counterLevel, ceilingExpressionEl, notificationLevels,managedByApp, sharedCounter);
     }
+	
+	public Boolean getSharedCounter() {
+		return sharedCounter;
+	}
+	
+	public void setSharedCounter(Boolean sharedCounter) {
+		this.sharedCounter = sharedCounter;
+	}
 }

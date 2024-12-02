@@ -478,6 +478,20 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             .getResultList();
         return pricesVersions.isEmpty() ? null : pricesVersions.get(0);
     }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public PricePlanMatrixVersion getLastPricePlanMatrixtVersionWithCollections(String ppmCode) {
+        PricePlanMatrixVersion version = getLastPricePlanMatrixtVersion(ppmCode);
+        if (version != null) {
+            // Initialize collections
+            version.getColumns().size();
+            version.getLines().size();
+            for (PricePlanMatrixLine line : version.getLines()) {
+                line.getPricePlanMatrixValues().size();
+            }
+        }
+        return version;
+    }
 
     private Map<Long, PricePlanMatrixColumn> duplicateColumns(PricePlanMatrixVersion entity, Set<PricePlanMatrixColumn> columns) {
         var ids = new HashMap<Long, PricePlanMatrixColumn>();

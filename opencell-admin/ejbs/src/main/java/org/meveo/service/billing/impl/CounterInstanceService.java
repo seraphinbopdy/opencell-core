@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.meveo.admin.exception.CounterInstantiationException;
@@ -40,6 +41,7 @@ import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.CounterValueChangeInfo;
 import org.meveo.model.ICounterEntity;
+import org.meveo.model.RatingResult;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ChargeInstance;
 import org.meveo.model.billing.CounterInstance;
@@ -913,10 +915,11 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
      * @param chargeInstance Charge instance counter is associated to
      * @param walletOperations Wallet operations to increment accumulate counter for
      * @param isVirtual Is this a virtual operation - no counter period entity exists nor should be persisted
+     * @param ratingResult if the ratingResult is not null, counter changes will be traced
      * @return A list of Counter value change summary - the previous, deduced and new counter value
      * @throws CounterInstantiationException Failure to create a new counter period
      */
-    public List<CounterValueChangeInfo> incrementAccumulatorCounterValue(ChargeInstance chargeInstance, List<WalletOperation> walletOperations, boolean isVirtual,boolean verifyManagedByApp) throws CounterInstantiationException {
+    public List<CounterValueChangeInfo> incrementAccumulatorCounterValue(ChargeInstance chargeInstance, List<WalletOperation> walletOperations, boolean isVirtual,boolean verifyManagedByApp, RatingResult ratingResult) throws CounterInstantiationException {
         List<CounterValueChangeInfo> counterValueChangeInfos = new ArrayList<CounterValueChangeInfo>();
 
         for (CounterInstance counterInstance : chargeInstance.getAccumulatorCounterInstances()) {
@@ -936,8 +939,26 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
             }
 
         }
+        Optional.ofNullable(ratingResult).ifPresent(result -> result.addCounterChange(counterValueChangeInfos));
         return counterValueChangeInfos;
 
+    }
+    
+    /**
+     * Increment accumulator counter by a given value. Will instantiate a counter period if one was not created yet matching the given date
+     *
+     * <br/>
+     * <br/>
+     * <u>Method does a concurrency lock by chargeInstance.id value</u>
+     * 
+     * @param chargeInstance Charge instance counter is associated to
+     * @param walletOperations Wallet operations to increment accumulate counter for
+     * @param isVirtual Is this a virtual operation - no counter period entity exists nor should be persisted
+     * @return A list of Counter value change summary - the previous, deduced and new counter value
+     * @throws CounterInstantiationException Failure to create a new counter period
+     */
+    public List<CounterValueChangeInfo> incrementAccumulatorCounterValue(ChargeInstance chargeInstance, List<WalletOperation> walletOperations, boolean isVirtual,boolean verifyManagedByApp) throws CounterInstantiationException {
+        return incrementAccumulatorCounterValue(chargeInstance, walletOperations, verifyManagedByApp, verifyManagedByApp, null);
     }
 
     /**

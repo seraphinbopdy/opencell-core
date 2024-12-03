@@ -187,6 +187,12 @@ public class PaymentScript extends Script implements PaymentScriptInterface {
 
     public static final String CONTEXT_HOSTED_CO_ID = "CONTEXT_HOSTED_CO_ID";
 
+	public static final String CONTEXT_CCVV = "CVV";
+	
+	public static final String CONTEXT_PRE_AUTH_ID = "CONTEXT_PRE_AUTH_ID";
+
+	public static final String CONTEXT_MERCHANT_PARAMS = "CONTEXT_MERCHANT_PARAMS";
+
 
     @Override
     public void doPaymentCard(Map<String, Object> methodContext) throws BusinessException {
@@ -218,6 +224,10 @@ public class PaymentScript extends Script implements PaymentScriptInterface {
 
     @Override
     public void createCardToken(Map<String, Object> methodContext) throws BusinessException {
+    }
+    
+    @Override
+    public void createCardCvvToken(Map<String, Object> methodContext) throws BusinessException {
     }
 
     @Override
@@ -258,5 +268,7 @@ public class PaymentScript extends Script implements PaymentScriptInterface {
     public void getHostedCheckoutStatus(Map<String, Object> methodContext) throws BusinessException {
     }
 
-
+	@Override
+	public void capturePayment(Map<String, Object> methodContext) throws BusinessException {
+	}
 }

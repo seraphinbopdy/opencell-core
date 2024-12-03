@@ -7681,6 +7681,7 @@
 			<column name="mandate_change_action" type="varchar(20)" defaultValue="NONE">
                 <constraints nullable="false" />
 			</column>
+			<column name="pre_authorisation_id" type="varchar(255)"  />
         </createTable>
     </changeSet>
 
@@ -20778,6 +20779,7 @@
     <changeSet id="INTRD-25809_20241023" author="ZakariaB" />
     <changeSet id="#INTRD-25224_20240909" author="Mohammed_ElAzzouzi" />
     <changeSet id="INTRD-26817_20241126" author="AndriusKarpavicius"/>
+    <changeSet id="#INTRD-25643-202401011" author="anasseh" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

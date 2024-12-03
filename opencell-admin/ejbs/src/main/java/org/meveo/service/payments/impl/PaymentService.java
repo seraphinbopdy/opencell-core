@@ -399,9 +399,11 @@ public class PaymentService extends PersistenceService<Payment> {
 				preferredMethod = addCardFromPayment(tokenId, customerAccount, cardNumber, cardType, ownerName, cvv, expiryDate);				
 			}
 			
-			  preferredMethod.setUserId(doPaymentResponseDto.getCodeClientSide());
-	            preferredMethod = paymentMethodService.update(preferredMethod);
-	            
+			preferredMethod.setUserId(doPaymentResponseDto.getCodeClientSide());
+	        preferredMethod = paymentMethodService.update(preferredMethod);
+	        
+	        String preAuthId = null;
+	        
             if (PaymentMethodEnum.CARD == paymentMethodType) {
             	if(!isNewCard) {
 	                if (!(preferredMethod instanceof CardPaymentMethod)) {
@@ -422,7 +424,12 @@ public class PaymentService extends PersistenceService<Payment> {
                     if (isNewCard) {
                         doPaymentResponseDto = gatewayPaymentInterface.doPaymentCard(customerAccount, ctsAmount, cardNumber, ownerName, cvv, expiryDate, cardType, null, null);
                     } else {
-                        doPaymentResponseDto = gatewayPaymentInterface.doPaymentToken(((CardPaymentMethod) preferredMethod), ctsAmount, null);
+                    	preAuthId =  ((CardPaymentMethod) preferredMethod).getPreAuthorisationId();                        	
+                    	if(preAuthId == null) {                    		
+                    		doPaymentResponseDto = gatewayPaymentInterface.doPaymentToken(((CardPaymentMethod) preferredMethod), ctsAmount, null);
+                    	}else {                    		
+                    		doPaymentResponseDto = gatewayPaymentInterface.capturePayment(preAuthId, ctsAmount, preAuthId);
+                    	}
                     }
                 } else {
                     if (isNewCard) {
@@ -471,6 +478,10 @@ public class PaymentService extends PersistenceService<Payment> {
 
 			if(payment != null) {
 				payment.setReference(doPaymentResponseDto.getPaymentID());
+				if( preAuthId != null) {
+					((CardPaymentMethod) preferredMethod).setPreAuthorisationId(null); 
+					paymentMethodService.updateNoCheck(preferredMethod);				
+				}
 			}
 			if(refund != null) {
 				refund.setReference(doPaymentResponseDto.getPaymentID());

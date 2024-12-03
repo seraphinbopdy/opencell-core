@@ -128,6 +128,8 @@ import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenCardD
  * @author Mbarek-Ay
  * @lastModifiedVersion 10.0.0 
  */
+
+@Deprecated //use IngenicoDirectGatewayPayment
 @PaymentGatewayClass
 public class IngenicoGatewayPayment implements GatewayPaymentInterface {
 
@@ -1032,4 +1034,17 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
 
         return customerAccountService;
     }
+
+	@Override
+	public String createCardCvvToken(CustomerAccount customerAccount, String alias, String cardNumber,
+			String cardHolderName, String expirayDate, String issueNumber, CreditCardTypeEnum cardType, String cvv)
+			throws BusinessException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public PaymentResponseDto capturePayment(String preAuthorisationId, Long ctsAmount, String merchantParameters)
+			throws BusinessException {
+		throw new UnsupportedOperationException();
+	}
 }

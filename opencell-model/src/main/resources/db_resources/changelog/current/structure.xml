@@ -15623,5 +15623,11 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         <modifyDataType tableName="meveo_script_instance" columnName="description" newDataType="varchar(255)"/>
         <modifyDataType tableName="batch_entity" columnName="description" newDataType="varchar(255)"/>
     </changeSet>
+    
+    <changeSet id="#INTRD-25643-202401011" author="anasseh">
+       <addColumn tableName="ar_payment_token">
+            <column name="pre_authorisation_id" type="varchar(255)"  />
+        </addColumn>
+    </changeSet> 
 
 </databaseChangeLog>

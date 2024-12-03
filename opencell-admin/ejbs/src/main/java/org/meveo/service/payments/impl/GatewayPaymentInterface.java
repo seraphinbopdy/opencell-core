@@ -69,12 +69,30 @@ public interface GatewayPaymentInterface {
      * @param cardHolderName Card holder's name on the card
      * @param expirayDate Expiry date of the card Format: MMYY ,Required for Create and Update token.
      * @param issueNumber Issue number on the card (if applicable)
-     * @param cardType ( Visa | American Express | MasterCard)
+     * @param cardType ( Visa | American Express | MasterCard | CB)
      * @return cart token.
      * @throws BusinessException business exception
      */
     public String createCardToken(CustomerAccount customerAccount, String alias, String cardNumber, String cardHolderName, String expirayDate, String issueNumber,
             CreditCardTypeEnum cardType) throws BusinessException;
+    
+    /**
+     * Declare a card with cvv on the psp and return the token for the future uses.
+     * 
+     * @param customerAccount customer account.
+     * @param alias An alias for the token. This can be used to visually represent the token. If no alias is given in Create token calls, a payment product specific default is
+     *        used, e.g. the obfuscated card number for card payment products.Do not include any unobfuscated sensitive data in the alias.
+     * @param cardNumber The complete credit/debit card number (also know as the PAN),Required for Create and Update token.
+     * @param cardHolderName Card holder's name on the card
+     * @param expirayDate Expiry date of the card Format: MMYY ,Required for Create and Update token.
+     * @param issueNumber Issue number on the card (if applicable)
+     * @param cardType ( Visa | American Express | MasterCard |CB)
+     * @param cvv Card Verification Value, a 3 or 4 digit code used as an additional security feature for card not present transactions.
+     * @return cart token.
+     * @throws BusinessException business exception
+     */
+    public String createCardCvvToken(CustomerAccount customerAccount, String alias, String cardNumber, String cardHolderName, String expirayDate, String issueNumber,
+            CreditCardTypeEnum cardType,String cvv) throws BusinessException;
 
     /**
      * Initiate a payment with token.
@@ -253,4 +271,19 @@ public interface GatewayPaymentInterface {
      * @throws BusinessException business exception
      */
     public void approveSepaDDMandate(String token,Date signatureDate) throws BusinessException;
+    
+
+    /**
+     * When you want to capture the funds on a payment with a PENDING_CAPTURE state you can call this API. This API allows multiple, partial captures of the authorized funds.
+     *
+     * @param preAuthorisationId
+     * @param ctsAmount The amount that you want to capture (specified in cents, where single digit currencies are presumed to have 2 digits). The amount can be lower than the amount that was authorized, but not higher. If left empty, the full amount will be captured and the request will be final. If the full amount is captured, the request will also be final.
+     * @param merchantParameters It allows you to store additional parameters for the transaction in the format you prefer (e.g.-> key-value query string, JSON, etc.) These parameters are then echoed back to you in API GET calls and Webhook notifications. This field must not contain any personal data.
+     * @return payment by card response dto
+     * @throws BusinessException
+
+     */
+	public PaymentResponseDto capturePayment(String preAuthorisationId, Long ctsAmount, String merchantParameters)throws BusinessException ;
+
+
 }

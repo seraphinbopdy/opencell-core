@@ -582,4 +582,17 @@ public class AtosWalletGatewayPayment implements GatewayPaymentInterface {
     public HostedCheckoutStatusResponseDto getHostedCheckoutStatus(String id) throws BusinessException {
         throw new UnsupportedOperationException();
     }
+
+	@Override
+	public String createCardCvvToken(CustomerAccount customerAccount, String alias, String cardNumber,
+			String cardHolderName, String expirayDate, String issueNumber, CreditCardTypeEnum cardType, String cvv)
+			throws BusinessException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public PaymentResponseDto capturePayment(String preAuthorisationId, Long ctsAmount, String merchantParameters)
+			throws BusinessException {
+		throw new UnsupportedOperationException();
+	}
 }

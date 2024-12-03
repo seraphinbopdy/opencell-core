@@ -327,28 +327,30 @@ public class AuditDataHierarchy implements Serializable {
      */
     public static Object matchMapKeyRecursively(Map<String, ?> mapToInspect, String keyToMatch, boolean fullMatch, boolean isValuesChangedField) {
 
-        if (fullMatch && mapToInspect.containsKey(keyToMatch)) {
-            return mapToInspect.get(keyToMatch);
+        if(mapToInspect != null) {
+            if (fullMatch && mapToInspect.containsKey(keyToMatch)) {
+                return mapToInspect.get(keyToMatch);
 
-        } else {
-            for (Entry<String, ?> entry : mapToInspect.entrySet()) {
-                if (!fullMatch && entry.getKey().startsWith(keyToMatch)) {
-                    return entry.getValue();
-                } else if (entry.getValue() instanceof Map) {
-                    @SuppressWarnings("unchecked")
-                    Object matched = matchMapKeyRecursively((Map<String, ?>) entry.getValue(), keyToMatch, fullMatch, isValuesChangedField);
-                    if (matched != null) {
-                        return matched;
-                    }
-                } else if (entry.getValue() instanceof AuditDataLog && isValuesChangedField) {
-                    Object matched = matchMapKeyRecursively(((AuditDataLog) entry.getValue()).getValuesChanged(), keyToMatch, fullMatch, isValuesChangedField);
-                    if (matched != null) {
-                        return matched;
-                    }
-                } else if (entry.getValue() instanceof AuditDataLog && !isValuesChangedField) {
-                    Object matched = matchMapKeyRecursively(((AuditDataLog) entry.getValue()).getValuesOld(), keyToMatch, fullMatch, isValuesChangedField);
-                    if (matched != null) {
-                        return matched;
+            } else {
+                for (Entry<String, ?> entry : mapToInspect.entrySet()) {
+                    if (!fullMatch && entry.getKey().startsWith(keyToMatch)) {
+                        return entry.getValue();
+                    } else if (entry.getValue() instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Object matched = matchMapKeyRecursively((Map<String, ?>) entry.getValue(), keyToMatch, fullMatch, isValuesChangedField);
+                        if (matched != null) {
+                            return matched;
+                        }
+                    } else if (entry.getValue() instanceof AuditDataLog && isValuesChangedField) {
+                        Object matched = matchMapKeyRecursively(((AuditDataLog) entry.getValue()).getValuesChanged(), keyToMatch, fullMatch, isValuesChangedField);
+                        if (matched != null) {
+                            return matched;
+                        }
+                    } else if (entry.getValue() instanceof AuditDataLog && !isValuesChangedField) {
+                        Object matched = matchMapKeyRecursively(((AuditDataLog) entry.getValue()).getValuesOld(), keyToMatch, fullMatch, isValuesChangedField);
+                        if (matched != null) {
+                            return matched;
+                        }
                     }
                 }
             }

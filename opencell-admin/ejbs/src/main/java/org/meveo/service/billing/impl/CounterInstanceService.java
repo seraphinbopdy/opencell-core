@@ -134,15 +134,23 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
 
     public CounterInstance counterInstanciation(ServiceInstance serviceInstance, CounterTemplate counterTemplate, ChargeInstance chargeInstance, boolean isVirtual) {
 
-        CounterInstance counterInstance = instantiateCounter(counterTemplate, serviceInstance, chargeInstance, isVirtual);
-
-        // Need a commit, so when creating counter periods in the same TX, counter instance is already present in DB
-        commit();
-
-        return counterInstance;
+      return counterInstanciation(serviceInstance, counterTemplate, chargeInstance, isVirtual, null);
     }
-
-    /**
+	
+	public CounterInstance counterInstanciation(ServiceInstance serviceInstance, CounterTemplate counterTemplate, ChargeInstance chargeInstance, boolean isVirtual, CounterInstance counterInstanceShared) {
+		var isCounterSharedExist = counterInstanceShared != null;
+		CounterInstance counterInstance = instantiateCounter(counterTemplate, serviceInstance, chargeInstance, isVirtual, counterInstanceShared);
+		// Need a commit, so when creating counter periods in the same TX, counter instance is already present in DB
+		if(!isCounterSharedExist) {
+			commit();
+		}
+		
+		
+		return counterInstance;
+	}
+	
+	
+	/**
      * New transactionnal method, used for new API CounterInstance, to avoid force commit added in existing one
      * @param serviceInstance service instance
      * @param counterTemplate template
@@ -153,38 +161,40 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
     public CounterInstance counterInstanciationWithoutForceCommit(ServiceInstance serviceInstance, CounterTemplate counterTemplate, ChargeInstance chargeInstance, boolean isVirtual) {
         return instantiateCounter(counterTemplate, serviceInstance, chargeInstance, isVirtual);
     }
-
-    private CounterInstance instantiateCounter(CounterTemplate counterTemplate, ServiceInstance serviceInstance, ChargeInstance chargeInstance, boolean isVirtual) {
-        CounterInstance counterInstance = null;
-
-        switch (counterTemplate.getCounterLevel()) {
-            case CUST:
-
-                counterInstance = instantiateCounter(customerService, customerService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount().getBillingAccount().getCustomerAccount().getCustomer()), counterTemplate, chargeInstance, isVirtual);
-                break;
-
-            case CA:
-                counterInstance = instantiateCounter(customerAccountService, customerAccountService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount().getBillingAccount().getCustomerAccount()), counterTemplate, chargeInstance, isVirtual);
-                break;
-
-            case BA:
-                counterInstance = instantiateCounter(billingAccountService, billingAccountService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount().getBillingAccount()), counterTemplate, chargeInstance, isVirtual);
-                break;
-
-            case UA:
-                counterInstance = instantiateCounter(userAccountService, userAccountService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount()), counterTemplate, chargeInstance, isVirtual);
-                break;
-
-            case SU:
-                counterInstance = instantiateCounter(subscriptionService, subscriptionService.refreshOrRetrieve(serviceInstance.getSubscription()), counterTemplate, chargeInstance, isVirtual);
-                break;
-
-            case SI:
-                counterInstance = instantiateCounter(serviceInstanceService, serviceInstance, counterTemplate, chargeInstance, isVirtual);
-                break;
-        }
-        return counterInstance;
-    }
+	
+	private CounterInstance instantiateCounter(CounterTemplate counterTemplate, ServiceInstance serviceInstance, ChargeInstance chargeInstance, boolean isVirtual) {
+		return instantiateCounter(counterTemplate, serviceInstance, chargeInstance, isVirtual, null);
+	}
+	
+	private CounterInstance instantiateCounter(CounterTemplate counterTemplate, ServiceInstance serviceInstance, ChargeInstance chargeInstance, boolean isVirtual, CounterInstance counterInstance) {
+		switch (counterTemplate.getCounterLevel()) {
+			case CUST:
+				
+				counterInstance = instantiateCounter(customerService, customerService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount().getBillingAccount().getCustomerAccount().getCustomer()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+				break;
+			
+			case CA:
+				counterInstance = instantiateCounter(customerAccountService, customerAccountService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount().getBillingAccount().getCustomerAccount()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+				break;
+			
+			case BA:
+				counterInstance = instantiateCounter(billingAccountService, billingAccountService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount().getBillingAccount()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+				break;
+			
+			case UA:
+				counterInstance = instantiateCounter(userAccountService, userAccountService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+				break;
+			
+			case SU:
+				counterInstance = instantiateCounter(subscriptionService, subscriptionService.refreshOrRetrieve(serviceInstance.getSubscription()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+				break;
+			
+			case SI:
+				counterInstance = instantiateCounter(serviceInstanceService, serviceInstance, counterTemplate, chargeInstance, isVirtual, counterInstance);
+				break;
+		}
+		return counterInstance;
+	}
 
     /**
      * Instantiate a counter for a business entity
@@ -197,43 +207,69 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private CounterInstance instantiateCounter(BusinessService service, ICounterEntity entity, CounterTemplate counterTemplate, ChargeInstance chargeInstance, boolean isVirtual) {
-        CounterInstance counterInstance = new CounterInstance();
-        if (!entity.getCounters().containsKey(counterTemplate.getCode()) || chargeInstance.getAccumulatorCounterInstances().stream().noneMatch(c -> c.getCode().equals(counterTemplate.getCode()))) {
-            counterInstance.setCounterTemplate(counterTemplate);
-
-            if (entity instanceof Customer) {
-                counterInstance.setCustomer((Customer) entity);
-            } else if (entity instanceof CustomerAccount) {
-                counterInstance.setCustomerAccount((CustomerAccount) entity);
-            } else if (entity instanceof BillingAccount) {
-                counterInstance.setBillingAccount((BillingAccount) entity);
-            } else if (entity instanceof UserAccount) {
-                counterInstance.setUserAccount((UserAccount) entity);
-            } else if (entity instanceof Subscription) {
-                counterInstance.setSubscription((Subscription) entity);
-            } else if (entity instanceof ServiceInstance) {
-                counterInstance.setServiceInstance((ServiceInstance) entity);
-            }
-            
-            if(counterTemplate.getAccumulator() != null && counterTemplate.getAccumulator()) {
-                chargeInstance.addAccumulatorCounterInstance(counterInstance);
-                genericChargeInstanceService.update(chargeInstance);
-            }
-
-            if (!isVirtual) {
-                create(counterInstance);
-            }
-
-            entity.getCounters().put(counterTemplate.getCode(), counterInstance);
-
-            if (!isVirtual) {
-                service.update((BusinessEntity) entity);
-            }
-        } else {
-            counterInstance = entity.getCounters().get(counterTemplate.getCode());
-        }
-        return counterInstance;
+      return instantiateCounter(service, entity, counterTemplate, chargeInstance, isVirtual, null);
     }
+	
+	/**
+	 * Instantiate a counter for a business entity
+	 *
+	 * @param service the business service to manage the entity that counter is instantiated for
+	 * @param entity the business entity Entity to instantiate the counter for
+	 * @param counterTemplate the counter template
+	 * @param isVirtual is virtual
+	 * @param counterInstanceShared shared counter instance
+	 * @return a counter instance
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private CounterInstance instantiateCounter(BusinessService service, ICounterEntity entity, CounterTemplate counterTemplate, ChargeInstance chargeInstance, boolean isVirtual, CounterInstance counterInstanceShared) {
+		if(counterInstanceShared != null) {
+			if(counterTemplate.getAccumulator() != null && counterTemplate.getAccumulator()) {
+				chargeInstance.addAccumulatorCounterInstance(counterInstanceShared);
+				genericChargeInstanceService.update(chargeInstance);
+			}
+			entity.getCounters().put(counterTemplate.getCode(), counterInstanceShared);
+			if (!isVirtual) {
+				service.update((BusinessEntity) entity);
+			}
+			return counterInstanceShared;
+		}
+		CounterInstance counterInstance = new CounterInstance();
+		if (!entity.getCounters().containsKey(counterTemplate.getCode()) || chargeInstance.getAccumulatorCounterInstances().stream().noneMatch(c -> c.getCode().equals(counterTemplate.getCode()))) {
+			counterInstance.setCounterTemplate(counterTemplate);
+			
+			if (entity instanceof Customer) {
+				counterInstance.setCustomer((Customer) entity);
+			} else if (entity instanceof CustomerAccount) {
+				counterInstance.setCustomerAccount((CustomerAccount) entity);
+			} else if (entity instanceof BillingAccount) {
+				counterInstance.setBillingAccount((BillingAccount) entity);
+			} else if (entity instanceof UserAccount) {
+				counterInstance.setUserAccount((UserAccount) entity);
+			} else if (entity instanceof Subscription) {
+				counterInstance.setSubscription((Subscription) entity);
+			} else if (entity instanceof ServiceInstance) {
+				counterInstance.setServiceInstance((ServiceInstance) entity);
+			}
+			
+			if(counterTemplate.getAccumulator() != null && counterTemplate.getAccumulator()) {
+				chargeInstance.addAccumulatorCounterInstance(counterInstance);
+				genericChargeInstanceService.update(chargeInstance);
+			}
+			
+			if (!isVirtual) {
+				create(counterInstance);
+			}
+			
+			entity.getCounters().put(counterTemplate.getCode(), counterInstance);
+			
+			if (!isVirtual) {
+				service.update((BusinessEntity) entity);
+			}
+		} else {
+			counterInstance = entity.getCounters().get(counterTemplate.getCode());
+		}
+		return counterInstance;
+	}
 
     /**
      * Instantiate and attach a counter to a notification entity
@@ -1147,6 +1183,8 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
 
         return ids;
     }
+	
+	
 
     /**
      * Get a list of updated counter periods
@@ -1175,4 +1213,44 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
         virtualCounterInstances.setVirtualCounters(virtualCounters);
         counterUpdatesTracking.setCounterUpdates(counterUpdates);
     }
+	
+	
+	public List<Long> findByCounterbyLevel(String counterTemplateCode, CounterTemplateLevel level) {
+		List<Long> ids = new ArrayList<>();
+		try {
+			if (CounterTemplateLevel.CA.equals(level)) {
+				ids = (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndCustomer").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
+			}
+			if (CounterTemplateLevel.CUST.equals(level)) {
+				ids = (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndCustomerAccount").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
+			}
+			if (CounterTemplateLevel.BA.equals(level)) {
+				ids = (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndBillingAccount").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
+			}
+			if (CounterTemplateLevel.UA.equals(level)) {
+				ids = (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndUserAccount").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
+			}
+			if (CounterTemplateLevel.SU.equals(level)) {
+				ids = (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndSubscription").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
+			}
+			if (CounterTemplateLevel.SI.equals(level)) {
+				ids = (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndService").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
+			}
+			
+		} catch (Exception e) {
+			log.error("findByCounterAndAccounts error ", e.getMessage());
+		}
+		
+		return ids;
+	}
+	public List<Long> findByCounterbyLevelShared(String counterTemplateCode, CounterTemplateLevel level) {
+		List<Long> ids = new ArrayList<>();
+		switch (level) {
+			case SI:
+				return (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndServiceShared").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
+			case SU:
+				return (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndSubscriptionShared").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
+		}
+		return ids;
+	}
 }

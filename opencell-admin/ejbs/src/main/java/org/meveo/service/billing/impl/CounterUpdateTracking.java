@@ -32,12 +32,23 @@ public class CounterUpdateTracking {
      * @param counterValueChangeInfo Counter value change details
      */
     public void addCounterPeriodChange(CounterPeriod counterPeriod, CounterValueChangeInfo counterValueChangeInfo) {
-
+		
         if (counterUpdates == null) {
             counterUpdates = new HashMap<String, List<CounterPeriod>>();
         }
+	    
+	    String key = counterPeriod.getCounterInstance().getId() + "-" + counterPeriod.getCode();
+		
+	    var counterTemplate = counterPeriod.getCounterInstance().getCounterTemplate();
+	    if(counterTemplate.isSharedCounter() && counterTemplate.getAccumulator() == Boolean.TRUE) {
+		    counterPeriod.setValue(counterPeriod.getValue() != null ? counterPeriod.getValue().add(counterValueChangeInfo.getDeltaValue()) : counterValueChangeInfo.getDeltaValue());
+		    counterUpdates.put(key, List.of(counterPeriod));
+		    if (counterPeriod.getAccumulatedValues() != null) {
+			    counterPeriod.setAccumulatedValues(new HashMap<String, BigDecimal>(counterPeriod.getAccumulatedValues()));
+		    }
+		    return;
+	    }
 
-        String key = counterPeriod.getCounterInstance().getId() + "-" + counterPeriod.getCode();
         List<CounterPeriod> counterPeriods = counterUpdates.get(key);
 
         if (counterPeriods == null) {

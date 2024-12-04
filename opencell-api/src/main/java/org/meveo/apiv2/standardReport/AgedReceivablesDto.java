@@ -6,11 +6,11 @@ import org.immutables.value.Value;
 import org.meveo.apiv2.generic.GenericPagingAndFiltering;
 import org.meveo.apiv2.models.Resource;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import java.util.Date;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableAgedReceivablesDto.class)
 public interface AgedReceivablesDto extends Resource {
 

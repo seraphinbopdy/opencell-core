@@ -4,12 +4,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
@@ -19,6 +13,12 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 @Stateless
 public class ArticleMappingJobBean extends IteratorBasedScopedJobBean<AccountingArticleAssignmentItem> {

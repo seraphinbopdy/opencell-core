@@ -38,8 +38,7 @@ public enum EnvelopeFormatEnum {
         return PaperFormatEnum.getLargerFormatSmallerOrEqualThan(heightInMillimeters, widhtInMillimeter, serie);
     }
 
-    public static EnvelopeFormatEnum getSmallestContainingFormat(PaperFormatEnum paperFormat, int withFoldingNumber, int heightFoldingNumber,
-            List<EnvelopeFormatEnum> excludedFormats) {
+    public static EnvelopeFormatEnum getSmallestContainingFormat(PaperFormatEnum paperFormat, int withFoldingNumber, int heightFoldingNumber, List<EnvelopeFormatEnum> excludedFormats) {
         EnvelopeFormatEnum result = null;
         if (withFoldingNumber <= 0) {
             withFoldingNumber = 1;

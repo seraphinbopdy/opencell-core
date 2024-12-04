@@ -20,19 +20,23 @@ package org.meveo.api.dto.billing;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.xml.bind.annotation.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.meveo.api.dto.CustomFieldsDto;
-import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.catalog.ServiceCharge;
 import org.meveo.model.catalog.ServiceTemplate;
-import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.ProductVersion;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
  * The Class ServiceToInstantiateDto.

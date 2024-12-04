@@ -28,10 +28,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.inject.Inject;
-
 import org.infinispan.Cache;
 import org.infinispan.commons.CacheException;
 import org.infinispan.context.Flag;
@@ -41,19 +37,22 @@ import org.meveo.security.MeveoUser;
 import org.meveo.service.metrics.configuration.MetricsConfigurationService;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.inject.Inject;
+
 /**
  * Provides cache related services (tracking running jobs) for job running related operations
  *
  * @author Andrius Karpavicius
  */
-public class MetricsConfigurationCacheContainerProvider implements Serializable {
+public class MetricsConfigurationCacheContainerProvider implements CacheContainerProvider, Serializable {
 
     @Inject
     protected Logger log;
 
     /**
-     * Contains association between metrics and cluster nodes it runs in.
-     * Key format: &lt;metricsName&gt;, value: List of &lt;cluster node name&gt;
+     * Contains association between metrics and cluster nodes it runs in. Key format: &lt;metricsName&gt;, value: List of &lt;cluster node name&gt;
      */
     @Resource(lookup = "java:jboss/infinispan/cache/opencell/opencell-metrics-config")
     private Cache<CacheKeyStr, Map<String, Map<String, String>>> metricsConfigCache;
@@ -71,6 +70,7 @@ public class MetricsConfigurationCacheContainerProvider implements Serializable 
      * @return A list of a map containing cache information with cache name as a key and cache as a value
      */
     @SuppressWarnings("rawtypes")
+    @Override
     public Map<String, Cache> getCaches() {
         Map<String, Cache> summaryOfCaches = new HashMap<>();
         summaryOfCaches.put(metricsConfigCache.getName(), metricsConfigCache);
@@ -83,12 +83,13 @@ public class MetricsConfigurationCacheContainerProvider implements Serializable 
      *
      * @param cacheName Name of cache to refresh or null to refresh all caches
      */
+    @Override
     @Asynchronous
     public void refreshCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(metricsConfigCache.getName())) {
             clear();
-            populateJobCache();
+            populateMetricsConfigCache();
         }
     }
 
@@ -97,7 +98,7 @@ public class MetricsConfigurationCacheContainerProvider implements Serializable 
      */
     public void clearAndUpdateCache() {
         clear();
-        populateJobCache();
+        populateMetricsConfigCache();
     }
 
     /**
@@ -105,10 +106,11 @@ public class MetricsConfigurationCacheContainerProvider implements Serializable 
      *
      * @param cacheName Name of cache to populate or null to populate all caches
      */
+    @Override
     public void populateCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(metricsConfigCache.getName())) {
-            populateJobCache();
+            populateMetricsConfigCache();
         }
     }
 
@@ -169,7 +171,7 @@ public class MetricsConfigurationCacheContainerProvider implements Serializable 
     /**
      * Initialize cache for all metrics
      */
-    private void populateJobCache() {
+    private void populateMetricsConfigCache() {
         log.debug("Start to pre-populate metrics cache of provider {}.", currentUser.getProviderCode());
         List<MetricsConfiguration> list = metricsConfigurationService.findAllForCache();
         Map<String, Map<String, Map<String, String>>> entries = new HashMap<>();

@@ -1,19 +1,28 @@
 package org.meveo.model.article;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.enums.RuleOperatorEnum;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @CustomFieldEntity(cftCodePrefix = "Attribute_Mapping")
 @Table(name = "billing_attribute_mapping")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-        parameters = { @org.hibernate.annotations.Parameter(name = "sequence_name", value = "billing_attribute_mapping_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {
+        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "billing_attribute_mapping_seq"), @Parameter(name = "increment_size", value = "1") })
 @Cacheable
 public class AttributeMapping extends AuditableEntity {
 

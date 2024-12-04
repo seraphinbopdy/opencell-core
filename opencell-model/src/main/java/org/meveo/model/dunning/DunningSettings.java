@@ -4,25 +4,26 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.payments.CustomerBalance;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * @author Mbarek-Ay
@@ -30,8 +31,7 @@ import org.meveo.model.payments.CustomerBalance;
  */
 @Entity
 @Table(name = "dunning_settings", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "dunning_settings_seq") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_settings_seq"), @Parameter(name = "increment_size", value = "1") })
 public class DunningSettings extends BusinessEntity {
 
     private static final long serialVersionUID = 1L;
@@ -40,8 +40,8 @@ public class DunningSettings extends BusinessEntity {
         super();
     }
 
-    public DunningSettings(DunningModeEnum dunningMode, Integer maxDunningLevels, int maxDaysOutstanding, boolean allowInterestForDelay, BigDecimal interestForDelayRate,
-            boolean allowDunningCharges, boolean applyDunningChargeFxExchangeRate, AccountingArticle accountingArticle) {
+    public DunningSettings(DunningModeEnum dunningMode, Integer maxDunningLevels, int maxDaysOutstanding, boolean allowInterestForDelay, BigDecimal interestForDelayRate, boolean allowDunningCharges,
+            boolean applyDunningChargeFxExchangeRate, AccountingArticle accountingArticle) {
         super();
         this.dunningMode = dunningMode;
         this.maxDunningLevels = maxDunningLevels;
@@ -88,7 +88,7 @@ public class DunningSettings extends BusinessEntity {
     /**
      * Allow interest for delay
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "allow_interest_for_delay")
     private boolean allowInterestForDelay = true;
 
@@ -101,14 +101,14 @@ public class DunningSettings extends BusinessEntity {
     /**
      * Allow dunning charges
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "allow_dunning_charges")
     private boolean allowDunningCharges = true;
 
     /**
      * apply dunning charge fx exchange_rate
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "apply_dunning_charge_fx_exchange_rate")
     private boolean applyDunningChargeFxExchangeRate = true;
 
@@ -122,7 +122,6 @@ public class DunningSettings extends BusinessEntity {
 
     @OneToMany(mappedBy = "dunningSettings", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DunningAgent> dunningAgents = new ArrayList<>();
-
 
     @OneToMany(mappedBy = "dunningSettings", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DunningCollectionPlanStatus> dunningCollectionPlanStatuses = new ArrayList<>();
@@ -211,6 +210,7 @@ public class DunningSettings extends BusinessEntity {
     public void setDunningAgents(List<DunningAgent> dunningAgents) {
         this.dunningAgents = dunningAgents;
     }
+
     public List<DunningCollectionPlanStatus> getDunningCollectionPlanStatuses() {
         return dunningCollectionPlanStatuses;
     }

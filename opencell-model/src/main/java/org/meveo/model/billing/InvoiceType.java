@@ -21,12 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.*;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ExportIdentifier;
@@ -36,6 +35,23 @@ import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.communication.email.MailingTypeEnum;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.scripts.ScriptInstance;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 
 /**
  * @author Edward P. Legaspi
@@ -49,8 +65,7 @@ import org.meveo.model.scripts.ScriptInstance;
 @ExportIdentifier({ "code" })
 @Table(name = "billing_invoice_type", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
 @CustomFieldEntity(cftCodePrefix = "InvoiceType")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_invoice_type_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_type_seq"), @Parameter(name = "increment_size", value = "1") })
 public class InvoiceType extends BusinessCFEntity {
 
     private static final long serialVersionUID = 1L;
@@ -82,18 +97,18 @@ public class InvoiceType extends BusinessCFEntity {
     @OneToMany(mappedBy = "invoiceType", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceTypeSellerSequence> sellerSequence = new ArrayList<InvoiceTypeSellerSequence>();
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "matching_auto")
     private boolean matchingAuto = false;
     
     /** 
      * Used to decide if AccountOperations will be created or not , during AO_Job execution
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "invoice_accountable")
     private boolean invoiceAccountable = true;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "use_self_sequence")
     private boolean useSelfSequence = true;
 
@@ -138,7 +153,7 @@ public class InvoiceType extends BusinessCFEntity {
     /**
      * Exclude this invoiceType from Aged Balance
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "exclude_from_aged_trial_balance")
     private boolean excludeFromAgedTrialBalance = false;
     
@@ -160,7 +175,7 @@ public class InvoiceType extends BusinessCFEntity {
     @JoinColumn(name = "vat_payment_option_id")
     private UntdidVatPaymentOption untdidVatPaymentOption;
     
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;  
     
@@ -175,8 +190,6 @@ public class InvoiceType extends BusinessCFEntity {
 	public void setInvoiceValidationScript(ScriptInstance invoiceValidationScript) {
 		this.invoiceValidationScript = invoiceValidationScript;
 	}
-
-
 
 	public OCCTemplate getOccTemplate() {
         return occTemplate;
@@ -333,6 +346,7 @@ public class InvoiceType extends BusinessCFEntity {
 
     /**
      * Gets Email Template.
+     * 
      * @return Email Template.
      */
     public EmailTemplate getEmailTemplate() {
@@ -341,6 +355,7 @@ public class InvoiceType extends BusinessCFEntity {
 
     /**
      * Sets Email template.
+     * 
      * @param emailTemplate the Email template.
      */
     public void setEmailTemplate(EmailTemplate emailTemplate) {
@@ -349,6 +364,7 @@ public class InvoiceType extends BusinessCFEntity {
 
     /**
      * Gets Mailing Type.
+     * 
      * @return Mailing Type.
      */
     public MailingTypeEnum getMailingType() {
@@ -357,6 +373,7 @@ public class InvoiceType extends BusinessCFEntity {
 
     /**
      * Sets Mailing Type.
+     * 
      * @param mailingType mailing type
      */
     public void setMailingType(MailingTypeEnum mailingType) {
@@ -396,6 +413,7 @@ public class InvoiceType extends BusinessCFEntity {
 	public void setInvoiceValidationRules(List<InvoiceValidationRule> invoiceValidationRules) {
 		this.invoiceValidationRules = invoiceValidationRules;
 	}
+
 	public UntdidInvoiceCodeType getUntdidInvoiceCodeType() {
 		return untdidInvoiceCodeType;
 	}

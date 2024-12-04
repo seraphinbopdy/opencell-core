@@ -29,13 +29,12 @@ import static org.meveo.model.payments.PaymentMethodEnum.SIPS;
 import static org.meveo.model.payments.PaymentMethodEnum.STRIPEDIRECTLINK;
 
 import java.math.BigDecimal;
-import java.util.*;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.hibernate.proxy.HibernateProxy;
@@ -44,16 +43,51 @@ import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.PaymentException;
 import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.api.dto.payment.PaymentResponseDto;
-import org.meveo.api.exception.*;
+import org.meveo.api.exception.BusinessApiException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.api.exception.InvalidParameterException;
+import org.meveo.api.exception.MeveoApiException;
 import org.meveo.audit.logging.annotations.MeveoAudit;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.ExchangeRate;
 import org.meveo.model.billing.TradingCurrency;
-import org.meveo.model.payments.*;
+import org.meveo.model.payments.AccountOperation;
+import org.meveo.model.payments.AutomatedRefund;
+import org.meveo.model.payments.CardPaymentMethod;
+import org.meveo.model.payments.CreditCardTypeEnum;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.DDPaymentMethod;
+import org.meveo.model.payments.MatchingAmount;
+import org.meveo.model.payments.MatchingStatusEnum;
+import org.meveo.model.payments.MatchingTypeEnum;
+import org.meveo.model.payments.OCCTemplate;
+import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.payments.Payment;
+import org.meveo.model.payments.PaymentErrorEnum;
+import org.meveo.model.payments.PaymentErrorTypeEnum;
+import org.meveo.model.payments.PaymentGateway;
+import org.meveo.model.payments.PaymentHistory;
+import org.meveo.model.payments.PaymentMethod;
+import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.PaymentRejectionAction;
+import org.meveo.model.payments.PaymentRejectionActionReport;
+import org.meveo.model.payments.PaymentRejectionActionStatus;
+import org.meveo.model.payments.PaymentStatusEnum;
+import org.meveo.model.payments.RecordedInvoice;
+import org.meveo.model.payments.Refund;
+import org.meveo.model.payments.RejectedPayment;
+import org.meveo.model.payments.RejectedType;
+import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.JournalService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * Payment service implementation.
@@ -365,9 +399,11 @@ public class PaymentService extends PersistenceService<Payment> {
 				preferredMethod = addCardFromPayment(tokenId, customerAccount, cardNumber, cardType, ownerName, cvv, expiryDate);				
 			}
 			
-			  preferredMethod.setUserId(doPaymentResponseDto.getCodeClientSide());
-	            preferredMethod = paymentMethodService.update(preferredMethod);
-	            
+			preferredMethod.setUserId(doPaymentResponseDto.getCodeClientSide());
+	        preferredMethod = paymentMethodService.update(preferredMethod);
+	        
+	        String preAuthId = null;
+	        
             if (PaymentMethodEnum.CARD == paymentMethodType) {
             	if(!isNewCard) {
 	                if (!(preferredMethod instanceof CardPaymentMethod)) {
@@ -388,7 +424,12 @@ public class PaymentService extends PersistenceService<Payment> {
                     if (isNewCard) {
                         doPaymentResponseDto = gatewayPaymentInterface.doPaymentCard(customerAccount, ctsAmount, cardNumber, ownerName, cvv, expiryDate, cardType, null, null);
                     } else {
-                        doPaymentResponseDto = gatewayPaymentInterface.doPaymentToken(((CardPaymentMethod) preferredMethod), ctsAmount, null);
+                    	preAuthId =  ((CardPaymentMethod) preferredMethod).getPreAuthorisationId();                        	
+                    	if(preAuthId == null) {                    		
+                    		doPaymentResponseDto = gatewayPaymentInterface.doPaymentToken(((CardPaymentMethod) preferredMethod), ctsAmount, null);
+                    	}else {                    		
+                    		doPaymentResponseDto = gatewayPaymentInterface.capturePayment(preAuthId, ctsAmount, preAuthId);
+                    	}
                     }
                 } else {
                     if (isNewCard) {
@@ -437,6 +478,10 @@ public class PaymentService extends PersistenceService<Payment> {
 
 			if(payment != null) {
 				payment.setReference(doPaymentResponseDto.getPaymentID());
+				if( preAuthId != null) {
+					((CardPaymentMethod) preferredMethod).setPreAuthorisationId(null); 
+					paymentMethodService.updateNoCheck(preferredMethod);				
+				}
 			}
 			if(refund != null) {
 				refund.setReference(doPaymentResponseDto.getPaymentID());

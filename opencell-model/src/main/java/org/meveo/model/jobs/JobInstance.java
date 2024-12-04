@@ -22,27 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.commons.utils.JobCategoryEnumCoverter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
@@ -50,6 +34,24 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ModuleItem;
 import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.report.query.QueryScheduler;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * The Class JobInstance.
@@ -63,7 +65,7 @@ import org.meveo.model.report.query.QueryScheduler;
 @CustomFieldEntity(cftCodePrefix = "JobInstance", cftCodeFields = "jobTemplate")
 @ExportIdentifier({ "code" })
 @Table(name = "meveo_job_instance", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "meveo_job_instance_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "meveo_job_instance_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "JobInstance.listByTemplate", query = "SELECT ji FROM JobInstance ji where ji.jobTemplate=:jobTemplate order by ji.code"),
         @NamedQuery(name = "JobInstance.findByJobTemplate", query = "select ji FROM JobInstance ji WHERE ji.jobTemplate=:jobTemplate") })
 public class JobInstance extends EnableBusinessCFEntity {
@@ -140,21 +142,21 @@ public class JobInstance extends EnableBusinessCFEntity {
     private JobClusterBehaviorEnum clusterBehavior;
 
     /** The include invoices without amount. */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "exclude_inv_without_amount")
     private boolean excludeInvoicesWithoutAmount = false;
 
     /**
      * Whether a verbose error log will be kept.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "verbose_report")
     private boolean verboseReport = true;
 
     /**
      * If job should stop on error.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "stop_on_error")
     private boolean stopOnError = false;
     
@@ -162,7 +164,7 @@ public class JobInstance extends EnableBusinessCFEntity {
      * If the next job should be started on error.
      */
     @NotNull
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "process_next_job_on_error")
     private boolean processNextJobOnError = true;
 
@@ -176,7 +178,7 @@ public class JobInstance extends EnableBusinessCFEntity {
     /**
      * Description of the job in different languages
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 

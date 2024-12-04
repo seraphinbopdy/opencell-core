@@ -2,8 +2,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
-    xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:hftl="http://hftl.org"
-    xmlns:l="http://www.lapis.com/jsf/exporter">
+    xmlns:p="http://primefaces.org/ui" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:hftl="http://hftl.org" >
 
 <!-- 
 
@@ -135,7 +134,7 @@
 
         <h:form id="#{formId}" prependId="false" onkeypress="if (event.keyCode == 13) {return false;}">
             <p:dataTable id="datatable_#{resultsId}" var="entity" scrollable="#{scrollable}" value="#{dataModel}" paginator="true" rows="10" editable="#{editable}" editMode="#{editMode}"
-                widgetVar="cellEntity_#{resultsId}" selection="#{backingBean.selectedEntities}" sortBy="#{'sortBy'}" sortField="#{sortBy}" sortOrder="#{sortOrder}" paginatorAlwaysVisible="#{paginatorAlwaysVisible}"
+                widgetVar="cellEntity_#{resultsId}" selection="#{backingBean.selectedEntities}" paginatorAlwaysVisible="#{paginatorAlwaysVisible}"
                 paginatorTemplate="${prePaginatorControls} {RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                 rowsPerPageTemplate="#{rowsPerPage}" lazy="true" resizableColumns="true" styleClass="custom-grid #{styleClass}" rowKey="#{entity.id}" first="#{backingBean.dataTableFirstAttribute}"
                 reflow="true" paginatorPosition="#{paginatorPosition}">
@@ -162,46 +161,46 @@
             </p:dataTable>
 
             <h:panelGroup rendered="#{dataModel !=null and dataModel.size()>0}">
-                <p:commandButton id="#{formId}deleteEntitieslink" rendered="#{deleteManyButton}" value="#{messages['commons.deleteMultiple']}" action="#{backingBean.deleteMany()}" icon="ui-icon-trash"
+                <p:commandButton id="#{formId}deleteEntitieslink" rendered="#{deleteManyButton}" value="#{messages['commons.deleteMultiple']}" action="#{backingBean.deleteMany()}" icon="pi pi-trash"
                     onclick="if(confirm('#{messages['commons.confirmDelete']}')){return true;}else{return false;}" update="@form" />
 
-                <p:commandButton id="#{formId}buttonExport" icon="ui-icon-xls" value="#{messages['commons.exportExcel']}" ajax="false" rendered="#{exportButton}">
+                <p:commandButton id="#{formId}buttonExport" icon="pi pi-file-excel" value="#{messages['commons.exportExcel']}" ajax="false" rendered="#{exportButton}">
                     <p:dataExporter type="xls" target="datatable_#{resultsId}" fileName="data" pageOnly="false" />
                 </p:commandButton>
-                <p:commandButton id="#{formId}buttonXlsxExport" icon="ui-icon-xls" value="#{messages['commons.exportExcel']}" ajax="false" rendered="#{exportXlsxButton}">
-                    <pe:exporter type="xlsx" target="datatable_#{resultsId}" fileName="data" pageOnly="false" skipComponents="true" selectionOnly="#{backingBean.selectedEntities.size()>0}" />
+                <p:commandButton id="#{formId}buttonXlsxExport" icon="pi pi-file-excel" value="#{messages['commons.exportExcel']}" ajax="false" rendered="#{exportXlsxButton}">
+                    <p:dataExporter type="xlsx" target="datatable_#{resultsId}" fileName="data" pageOnly="false" />
                 </p:commandButton>
-                <p:commandButton value="#{messages['commons.importCsv']}" rendered="#{importCsv and backingBean.canUserUpdateEntity()}" type="button" onclick="PF('csvDialog').show();" />
-                <p:commandButton id="#{formId}buttonCsvExport" value="#{messages['commons.exportCsv']}" ajax="false" rendered="#{exportToCsv}">
-                    <l:dataExporter fileType="csv" source="datatable_#{resultsId}" fileName="#{fileName}" fileOptions="#{backingBean.csvOptions()}" />
-                </p:commandButton>
-                <c:if test="#{exportToXml}">
-                    <p:commandButton id="#{formId}exportToXml" value="#{messages['export.exportToXml']}" update=":#{p:component('exportParametersDialog')}"
-                        oncomplete="PF('exportParametersDialog').show()">
-                        <f:setPropertyActionListener target="#{entityExportImportBean.selectedExportTemplate}" value="#{null}" />
-                        <f:setPropertyActionListener target="#{entityExportImportBean.dataModelToExport}" value="#{dataModel}" />
-                        <f:setPropertyActionListener target="#{entityExportImportBean.selectedEntitiesToExport}" value="#{backingBean.selectedEntities}" />
-                    </p:commandButton>
-                </c:if>
+<!--                 <p:commandButton value="#{messages['commons.importCsv']}" rendered="#{importCsv and backingBean.canUserUpdateEntity()}" type="button" onclick="PF('csvDialog').show();" /> -->
+<!--                 <p:commandButton id="#{formId}buttonCsvExport" value="#{messages['commons.exportCsv']}" ajax="false" rendered="#{exportToCsv}"> -->
+<!--                     <l:dataExporter fileType="csv" source="datatable_#{resultsId}" fileName="#{fileName}" fileOptions="#{backingBean.csvOptions()}" /> -->
+<!--                 </p:commandButton> -->
+<!--                 <c:if test="#{exportToXml}"> -->
+<!--                     <p:commandButton id="#{formId}exportToXml" value="#{messages['export.exportToXml']}" update="@([id$=exportParametersDialog])" -->
+<!--                         oncomplete="PF('exportParametersDialog').show()"> -->
+<!--                         <f:setPropertyActionListener target="#{entityExportImportBean.selectedExportTemplate}" value="#{null}" /> -->
+<!--                         <f:setPropertyActionListener target="#{entityExportImportBean.dataModelToExport}" value="#{dataModel}" /> -->
+<!--                         <f:setPropertyActionListener target="#{entityExportImportBean.selectedEntitiesToExport}" value="#{backingBean.selectedEntities}" /> -->
+<!--                     </p:commandButton> -->
+<!--                 </c:if> -->
 
             </h:panelGroup>
 
-            <p:dialog header="#{messages['commons.importCsv']}" id="#{formId}_strategyDlg" widgetVar="csvDialog" modal="true" closeOnEscape="true">
-                <p:messages autoUpdate="true" />
-                <hftl:decorateFormField fieldId="#{formId}_strategy" label="#{messages['notification.strategyImportType']}" rendered="#{importStrategy}">
-                    <p:selectOneMenu id="#{formId}_strategy" value="#{backingBean.strategyImportType}">
-                        <f:selectItem itemLabel="#{messages['commons.select']}" />
-                        <f:selectItem itemLabel="#{messages['enum.strategyImportTypeEnum.UPDATED']}" itemValue="UPDATED" />
-                        <f:selectItem itemLabel="#{messages['enum.strategyImportTypeEnum.REJECTE_IMPORT']}" itemValue="REJECTE_IMPORT" />
-                        <f:selectItem itemLabel="#{messages['enum.strategyImportTypeEnum.REJECT_EXISTING_RECORDS']}" itemValue="REJECT_EXISTING_RECORDS" />
-                        <p:ajax event="valueChange" update="@this"></p:ajax>
-                    </p:selectOneMenu>
-                </hftl:decorateFormField>
-                <div class="clearLeft">
-                    <p:fileUpload fileUploadListener="#{backingBean.handleFileUpload}" update="datatable_#{resultsId}" rendered="#{importCsv}" multiple="true" mode="advanced" dragDropSupport="true"
-                        fileLimit="5" process="@this #{formId}_strategy" />
-                </div>
-            </p:dialog>
+<!--             <p:dialog header="#{messages['commons.importCsv']}" id="#{formId}_strategyDlg" widgetVar="csvDialog" modal="true" closeOnEscape="true"> -->
+<!--                 <p:messages autoUpdate="true" /> -->
+<!--                 <hftl:decorateFormField fieldId="#{formId}_strategy" label="#{messages['notification.strategyImportType']}" rendered="#{importStrategy}"> -->
+<!--                     <p:selectOneMenu id="#{formId}_strategy" value="#{backingBean.strategyImportType}"> -->
+<!--                         <f:selectItem itemLabel="#{messages['commons.select']}" /> -->
+<!--                         <f:selectItem itemLabel="#{messages['enum.strategyImportTypeEnum.UPDATED']}" itemValue="UPDATED" /> -->
+<!--                         <f:selectItem itemLabel="#{messages['enum.strategyImportTypeEnum.REJECTE_IMPORT']}" itemValue="REJECTE_IMPORT" /> -->
+<!--                         <f:selectItem itemLabel="#{messages['enum.strategyImportTypeEnum.REJECT_EXISTING_RECORDS']}" itemValue="REJECT_EXISTING_RECORDS" /> -->
+<!--                         <p:ajax event="valueChange" update="@this"></p:ajax> -->
+<!--                     </p:selectOneMenu> -->
+<!--                 </hftl:decorateFormField> -->
+<!--                 <div class="clearLeft"> -->
+<!--                     <p:fileUpload fileUploadListener="#{backingBean.handleFileUpload}" update="datatable_#{resultsId}" rendered="#{importCsv}" multiple="true" mode="advanced" dragDropSupport="true" -->
+<!--                         fileLimit="5" process="@this #{formId}_strategy" /> -->
+<!--                 </div> -->
+<!--             </p:dialog> -->
             <p:panel styleClass="buttons-set-data-table">
                 <ui:insert name="add-on-buttons" />
             </p:panel>
@@ -219,7 +218,7 @@
         </h:form>
 
         <c:if test="#{exportToXml}">
-            <hftl:exportToXmlDialogs messagesId=":#{p:component('search_messages')}" />
+            <hftl:exportToXmlDialogs messagesId="@([id$=search_messages])" />
         </c:if>
     </p:panel>
 

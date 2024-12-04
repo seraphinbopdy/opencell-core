@@ -17,9 +17,9 @@
  */
 package org.meveo.admin.report;
 
-import javax.ejb.Local;
-
 import org.meveo.model.bi.Report;
+
+import jakarta.ejb.Local;
 
 @Local
 public interface Reporting {

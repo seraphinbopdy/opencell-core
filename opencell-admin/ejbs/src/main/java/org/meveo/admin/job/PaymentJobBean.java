@@ -28,15 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.async.SynchronizedIterator;
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.exception.NoAllOperationUnmatchedException;
-import org.meveo.admin.exception.UnbalanceAmountException;
 import org.meveo.admin.job.PaymentJobBean.PaymentItem;
 import org.meveo.api.dto.payment.PaymentResponseDto;
 import org.meveo.model.IEntity;
@@ -59,6 +51,11 @@ import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
 import org.meveo.service.script.payment.AccountOperationFilterScript;
 import org.meveo.service.script.payment.DateRangeScript;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job implementation to create payment or payout for all opened account operations.

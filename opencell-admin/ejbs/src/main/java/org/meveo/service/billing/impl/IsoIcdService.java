@@ -2,14 +2,14 @@ package org.meveo.service.billing.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.IsoIcd;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class IsoIcdService extends PersistenceService<IsoIcd> {

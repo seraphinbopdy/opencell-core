@@ -1,24 +1,29 @@
 package org.meveo.service.payments.impl;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.api.exception.EntityDoesNotExistsException;
-import org.meveo.model.crm.Provider;
-import org.meveo.model.payments.*;
-import org.meveo.service.script.ScriptInstanceService;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.model.crm.Provider;
+import org.meveo.model.payments.AccountOperation;
+import org.meveo.model.payments.CashPaymentMethod;
+import org.meveo.model.payments.CheckPaymentMethod;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.DDPaymentMethod;
+import org.meveo.model.payments.PaymentActionEnum;
+import org.meveo.model.payments.PaymentMethodEnum;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountOperationServiceTest {

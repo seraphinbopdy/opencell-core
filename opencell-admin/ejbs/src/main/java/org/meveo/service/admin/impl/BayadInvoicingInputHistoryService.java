@@ -17,10 +17,10 @@
  */
 package org.meveo.service.admin.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.admin.BayadInvoicingInputHistory;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Bayad invoicing input History service implementation.

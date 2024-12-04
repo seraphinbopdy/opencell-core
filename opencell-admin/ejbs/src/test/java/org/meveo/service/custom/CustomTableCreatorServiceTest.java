@@ -18,7 +18,8 @@
 
 package org.meveo.service.custom;
 
-import liquibase.change.AddColumnConfig;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -26,7 +27,7 @@ import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import liquibase.change.AddColumnConfig;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CustomTableCreatorServiceTest {
@@ -68,6 +69,6 @@ public class CustomTableCreatorServiceTest {
         //When
         sut.setColumnType(customFieldTemplate, addColumnConfig);
         //Then
-        assertThat(addColumnConfig.getType()).isEqualTo("boolean ");
+        assertThat(addColumnConfig.getType()).isEqualTo("int4 ");
     }
 }

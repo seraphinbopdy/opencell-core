@@ -20,13 +20,13 @@ package org.meveo.admin.job;
 
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.service.script.ScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 
 /**
  * The Class UnitFlatFileProcessingJobBean execute one line/record, in a new transaction.

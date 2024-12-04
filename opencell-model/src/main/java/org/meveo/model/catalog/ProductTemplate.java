@@ -21,20 +21,20 @@ package org.meveo.model.catalog;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OrderColumn;
-import javax.persistence.Transient;
-
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ICustomFieldEntity;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Transient;
 
 /**
  * @author Edward P. Legaspi
@@ -46,7 +46,7 @@ import org.meveo.model.ICustomFieldEntity;
 @DiscriminatorValue("PRODUCT")
 @NamedQueries({ @NamedQuery(name = "ProductTemplate.countActive", query = "SELECT COUNT(*) FROM ProductTemplate WHERE lifeCycleStatus='ACTIVE' "),
         @NamedQuery(name = "ProductTemplate.countDisabled", query = "SELECT COUNT(*) FROM ProductTemplate WHERE lifeCycleStatus<>'ACTIVE'"),
-        @NamedQuery(name = "ProductTemplate.countExpiring", query = "SELECT COUNT(*) FROM ProductTemplate WHERE :nowMinusXDay<validity.to and validity.to<=NOW()") })
+        @NamedQuery(name = "ProductTemplate.countExpiring", query = "SELECT COUNT(*) FROM ProductTemplate WHERE :nowMinusXDay<validity.to and validity.to<=function('NOW')") })
 public class ProductTemplate extends ProductOffering {
 
     private static final long serialVersionUID = 6380565206599659432L;
@@ -70,9 +70,6 @@ public class ProductTemplate extends ProductOffering {
     @JoinTable(name = "cat_product_wallet_template", joinColumns = @JoinColumn(name = "product_template_id"), inverseJoinColumns = @JoinColumn(name = "wallet_template_id"))
     @OrderColumn(name = "indx")
     private List<WalletTemplate> walletTemplates = new ArrayList<WalletTemplate>();
-    
-    
-	 
 
     public void addProductChargeTemplate(ProductChargeTemplate productChargeTemplate) {
         if (getProductChargeTemplates() == null) {
@@ -122,13 +119,11 @@ public class ProductTemplate extends ProductOffering {
 
     public void setWalletTemplates(List<WalletTemplate> walletTemplates) {
         this.walletTemplates = walletTemplates;
-    } 
-    
-	@Override
+    }
+
+    @Override
     public ICustomFieldEntity[] getParentCFEntities() {
         return null;
     }
-    
-	
-    
+
 }

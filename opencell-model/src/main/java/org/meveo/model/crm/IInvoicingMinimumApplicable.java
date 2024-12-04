@@ -8,15 +8,15 @@ import org.meveo.model.article.AccountingArticle;
 
 public interface IInvoicingMinimumApplicable {
 
-	public String getMinimumLabelEl();
+    public String getMinimumLabelEl();
 
-	public String getMinimumAmountEl();
+    public String getMinimumAmountEl();
 
-	public AccountingArticle getMinimumArticle();
+    public AccountingArticle getMinimumArticle();
 
-	public Seller getSeller();
+    public Seller getSeller();
 
-	public Long getId();
-	
-	public String getCode();
+    public Long getId();
+
+    public String getCode();
 }

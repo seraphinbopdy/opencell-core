@@ -21,14 +21,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.ResourceBundle;
-import org.meveo.api.exception.*;
+import org.meveo.api.exception.ActionForbiddenException;
+import org.meveo.api.exception.BusinessApiException;
+import org.meveo.api.exception.EntityAlreadyExistsException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.api.exception.MeveoApiException;
 import org.meveo.apiv2.dunning.DunningActionInstanceInput;
 import org.meveo.apiv2.dunning.DunningCollectionPlanPause;
 import org.meveo.apiv2.dunning.DunningCollectionPlanStop;
@@ -73,6 +72,11 @@ import org.meveo.service.payments.impl.DunningPauseReasonsService;
 import org.meveo.service.payments.impl.DunningPolicyLevelService;
 import org.meveo.service.payments.impl.DunningPolicyService;
 import org.meveo.service.payments.impl.DunningStopReasonsService;
+
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 public class DunningCollectionPlanApiService implements ApiService<DunningCollectionPlan> {
 
@@ -119,7 +123,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
 
     @Inject
     private AuditLogService auditLogService;
-    
+
     @Inject
     private CustomerAccountService customerAccountService;
     

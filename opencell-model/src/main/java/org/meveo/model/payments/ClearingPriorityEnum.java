@@ -6,7 +6,7 @@ package org.meveo.model.payments;
  * @author HHANINE
  */
 public enum ClearingPriorityEnum {
-	NEWEST(1, "Newest"), OLDEST(2, "Oldest"), SMALLEST(3, "Smallest"), BIGGEST(4, "Biggest");
+    NEWEST(1, "Newest"), OLDEST(2, "Oldest"), SMALLEST(3, "Smallest"), BIGGEST(4, "Biggest");
 
     private String label;
     private Integer id;

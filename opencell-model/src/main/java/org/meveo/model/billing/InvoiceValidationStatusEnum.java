@@ -1,4 +1,5 @@
 package org.meveo.model.billing;
-public enum InvoiceValidationStatusEnum{
-	REJECTED, SUSPECT, VALID
+
+public enum InvoiceValidationStatusEnum {
+    REJECTED, SUSPECT, VALID
 }

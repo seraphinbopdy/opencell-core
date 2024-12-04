@@ -1,6 +1,12 @@
 package org.meveo.service.payment;
 
 
+import static java.math.BigDecimal.valueOf;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.model.payments.AccountOperation;
@@ -10,12 +16,6 @@ import org.meveo.service.payments.impl.PaymentService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.List;
-
-import static java.math.BigDecimal.valueOf;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentServiceTest {

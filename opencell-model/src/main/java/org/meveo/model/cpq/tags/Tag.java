@@ -2,17 +2,25 @@ package org.meveo.model.cpq.tags;
 
 import java.util.Objects;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.crm.Customer;
-import org.meveo.model.ordering.OpenOrder;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * 
@@ -22,127 +30,120 @@ import org.meveo.model.ordering.OpenOrder;
  */
 @Entity
 @Table(name = "cpq_tag", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_tag_seq"), })
-@NamedQueries({
-		@NamedQuery(name = "Tag.findByTagType", query = "select t from Tag t where t.tagType.id=:id"),
-		@NamedQuery(name = "Tag.findByCode", query = "select t from Tag t where t.code.id=:code"),
-		@NamedQuery(name = "Tag.findByRequestedTagType", query = "select tag.code from Tag tag where tag.tagType.code IN (:requestedTagType)") 
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_tag_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "Tag.findByTagType", query = "select t from Tag t where t.tagType.id=:id"), @NamedQuery(name = "Tag.findByCode", query = "select t from Tag t where t.code=:code"),
+        @NamedQuery(name = "Tag.findByRequestedTagType", query = "select tag.code from Tag tag where tag.tagType.code IN (:requestedTagType)")
 
 })
 @Cacheable
 public class Tag extends BusinessEntity {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * seller associated to the entity
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "seller_id")
-	private Seller seller;
-	
-	
-	/**
-	 * translate the code of the tag to different language
-	 */
-	@Column(name = "name", length = 20, nullable = false)
-	@Size(max = 20)
-	@NotNull
-	private String name;
-	
-	/**
-	 * type of the tag, the seller of the type must be the same seller of the current tag
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "tag_type_id", nullable = false)
-	@NotNull
-	private TagType tagType;
-	
-	/**
-	 * link to parent tag, the seller of the parent must be the same as the current tag
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "parent_tag_id")
-	private Tag parentTag;
-	
-	/**
-	 * the expression of language used on this entity are from {@link Customer} and {@link Subscription}
-	 * 
-	 */
-	@Size(max = 2000)
-    @Column(name = "filter_el") 
-	private String filterEl;
- 
-	public String getName() {
-		return name;
-	}
+    /**
+     * seller associated to the entity
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * translate the code of the tag to different language
+     */
+    @Column(name = "name", length = 20, nullable = false)
+    @Size(max = 20)
+    @NotNull
+    private String name;
 
-	public TagType getTagType() {
-		return tagType;
-	}
+    /**
+     * type of the tag, the seller of the type must be the same seller of the current tag
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tag_type_id", nullable = false)
+    @NotNull
+    private TagType tagType;
 
-	public void setTagType(TagType tagType) {
-		this.tagType = tagType;
-	}
+    /**
+     * link to parent tag, the seller of the parent must be the same as the current tag
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_tag_id")
+    private Tag parentTag;
 
-	public Tag getParentTag() {
-		return parentTag;
-	}
+    /**
+     * the expression of language used on this entity are from {@link Customer} and {@link Subscription}
+     * 
+     */
+    @Size(max = 2000)
+    @Column(name = "filter_el")
+    private String filterEl;
 
-	public void setParentTag(Tag parentTag) {
-		this.parentTag = parentTag;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getFilterEl() {
-		return filterEl;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setFilterEl(String filterEl) {
-		this.filterEl = filterEl;
-	}
+    public TagType getTagType() {
+        return tagType;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(filterEl, name, parentTag, seller, tagType);
-		return result;
-	}
+    public void setTagType(TagType tagType) {
+        this.tagType = tagType;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Tag other = (Tag) obj;
-		return Objects.equals(filterEl, other.filterEl) && Objects.equals(name, other.name)
-				&& Objects.equals(parentTag, other.parentTag) && Objects.equals(seller, other.seller)
-				&& Objects.equals(tagType, other.tagType);
-	}
+    public Tag getParentTag() {
+        return parentTag;
+    }
 
-	/**
-	 * @return the seller
-	 */
-	public Seller getSeller() {
-		return seller;
-	}
+    public void setParentTag(Tag parentTag) {
+        this.parentTag = parentTag;
+    }
 
-	/**
-	 * @param seller the seller to set
-	 */
-	public void setSeller(Seller seller) {
-		this.seller = seller;
-	}
+    public String getFilterEl() {
+        return filterEl;
+    }
+
+    public void setFilterEl(String filterEl) {
+        this.filterEl = filterEl;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(filterEl, name, parentTag, seller, tagType);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Tag other = (Tag) obj;
+        return Objects.equals(filterEl, other.filterEl) && Objects.equals(name, other.name) && Objects.equals(parentTag, other.parentTag) && Objects.equals(seller, other.seller) && Objects.equals(tagType, other.tagType);
+    }
+
+    /**
+     * @return the seller
+     */
+    public Seller getSeller() {
+        return seller;
+    }
+
+    /**
+     * @param seller the seller to set
+     */
+    public void setSeller(Seller seller) {
+        this.seller = seller;
+    }
 }

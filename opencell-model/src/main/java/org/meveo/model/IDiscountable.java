@@ -18,11 +18,12 @@
 
 package org.meveo.model;
 
-import org.meveo.model.billing.DiscountPlanInstance;
-
 import java.util.List;
+
+import org.meveo.model.billing.DiscountPlanInstance;
 
 public interface IDiscountable {
     List<DiscountPlanInstance> getAllDiscountPlanInstances();
+
     void addDiscountPlanInstances(DiscountPlanInstance discountPlanInstance);
 }

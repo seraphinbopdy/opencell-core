@@ -18,15 +18,16 @@
 
 package org.meveo.api.rest;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.Provider;
-
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
+
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class JacksonProvider extends ResteasyJackson2Provider {
@@ -39,6 +40,7 @@ public class JacksonProvider extends ResteasyJackson2Provider {
         try {
              mapper.setDateFormat(new StdDefaultDateFormat());
              mapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+             mapper.registerModule(new JakartaXmlBindAnnotationModule());
         } catch (Exception e) {
             log.error(" error setting ObjectMapper DateFormat ", e);
         }

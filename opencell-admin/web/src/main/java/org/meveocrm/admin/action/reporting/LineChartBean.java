@@ -18,11 +18,11 @@
 
 package org.meveocrm.admin.action.reporting;
 
-import javax.faces.view.ViewScoped;
-import javax.inject.Named;
-
 import org.meveo.model.dwh.LineChart;
-import org.primefaces.model.chart.LineChartModel;
+import org.primefaces.model.charts.line.LineChartModel;
+
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Named;
 
 
 @Named

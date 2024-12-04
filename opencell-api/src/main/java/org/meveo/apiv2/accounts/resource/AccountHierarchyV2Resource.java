@@ -1,14 +1,14 @@
 package org.meveo.apiv2.accounts.resource;
 
-import io.swagger.v3.oas.annotations.Operation;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.account.CustomerHierarchyDto;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * API for managing account hierarchies.

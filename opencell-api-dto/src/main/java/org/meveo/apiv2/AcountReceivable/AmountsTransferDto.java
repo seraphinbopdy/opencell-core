@@ -1,15 +1,18 @@
 package org.meveo.apiv2.AcountReceivable;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Immutable
-@Style(jdkOnly = true)
+@Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableAmountsTransferDto.class)
 public interface AmountsTransferDto {
 	@Schema(description = "List of amounts to transfer")

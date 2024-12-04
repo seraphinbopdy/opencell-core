@@ -9,7 +9,6 @@
         <title>Opencell | Open Source Billing Platform</title>
         <link rel="shortcut icon" href="#{request.contextPath}/favicon.ico"/>
 
-        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/stylesheet/theme.css"/>
         <link rel="stylesheet" type="text/css" href="#{request.contextPath}/stylesheet/main.css"/>
         <link rel="stylesheet" type="text/css" href="#{request.contextPath}/stylesheet/custom.css"/>
 
@@ -17,16 +16,14 @@
 
         <h:outputScript name="js/jquery.cookie.js" library="layout"/>
         <h:outputScript name="js/equalHeight.js" library="layout"/>
-        <h:outputScript name="js/layout.js" library="layout"/>
+<!--         <h:outputScript name="js/layout.js" library="layout"/> -->
 
-        <h:outputStylesheet library="css" name="opencell-layout.css"></h:outputStylesheet>
+        <h:outputStylesheet library="css" name="opencell-layout.css"/>
     </h:head>
 
     <h:body styleClass="FixedTopBar OpencellMegaMenu">
 
         <f:view contentType="text/html" locale="#{localeSelector.currentLocale}">
-
-            <ui:insert name="metadata"/>
 
             <c:if test="#{!currentUser.hasRole('hideMenuHeaderFooter') }">
                 <div id="layout-topbar-cover">
@@ -54,8 +51,8 @@
             </p:ajaxStatus>
 
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" closeOnEscape="true">
-                <p:commandButton value="#{messages['commons.yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/>
-                <p:commandButton value="#{messages['commons.no']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close"/>
+                <p:commandButton value="#{messages['commons.yes']}" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check"/>
+                <p:commandButton value="#{messages['commons.no']}" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times"/>
             </p:confirmDialog>
 
         </f:view>

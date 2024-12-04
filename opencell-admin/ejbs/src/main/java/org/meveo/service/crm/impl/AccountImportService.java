@@ -23,11 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.CacheKeyStr;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -63,6 +58,11 @@ import org.meveo.service.billing.impl.UserAccountService;
 import org.meveo.service.billing.impl.WalletService;
 import org.meveo.service.catalog.impl.TitleService;
 import org.meveo.service.payments.impl.CustomerAccountService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * @author Wassim Drira

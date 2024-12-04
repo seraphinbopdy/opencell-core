@@ -19,6 +19,5 @@ package org.meveo.model.payments;
 
 public enum RejectionActionStatus {
 
-	PENDING, RUNNING, COMPLETED, FAILED, CANCELED, NO_ACTION;
+    PENDING, RUNNING, COMPLETED, FAILED, CANCELED, NO_ACTION;
 }
-

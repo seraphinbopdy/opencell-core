@@ -22,10 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.xml.bind.ValidationException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.catalog.UsageChargeTemplateDto;
@@ -43,6 +39,10 @@ import org.meveo.model.cpq.Attribute;
 import org.meveo.model.crm.custom.CustomFieldInheritanceEnum;
 import org.meveo.service.catalog.impl.UsageChargeTemplateService;
 import org.meveo.service.cpq.AttributeService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.validation.ValidationException;
 
 /**
  * @author Edward P. Legaspi

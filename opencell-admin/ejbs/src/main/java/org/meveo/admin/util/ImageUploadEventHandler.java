@@ -38,7 +38,7 @@ import org.meveo.model.catalog.OfferTemplateCategory;
 import org.meveo.model.catalog.ProductTemplate;
 import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.finance.ReportExtract;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 
 /**
  * @author Edward P. Legaspi
@@ -89,7 +89,7 @@ public class ImageUploadEventHandler<T extends IEntity> {
         if (uploadedFile == null) {
             return null;
         }
-        String filename = saveToFile(entity, uploadedFile.getInputstream(), uploadedFile.getFileName());
+        String filename = saveToFile(entity, uploadedFile.getInputStream(), uploadedFile.getFileName());
         return filename;
     }
 

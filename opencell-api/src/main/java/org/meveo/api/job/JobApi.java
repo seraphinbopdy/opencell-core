@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -127,7 +127,13 @@ public class JobApi extends BaseApi {
             jobCacheContainerProvider.resetJobRunningStatus(jobInstance);
         }
 
-        Long executionId = jobExecutionService.executeJob(jobInstance, getJobRunTimeJobValues(jobExecution, jobInstance), JobLauncherEnum.API);
+        Long executionId = null;
+        if (jobExecution.isWaitToComplete()) {
+            executionId = jobExecutionService.executeJobWithWait(jobInstance, getJobRunTimeJobValues(jobExecution, jobInstance), JobLauncherEnum.API);
+
+        } else {
+            executionId = jobExecutionService.executeJob(jobInstance, getJobRunTimeJobValues(jobExecution, jobInstance), JobLauncherEnum.API);
+        }
 
         return findJobExecutionResult(null, executionId);
     }

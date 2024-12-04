@@ -1,5 +1,5 @@
 package org.meveo.model.billing;
 
 public enum TransmittedFormatEnum {
-	UBL, XML, PDF
+    UBL, XML, PDF
 }

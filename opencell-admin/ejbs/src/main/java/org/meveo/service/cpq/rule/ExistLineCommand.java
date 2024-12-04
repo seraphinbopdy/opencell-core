@@ -1,11 +1,11 @@
 package org.meveo.service.cpq.rule;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.model.cpq.trade.CommercialRuleHeader;
 import org.meveo.model.cpq.trade.CommercialRuleLine;
-
-import java.util.List;
-import java.util.Optional;
 
 public class ExistLineCommand implements CommercialRuleLineCommand {
 

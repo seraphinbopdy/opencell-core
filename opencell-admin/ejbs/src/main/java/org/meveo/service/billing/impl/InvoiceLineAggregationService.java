@@ -4,9 +4,7 @@ import static java.util.Arrays.asList;
 import static org.meveo.model.billing.BillingEntityTypeEnum.BILLINGACCOUNT;
 import static org.meveo.model.billing.BillingEntityTypeEnum.ORDER;
 
-
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -23,10 +21,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.EntityManager;
 
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
@@ -56,6 +50,10 @@ import org.meveo.service.base.PersistenceService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManager;
 
 public class InvoiceLineAggregationService implements Serializable {
 
@@ -142,11 +140,11 @@ public class InvoiceLineAggregationService implements Serializable {
             }
         });
 
-        Long ilCount = ((BigInteger) em.createNativeQuery("select count(*) from " + viewName).getSingleResult()).longValue();
+        Long ilCount =  (Long) em.createNativeQuery("select count(*) from " + viewName).getSingleResult();
         Long baCount = 0L;
         org.hibernate.query.Query query = null;
         if (ilCount > 0) {
-            baCount = ((BigInteger) em.createNativeQuery("select count(distinct billing_account__id) from " + viewName).getSingleResult()).longValue();
+            baCount = (Long) em.createNativeQuery("select count(distinct billing_account__id) from " + viewName).getSingleResult();
 
             if (!aggregationConfiguration.isDisableAggregation() && incrementalInvoiceLines) {
                 aggregationQuery = buildJoinWithILQuery(billingRun.getId(), aggregationFields, aggregationConfiguration);

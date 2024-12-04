@@ -1,12 +1,13 @@
 package org.meveo.service.admin.impl;
 
+import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.model.RegistrationNumber;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import java.util.List;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class RegistrationNumberService extends PersistenceService<RegistrationNumber> {

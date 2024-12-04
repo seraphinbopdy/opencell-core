@@ -1,41 +1,41 @@
 package org.meveo.model.article;
 
-import static javax.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.LAZY;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.enums.OperatorEnum;
 
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
 @Entity
 @Table(name = "billing_article_mapping_line")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-        parameters = { @org.hibernate.annotations.Parameter(name = "sequence_name", value = "billing_article_mapping_line_seq") })
-@NamedQueries({
-        @NamedQuery(name = "ArticleMappingLine.findAll", query = "SELECT a FROM ArticleMappingLine a")})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {
+        @org.hibernate.annotations.Parameter(name = "sequence_name", value = "billing_article_mapping_line_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "ArticleMappingLine.findAll", query = "SELECT a FROM ArticleMappingLine a") })
 @Cacheable
 public class ArticleMappingLine extends BusinessEntity {
 
@@ -45,10 +45,10 @@ public class ArticleMappingLine extends BusinessEntity {
     private static final long serialVersionUID = 6999650126224128377L;
 
     public ArticleMappingLine() {
-		super();
-	}
+        super();
+    }
 
-	@OneToOne(fetch = LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "article_mapping_id")
     private ArticleMapping articleMapping;
 

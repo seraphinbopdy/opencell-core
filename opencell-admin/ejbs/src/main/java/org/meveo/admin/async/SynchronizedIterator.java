@@ -70,7 +70,7 @@ public class SynchronizedIterator<T> implements Iterator<T> {
      * Constructor
      *
      * @param dataList Data to iterate over
-     * @param size     the size of total data
+     * @param size the size of total data
      */
     public SynchronizedIterator(Collection<T> dataList, int size) {
         iterator = dataList.iterator();
@@ -127,7 +127,7 @@ public class SynchronizedIterator<T> implements Iterator<T> {
                                 // Or mapped by a fieldname
                             } else {
 
-                                Object[] data = scrollableResults.get();
+                                Object[] data = (Object[]) scrollableResults.get();
 
                                 Map<String, Object> mappedData = new HashMap<>();
                                 for (int i = 0; i < data.length; i++) {
@@ -139,7 +139,7 @@ public class SynchronizedIterator<T> implements Iterator<T> {
                             }
 
                         } else {
-                            return (T) scrollableResults.get(0);
+                            return (T) scrollableResults.get();
                         }
 
                     } else {
@@ -191,7 +191,7 @@ public class SynchronizedIterator<T> implements Iterator<T> {
                                     // Or mapped by a fieldname
                                 } else {
 
-                                    Object[] data = scrollableResults.get();
+                                    Object[] data = (Object[]) scrollableResults.get();
 
                                     Map<String, Object> mappedData = new HashMap<>();
                                     for (int k = 0; k < data.length; k++) {
@@ -201,7 +201,7 @@ public class SynchronizedIterator<T> implements Iterator<T> {
                                 }
 
                             } else {
-                                item = (T) scrollableResults.get(0);
+                                item = (T) scrollableResults.get();
                             }
                         } else {
                             break;
@@ -253,7 +253,7 @@ public class SynchronizedIterator<T> implements Iterator<T> {
                         // Or mapped by a fieldname
                     } else {
 
-                        Object[] data = scrollableResults.get();
+                        Object[] data = (Object[]) scrollableResults.get();
 
                         Map<String, Object> mappedData = new HashMap<>();
                         for (int k = 0; k < data.length; k++) {
@@ -263,7 +263,7 @@ public class SynchronizedIterator<T> implements Iterator<T> {
                     }
 
                 } else {
-                    item = (T) scrollableResults.get(0);
+                    item = (T) scrollableResults.get();
                 }
 
                 NextItem<T> nextItem = new NextItem<T>(position, item);

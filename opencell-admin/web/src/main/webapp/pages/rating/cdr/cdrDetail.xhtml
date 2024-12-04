@@ -8,13 +8,11 @@
     xmlns:p="http://primefaces.org/ui" 
     template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{cdrBean.objectId}" />
         </f:metadata>
 
         <o:importConstants type="org.meveo.model.rating.CDRStatusEnum" />
-    </ui:define>
 
     <ui:define name="body">
         <h:form id="crumbmenuForm">

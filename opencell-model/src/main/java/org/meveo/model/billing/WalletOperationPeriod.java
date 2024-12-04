@@ -19,41 +19,18 @@ package org.meveo.model.billing;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Types;
 import java.util.Date;
-import java.util.UUID;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Subselect;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.commons.utils.NumberUtils;
 import org.meveo.model.BaseEntity;
-
-import org.meveo.model.ICustomFieldEntity;
+import org.meveo.model.CFEntity;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
-import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
@@ -65,9 +42,25 @@ import org.meveo.model.cpq.ProductVersion;
 import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
-import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.tax.TaxClass;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Group WO by continuous period.
@@ -78,7 +71,7 @@ import org.meveo.model.tax.TaxClass;
 @Entity
 @Immutable
 @Table(name = "billing_wallet_operation_period")
-public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEntity {
+public class WalletOperationPeriod extends CFEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -408,29 +401,6 @@ public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEnt
     private WalletOperationStatusEnum status = WalletOperationStatusEnum.OPEN;
 
     /**
-     * Custom field values in JSON format
-     */
-    @Type(type = "cfjson")
-    @Column(name = "cf_values", columnDefinition = "jsonb")
-    private CustomFieldValues cfValues;
-
-    /**
-     * Accumulated custom field values in JSON format
-     */
-//    @Type(type = "cfjson")
-//    @Column(name = "cf_values_accum", columnDefinition = "TEXT")
-    @Transient
-    private CustomFieldValues cfAccumulatedValues;
-
-    /**
-     * Unique identifier - UUID
-     */
-    @Column(name = "uuid", nullable = false, updatable = false, length = 60)
-    @Size(max = 60)
-    @NotNull
-    private String uuid;
-
-    /**
      * Accounting code
      */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -446,7 +416,7 @@ public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEnt
     /**
      * Processing error reason
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "reject_reason")
     private String rejectReason;
 
@@ -484,7 +454,7 @@ public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEnt
     @JoinColumn(name = "discount_plan_item_id")
     private DiscountPlanItem discountPlanItem;
 
-    /**The amount after discount**/
+    /** The amount after discount **/
     @Column(name = "discounted_amount")
     private BigDecimal discountedAmount;
 
@@ -494,52 +464,51 @@ public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEnt
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rules_contract_id")
     private Contract rulesContract;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_version_id")
     private ProductVersion productVersion;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_product_id")
     private OrderProduct orderProduct;
-    
+
     @Column(name = "use_specific_price_conversion")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean useSpecificPriceConversion;
-    
+
     @Column(name = "transactional_amount_without_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalAmountWithoutTax;
-    
+
     @Column(name = "transactional_amount_with_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalAmountWithTax;
-    
+
     @Column(name = "transactional_amount_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalAmountTax;
-    
+
     @Column(name = "transactional_unit_amount_without_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalUnitAmountWithoutTax;
-    
+
     @Column(name = "transactional_unit_amount_with_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalUnitAmountWithTax;
-    
+
     @Column(name = "transactional_unit_amount_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal transactionalUnitAmountTax;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trading_currency_id")
     private TradingCurrency tradingCurrency;
-    
+
     @Column(name = "business_key")
     private String businessKey;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_id")
     private Contract contract;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_line_id")
     private ContractItem contractLine;
-
 
     /**
      * Constructor
@@ -948,7 +917,7 @@ public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEnt
      * Compute derived amounts amountWithoutTax/amountWithTax/amountTax unitAmountWithoutTax/unitAmountWithTax/unitAmountTax
      *
      * @param isEnterprise Is application used used in B2B (base prices are without tax) or B2C mode (base prices are with tax)
-     * @param rounding     Rounding precision to apply
+     * @param rounding Rounding precision to apply
      * @param roundingMode Rounding mode to apply
      */
     public void computeDerivedAmounts(boolean isEnterprise, int rounding, RoundingModeEnum roundingMode) {
@@ -1073,58 +1042,6 @@ public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEnt
      */
     public void setTaxClass(TaxClass taxClass) {
         this.taxClass = taxClass;
-    }
-
-    @Override
-    public CustomFieldValues getCfValues() {
-        return cfValues;
-    }
-
-    @Override
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
-    }
-
-    /**
-     * setting uuid if null
-     */
-    @PrePersist
-    public void setUUIDIfNull() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID().toString();
-        }
-    }
-
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfAccumulatedValues) {
-        this.cfAccumulatedValues = cfAccumulatedValues;
-    }
-
-    @Override
-    public String getUuid() {
-        setUUIDIfNull(); // setting uuid if null to be sure that the existing code expecting uuid not null will not be impacted
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    @Override
-    public ICustomFieldEntity[] getParentCFEntities() {
-        return null;
-    }
-
-    @Override
-    public String clearUuid() {
-        String oldUuid = uuid;
-        uuid = UUID.randomUUID().toString();
-        return oldUuid;
     }
 
     /**
@@ -1254,108 +1171,108 @@ public class WalletOperationPeriod extends BaseEntity implements ICustomFieldEnt
         this.rulesContract = rulesContract;
     }
 
-	public ProductVersion getProductVersion() {
-		return productVersion;
-	}
+    public ProductVersion getProductVersion() {
+        return productVersion;
+    }
 
-	public void setProductVersion(ProductVersion productVersion) {
-		this.productVersion = productVersion;
-	}
+    public void setProductVersion(ProductVersion productVersion) {
+        this.productVersion = productVersion;
+    }
 
-	public OrderProduct getOrderProduct() {
-		return orderProduct;
-	}
+    public OrderProduct getOrderProduct() {
+        return orderProduct;
+    }
 
-	public void setOrderProduct(OrderProduct orderProduct) {
-		this.orderProduct = orderProduct;
-	}
+    public void setOrderProduct(OrderProduct orderProduct) {
+        this.orderProduct = orderProduct;
+    }
 
-	public boolean isUseSpecificPriceConversion() {
-		return useSpecificPriceConversion;
-	}
+    public boolean isUseSpecificPriceConversion() {
+        return useSpecificPriceConversion;
+    }
 
-	public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
-		this.useSpecificPriceConversion = useSpecificPriceConversion;
-	}
+    public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
+        this.useSpecificPriceConversion = useSpecificPriceConversion;
+    }
 
-	public BigDecimal getTransactionalAmountWithoutTax() {
-		return transactionalAmountWithoutTax;
-	}
+    public BigDecimal getTransactionalAmountWithoutTax() {
+        return transactionalAmountWithoutTax;
+    }
 
-	public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
-		this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
-	}
+    public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
+        this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
+    }
 
-	public BigDecimal getTransactionalAmountWithTax() {
-		return transactionalAmountWithTax;
-	}
+    public BigDecimal getTransactionalAmountWithTax() {
+        return transactionalAmountWithTax;
+    }
 
-	public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
-		this.transactionalAmountWithTax = transactionalAmountWithTax;
-	}
+    public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
+        this.transactionalAmountWithTax = transactionalAmountWithTax;
+    }
 
-	public BigDecimal getTransactionalAmountTax() {
-		return transactionalAmountTax;
-	}
+    public BigDecimal getTransactionalAmountTax() {
+        return transactionalAmountTax;
+    }
 
-	public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
-		this.transactionalAmountTax = transactionalAmountTax;
-	}
+    public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
+        this.transactionalAmountTax = transactionalAmountTax;
+    }
 
-	public BigDecimal getTransactionalUnitAmountWithoutTax() {
-		return transactionalUnitAmountWithoutTax;
-	}
+    public BigDecimal getTransactionalUnitAmountWithoutTax() {
+        return transactionalUnitAmountWithoutTax;
+    }
 
-	public void setTransactionalUnitAmountWithoutTax(BigDecimal transactionalUnitAmountWithoutTax) {
-		this.transactionalUnitAmountWithoutTax = transactionalUnitAmountWithoutTax;
-	}
+    public void setTransactionalUnitAmountWithoutTax(BigDecimal transactionalUnitAmountWithoutTax) {
+        this.transactionalUnitAmountWithoutTax = transactionalUnitAmountWithoutTax;
+    }
 
-	public BigDecimal getTransactionalUnitAmountWithTax() {
-		return transactionalUnitAmountWithTax;
-	}
+    public BigDecimal getTransactionalUnitAmountWithTax() {
+        return transactionalUnitAmountWithTax;
+    }
 
-	public void setTransactionalUnitAmountWithTax(BigDecimal transactionalUnitAmountWithTax) {
-		this.transactionalUnitAmountWithTax = transactionalUnitAmountWithTax;
-	}
+    public void setTransactionalUnitAmountWithTax(BigDecimal transactionalUnitAmountWithTax) {
+        this.transactionalUnitAmountWithTax = transactionalUnitAmountWithTax;
+    }
 
-	public BigDecimal getTransactionalUnitAmountTax() {
-		return transactionalUnitAmountTax;
-	}
+    public BigDecimal getTransactionalUnitAmountTax() {
+        return transactionalUnitAmountTax;
+    }
 
-	public void setTransactionalUnitAmountTax(BigDecimal transactionalUnitAmountTax) {
-		this.transactionalUnitAmountTax = transactionalUnitAmountTax;
-	}
+    public void setTransactionalUnitAmountTax(BigDecimal transactionalUnitAmountTax) {
+        this.transactionalUnitAmountTax = transactionalUnitAmountTax;
+    }
 
-	public TradingCurrency getTradingCurrency() {
-		return tradingCurrency;
-	}
+    public TradingCurrency getTradingCurrency() {
+        return tradingCurrency;
+    }
 
-	public void setTradingCurrency(TradingCurrency tradingCurrency) {
-		this.tradingCurrency = tradingCurrency;
-	}
+    public void setTradingCurrency(TradingCurrency tradingCurrency) {
+        this.tradingCurrency = tradingCurrency;
+    }
 
-	public String getBusinessKey() {
-		return businessKey;
-	}
+    public String getBusinessKey() {
+        return businessKey;
+    }
 
-	public void setBusinessKey(String businessKey) {
-		this.businessKey = businessKey;
-	}
+    public void setBusinessKey(String businessKey) {
+        this.businessKey = businessKey;
+    }
 
-	public Contract getContract() {
-		return contract;
-	}
+    public Contract getContract() {
+        return contract;
+    }
 
-	public void setContract(Contract contract) {
-		this.contract = contract;
-	}
+    public void setContract(Contract contract) {
+        this.contract = contract;
+    }
 
-	public ContractItem getContractLine() {
-		return contractLine;
-	}
+    public ContractItem getContractLine() {
+        return contractLine;
+    }
 
-	public void setContractLine(ContractItem contractLine) {
-		this.contractLine = contractLine;
-	}
-    
+    public void setContractLine(ContractItem contractLine) {
+        this.contractLine = contractLine;
+    }
+
 }

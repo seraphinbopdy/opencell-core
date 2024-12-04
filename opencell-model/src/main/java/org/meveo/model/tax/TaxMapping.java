@@ -20,22 +20,6 @@ package org.meveo.model.tax;
 
 import java.io.Serializable;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
@@ -44,6 +28,22 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.billing.Tax;
 import org.meveo.model.billing.TradingCountry;
 import org.meveo.model.scripts.ScriptInstance;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 
 /**
  * Tax mapping
@@ -55,12 +55,11 @@ import org.meveo.model.scripts.ScriptInstance;
 @Cacheable
 @ExportIdentifier({ "accountTaxCategory.code", "chargeTaxClass.code", "valid.from", "valid.to", "sellerCountry.country.countryCode", "buyerCountry.country.countryCode", "tax.code" })
 @Table(name = "billing_tax_mapping", uniqueConstraints = @UniqueConstraint(columnNames = { "tax_category_id", "tax_class_id", "seller_country_id", "buyer_country_id", "valid_from", "valid_to" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "billing_tax_mapping_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_tax_mapping_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "TaxMapping.findApplicableTax", query = "select m from TaxMapping m where m.accountTaxCategory=:taxCategory and (m.chargeTaxClass=:taxClass or m.chargeTaxClass is null) and (m.sellerCountry=:sellerCountry or m.sellerCountry is null) and (m.buyerCountry=:buyerCountry or m.buyerCountry is null) and ((m.valid.from is null or m.valid.from<=:applicationDate) AND (:applicationDate<m.valid.to or m.valid.to is null)) ORDER BY m.chargeTaxClass asc NULLS LAST, m.sellerCountry asc NULLS LAST, m.buyerCountry asc NULLS LAST, priority DESC", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "TRUE"), @QueryHint(name = "org.hibernate.readOnly", value = "true") }),
-        @NamedQuery(name = "TaxMapping.findApplicableTaxByIds", query = "select m from TaxMapping m where m.accountTaxCategory.id=:taxCategoryId and (m.chargeTaxClass.id=:taxClassId or m.chargeTaxClass is null) and (m.sellerCountry.id=:sellerCountryId or m.sellerCountry.id is null) and (m.buyerCountry.id=:buyerCountryId or m.buyerCountry is null) and ((m.valid.from is null or m.valid.from<=:applicationDate) AND (:applicationDate<m.valid.to or m.valid.to is null)) ORDER BY m.chargeTaxClass asc NULLS LAST, m.sellerCountry asc NULLS LAST, m.buyerCountry asc NULLS LAST, priority DESC"),
-})
+        @NamedQuery(name = "TaxMapping.findApplicableTaxByIds", query = "select m from TaxMapping m where m.accountTaxCategory.id=:taxCategoryId and (m.chargeTaxClass.id=:taxClassId or m.chargeTaxClass is null) and (m.sellerCountry.id=:sellerCountryId or m.sellerCountry.id is null) and (m.buyerCountry.id=:buyerCountryId or m.buyerCountry is null) and ((m.valid.from is null or m.valid.from<=:applicationDate) AND (:applicationDate<m.valid.to or m.valid.to is null)) ORDER BY m.chargeTaxClass asc NULLS LAST, m.sellerCountry asc NULLS LAST, m.buyerCountry asc NULLS LAST, priority DESC"), })
 public class TaxMapping extends AuditableEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -228,7 +227,6 @@ public class TaxMapping extends AuditableEntity implements Serializable {
     public String getFilterEL() {
         return this.filterEL;
     }
-
 
     /**
      * @param tax Tax to apply

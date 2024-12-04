@@ -1,16 +1,20 @@
 package org.meveo.apiv2.securityDeposit;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.securityDeposit.SecurityTemplateStatusEnum;
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableSecurityDepositTemplate.class)
 public interface SecurityDepositTemplate extends Resource {
 

@@ -22,12 +22,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.io.IOUtils;
 import org.meveo.commons.utils.ParamBean;
@@ -36,7 +31,9 @@ import org.meveo.model.bi.OutputFormatEnum;
 import org.meveo.model.bi.Report;
 import org.meveo.model.datawarehouse.DWHAccountOperation;
 import org.meveo.service.reporting.impl.DWHAccountOperationService;
-import org.slf4j.Logger;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Edward P. Legaspi

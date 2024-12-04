@@ -9,9 +9,9 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.payments.PaymentTerm;
 import org.meveo.service.billing.impl.PaymentTermService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 @Stateless
 @Interceptors(SecuredBusinessEntityMethodInterceptor.class)

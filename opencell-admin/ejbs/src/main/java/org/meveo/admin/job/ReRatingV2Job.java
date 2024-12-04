@@ -5,9 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
@@ -21,12 +18,15 @@ import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.TablesPartitioningService;
 
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+
 @Stateless
 public class ReRatingV2Job extends Job {
 
     private static final String JOB_INSTANCE_RE_RATING_V2_JOB = "JobInstance_ReRatingV2Job";
 
-	public static final String CF_NR_ITEMS_PER_TX = "JobInstance_ReRatingV2Job_MaxRTsPerTransaction";
+    public static final String CF_NR_ITEMS_PER_TX = "JobInstance_ReRatingV2Job_MaxRTsPerTransaction";
 
 	public static final String CF_OPERATIONS_STARTING_DATE="CF_OPERATIONS_STARTING_DATE";
 	
@@ -34,7 +34,7 @@ public class ReRatingV2Job extends Job {
 	
 	public static final String NO_DATE_LIMITE="NO DATE LIMITE";
 	
-	@Inject
+    @Inject
 	TablesPartitioningService tablesPartitioningService;
 	
     @Inject

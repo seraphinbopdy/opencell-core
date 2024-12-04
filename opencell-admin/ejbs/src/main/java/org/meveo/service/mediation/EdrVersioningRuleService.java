@@ -2,12 +2,12 @@ package org.meveo.service.mediation;
 
 import java.util.ArrayList;
 
-import javax.ejb.Stateless;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.model.mediation.EdrVersioningRule;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class EdrVersioningRuleService extends PersistenceService<EdrVersioningRule>{

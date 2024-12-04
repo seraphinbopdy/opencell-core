@@ -19,39 +19,42 @@
 package org.meveo.model.module;
 
 import java.io.Serializable;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.EnableBusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ModuleItem;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.scripts.ScriptInstance;
 
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 /**
- * Opencell data/configuration deployment module contains Custom entity, Custom field, Charge, Counter, Service templates, Offer template categories, Product offerings, Price
- * plans, Custom entity actions, Charts, Scripts, Filters, Jobs, Notifications, Timers, Workflow and others.
+ * Opencell data/configuration deployment module contains Custom entity, Custom field, Charge, Counter, Service templates, Offer template categories, Product offerings, Price plans, Custom entity actions, Charts,
+ * Scripts, Filters, Jobs, Notifications, Timers, Workflow and others.
  * 
  * Module can be exported to another Opencell instance.
  * 
@@ -63,8 +66,7 @@ import org.meveo.model.scripts.ScriptInstance;
 @ModuleItem
 @ExportIdentifier({ "code" })
 @Table(name = "meveo_module", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "meveo_module_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "meveo_module_seq"), @Parameter(name = "increment_size", value = "1") })
 @Inheritance(strategy = InheritanceType.JOINED)
 public class MeveoModule extends EnableBusinessEntity implements Serializable {
 
@@ -94,14 +96,14 @@ public class MeveoModule extends EnableBusinessEntity implements Serializable {
     /**
      * Is module installed
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "installed")
     private boolean installed;
 
     /**
      * Module source in serialized XML fromat
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "module_source", nullable = false)
     private String moduleSource;
 

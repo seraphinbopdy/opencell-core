@@ -2,12 +2,10 @@
     xmlns:hftl="http://hftl.org" xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags" xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions"
     template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{scriptInstanceBean.objectId}" />
             <f:event type="preRenderView" listener="#{scriptInstanceBean.initCompilationErrors}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <p:panel>
@@ -38,9 +36,8 @@
                 doNotShowOnNew="#{scriptInstanceBean.entity.sourceTypeEnum == 'JAVA'}" disabled="#{scriptInstanceBean.entity.sourceTypeEnum == 'JAVA'}" />
             <hftl:formField label="#{messages['businessEntity.description']}" field="description" />
             <hftl:formField label="#{messages['scriptInstanceCategory']}" field="scriptInstanceCategory" valueLabelField="code" listBean="#{scriptInstanceCategoryListBean}" />
-            <hftl:formField label="#{messages['scriptInstance.reuse']}" field="reuse" componentWidth="15" rendered="#{scriptInstanceBean.entity.sourceTypeEnum == 'JAVA'}" newLine="true" />
             <hftl:decorateFormField label="#{messages['scriptInstance.script']}" fieldId="codeMirror" componentWidth="100"
-                rendered="#{scriptInstanceBean.entity.sourceTypeEnum == 'JAVA'}">
+                rendered="#{scriptInstanceBean.entity.sourceTypeEnum == 'JAVA'}" newLine="true">
                 <pe:codeMirror id="codeMirror" theme="eclipse" mode="text/x-java" value="#{scriptInstanceBean.entity.script}" lineNumbers="true" required="true" />
                 <h:panelGroup layout="block" styleClass="form-panel-actions">
                     <p:commandButton value="#{messages['scriptInstance.testCompilation']}" action="#{scriptInstanceBean.testCompilation}" process="@form" update="@form" />
@@ -59,6 +56,14 @@
                     </p:dataTable>
                 </hftl:decorateFormField>
             </h:panelGroup>
+            
+            <p:fieldset legend="#{messages['scriptInstance.pool']}" id="pool">
+                 <hftl:formField label="#{messages['scriptInstance.pool.usePool']}" id="usePool" field="pool" childField="usePool" listenerUpdate=":scriptInstanceForm:min :scriptInstanceForm:max :scriptInstanceForm:maxIdleTime" actionListenerBean="#{scriptInstanceBean}" actionListenerMethod="onUsePoolChange"/>
+                 <hftl:formField label="#{messages['scriptInstance.pool.min']}" id="min" field="pool" childField="min" disabled="#{!scriptInstanceBean.entity.isUsePool()}"/>
+                 <hftl:formField label="#{messages['scriptInstance.pool.max']}" id="max" field="pool" childField="max" disabled="#{!scriptInstanceBean.entity.isUsePool()}"/>
+                 <hftl:formField label="#{messages['scriptInstance.pool.maxIdleTime']}" id="maxIdleTime" field="pool" childField="maxIdleTime" disabled="#{!scriptInstanceBean.entity.isUsePool()}"/>
+            </p:fieldset>            
+            
             <hftl:formField label="#{messages['scriptInstance.executionRoles']}" field="executionRoles" listType="pickUpList" dualListModel="#{scriptInstanceBean.execRolesDM}"
                 componentWidth="50" newLine="true"/>
             <hftl:formField label="#{messages['scriptInstance.sourcingRoles']}" field="sourcingRoles" listType="pickUpList" dualListModel="#{scriptInstanceBean.sourcRolesDM}"

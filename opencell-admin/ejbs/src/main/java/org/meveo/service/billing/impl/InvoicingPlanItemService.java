@@ -19,13 +19,13 @@ package org.meveo.service.billing.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.cpq.commercial.InvoicingPlan;
 import org.meveo.model.cpq.commercial.InvoicingPlanItem;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
 
 /**
  * InvoicingPlanItem service implementation.

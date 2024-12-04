@@ -1,11 +1,9 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html"
     xmlns:hftl="http://hftl.org" xmlns:p="http://primefaces.org/ui" template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{invoiceTypeBean.objectId}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <hftl:entityPopup id="searchOccTemplatePopup" header="#{messages['invoiceType.occTemplate']}" updateField=":formInvoiceType:occTemplateSelectedId :formInvoiceType:occTemplateSelectedId_text"
@@ -96,7 +94,7 @@
 
 
             <h:panelGroup rendered="#{not empty invoiceTypeBean.entity.id}">
-                <p:dataTable id="sellerSequenceTable" width="80px;" label="#{messages['inboundRequest.responseHeaders']}" style="width:70%;" value="#{invoiceTypeBean.entity.sellerSequence}"
+                <p:dataTable id="sellerSequenceTable" label="#{messages['inboundRequest.responseHeaders']}" value="#{invoiceTypeBean.entity.sellerSequence}"
                     var="sellerSeq" paginator="false" resizableColumns="true">
                     <f:facet name="header">#{messages['invoiceType.sellerSequences']}</f:facet>
                     <p:column headerText="#{messages['seller.title']}">

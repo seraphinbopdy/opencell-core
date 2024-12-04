@@ -40,9 +40,9 @@ import org.meveo.service.securityDeposit.impl.SecurityDepositTransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -199,6 +199,9 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		// Check existence of all passed accountOperation
 		List<AccountOperation> aos = new ArrayList<>();
 		aoIds.forEach(aoId -> aos.add(accountOperationService.findById(aoId)));
+		if(containFaoAos(aos)) {
+			throw new BusinessApiException("FAE account operations can not be matched");
+		}
 		//checkIncompatibleAccountOperationTypes(aos);
 		if (aoIds.size() != aos.size()) {
 			throw new EntityDoesNotExistsException("One or more AccountOperations passed for matching are not found");
@@ -326,6 +329,11 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 		} catch (Exception e) {
 			throw new BusinessApiException(e.getMessage());
 		}
+	}
+
+	private boolean containFaoAos(List<AccountOperation> aos) {
+		return !aos.isEmpty()
+				&& aos.stream().anyMatch(accountOperation -> accountOperation.getCode().endsWith("_FAE"));
 	}
 
 	public List<UnMatchingOperationRequestDto> validateAndGetAOForUnmatching(List<UnMatchingAccountOperationDetail> accountOperations){

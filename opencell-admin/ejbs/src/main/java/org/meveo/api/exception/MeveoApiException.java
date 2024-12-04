@@ -18,10 +18,10 @@
 
 package org.meveo.api.exception;
 
-import javax.ejb.ApplicationException;
-
 import org.meveo.api.ApiErrorCodeEnum;
 import org.meveo.api.MeveoApiErrorCodeEnum;
+
+import jakarta.ejb.ApplicationException;
 
 @ApplicationException(rollback = true)
 public class MeveoApiException extends RuntimeException {

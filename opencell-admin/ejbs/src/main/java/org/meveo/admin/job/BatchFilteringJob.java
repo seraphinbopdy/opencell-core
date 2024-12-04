@@ -18,6 +18,9 @@
 
 package org.meveo.admin.job;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.EntityReferenceWrapper;
@@ -33,12 +36,10 @@ import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.filter.FilterService;
 import org.meveo.service.job.Job;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job definition to execute the given script for a list of entities returned from the given filter.

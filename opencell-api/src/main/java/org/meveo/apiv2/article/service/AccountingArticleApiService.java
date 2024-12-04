@@ -6,10 +6,10 @@ import static org.meveo.commons.utils.StringUtils.isBlank;
 
 import java.util.*;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.persistence.FlushModeType;
-import javax.ws.rs.*;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.persistence.FlushModeType;
+import jakarta.ws.rs.*;
 
 import org.meveo.admin.exception.*;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -190,7 +190,7 @@ public class AccountingArticleApiService implements AccountingArticleServiceBase
         }
 
         if (baseEntity.getCfValues() != null) {
-            accountingArticle.setCfValues(baseEntity.getCfValues());
+            accountingArticle.setCfValuesAsJson(baseEntity.getCfValuesAsJson());
         }
         
         if (baseEntity.getInvoiceType() != null) {

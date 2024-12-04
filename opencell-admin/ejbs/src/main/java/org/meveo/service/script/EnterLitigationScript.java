@@ -4,6 +4,10 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.meveo.model.payments.PaymentStatusEnum.REJECTED;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.model.billing.Invoice;
@@ -15,10 +19,6 @@ import org.meveo.service.payments.impl.PaymentHistoryService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.payments.impl.RejectedPaymentService;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class EnterLitigationScript extends Script {
 

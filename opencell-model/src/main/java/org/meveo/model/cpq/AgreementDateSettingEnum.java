@@ -8,5 +8,5 @@ package org.meveo.model.cpq;
  */
 public enum AgreementDateSettingEnum {
 
-	COPY, INHERIT, MANUAL;
+    COPY, INHERIT, MANUAL;
 }

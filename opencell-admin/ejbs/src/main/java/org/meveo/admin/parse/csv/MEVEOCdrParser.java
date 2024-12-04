@@ -24,11 +24,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -44,6 +39,11 @@ import org.meveo.service.medina.impl.DuplicateException;
 import org.meveo.service.medina.impl.ICdrParser;
 import org.meveo.service.medina.impl.InvalidAccessException;
 import org.meveo.service.medina.impl.InvalidFormatException;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * A default CDR file parser

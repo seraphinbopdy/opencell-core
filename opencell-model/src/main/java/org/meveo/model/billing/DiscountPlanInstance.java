@@ -19,36 +19,30 @@
 package org.meveo.model.billing;
 
 import java.util.Date;
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.meveo.model.BaseEntity;
+import org.meveo.model.CFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IDiscountable;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.catalog.DiscountPlan;
-import org.meveo.model.crm.custom.CustomFieldValues;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 /**
  * Instance of {@link DiscountPlan}. It basically just contains the effectivity date per BA.
@@ -61,13 +55,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @ObservableEntity
 @Table(name = "billing_discount_plan_instance")
 @CustomFieldEntity(cftCodePrefix = "DiscountPlanInstance", inheritCFValuesFrom = { "discountPlan" })
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_discount_plan_instance_seq"), })
-@NamedQueries({
-        @NamedQuery(name = "discountPlanInstance.getExpired", query = "select d.id from DiscountPlanInstance d where d.endDate is not null and d.endDate<=:date and d.status in (:statuses)"),
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_discount_plan_instance_seq"),
+        @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "discountPlanInstance.getExpired", query = "select d.id from DiscountPlanInstance d where d.endDate is not null and d.endDate<=:date and d.status in (:statuses)"),
         @NamedQuery(name = "discountPlanInstance.getToActive", query = "select d.id from DiscountPlanInstance d where (d.startDate is not null and d.startDate<=:date or d.startDate is null) and (d.endDate is not null and d.endDate>:date or d.endDate is null) and d.status in (:statuses)") })
 
-public class DiscountPlanInstance extends BaseEntity implements ICustomFieldEntity {
+public class DiscountPlanInstance extends CFEntity {
 
     private static final long serialVersionUID = -3794502716655922498L;
 
@@ -98,34 +91,8 @@ public class DiscountPlanInstance extends BaseEntity implements ICustomFieldEnti
     private Date endDate;
 
     /**
-     * Unique identifier UUID
-     */
-    @Column(name = "uuid", nullable = false, updatable = false, length = 60)
-    @Size(max = 60)
-    @NotNull
-    protected String uuid = UUID.randomUUID().toString();
-
-    /**
-     * Custom field values in JSON format
-     */
-    @Type(type = "cfjson")
-    @Column(name = "cf_values", columnDefinition = "jsonb")
-    protected CustomFieldValues cfValues;
-
-    /**
-     * Accumulated custom field values in JSON format
-     */
-//    @Type(type = "cfjson")
-//    @Column(name = "cf_values_accum", columnDefinition = "TEXT")
-    @Transient
-    protected CustomFieldValues cfAccumulatedValues;
-
-    /**
-     * Status of this specific discount plan instance
-     * APPLIED: the discount plan has be applied to entity but effective start date is not reached yet
-     * ACTIVE: the discount plan is active on the entity (start date has been reached)
-     * IN_USE: the discount plan has already been used once for the entity.
-     * EXPIRED: the discount plan is no longer active
+     * Status of this specific discount plan instance APPLIED: the discount plan has be applied to entity but effective start date is not reached yet ACTIVE: the discount plan is active on the entity (start date has been
+     * reached) IN_USE: the discount plan has already been used once for the entity. EXPIRED: the discount plan is no longer active
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -146,7 +113,6 @@ public class DiscountPlanInstance extends BaseEntity implements ICustomFieldEnti
     @Column(name = "application_count")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long applicationCount;
-    
 
     /** The service instance. */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -158,8 +124,7 @@ public class DiscountPlanInstance extends BaseEntity implements ICustomFieldEnti
     }
 
     /**
-     * Check if a date is within this Discount's effective date. Exclusive of the endDate. If startDate is null, it returns true. If startDate is not null and endDate is null,
-     * endDate is computed from the given duration.
+     * Check if a date is within this Discount's effective date. Exclusive of the endDate. If startDate is null, it returns true. If startDate is not null and endDate is null, endDate is computed from the given duration.
      *
      * @param date the given date
      * @return returns true if this DiscountItem is to be applied
@@ -244,52 +209,8 @@ public class DiscountPlanInstance extends BaseEntity implements ICustomFieldEnti
     }
 
     @Override
-    public String getUuid() {
-        return uuid;
-    }
-
-    /**
-     * @param uuid Unique identifier
-     */
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    /**
-     * Change UUID value. Return old value
-     * 
-     * @return Old UUID value
-     */
-    @Override
-    public String clearUuid() {
-        String oldUuid = uuid;
-        uuid = UUID.randomUUID().toString();
-        return oldUuid;
-    }
-
-    @Override
     public ICustomFieldEntity[] getParentCFEntities() {
         return discountPlan != null ? new ICustomFieldEntity[] { discountPlan } : null;
-    }
-
-    @Override
-    public CustomFieldValues getCfValues() {
-        return cfValues;
-    }
-
-    @Override
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
-    }
-
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfAccumulatedValues) {
-        this.cfAccumulatedValues = cfAccumulatedValues;
     }
 
     public Subscription getSubscription() {
@@ -303,9 +224,9 @@ public class DiscountPlanInstance extends BaseEntity implements ICustomFieldEnti
     public void assignEntityToDiscountPlanInstances(IDiscountable entity) {
         if (entity instanceof BillingAccount) {
             this.setBillingAccount((BillingAccount) entity);
-        }else if (entity instanceof ServiceInstance) {
-        	this.setServiceInstance((ServiceInstance) entity);
-        }else {
+        } else if (entity instanceof ServiceInstance) {
+            this.setServiceInstance((ServiceInstance) entity);
+        } else {
             this.setSubscription((Subscription) entity);
         }
     }
@@ -351,7 +272,7 @@ public class DiscountPlanInstance extends BaseEntity implements ICustomFieldEnti
             this.status = DiscountPlanInstanceStatusEnum.ACTIVE;
             return;
         }
-        if (( start == null || now.after(start) ) && ( end == null || now.before(end))) {
+        if ((start == null || now.after(start)) && (end == null || now.before(end))) {
             this.status = DiscountPlanInstanceStatusEnum.ACTIVE;
             return;
         }
@@ -363,12 +284,12 @@ public class DiscountPlanInstance extends BaseEntity implements ICustomFieldEnti
         this.statusDate = now;
     }
 
-	public ServiceInstance getServiceInstance() {
-		return serviceInstance;
-	}
+    public ServiceInstance getServiceInstance() {
+        return serviceInstance;
+    }
 
-	public void setServiceInstance(ServiceInstance serviceInstance) {
-		this.serviceInstance = serviceInstance;
-	}
+    public void setServiceInstance(ServiceInstance serviceInstance) {
+        this.serviceInstance = serviceInstance;
+    }
 
 }

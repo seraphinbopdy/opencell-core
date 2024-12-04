@@ -20,10 +20,6 @@ package org.meveo.service.order;
 
 import java.util.Date;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
@@ -31,6 +27,10 @@ import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.order.OrderHistory;
 import org.meveo.model.order.OrderItemActionEnum;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * @author Edward P. Legaspi

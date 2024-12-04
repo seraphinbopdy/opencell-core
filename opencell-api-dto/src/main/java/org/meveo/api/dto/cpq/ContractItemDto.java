@@ -4,14 +4,13 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
-
 import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.cpq.contract.ContractRateTypeEnum;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * @author Tarik FAKHOURI

@@ -1,11 +1,11 @@
 package org.meveo.service.script.accountingscheme;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.accountingScheme.JournalEntry;
 import org.meveo.service.script.Script;
-
-import java.util.ArrayList;
-import java.util.Map;
 
 public class NoAccountingEntryScript extends Script {
 

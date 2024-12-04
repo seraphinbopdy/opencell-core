@@ -20,9 +20,6 @@ package org.meveo.service.generic.wf;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
@@ -31,9 +28,12 @@ import org.meveo.model.generic.wf.GenericWorkflow;
 import org.meveo.model.generic.wf.WorkflowInstance;
 import org.meveo.model.generic.wf.WorkflowInstanceHistory;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.service.wf.WorkflowService;
 
 import com.google.common.collect.Maps;
-import org.meveo.service.wf.WorkflowService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class WorkflowInstanceHistoryService extends PersistenceService<WorkflowInstanceHistory> {
@@ -44,7 +44,7 @@ public class WorkflowInstanceHistoryService extends PersistenceService<WorkflowI
     public List<WorkflowInstanceHistory> findByGenericWorkflow(GenericWorkflow genericWorkflow) {
 
         Map<String, Object> params = Maps.newHashMap();
-        String query = "From WorkflowInstanceHistory where workflowInstance.genericWorkflow = :genericWorkflow order by actionDate desc";
+        String query = "select wih From WorkflowInstanceHistory wih where wih.workflowInstance.genericWorkflow = :genericWorkflow order by wih.actionDate desc";
         params.put("genericWorkflow", genericWorkflow);
 
         return (List<WorkflowInstanceHistory>) executeSelectQuery(query, params);
@@ -53,7 +53,7 @@ public class WorkflowInstanceHistoryService extends PersistenceService<WorkflowI
     public List<WorkflowInstanceHistory> findByWorkflowInstance(WorkflowInstance workflowInstance) {
 
         Map<String, Object> params = Maps.newHashMap();
-        String query = "From WorkflowInstanceHistory where workflowInstance = :workflowInstance order by actionDate desc";
+        String query = "select wih From WorkflowInstanceHistory wih where wih.workflowInstance = :workflowInstance order by wih.actionDate desc";
         params.put("workflowInstance", workflowInstance);
 
         return (List<WorkflowInstanceHistory>) executeSelectQuery(query, params);
@@ -62,11 +62,11 @@ public class WorkflowInstanceHistoryService extends PersistenceService<WorkflowI
     public List<WorkflowInstanceHistory> findByBusinessEntity(BusinessEntity entity) {
 
         Map<String, Object> params = Maps.newHashMap();
-        String query = "From WorkflowInstanceHistory where workflowInstance.entityInstanceCode = :entityInstanceCode order by workflowInstance.genericWorkflow.code, actionDate desc";
+        String query = "select wih From WorkflowInstanceHistory wih where wih.workflowInstance.entityInstanceCode = :entityInstanceCode order by wih.workflowInstance.genericWorkflow.code, wih.actionDate desc";
         params.put("entityInstanceCode", workflowService.mapWFBaseEntityCode(entity));
 
         if (entity instanceof CustomEntityInstance) {
-            query = "From WorkflowInstanceHistory where workflowInstance.entityInstanceCode = :entityInstanceCode and workflowInstance.targetCetCode = :targetCetCode order by workflowInstance.genericWorkflow.code, actionDate desc";
+            query = "select wih From WorkflowInstanceHistory wih where wih.workflowInstance.entityInstanceCode = :entityInstanceCode and wih.workflowInstance.targetCetCode = :targetCetCode order by wih.workflowInstance.genericWorkflow.code, wih.actionDate desc";
             params.put("targetCetCode", ((CustomEntityInstance) entity).getCetCode());
         }
 

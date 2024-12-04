@@ -19,7 +19,8 @@
 package org.meveo.model.cpq.contract;
 
 /**
- * Type of rate applied 
+ * Type of rate applied
+ * 
  * @author Mbarek-Ay
  * @lastModifiedVersion 11.0.0
  */

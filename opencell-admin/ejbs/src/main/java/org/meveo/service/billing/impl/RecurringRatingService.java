@@ -28,7 +28,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,13 +35,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.BusinessException.ErrorContextAttributeEnum;
@@ -77,6 +69,13 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.catalog.impl.CalendarService;
 import org.meveo.service.catalog.impl.PricePlanMatrixService;
+
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 
 @Stateless
 public class RecurringRatingService extends RatingService implements Serializable {
@@ -309,7 +308,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
                             counterInstanceService.deduceCounterValue_noLock(counterInstance, chargeInstance.getChargeDate(),
                                     chargeInstance.getServiceInstance().getSubscriptionDate(), chargeInstance, inputQuantity, isVirtual);
                 	
-
+                	
                     boolean isApplyInAdvance = isApplyInAdvance(chargeInstance);
 
                     // If the counter was not deducted, then the charge is not applied (but next activation date is updated).

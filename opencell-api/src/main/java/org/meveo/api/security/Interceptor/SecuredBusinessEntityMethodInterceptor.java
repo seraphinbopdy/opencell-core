@@ -33,10 +33,10 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
-import javax.persistence.NoResultException;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
+import jakarta.persistence.NoResultException;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;

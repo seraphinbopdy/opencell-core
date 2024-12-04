@@ -24,9 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.Invoice;
@@ -36,6 +33,9 @@ import org.meveo.model.billing.UserAccount;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.tax.TaxClass;
 import org.meveo.service.script.ScriptInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * Takes care of tax related script method invocation.

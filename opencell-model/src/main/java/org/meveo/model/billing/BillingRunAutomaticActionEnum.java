@@ -8,7 +8,6 @@ public enum BillingRunAutomaticActionEnum {
     AUTOMATIC_VALIDATION(4, "BillingRunAutomaticActionsEnum.automaticValidation"), // default Action on SUSPECT
     CANCEL_RT(5, "BillingRunAutomaticActionsEnum.automaticCancellation"); // automatically cancels invoice and its rated transactions
 
-
     private Integer id;
     private String label;
 

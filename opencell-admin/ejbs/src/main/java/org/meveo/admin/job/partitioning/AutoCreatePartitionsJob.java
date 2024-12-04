@@ -5,10 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.UpdateStepExecutor;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
@@ -25,6 +22,11 @@ import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.TablesPartitioningService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 /**
  * Job to create the next needed partition, and  find and move operations (EDR, WalletOperation,
  * RatedTransacrion) from 'default partition' to the new partition (only

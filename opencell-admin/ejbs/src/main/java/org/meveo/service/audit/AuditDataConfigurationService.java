@@ -7,26 +7,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.ejb.Stateless;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.NoResultException;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.audit.AuditCrudActionEnum;
 import org.meveo.model.audit.AuditDataConfiguration;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * A service for managing AuditDataConfiguration entities
@@ -189,13 +189,9 @@ public class AuditDataConfigurationService extends PersistenceService<AuditDataC
             boolean isUpdate = auditDataConfig.getActions() == null || auditDataConfig.getActions().toUpperCase().contains(AuditCrudActionEnum.UPDATE.name());
             boolean isDelete = auditDataConfig.getActions() == null || auditDataConfig.getActions().toUpperCase().contains(AuditCrudActionEnum.DELETE.name());
 
-            em.createNamedStoredProcedureQuery("AuditDataConfiguration.recreateDataAuditTrigger")
-                    .setParameter("tableName", auditDataHierarchy.getTableName())
-                    .setParameter("fields", dbFields)
-                    .setParameter("actions", auditDataConfig.getActions())
-                    .setParameter("preserveField", null)
-                    .setParameter("saveEvenDiffIsEmpty", false)
-                    .execute();
+            em.createNamedStoredProcedureQuery("AuditDataConfiguration.recreateDataAuditTrigger").setParameter("tableName", auditDataHierarchy.getTableName()).setParameter("fields", dbFields)
+                .setParameter("actions", auditDataConfig.getActions()).setParameter("preserveField", auditDataHierarchy.getParentIdDbColumn()).setParameter("saveEvenDiffIsEmpty", auditDataHierarchy.getSaveEvenDiffIsEmpty())
+                .execute();
 
             // Create triggers for any @JoinTable and @OneToMany with Cascade=All/Persist/Merge
             for (AuditDataHierarchy fieldAuditDataHierarchy : auditDataHierarchy.getRelatedEntities()) {
@@ -220,12 +216,8 @@ public class AuditDataConfigurationService extends PersistenceService<AuditDataC
                 }
 
                 if (fieldAuditDataHierarchy.getRelatedEntities().isEmpty()) {
-                    em.createNamedStoredProcedureQuery("AuditDataConfiguration.recreateDataAuditTrigger")
-                            .setParameter("tableName", fieldAuditDataHierarchy.getTableName())
-                            .setParameter("fields", null)
-                            .setParameter("actions", fieldActions)
-                            .setParameter("preserveField", null)
-                            .setParameter("saveEvenDiffIsEmpty", false)
+                    em.createNamedStoredProcedureQuery("AuditDataConfiguration.recreateDataAuditTrigger").setParameter("tableName", fieldAuditDataHierarchy.getTableName()).setParameter("fields", null)
+                        .setParameter("actions", fieldActions).setParameter("preserveField", fieldAuditDataHierarchy.getParentIdDbColumn()).setParameter("saveEvenDiffIsEmpty", fieldAuditDataHierarchy.getSaveEvenDiffIsEmpty())
                         .execute();
 
                 } else {

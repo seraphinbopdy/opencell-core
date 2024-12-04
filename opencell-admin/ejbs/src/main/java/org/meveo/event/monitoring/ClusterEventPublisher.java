@@ -23,31 +23,31 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.jms.Destination;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
-import javax.jms.JMSDestinationDefinition;
-import javax.jms.JMSDestinationDefinitions;
-import javax.jms.JMSProducer;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.Topic;
-
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ReflectionUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.IEntity;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.slf4j.Logger;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSConsumer;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSDestinationDefinition;
+import jakarta.jms.JMSDestinationDefinitions;
+import jakarta.jms.JMSProducer;
+import jakarta.jms.Message;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.Queue;
+import jakarta.jms.Topic;
 
 /**
  * Handle data synchronization between cluster nodes. Inform about CRUD actions to certain entities. Messages are written to topic "topic/CLUSTEREVENTTOPIC".
@@ -56,17 +56,22 @@ import org.slf4j.Logger;
  * 
  * @author Andrius Karpavicius
  */
-@JMSDestinationDefinitions(value = { @JMSDestinationDefinition(name = "java:/topic/CLUSTEREVENTTOPIC", interfaceName = "javax.jms.Topic", destinationName = "ClusterEventTopic"),
-        @JMSDestinationDefinition(name = "java:/queue/CLUSTEREVENTREPLY", interfaceName = "javax.jms.Queue", destinationName = "ClusterEventReply") })
+@JMSDestinationDefinitions(value = { @JMSDestinationDefinition(name = "java:/topic/CLUSTEREVENTTOPIC", interfaceName = "jakarta.jms.Topic", destinationName = "ClusterEventTopic"),
+        @JMSDestinationDefinition(name = "java:/queue/CLUSTEREVENTREPLY", interfaceName = "jakarta.jms.Queue", destinationName = "ClusterEventReply") })
 @Stateless
 public class ClusterEventPublisher implements Serializable {
 
     private static final long serialVersionUID = 4434372450314613654L;
 
     /**
-     * Time to wait for a reply message to a MQ message send
+     * Time to wait for a reply message to a MQ message send. A default wait time - 10 seconds.
      */
     private static final long MQ_RESPONSE_WAIT = 10000L;
+
+    /**
+     * Time to wait for a reply message to a MQ message send. A "wait forever" time - 10 minutes. Anything longer would require a use of asynchronous communication instead.
+     */
+    private static final long MQ_RESPONSE_WAIT_MAX = 600000L;
 
     @Inject
     private Logger log;
@@ -90,8 +95,8 @@ public class ClusterEventPublisher implements Serializable {
      * @param entity Entity that triggered event
      * @param action Action performed
      */
-    public void publishEvent(IEntity entity, CrudActionEnum action) {
-        publishEvent(entity, action, null, false);
+    public void publishEvent(IEntity entity, ClusterEventActionEnum action) {
+        publishEvent(entity, action, null, false, null, null);
     }
 
     /**
@@ -104,12 +109,15 @@ public class ClusterEventPublisher implements Serializable {
      * @param action Action performed
      * @param additionalInformation Additional information about the action
      * @param expectResponse Is expected to receive a response to a message send
+     * @param messageId A JMS message ID prefix. If omitted, an entity.id value will be used
+     * @param timeToWait How long to wait for a response. Value of -1 will wait indefinitely (10 minutes - MQ_RESPONSE_WAIT_MAX value), value of NULL will use a default timeout (10 seconds - MQ_RESPONSE_WAIT value)
      * @return A received response from a message send. Applicable only when expectedResponse = true
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Object publishEvent(IEntity entity, CrudActionEnum action, Map<String, Object> additionalInformation, boolean expectResponse) {
+    public Object publishEvent(IEntity entity, ClusterEventActionEnum action, Map<String, Object> additionalInformation, boolean expectResponse, String messageId, Long timeToWait) {
 
-        if (!EjbUtils.isRunningInClusterMode()) {
+        // Don't send JMS messages if not running in cluster mode expect when its execution result lookup for Endpoint
+        if (!EjbUtils.isRunningInClusterMode() && action != ClusterEventActionEnum.getEndpointExecutionResult) {
             return null;
         }
 
@@ -117,7 +125,7 @@ public class ClusterEventPublisher implements Serializable {
             String code = entity instanceof BusinessEntity ? ((BusinessEntity) entity).getCode() : null;
             ClusterEventDto eventDto = new ClusterEventDto(ReflectionUtils.getCleanClassName(entity.getClass().getSimpleName()), (Long) entity.getId(), code, action, EjbUtils.getCurrentClusterNode(),
                 currentUser.getProviderCode(), currentUser.getUserName(), additionalInformation);
-            log.debug("Publishing data synchronization between cluster nodes event {}", eventDto);
+            log.info("Publishing data synchronization between cluster nodes event {}", eventDto);
 
             JMSProducer jmsProducer = context.createProducer();
             Message message = context.createObjectMessage(eventDto);
@@ -125,12 +133,12 @@ public class ClusterEventPublisher implements Serializable {
             // Specify Message id and reply queue if response is expected
             if (expectResponse) {
                 message.setJMSReplyTo(replyQueue);
-                String messageId = entity.getId() + "_" + action + "_" + EjbUtils.getCurrentClusterNode() + "_" + (new Date()).getTime();
-                message.setJMSCorrelationID(messageId);
+                String correlationId = (messageId != null ? messageId : entity.getId()) + "_" + action + "_" + EjbUtils.getCurrentClusterNode() + "_" + (new Date()).getTime();
+                message.setJMSCorrelationID(correlationId);
             }
 
             // For create and update CRUD actions, send message with a delivery delay of two seconds, so data is saved to DB already before another node process the message
-            if (action == CrudActionEnum.create || action == CrudActionEnum.update) {
+            if (action == ClusterEventActionEnum.create || action == ClusterEventActionEnum.update) {
                 jmsProducer.setDeliveryDelay(2000L).send(topic, message);
             } else {
                 jmsProducer.send(topic, message);
@@ -142,17 +150,23 @@ public class ClusterEventPublisher implements Serializable {
 
                 // Use try-with-resources to ensure JMSConsumer is closed
                 try (JMSConsumer consumer = context.createConsumer(replyQueue, selector)) {
-                    ObjectMessage responseMessage = (ObjectMessage) consumer.receive(MQ_RESPONSE_WAIT);
-                    if (responseMessage != null) {
-                        Object responseObj = responseMessage.getObject();
+                if (timeToWait == null) {
+                    timeToWait = MQ_RESPONSE_WAIT;
 
-                        log.debug("Received a reply to data synchronization message {}", responseObj);
-
-                        return responseObj;
-                    } else {
-                        log.warn("Failed to receive a reply message to a data synchronization message sent within a time out of {}", MQ_RESPONSE_WAIT);
-                    }
+                } else if (timeToWait.intValue() == -1) {
+                    timeToWait = MQ_RESPONSE_WAIT_MAX;
                 }
+                ObjectMessage responseMessage = (ObjectMessage) consumer.receive(timeToWait);
+                if (responseMessage != null) {
+                    Object responseObj = responseMessage.getObject();
+
+                    log.debug("Received a reply to data synchronization message {}", responseObj);
+
+                    return responseObj;
+                } else {
+                    log.warn("Failed to receive a reply message to a data synchronization message send within a time out of {}", timeToWait);
+                }
+            }
             }
 
         } catch (Exception e) {
@@ -169,7 +183,7 @@ public class ClusterEventPublisher implements Serializable {
      * @param additionalInformation Additional information about the action
      */
     @Asynchronous
-    public void publishEventAsync(IEntity entity, CrudActionEnum action, Map<String, Object> additionalInformation, String providerCode, String username) {
+    public void publishEventAsync(IEntity entity, ClusterEventActionEnum action, Map<String, Object> additionalInformation, String providerCode, String username) {
 
         if (!EjbUtils.isRunningInClusterMode()) {
             return;
@@ -179,7 +193,7 @@ public class ClusterEventPublisher implements Serializable {
             String code = entity instanceof BusinessEntity ? ((BusinessEntity) entity).getCode() : null;
             ClusterEventDto eventDto = new ClusterEventDto(ReflectionUtils.getCleanClassName(entity.getClass().getSimpleName()), (Long) entity.getId(), code, action, EjbUtils.getCurrentClusterNode(), providerCode,
                 username, additionalInformation);
-            log.debug("Publishing data synchronization between cluster nodes event {}", eventDto);
+            log.info("Publishing data synchronization between cluster nodes event {}", eventDto);
 
             context.createProducer().send(topic, eventDto);
 

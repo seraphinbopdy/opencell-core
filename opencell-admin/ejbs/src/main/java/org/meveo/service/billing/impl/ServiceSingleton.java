@@ -18,18 +18,42 @@
 
 package org.meveo.service.billing.impl;
 
-import com.mifmif.common.regex.Generex;
+import static java.lang.String.valueOf;
+import static java.time.Instant.now;
+import static java.util.Optional.ofNullable;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.meveo.model.sequence.SequenceTypeEnum.ALPHA_UP;
+import static org.meveo.model.sequence.SequenceTypeEnum.CUSTOMER_NO;
+import static org.meveo.model.sequence.SequenceTypeEnum.NUMERIC;
+import static org.meveo.model.sequence.SequenceTypeEnum.REGEXP;
+import static org.meveo.model.sequence.SequenceTypeEnum.RUM;
+import static org.meveo.model.sequence.SequenceTypeEnum.SEQUENCE;
+import static org.meveo.model.sequence.SequenceTypeEnum.UUID;
+import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
+
+import java.math.BigDecimal;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.qualifier.InvoiceNumberAssigned;
 import org.meveo.jpa.JpaAmpNewTx;
-import org.meveo.model.BaseEntity;
 import org.meveo.model.admin.CustomGenericEntityCode;
 import org.meveo.model.admin.Seller;
-import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ExchangeRate;
+import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceSequence;
 import org.meveo.model.billing.InvoiceStatusEnum;
 import org.meveo.model.billing.InvoiceType;
@@ -61,39 +85,16 @@ import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 
-import javax.ejb.AccessTimeout;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.mifmif.common.regex.Generex;
 
-import static java.lang.String.valueOf;
-import static java.time.Instant.now;
-import static java.util.Optional.ofNullable;
-import static java.util.UUID.randomUUID;
-import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.meveo.model.sequence.SequenceTypeEnum.ALPHA_UP;
-import static org.meveo.model.sequence.SequenceTypeEnum.CUSTOMER_NO;
-import static org.meveo.model.sequence.SequenceTypeEnum.NUMERIC;
-import static org.meveo.model.sequence.SequenceTypeEnum.REGEXP;
-import static org.meveo.model.sequence.SequenceTypeEnum.RUM;
-import static org.meveo.model.sequence.SequenceTypeEnum.SEQUENCE;
-import static org.meveo.model.sequence.SequenceTypeEnum.UUID;
-import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
+import jakarta.ejb.AccessTimeout;
+import jakarta.ejb.Lock;
+import jakarta.ejb.LockType;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 
 /**
  * A singleton service to handle synchronized calls. DO not change lock mode to Write

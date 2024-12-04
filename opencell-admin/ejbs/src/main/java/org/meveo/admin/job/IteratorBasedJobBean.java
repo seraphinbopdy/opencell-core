@@ -19,24 +19,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.annotation.Resource;
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSConnectionFactory;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
-import javax.jms.JMSException;
-import javax.jms.JMSProducer;
-import javax.jms.JMSRuntimeException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Queue;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -56,7 +38,7 @@ import org.meveo.cache.JobRunningStatusEnum;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.ParamBean;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.event.qualifier.LastJobDataMessageReceived;
 import org.meveo.model.IEntity;
@@ -73,6 +55,24 @@ import org.meveo.service.job.JobExecutionResultService;
 import org.meveo.service.job.JobExecutionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSConnectionFactory;
+import jakarta.jms.JMSConsumer;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSException;
+import jakarta.jms.JMSProducer;
+import jakarta.jms.JMSRuntimeException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
+import jakarta.jms.Queue;
 
 /**
  * Implements job logic to iterate over data and process one item at a time, checking if job is still running and update job progress in DB periodically
@@ -150,7 +150,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
     /**
      * Tracks countDowns used to wait for last message to receive when job load is spread over multiple nodes. Job identifier is a map key.<br/>
-     * When EOF message is received in a queue, a EJB event is fired and countDown is reduced.
+     * When EOF message is received in a queue, a EJB event is fired and countDown is reduced. <br/>
+     * When countDown is reduced a data processing thread continues passed countDown.await() call and future.get() successfully completes.
      */
     private static final Map<Long, CountDownLatch> countDowns = new HashMap<Long, CountDownLatch>();
 
@@ -403,7 +404,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                 additionalInformation.put(Job.JOB_PARAM_HISTORY_PARENT_ID, jobExecutionResult.getId());
                 additionalInformation.put(Job.JOB_PARAM_LAUNCHER, JobLauncherEnum.WORKER);
 
-                clusterEventPublisher.publishEventAsync(jobInstance, CrudActionEnum.executeWorker, additionalInformation, currentUser.getProviderCode(), currentUser.getUserName());
+                clusterEventPublisher.publishEventAsync(jobInstance, ClusterEventActionEnum.executeWorker, additionalInformation, currentUser.getProviderCode(), currentUser.getUserName());
             }
 
             // Wait for all async methods to finish

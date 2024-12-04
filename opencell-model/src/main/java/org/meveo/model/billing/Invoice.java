@@ -27,42 +27,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.ValidationException;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.meveo.model.AuditableEntity;
+import org.hibernate.type.NumericBooleanConverter;
+import org.meveo.model.AuditableCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.HugeEntity;
 import org.meveo.model.ICustomFieldEntity;
@@ -74,7 +43,6 @@ import org.meveo.model.audit.AuditTarget;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.cpq.CpqQuote;
 import org.meveo.model.cpq.commercial.CommercialOrder;
-import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.dunning.DunningCollectionPlan;
 import org.meveo.model.order.Order;
 import org.meveo.model.payments.CustomerAccount;
@@ -84,6 +52,37 @@ import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.plan.PaymentPlan;
 import org.meveo.model.quote.Quote;
 import org.meveo.model.shared.DateUtils;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedNativeQueries;
+import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostUpdate;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Invoice
@@ -97,7 +96,8 @@ import org.meveo.model.shared.DateUtils;
 @HugeEntity
 @ObservableEntity
 @Table(name = "billing_invoice", uniqueConstraints = @UniqueConstraint(columnNames = { "invoice_number", "invoice_type_id" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_seq"),
+        @Parameter(name = "increment_size", value = "1") })
 @CustomFieldEntity(cftCodePrefix = "Invoice")
 @NamedQueries({ @NamedQuery(name = "Invoice.validatedByBRNoXml", query = "select inv.id from Invoice inv where inv.invoiceNumber IS NOT NULL and inv.billingRun.id=:billingRunId and inv.xmlFilename IS NULL"),
         @NamedQuery(name = "Invoice.draftByBRNoXml", query = "select inv.id from Invoice inv where inv.invoiceNumber IS NULL and inv.temporaryInvoiceNumber IS NOT NULL and inv.billingRun.id=:billingRunId and inv.xmlFilename IS NULL"),
@@ -129,13 +129,10 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "Invoice.moveToRejectedBRByIds", query = "update Invoice inv set inv.billingRun=:billingRun, inv.status=org.meveo.model.billing.InvoiceStatusEnum.REJECTED where inv.id in (:invoiceIds)"),
         @NamedQuery(name = "Invoice.moveToBR", query = "update Invoice inv set inv.billingRun=:nextBR where inv.billingRun.id=:billingRunId and inv.status in(:statusList)"),
         @NamedQuery(name = "Invoice.deleteByStatusAndBR", query = "delete from Invoice inv where inv.status in(:statusList) and inv.billingRun.id=:billingRunId"),
-        @NamedQuery(name = "Invoice.findByStatusAndBR", query = "from Invoice inv where inv.status in (:statusList) and inv.billingRun.id=:billingRunId"),
-        @NamedQuery(name = "Invoice.listUnpaidInvoicesIds", query = "SELECT inv.id FROM Invoice inv "
-                                + " WHERE inv.dueDate <= NOW() AND inv.status = org.meveo.model.billing.InvoiceStatusEnum.VALIDATED "
-                                + " AND inv.paymentStatus = org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING"),
+        @NamedQuery(name = "Invoice.findByStatusAndBR", query = "select inv from Invoice inv where inv.status in (:statusList) and inv.billingRun.id=:billingRunId"),
+        @NamedQuery(name = "Invoice.listUnpaidInvoicesIds", query = "SELECT inv.id FROM Invoice inv WHERE inv.dueDate <= function('NOW') AND inv.status = 'VALIDATED' AND inv.paymentStatus = 'PENDING'"),
         @NamedQuery(name = "Invoice.detachAOFromInvoice", query = "UPDATE Invoice set recordedInvoice = null where recordedInvoice = :ri"),
-        @NamedQuery(name = "Invoice.sumInvoiceableAmountByBR", query =
-        "select sum(inv.amountWithoutTax), sum(inv.amountWithTax), inv.subscription.id, inv.commercialOrder.id , inv.id, inv.billingAccount.id, inv.billingAccount.customerAccount.id, inv.billingAccount.customerAccount.customer.id "
+        @NamedQuery(name = "Invoice.sumInvoiceableAmountByBR", query = "select sum(inv.amountWithoutTax), sum(inv.amountWithTax), inv.subscription.id, inv.commercialOrder.id , inv.id, inv.billingAccount.id, inv.billingAccount.customerAccount.id, inv.billingAccount.customerAccount.customer.id "
                 + "FROM Invoice inv where inv.billingRun.id=:billingRunId group by inv.subscription.id, inv.commercialOrder.id , inv.id, inv.billingAccount.id, inv.billingAccount.customerAccount.id, inv.billingAccount.customerAccount.customer.id"),
 
         @NamedQuery(name = "Invoice.sumAmountsByBR", query = "select sum(inv.amountTax),sum(inv.amountWithoutTax), sum(inv.amountWithTax) FROM Invoice inv where inv.billingRun.id=:billingRunId and inv.status <> 'CANCELED'"),
@@ -158,26 +155,24 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "Invoice.findValidatedInvoiceAdvWithOrder", query = "select inv from Invoice inv  where  inv.commercialOrder=:commercialOrder and inv.status='VALIDATED' and inv.invoiceType.code = 'ADV' and inv.invoiceBalance > 0 and inv.billingAccount.id =:billingAccountId"),
         @NamedQuery(name = "Invoice.findWithFuntionalCurrencyDifferentFromOne", query = "SELECT i FROM Invoice i JOIN Provider p ON p.currency.id = i.tradingCurrency.currency.id WHERE i.lastAppliedRate <> :EXPECTED_RATE"),
         @NamedQuery(name = "Invoice.countByValidationRule", query = "SELECT count(id) FROM Invoice WHERE rejectedByRule.id = :ruleId"),
-		@NamedQuery(name = "Invoice.xmlWithStatusForUBL", query = "select inv.id from Invoice inv where inv.status in(:statusList) and inv.ublReference = false"),
-        @NamedQuery(name = "Invoice.SUM_VALIDATED_LINKED_INVOICES", query = "SELECT SUM(i.amountWithTax) FROM Invoice i" +
-                " WHERE i.id in (SELECT li.linkedInvoiceValue.id FROM LinkedInvoice li WHERE li.id.id = :SRC_INVOICE_ID) AND i.status = 'VALIDATED'"),
-        @NamedQuery(name = "Invoice.validateInvoicesByStatusAndBr", query = "UPDATE Invoice inv SET inv.status = :status, inv.statusDate= NOW(), inv.rejectReason=null WHERE inv.billingRun=:billingRun AND inv.status in (:toValidate)"),
+        @NamedQuery(name = "Invoice.xmlWithStatusForUBL", query = "select inv.id from Invoice inv where inv.status in(:statusList) and inv.ublReference = false"),
+        @NamedQuery(name = "Invoice.SUM_VALIDATED_LINKED_INVOICES", query = "SELECT SUM(i.amountWithTax) FROM Invoice i"
+                + " WHERE i.id in (SELECT li.linkedInvoiceValue.id FROM LinkedInvoice li WHERE li.id.id = :SRC_INVOICE_ID) AND i.status = 'VALIDATED'"),
+        @NamedQuery(name = "Invoice.validateInvoicesByStatusAndBr", query = "UPDATE Invoice inv SET inv.status = :status, inv.statusDate= function('NOW'), inv.rejectReason=null WHERE inv.billingRun=:billingRun AND inv.status in (:toValidate)"),
         @NamedQuery(name = "Invoice.sendToLitigation", query = "UPDATE Invoice inv SET inv.paymentStatus = 'DISPUTED' WHERE inv.id in (:ids)"),
 		@NamedQuery(name = "Invoice.abandoneInvoices", query = "UPDATE Invoice inv SET inv.paymentStatus = 'ABANDONED' WHERE inv.id in (:ids)"),
 })
 @NamedNativeQueries({
-	@NamedNativeQuery(name = "Invoice.rollbackAdvance", query = "update billing_invoice set invoice_balance = invoice_balance + li.amount from (select bli.linked_invoice_id, bli.amount from billing_linked_invoices bli join billing_invoice i on i.id = bli.id where i.billing_run_id = :billingRunId and bli.type = 'ADVANCEMENT_PAYMENT') li where li.linked_invoice_id = id"),
-	@NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
-			+ "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt "
-			+ "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
-			+ "	WHERE il.status = 'BILLED' and il.invoice_id=:invoiceId"),
-	@NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
-			+ "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt "
-			+ "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
-			+ "	WHERE il.status = 'BILLED' and il.billing_run_id=:billingRunId")
+        @NamedNativeQuery(name = "Invoice.rollbackAdvance", query = "update billing_invoice set invoice_balance = invoice_balance + li.amount from (select bli.linked_invoice_id, bli.amount from billing_linked_invoices bli join billing_invoice i on i.id = bli.id where i.billing_run_id = :billingRunId and bli.type = 'ADVANCEMENT_PAYMENT') li where li.linked_invoice_id = id"),
+        @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
+                + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
+                + "	WHERE il.status = 'BILLED' and il.invoice_id=:invoiceId"),
+        @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
+                + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
+                + "	WHERE il.status = 'BILLED' and il.billing_run_id=:billingRunId")
 
 })
-public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISearchable {
+public class Invoice extends AuditableCFEntity implements ISearchable {
 
     private static final long serialVersionUID = 1L;
 
@@ -340,7 +335,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     /**
      * Is this a detailed invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "detailed_invoice")
     private boolean isDetailedInvoice = true;
 
@@ -359,27 +354,6 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     private InvoiceType invoiceType;
 
     /**
-     * Unique identifier - UUID
-     */
-    @Column(name = "uuid", nullable = false, updatable = false, length = 60)
-    @Size(max = 60)
-    @NotNull
-    private String uuid;
-
-    /**
-     * Custom field values in JSON format
-     */
-    @Type(type = "cfjson")
-    @Column(name = "cf_values", columnDefinition = "jsonb")
-    private CustomFieldValues cfValues;
-
-    /**
-     * Accumulated custom field values in JSON format
-     */
-    @Transient
-    private CustomFieldValues cfAccumulatedValues;
-
-    /**
      * Linked invoices
      */
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -391,7 +365,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "billing_invoices_orders", joinColumns = @JoinColumn(name = "invoice_id"), inverseJoinColumns = @JoinColumn(name = "order_id"))
     private List<Order> orders = new ArrayList<>();
-    
+
     /**
      * subscriptions that produced rated transactions that were included in the invoice
      */
@@ -399,7 +373,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     @JoinTable(name = "billing_invoices_subscriptions", joinColumns = @JoinColumn(name = "invoice_id"), inverseJoinColumns = @JoinColumn(name = "subscription_id"))
     private List<Subscription> subscriptions = new ArrayList<>();
 
-	/**
+    /**
      * Quote that invoice was produced for
      */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -450,14 +424,14 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     /**
      * Check if the invoice already sent
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "already_sent")
     private boolean alreadySent;
 
     /**
      * Dont send the invoice if true.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "dont_send")
     private boolean dontSend;
 
@@ -471,7 +445,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     /**
      * Is this a prepaid invoice
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "prepaid", nullable = false)
     @NotNull
     protected boolean prepaid;
@@ -482,7 +456,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     @Column(name = "external_ref")
     @Size(max = 255)
     private String externalRef;
-    
+
     /**
      * Invoicing error reason
      */
@@ -526,10 +500,10 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     /**
      *
      */
-	@Column(name = "payment_status")
-	@Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
+    @Enumerated(EnumType.STRING)
     @AuditTarget(type = AuditChangeTypeEnum.OTHER, history = true, notif = true)
-	private InvoicePaymentStatusEnum paymentStatus = InvoicePaymentStatusEnum.NONE;
+    private InvoicePaymentStatusEnum paymentStatus = InvoicePaymentStatusEnum.NONE;
 
     /**
      * Payment status change date
@@ -543,44 +517,37 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     @Column(name = "start_date")
     private Date startDate;
 
-
     /**
      * End of the billed period (based on billing cycle period whenever possible or applied lastTransactionDate or max(invoiceLine.valueDate))
      */
     @Column(name = "end_date")
     private Date endDate;
 
-
     /**
-     * Total raw amount from invoice lines.
-     *      -Does not include discount.
-     *      -With or without tax depending on provider setting (isEnterprise).
+     * Total raw amount from invoice lines. -Does not include discount. -With or without tax depending on provider setting (isEnterprise).
      */
     @Column(name = "raw_amount", nullable = false, precision = NB_PRECISION, scale = NB_DECIMALS)
-    private BigDecimal rawAmount= ZERO;
+    private BigDecimal rawAmount = ZERO;
 
     /**
-     * Discount rate to apply (in %).
-     * Initialize with discount rate from linked invoice discount plan.
+     * Discount rate to apply (in %). Initialize with discount rate from linked invoice discount plan.
      */
     @Column(name = "discount_rate", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal discountRate;
 
-	/**
-     * Total discount amount with or without tax depending on provider settings.
-	 * Can be inconsistent with discountRate.
-	 * discountAmount has precedence over discountRate
+    /**
+     * Total discount amount with or without tax depending on provider settings. Can be inconsistent with discountRate. discountAmount has precedence over discountRate
      */
     @Column(name = "discount_amount", nullable = false, precision = NB_PRECISION, scale = NB_DECIMALS)
-    private BigDecimal discountAmount= ZERO;
+    private BigDecimal discountAmount = ZERO;
 
     /**
      * Indicates if the invoicing minimum has already been applied
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_already_applied_minimum")
     private boolean isAlreadyAppliedMinimum;
-    
+
     /**
      * Cpq quote
      */
@@ -591,7 +558,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     /**
      * Indicates if the invoice discounts have already been applied
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_already_added_discount")
     private boolean isAlreadyAddedDiscount;
 
@@ -633,42 +600,41 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     /**
      * Is invoice generated using new invoice process
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "new_invoicing_process")
     private boolean newInvoicingProcess = false;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "has_taxes")
     private boolean hasTaxes;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "has_discounts")
     private boolean hasDiscounts;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "has_minimum")
     private boolean hasMinimum;
 
     /**
-	 * discountPlan attached to the invoice
-	 */
+     * discountPlan attached to the invoice
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "discount_plan_id", referencedColumnName = "id")
-	private DiscountPlan discountPlan;
+    @JoinColumn(name = "discount_plan_id", referencedColumnName = "id")
+    private DiscountPlan discountPlan;
 
     /**
-	 * invoiceLines attached to the invoice
-	 */
+     * invoiceLines attached to the invoice
+     */
     @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-	private List<InvoiceLine>  invoiceLines;
-
+    private List<InvoiceLine> invoiceLines;
 
     /**
      * Commercial order attached to the invoice
      */
     @ManyToOne(fetch = FetchType.LAZY)
-  	@JoinColumn(name = "commercial_order_id", referencedColumnName = "id")
-  	private CommercialOrder commercialOrder;
+    @JoinColumn(name = "commercial_order_id", referencedColumnName = "id")
+    private CommercialOrder commercialOrder;
 
     @Transient
     private List<InvoiceLine> draftInvoiceLines = new ArrayList<>();
@@ -679,7 +645,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     @Column(name = "amount_without_tax_before_discount", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal amountWithoutTaxBeforeDiscount;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_reminder_level_triggered")
     private boolean isReminderLevelTriggered;
 
@@ -690,26 +656,28 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     @JoinColumn(name = "related_dunning_collection_plan_id")
     private DunningCollectionPlan relatedDunningCollectionPlan;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "dunning_collection_plan_triggered")
     private boolean dunningCollectionPlanTriggered;
-    @Transient
-  	private Set<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates;
     
+    @Transient
+    private Set<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates;
+
     /**
      * The exchange rate that converted amounts of the invoice.
      */
     @Column(name = "last_applied_rate", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal lastAppliedRate;
-    
+
     /**
      * The date of exchange rate applied to amounts of the invoice.
      */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_applied_rate_date")
     private Date lastAppliedRateDate = new Date();
+    
     @Transient
-  	private Date nextInvoiceDate;
+    private Date nextInvoiceDate;
 
     /**
      * Transactional amount without tax
@@ -739,7 +707,7 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
      * Transactional raw amount
      */
     @Column(name = "transactional_raw_amount", nullable = false, precision = NB_PRECISION, scale = NB_DECIMALS)
-    private BigDecimal transactionalRawAmount= ZERO;
+    private BigDecimal transactionalRawAmount = ZERO;
 
     /**
      * Transactional discount amount
@@ -765,18 +733,18 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
      */
     @Column(name = "open_order_number")
     @Size(max = 255)
-	private String openOrderNumber;
+    private String openOrderNumber;
 
     @Column(name = "invoice_balance", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal invoiceBalance;
-    
+
     /**
      * Indicates if the current rate has already been applied.
      */
     @Column(name = "use_current_rate")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean useCurrentRate = false;
-    
+
     /**
      * Rejected rule validation invoice
      */
@@ -788,88 +756,87 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     private BigDecimal transactionalInvoiceBalance;
 
     @Column(name = "use_specific_price_conversion")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean useSpecificPriceConversion = false;
-    
+
     @Column(name = "conversion_from_billing_currency")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean conversionFromBillingCurrency = false;
-	
-	@Column(name = "auto_matching")
-	@Type(type = "numeric_boolean")
-	private boolean autoMatching;
-	
+
+    @Column(name = "auto_matching")
+    @Convert(converter = NumericBooleanConverter.class)
+    private boolean autoMatching;
+
     @Column(name = "external_purchase_order_number")
     @Size(max = 100)
     private String externalPurchaseOrderNumber;
-	
-	@Column(name = "ubl_reference")
-	@Type(type = "numeric_boolean")
-	private boolean ublReference;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "pdp_status_id")
-	private PDPStatusEntity pdpStatus;
-	
-	@Column(name = "certificate_uncollectibility_number", length = 50)
-	private String certificateUncollectibilityNumber;
-    
+
+    @Column(name = "ubl_reference")
+    @Convert(converter = NumericBooleanConverter.class)
+    private boolean ublReference;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pdp_status_id")
+    private PDPStatusEntity pdpStatus;
+
+    @Column(name = "certificate_uncollectibility_number", length = 50)
+    private String certificateUncollectibilityNumber;
+
     public Invoice() {
-	}
+    }
 
     public Invoice(Invoice copy) {
-		this.billingAccount = copy.billingAccount;
-		this.paymentMethodType = copy.paymentMethodType;
+        this.billingAccount = copy.billingAccount;
+        this.paymentMethodType = copy.paymentMethodType;
         this.paymentMethod = copy.paymentMethod;
-		this.dueDate = copy.dueDate;
-		this.invoiceDate = copy.invoiceDate;
-		this.discountPlan = copy.discountPlan;
-		this.amountWithoutTax = copy.amountWithoutTax;
-		this.amountTax = copy.amountTax;
-		this.amountWithTax = copy.amountWithTax;
-		this.netToPay = copy.netToPay;
-		this.tradingCurrency = copy.tradingCurrency;
-		this.tradingLanguage = copy.tradingLanguage;
-		this.tradingCountry = copy.tradingCountry;
-		this.iban = copy.iban;
-		this.isDetailedInvoice = copy.isDetailedInvoice;
-		this.discountRate = copy.discountRate;
-		this.discountAmount = copy.discountAmount;
-		this.externalRef = copy.externalRef;
-		setUUIDIfNull();
-		this.cfValues = copy.cfValues;
-		this.cfAccumulatedValues = copy.cfAccumulatedValues;
-		this.seller = copy.seller;
-		this.invoiceType = copy.invoiceType;
+        this.dueDate = copy.dueDate;
+        this.invoiceDate = copy.invoiceDate;
+        this.discountPlan = copy.discountPlan;
+        this.amountWithoutTax = copy.amountWithoutTax;
+        this.amountTax = copy.amountTax;
+        this.amountWithTax = copy.amountWithTax;
+        this.netToPay = copy.netToPay;
+        this.tradingCurrency = copy.tradingCurrency;
+        this.tradingLanguage = copy.tradingLanguage;
+        this.tradingCountry = copy.tradingCountry;
+        this.iban = copy.iban;
+        this.isDetailedInvoice = copy.isDetailedInvoice;
+        this.discountRate = copy.discountRate;
+        this.discountAmount = copy.discountAmount;
+        this.externalRef = copy.externalRef;
+        setUUIDIfNull();
+        this.cfValuesAsJson = copy.getCfValuesAsJson();
+        this.seller = copy.seller;
+        this.invoiceType = copy.invoiceType;
 
-		this.alias = null;
-		this.quote = null;
-		this.commercialOrder = null;
-		this.status = InvoiceStatusEnum.NEW;
-		this.paymentStatus = InvoicePaymentStatusEnum.NONE;
-		this.alreadySent = false;
-		this.invoiceNumber = null;
-		this.temporaryInvoiceNumber = null;
-		this.comment = null;
-		this.linkedInvoices = new HashSet<>();
-		this.orders = new ArrayList<>();
-		this.xmlFilename = null;
-		this.pdfFilename = null;
-		this.rejectReason = null;
+        this.alias = null;
+        this.quote = null;
+        this.commercialOrder = null;
+        this.status = InvoiceStatusEnum.NEW;
+        this.paymentStatus = InvoicePaymentStatusEnum.NONE;
+        this.alreadySent = false;
+        this.invoiceNumber = null;
+        this.temporaryInvoiceNumber = null;
+        this.comment = null;
+        this.linkedInvoices = new HashSet<>();
+        this.orders = new ArrayList<>();
+        this.xmlFilename = null;
+        this.pdfFilename = null;
+        this.rejectReason = null;
 
-		this.xmlDate = null;
-		this.pdfDate = null;
-		this.emailSentDate = null;
-		this.paymentStatusDate = null;
-		this.invoiceLines = new ArrayList<>();
-		this.invoiceAgregates = new ArrayList<>();
-		this.isReminderLevelTriggered = copy.isReminderLevelTriggered;
-		this.relatedDunningCollectionPlan = copy.relatedDunningCollectionPlan;
-		this.externalPurchaseOrderNumber = copy.externalPurchaseOrderNumber;
-	}
+        this.xmlDate = null;
+        this.pdfDate = null;
+        this.emailSentDate = null;
+        this.paymentStatusDate = null;
+        this.invoiceLines = new ArrayList<>();
+        this.invoiceAgregates = new ArrayList<>();
+        this.isReminderLevelTriggered = copy.isReminderLevelTriggered;
+        this.relatedDunningCollectionPlan = copy.relatedDunningCollectionPlan;
+        this.externalPurchaseOrderNumber = copy.externalPurchaseOrderNumber;
+        this.subscription = copy.subscription;
+    }
 
-
-	/**
+    /**
      * 3583 : dueDate and invoiceDate should be truncated before persist or update.
      */
     @PrePersist
@@ -880,23 +847,21 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
         this.invoiceDate = DateUtils.truncateTime(this.invoiceDate);
         setUUIDIfNull();
 
-        if(this.getBillingAccount() != null) {
-        	CustomerAccount customerAccount = this.getBillingAccount().getCustomerAccount();
-        	this.tradingCountry = billingAccount.getTradingCountry() != null ? billingAccount.getTradingCountry() :this.getSeller().getTradingCountry();
-            if(this.tradingCurrency == null) {
-                this.tradingCurrency = billingAccount.getTradingCurrency() != null
-                        ? billingAccount.getTradingCurrency() : this.getSeller().getTradingCurrency();
-                if(this.tradingCurrency == null) {
-                    this.tradingCurrency = customerAccount.getTradingCurrency() != null
-                            ? customerAccount.getTradingCurrency() : this.getSeller().getTradingCurrency();
+        if (this.getBillingAccount() != null) {
+            CustomerAccount customerAccount = this.getBillingAccount().getCustomerAccount();
+            this.tradingCountry = billingAccount.getTradingCountry() != null ? billingAccount.getTradingCountry() : this.getSeller().getTradingCountry();
+            if (this.tradingCurrency == null) {
+                this.tradingCurrency = billingAccount.getTradingCurrency() != null ? billingAccount.getTradingCurrency() : this.getSeller().getTradingCurrency();
+                if (this.tradingCurrency == null) {
+                    this.tradingCurrency = customerAccount.getTradingCurrency() != null ? customerAccount.getTradingCurrency() : this.getSeller().getTradingCurrency();
                 }
             }
-            if(billingAccount.getTradingLanguage() != null) {
-        		this.tradingLanguage = billingAccount.getTradingLanguage();
+            if (billingAccount.getTradingLanguage() != null) {
+                this.tradingLanguage = billingAccount.getTradingLanguage();
             }
-        	if(this.tradingLanguage == null) {
-        		this.tradingLanguage = customerAccount.getTradingLanguage() != null ? customerAccount.getTradingLanguage() : this.getSeller().getTradingLanguage();
-        	}
+            if (this.tradingLanguage == null) {
+                this.tradingLanguage = customerAccount.getTradingLanguage() != null ? customerAccount.getTradingLanguage() : this.getSeller().getTradingLanguage();
+            }
         }
         if (this.id == null) {
             if (this.lastAppliedRateDate == null) {
@@ -910,18 +875,18 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
             }
         }
 
-		if (!this.useSpecificPriceConversion) {
-			BigDecimal appliedRate = getAppliedRate();
-			setTransactionalAmountTax(toTransactional(amountTax, appliedRate));
-			setTransactionalAmountWithoutTax(toTransactional(amountWithoutTax, appliedRate));
-			setTransactionalAmountWithTax(toTransactional(amountWithTax, appliedRate));
-			setTransactionalDiscountAmount(toTransactional(discountAmount, appliedRate));
-			setTransactionalNetToPay(toTransactional(netToPay, appliedRate));
-			setTransactionalRawAmount(toTransactional(rawAmount, appliedRate));
-			setTransactionalAmountWithoutTaxBeforeDiscount(toTransactional(amountWithoutTaxBeforeDiscount, appliedRate));
-			setTransactionalInvoiceBalance(toTransactional(invoiceBalance, appliedRate));
-		}
-        
+        if (!this.useSpecificPriceConversion) {
+            BigDecimal appliedRate = getAppliedRate();
+            setTransactionalAmountTax(toTransactional(amountTax, appliedRate));
+            setTransactionalAmountWithoutTax(toTransactional(amountWithoutTax, appliedRate));
+            setTransactionalAmountWithTax(toTransactional(amountWithTax, appliedRate));
+            setTransactionalDiscountAmount(toTransactional(discountAmount, appliedRate));
+            setTransactionalNetToPay(toTransactional(netToPay, appliedRate));
+            setTransactionalRawAmount(toTransactional(rawAmount, appliedRate));
+            setTransactionalAmountWithoutTaxBeforeDiscount(toTransactional(amountWithoutTaxBeforeDiscount, appliedRate));
+            setTransactionalInvoiceBalance(toTransactional(invoiceBalance, appliedRate));
+        }
+
     }
 
     public String getInvoiceNumber() {
@@ -930,8 +895,8 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
 
     public void setInvoiceNumber(String invoiceNumber) {
         this.invoiceNumber = invoiceNumber;
-        if(this.status == null) {
-        	this.status=InvoiceStatusEnum.NEW;
+        if (this.status == null) {
+            this.status = InvoiceStatusEnum.NEW;
         }
     }
 
@@ -1076,28 +1041,28 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
 
     public void addTransactionalAmountWithTax(BigDecimal amountToAdd) {
         if (transactionalAmountWithTax == null) {
-        	transactionalAmountWithTax = ZERO;
+            transactionalAmountWithTax = ZERO;
         }
         if (amountToAdd != null) {
-        	transactionalAmountWithTax = transactionalAmountWithTax.add(amountToAdd);
+            transactionalAmountWithTax = transactionalAmountWithTax.add(amountToAdd);
         }
     }
 
     public void addTransactionalAmountWithoutTax(BigDecimal amountToAdd) {
         if (transactionalAmountWithoutTax == null) {
-        	transactionalAmountWithoutTax = ZERO;
+            transactionalAmountWithoutTax = ZERO;
         }
         if (amountToAdd != null) {
-        	transactionalAmountWithoutTax = transactionalAmountWithoutTax.add(amountToAdd);
+            transactionalAmountWithoutTax = transactionalAmountWithoutTax.add(amountToAdd);
         }
     }
 
     public void addTransactionalAmountTax(BigDecimal amountToAdd) {
         if (transactionalAmountTax == null) {
-        	transactionalAmountTax = ZERO;
+            transactionalAmountTax = ZERO;
         }
         if (amountToAdd != null) {
-        	transactionalAmountTax = transactionalAmountTax.add(amountToAdd);
+            transactionalAmountTax = transactionalAmountTax.add(amountToAdd);
         }
     }
 
@@ -1202,31 +1167,31 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     }
 
     public InvoicePaymentStatusEnum getRealTimeStatus() {
-    	if(dueDate!=null && dueDate.before( new Date()) && (status==InvoiceStatusEnum.VALIDATED)) {
-    		return InvoicePaymentStatusEnum.UNPAID;
-    	}
+        if (dueDate != null && dueDate.before(new Date()) && (status == InvoiceStatusEnum.VALIDATED)) {
+            return InvoicePaymentStatusEnum.UNPAID;
+        }
         return paymentStatus;
     }
 
     public void setStatus(InvoiceStatusEnum status) {
-    	if(status == this.status) {
-    		return;
-    	}
-    	if(status!=null && status.getPreviousStats().contains(this.status)) {
-	        this.status = status;
-	        setStatusDate(new Date());
-    	} else {
-    		throw new ValidationException("Not possible to change invoice status from "+this.status+" to "+status) ;
-    	}
+        if (status == this.status) {
+            return;
+        }
+        if (status != null && status.getPreviousStats().contains(this.status)) {
+            this.status = status;
+            setStatusDate(new Date());
+        } else {
+            throw new ValidationException("Not possible to change invoice status from " + this.status + " to " + status);
+        }
     }
 
     public void rebuildStatus(InvoiceStatusEnum status) {
-    	if(status==InvoiceStatusEnum.DRAFT || status==InvoiceStatusEnum.SUSPECT || status==InvoiceStatusEnum.REJECTED) {
-			setStatusDate(new Date());
-	        this.status = status;
-    	} else {
-    		throw new ValidationException("Not possible to rebuild invoice status with "+status) ;
-    	}
+        if (status == InvoiceStatusEnum.DRAFT || status == InvoiceStatusEnum.SUSPECT || status == InvoiceStatusEnum.REJECTED) {
+            setStatusDate(new Date());
+            this.status = status;
+        } else {
+            throw new ValidationException("Not possible to rebuild invoice status with " + status);
+        }
     }
 
     @Override
@@ -1279,55 +1244,6 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
      */
     public void setOrders(List<Order> orders) {
         this.orders = orders;
-    }
-
-    /**
-     * setting uuid if null
-     */
-    public void setUUIDIfNull() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID().toString();
-        }
-    }
-
-    @Override
-    public String getUuid() {
-        setUUIDIfNull(); // setting uuid if null to be sure that the existing code expecting uuid not null will not be impacted
-        return uuid;
-    }
-
-    /**
-     * @param uuid Unique identifier
-     */
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    @Override
-    public CustomFieldValues getCfValues() {
-        return cfValues;
-    }
-
-    @Override
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
-    }
-
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfAccumulatedValues) {
-        this.cfAccumulatedValues = cfAccumulatedValues;
-    }
-
-    @Override
-    public String clearUuid() {
-        String oldUuid = uuid;
-        uuid = UUID.randomUUID().toString();
-        return oldUuid;
     }
 
     @Override
@@ -1445,9 +1361,9 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     public void assignTemporaryInvoiceNumber() {
 
         StringBuffer num1 = new StringBuffer("000000000");
-		if (id != null) {
-			num1.append(id + "");
-		}
+        if (id != null) {
+            num1.append(id + "");
+        }
         String invoiceNumber = num1.substring(num1.length() - 9);
         int key = 0;
 
@@ -1628,139 +1544,139 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
         this.initialCollectionDate = initialCollectionDate;
     }
 
-	public String getRejectReason() {
-		return rejectReason;
-	}
+    public String getRejectReason() {
+        return rejectReason;
+    }
 
-	public void setRejectReason(String rejectReason) {
-		this.rejectReason = rejectReason;
-	}
+    public void setRejectReason(String rejectReason) {
+        this.rejectReason = rejectReason;
+    }
 
-	public Date getStatusDate() {
-		return statusDate;
-	}
+    public Date getStatusDate() {
+        return statusDate;
+    }
 
-	public void setStatusDate(Date statusDate) {
-		this.statusDate = statusDate;
-	}
+    public void setStatusDate(Date statusDate) {
+        this.statusDate = statusDate;
+    }
 
-	public Date getXmlDate() {
-		return xmlDate;
-	}
+    public Date getXmlDate() {
+        return xmlDate;
+    }
 
-	public void setXmlDate(Date xmlDate) {
-		this.xmlDate = xmlDate;
-	}
+    public void setXmlDate(Date xmlDate) {
+        this.xmlDate = xmlDate;
+    }
 
-	public Date getPdfDate() {
-		return pdfDate;
-	}
+    public Date getPdfDate() {
+        return pdfDate;
+    }
 
-	public void setPdfDate(Date pdfDate) {
-		this.pdfDate = pdfDate;
-	}
+    public void setPdfDate(Date pdfDate) {
+        this.pdfDate = pdfDate;
+    }
 
-	public Date getEmailSentDate() {
-		return emailSentDate;
-	}
+    public Date getEmailSentDate() {
+        return emailSentDate;
+    }
 
-	public void setEmailSentDate(Date emailSentDate) {
-		this.emailSentDate = emailSentDate;
-	}
+    public void setEmailSentDate(Date emailSentDate) {
+        this.emailSentDate = emailSentDate;
+    }
 
-	public InvoicePaymentStatusEnum getPaymentStatus() {
-		return paymentStatus;
-	}
+    public InvoicePaymentStatusEnum getPaymentStatus() {
+        return paymentStatus;
+    }
 
-	public void setPaymentStatus(InvoicePaymentStatusEnum paymentStatus) {
-		this.paymentStatus = paymentStatus;
-	}
+    public void setPaymentStatus(InvoicePaymentStatusEnum paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
 
-	public Date getPaymentStatusDate() {
-		return paymentStatusDate;
-	}
+    public Date getPaymentStatusDate() {
+        return paymentStatusDate;
+    }
 
-	public void setPaymentStatusDate(Date paymentStatusDate) {
-		this.paymentStatusDate = paymentStatusDate;
-	}
+    public void setPaymentStatusDate(Date paymentStatusDate) {
+        this.paymentStatusDate = paymentStatusDate;
+    }
 
-	public Date getStartDate() {
-		return startDate;
-	}
+    public Date getStartDate() {
+        return startDate;
+    }
 
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
 
-	public Date getEndDate() {
-		return endDate;
-	}
+    public Date getEndDate() {
+        return endDate;
+    }
 
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
 
-	public BigDecimal getRawAmount() {
-		return rawAmount;
-	}
+    public BigDecimal getRawAmount() {
+        return rawAmount;
+    }
 
-	public void setRawAmount(BigDecimal rawAmount) {
-		this.rawAmount = rawAmount;
-	}
+    public void setRawAmount(BigDecimal rawAmount) {
+        this.rawAmount = rawAmount;
+    }
 
-	public BigDecimal getDiscountRate() {
-		return discountRate;
-	}
+    public BigDecimal getDiscountRate() {
+        return discountRate;
+    }
 
-	public void setDiscountRate(BigDecimal discountRate) {
-		this.discountRate = discountRate;
-	}
+    public void setDiscountRate(BigDecimal discountRate) {
+        this.discountRate = discountRate;
+    }
 
-	public BigDecimal getDiscountAmount() {
-		return discountAmount;
-	}
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
 
-	public void setDiscountAmount(BigDecimal discountAmount) {
-		this.discountAmount = discountAmount;
-	}
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
 
-	public boolean isAlreadyAppliedMinimum() {
-		return isAlreadyAppliedMinimum;
-	}
+    public boolean isAlreadyAppliedMinimum() {
+        return isAlreadyAppliedMinimum;
+    }
 
-	public void setAlreadyAppliedMinimum(boolean isAlreadyAppliedMinimum) {
-		this.isAlreadyAppliedMinimum = isAlreadyAppliedMinimum;
-	}
+    public void setAlreadyAppliedMinimum(boolean isAlreadyAppliedMinimum) {
+        this.isAlreadyAppliedMinimum = isAlreadyAppliedMinimum;
+    }
 
-	public boolean isAlreadyAddedDiscount() {
-		return isAlreadyAddedDiscount;
-	}
+    public boolean isAlreadyAddedDiscount() {
+        return isAlreadyAddedDiscount;
+    }
 
-	public void setAlreadyAddedDiscount(boolean isAlreadyAddedDiscount) {
-		this.isAlreadyAddedDiscount = isAlreadyAddedDiscount;
-	}
+    public void setAlreadyAddedDiscount(boolean isAlreadyAddedDiscount) {
+        this.isAlreadyAddedDiscount = isAlreadyAddedDiscount;
+    }
 
-	public Boolean getDraft() {
-		return draft;
-	}
+    public Boolean getDraft() {
+        return draft;
+    }
 
-	public void setPreviousInvoiceNumber(String previousInvoiceNumber) {
-		this.previousInvoiceNumber = previousInvoiceNumber;
-	}
+    public void setPreviousInvoiceNumber(String previousInvoiceNumber) {
+        this.previousInvoiceNumber = previousInvoiceNumber;
+    }
 
-	/**
-	 * @return the newInvoicingProcess
-	 */
-	public boolean isNewInvoicingProcess() {
-		return newInvoicingProcess;
-	}
+    /**
+     * @return the newInvoicingProcess
+     */
+    public boolean isNewInvoicingProcess() {
+        return newInvoicingProcess;
+    }
 
-	/**
-	 * @param newInvoicingProcess the newInvoicingProcess to set
-	 */
-	public void setNewInvoicingProcess(boolean newInvoicingProcess) {
-		this.newInvoicingProcess = newInvoicingProcess;
-	}
+    /**
+     * @param newInvoicingProcess the newInvoicingProcess to set
+     */
+    public void setNewInvoicingProcess(boolean newInvoicingProcess) {
+        this.newInvoicingProcess = newInvoicingProcess;
+    }
 
     public boolean isHasTaxes() {
         return hasTaxes;
@@ -1786,42 +1702,41 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
         this.hasMinimum = hasMinimum;
     }
 
-	/**
-	 * @return the discountPlan
-	 */
-	public DiscountPlan getDiscountPlan() {
-		return discountPlan;
-	}
+    /**
+     * @return the discountPlan
+     */
+    public DiscountPlan getDiscountPlan() {
+        return discountPlan;
+    }
 
-	/**
-	 * @param discountPlan the discountPlan to set
-	 */
-	public void setDiscountPlan(DiscountPlan discountPlan) {
-		this.discountPlan = discountPlan;
-	}
+    /**
+     * @param discountPlan the discountPlan to set
+     */
+    public void setDiscountPlan(DiscountPlan discountPlan) {
+        this.discountPlan = discountPlan;
+    }
 
-	/**
-	 * @return the invoiceLines
-	 */
-	public List<InvoiceLine> getInvoiceLines() {
-		return invoiceLines;
-	}
+    /**
+     * @return the invoiceLines
+     */
+    public List<InvoiceLine> getInvoiceLines() {
+        return invoiceLines;
+    }
 
-	/**
-	 * @param invoiceLines the invoiceLines to set
-	 */
-	public void setInvoiceLines(List<InvoiceLine> invoiceLines) {
-		this.invoiceLines = invoiceLines;
-	}
+    /**
+     * @param invoiceLines the invoiceLines to set
+     */
+    public void setInvoiceLines(List<InvoiceLine> invoiceLines) {
+        this.invoiceLines = invoiceLines;
+    }
 
-	public CommercialOrder getCommercialOrder() {
-		return commercialOrder;
-	}
+    public CommercialOrder getCommercialOrder() {
+        return commercialOrder;
+    }
 
-	public void setCommercialOrder(CommercialOrder commercialOrder) {
-		this.commercialOrder = commercialOrder;
-	}
-
+    public void setCommercialOrder(CommercialOrder commercialOrder) {
+        this.commercialOrder = commercialOrder;
+    }
 
     public List<InvoiceLine> getDraftInvoiceLines() {
         return draftInvoiceLines;
@@ -1831,16 +1746,13 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
         this.draftInvoiceLines = draftInvoiceLines;
     }
 
+    public CpqQuote getCpqQuote() {
+        return cpqQuote;
+    }
 
-	public CpqQuote getCpqQuote() {
-		return cpqQuote;
-	}
-
-
-	public void setCpqQuote(CpqQuote cpqQuote) {
-		this.cpqQuote = cpqQuote;
-	}
-
+    public void setCpqQuote(CpqQuote cpqQuote) {
+        this.cpqQuote = cpqQuote;
+    }
 
     public BigDecimal getAmountWithoutTaxBeforeDiscount() {
         return amountWithoutTaxBeforeDiscount;
@@ -1967,34 +1879,33 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     }
 
     public String getOpenOrderNumber() {
-		return openOrderNumber;
-	}
+        return openOrderNumber;
+    }
 
-	public void setOpenOrderNumber(String openOrderNumber) {
-		this.openOrderNumber = openOrderNumber;
-	}
+    public void setOpenOrderNumber(String openOrderNumber) {
+        this.openOrderNumber = openOrderNumber;
+    }
 
-	public boolean isUseCurrentRate() {
-		return useCurrentRate;
-	}
+    public boolean isUseCurrentRate() {
+        return useCurrentRate;
+    }
 
-	public void setUseCurrentRate(boolean useCurrentRate) {
-		this.useCurrentRate = useCurrentRate;
-	}
+    public void setUseCurrentRate(boolean useCurrentRate) {
+        this.useCurrentRate = useCurrentRate;
+    }
 
-
-	/**
+    /**
      * Check if an invoice can be refreshed
+     * 
      * @return refresh check result
      */
     public boolean canBeRefreshed() {
-        return this.status == InvoiceStatusEnum.NEW || this.status == InvoiceStatusEnum.DRAFT
-                && (this.lastAppliedRate != null
-                && !this.lastAppliedRate.equals(this.tradingCurrency.getCurrentRate()));
+        return this.status == InvoiceStatusEnum.NEW || this.status == InvoiceStatusEnum.DRAFT && (this.lastAppliedRate != null && !this.lastAppliedRate.equals(this.tradingCurrency.getCurrentRate()));
     }
 
     /**
      * Get applied rate for an invoice
+     * 
      * @return last applied rate
      */
     public BigDecimal getAppliedRate() {
@@ -2002,142 +1913,140 @@ public class Invoice extends AuditableEntity implements ICustomFieldEntity, ISea
     }
 
     /**
-	 * @param invoiceSCAs
-	 * @return
-	 */
-	public void setSubCategoryInvoiceAgregate(Set<SubCategoryInvoiceAgregate> invoiceSCAs) {
-		this.subCategoryInvoiceAgregates = invoiceSCAs;
-	}
+     * @param invoiceSCAs
+     * @return
+     */
+    public void setSubCategoryInvoiceAgregate(Set<SubCategoryInvoiceAgregate> invoiceSCAs) {
+        this.subCategoryInvoiceAgregates = invoiceSCAs;
+    }
 
-	/**
-	 * @param invoiceSCAs
-	 * @return
-	 */
-	public Set<SubCategoryInvoiceAgregate> getSubCategoryInvoiceAgregate() {
-		return this.subCategoryInvoiceAgregates;
-	}
+    /**
+     * @param invoiceSCAs
+     * @return
+     */
+    public Set<SubCategoryInvoiceAgregate> getSubCategoryInvoiceAgregate() {
+        return this.subCategoryInvoiceAgregates;
+    }
 
-	public void setNextInvoiceDate(Date nextInvoiceDate) {
-		this.nextInvoiceDate = nextInvoiceDate;
-	}
+    public void setNextInvoiceDate(Date nextInvoiceDate) {
+        this.nextInvoiceDate = nextInvoiceDate;
+    }
 
-	/**
-	 * @return
-	 */
-	public Date getNextInvoiceDate() {
-		return nextInvoiceDate;
-	}
+    /**
+     * @return
+     */
+    public Date getNextInvoiceDate() {
+        return nextInvoiceDate;
+    }
 
     public List<Subscription> getSubscriptions() {
-		return subscriptions;
-	}
+        return subscriptions;
+    }
 
+    public void setSubscriptions(List<Subscription> subscriptions) {
+        this.subscriptions = subscriptions;
+    }
 
-	public void setSubscriptions(List<Subscription> subscriptions) {
-		this.subscriptions = subscriptions;
-	}
-	
-	/**
-	 * set all invoice amounts to 0
-	 */
-	public void initAmounts() {
-		this.amountTax=BigDecimal.ZERO;
-		this.amountWithTax=BigDecimal.ZERO;
-		this.amountWithoutTax=BigDecimal.ZERO;
+    /**
+     * set all invoice amounts to 0
+     */
+    public void initAmounts() {
+        this.amountTax = BigDecimal.ZERO;
+        this.amountWithTax = BigDecimal.ZERO;
+        this.amountWithoutTax = BigDecimal.ZERO;
 		this.transactionalAmountTax=BigDecimal.ZERO;
 		this.transactionalAmountWithTax=BigDecimal.ZERO;
 		this.transactionalAmountWithoutTax=BigDecimal.ZERO;
-	}
+    }
 
     public BigDecimal getInvoiceBalance() {
         return invoiceBalance;
     }
 
-
     public void setInvoiceBalance(BigDecimal invoiceBalance) {
         this.invoiceBalance = invoiceBalance;
     }
 
-	public InvoiceValidationRule getRejectedByRule() {
-		return rejectedByRule;
-	}
+    public InvoiceValidationRule getRejectedByRule() {
+        return rejectedByRule;
+    }
 
-	public void setRejectedByRule(InvoiceValidationRule rejectedByRule) {
-		this.rejectedByRule = rejectedByRule;
-	}
+    public void setRejectedByRule(InvoiceValidationRule rejectedByRule) {
+        this.rejectedByRule = rejectedByRule;
+    }
 
     public BigDecimal getTransactionalInvoiceBalance() {
         return transactionalInvoiceBalance;
     }
+
     public void setTransactionalInvoiceBalance(BigDecimal transactionalInvoiceBalance) {
         this.transactionalInvoiceBalance = transactionalInvoiceBalance;
     }
 
+    /**
+     * @return the useSpecificPriceConversion
+     */
+    public boolean isUseSpecificPriceConversion() {
+        return useSpecificPriceConversion;
+    }
 
-	/**
-	 * @return the useSpecificPriceConversion
-	 */
-	public boolean isUseSpecificPriceConversion() {
-		return useSpecificPriceConversion;
-	}
+    /**
+     * @param useSpecificPriceConversion the useSpecificPriceConversion to set
+     */
+    public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
+        this.useSpecificPriceConversion = useSpecificPriceConversion;
+    }
 
+    public boolean isConversionFromBillingCurrency() {
+        return conversionFromBillingCurrency;
+    }
 
-	/**
-	 * @param useSpecificPriceConversion the useSpecificPriceConversion to set
-	 */
-	public void setUseSpecificPriceConversion(boolean useSpecificPriceConversion) {
-		this.useSpecificPriceConversion = useSpecificPriceConversion;
-	}
+    public void setConversionFromBillingCurrency(boolean conversionFromBillingCurrency) {
+        this.conversionFromBillingCurrency = conversionFromBillingCurrency;
+    }
 
-	public boolean isConversionFromBillingCurrency() {
-		return conversionFromBillingCurrency;
-	}
+    private BigDecimal toTransactional(BigDecimal amount, BigDecimal rate) {
+        return amount != null ? amount.multiply(rate) : ZERO;
+    }
 
-	public void setConversionFromBillingCurrency(boolean conversionFromBillingCurrency) {
-		this.conversionFromBillingCurrency = conversionFromBillingCurrency;
-	}
-	
-	private BigDecimal toTransactional(BigDecimal amount, BigDecimal rate) {
-		return amount != null ? amount.multiply(rate) : ZERO;
-	}
-	
-	public boolean isAutoMatching() {
-		return autoMatching;
-	}
-	
-	public void setAutoMatching(boolean autoMatching) {
-		this.autoMatching = autoMatching;
-	}
+    public boolean isAutoMatching() {
+        return autoMatching;
+    }
 
-	public String getExternalPurchaseOrderNumber() {
-		return externalPurchaseOrderNumber;
-	}
+    public void setAutoMatching(boolean autoMatching) {
+        this.autoMatching = autoMatching;
+    }
 
-	public void setExternalPurchaseOrderNumber(String externalPurchaseOrderNumber) {
-		this.externalPurchaseOrderNumber = externalPurchaseOrderNumber;
-	}
-	public boolean isUblReference() {
-		return ublReference;
-	}
-	
-	public void setUblReference(boolean ublReference) {
-		this.ublReference = ublReference;
-	}
-	
-	public PDPStatusEntity getPdpStatus() {
-		return pdpStatus;
-	}
-	
-	public void setPdpStatus(PDPStatusEntity pdpStatus) {
-		this.pdpStatus = pdpStatus;
-	}
-	
-	public String getCertificateUncollectibilityNumber() {
-		return certificateUncollectibilityNumber;
-	}
-	
-	public Invoice setCertificateUncollectibilityNumber(String certificateUncollectibilityNumber) {
-		this.certificateUncollectibilityNumber = certificateUncollectibilityNumber;
-		return this;
-	}
+    public String getExternalPurchaseOrderNumber() {
+        return externalPurchaseOrderNumber;
+    }
+
+    public void setExternalPurchaseOrderNumber(String externalPurchaseOrderNumber) {
+        this.externalPurchaseOrderNumber = externalPurchaseOrderNumber;
+    }
+
+    public boolean isUblReference() {
+        return ublReference;
+    }
+
+    public void setUblReference(boolean ublReference) {
+        this.ublReference = ublReference;
+    }
+
+    public PDPStatusEntity getPdpStatus() {
+        return pdpStatus;
+    }
+
+    public void setPdpStatus(PDPStatusEntity pdpStatus) {
+        this.pdpStatus = pdpStatus;
+    }
+
+    public String getCertificateUncollectibilityNumber() {
+        return certificateUncollectibilityNumber;
+    }
+
+    public Invoice setCertificateUncollectibilityNumber(String certificateUncollectibilityNumber) {
+        this.certificateUncollectibilityNumber = certificateUncollectibilityNumber;
+        return this;
+    }
 }

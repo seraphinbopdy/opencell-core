@@ -24,7 +24,7 @@ import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.model.IEntity;
 import org.meveo.service.base.PersistenceService;
 
-import javax.persistence.Embedded;
+import jakarta.persistence.Embedded;
 
 public class GenericRequestMapper {
     private final Class entityClass;

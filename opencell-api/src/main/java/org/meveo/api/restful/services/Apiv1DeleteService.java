@@ -1,10 +1,10 @@
 package org.meveo.api.restful.services;
 
-import org.meveo.api.restful.GenericOpencellRestfulAPIv1;
+import org.meveo.api.restful.JaxRsActivatorGenericApiV1;
 
-import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.PathSegment;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,10 +32,10 @@ public class Apiv1DeleteService {
         StringBuilder suffixPathBuilder = new StringBuilder();
         for (int i = 0; i < segmentsOfPathAPIv1.size() - 1; i++ )
             suffixPathBuilder.append( FORWARD_SLASH + segmentsOfPathAPIv1.get(i).getPath() );
-        String deletePath = GenericOpencellRestfulAPIv1.REST_PATH + suffixPathBuilder;
+        String deletePath = JaxRsActivatorGenericApiV1.REST_PATH + suffixPathBuilder;
 
-        if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( deletePath ) ) {
-            String pathIBaseRS = GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get(deletePath);
+        if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( deletePath ) ) {
+            String pathIBaseRS = JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get(deletePath);
             String entityCode = segmentsOfPathAPIv1.get(segmentsOfPathAPIv1.size() - 1).getPath();
 
             if ( pathIBaseRS.equals( Apiv1ConstantDictionary.PAYMENT_METHOD ) )

@@ -19,15 +19,15 @@ package org.meveo.service.catalog.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.catalog.ServiceChargeTemplateRecurring;
 import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.catalog.WalletTemplate;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
 
 /**
  * @author Abdellatif BARI

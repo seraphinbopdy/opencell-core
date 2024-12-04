@@ -4,11 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.apache.logging.log4j.util.Strings;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
@@ -18,6 +13,11 @@ import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * @author Tarik FAKHOURI

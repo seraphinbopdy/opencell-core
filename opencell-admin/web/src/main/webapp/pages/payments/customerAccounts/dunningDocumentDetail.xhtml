@@ -8,12 +8,10 @@
 	xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags"
 	template="/layout/template.xhtml">
 
-	<ui:define name="metadata">
 		<f:metadata>
 			<f:viewParam name="objectId" value="#{dunningDocumentBean.objectId}" />
 			<f:viewParam name="tab" value="#{dunningDocumentBean.activeTab}" />
 		</f:metadata>
-	</ui:define>
 
 	<ui:define name="body">
 		<h:form id="crumbmenuForm">
@@ -173,7 +171,7 @@
 							value="#{dunningDocumentBean.entity.customerAccount.id}" />
 						<f:param name="edit" value="false" />
 						<f:param name="cid"
-							value="#{javax.enterprise.context.conversation.id}" />
+							value="#{jakarta.enterprise.context.conversation.id}" />
 					</p:button>
 				</ui:define>
 			</hftl:formPanel>

@@ -1,6 +1,6 @@
 package org.meveo.model.billing;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 public class CustomizationIdConverter implements AttributeConverter<Object, String> {
 

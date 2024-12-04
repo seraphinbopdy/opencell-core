@@ -23,16 +23,12 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -41,6 +37,8 @@ import org.meveo.model.bi.Report;
 import org.meveo.service.bi.impl.ReportService;
 import org.slf4j.Logger;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;

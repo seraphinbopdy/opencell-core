@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.enterprise.event.Event;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +24,7 @@ import org.meveo.event.qualifier.Rejected;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.RecurringChargeInstance;
 import org.meveo.model.billing.ServiceInstance;
+import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.CalendarYearly;
 import org.meveo.model.catalog.DayInYear;
@@ -44,6 +43,8 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
+import jakarta.enterprise.event.Event;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecurringChargeInstanceServiceTest {
@@ -142,6 +143,9 @@ public class RecurringChargeInstanceServiceTest {
         chargeInstance.setQuantity(BigDecimal.valueOf(100d));
         chargeInstance.setServiceInstance(serviceInstance);
         chargeInstance.setChargeTemplate(chargeTemplate);
+
+        Subscription subscription = new Subscription();
+        chargeInstance.setSubscription(subscription);
 
         return chargeInstance;
     }

@@ -35,22 +35,19 @@ public class MinAmountsResult implements Serializable {
      * 
      */
     private static final long serialVersionUID = 3290648156748434424L;
-    
+
     /**
-     * A map of amounts created with subscription id as a main key and a secondary map of "&lt;seller.id&gt;_&lt;invoiceSubCategory.id&gt; as a key a and amounts as values"
-    as a value 
-    */
+     * A map of amounts created with subscription id as a main key and a secondary map of "&lt;seller.id&gt;_&lt;invoiceSubCategory.id&gt; as a key a and amounts as values" as a value
+     */
     Map<Long, Map<String, Amounts>> createdAmountServices;
-    
+
     /**
-     * Additional Rated transaction amounts created to reach minimum invoicing amount per subscription. A map of &lt;seller.id&gt;_&lt;invoiceSubCategory.id&gt; as a key a
-     and amounts as values 
-    */
+     * Additional Rated transaction amounts created to reach minimum invoicing amount per subscription. A map of &lt;seller.id&gt;_&lt;invoiceSubCategory.id&gt; as a key a and amounts as values
+     */
     Map<String, Amounts> createdAmountSubscription;
 
     /**
-     * Additional Rated transaction amounts created to reach minimum invoicing amount per user account. A map of &lt;seller.id&gt;_&lt;invoiceSubCategory.id&gt; as a key a
-     and amounts as values
+     * Additional Rated transaction amounts created to reach minimum invoicing amount per user account. A map of &lt;seller.id&gt;_&lt;invoiceSubCategory.id&gt; as a key a and amounts as values
      */
     Map<String, Amounts> createdAmountUserAccount;
 
@@ -102,7 +99,7 @@ public class MinAmountsResult implements Serializable {
     public void setMinAmountTransactions(List<RatedTransaction> minAmountTransactions) {
         this.minAmountTransactions = minAmountTransactions;
     }
-    
+
     /**
      * Add a ratedTransaction
      * 
@@ -144,6 +141,7 @@ public class MinAmountsResult implements Serializable {
 
     /**
      * Gets ExtraMinAmount
+     * 
      * @return an ExtraMinAmount
      */
     public List<ExtraMinAmount> getExtraMinAmounts() {
@@ -152,6 +150,7 @@ public class MinAmountsResult implements Serializable {
 
     /**
      * Sets ExtraMinAmount
+     * 
      * @param extraMinAmounts the ExtraMinAmount
      */
     public void setExtraMinAmounts(List<ExtraMinAmount> extraMinAmounts) {

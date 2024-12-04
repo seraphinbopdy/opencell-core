@@ -4,21 +4,15 @@ import org.meveo.api.account.UserAccountApi;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.account.UserAccountDto;
-import org.meveo.api.dto.account.UserAccountsDto;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.apiv2.accounts.resource.UserAccountV2Resource;
-import org.meveo.apiv2.accounts.resource.UserAccountsResource;
 import org.meveo.apiv2.accounts.service.UserAccountsApiService;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.UserAccount;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
-import static javax.ws.rs.core.Response.ok;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class UserAccountsV2ResourceImpl extends BaseRs implements UserAccountV2Resource {

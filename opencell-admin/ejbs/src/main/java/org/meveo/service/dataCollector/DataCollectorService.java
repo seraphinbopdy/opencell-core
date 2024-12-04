@@ -1,10 +1,15 @@
 package org.meveo.service.dataCollector;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static java.util.Optional.ofNullable;
 import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.bi.DataCollector;
@@ -13,15 +18,10 @@ import org.meveo.service.base.BusinessService;
 import org.meveo.service.custom.CustomEntityTemplateService;
 import org.meveo.service.custom.CustomTableService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 @Stateless
 public class DataCollectorService extends BusinessService<DataCollector> {

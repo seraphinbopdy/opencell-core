@@ -31,11 +31,11 @@ import org.meveo.model.customEntities.CustomEntityInstance;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * Represents a custom field value type - reference to an Meveo entity identified by a classname and code. In case a class is a generic Custom Entity Template a classnameCode is
- * required to identify a concrete custom entity template by its code
+ * Represents a custom field value type - reference to an Meveo entity identified by a classname and code. In case a class is a generic Custom Entity Template a classnameCode is required to identify a concrete custom
+ * entity template by its code
  * 
- * For CustomEntityInstance classname = CustomEntityInstance.class, code = CustomEntityTemplate.code, code = CustomEntityInstance.code
- * For CustomTable record classname = CustomEntityInstance.class, code = CustomEntityTemplate.code, code = Custom table record id
+ * For CustomEntityInstance classname = CustomEntityInstance.class, code = CustomEntityTemplate.code, code = CustomEntityInstance.code For CustomTable record classname = CustomEntityInstance.class, code =
+ * CustomEntityTemplate.code, code = Custom table record id
  * 
  * @author Andrius Karpavicius
  **/
@@ -108,10 +108,10 @@ public class EntityReferenceWrapper implements Serializable, IReferenceEntity {
     /**
      * Constructor
      *
-     * @param classname     Classname of an entity
+     * @param classname Classname of an entity
      * @param classnameCode Custom entity template code - applicable and required when reference is to Custom Entity Template type
-     * @param id            Entity id
-     * @param code          Entity code
+     * @param id Entity id
+     * @param code Entity code
      */
     public EntityReferenceWrapper(String classname, String classnameCode, String code, Long id) {
         this.classname = classname;

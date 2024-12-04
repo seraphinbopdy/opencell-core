@@ -2,6 +2,7 @@ package org.meveo.service.payment;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.hamcrest.CoreMatchers.is;
@@ -9,12 +10,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.meveo.model.payments.OperationCategoryEnum.CREDIT;
 import static org.meveo.model.payments.OperationCategoryEnum.DEBIT;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.exception.ValidationException;
 import org.meveo.api.dto.CurrencyDto;
 import org.meveo.api.dto.account.CustomerAccountDto;
 import org.meveo.apiv2.payments.AccountOperationsDetails;
@@ -33,14 +42,16 @@ import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.CustomerBalanceService;
 import org.meveo.service.payments.impl.OCCTemplateService;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.persistence.EntityManager;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.EntityManager;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CustomerBalanceServiceTest {
@@ -81,9 +92,11 @@ public class CustomerBalanceServiceTest {
         OCCTemplate template = new OCCTemplate();
         template.setId(1L);
         template.setOccCategory(CREDIT);
+        template.setCode("OCC_CODE");
         OCCTemplate template2 = new OCCTemplate();
         template2.setId(2L);
         template2.setOccCategory(DEBIT);
+        template2.setCode("OCC_CODE");
         CustomerBalance customerBalance = createCustomerBalance(true, asList(template, template2));
 
         when(emWrapper.getEntityManager()).thenReturn(entityManager);
@@ -146,6 +159,7 @@ public class CustomerBalanceServiceTest {
     public void shouldNotCreateCustomerBalanceWithEmptyCreditLine() {
         OCCTemplate template2 = new OCCTemplate();
         template2.setId(2L);
+        template2.setCode("2L");
         template2.setOccCategory(DEBIT);
         CustomerBalance customerBalance = createCustomerBalance(true, asList(template2));
 
@@ -165,6 +179,7 @@ public class CustomerBalanceServiceTest {
     public void shouldNotCreateCustomerBalanceWithEmptyDebitLine() {
         OCCTemplate template2 = new OCCTemplate();
         template2.setId(2L);
+        template2.setCode("2L");
         template2.setOccCategory(CREDIT);
         CustomerBalance customerBalance = createCustomerBalance(true, asList(template2));
 
@@ -321,5 +336,22 @@ public class CustomerBalanceServiceTest {
         public String errorMessage() {
             return message;
         }
+    }
+
+    @Test(expected = ValidationException.class)
+    public void shouldThrowValidationErrorIfFAEIsUsed() {
+        OCCTemplate template = new OCCTemplate();
+        template.setId(2L);
+        template.setCode("INV_FAE");
+        template.setOccCategory(CREDIT);
+        CustomerBalance customerBalance = createCustomerBalance(true, singletonList(template));
+
+        when(paramBeanFactory.getInstance()).thenReturn(paramBean);
+        when(paramBean.getPropertyAsInteger("max.customer.balance", 6)).thenReturn(6);
+        doReturn(5L).when(customerBalanceService).count();
+        doReturn(empty()).when(customerBalanceService).findDefaultCustomerBalance();
+        when(occTemplateService.findById(2L)).thenReturn(template);
+
+        customerBalanceService.create(customerBalance);
     }
 }

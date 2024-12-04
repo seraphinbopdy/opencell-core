@@ -20,17 +20,17 @@ package org.meveo.model.metrics.configuration;
 
 import java.util.Objects;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Opencell monitoring configuration by metrics.
@@ -43,8 +43,7 @@ import org.meveo.model.ExportIdentifier;
 @Cacheable
 @ExportIdentifier({ "code" })
 @Table(name = "meveo_metrics_config", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "meveo_metrics_config_seq") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "meveo_metrics_config_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQuery(name = "MetricConfiguration.findAllForCache", query = "SELECT m FROM MetricsConfiguration m")
 public class MetricsConfiguration extends BusinessEntity {
     /**
@@ -104,8 +103,7 @@ public class MetricsConfiguration extends BusinessEntity {
         if (!super.equals(o))
             return false;
         MetricsConfiguration that = (MetricsConfiguration) o;
-        return Objects.equals(fullPath, that.fullPath) && Objects.equals(method, that.method)
-                && Objects.equals(metricsType, that.metricsType) && Objects.equals(metricsUnit, that.metricsUnit);
+        return Objects.equals(fullPath, that.fullPath) && Objects.equals(method, that.method) && Objects.equals(metricsType, that.metricsType) && Objects.equals(metricsUnit, that.metricsUnit);
     }
 
     @Override
@@ -115,9 +113,8 @@ public class MetricsConfiguration extends BusinessEntity {
 
     @Override
     public String toString() {
-        return "MetricConfiguration{" + "fullPath='" + fullPath + '\'' + ", method='" + method + '\'' + ", metricType='" + metricsType + '\'' + ", code='" + code + '\''
-                + ", previousCode='" + previousCode + '\'' + ", description='" + description + '\'' + ", appendGeneratedCode=" + appendGeneratedCode + ", auditable=" + auditable
-                + ", id=" + id + ", version=" + version + '}';
+        return "MetricConfiguration{" + "fullPath='" + fullPath + '\'' + ", method='" + method + '\'' + ", metricType='" + metricsType + '\'' + ", code='" + code + '\'' + ", previousCode='" + previousCode + '\''
+                + ", description='" + description + '\'' + ", appendGeneratedCode=" + appendGeneratedCode + ", auditable=" + auditable + ", id=" + id + ", version=" + version + '}';
     }
 
     public String getMetricsUnit() {

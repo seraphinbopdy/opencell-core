@@ -1,14 +1,13 @@
 package org.meveo.service.catalog.impl;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.ejb.Stateless;
 
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.catalog.PricePlanMatrixValue;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class PricePlanMatrixValueService extends PersistenceService<PricePlanMatrixValue> {

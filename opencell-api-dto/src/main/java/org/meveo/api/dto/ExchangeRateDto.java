@@ -2,14 +2,18 @@ package org.meveo.api.dto;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import jakarta.validation.constraints.NotNull;
+
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableExchangeRateDto.class)
 public interface ExchangeRateDto extends Resource {
 

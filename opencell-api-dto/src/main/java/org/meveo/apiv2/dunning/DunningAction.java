@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.immutables.value.Value;
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(builder = ImmutableDunningAction.Builder.class)
 public interface DunningAction {
     @Nullable

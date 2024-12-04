@@ -17,28 +17,29 @@
  */
 package org.meveo.model.payments;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
+import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.billing.AccountingCode;
 
-import java.util.List;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 
 /**
  * @author Edward P. Legaspi
@@ -48,8 +49,7 @@ import java.util.List;
 @Cacheable
 @ExportIdentifier({ "code" })
 @Table(name = "ar_occ_template", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_occ_template_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_occ_template_seq"), @Parameter(name = "increment_size", value = "1") })
 public class OCCTemplate extends BusinessEntity {
 
     private static final long serialVersionUID = 1L;
@@ -69,7 +69,7 @@ public class OCCTemplate extends BusinessEntity {
     @Column(name = "occ_category")
     @Enumerated(EnumType.STRING)
     private OperationCategoryEnum occCategory;
-    
+
     /**
      * journal
      */
@@ -91,19 +91,16 @@ public class OCCTemplate extends BusinessEntity {
     @JoinColumn(name = "contra_accounting_code_id")
     private AccountingCode contraAccountingCode;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contra_accounting_code2_id")
     private AccountingCode contraAccountingCode2;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "manual_creation_enabled")
     private boolean manualCreationEnabled = true;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "ar_customer_balance_templates",
-            joinColumns = @JoinColumn(name = "template_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "customer_balance_id", referencedColumnName = "id"))
+    @JoinTable(name = "ar_customer_balance_templates", joinColumns = @JoinColumn(name = "template_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "customer_balance_id", referencedColumnName = "id"))
     private List<CustomerBalance> balances;
 
     public String getAccountCodeClientSide() {
@@ -158,14 +155,14 @@ public class OCCTemplate extends BusinessEntity {
     public void setAccountingCode(AccountingCode accountingCode) {
         this.accountingCode = accountingCode;
     }
-    
-    public Journal getJournal() {
-		return journal;
-	}
 
-	public void setJournal(Journal journal) {
-		this.journal = journal;
-	}
+    public Journal getJournal() {
+        return journal;
+    }
+
+    public void setJournal(Journal journal) {
+        this.journal = journal;
+    }
 
     public AccountingScheme getAccountingScheme() {
         return accountingScheme;

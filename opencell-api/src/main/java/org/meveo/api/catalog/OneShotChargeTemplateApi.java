@@ -40,9 +40,9 @@ import org.meveo.service.billing.impl.RealtimeChargingService;
 import org.meveo.service.billing.impl.TradingCountryService;
 import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.inject.Inject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;

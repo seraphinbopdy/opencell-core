@@ -3,8 +3,8 @@ package org.meveo.model.billing;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import javax.persistence.Embeddable;
-import javax.persistence.Transient;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 
 /**
  * Sub category invoice aggregate amounts by tax
@@ -91,8 +91,8 @@ public class SubcategoryInvoiceAgregateAmount implements Serializable, Cloneable
         }
     }
 
-    public SubcategoryInvoiceAgregateAmount(BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal amountTax,
-                                            BigDecimal transactionalAmountWithoutTax, BigDecimal transactionalAmountWithTax, BigDecimal transactionalAmountTax) {
+    public SubcategoryInvoiceAgregateAmount(BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal amountTax, BigDecimal transactionalAmountWithoutTax, BigDecimal transactionalAmountWithTax,
+            BigDecimal transactionalAmountTax) {
         super();
 
         if (amountWithoutTax != null) {
@@ -163,51 +163,51 @@ public class SubcategoryInvoiceAgregateAmount implements Serializable, Cloneable
     }
 
     /**
-	 * @return the transactionalAmountWithoutTax
-	 */
+     * @return the transactionalAmountWithoutTax
+     */
     @Transient
-	public BigDecimal getTransactionalAmountWithoutTax() {
-		return transactionalAmountWithoutTax;
-	}
+    public BigDecimal getTransactionalAmountWithoutTax() {
+        return transactionalAmountWithoutTax;
+    }
 
-	/**
-	 * @param transactionalAmountWithoutTax the transactionalAmountWithoutTax to set
-	 */
-	public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
-		this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
-	}
+    /**
+     * @param transactionalAmountWithoutTax the transactionalAmountWithoutTax to set
+     */
+    public void setTransactionalAmountWithoutTax(BigDecimal transactionalAmountWithoutTax) {
+        this.transactionalAmountWithoutTax = transactionalAmountWithoutTax;
+    }
 
-	/**
-	 * @return the transactionalAmountWithTax
-	 */
-	@Transient
-	public BigDecimal getTransactionalAmountWithTax() {
-		return transactionalAmountWithTax;
-	}
+    /**
+     * @return the transactionalAmountWithTax
+     */
+    @Transient
+    public BigDecimal getTransactionalAmountWithTax() {
+        return transactionalAmountWithTax;
+    }
 
-	/**
-	 * @param transactionalAmountWithTax the transactionalAmountWithTax to set
-	 */
-	public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
-		this.transactionalAmountWithTax = transactionalAmountWithTax;
-	}
+    /**
+     * @param transactionalAmountWithTax the transactionalAmountWithTax to set
+     */
+    public void setTransactionalAmountWithTax(BigDecimal transactionalAmountWithTax) {
+        this.transactionalAmountWithTax = transactionalAmountWithTax;
+    }
 
-	/**
-	 * @return the transactionalAmountTax
-	 */
-	@Transient
-	public BigDecimal getTransactionalAmountTax() {
-		return transactionalAmountTax;
-	}
+    /**
+     * @return the transactionalAmountTax
+     */
+    @Transient
+    public BigDecimal getTransactionalAmountTax() {
+        return transactionalAmountTax;
+    }
 
-	/**
-	 * @param transactionalAmountTax the transactionalAmountTax to set
-	 */
-	public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
-		this.transactionalAmountTax = transactionalAmountTax;
-	}
+    /**
+     * @param transactionalAmountTax the transactionalAmountTax to set
+     */
+    public void setTransactionalAmountTax(BigDecimal transactionalAmountTax) {
+        this.transactionalAmountTax = transactionalAmountTax;
+    }
 
-	/**
+    /**
      * Get one of the amounts requested
      * 
      * @param isWithTax Should return amount with tax
@@ -326,8 +326,7 @@ public class SubcategoryInvoiceAgregateAmount implements Serializable, Cloneable
      */
     @Override
     public SubcategoryInvoiceAgregateAmount clone() {
-        return new SubcategoryInvoiceAgregateAmount(amountWithoutTax, amountWithTax, amountTax,
-                transactionalAmountWithoutTax, transactionalAmountWithTax, transactionalAmountTax);
+        return new SubcategoryInvoiceAgregateAmount(amountWithoutTax, amountWithTax, amountTax, transactionalAmountWithoutTax, transactionalAmountWithTax, transactionalAmountTax);
     }
 
     /**

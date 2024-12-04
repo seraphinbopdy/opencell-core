@@ -22,8 +22,9 @@ package org.meveo.model.catalog;
  * @author Khalid HORRI
  **/
 public enum DiscountPlanStatusEnum {
-    ACTIVE(1, "DiscountPlanStatusEnum.active"), INACTIVE(2, "DiscountPlanStatusEnum.inactive"), DRAFT(3, "DiscountPlanStatusEnum.draft"), IN_USE(4,
-            "DiscountPlanStatusEnum.inUse"), EXPIRED(5, "DiscountPlanStatusEnum.expired");
+    ACTIVE(1, "DiscountPlanStatusEnum.active"), INACTIVE(2, "DiscountPlanStatusEnum.inactive"), DRAFT(3, "DiscountPlanStatusEnum.draft"), IN_USE(4, "DiscountPlanStatusEnum.inUse"), EXPIRED(5,
+            "DiscountPlanStatusEnum.expired");
+
     /**
      * Enum Id
      */
@@ -34,7 +35,7 @@ public enum DiscountPlanStatusEnum {
     private String label;
 
     /**
-     * @param id    Enum Id
+     * @param id Enum Id
      * @param label enum label
      */
     DiscountPlanStatusEnum(final Integer id, final String label) {

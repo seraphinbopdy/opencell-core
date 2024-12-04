@@ -18,6 +18,12 @@
 
 package org.meveo.api;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.function.BiFunction;
+
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.CustomFieldsDto;
@@ -49,14 +55,9 @@ import org.meveo.service.communication.impl.EmailTemplateService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.script.ScriptInstanceService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.function.BiFunction;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * The CRUD Api for InvoiceType Entity.

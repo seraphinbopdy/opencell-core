@@ -6,7 +6,7 @@ package org.meveo.model.payments;
  * @author HHANINE
  */
 public enum ActionOnRemainingAmountEnum {
-	FIRST(1, "First"), LAST(2, "Last"), ADDITIONAL(3, "Additional");
+    FIRST(1, "First"), LAST(2, "Last"), ADDITIONAL(3, "Additional");
 
     private String label;
     private Integer id;

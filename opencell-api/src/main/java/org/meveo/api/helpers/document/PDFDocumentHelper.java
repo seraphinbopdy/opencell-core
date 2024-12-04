@@ -25,7 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.io.RandomAccessStreamCache;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.meveo.api.dto.document.PDFDocumentRequestDto;
@@ -98,8 +100,10 @@ public class PDFDocumentHelper {
             pdfMerger.setDestinationFileName(destinationPath);
             for (String path: listPaths) {
                 pdfMerger.addSource(new File(path)); 
-            }
-            pdfMerger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+            }            
+            
+            RandomAccessStreamCache.StreamCacheCreateFunction streamCache = IOUtils.createTempFileOnlyStreamCache();
+            pdfMerger.mergeDocuments(streamCache);
             return destinationPath;
         } catch (Exception e) {
             LOG.error(e.getMessage());
@@ -113,7 +117,7 @@ public class PDFDocumentHelper {
             templatePath = rootDir + templatePath;
         }
         File templateFile = new File(templatePath);
-        try (PDDocument templateDoc = PDDocument.load(templateFile)) {
+        try (PDDocument templateDoc = Loader.loadPDF(templateFile)) {
             pdfBuilder.withFormFieds(templateDto.getTemplateFields()).withBarcodeFieds(templateDto.getBarCodeFields()).withTemplate(templateDoc).buildAndAppendToMainTemplate(
                     postData.isFlattened());
         }

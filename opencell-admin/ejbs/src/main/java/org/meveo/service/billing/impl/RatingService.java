@@ -40,11 +40,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
-import javax.inject.Inject;
-import javax.persistence.Query;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
@@ -108,8 +103,8 @@ import org.meveo.model.catalog.TradingPricePlanMatrixLine;
 import org.meveo.model.catalog.TradingPricePlanVersion;
 import org.meveo.model.catalog.TriggeredEDRTemplate;
 import org.meveo.model.communication.MeveoInstance;
-import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.commercial.CommercialOrder;
+import org.meveo.model.cpq.commercial.OrderInfo;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.cpq.contract.ContractRateTypeEnum;
@@ -147,6 +142,11 @@ import org.meveo.service.script.catalog.TriggeredEdrScriptInterface;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.service.tax.TaxMappingService;
 import org.meveo.service.tax.TaxMappingService.TaxInfo;
+
+import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Rate charges such as {@link org.meveo.model.catalog.OneShotChargeTemplate}, {@link org.meveo.model.catalog.RecurringChargeTemplate} and {@link org.meveo.model.catalog.UsageChargeTemplate}. Generate the
@@ -656,7 +656,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                 bareWalletOperation.setOverrodePrice(true);
             }
 
-            executeRatingScript(bareWalletOperation, chargeInstance.getChargeTemplate().getRatingScript(), isVirtual);
+            executeRatingScript(bareWalletOperation, chargeInstance.getChargeTemplate().getRatingScript(), isVirtual, ratingResult);
 
             // Use a standard price plan approach to rating
         } else {
@@ -724,7 +724,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 	                                unitPriceWithoutTax = pricePlanMatrixLine != null ? pricePlanMatrixLine.getValue() : pricePlanMatrixLine.getPricePlanMatrixVersion().getPrice();
                                     if (pricePlan.getScriptInstance() != null) {
                                         log.debug("start to execute script instance for ratePrice {}", pricePlan);
-                                        executeRatingScript(bareWalletOperation, pricePlan.getScriptInstance(), false);
+                                        executeRatingScript(bareWalletOperation, pricePlan.getScriptInstance(), false, ratingResult);
                                         unitPriceWithoutTax=bareWalletOperation.getUnitAmountWithoutTax()!=null?bareWalletOperation.getUnitAmountWithoutTax():BigDecimal.ZERO;
                                         unitPriceWithTax=bareWalletOperation.getUnitAmountWithTax()!=null?bareWalletOperation.getUnitAmountWithTax():BigDecimal.ZERO;
                                     }
@@ -953,14 +953,14 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 
             if (pricePlan != null && pricePlan.getScriptInstance() != null) {
                 log.debug("start to execute script instance for ratePrice {}", pricePlan);
-                executeRatingScript(bareWalletOperation, pricePlan.getScriptInstance(), false);
+                executeRatingScript(bareWalletOperation, pricePlan.getScriptInstance(), false, ratingResult);
             }
         }
 
         // Execute a final rating script set on offer template
         if (bareWalletOperation.getOfferTemplate() != null && bareWalletOperation.getOfferTemplate().getGlobalRatingScriptInstance() != null) {
             log.trace("Will execute an offer level rating script for offer {}", bareWalletOperation.getOfferTemplate());
-            executeRatingScript(bareWalletOperation, bareWalletOperation.getOfferTemplate().getGlobalRatingScriptInstance(), isVirtual);
+            executeRatingScript(bareWalletOperation, bareWalletOperation.getOfferTemplate().getGlobalRatingScriptInstance(), isVirtual, ratingResult);
         }
 	    if (financeSettings != null && financeSettings.getArticleSelectionMode() == ArticleSelectionModeEnum.AFTER_PRICING) {
 		    bareWalletOperation.setAccountingArticle(accountingArticle);
@@ -1495,16 +1495,29 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         return ratingResult;
     }
 
-
     /**
      * Execute a rating script
      *
      * @param bareWalletOperation Wallet operation to rate
      * @param scriptInstance Script to execute
      * @param isVirtual Is this a virtual rating
+     * @param ratingResult 
      * @throws RatingException Rating exception
      */
     private void executeRatingScript(WalletOperation bareWalletOperation, ScriptInstance scriptInstance, boolean isVirtual) throws RatingException {
+    	executeRatingScript(bareWalletOperation, scriptInstance, isVirtual, null);
+    }
+    
+    /**
+     * Execute a rating script
+     *
+     * @param bareWalletOperation Wallet operation to rate
+     * @param scriptInstance Script to execute
+     * @param isVirtual Is this a virtual rating
+     * @param ratingResult 
+     * @throws RatingException Rating exception
+     */
+    private void executeRatingScript(WalletOperation bareWalletOperation, ScriptInstance scriptInstance, boolean isVirtual, RatingResult ratingResult) throws RatingException {
 
         String scriptInstanceCode = scriptInstance.getCode();
         try {
@@ -1513,7 +1526,8 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             }
             Map<String, Object> context = new HashMap<>();
             context.put("isVirtual", isVirtual);
-            scriptInstanceService.executeCached(bareWalletOperation, scriptInstanceCode, context);
+            context.put("ratingResult", ratingResult);
+            scriptInstanceService.executeFromPool(bareWalletOperation, scriptInstanceCode, context);
 
         } catch (RatingException e) {
             throw e;

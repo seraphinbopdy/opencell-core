@@ -21,9 +21,6 @@ package org.meveo.api.rest;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import org.meveo.api.rest.filter.RESTCorsRequestFilter;
 import org.meveo.api.rest.filter.RESTCorsResponseFilter;
 import org.meveo.api.rest.impl.BaseRs;
@@ -31,11 +28,12 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 /**
  * @author Edward P. Legaspi
@@ -65,7 +63,7 @@ public class JaxRsActivator extends Application {
         resources.add(RESTCorsResponseFilter.class);
         resources.add(JaxRsExceptionMapper.class);
         resources.add(JacksonProvider.class);
-        resources.add(OpenApiResource.class);
+        // resources.add(OpenApiResource.class); Akk migrate me
 
         return resources;
     }

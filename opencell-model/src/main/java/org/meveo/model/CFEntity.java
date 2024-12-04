@@ -17,16 +17,18 @@
  */
 package org.meveo.model;
 
-import org.hibernate.annotations.Type;
+import java.util.UUID;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.crm.custom.CustomFieldValues;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.UUID;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Represents a entity that has custom fields
@@ -42,15 +44,13 @@ public abstract class CFEntity extends BaseEntity implements ICustomFieldEntity 
     /**
      * Unique identifier UUID
      * <p>
-     * Initializing uuid field value like this "private String uuid = UUID.randomUUID().toString();"
-     * is leading to performances issues and threads blocking ...
+     * Initializing uuid field value like this "private String uuid = UUID.randomUUID().toString();" is leading to performances issues and threads blocking ...
      * <p>
-     * Indeed,  if initialized then this method UUID.randomUUID() will be invoked for each instantiation of BusinessCFEntity's subclasses
-     * e.g Subscription & ServiceInstaces, and some times this will be fore free and not needed.
+     * Indeed, if initialized then this method UUID.randomUUID() will be invoked for each instantiation of BusinessCFEntity's subclasses e.g Subscription & ServiceInstaces, and some times this will be fore free and not
+     * needed.
      * <p>
-     * => E.g : During services searching Entities (Subscription for example) from database, once the results are found
-     * a new BusinessCFEntity instances will be created to set these results and the initialized value of uuid
-     * will be overridden by the value coming from DB ..
+     * => E.g : During services searching Entities (Subscription for example) from database, once the results are found a new BusinessCFEntity instances will be created to set these results and the initialized value of
+     * uuid will be overridden by the value coming from DB ..
      */
     @Column(name = "uuid", nullable = false, updatable = false, length = 60)
     @Size(max = 60)
@@ -70,15 +70,15 @@ public abstract class CFEntity extends BaseEntity implements ICustomFieldEntity 
     /**
      * Custom field values in JSON format
      */
-    @Type(type = "cfjson")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "cf_values", columnDefinition = "jsonb")
-    protected CustomFieldValues cfValues;
+    protected String cfValuesAsJson;
 
     /**
-     * Accumulated custom field values in JSON format
+     * Custom field values holder for easier manipulation
      */
     @Transient
-    protected CustomFieldValues cfAccumulatedValues;
+    private CustomFieldValues cfValues;
 
     @Override
     public String getUuid() {
@@ -94,26 +94,6 @@ public abstract class CFEntity extends BaseEntity implements ICustomFieldEntity 
         this.uuid = uuid;
     }
 
-    @Override
-    public CustomFieldValues getCfValues() {
-        return cfValues;
-    }
-
-    @Override
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
-    }
-
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfAccumulatedValues) {
-        this.cfAccumulatedValues = cfAccumulatedValues;
-    }
-
     /**
      * Change UUID value. Return old value
      *
@@ -127,7 +107,22 @@ public abstract class CFEntity extends BaseEntity implements ICustomFieldEntity 
     }
 
     @Override
-    public ICustomFieldEntity[] getParentCFEntities() {
-        return null;
+    public String getCfValuesAsJson() {
+        return cfValuesAsJson;
+    }
+
+    @Override
+    public void setCfValuesAsJson(String cfValuesAsJson) {
+        this.cfValuesAsJson = cfValuesAsJson;
+    }
+
+    @Override
+    public CustomFieldValues getCFValuesTransient() {
+        return cfValues;
+    }
+
+    @Override
+    public void setCFValuesTransient(CustomFieldValues cfValues) {
+        this.cfValues = cfValues;
     }
 }

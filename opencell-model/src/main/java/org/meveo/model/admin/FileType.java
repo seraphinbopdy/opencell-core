@@ -22,9 +22,9 @@ import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /**
  * File format entity
@@ -36,8 +36,7 @@ import javax.persistence.Table;
 @Cacheable
 @ExportIdentifier("code")
 @Table(name = "adm_file_type")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "adm_file_type_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "adm_file_type_seq"), @Parameter(name = "increment_size", value = "1") })
 public class FileType extends BusinessEntity {
 
     private static final long serialVersionUID = 2847700430225097511L;

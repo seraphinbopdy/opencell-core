@@ -20,13 +20,12 @@ package org.meveo.service.payments.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.QueryBuilder;
-import org.meveo.model.billing.Country;
 import org.meveo.model.payments.Journal;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
 
 
 @Stateless

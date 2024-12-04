@@ -18,11 +18,9 @@
 
 package org.meveo.service.script.payment;
 
-import java.util.Date;
 import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.model.payments.CustomerAccount;
 import org.meveo.service.script.ScriptInterface;
 
 /**
@@ -40,6 +38,14 @@ public interface PaymentScriptInterface extends ScriptInterface {
      * @throws BusinessException the business exception
      */
     void createCardToken(Map<String, Object> methodContext) throws BusinessException;
+    
+    /**
+     * Creates the card token with ccv.
+     *
+     * @param methodContext the method context
+     * @throws BusinessException the business exception
+     */
+    void createCardCvvToken(Map<String, Object> methodContext) throws BusinessException;
     
     /**
      * Do payment with token.
@@ -161,5 +167,15 @@ public interface PaymentScriptInterface extends ScriptInterface {
      * @throws BusinessException business exception
      */
      void approveSepaDDMandate(Map<String, Object> methodContext) throws BusinessException;
+     
+     /**
+      * When you want to capture the funds on a payment with a PENDING_CAPTURE state you can call this API. This API allows multiple, partial captures of the authorized funds.
+      * 
+      * @param preAuthorisationId
+      * @param ctsAmount The amount that you want to capture (specified in cents, where single digit currencies are presumed to have 2 digits). The amount can be lower than the amount that was authorized, but not higher. If left empty, the full amount will be captured and the request will be final. If the full amount is captured, the request will also be final.
+      * @param merchantParameters It allows you to store additional parameters for the transaction in the format you prefer (e.g.-> key-value query string, JSON, etc.) These parameters are then echoed back to you in API GET calls and Webhook notifications. This field must not contain any personal data.
+      * @throws BusinessException
+      */
+     void capturePayment(Map<String, Object> methodContext) throws BusinessException;
     
     }

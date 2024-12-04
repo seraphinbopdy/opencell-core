@@ -20,7 +20,7 @@ package org.meveo.model.rating;
 
 public enum CDRStatusEnum {
 
-	 OPEN(1, "cdrStatus.open"), PROCESSED(2, "cdrStatus.processed"), CLOSED(3, "cdrStatus.closed"), DISCARDED(4, "cdrStatus.discarded"), ERROR(5, "cdrStatus.error"),TO_REPROCESS(6, "cdrStatus.toReprocess");
+    OPEN(1, "cdrStatus.open"), PROCESSED(2, "cdrStatus.processed"), CLOSED(3, "cdrStatus.closed"), DISCARDED(4, "cdrStatus.discarded"), ERROR(5, "cdrStatus.error"), TO_REPROCESS(6, "cdrStatus.toReprocess");
 
     private Integer id;
     private String label;
@@ -48,6 +48,7 @@ public enum CDRStatusEnum {
         }
         return null;
     }
+
     public static CDRStatusEnum getByLabel(String label) {
         if (label != null) {
             for (CDRStatusEnum status : values()) {
@@ -58,6 +59,7 @@ public enum CDRStatusEnum {
         }
         return null;
     }
+
     public String toString() {
         return name();
     }

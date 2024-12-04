@@ -1,7 +1,7 @@
 package org.meveo.apiv2.accountreceivable.accountOperation;
 
-import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
-import static javax.ws.rs.core.Response.ok;
+import static jakarta.ws.rs.core.Response.Status.PRECONDITION_FAILED;
+import static jakarta.ws.rs.core.Response.ok;
 import static org.meveo.api.dto.ActionStatusEnum.FAIL;
 import static org.meveo.api.MeveoApiErrorCodeEnum.DIFFERENT_CURRENCIES;
 
@@ -14,9 +14,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.util.ResourceBundle;

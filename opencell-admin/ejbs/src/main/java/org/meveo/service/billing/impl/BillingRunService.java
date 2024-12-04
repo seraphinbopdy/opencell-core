@@ -23,10 +23,10 @@ import static java.util.stream.Collectors.joining;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.meveo.commons.utils.ParamBean.getInstance;
+import static org.meveo.model.billing.BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION;
 import static org.meveo.model.billing.BillingRunAutomaticActionEnum.CANCEL;
 import static org.meveo.model.billing.BillingRunAutomaticActionEnum.CANCEL_RT;
 import static org.meveo.model.billing.BillingRunAutomaticActionEnum.MOVE;
-import static org.meveo.model.billing.BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION;
 import static org.meveo.model.billing.BillingRunStatusEnum.DRAFT_INVOICES;
 import static org.meveo.model.billing.BillingRunStatusEnum.POSTVALIDATED;
 import static org.meveo.model.billing.BillingRunStatusEnum.REJECTED;
@@ -49,16 +49,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.meveo.admin.async.AmountsToInvoice;
@@ -123,6 +113,16 @@ import org.meveo.service.order.OrderService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
+
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 /**
  * The Class BillingRunService.
@@ -970,7 +970,7 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                             methodContext.put("billingRun", billingRun);
                             script.execute(methodContext);                    
                             billingRun = update(billingRun);
-                        } catch (javax.validation.ValidationException e) { //RuntimeException 
+                        } catch (jakarta.validation.ValidationException e) { //RuntimeException 
                             throw new BusinessException(e);
                         }
                     }                

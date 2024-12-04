@@ -27,10 +27,10 @@ import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.service.job.Job;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 @Stateless
 public class ResumeDunningCollectionPlanJob extends Job {

@@ -1,12 +1,15 @@
 package org.meveo.admin.job;
 
+import java.util.Iterator;
+import java.util.Optional;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.LongType;
+import org.hibernate.type.StandardBasicTypes;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.EntityManagerWrapper;
@@ -18,10 +21,8 @@ import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.TablesPartitioningService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.Iterator;
-import java.util.Optional;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * A job implementation to duplicate billed rated transactions
@@ -81,7 +82,7 @@ public class DuplicateBilledRTsJobBean extends IteratorBasedJobBean<Long> {
         scrollableResults = query.setFetchSize(fetchSize)
                 .setReadOnly(true)
                 .setCacheable(false)
-                .addScalar("to_duplicate", new LongType())
+                .addScalar("to_duplicate", StandardBasicTypes.LONG)
                 .scroll(ScrollMode.FORWARD_ONLY);
 
         return Optional.of(new SynchronizedIterator<Long>(scrollableResults, nrOfRecords.intValue()));

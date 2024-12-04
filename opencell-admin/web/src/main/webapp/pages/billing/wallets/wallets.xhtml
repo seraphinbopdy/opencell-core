@@ -6,12 +6,10 @@
 	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
 	template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView"
                 listener="#{walletListBean.preRenderView}" />
         </f:metadata>
-    </ui:define>
     
 	<ui:define name="body">
 		<!-- Entity select popup. -->

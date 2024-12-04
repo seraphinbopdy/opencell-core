@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.apiv2.settings.globalSettings.AdvancedSettingsResource;

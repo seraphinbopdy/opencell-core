@@ -64,7 +64,7 @@
         </p:column>
         <p:column headerText="#{messages['commons.actions']}" width="15%">
             <!-- update="periodFields"  -->
-            <p:commandButton icon="ui-icon-search" immediate="true" update="#{periodDetailsGuiId}" actionListener="#{cfValueHolder.clearNewValueDefaults(cft)}"
+            <p:commandButton icon="pi pi-search" immediate="true" update="#{periodDetailsGuiId}" actionListener="#{cfValueHolder.clearNewValueDefaults(cft)}"
                 onsuccess="PF('#{prefix}periodValuesDialogWidget').show()" rendered="#{cft.storageType != CustomFieldStorageTypeEnum.SINGLE}" title="#{messages['customFieldTemplate.periodValue.view']}">
                 <f:setPropertyActionListener target="#{cfValueHolder.selectedFieldTemplate}" value="#{cft}" />
                 <f:setPropertyActionListener target="#{cfValueHolder.selectedValuePeriod}" value="#{period}" />
@@ -72,11 +72,11 @@
                 <f:setPropertyActionListener target="#{cfValueHolder.selectedValuePeriodEdit}" value="#{edit and !inherited}" />
                 <p:resetInput target="#{periodDetailsGuiId}" />
             </p:commandButton>
-            <p:commandButton action="#{customFieldDataEntryBean.removePeriod(cfValueHolder, cft, period)}" process="@this addNewFields" icon="ui-icon-trash"
+            <p:commandButton action="#{customFieldDataEntryBean.removePeriod(cfValueHolder, cft, period)}" process="@this addNewFields" icon="pi pi-trash"
                 update="#{idPrefix}periodTable_omitFromSubmit" rendered="#{edit and !disabled}" title="#{messages['customFieldTemplate.periodValue.removePeriod']}" />
-            <p:commandButton action="#{customFieldDataEntryBean.decreasePriority(cfValueHolder, cft, period)}" partialSubmit="true" process="@this" icon="ui-icon-arrowthick-1-n"
+            <p:commandButton action="#{customFieldDataEntryBean.decreasePriority(cfValueHolder, cft, period)}" partialSubmit="true" process="@this" icon="pi pi-arrow-up"
                 update="#{idPrefix}periodTable_omitFromSubmit" rendered="#{edit and !disabled and cft.calendar==null and rowIndex>0}" title="#{messages['customFieldTemplate.periodValue.priorityDecrease']}" />
-            <p:commandButton action="#{customFieldDataEntryBean.increasePriority(cfValueHolder, cft, period)}" partialSubmit="true" process="@this" icon="ui-icon-arrowthick-1-s"
+            <p:commandButton action="#{customFieldDataEntryBean.increasePriority(cfValueHolder, cft, period)}" partialSubmit="true" process="@this" icon="pi pi-arrow-down"
                 update="#{idPrefix}periodTable_omitFromSubmit" rendered="#{edit and !disabled and cft.calendar==null and rowIndex&lt;cfVersionableValues.size()-1}" title="#{messages['customFieldTemplate.periodValue.priorityIncrease']}" />
 
         </p:column>
@@ -118,7 +118,7 @@
             </p:commandButton>
             
             <c:if test="${not empty cft.id and edit and !disabled}">
-            	<p:commandButton value="#{messages['customFieldTemplate.import']}" partialSubmit="true" process="@this addNewFields" icon="fa fa-arrow-up"
+            	<p:commandButton value="#{messages['customFieldTemplate.import']}" partialSubmit="true" process="@this addNewFields" icon="pi pi-arrow-up"
 	                update="#{idPrefix}periodTable_omitFromSubmit #{periodDetailsGuiId}" 
 	                oncomplete="if (args &amp;&amp; !args.validationFailed) PF('importDialog_#{idPrefix}_#{cft.id}').show()"
 	                action="#{customFieldDataEntryBean.addNewValuePeriod(cfValueHolder, cft)}"

@@ -1,34 +1,30 @@
 package org.meveo.model.dunning;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import java.util.Date;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
-import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.payments.ActionModeEnum;
 import org.meveo.model.payments.ActionTypeEnum;
 
-import java.util.Date;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "dunning_action_instance")
-@CustomFieldEntity(cftCodePrefix = "DunningActionInstance", inheritCFValuesFrom = "dunningAction")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "dunning_action_instance_seq") })
-@NamedQueries({
-        @NamedQuery(name = "DunningActionInstance.updateStatus", query = "UPDATE DunningActionInstance ai SET ai.actionStatus=:actionStatus WHERE ai.dunningLevelInstance=:dunningLevelInstance") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_action_instance_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "DunningActionInstance.updateStatus", query = "UPDATE DunningActionInstance ai SET ai.actionStatus=:actionStatus WHERE ai.dunningLevelInstance=:dunningLevelInstance") })
 public class DunningActionInstance extends BusinessCFEntity {
 
     private static final long serialVersionUID = 2810376973487134233L;
@@ -139,7 +135,7 @@ public class DunningActionInstance extends BusinessCFEntity {
 
     public Date getExecutionDate() {
         return executionDate;
-    }
+}
 
     public void setExecutionDate(Date executionDate) {
         this.executionDate = executionDate;

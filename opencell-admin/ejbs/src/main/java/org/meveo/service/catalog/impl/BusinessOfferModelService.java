@@ -19,13 +19,9 @@
 package org.meveo.service.catalog.impl;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -47,6 +43,7 @@ import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.ProductTemplate;
 import org.meveo.model.catalog.ServiceTemplate;
+import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.module.MeveoModuleItem;
 import org.meveo.service.admin.impl.GenericModuleService;
 import org.meveo.service.script.offer.OfferModelScriptService;
@@ -55,6 +52,9 @@ import org.meveo.service.script.product.ProductModelScriptService;
 import org.meveo.service.script.product.ProductScriptInterface;
 import org.meveo.service.script.service.ServiceModelScriptService;
 import org.meveo.service.script.service.ServiceScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi
@@ -187,9 +187,9 @@ public class BusinessOfferModelService extends GenericModuleService<BusinessOffe
 		newOfferTemplate.setSubscriptionRenewal(newSubscriptionRenewal);
 
         if (bomParams.getOfferCfValue() != null) {
-            newOfferTemplate.getCfValuesNullSafe().setValues(bomParams.getOfferCfValue());
+            newOfferTemplate.setCfValues(new CustomFieldValues(bomParams.getOfferCfValue()));
         } else if (bomOffer.getCfValues() != null) {
-            newOfferTemplate.getCfValuesNullSafe().setValues(bomOffer.getCfValues().getValuesByCode());
+            newOfferTemplate.setCfValues(new CustomFieldValues(bomOffer.getCfValues().getValuesByCode()));
         }
 
         offerTemplateService.create(newOfferTemplate);

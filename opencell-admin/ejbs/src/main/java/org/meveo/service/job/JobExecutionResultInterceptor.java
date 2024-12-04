@@ -1,15 +1,18 @@
 package org.meveo.service.job;
 
-import org.eclipse.microprofile.metrics.*;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.meveo.commons.utils.EjbUtils;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * Interceptor to update the Jobs informations in realtime
@@ -25,12 +28,10 @@ public class JobExecutionResultInterceptor {
     private static final Logger log = LoggerFactory.getLogger(JobExecutionResultInterceptor.class);
 
     @Inject
-    @RegistryType(type = MetricRegistry.Type.APPLICATION)
-    MetricRegistry registry;
+    private MeterRegistry meterRegistry;
 
     /**
-     * Update metrics for Prometheus
-     * a method on an entity
+     * Update metrics for Prometheus a method on an entity
      *
      * @param context the method invocation context
      * @return the method result if update is OK
@@ -47,37 +48,33 @@ public class JobExecutionResultInterceptor {
         long numberOfRemainingValues = (result.getNbItemsToProcess() - numberOfOKs - numberOfKOs);
         long numberOfWarnings = result.getNbItemsProcessedWithWarning();
 
+        updateMetrics(result, "number_of_OKs", numberOfOKs);
+        updateMetrics(result, "number_of_KOs", numberOfKOs);
+        updateMetrics(result, "number_of_Remaining_Items", numberOfRemainingValues);
+        updateMetrics(result, "number_of_Warnings", numberOfWarnings);
 
-
-        counterInc(result, "number_of_OKs", numberOfOKs);
-        counterInc(result, "number_of_KOs",numberOfKOs);
-        counterInc(result, "number_of_Remaining_Items",numberOfRemainingValues);
-        counterInc(result, "number_of_Warnings",numberOfWarnings);
-
-        try{
+        try {
             return context.proceed();
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.warn(" update of metrics failed because of : {}", e);
             return null;
         }
     }
 
     /**
-     * Increment counter metric for JobExecutionResultImpl
+     * Update gauge metrics for Job execution result statistics
      *
-     * @param value
+     * @param jobExecutionResultImpl Job execution result
      * @param name the name of metric
+     * @param value Absolute value to set gauge to.
      */
-    private void counterInc(JobExecutionResultImpl jobExecutionResultImpl, String name, Long value) {
-        JobInstance jobInstance = jobExecutionResultImpl.getJobInstance();
-        Metadata metadata = new MetadataBuilder().withName(name + "_" + jobInstance.getJobTemplate() + "_" + jobInstance.getCode()).build();
-        Tag tgName = new Tag("name", jobInstance.getCode());
-        Counter counter = registry.counter(metadata, tgName);
-        if (value != null) {
-            counter.inc(value - counter.getCount());
-        } else {
-            counter.inc();
-        }
-    }
+    private void updateMetrics(JobExecutionResultImpl jobExecutionResultImpl, String name, Long value) {
 
+        JobInstance jobInstance = jobExecutionResultImpl.getJobInstance();
+
+        AtomicInteger gaugeValue = meterRegistry.gauge(name + "." + jobInstance.getJobTemplate() + "." + jobInstance.getCode(), Tags.of("name", jobInstance.getCode(), "node", EjbUtils.getCurrentClusterNode()),
+            new AtomicInteger(0));
+
+        gaugeValue.set(value.intValue());
+    }
 }

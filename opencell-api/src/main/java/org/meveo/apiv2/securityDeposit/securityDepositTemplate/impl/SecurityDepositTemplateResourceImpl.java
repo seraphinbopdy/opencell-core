@@ -10,9 +10,9 @@ import org.meveo.apiv2.securityDeposit.securityDepositTemplate.SecurityDepositTe
 import org.meveo.model.securityDeposit.SecurityTemplateStatusEnum;
 import org.meveo.service.securityDeposit.impl.SecurityDepositTemplateService;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

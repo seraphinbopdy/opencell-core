@@ -18,10 +18,10 @@
 
 package org.meveo.validation.constraint;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import org.meveo.commons.utils.StringUtils;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class ClassNameValidator implements ConstraintValidator<ClassName, String> {
 
@@ -31,11 +31,11 @@ public class ClassNameValidator implements ConstraintValidator<ClassName, String
 
     @Override
     public boolean isValid(String className, ConstraintValidatorContext arg1) {
-        
-        if(StringUtils.isBlank(className)) {
+
+        if (StringUtils.isBlank(className)) {
             return true;
         }
-        
+
         boolean result = false;
         try {
             Class.forName(className);

@@ -18,12 +18,13 @@
 
 package org.meveo.admin.job;
 
-import java.util.*;
+import static java.util.Optional.of;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.job.utils.BillinRunApplicationElFilterUtils;
@@ -31,11 +32,14 @@ import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
-import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.BillingRunExtensionService;
+import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.InvoiceService;
 
-import static java.util.Optional.of;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job definition to generate PDF for all valid invoices that don't have it.

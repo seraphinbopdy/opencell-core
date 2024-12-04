@@ -6,7 +6,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.meveo.api.restful.GenericOpencellRestfulAPIv1;
+import org.meveo.api.restful.JaxRsActivatorGenericApiV1;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class Apiv1SwaggerGetOperation {
         String getAnEntityRFPath = getAnEntityRFPathBuilder.toString();
 
         // In case of retrieving all entities
-        if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( aRFPath ) ) {
+        if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( aRFPath ) ) {
             ApiResponses responses = new ApiResponses();
             ApiResponse successfulRequest = new ApiResponse();
             successfulRequest.setDescription("results successfully retrieved");
@@ -39,7 +39,7 @@ public class Apiv1SwaggerGetOperation {
         // In case of retrieving a particular entity, transform a queryParam to a pathParam. For this, do the following :
         // - Add a pathParam
         // - Remove the queryParam
-        else if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( getAnEntityRFPath ) ) {
+        else if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( getAnEntityRFPath ) ) {
             if ( getOp.getParameters() != null ) {
                 List<Parameter> parameters = getOp.getParameters();
                 for ( Parameter param : parameters ) {

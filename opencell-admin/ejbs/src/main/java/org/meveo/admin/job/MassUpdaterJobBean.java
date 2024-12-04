@@ -17,6 +17,11 @@
  */
 package org.meveo.admin.job;
 
+import java.sql.Statement;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
 import org.hibernate.Session;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.jpa.EntityManagerWrapper;
@@ -24,14 +29,10 @@ import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import java.sql.Statement;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 /**
  * Job definition to do the mass update.

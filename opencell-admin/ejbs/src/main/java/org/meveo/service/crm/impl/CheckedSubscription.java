@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.meveo.model.admin.Seller;
-import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.UserAccount;
 import org.meveo.model.catalog.OfferTemplate;

@@ -20,11 +20,11 @@ package org.meveo.api.dto.billing;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import org.meveo.api.dto.cpq.ProductToInstantiateDto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.xml.bind.annotation.XmlElement;
 
 /** 
  *

@@ -1,73 +1,29 @@
 package org.meveo.service.billing.impl;
 
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Marshaller;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.*;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AdditionalStreetName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AllowanceChargeReason;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AllowanceChargeReasonCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Amount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseQuantity;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BuildingNumber;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ChargeIndicator;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CityName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyLegalForm;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentity;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditNoteTypeCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditedQuantity;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentityCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CustomizationID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Department;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Description;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DocumentCurrencyCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndDate;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndpointID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FamilyName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FirstName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IdentificationCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceTypeCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoicedQuantity;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IssueDate;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.JobTitle;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Line;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.LineExtensionAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Note;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PayableAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PaymentMeansCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Percent;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PostalZone;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrepaidAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PriceAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.RegistrationName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.SalesOrderID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.StartDate;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.StreetName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxCurrencyCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExclusiveAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReason;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReasonCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxInclusiveAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxTypeCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxableAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Telephone;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IndustryClassificationCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrimaryAccountNumberID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.HolderName;
-import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNote;
-import oasis.names.specification.ubl.schema.xsd.invoice_2.Invoice;
-import oasis.names.specification.ubl.schema.xsd.invoice_2.ObjectFactory;
+
+import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.storage.StorageFactory;
@@ -92,7 +48,10 @@ import org.meveo.model.billing.UntdidTaxationCategory;
 import org.meveo.model.billing.VatDateCodeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.crm.Provider;
-import org.meveo.model.payments.*;
+import org.meveo.model.payments.CardPaymentMethod;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.DDPaymentMethod;
+import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
@@ -101,25 +60,108 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.crm.impl.ProviderService;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.File;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressLine;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AllowanceChargeType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.BillingReference;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.BranchType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CardAccount;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ContactType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CountryType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CreditNoteLineType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CustomerPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DeliveryType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DocumentReferenceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.FinancialAccountType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.FinancialInstitution;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.InvoiceLineType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ItemType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.LocationType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.MonetaryTotalType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderReference;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyIdentification;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyLegalEntity;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyName;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxScheme;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMandate;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMeans;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentTermsType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PeriodType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PersonType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PriceType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ServiceProviderParty;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.SupplierPartyType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxCategoryType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxScheme;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxSubtotal;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxTotalType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AdditionalStreetName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AllowanceChargeReason;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AllowanceChargeReasonCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Amount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseQuantity;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BuildingNumber;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ChargeIndicator;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CityName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyLegalForm;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentity;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentityCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditNoteTypeCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditedQuantity;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CustomizationID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Department;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Description;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DocumentCurrencyCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndpointID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FamilyName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FirstName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.HolderName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IdentificationCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IndustryClassificationCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceTypeCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoicedQuantity;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IssueDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.JobTitle;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Line;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.LineExtensionAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Note;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PayableAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PaymentMeansCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Percent;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PostalZone;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrepaidAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PriceAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrimaryAccountNumberID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.RegistrationName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.SalesOrderID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.StartDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.StreetName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxCurrencyCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExclusiveAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReason;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReasonCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxInclusiveAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxTypeCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxableAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Telephone;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionID;
+import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNote;
+import oasis.names.specification.ubl.schema.xsd.invoice_2.Invoice;
+import oasis.names.specification.ubl.schema.xsd.invoice_2.ObjectFactory;
+
 
 public class InvoiceUblHelper {
 	
@@ -157,7 +199,7 @@ public class InvoiceUblHelper {
 		Provider provider = providerService.getProvider();
 		if(provider != null) {
 			rounding = provider.getInvoiceRounding();
-		}
+	}
 	}
 	
 	private InvoiceUblHelper(){}
@@ -196,14 +238,16 @@ public class InvoiceUblHelper {
 												.stream()
 												.map(InvoiceLine::getAmountWithTax)
 												.reduce(BigDecimal.ZERO, BigDecimal::add);
+		var profileID = getProfileID(invoice.getInvoiceLines());
 		BigDecimal payableAmount = invoice.getNetToPay();
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
-			//setBillingReference(invoice, creditNote);
+			setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
 			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
 			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
+			creditNote.setProfileID(profileID);
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
 			//setBillingReference(invoice, invoiceXml);
@@ -214,6 +258,7 @@ public class InvoiceUblHelper {
 			var commercialorderIds = invoice.getInvoiceLines().stream().map(InvoiceLine::getCommercialOrder).filter(Objects::nonNull)
 					.collect(Collectors.toSet());
 			setBillingReferenceForInvoice(commercialorderIds, invoiceXml);
+			invoiceXml.setProfileID(profileID);
 		}
 		
 		
@@ -337,10 +382,11 @@ public class InvoiceUblHelper {
 			target.getDeliveries().add(getDeliveryType(source));
 		}
 
+		if(StringUtils.isNotBlank(source.getComment())){
 		Note note = objectFactorycommonBasic.createNote();
 		note.setValue(source.getComment());
 		target.getNotes().add(note);
-		
+		}
 		CustomizationID customizationID = objectFactorycommonBasic.createCustomizationID();
 		customizationID.setValue("urn:cen.eu:en16931:2017#conformant#urn:ubl.eu:1p0:extended-ctc-fr");
 		target.setCustomizationID(customizationID);
@@ -391,6 +437,7 @@ public class InvoiceUblHelper {
 			startDate.setValue(toXmlDate(source.getStartDate()));
 			endDate.setValue(toXmlDate(source.getEndDate()));
 			periodType.setStartDate(startDate);
+			periodType.setEndDate(endDate);
 			target.getInvoicePeriods().add(periodType);
 		}
 
@@ -400,9 +447,16 @@ public class InvoiceUblHelper {
 			target.getDeliveries().add(getDeliveryType(source));
 		}
 		
+		if(StringUtils.isNotBlank(source.getComment())){
 		Note note = objectFactorycommonBasic.createNote();
 		note.setValue(source.getComment());
 		target.getNotes().add(note);
+		}
+		
+		
+		CustomizationID customizationID = objectFactorycommonBasic.createCustomizationID();
+		customizationID.setValue("urn:cen.eu:en16931:2017#conformant#urn:ubl.eu:1p0:extended-ctc-fr");
+		target.setCustomizationID(customizationID);
 		
 		setTaxCurrencyCodeAndDocumentCurrencyCode(objectFactorycommonBasic, source, target);
 		
@@ -573,15 +627,6 @@ public class InvoiceUblHelper {
 			paymentMeans.setPaymentMandate(paymentMandate);
 		}
 
-		// PaymentMeans/PartyIdentification
-		if (provider != null && (StringUtils.isNotBlank(provider.getBankCoordinates().getIban()) || StringUtils.isNotBlank(provider.getBankCoordinates().getBankId()))) {
-			PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
-			ID partyIdentificationId = objectFactorycommonBasic.createID();
-			partyIdentificationId.setValue(StringUtils.isNotBlank(provider.getBankCoordinates().getIban()) ? provider.getBankCoordinates().getIban() : provider.getBankCoordinates().getBankId());
-			partyIdentification.setID(partyIdentificationId);
-			paymentMeans.setPartyIdentification(partyIdentification);
-		}
-
 		// PaymentMeans/PayeeFinancialAccount
 		if (StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())) {
 			FinancialAccountType payerFinancialAccount = objectFactoryCommonAggrement.createFinancialAccountType();
@@ -744,13 +789,14 @@ public class InvoiceUblHelper {
 			partyType.setPostalAddress(postalAddress);
 		}
 		// AccountingCustomerParty/Party/PartyTaxScheme/CompanyID
-		if(StringUtils.isNotBlank(billingAccount.getVatNo()) || ( billingAccount.getSeller() != null && billingAccount.getVatNo() != null)){
+		if(StringUtils.isNotBlank(billingAccount.getVatNo()) || ( billingAccount.getSeller() != null && billingAccount.getSeller().getVatNo() != null)){
 			// AccountingSupplierParty/Party/PartyTaxScheme/CompanyID
+			var vatNo = StringUtils.isNotBlank(billingAccount.getVatNo()) ? billingAccount.getVatNo() : billingAccount.getSeller().getVatNo();
 			PartyTaxScheme partyTaxScheme = objectFactoryCommonAggrement.createPartyTaxScheme();
 			CompanyID companyID = objectFactorycommonBasic.createCompanyID();
 			companyID.setSchemeAgencyID("ZZZ");
 			companyID.setSchemeID(address.getCountry() != null ? address.getCountry().getCountryCode() : null );
-			companyID.setValue(billingAccount.getVatNo());
+			companyID.setValue(vatNo);
 			partyTaxScheme.setCompanyID(companyID);
 			partyTaxScheme.setTaxScheme(getTaxSheme());
 			partyType.getPartyTaxSchemes().add(partyTaxScheme);
@@ -831,7 +877,7 @@ public class InvoiceUblHelper {
 			return false;
 		});
 		if(icd00225Exist){
-			partyType.getServiceProviderParties().add(getServiceProviderParty(billingAccount));
+		partyType.getServiceProviderParties().add(getServiceProviderParty(billingAccount));
 		}
 
 		customerPartyType.setParty(partyType);
@@ -1107,7 +1153,7 @@ public class InvoiceUblHelper {
 		}
 	}
 	private void setAllowanceCharge(org.meveo.model.billing.Invoice invoice, Invoice target, CreditNote creditNote){
-		List<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates = (List<SubCategoryInvoiceAgregate>) invoiceAgregateService.listByInvoiceAndType(invoice, "F");
+		List<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates = invoiceAgregateService.listByInvoiceAndType(invoice, SubCategoryInvoiceAgregate.class);
 		if(CollectionUtils.isNotEmpty(subCategoryInvoiceAgregates)){
 			subCategoryInvoiceAgregates.forEach(subCategoryInvoiceAgregate -> {
 				AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
@@ -1177,7 +1223,7 @@ public class InvoiceUblHelper {
 			BillingReference billingReference = setBillingReference(linInv.getLinkedInvoiceValue());
 			if(billingReference != null &&
 							StringUtils.isNotBlank(billingReference.getInvoiceDocumentReference().getID().getValue()))
-				target.getBillingReferences().add(billingReference);
+			target.getBillingReferences().add(billingReference);
 		});
 	}
 	private void setBillingReference(org.meveo.model.billing.Invoice source, CreditNote target){
@@ -1185,7 +1231,7 @@ public class InvoiceUblHelper {
 			BillingReference billingReference = setBillingReference(linInv.getLinkedInvoiceValue());
 			if(billingReference != null &&
 					StringUtils.isNotBlank(billingReference.getInvoiceDocumentReference().getID().getValue()))
-				target.getBillingReferences().add(billingReference);
+			target.getBillingReferences().add(billingReference);
 		});
 	}
 	private BillingReference setBillingReference(org.meveo.model.billing.Invoice source){
@@ -1258,7 +1304,7 @@ public class InvoiceUblHelper {
 			UntdidTaxationCategory untdidTaxationCategory = tax.getUntdidTaxationCategory();
 			TaxExemptionReason taxExemptionReason = objectFactorycommonBasic.createTaxExemptionReason();
 			taxExemptionReason.setValue(untdidTaxationCategory.getSemanticModel());
-			taxCategoryType.getTaxExemptionReasons().add(taxExemptionReason);
+				taxCategoryType.getTaxExemptionReasons().add(taxExemptionReason);
 			if(tax.getUntdidVatex() != null) {
 				TaxExemptionReasonCode taxExemptionReasonCode = objectFactorycommonBasic.createTaxExemptionReasonCode();
 				taxExemptionReasonCode.setListID("CEF VATEX");
@@ -1310,28 +1356,30 @@ public class InvoiceUblHelper {
 
 	}
 	
-	private BillingReference setBillingReferenceForInvoice(Set<CommercialOrder> commercialOrders, Invoice target) {
-		BillingReference billingReference = null;
-		DocumentReferenceType documentReferenceType = null;
-		ID id = null;
-		if(CollectionUtils.isNotEmpty(commercialOrders)) {
-			for(CommercialOrder commercialOrder : commercialOrders) {
-				if(Strings.isBlank(commercialOrder.getOrderNumber())) continue;
-				billingReference = objectFactoryCommonAggrement.createBillingReference();
-				documentReferenceType = objectFactoryCommonAggrement.createDocumentReferenceType();
-				id = objectFactorycommonBasic.createID();
-				id.setValue(commercialOrder.getOrderNumber());
-				documentReferenceType.setID(id);
-				billingReference.setInvoiceDocumentReference(documentReferenceType);
-				
-				IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
-				dueDate.setValue(toXmlDate(commercialOrder.getOrderDate()));
-				documentReferenceType.setIssueDate(dueDate);
-				
-				target.getBillingReferences().add(billingReference);
-			}
-		}
-		
+    private BillingReference setBillingReferenceForInvoice(Set<CommercialOrder> commercialOrders, Invoice target) {
+        BillingReference billingReference = null;
+        DocumentReferenceType documentReferenceType = null;
+        ID id = null;
+        if (CollectionUtils.isNotEmpty(commercialOrders)) {
+            for (CommercialOrder commercialOrder : commercialOrders) {
+                if (StringUtils.isBlank(commercialOrder.getOrderNumber())) {
+                    continue;
+                }
+                billingReference = objectFactoryCommonAggrement.createBillingReference();
+                documentReferenceType = objectFactoryCommonAggrement.createDocumentReferenceType();
+                id = objectFactorycommonBasic.createID();
+                id.setValue(commercialOrder.getOrderNumber());
+                documentReferenceType.setID(id);
+                billingReference.setInvoiceDocumentReference(documentReferenceType);
+
+                IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
+                dueDate.setValue(toXmlDate(commercialOrder.getOrderDate()));
+                documentReferenceType.setIssueDate(dueDate);
+
+                target.getBillingReferences().add(billingReference);
+            }
+        }
+
 		return billingReference;
 	}
 	
@@ -1451,7 +1499,7 @@ public class InvoiceUblHelper {
 		CountryType countryType = objectFactoryCommonAggrement.createCountryType();
 		IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
 		if(pCustomerAccount.getAddress() != null && pCustomerAccount.getAddress().getCountry() != null){
-			identificationCode.setValue(pCustomerAccount.getAddress().getCountry().getCode());
+		identificationCode.setValue(pCustomerAccount.getAddress().getCountry().getCode());
 		}
 		countryType.setIdentificationCode(identificationCode);
 		addressType.setCountry(countryType);
@@ -1553,5 +1601,22 @@ public class InvoiceUblHelper {
 		descriptionCode.setValue(String.valueOf(vatDateCode.getPaidToDays()));
 		periodType.getDescriptionCodes().add(descriptionCode);
 		return periodType;
+	}
+	
+	private ProfileID getProfileID(List<InvoiceLine> invoiceLines) {
+		ProfileID profileID = objectFactorycommonBasic.createProfileID();
+		if(CollectionUtils.isNotEmpty(invoiceLines)) {
+			var physicalExist = invoiceLines.stream().filter(invoiceLine -> invoiceLine.getAccountingArticle() != null)
+									.map(InvoiceLine::getAccountingArticle).map(AccountingArticle::isPhysical).collect(Collectors.toSet());
+			if(physicalExist.contains(true) && physicalExist.contains(false)) {
+				profileID.setValue("M1");
+			}else if(physicalExist.contains(true)) {
+				profileID.setValue("B1");
+			}else if (physicalExist.contains(false)){
+					profileID.setValue("S1");
+			}else return null;
+			
+}
+		return profileID;
 	}
 }

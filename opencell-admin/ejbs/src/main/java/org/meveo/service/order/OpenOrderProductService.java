@@ -1,11 +1,12 @@
 package org.meveo.service.order;
 
+import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.model.ordering.OpenOrderProduct;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import java.util.List;
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class OpenOrderProductService extends PersistenceService<OpenOrderProduct> {

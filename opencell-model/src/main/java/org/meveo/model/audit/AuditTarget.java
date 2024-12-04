@@ -29,11 +29,12 @@ import java.lang.annotation.Target;
  * @author Abdellatif BARI
  * @since 7.0
  */
-@Target({ElementType.FIELD})
+@Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuditTarget {
     AuditChangeTypeEnum type();
 
     boolean history() default false;
+
     boolean notif() default false;
 }

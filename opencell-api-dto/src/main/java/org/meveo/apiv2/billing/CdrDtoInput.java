@@ -3,7 +3,7 @@ package org.meveo.apiv2.billing;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
@@ -12,7 +12,7 @@ import org.meveo.model.rating.CDRStatusEnum;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableCdrDtoInput.class)
 public interface CdrDtoInput extends Resource {
 

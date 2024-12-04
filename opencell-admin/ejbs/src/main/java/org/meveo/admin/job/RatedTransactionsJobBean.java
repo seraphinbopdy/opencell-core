@@ -25,12 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.TypedQuery;
-
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -50,6 +44,12 @@ import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.WalletOperationAggregationSettingsService;
 import org.meveo.service.billing.impl.WalletOperationService;
 import org.meveo.service.job.Job;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.TypedQuery;
 
 /**
  * A job implementation to convert Open Wallet operations to Rated transactions
@@ -80,7 +80,7 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
 
     private boolean hasMore = false;
     private StatelessSession statelessSession;
-    private ScrollableResults scrollableResults;
+    private ScrollableResults<WalletOperationNative> scrollableResults;
 
     private Long minId = null;
     private Long maxId = null;
@@ -165,7 +165,6 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
             statelessSession.close();
         }
     }
-    
 
     /**
      * Bridge discount Rated transactions
@@ -183,7 +182,7 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
             jobContextHolder.clearMap(RatedTransactionsJob.BILLING_ACCOUNTS_MAP_KEY);
         }
     }
-    
+
     public void initBillingAccountsData() {
         if (jobContextHolder.isNotEmpty(RatedTransactionsJob.BILLING_ACCOUNTS_MAP_KEY)) {
             return;
@@ -223,13 +222,14 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
         int processNrInJobRun = ParamBean.getInstance().getPropertyAsInteger("jobs.ratedTransactionsJob.processNrInJobRun", 4000000);
 
         if (jobItemsLimit > 0) {
-            List<Long> ids = emWrapper.getEntityManager().createNamedQuery("WalletOperation.getOpenIds", Long.class).setMaxResults(jobItemsLimit).getResultList();
+            nrOfRecords = emWrapper.getEntityManager().createNamedQuery("WalletOperation.getOpenCount", Long.class).getSingleResult();
 
-            nrOfRecords = Long.valueOf(ids.size());
-            if (!ids.isEmpty()) {
-                maxId = Long.valueOf(ids.get(ids.size() - 1));
-                minId = Long.valueOf(ids.get(0));
+            if (nrOfRecords.intValue() > 0) {
+                Object[] convertSummary = (Object[]) emWrapper.getEntityManager().createNamedQuery("WalletOperation.getConvertToRTsSummaryWithLimit").setParameter("limitNr", jobItemsLimit).getSingleResult();
+                maxId = (Long) convertSummary[0];
+                minId = (Long) convertSummary[1];
             }
+            
         } else {
             Object[] convertSummary = (Object[]) emWrapper.getEntityManager().createNamedQuery("WalletOperation.getConvertToRTsSummary").getSingleResult();
 
@@ -243,7 +243,7 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
         }
 
         statelessSession = emWrapper.getEntityManager().unwrap(Session.class).getSessionFactory().openStatelessSession();
-        scrollableResults = statelessSession.createNamedQuery("WalletOperationNative.listConvertToRTs").setParameter("maxId", maxId).setReadOnly(true).setCacheable(false)
+        scrollableResults = statelessSession.createNamedQuery("WalletOperationNative.listConvertToRTs", WalletOperationNative.class).setParameter("maxId", maxId).setReadOnly(true).setCacheable(false)
             .setMaxResults(processNrInJobRun > jobItemsLimit && jobItemsLimit > 0 ? jobItemsLimit : processNrInJobRun).setFetchSize(fetchSize).scroll(ScrollMode.FORWARD_ONLY);
 
         hasMore = nrOfRecords >= processNrInJobRun;

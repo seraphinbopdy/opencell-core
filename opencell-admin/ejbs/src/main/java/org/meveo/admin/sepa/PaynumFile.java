@@ -24,8 +24,6 @@ import java.math.RoundingMode;
 import java.security.MessageDigest;
 import java.util.Date;
 
-import javax.inject.Inject;
-
 import org.apache.commons.codec.binary.Base64;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ArConfig;
@@ -44,6 +42,8 @@ import org.meveo.service.payments.impl.AbstractDDRequestBuilder;
 import org.meveo.util.DDRequestBuilderClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.inject.Inject;
 
 /**
  * The Class PaynumFile.

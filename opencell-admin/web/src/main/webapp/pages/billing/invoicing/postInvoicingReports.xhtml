@@ -8,11 +8,9 @@
                 xmlns:e="http://jboss.com/products/seam/excel"
                 xmlns:p="http://primefaces.org/ui">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{billingRunBean.objectId}"/>
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <h:form id="crumbmenuForm">
@@ -212,24 +210,24 @@
                     <f:facet name="header">
                         <h:outputText value="#{messages['commons.actions']}" />
                     </f:facet>
-                    <p:button id="usagesButton" outcome="updateInvoiceDetail" icon="ui-icon-document" disabled="#{billingRunBean.entity.status.toString() == 'VALIDATED' or !invoiceBean.canCancelInvoice(entity)}">
+                    <p:button id="usagesButton" outcome="updateInvoiceDetail" icon="pi pi-file-edit" disabled="#{billingRunBean.entity.status.toString() == 'VALIDATED' or !invoiceBean.canCancelInvoice(entity)}">
                         <f:param name="objectId" value="#{entity.id}" />
                         <f:param name="backEntityId" value="#{billingRunBean.entity.id}"/>
                         <f:param name="edit" value="true" />
-                        <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                        <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                         <f:param name="backView" value="/pages/billing/invoicing/postInvoicingReports.xhtml?objectId=#{billingRunBean.entity.id}" />
                     </p:button>
                     <p:commandButton disabled="#{billingRunBean.entity.status.toString() == 'VALIDATED' or !invoiceBean.canValidateInvoice(entity)}"
-                        action="#{invoiceBean.validateInvoice(entity)}" icon="ui-icon-circle-check" update=":results_form :operationsForm">
-                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmValidateInvoice']}" icon="ui-icon-alert" />
+                        action="#{invoiceBean.validateInvoice(entity)}" icon="pi pi-check-circle" update=":results_form :operationsForm">
+                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmValidateInvoice']}" icon="pi pi-exclamation-triangle" />
                     </p:commandButton>
                     <p:commandButton disabled="#{billingRunBean.entity.status.toString() == 'VALIDATED' or !invoiceBean.canCancelInvoice(entity)}"
-                        action="#{invoiceBean.cancelInvoice(entity)}" icon="ui-icon-circle-close" update=":results_form :operationsForm">
-                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmCancelInvoice']}" icon="ui-icon-alert" />
+                        action="#{invoiceBean.cancelInvoice(entity)}" icon="pi pi-stop-circle" update=":results_form :operationsForm">
+                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmCancelInvoice']}" icon="pi pi-exclamation-triangle" />
                     </p:commandButton>
                     <p:commandButton disabled="#{billingRunBean.entity.status.toString() == 'VALIDATED' or !invoiceBean.canCancelInvoice(entity)}"
-                    	action="#{invoiceBean.rebuildInvoice(entity)}" icon="ui-icon-refresh"  update=":results_form :operationsForm">
-		                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmRebuildInvoice']}" icon="ui-icon-alert" />
+                    	action="#{invoiceBean.rebuildInvoice(entity)}" icon="pi pi-refresh"  update=":results_form :operationsForm">
+		                        <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmRebuildInvoice']}" icon="pi pi-exclamation-triangle" />
 		            </p:commandButton>
                 </p:column>
             </hftl:dataList>
@@ -240,28 +238,28 @@
                                  rendered="#{billingRunBean.entity.status.toString() != 'VALIDATED' and billingRunBean.entity.getInvoices().size()>0}">
                     <p:confirm header="#{messages['commons.confirmationHeader']}"
                                message="#{messages['commons.excludeBillingAccounts']}"
-                               icon="ui-icon-alert"/>
+                               icon="pi pi-exclamation-triangle"/>
                 </p:commandButton>
                 <p:commandButton id="cancelInvoices" style="left:10px; top:-26px" disabled="#{billingRunBean.entity.status.toString() == 'VALIDATED' or !invoiceBean.canCancelInvoices()}"
                                  value="#{messages['commons.cancelInvoices']}"
                                  update=":results_form :operationsForm :messages" action="#{invoiceBean.cancelInvoices()}">
                     <p:confirm header="#{messages['commons.confirmationHeader']}"
                                message="#{messages['commons.cancelInvoices']}"
-                               icon="ui-icon-alert"/>
+                               icon="pi pi-exclamation-triangle"/>
                 </p:commandButton>
                 <p:commandButton id="validateInvoices" style="left:10px; top:-26px" disabled="#{billingRunBean.entity.status.toString() == 'VALIDATED' or !invoiceBean.canValidateInvoices()}"
                                  value="#{messages['commons.validateInvoices']}"
                                  update=":results_form :operationsForm :messages" action="#{invoiceBean.validateInvoices()}">
                     <p:confirm header="#{messages['commons.confirmationHeader']}"
                                message="#{messages['commons.validateInvoices']}"
-                               icon="ui-icon-alert"/>
+                               icon="pi pi-exclamation-triangle"/>
                 </p:commandButton>
                 <p:commandButton id="moveInvoices" style="left:10px; top:-26px" disabled="#{billingRunBean.entity.status.toString() == 'VALIDATED' or !invoiceBean.canCancelInvoices()}"
                                  value="#{messages['commons.moveInvoices']}"
                                  update=":results_form :operationsForm :messages" action="#{invoiceBean.moveInvoices(billingRunBean.entity)}">
                     <p:confirm header="#{messages['commons.confirmationHeader']}"
                                message="#{messages['commons.moveInvoices']}"
-                               icon="ui-icon-alert"/>
+                               icon="pi pi-exclamation-triangle"/>
                 </p:commandButton>
             </p:panel>
         </p:panel>

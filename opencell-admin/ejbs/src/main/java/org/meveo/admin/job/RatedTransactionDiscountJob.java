@@ -23,11 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
@@ -41,6 +36,11 @@ import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.TablesPartitioningService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job definition to link Open RatedTransaction to the
@@ -62,7 +62,7 @@ public class RatedTransactionDiscountJob extends Job {
 
 	@Inject
 	private UpdateStepExecutor updateStepExecutor;
-	
+
 	@Inject
 	private TablesPartitioningService tablesPartitioningService; 
 
@@ -125,7 +125,7 @@ public class RatedTransactionDiscountJob extends Job {
 		cft.setListValues(options);
 		cft.setTags(CustomFieldTemplateService.UPDATE_EXISTING);
         result.put(CF_OPERATIONS_STARTING_DATE, cft);
-		
+
 
 		return result;
 	}

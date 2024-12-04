@@ -28,11 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ImageUploadEventHandler;
@@ -72,6 +67,11 @@ import org.meveo.service.cpq.CommercialRuleItemService;
 import org.meveo.service.cpq.CommercialRuleLineService;
 import org.meveo.service.cpq.MediaService;
 import org.meveo.service.cpq.ProductService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * Offer Template service implementation.

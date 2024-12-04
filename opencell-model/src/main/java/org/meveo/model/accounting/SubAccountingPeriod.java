@@ -2,36 +2,34 @@ package org.meveo.model.accounting;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+
 @Entity
 @Table(name = "sub_accounting_period")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "sub_accounting_period_seq"), })
-@NamedQueries({
-	@NamedQuery(name = "SubAccountingPeriod.findByNumber", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.number=:number and SAP.accountingPeriod.accountingPeriodYear=:fiscalYear"),
-	@NamedQuery(name = "SubAccountingPeriod.findLastSubAP", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.endDate = (select max(endDate) from SubAccountingPeriod where regularUsersSubPeriodStatus = 'OPEN')"),
-	@NamedQuery(name = "SubAccountingPeriod.findNextOpenSubAP", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.endDate = (select min(endDate) from SubAccountingPeriod where regularUsersSubPeriodStatus = 'OPEN' AND startDate >= :accountingDate)"),
-    @NamedQuery(name = "SubAccountingPeriod.findByAP", query = "SELECT count(SAP) FROM SubAccountingPeriod SAP where SAP.accountingPeriod.id = :apId"),
-    @NamedQuery(name = "SubAccountingPeriod.findByAPAndAfterEndDate", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.accountingPeriod.id = :apId and SAP.endDate <= :endDate"),
-    @NamedQuery(name = "SubAccountingPeriod.getRegularUsersSubPeriodWithStatusOpen", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.accountingPeriod.id = :apId  and SAP.regularUsersSubPeriodStatus = 'OPEN'"),
-    @NamedQuery(name = "SubAccountingPeriod.getAllUsersSubPeriodWithStatusOpen", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.accountingPeriod.id = :apId  and SAP.allUsersSubPeriodStatus = 'OPEN'"),
-    @NamedQuery(name = "SubAccountingPeriod.closeSubAccountingPeriods", query = "UPDATE SubAccountingPeriod SAP SET SAP.regularUsersSubPeriodStatus = 'CLOSED', SAP.regularUsersReopeningReason = null, SAP.regularUsersClosedDate = NOW() WHERE SAP.id in (:ids)"),
-    @NamedQuery(name = "SubAccountingPeriod.isTheLastPeriodToClose", query = "SELECT COUNT(*) FROM SubAccountingPeriod SAP WHERE SAP.accountingPeriod = :accountingPeriod AND SAP.regularUsersSubPeriodStatus = 'OPEN' AND SAP.id not in (:ids)") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "sub_accounting_period_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "SubAccountingPeriod.findByNumber", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.number=:number and SAP.accountingPeriod.accountingPeriodYear=:fiscalYear"),
+        @NamedQuery(name = "SubAccountingPeriod.findLastSubAP", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.endDate = (select max(endDate) from SubAccountingPeriod where regularUsersSubPeriodStatus = 'OPEN')"),
+        @NamedQuery(name = "SubAccountingPeriod.findNextOpenSubAP", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.endDate = (select min(endDate) from SubAccountingPeriod where regularUsersSubPeriodStatus = 'OPEN' AND startDate >= :accountingDate)"),
+        @NamedQuery(name = "SubAccountingPeriod.findByAP", query = "SELECT count(SAP) FROM SubAccountingPeriod SAP where SAP.accountingPeriod.id = :apId"),
+        @NamedQuery(name = "SubAccountingPeriod.findByAPAndAfterEndDate", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.accountingPeriod.id = :apId and SAP.endDate <= :endDate"),
+        @NamedQuery(name = "SubAccountingPeriod.getRegularUsersSubPeriodWithStatusOpen", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.accountingPeriod.id = :apId  and SAP.regularUsersSubPeriodStatus = 'OPEN'"),
+        @NamedQuery(name = "SubAccountingPeriod.getAllUsersSubPeriodWithStatusOpen", query = "SELECT SAP FROM SubAccountingPeriod SAP where SAP.accountingPeriod.id = :apId  and SAP.allUsersSubPeriodStatus = 'OPEN'"),
+        @NamedQuery(name = "SubAccountingPeriod.closeSubAccountingPeriods", query = "UPDATE SubAccountingPeriod SAP SET SAP.regularUsersSubPeriodStatus = 'CLOSED', SAP.regularUsersReopeningReason = null, SAP.regularUsersClosedDate = function('NOW') WHERE SAP.id in (:ids)"),
+        @NamedQuery(name = "SubAccountingPeriod.isTheLastPeriodToClose", query = "SELECT COUNT(*) FROM SubAccountingPeriod SAP WHERE SAP.accountingPeriod = :accountingPeriod AND SAP.regularUsersSubPeriodStatus = 'OPEN' AND SAP.id not in (:ids)") })
 public class SubAccountingPeriod extends AuditableEntity {
 
     /**
@@ -69,10 +67,10 @@ public class SubAccountingPeriod extends AuditableEntity {
     @ManyToOne
     @JoinColumn(name = "accounting_period_id")
     private AccountingPeriod accountingPeriod;
-    
+
     @Column(name = "regularUsers_reopening_reason")
     private String regularUsersReopeningReason;
-    
+
     @Column(name = "allUsers_reopening_reason")
     private String allUsersReopeningReason;
 
@@ -136,43 +134,45 @@ public class SubAccountingPeriod extends AuditableEntity {
         this.accountingPeriod = accountingPeriod;
     }
 
-	public SubAccountingPeriodStatusEnum getAllUsersSubPeriodStatus() {
-		return allUsersSubPeriodStatus;
-	}
+    public SubAccountingPeriodStatusEnum getAllUsersSubPeriodStatus() {
+        return allUsersSubPeriodStatus;
+    }
 
-	public void setAllUsersSubPeriodStatus(SubAccountingPeriodStatusEnum allUsersSubPeriodStatus) {
-		this.allUsersSubPeriodStatus = allUsersSubPeriodStatus;
-	}
+    public void setAllUsersSubPeriodStatus(SubAccountingPeriodStatusEnum allUsersSubPeriodStatus) {
+        this.allUsersSubPeriodStatus = allUsersSubPeriodStatus;
+    }
 
-	public String getRegularUsersReopeningReason() {
-		return regularUsersReopeningReason;
-	}
+    public String getRegularUsersReopeningReason() {
+        return regularUsersReopeningReason;
+    }
 
-	public void setRegularUsersReopeningReason(String regularUsersReopeningReason) {
-		this.regularUsersReopeningReason = regularUsersReopeningReason;
-	}
+    public void setRegularUsersReopeningReason(String regularUsersReopeningReason) {
+        this.regularUsersReopeningReason = regularUsersReopeningReason;
+    }
 
-	public String getAllUsersReopeningReason() {
-		return allUsersReopeningReason;
-	}
+    public String getAllUsersReopeningReason() {
+        return allUsersReopeningReason;
+    }
 
-	public void setAllUsersReopeningReason(String allUsersReopeningReason) {
-		this.allUsersReopeningReason = allUsersReopeningReason;
-	}
-	
-	/**
-	 * Check if the current S-AP is open
-	 * @return
-	 */
-	public boolean isOpen() {
-		return this.regularUsersSubPeriodStatus == SubAccountingPeriodStatusEnum.OPEN;
-	}
+    public void setAllUsersReopeningReason(String allUsersReopeningReason) {
+        this.allUsersReopeningReason = allUsersReopeningReason;
+    }
 
-	/**
-	 * Check if the current S-AP is closed
-	 * @return
-	 */
-	public boolean isClosed() {
-		return this.regularUsersSubPeriodStatus == SubAccountingPeriodStatusEnum.CLOSED;
-	}
+    /**
+     * Check if the current S-AP is open
+     * 
+     * @return
+     */
+    public boolean isOpen() {
+        return this.regularUsersSubPeriodStatus == SubAccountingPeriodStatusEnum.OPEN;
+    }
+
+    /**
+     * Check if the current S-AP is closed
+     * 
+     * @return
+     */
+    public boolean isClosed() {
+        return this.regularUsersSubPeriodStatus == SubAccountingPeriodStatusEnum.CLOSED;
+    }
 }

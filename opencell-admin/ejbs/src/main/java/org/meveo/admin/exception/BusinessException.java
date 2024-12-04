@@ -20,13 +20,13 @@ package org.meveo.admin.exception;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.ApplicationException;
-
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.event.monitoring.CreateEventHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.ApplicationException;
 
 /**
  * General business exception. Will result in data rollback

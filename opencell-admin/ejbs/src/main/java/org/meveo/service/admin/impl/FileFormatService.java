@@ -17,14 +17,15 @@
  */
 package org.meveo.service.admin.impl;
 
+import java.util.List;
+
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.admin.FileFormat;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-import java.util.List;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
 
 /**
  * File format service

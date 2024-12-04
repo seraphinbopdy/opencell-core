@@ -78,15 +78,14 @@ public class MinAmountForAccounts {
     /**
      * A contructor.
      *
-     * @param customerHasMinAmount     is customer Has Minimum Amount.
-     * @param caHasMinAmount           is customer Account Has Minimum Amount.
-     * @param baHasMinAmount           is Billing account Has Minimum Amount.
-     * @param uaHasMinAmount           is user account Has Minimum Amount
+     * @param customerHasMinAmount is customer Has Minimum Amount.
+     * @param caHasMinAmount is customer Account Has Minimum Amount.
+     * @param baHasMinAmount is Billing account Has Minimum Amount.
+     * @param uaHasMinAmount is user account Has Minimum Amount
      * @param subscriptionHasMinAmount is Subscription Has Minimum Amount
-     * @param serviceHasMinAmount      is Service Has Minimum Amount
+     * @param serviceHasMinAmount is Service Has Minimum Amount
      */
-    public MinAmountForAccounts(boolean customerHasMinAmount, boolean caHasMinAmount, boolean baHasMinAmount, boolean uaHasMinAmount, boolean subscriptionHasMinAmount,
-            boolean serviceHasMinAmount) {
+    public MinAmountForAccounts(boolean customerHasMinAmount, boolean caHasMinAmount, boolean baHasMinAmount, boolean uaHasMinAmount, boolean subscriptionHasMinAmount, boolean serviceHasMinAmount) {
 
         this.customerHasMinAmount = customerHasMinAmount;
         this.customerAccountHasMinAmount = caHasMinAmount;
@@ -99,8 +98,8 @@ public class MinAmountForAccounts {
     /**
      * Contructor.
      *
-     * @param minRTsUsed           An array of booleans
-     * @param entity               a billable entity
+     * @param minRTsUsed An array of booleans
+     * @param entity a billable entity
      * @param applyMinimumModeEnum an applyMinimumMode Enum
      */
     public MinAmountForAccounts(boolean[] minRTsUsed, IBillableEntity entity, ApplyMinimumModeEnum applyMinimumModeEnum) {
@@ -221,12 +220,13 @@ public class MinAmountForAccounts {
      */
     public MinAmountForAccounts adjustForFirstRun(boolean alreadyInstantiatedMinRTs) {
         MinAmountForAccounts minAmountForAccounts = new MinAmountForAccounts(!alreadyInstantiatedMinRTs && customerHasMinAmount, !alreadyInstantiatedMinRTs && customerAccountHasMinAmount,
-                !alreadyInstantiatedMinRTs && baHasMinAmount, !alreadyInstantiatedMinRTs && uaHasMinAmount, !alreadyInstantiatedMinRTs && subscriptionHasMinAmount, !alreadyInstantiatedMinRTs && serviceHasMinAmount);
+            !alreadyInstantiatedMinRTs && baHasMinAmount, !alreadyInstantiatedMinRTs && uaHasMinAmount, !alreadyInstantiatedMinRTs && subscriptionHasMinAmount, !alreadyInstantiatedMinRTs && serviceHasMinAmount);
         return minAmountForAccounts;
     }
 
     /**
      * Check if Minimum amount is activated in account or a service.
+     * 
      * @param accountClass the account class.
      * @param entity the billable entity.
      * @return true if Minimum amount is activated false otherwise.
@@ -254,7 +254,8 @@ public class MinAmountForAccounts {
             return customerAccountHasMinAmount && billingAccount.getCustomerAccount().getMinimumTargetAccount() != null && billingAccount.getCustomerAccount().getMinimumTargetAccount().equals(entity);
         }
         if (Customer.class.equals(accountClass)) {
-            return customerHasMinAmount && billingAccount.getCustomerAccount().getCustomer().getMinimumTargetAccount() != null && billingAccount.getCustomerAccount().getCustomer().getMinimumTargetAccount().equals(entity);
+            return customerHasMinAmount && billingAccount.getCustomerAccount().getCustomer().getMinimumTargetAccount() != null
+                    && billingAccount.getCustomerAccount().getCustomer().getMinimumTargetAccount().equals(entity);
         }
         return false;
     }

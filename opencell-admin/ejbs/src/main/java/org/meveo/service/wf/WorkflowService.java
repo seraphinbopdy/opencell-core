@@ -28,10 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityNotFoundException;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
@@ -56,6 +52,10 @@ import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.script.ScriptCompilerService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
 
 @Stateless
 public class WorkflowService extends BusinessService<Workflow> {

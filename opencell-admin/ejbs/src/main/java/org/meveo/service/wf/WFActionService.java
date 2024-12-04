@@ -19,12 +19,12 @@ package org.meveo.service.wf;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.wf.WFAction;
 import org.meveo.model.wf.WFTransition;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class WFActionService extends PersistenceService<WFAction> {

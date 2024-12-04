@@ -29,19 +29,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.jpa.JpaAmpNewTx;
-import org.meveo.model.billing.*;
+import org.meveo.model.billing.BillingCycle;
+import org.meveo.model.billing.BillingProcessTypesEnum;
+import org.meveo.model.billing.BillingRun;
+import org.meveo.model.billing.BillingRunAutomaticActionEnum;
+import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
@@ -49,6 +47,12 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.billing.impl.BillingCycleService;
 import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.InvoiceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 /**
  * Job implementation to create Billing runs automatically

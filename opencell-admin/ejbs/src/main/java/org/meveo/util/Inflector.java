@@ -18,15 +18,15 @@
 
 package org.meveo.util;
 
-import org.meveo.model.crm.custom.CustomFieldValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.meveo.model.crm.custom.CustomFieldValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Transforms words to singular, plural, humanized (human readable), underscore, camel case, or ordinal form. This is inspired by

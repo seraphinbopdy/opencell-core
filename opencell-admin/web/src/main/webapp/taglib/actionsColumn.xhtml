@@ -74,12 +74,12 @@
         </f:facet>
 
         <p:button id="#{resultsId}viewlink" outcome="#{editView}"
-                  icon="ui-icon-search" rendered="#{renderViewLink}">
+                  icon="pi pi-search" rendered="#{renderViewLink}">
             <f:param name="#{objectIdParamName}" value="#{entity.id}"/>
             <f:param name="edit" value="false"/>
             <c:if test="${propagateConversation}">
                 <f:param name="cid"
-                         value="#{javax.enterprise.context.conversation.id}"/>
+                         value="#{jakarta.enterprise.context.conversation.id}"/>
             </c:if>
             <c:if test="${not empty backView}">
                 <f:param name="backView"
@@ -100,12 +100,12 @@
                    value="#{messages['commons.edit']}" showEffect="slide"
                    hideEffect="slide"/>
         <p:button id="#{resultsId}editlink" outcome="#{editView}"
-                  icon="ui-icon-document" rendered="#{renderEditLink}">
+                  icon="pi pi-file-edit" rendered="#{renderEditLink}">
             <f:param name="#{objectIdParamName}" value="#{entity.id}"/>
             <f:param name="edit" value="true"/>
             <c:if test="${propagateConversation}">
                 <f:param name="cid"
-                         value="#{javax.enterprise.context.conversation.id}"/>
+                         value="#{jakarta.enterprise.context.conversation.id}"/>
             </c:if>
             <c:if test="${not empty backView}">
                 <f:param name="backView"
@@ -113,22 +113,22 @@
             </c:if>
         </p:button>
 
-        <p:commandButton id="#{resultsId}duplicatelink" icon="ui-icon-plus" rendered="#{renderDuplicateLink and backingBean.canUserUpdateEntity()}"
+        <p:commandButton id="#{resultsId}duplicatelink" icon="pi pi-plus" rendered="#{renderDuplicateLink and backingBean.canUserUpdateEntity()}"
                          action="#{backingBean.duplicate()}" update="@form"  process="@this">
             <f:setPropertyActionListener target="#{backingBean.entity}" value="#{entity}"/>
             <c:if test="${propagateConversation}">
-                <f:param name="cid" value="#{javax.enterprise.context.conversation.id}"/>
+                <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}"/>
             </c:if>
             <p:confirm header="#{messages['commons.duplicate']}" message="#{messages['commons.confirmDuplicate']}"/>
         </p:commandButton>
 
-        <p:commandButton id="#{resultsId}enablelink" icon="ui-icon-circle-check"
+        <p:commandButton id="#{resultsId}enablelink" icon="pi pi-check-circle"
                          rendered="#{renderEnableLink and entity.disabled and backingBean.canUserUpdateEntity()}" action="#{backingBean.enable()}" update="@form searchForm" process="@this">
             <f:setPropertyActionListener target="#{backingBean.entity}" value="#{entity}"/>
             <p:confirm header="#{messages['commons.enable']}" message="#{messages['commons.confirmEnable']}"/>
         </p:commandButton>
 
-        <p:commandButton id="#{resultsId}disablelink" icon="ui-icon-circle-close"
+        <p:commandButton id="#{resultsId}disablelink" icon="pi pi-stop-circle"
                          rendered="#{renderEnableLink and not entity.disabled and backingBean.canUserUpdateEntity()}" action="#{backingBean.disable()}" update="@form searchForm" process="@this">
             <f:setPropertyActionListener target="#{backingBean.entity}" value="#{entity}"/>
             <p:confirm header="#{messages['commons.disable']}" message="#{messages['commons.confirmDisable']}"/>
@@ -137,10 +137,10 @@
 
         <p:remoteCommand id="remoteDeleteButton" actionListener="#{backingBean.delete}" name="#{resultsId}doDelete"
                          update="@form :searchForm" process="@this" rendered="#{renderDeleteLink and backingBean.canUserDeleteEntity()}"/>
-        <p:commandButton id="#{resultsId}deletelink" icon="ui-icon-trash" oncomplete="#{resultsId}doDelete()"
+        <p:commandButton id="#{resultsId}deletelink" icon="pi pi-trash" oncomplete="#{resultsId}doDelete()"
                          rendered="#{renderDeleteLink and backingBean.canUserDeleteEntity()}">
             <f:setPropertyActionListener target="#{backingBean.entity}" value="#{entity}"/>
-            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert"/>
+            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle"/>
         </p:commandButton>
         <ui:insert/>
     </p:column>

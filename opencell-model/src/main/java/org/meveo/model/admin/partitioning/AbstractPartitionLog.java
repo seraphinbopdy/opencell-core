@@ -1,31 +1,31 @@
 package org.meveo.model.admin.partitioning;
 
-
-import org.meveo.model.IEntity;
-
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.meveo.model.IEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+
 @MappedSuperclass
 public class AbstractPartitionLog implements IEntity {
-    
+
     @Id
     @Column(name = "id")
     private Long id;
-    
+
     @Column(name = "partition_name")
     private String partitionName;
-    
+
     @Column(name = "range_from")
     private Date periodFrom;
 
     @Column(name = "range_to")
     private Date periodTo;
 
-    @Column(name = "purge_date") 
+    @Column(name = "purge_date")
     private Date purgeDate;
 
     public String getPartitionName() {

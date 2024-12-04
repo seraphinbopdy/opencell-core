@@ -17,15 +17,18 @@
  */
 package org.meveo.apiv2.common;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Map;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * A definition of huge entity DTO.
@@ -34,7 +37,7 @@ import java.util.Map;
  * @since 15.1.0
  */
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableHugeEntity.class)
 public interface HugeEntity extends Resource {
 

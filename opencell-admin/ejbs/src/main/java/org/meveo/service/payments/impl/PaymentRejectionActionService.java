@@ -2,10 +2,10 @@ package org.meveo.service.payments.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.payments.PaymentRejectionAction;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class PaymentRejectionActionService extends BusinessService<PaymentRejectionAction> {

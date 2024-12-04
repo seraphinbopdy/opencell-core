@@ -23,12 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.type.BooleanType;
-import org.hibernate.type.DateType;
-import org.hibernate.type.DoubleType;
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
-import org.hibernate.type.Type;
+import org.hibernate.type.BasicTypeReference;
+import org.hibernate.type.StandardBasicTypes;
 import org.meveo.model.crm.CustomTableWrapper;
 import org.meveo.model.crm.EntityReferenceWrapper;
 
@@ -40,67 +36,67 @@ public enum CustomFieldTypeEnum {
     /**
      * String value
      */
-    STRING(false, String.class, "varchar(%length)", new StringType()),
+    STRING(false, String.class, "varchar(%length)", StandardBasicTypes.STRING),
 
     /**
      * Date value
      */
-    DATE(false, Date.class, "datetime", new DateType()),
+    DATE(false, Date.class, "datetime", StandardBasicTypes.DATE),
 
     /**
      * Long value
      */
-    LONG(false, Long.class, "bigInt", new LongType()),
+    LONG(false, Long.class, "bigInt", StandardBasicTypes.LONG),
 
     /**
      * Double value
      */
-    DOUBLE(false, Double.class, "numeric(23,12)", new DoubleType()),
+    DOUBLE(false, Double.class, "numeric(23,12)", StandardBasicTypes.DOUBLE),
 
     /**
      * String value picked from a list of values
      */
-    LIST(false, String.class, "varchar(%length)", new StringType()),
+    LIST(false, String.class, "varchar(%length)", StandardBasicTypes.STRING),
 
     /**
      * String value picked from a list of values, with possibility of multi select
      */
-    CHECKBOX_LIST(false, List.class, StringUtils.EMPTY, new StringType()),
+    CHECKBOX_LIST(false, List.class, StringUtils.EMPTY, StandardBasicTypes.STRING),
 
     /**
      * A reference to an entity
      */
-    ENTITY(true, EntityReferenceWrapper.class, "bigint", new LongType()),
+    ENTITY(true, EntityReferenceWrapper.class, "bigint", StandardBasicTypes.LONG),
 
     /**
      * A long string value
      */
-    TEXT_AREA(false, String.class, "text", new StringType()),
+    TEXT_AREA(false, String.class, "text", StandardBasicTypes.STRING),
 
     /**
      * An embedded entity data
      */
-    CHILD_ENTITY(true, EntityReferenceWrapper.class, StringUtils.EMPTY, new StringType()),
+    CHILD_ENTITY(true, EntityReferenceWrapper.class, StringUtils.EMPTY, StandardBasicTypes.STRING),
 
     /**
      * Multi value (map) type value
      */
-    MULTI_VALUE(true, Map.class, StringUtils.EMPTY, new StringType()),
+    MULTI_VALUE(true, Map.class, StringUtils.EMPTY, StandardBasicTypes.STRING),
 
     /**
      * A boolean value
      */
-    BOOLEAN(false, Boolean.class, "boolean default false", new BooleanType()),
+    BOOLEAN(false, Boolean.class, "int4 default 0", StandardBasicTypes.BOOLEAN),
 
     /**
      * A reference to an entity
      */
-    CUSTOM_TABLE_WRAPPER(true, CustomTableWrapper.class, StringUtils.EMPTY, new StringType()),
+    CUSTOM_TABLE_WRAPPER(true, CustomTableWrapper.class, StringUtils.EMPTY, StandardBasicTypes.STRING),
 
     /**
      * A URL value
      */
-    URL(true, UrlReferenceWrapper.class, StringUtils.EMPTY, new StringType());
+    URL(true, UrlReferenceWrapper.class, StringUtils.EMPTY, StandardBasicTypes.STRING);
 
     /**
      * Is value stored in a serialized form in DB
@@ -110,7 +106,7 @@ public enum CustomFieldTypeEnum {
     /**
      * Corresponding class to field type for conversion to json
      */
-    private Class dataClass;
+    private Class<?> dataClass;
 
     /**
      * Liquibase data type
@@ -120,9 +116,9 @@ public enum CustomFieldTypeEnum {
     /**
      * Hibernate native query type
      */
-    private Type hibernateType;
+    private BasicTypeReference<?> hibernateType;
 
-    CustomFieldTypeEnum(boolean storedSerialized, Class dataClass, String dataType, Type hibernateType) {
+    CustomFieldTypeEnum(boolean storedSerialized, Class<?> dataClass, String dataType, BasicTypeReference<?> hibernateType) {
         this.storedSerialized = storedSerialized;
         this.dataClass = dataClass;
         this.dataType = dataType;
@@ -137,7 +133,7 @@ public enum CustomFieldTypeEnum {
         return storedSerialized;
     }
 
-    public Class getDataClass() {
+    public Class<?> getDataClass() {
         return dataClass;
     }
 
@@ -145,7 +141,7 @@ public enum CustomFieldTypeEnum {
         return dataType;
     }
 
-    public Type getHibernateType() {
+    public BasicTypeReference<?> getHibernateType() {
         return hibernateType;
     }
 }

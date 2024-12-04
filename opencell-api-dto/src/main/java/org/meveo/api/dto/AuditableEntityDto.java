@@ -18,15 +18,21 @@
 
 package org.meveo.api.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+
 import org.meveo.api.dto.audit.AuditableFieldDto;
 import org.meveo.model.AuditableEntity;
 
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.*;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Equivalent of AuditableEntity in DTO

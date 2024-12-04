@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.api.exception.InvalidParameterException;
-import org.meveo.model.admin.Currency;
 import org.meveo.model.dunning.DunningLevel;
 import org.meveo.model.dunning.DunningModeEnum;
 import org.meveo.model.dunning.DunningSettings;
@@ -21,8 +20,6 @@ import org.meveo.service.payments.impl.DunningSettingsService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import javax.inject.Inject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DunningLevelApiServiceTest {

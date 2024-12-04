@@ -31,8 +31,8 @@
                 <h:outputText value="#{messages['commons.actions']}" />
             </f:facet>
             <p:commandButton update="#{mainFormId}:messages #{mainFormId}:tabView:offerProductMessages #{mainFormId}:tabView:offerProductDetails"
-                action="#{mainBackingBean.editOfferProductTemplate(entity)}" icon="ui-icon-document" process="@this" />
-            <p:commandButton action="#{mainBackingBean.deleteOfferProductTemplate(entity)}" rendered="#{mainBackingBean.edit and mainBackingBean.canUserDeleteEntity()}" icon="ui-icon-trash"
+                action="#{mainBackingBean.editOfferProductTemplate(entity)}" icon="pi pi-file-edit" process="@this" />
+            <p:commandButton action="#{mainBackingBean.deleteOfferProductTemplate(entity)}" rendered="#{mainBackingBean.edit and mainBackingBean.canUserDeleteEntity()}" icon="pi pi-trash"
                 update="#{mainFormId}:messages #{mainFormId}:tabView:offerProductMessages #{mainFormId}:tabView:offerProductDetails #{mainFormId}:tabView:offerProducts" process="@this" />
         </p:column>
         <f:facet name="footer">

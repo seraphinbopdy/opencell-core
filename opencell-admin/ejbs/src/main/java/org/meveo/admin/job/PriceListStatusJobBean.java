@@ -1,5 +1,9 @@
 package org.meveo.admin.job;
 
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
@@ -8,11 +12,8 @@ import org.meveo.model.pricelist.PriceListStatusEnum;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.catalog.impl.PriceListService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class PriceListStatusJobBean extends IteratorBasedJobBean<Long> {

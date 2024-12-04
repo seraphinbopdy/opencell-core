@@ -1,20 +1,5 @@
 package org.meveo.commons.encryption;
 
-import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.meveo.commons.keystore.KeystoreManager;
-import org.meveo.commons.utils.ParamBean;
-import org.meveo.commons.utils.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -23,6 +8,22 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Base64;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.meveo.commons.keystore.KeystoreManager;
+import org.meveo.commons.utils.ParamBean;
+import org.meveo.commons.utils.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * EncryptionFactory
@@ -58,8 +59,6 @@ public class EncryptionFactory {
     public static final String ENCRYPTION_KEY_PROP = "encrypt.secretKey";
 
     private static final int LENGTH_HASH_MD5_EN_HEXA = 32;
-
-
 
     public static final String ENCRYPTION_CHECK_STRING = "AES";
 
@@ -98,7 +97,7 @@ public class EncryptionFactory {
     }
 
     public static void listOfSecurityProviders() {
-        //Security listing
+        // Security listing
         for (Provider provider : Security.getProviders()) {
             log.info("Security provider : {}", provider.getName());
             for (Provider.Service service : provider.getServices()) {
@@ -122,7 +121,7 @@ public class EncryptionFactory {
         return result;
     }
 
-    public static String getHashOfAlgoKey(String algoKey){
+    public static String getHashOfAlgoKey(String algoKey) {
         MessageDigest md5;
         byte[] keyBytes = new byte[0];
 
@@ -137,11 +136,10 @@ public class EncryptionFactory {
         return Hex.encodeHexString(keyBytes);
     }
 
-    public static String encrypt(String clearText){
+    public static String encrypt(String clearText) {
         try {
             String completePrefix = buildCipherAndGetPrefix();
-            return completePrefix + SEPARATOR
-                    + Base64.getEncoder().encodeToString(cipher.doFinal(clearText.getBytes()));
+            return completePrefix + SEPARATOR + Base64.getEncoder().encodeToString(cipher.doFinal(clearText.getBytes()));
         } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException e) {
             log.error("Error while encrypting: {}", e.getMessage(), e);
         }
@@ -149,9 +147,8 @@ public class EncryptionFactory {
     }
 
     /**
-     * Encrypt value without adding Opencell custom prefix
-     * Use to keep interoperability with old AesEncrypt with use "AES" prefix
-     * /!\ CAREFULNESS : PLEASE DONT USE IT TO OTHER CONTEXT, THE CIPHER DATA CANNOT BE DECRYPTED /!\
+     * Encrypt value without adding Opencell custom prefix Use to keep interoperability with old AesEncrypt with use "AES" prefix /!\ CAREFULNESS : PLEASE DONT USE IT TO OTHER CONTEXT, THE CIPHER DATA CANNOT BE DECRYPTED
+     * /!\
      *
      * @param clearText clear content
      * @return encrypted value without prefix
@@ -188,7 +185,7 @@ public class EncryptionFactory {
         return completePrefix;
     }
 
-    public static String decrypt(String encryptedText){
+    public static String decrypt(String encryptedText) {
         try {
             if (encryptedText != null) {
                 // this if is for migration from data encrypted by AES in client database
@@ -199,8 +196,7 @@ public class EncryptionFactory {
                     cipher.init(Cipher.DECRYPT_MODE, secretKey);
 
                     return new String(cipher.doFinal(Base64.getDecoder().decode(encryptedText)));
-                }
-                else if (encryptedText.startsWith(PREFIX)) {
+                } else if (encryptedText.startsWith(PREFIX)) {
                     String completePrefix = encryptedText.substring(0, PREFIX.length() + LENGTH_HASH_MD5_EN_HEXA); // get complete prefix
                     encryptedText = encryptedText.substring(PREFIX.length() + LENGTH_HASH_MD5_EN_HEXA + 1);
 
@@ -229,10 +225,8 @@ public class EncryptionFactory {
 
     public static IvParameterSpec generateIv() {
 
-        byte[] iv = new byte[] { (byte) 0x14, (byte) 0x0b,
-                (byte) 0x41, (byte) 0xb2, (byte) 0x2a, (byte) 0x29, (byte) 0xbe,
-                (byte) 0xb4, (byte) 0x06, (byte) 0x1b, (byte) 0xda, (byte) 0x66,
-                (byte) 0xb6, (byte) 0x74, (byte) 0x7e, (byte) 0x14 };
+        byte[] iv = new byte[] { (byte) 0x14, (byte) 0x0b, (byte) 0x41, (byte) 0xb2, (byte) 0x2a, (byte) 0x29, (byte) 0xbe, (byte) 0xb4, (byte) 0x06, (byte) 0x1b, (byte) 0xda, (byte) 0x66, (byte) 0xb6, (byte) 0x74,
+                (byte) 0x7e, (byte) 0x14 };
 
         return new IvParameterSpec(iv);
     }
@@ -252,7 +246,7 @@ public class EncryptionFactory {
         return new SecretKeySpec(keyBytes, BUILD_KEY_ALGORITHM);
     }
 
-    public static byte[] digest(byte[] bytesToDigest){
+    public static byte[] digest(byte[] bytesToDigest) {
         synchronized (messageDigest) {
             return messageDigest.digest(bytesToDigest);
         }

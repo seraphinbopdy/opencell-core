@@ -17,18 +17,40 @@
  */
 package org.meveo.service.base;
 
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.collections4.ListUtils.partition;
+import static org.meveo.commons.utils.ParamBean.getInstance;
+
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.FlushMode;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.internal.SessionFactoryImpl;
-import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.persister.entity.AbstractEntityPersister;
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StandardBasicTypes;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.ValidationException;
@@ -53,14 +75,12 @@ import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.model.customEntities.CustomEntityTemplate;
-import org.meveo.model.jaxb.account.UserAccount;
 import org.meveo.model.notification.Notification;
 import org.meveo.model.notification.NotificationEventTypeEnum;
-import org.meveo.model.payments.PaymentHistory;
 import org.meveo.model.report.query.ReportQuery;
 import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.model.shared.DateUtils;
-import org.meveo.model.transformer.AliasToEntityOrderedMapResultTransformer;
+import org.meveo.model.transformer.TupleToMapResultTransformer;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.base.expressions.ExpressionFactory;
 import org.meveo.service.base.expressions.NativeExpressionFactory;
@@ -70,41 +90,15 @@ import org.meveo.service.notification.GenericNotificationService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.meveo.util.MeveoParamBean;
 
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.Query;
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.joining;
-import static org.apache.commons.collections4.ListUtils.partition;
-import static org.meveo.commons.utils.ParamBean.getInstance;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.Table;
+import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.Metamodel;
 
 /**
  * Generic implementation that provides the default implementation for persistence methods working directly with native DB tables
@@ -176,7 +170,7 @@ public class NativePersistenceService extends BaseService {
      * Find record by its identifier
      *
      * @param tableName Table name
-     * @param id        Identifier
+     * @param id Identifier
      * @return A map of values with field name as a map key and field value as a map value. Or null if no record was found with such identifier.
      */
     public Map<String, Object> findById(String tableName, Long id) {
@@ -187,8 +181,8 @@ public class NativePersistenceService extends BaseService {
      * Find record by its identifier
      *
      * @param tableName Table name
-     * @param id        Identifier
-     * @param fields    A set of fields to return. If null or empty, only id field will be returned
+     * @param id Identifier
+     * @param fields A set of fields to return. If null or empty, only id field will be returned
      * @return A map of values with field name as a map key and field value as a map value. Or null if no record was found with such identifier.
      */
     public Map<String, Object> findById(String tableName, Long id, Set<String> fields) {
@@ -199,11 +193,11 @@ public class NativePersistenceService extends BaseService {
      * Find record by its identifier
      *
      * @param tableName Table name
-     * @param id        Identifier
-     * @param canCheck  When True it will get id, and the code of the customer table
+     * @param id Identifier
+     * @param canCheck When True it will get id, and the code of the customer table
      * @return A map of values with field name as a map key and field value as a map value. Or null if no record was found with such identifier.
      */
-    @SuppressWarnings({"rawtypes", "deprecation"})
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     public Map<String, Object> findByIdWithouCheckCodeAndDescription(String tableName, Long id, boolean canCheck) {
         return findByIdWithouCheckCodeAndDescription(tableName, id, null, canCheck);
     }
@@ -212,28 +206,28 @@ public class NativePersistenceService extends BaseService {
      * Find record by its identifier
      *
      * @param tableName Table name
-     * @param id        Identifier
-     * @param fields    A set of fields to return. Works only when canCheck is true
-     * @param canCheck  When True it will get id, and the code of the customer table
+     * @param id Identifier
+     * @param fields A set of fields to return. Works only when canCheck is true
+     * @param canCheck When True it will get id, and the code of the customer table
      * @return A map of values with field name as a map key and field value as a map value. Or null if no record was found with such identifier.
      */
-    @SuppressWarnings({"rawtypes", "deprecation"})
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     public Map<String, Object> findByIdWithouCheckCodeAndDescription(String tableName, Long id, Set<String> fields, boolean canCheck) {
         tableName = addCurrentSchema(tableName);
         try {
             Session session = getEntityManager().unwrap(Session.class);
             StringBuilder selectQuery = new StringBuilder("select * from ").append(tableName).append(" e where id=:id");
-            SQLQuery query = session.createSQLQuery(selectQuery.toString());
+            NativeQuery query = session.createNativeQuery(selectQuery.toString());
             query.setParameter("id", id);
             if (canCheck) {
-                query.addScalar("id", new LongType());
+                query.addScalar("id", StandardBasicTypes.LONG);
                 if (!ListUtils.isEmtyCollection(fields)) {
-                    fields.stream().filter(f -> !f.equals("id")).forEach(f -> query.addScalar(f, new StringType()));
+                    fields.stream().filter(f -> !f.equals("id")).forEach(f -> query.addScalar(f, StandardBasicTypes.STRING));
                 }
-                query.setFlushMode(FlushMode.COMMIT);
+                query.setFlushMode(FlushModeType.COMMIT);
             }
 
-            query.setResultTransformer(AliasToEntityOrderedMapResultTransformer.INSTANCE);
+            query.setTupleTransformer(TupleToMapResultTransformer.INSTANCE);
 
             Map<String, Object> values = (Map<String, Object>) query.uniqueResult();
             if (values != null) {
@@ -259,7 +253,7 @@ public class NativePersistenceService extends BaseService {
      * Insert values into table
      *
      * @param tableName Table name to insert values to
-     * @param values    Values to insert
+     * @param values Values to insert
      * @throws BusinessException General exception
      */
     public Long create(String tableName, Map<String, Object> values) throws BusinessException {
@@ -270,12 +264,11 @@ public class NativePersistenceService extends BaseService {
     /**
      * Insert multiple values into table. Uses a prepared statement.
      * <p>
-     * NOTE: The sql statement is determined by the fields passed in the first value, so its important that either all values have the same fields (order does not matter), or first
-     * value has the maximum number of fields
+     * NOTE: The sql statement is determined by the fields passed in the first value, so its important that either all values have the same fields (order does not matter), or first value has the maximum number of fields
      *
-     * @param tableName                Table name to insert values to
+     * @param tableName Table name to insert values to
      * @param customEntityTemplateCode Custom entity template, corresponding to a custom table, code
-     * @param values                   A list of values to insert
+     * @param values A list of values to insert
      * @throws BusinessException General exception
      */
     public void create(String tableName, String customEntityTemplateCode, List<Map<String, Object>> values) throws BusinessException {
@@ -375,7 +368,7 @@ public class NativePersistenceService extends BaseService {
      * @param tableName the table name
      * @return
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private Map<String, Object> getFields(String tableName) {
         tableName = addCurrentSchema(tableName);
         Map<String, Object> fields = new HashedMap();
@@ -413,9 +406,9 @@ public class NativePersistenceService extends BaseService {
     /**
      * Insert a new record into a table. If returnId=True values parameter will be updated with 'id' field value.
      *
-     * @param tableName         Table name to update
-     * @param values            Values
-     * @param returnId          Should identifier be returned - does a lookup in DB by matching same values. If True values will be updated with 'id' field value.
+     * @param tableName Table name to update
+     * @param values Values
+     * @param returnId Should identifier be returned - does a lookup in DB by matching same values. If True values will be updated with 'id' field value.
      * @param fireNotifications Should notifications be fired upon record creation
      * @throws BusinessException General exception
      */
@@ -530,8 +523,8 @@ public class NativePersistenceService extends BaseService {
     /**
      * Update a record in a table. Record is identified by an "id" field value.
      *
-     * @param tableName         Table name to update
-     * @param value             Values. Values must contain an "id" (FIELD_ID) field.
+     * @param tableName Table name to update
+     * @param value Values. Values must contain an "id" (FIELD_ID) field.
      * @param fireNotifications Should notifications be fired upon record update
      * @throws BusinessException General exception
      */
@@ -585,9 +578,9 @@ public class NativePersistenceService extends BaseService {
      * Update field value in a table
      *
      * @param tableName Table name to update
-     * @param id        Record identifier
+     * @param id Record identifier
      * @param fieldName Field to update
-     * @param value     New value
+     * @param value New value
      * @throws BusinessException General exception
      */
     public void updateValue(String tableName, Long id, String fieldName, Object value) throws BusinessException {
@@ -610,7 +603,7 @@ public class NativePersistenceService extends BaseService {
      * Disable a record. Note: There is no check done that record exists.
      *
      * @param tableName Table name to update
-     * @param id        Record identifier
+     * @param id Record identifier
      * @throws BusinessException General exception
      */
     public void disable(String tableName, Long id) throws BusinessException {
@@ -623,7 +616,7 @@ public class NativePersistenceService extends BaseService {
      * Disable multiple records. Note: There is no check done that records exists.
      *
      * @param tableName Table name to update
-     * @param ids       A list of record identifiers
+     * @param ids A list of record identifiers
      * @throws BusinessException General exception
      */
     public void disable(String tableName, Set<Long> ids) throws BusinessException {
@@ -635,7 +628,7 @@ public class NativePersistenceService extends BaseService {
      * Enable a record. Note: There is no check done that record exists.
      *
      * @param tableName Table name to update
-     * @param id        Record identifier
+     * @param id Record identifier
      * @throws BusinessException General exception
      */
     public void enable(String tableName, Long id) throws BusinessException {
@@ -648,7 +641,7 @@ public class NativePersistenceService extends BaseService {
      * Enable multiple records. Note: There is no check done that records exists.
      *
      * @param tableName Table name to update
-     * @param ids       A list of record identifiers
+     * @param ids A list of record identifiers
      * @throws BusinessException General exception
      */
     public void enable(String tableName, Set<Long> ids) throws BusinessException {
@@ -661,7 +654,7 @@ public class NativePersistenceService extends BaseService {
      * Delete a record. Note: There is no check done that record exists.
      *
      * @param tableName Table name to update
-     * @param id        Record identifier
+     * @param id Record identifier
      * @return Number of records deleted
      * @throws BusinessException General exception
      */
@@ -680,12 +673,10 @@ public class NativePersistenceService extends BaseService {
     }
 
     /**
-     * Delete multiple records. Note: There is no check done that records exists.
-     * Will call find by id and check if it has a code or description field other will throw
-     * excpetion
+     * Delete multiple records. Note: There is no check done that records exists. Will call find by id and check if it has a code or description field other will throw excpetion
      *
      * @param tableName Table name to delete from
-     * @param ids       A set of record identifiers
+     * @param ids A set of record identifiers
      * @return Number of records deleted
      * @throws BusinessException General exception
      */
@@ -703,11 +694,10 @@ public class NativePersistenceService extends BaseService {
     }
 
     /**
-     * Delete multiple records. Note: There is no check done that records exists.
-     * Will not check Code or description field, it will find the table by id and then delete
+     * Delete multiple records. Note: There is no check done that records exists. Will not check Code or description field, it will find the table by id and then delete
      *
      * @param tableName Table name to delete from
-     * @param ids       A set of record identifiers
+     * @param ids A set of record identifiers
      * @return Number of records deleted
      * @throws BusinessException General exception
      */
@@ -777,37 +767,35 @@ public class NativePersistenceService extends BaseService {
      * <p>
      * Following conditions are supported:
      * <ul>
-     * <li><b>fromRange</b>. Ranged search - field value in between from - to values. Specifies "from" part value: e.g value&lt;=fieldValue. Applies to date and number type fields.
-     * Date value is truncated to start of the day</li>
-     * <li><b>toRange</b>. Ranged search - field value in between from - to values. Specifies "to" part value: e.g fieldValue&lt;value. Value is exclusive. Applies to date and
-     * number type fields. Date value is truncated to the start of the day</li>
-     * <li><b>toRangeInclusive</b>. Ranged search - field value in between from - to values. Specifies "to" part value: e.g fieldValue&lt;=value. Value is inclusive. Applies to
-     * date and number type fields. Date value is truncated to the end of the day</li>
-     * <li><b>fromOptionalRange</b>. Ranged search - field value in between from - to values. Field value is optional. Specifies "from" part value: e.g value&lt;=field.value.
-     * Applies to date and number type fields. Date value is truncated to start of the day</li>
-     * <li><b>toOptionalRange</b>. Ranged search - field value in between from - to values. Field value is optional. Specifies "to" part value: e.g fieldValue&lt;value. Value is
-     * inclusive. Applies to date and number type fields. Date value is truncated to the start of the day</li>
-     * <li><b>toOptionalRangeInclusive</b>. Ranged search - field value in between from - to values. Field value is optional. Specifies "to" part value: e.g fieldValue&lt;=value.
-     * Value is inclusive. Applies to date and number type fields. Date value is truncated to the end of the day</li>
+     * <li><b>fromRange</b>. Ranged search - field value in between from - to values. Specifies "from" part value: e.g value&lt;=fieldValue. Applies to date and number type fields. Date value is truncated to start of the
+     * day</li>
+     * <li><b>toRange</b>. Ranged search - field value in between from - to values. Specifies "to" part value: e.g fieldValue&lt;value. Value is exclusive. Applies to date and number type fields. Date value is truncated
+     * to the start of the day</li>
+     * <li><b>toRangeInclusive</b>. Ranged search - field value in between from - to values. Specifies "to" part value: e.g fieldValue&lt;=value. Value is inclusive. Applies to date and number type fields. Date value is
+     * truncated to the end of the day</li>
+     * <li><b>fromOptionalRange</b>. Ranged search - field value in between from - to values. Field value is optional. Specifies "from" part value: e.g value&lt;=field.value. Applies to date and number type fields. Date
+     * value is truncated to start of the day</li>
+     * <li><b>toOptionalRange</b>. Ranged search - field value in between from - to values. Field value is optional. Specifies "to" part value: e.g fieldValue&lt;value. Value is inclusive. Applies to date and number type
+     * fields. Date value is truncated to the start of the day</li>
+     * <li><b>toOptionalRangeInclusive</b>. Ranged search - field value in between from - to values. Field value is optional. Specifies "to" part value: e.g fieldValue&lt;=value. Value is inclusive. Applies to date and
+     * number type fields. Date value is truncated to the end of the day</li>
      * <li><b>list</b>. Value is in field's list value. Applies to date and number type fields.</li>
-     * <li><b>inList</b>/<b>not-inList</b>. Field value is [not] in value (list). A comma separated string will be parsed into a list if values. A single value will be considered
-     * as a list value of one item</li>
-     * <li><b>minmaxRange</b>. The value is in between two field values. TWO field names must be provided. Applies to date and number type fields. The TO field value is exclusive.
-     * Date value is truncated to the start of the day. E.f. field1Value&lt;value&ltfield2Value</li>
-     * <li><b>minmaxRangeInclusive</b>. The value is in between two field values. TWO field names must be provided. Applies to date and number type fields. The TO field value is
-     * inclusive. Date value is truncated to the start of the day. E.g. field1Value&lt;=value&ltfield2Value</li>
-     * <li><b>minmaxOptionalRange</b>. Similar to minmaxRange. The value is in between two field values with either them being optional. TWO fieldnames must be specified. The TO
-     * field value is exclusive. Date value is truncated to the start of the day.</li>
-     * <li><b>minmaxOptionalRangeInclusive</b>. Similar to minmaxRangeOptional. The value is in between two field values with either them being optional. TWO fieldnames must be
-     * specified. The TO field value is inclusive. Date value is truncated to the start of the day.</li>
-     * <li><b>overlapOptionalRange</b>. The value range is overlapping two field values with either them being optional. TWO fieldnames must be specified. Value must be an array or
-     * a list of two values. End fields and to values are exclusive.</li>
-     * <li><b>overlapOptionalRangeInclusive</b>. The value range is overlapping two field values with either them being optional. TWO fieldnames must be specified. Value must be an
-     * array or a list of two values. End fields and to values are inclusive.</li>
-     * <li><b>likeCriterias</b>. Multiple fieldnames can be specified. Any of the multiple field values match the value (OR criteria). In case value contains *, a like criteria
-     * match will be used. In either case case insensative matching is used. Applies to String type fields.</li>
-     * <li><b>wildcardOr</b>. Similar to likeCriterias. A wildcard match will always used. A * will be appended to start and end of the value automatically if not present. Applies
-     * to
+     * <li><b>inList</b>/<b>not-inList</b>. Field value is [not] in value (list). A comma separated string will be parsed into a list if values. A single value will be considered as a list value of one item</li>
+     * <li><b>minmaxRange</b>. The value is in between two field values. TWO field names must be provided. Applies to date and number type fields. The TO field value is exclusive. Date value is truncated to the start of
+     * the day. E.f. field1Value&lt;value&ltfield2Value</li>
+     * <li><b>minmaxRangeInclusive</b>. The value is in between two field values. TWO field names must be provided. Applies to date and number type fields. The TO field value is inclusive. Date value is truncated to the
+     * start of the day. E.g. field1Value&lt;=value&ltfield2Value</li>
+     * <li><b>minmaxOptionalRange</b>. Similar to minmaxRange. The value is in between two field values with either them being optional. TWO fieldnames must be specified. The TO field value is exclusive. Date value is
+     * truncated to the start of the day.</li>
+     * <li><b>minmaxOptionalRangeInclusive</b>. Similar to minmaxRangeOptional. The value is in between two field values with either them being optional. TWO fieldnames must be specified. The TO field value is inclusive.
+     * Date value is truncated to the start of the day.</li>
+     * <li><b>overlapOptionalRange</b>. The value range is overlapping two field values with either them being optional. TWO fieldnames must be specified. Value must be an array or a list of two values. End fields and to
+     * values are exclusive.</li>
+     * <li><b>overlapOptionalRangeInclusive</b>. The value range is overlapping two field values with either them being optional. TWO fieldnames must be specified. Value must be an array or a list of two values. End
+     * fields and to values are inclusive.</li>
+     * <li><b>likeCriterias</b>. Multiple fieldnames can be specified. Any of the multiple field values match the value (OR criteria). In case value contains *, a like criteria match will be used. In either case case
+     * insensative matching is used. Applies to String type fields.</li>
+     * <li><b>wildcardOr</b>. Similar to likeCriterias. A wildcard match will always used. A * will be appended to start and end of the value automatically if not present. Applies to
      * <li><b>wildcardOrIgnoreCase</b>. Similar to wildcardOr but ignoring case String type fields.</li>
      * <li><b>eq</b>. Equals. Supports wildcards in case of string value. NOTE: This is a default behavior when condition is not specified
      * <li><b>eqOptional</b>. Equals. Supports wildcards in case of string value. Field value is optional.
@@ -826,8 +814,8 @@ public class NativePersistenceService extends BaseService {
      * <p>
      * <p>
      * <p>
-     * To filter by a related entity's field you can either filter by related entity's field or by related entity itself specifying code as value. These two example will do the
-     * same in case when quering a customer account: customer.code=aaa OR customer=aaa
+     * To filter by a related entity's field you can either filter by related entity's field or by related entity itself specifying code as value. These two example will do the same in case when quering a customer
+     * account: customer.code=aaa OR customer=aaa
      * <p>
      * To filter a list of related entities by a list of entity codes use "inList" on related entity field. e.g. for quering offer template by sellers: inList sellers=code1,code2
      *
@@ -841,8 +829,7 @@ public class NativePersistenceService extends BaseService {
      * <li>invoice number is not "1578AU": Filter key: ne invoiceNumber. Filter value: 1578AU</li>
      * <li>invoice number is null: Filter key: invoiceNumber. Filter value: IS_NULL</li>
      * <li>invoice number is not empty: Filter key: invoiceNumber. Filter value: IS_NOT_NULL</li>
-     * <li>Invoice date is between 2017-05-01 and 2017-06-01: Filter key: fromRange invoiceDate. Filter value: 2017-05-01 Filter key: toRange invoiceDate. Filter value:
-     * 2017-06-01</li>
+     * <li>Invoice date is between 2017-05-01 and 2017-06-01: Filter key: fromRange invoiceDate. Filter value: 2017-05-01 Filter key: toRange invoiceDate. Filter value: 2017-06-01</li>
      * <li>Date is between creation and update dates: Filter key: minmaxRange audit.created audit.updated. Filter value: 2017-05-25</li>
      * <li>invoice number is any of 158AU, 159KU or 189LL: Filter key: inList invoiceNumber. Filter value: 158AU,159KU,189LL</li>
      * <li>any of param1, param2 or param3 fields contains "energy": Filter key: wildcardOr param1 param2 param3. Filter value: energy</li>
@@ -851,41 +838,40 @@ public class NativePersistenceService extends BaseService {
      * </ul>
      *
      * @param tableName A name of a table to query
-     * @param config    Data filtering, sorting and pagination criteria
-     * @param id        Id field value to explicitly extract data by ID
+     * @param config Data filtering, sorting and pagination criteria
+     * @param id Id field value to explicitly extract data by ID
      * @return Query builder to filter entities according to pagination configuration data.
      */
     public QueryBuilder getQuery(String tableName, PaginationConfiguration config, Long id, Boolean isExport) {
         tableName = addCurrentSchema(tableName);
         Predicate<String> predicate = field -> this.checkAggFunctions(field.toUpperCase().trim());
         List<String> fetchFields = new ArrayList<>();
-        if(config != null && config.getFetchFields() != null) {
+        if (config != null && config.getFetchFields() != null) {
             fetchFields.addAll(config.getFetchFields());
         }
         String aggFields = (config != null && config.getFetchFields() != null) ? aggregationFields(config.getFetchFields(), predicate) : "";
         if (!aggFields.isEmpty()) {
             config.getFetchFields().remove("id");
         }
-        
+
         var rework = new ArrayList<String>();
         rework.addAll(fetchFields.stream().filter(predicate.negate()).collect(Collectors.toList()));
         rework.addAll(fetchFields.stream().filter(predicate).collect(Collectors.toList()));
-        
-        if(config != null) {
+
+        if (config != null) {
             config.setFetchFields(rework);
         }
-        
+
         String fieldsToRetrieve;
         if (fetchFields.isEmpty()) {
             fieldsToRetrieve = "*";
         } else {
             fieldsToRetrieve = retrieveFields(fetchFields, predicate.negate());
-            if(fetchFields.stream().anyMatch(predicate)) {
+            if (fetchFields.stream().anyMatch(predicate)) {
                 fieldsToRetrieve = fieldsToRetrieve + ", {aggregationFields}";
             }
         }
         StringBuilder sql = new StringBuilder("select " + fieldsToRetrieve + " from " + tableName + " a ");
-        sql.append(" ");
         QueryBuilder queryBuilder = new QueryBuilder(sql.toString(), "a");
         AdvancedSettings fieldSeparator = advancedSettingsService.findByCode("standardExports.fieldsSeparator");
         String listAggregationSeparator;
@@ -907,65 +893,60 @@ public class NativePersistenceService extends BaseService {
 
         Class<?> finalEntity = entity;
         fetchFields.stream().filter(predicate).forEach(s -> {
-            
+
         });
 
-        List<String> aggregationFields = fetchFields.stream()
-                                                    .filter(predicate)
-                                                    .map(s -> {
-                                                        String fieldName = extractAggregatedField(s);
-                                                        if(fieldName == null) {
-                                                            return null;
-                                                        }
-                                                        if(s.toLowerCase().startsWith("count(")) {
-                                                            // the dummy field is a workaround to be able to calculate inner joins using queryBuilder as the count need only the collection
-                                                            fieldName+= ".dummy"; 
-                                                        } else if(!fieldName.contains(".")) {
-                                                            throw new BusinessException("Aggregation functions can be used only for values in nested lists");
-                                                        }
+        List<String> aggregationFields = fetchFields.stream().filter(predicate).map(s -> {
+            String fieldName = extractAggregatedField(s);
+            if (fieldName == null) {
+                return null;
+            }
+            if (s.toLowerCase().startsWith("count(")) {
+                // the dummy field is a workaround to be able to calculate inner joins using queryBuilder as the count need only the collection
+                fieldName += ".dummy";
+            } else if (!fieldName.contains(".")) {
+                throw new BusinessException("Aggregation functions can be used only for values in nested lists");
+            }
 
-                                                        // as fieldName contains nested fields, get parent field
-                                                        String parentField = removeLastSegment(fieldName);
+            // as fieldName contains nested fields, get parent field
+            String parentField = removeLastSegment(fieldName);
 
-                                                        String[] parts = parentField.split("\\.");
-                                                        
-                                                        List<String> subFields = new ArrayList<>();
-                                                        StringBuilder sb = new StringBuilder();
+            String[] parts = parentField.split("\\.");
 
-                                                        for (int i = 0; i < parts.length; i++) {
-                                                            if (i > 0) {
-                                                                sb.append(".");
-                                                            }
-                                                            sb.append(parts[i]);
-                                                            subFields.add(sb.toString());
-                                                        }
-                                                        
-                                                        if(subFields.stream().noneMatch(subField -> {
-                                                            Field sf = ReflectionUtils.getField(finalEntity, subField);
-                                                            return sf != null && List.class.isAssignableFrom(sf.getType());
-                                                        })) {
-                                                            String functionName = s.split("\\(")[0];
-                                                            Field f = ReflectionUtils.getField(finalEntity, parentField);
-                                                            assert f != null;
-                                                            throw new BusinessException(String.format("Aggregation function “%s” cannot be applied to “%s” of type “%s”",
-                                                                    functionName, parentField, f.getType().getSimpleName()));
-                                                        }                                                      
+            List<String> subFields = new ArrayList<>();
+            StringBuilder sb = new StringBuilder();
 
-                                                        fieldName = queryBuilder.createExplicitInnerJoinsForAggregation(fieldName);
-                                                        String sToReplace = extractAggregatedField(s);
-                                                        if(s.toLowerCase().startsWith("list(")) {
-                                                            return String.format("string_agg(%s, '%s')", fieldName, listAggregationSeparator);
-                                                        }
-                                                        return s.replaceAll(sToReplace, fieldName.replace(".dummy", ""));
-                                                    })
-                                                    .filter(Objects::nonNull)
-                                                    .collect(Collectors.toList());
+            for (int i = 0; i < parts.length; i++) {
+                if (i > 0) {
+                    sb.append(".");
+                }
+                sb.append(parts[i]);
+                subFields.add(sb.toString());
+            }
+
+            if (subFields.stream().noneMatch(subField -> {
+                Field sf = ReflectionUtils.getField(finalEntity, subField);
+                return sf != null && List.class.isAssignableFrom(sf.getType());
+            })) {
+                String functionName = s.split("\\(")[0];
+                Field f = ReflectionUtils.getField(finalEntity, parentField);
+                assert f != null;
+                throw new BusinessException(String.format("Aggregation function “%s” cannot be applied to “%s” of type “%s”", functionName, parentField, f.getType().getSimpleName()));
+            }
+
+            fieldName = queryBuilder.createExplicitInnerJoinsForAggregation(fieldName);
+            String sToReplace = extractAggregatedField(s);
+            if (s.toLowerCase().startsWith("list(")) {
+                return String.format("string_agg(%s, '%s')", fieldName, listAggregationSeparator);
+            }
+            return s.replaceAll(sToReplace, fieldName.replace(".dummy", ""));
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         queryBuilder.setQ(new StringBuilder(queryBuilder.getSqlStringBuffer().toString().replace("{aggregationFields}", String.join(",", aggregationFields))));
 
         if (id != null) {
             queryBuilder.addSql(" a.id ='" + id + "'");
-            
+
         }
 
         if (config == null) {
@@ -975,10 +956,8 @@ public class NativePersistenceService extends BaseService {
 
         if (filters != null && !filters.isEmpty()) {
             NativeExpressionFactory nativeExpressionFactory = new NativeExpressionFactory(queryBuilder, "a");
-            filters.keySet().stream()
-                    .sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
-                    .filter(key -> filters.get(key) != null)
-                    .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
+            filters.keySet().stream().sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, ".")).filter(key -> filters.get(key) != null)
+                .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
 
         }
 
@@ -1017,8 +996,8 @@ public class NativePersistenceService extends BaseService {
      * Get Query without adding dependencies left join
      *
      * @param tableName Table name
-     * @param config    {@link PaginationConfiguration}
-     * @param id        Id
+     * @param config {@link PaginationConfiguration}
+     * @param id Id
      * @return {@link QueryBuilder}
      */
     public QueryBuilder getQueryWithoutDependencies(String tableName, PaginationConfiguration config, Long id) {
@@ -1049,9 +1028,7 @@ public class NativePersistenceService extends BaseService {
 
         if (filters != null && !filters.isEmpty()) {
             NativeExpressionFactory nativeExpressionFactory = new NativeExpressionFactory(queryBuilder, "a");
-            filters.keySet().stream()
-                    .filter(key -> filters.get(key) != null)
-                    .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
+            filters.keySet().stream().filter(key -> filters.get(key) != null).forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
 
         }
 
@@ -1069,10 +1046,10 @@ public class NativePersistenceService extends BaseService {
     /**
      * Specific getQuery
      *
-     * @param tableName                entity name
+     * @param tableName entity name
      * @param defaultLeftJoinWithAlias if needed, add left join alias when using SQL criteria with OR criteria
-     * @param config                   PaginationConfoguration
-     * @param id                       id
+     * @param config PaginationConfoguration
+     * @param id id
      * @return QueryBuilder
      */
     public QueryBuilder getQuery(String tableName, String defaultLeftJoinWithAlias, PaginationConfiguration config, Long id) {
@@ -1104,10 +1081,8 @@ public class NativePersistenceService extends BaseService {
 
         if (filters != null && !filters.isEmpty()) {
             NativeExpressionFactory nativeExpressionFactory = new NativeExpressionFactory(queryBuilder, "a");
-            filters.keySet().stream()
-                    .sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
-                    .filter(key -> filters.get(key) != null)
-                    .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
+            filters.keySet().stream().sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, ".")).filter(key -> filters.get(key) != null)
+                .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
 
         }
 
@@ -1126,10 +1101,9 @@ public class NativePersistenceService extends BaseService {
         return getAggregateQuery(tableName, config, id, null, null);
     }
 
-    public QueryBuilder getAggregateQuery(String tableName, PaginationConfiguration config, Long id, String extraCondition,
-                                          String leftJoinClause) {
+    public QueryBuilder getAggregateQuery(String tableName, PaginationConfiguration config, Long id, String extraCondition, String leftJoinClause) {
         tableName = addCurrentSchema(tableName);
-        config.setOrderings(new Object[]{});
+        config.setOrderings(new Object[] {});
 
         String fieldsToRetrieve = (config != null && config.getFetchFields() != null) ? retrieveFields(config.getFetchFields(), null) : "";
         if (!fieldsToRetrieve.isEmpty()) {
@@ -1145,11 +1119,9 @@ public class NativePersistenceService extends BaseService {
         }
         QueryBuilder queryBuilder;
         if (leftJoinClause != null) {
-            queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from "
-                    + tableName + " a " + leftJoinClause, "a", entityClass);
+            queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from " + tableName + " a " + leftJoinClause, "a", entityClass);
         } else {
-            queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from "
-                    + tableName + " a ", "a", entityClass);
+            queryBuilder = new QueryBuilder("select " + distinct + " " + buildFields(fieldsToRetrieve, "") + " from " + tableName + " a ", "a", entityClass);
         }
 
         if (id != null) {
@@ -1165,7 +1137,6 @@ public class NativePersistenceService extends BaseService {
         }
         Map<String, Object> filters = config.getFilters();
 
-
         Map<String, Object> cfFilters = PersistenceService.extractCustomFieldsFilters(filters);
         if (MapUtils.isNotEmpty(cfFilters)) {
             filters.putAll(cfFilters);
@@ -1173,19 +1144,16 @@ public class NativePersistenceService extends BaseService {
 
         if (filters != null && !filters.isEmpty()) {
             NativeExpressionFactory nativeExpressionFactory = new ExpressionFactory(queryBuilder, "a");
-            filters.keySet().stream()
-                    .sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
-                    .filter(key -> filters.get(key) != null && !"$OPERATOR".equalsIgnoreCase(key))
-                    .forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
+            filters.keySet().stream().sorted((k1, k2) -> org.apache.commons.lang3.StringUtils.countMatches(k2, ".") - org.apache.commons.lang3.StringUtils.countMatches(k1, "."))
+                .filter(key -> filters.get(key) != null && !"$OPERATOR".equalsIgnoreCase(key)).forEach(key -> nativeExpressionFactory.addFilters(key, filters.get(key)));
             for (String cft : cfFilters.keySet()) {
                 filters.remove(cft);
             }
         }
 
         if (config.getOrderings() != null && config.getOrderings().length == 2) {
-            if (config.getOrderings()[0].equals("id")
-                    && config.getOrderings()[1].equals(PagingAndFiltering.SortOrder.ASCENDING)) {
-                config.setOrderings(new Object[]{});
+            if (config.getOrderings()[0].equals("id") && config.getOrderings()[1].equals(PagingAndFiltering.SortOrder.ASCENDING)) {
+                config.setOrderings(new Object[] {});
             }
         }
 
@@ -1221,60 +1189,50 @@ public class NativePersistenceService extends BaseService {
 
     private String retrieveFields(List<String> fields, Predicate<String> predicate) {
         if (predicate == null) {
-            return fields
-                    .stream()
-                    .map(x -> {
-                        if (x.toLowerCase().trim().contains("->>string"))
-                            return "varcharFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>double"))
-                            return "numericFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>long"))
-                            return "bigIntFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>date"))
-                            return "timestampFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>boolean"))
-                            return "booleanFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>entity"))
-                            return "entityFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (checkAggFunctions(x.toUpperCase().trim()))
-                            return x;
-                        else
-                            return "a." + x;
-                    })
-                    .collect(joining(","));
+            return fields.stream().map(x -> {
+                if (x.toLowerCase().trim().contains("->>string"))
+                    return "varcharFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>double"))
+                    return "numericFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>long"))
+                    return "bigIntFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>date"))
+                    return "timestampFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>boolean"))
+                    return "booleanFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>entity"))
+                    return "entityFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (checkAggFunctions(x.toUpperCase().trim()))
+                    return x;
+                else
+                    return "a." + x;
+            }).collect(joining(","));
         } else {
-            return fields
-                    .stream()
-                    .filter(predicate)
-                    .map(x -> {
-                        if (x.toLowerCase().trim().contains("->>string"))
-                            return "varcharFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>double"))
-                            return "numericFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>long"))
-                            return "bigIntFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>date"))
-                            return "timestampFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>boolean"))
-                            return "booleanFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else if (x.toLowerCase().trim().contains("->>entity"))
-                            return "entityFromJson(a.cfValues," + x.split("->>")[0] + "," + x.split("->>")[1] + ")";
-                        else
-                            return "a." + x;
-                    })
-                    .collect(joining(","));
+            return fields.stream().filter(predicate).map(x -> {
+                if (x.toLowerCase().trim().contains("->>string"))
+                    return "varcharFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>double"))
+                    return "numericFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>long"))
+                    return "bigIntFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>date"))
+                    return "timestampFromJson(a.cfValuesv,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>boolean"))
+                    return "booleanFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else if (x.toLowerCase().trim().contains("->>entity"))
+                    return "entityFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
+                else
+                    return "a." + x;
+            }).collect(joining(","));
         }
     }
 
     private String aggregationFields(List<String> fields, Predicate<String> predicate) {
-        return fields.stream()
-                .filter(predicate)
-                .collect(joining(","));
+        return fields.stream().filter(predicate).collect(joining(","));
     }
 
     private boolean checkAggFunctions(String field) {
-        if (field.startsWith("SUM(") || field.startsWith("COUNT(") || field.startsWith("AVG(")
-                || field.startsWith("MAX(") || field.startsWith("MIN(") || field.startsWith("COALESCE(SUM(")
+        if (field.startsWith("SUM(") || field.startsWith("COUNT(") || field.startsWith("AVG(") || field.startsWith("MAX(") || field.startsWith("MIN(") || field.startsWith("COALESCE(SUM(")
                 || field.startsWith("STRING_AGG_LONG") || field.startsWith("LIST") || field.startsWith("TO_CHAR(") || field.startsWith("CAST(")) {
             return true;
         } else {
@@ -1286,7 +1244,7 @@ public class NativePersistenceService extends BaseService {
      * Load and return the list of the records IN A MAP format from database according to sorting and paging information in {@link PaginationConfiguration} object.
      *
      * @param tableName A name of a table to query
-     * @param config    Data filtering, sorting and pagination criteria
+     * @param config Data filtering, sorting and pagination criteria
      * @return A list of map of values for each record
      */
     @SuppressWarnings("unchecked")
@@ -1296,7 +1254,7 @@ public class NativePersistenceService extends BaseService {
 
         tableName = addCurrentSchema(tableName);
         QueryBuilder queryBuilder = getQuery(tableName, config, null, Boolean.FALSE);
-        SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
+        NativeQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
 
         if (config.isCacheable()) {
 
@@ -1312,12 +1270,12 @@ public class NativePersistenceService extends BaseService {
                     if (fieldType != null) {
                         query.addScalar(fieldName, fieldType.getHibernateType());
                     } else {
-                        query.addScalar(fieldName, new StringType());
+                        query.addScalar(fieldName, StandardBasicTypes.STRING);
                     }
                 }
             }
         }
-        return query.setFlushMode(FlushMode.COMMIT).list();
+        return query.setFlushMode(FlushModeType.COMMIT).list();
     }
 
     /**
@@ -1325,14 +1283,14 @@ public class NativePersistenceService extends BaseService {
      * In case a list of fields is provided in search and paging configuration, only that list of fields will be retrieved. Otherwise all fields will be retrieved.
      *
      * @param tableName A name of a table to query
-     * @param config    Data filtering, sorting and pagination criteria
+     * @param config Data filtering, sorting and pagination criteria
      * @return A list of Object[] values for each record. A full list of fields or only the ones specified in a list of fields in search and paging configuration
      */
-    @SuppressWarnings({"deprecation", "rawtypes"})
+    @SuppressWarnings({ "deprecation", "rawtypes" })
     public List listAsObjects(String tableName, PaginationConfiguration config) {
         tableName = addCurrentSchema(tableName);
         QueryBuilder queryBuilder = getQuery(tableName, config, null, Boolean.FALSE);
-        SQLQuery query = queryBuilder.getNativeQuery(getEntityManager(), false);
+        NativeQuery query = queryBuilder.getNativeQuery(getEntityManager(), false);
 
         if (config.isCacheable()) {
 
@@ -1348,23 +1306,23 @@ public class NativePersistenceService extends BaseService {
                     if (fieldType != null) {
                         query.addScalar(fieldName, fieldType.getHibernateType());
                     } else {
-                        query.addScalar(fieldName, new StringType());
+                        query.addScalar(fieldName, StandardBasicTypes.STRING);
                     }
                 }
             }
         }
-        return query.setFlushMode(FlushMode.COMMIT).list();
+        return query.setFlushMode(FlushModeType.COMMIT).list();
     }
 
     /**
      * Execute a search query with optional parameters
      *
-     * @param sql        A query to execute
+     * @param sql A query to execute
      * @param maxResults Number of records to retrieve. Optional.
      * @param parameters Query parameters
      * @return A list of Object[] values for each record
      */
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     public List listAsObjects(String sql, Integer maxResults, Map<String, Object> parameters) {
 
         Query query = getEntityManager().createNativeQuery(sql);
@@ -1386,7 +1344,7 @@ public class NativePersistenceService extends BaseService {
      * Count number of records in a database table
      *
      * @param tableName A name of a table to query
-     * @param config    Data filtering, sorting and pagination criteria
+     * @param config Data filtering, sorting and pagination criteria
      * @return Number of entities.
      */
     public long count(String tableName, PaginationConfiguration config) {
@@ -1409,7 +1367,7 @@ public class NativePersistenceService extends BaseService {
      * Create new or update existing custom table record value
      *
      * @param tableName A name of a table to query
-     * @param values    Values to save
+     * @param values Values to save
      * @throws BusinessException General exception
      */
     public void createOrUpdate(String tableName, List<Map<String, Object>> values) throws BusinessException {
@@ -1436,24 +1394,24 @@ public class NativePersistenceService extends BaseService {
         return emWrapper.getEntityManager();
 
         // Original comment: RE #5414 SQL request to create a new CT on second tenant issue
-        //return entityManagerProvider.getEntityManager().getEntityManager();
+        // return entityManagerProvider.getEntityManager().getEntityManager();
     }
 
     /**
      * Convert value of unknown data type to a target data type. A value of type list is considered as already converted value, as would come only from WS.
      *
-     * @param value        Value to convert
-     * @param targetClass  Target data type class to convert to
-     * @param expectedList Is return value expected to be a list. If value is not a list and is a string a value will be parsed as comma separated string and each value will be
-     *                     converted accordingly. If a single value is passed, it will be added to a list.
-     * @param datePatterns Optional. Date patterns to apply to a date type field. Conversion is attempted in that order until a valid date is matched.If no values are provided, a
-     *                     standard date and time and then date only patterns will be applied.
+     * @param value Value to convert
+     * @param targetClass Target data type class to convert to
+     * @param expectedList Is return value expected to be a list. If value is not a list and is a string a value will be parsed as comma separated string and each value will be converted accordingly. If a single value is
+     *        passed, it will be added to a list.
+     * @param datePatterns Optional. Date patterns to apply to a date type field. Conversion is attempted in that order until a valid date is matched.If no values are provided, a standard date and time and then date only
+     *        patterns will be applied.
      * @param cft
      * @param regExp
      * @return A converted data type
      * @throws ValidationException Value can not be cast to a target class
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Object castValue(Object value, Class targetClass, boolean expectedList, String[] datePatterns, CustomFieldTemplate cft) throws ValidationException {
 
         // log.debug("Casting {} of class {} target class {} expected list {} is array {}", value, value != null ? value.getClass() : null, targetClass, expectedList,
@@ -1634,16 +1592,16 @@ public class NativePersistenceService extends BaseService {
 
     private Object extractString(Object value, Class targetClass, CustomFieldTemplate cft) {
         if (targetClass == String.class) {
-            if (cft.getRegExp() != null) {
+            if (!StringUtils.isBlank(cft.getRegExp())) {
                 final Pattern pattern = Pattern.compile(cft.getRegExp());
                 if (!pattern.matcher((String) value).matches()) {
-                    throw new ValidationException("value of String " + value + " not accepted for regexp" + pattern.toString());
+                    throw new ValidationException("Value of String " + value + " does not match for regexp " + pattern.toString());
                 }
             }
             if (CustomFieldTypeEnum.LIST.equals(cft.getFieldType())) {
                 Map<String, String> listValues = cft.getListValuesSorted();
                 if (!listValues.containsKey(value)) {
-                    throw new ValidationException("value " + value + " is not accepted as value for enum " + cft.getCode());
+                    throw new ValidationException("Value " + value + " is not accepted as value for enum " + cft.getCode());
                 }
             }
         } else if (value instanceof java.sql.Timestamp) {
@@ -1667,12 +1625,31 @@ public class NativePersistenceService extends BaseService {
         }
     }
 
-    public String getTableNameForClass(Class entityClass) {
-        SessionFactory sessionFactory = ((Session) getEntityManager().getDelegate()).getSessionFactory();
-        ClassMetadata classMetadata = sessionFactory.getClassMetadata(entityClass);
-        SessionFactoryImpl sessionFactoryImpl = (SessionFactoryImpl) sessionFactory;
-        AbstractEntityPersister entityPersister = (AbstractEntityPersister) sessionFactoryImpl.getEntityPersister(classMetadata.getEntityName());
-        return entityPersister.getTableName();
+    public <T> String getTableNameForClass(Class<T> entityClass) {
+        /*
+         * Check if the specified class is present in the metamodel. Throws IllegalArgumentException if not.
+         */
+        Metamodel meta = getEntityManager().getMetamodel();
+        EntityType<T> entityType = meta.entity(entityClass);
+
+        // Check whether @Table annotation is present on the class.
+        Table tableAnnottation = null;
+
+        Class<?> clazz = entityClass;
+
+        do {
+            tableAnnottation = clazz.getAnnotation(Table.class);
+            clazz = clazz.getSuperclass();
+        } while (tableAnnottation == null && !clazz.equals(Object.class));
+
+        String tableName = (tableAnnottation == null) ? entityType.getName().toLowerCase() : tableAnnottation.name();
+        return tableName;
+
+        // Code that worked with hibernate 5.x
+        // ClassMetadata classMetadata = sessionFactory.getClassMetadata(entityClass);
+        // SessionFactoryImpl sessionFactoryImpl = (SessionFactoryImpl) sessionFactory;
+        // AbstractEntityPersister entityPersister = (AbstractEntityPersister) sessionFactoryImpl.getEntityPersister(classMetadata.getEntityName());
+        // return entityPersister.getTableName();
     }
 
     public boolean validateRecordExistance(CustomFieldTemplate field, Long id) {
@@ -1700,9 +1677,9 @@ public class NativePersistenceService extends BaseService {
         tableName = addCurrentSchema(tableName);
         Session session = getEntityManager().unwrap(Session.class);
         StringBuilder selectQuery = new StringBuilder("select ").append(FIELD_ID).append(" from ").append(tableName).append(" e where ").append(FIELD_ID).append("=:id");
-        SQLQuery query = session.createSQLQuery(selectQuery.toString());
+        NativeQuery query = session.createNativeQuery(selectQuery.toString());
         query.setParameter("id", id);
-        return query.setFlushMode(FlushMode.COMMIT).uniqueResult() != null;
+        return query.setFlushMode(FlushModeType.COMMIT).uniqueResult() != null;
     }
 
     @SuppressWarnings("unchecked")
@@ -1710,9 +1687,9 @@ public class NativePersistenceService extends BaseService {
         tableName = addCurrentSchema(tableName);
         Session session = getEntityManager().unwrap(Session.class);
         StringBuilder selectQuery = new StringBuilder("select ").append(FIELD_ID).append(" from ").append(tableName).append(" e where ").append(FIELD_ID).append(" in (:ids)");
-        SQLQuery query = session.createSQLQuery(selectQuery.toString());
+        NativeQuery query = session.createNativeQuery(selectQuery.toString());
         query.setParameterList("ids", ids);
-        return (List<BigInteger>) query.setFlushMode(FlushMode.COMMIT).list();
+        return (List<BigInteger>) query.setFlushMode(FlushModeType.COMMIT).list();
     }
 
     /**
@@ -1729,7 +1706,7 @@ public class NativePersistenceService extends BaseService {
     /**
      * Add a DB schema name to the table if not using a main provider
      *
-     * @param tableName    DB table name
+     * @param tableName DB table name
      * @param providerCode Provider code
      * @return DB Table name prefixed with a schema name
      */
@@ -1788,12 +1765,10 @@ public class NativePersistenceService extends BaseService {
     }
 
     private GenericPagingAndFiltering buildGenericPagingAndFiltering(ReportQuery reportQuery) {
-        Builder builder = ImmutableGenericPagingAndFiltering.builder()
-                .filters((Map<String, Object>) reportQuery.getAdvancedQuery().getOrDefault("filters", new HashMap<>()))
-                .groupBy((List<String>) reportQuery.getAdvancedQuery().getOrDefault("groupBy", new ArrayList<>()))
-                .nestedEntities((List<String>) reportQuery.getAdvancedQuery().getOrDefault("nestedEntities", new ArrayList<>()))
-                .genericFields((List<String>) reportQuery.getAdvancedQuery().getOrDefault("genericFields", new ArrayList<>()))
-                .having((List<String>) reportQuery.getAdvancedQuery().getOrDefault("having", new ArrayList<>()));
+        Builder builder = ImmutableGenericPagingAndFiltering.builder().filters((Map<String, Object>) reportQuery.getAdvancedQuery().getOrDefault("filters", new HashMap<>()))
+            .groupBy((List<String>) reportQuery.getAdvancedQuery().getOrDefault("groupBy", new ArrayList<>()))
+            .nestedEntities((List<String>) reportQuery.getAdvancedQuery().getOrDefault("nestedEntities", new ArrayList<>()))
+            .genericFields((List<String>) reportQuery.getAdvancedQuery().getOrDefault("genericFields", new ArrayList<>())).having((List<String>) reportQuery.getAdvancedQuery().getOrDefault("having", new ArrayList<>()));
         String sortBy = (String) reportQuery.getAdvancedQuery().get("sortBy");
         if (org.meveo.commons.utils.StringUtils.isNotBlank(sortBy)) {
             builder.sortBy(sortBy);
@@ -1808,8 +1783,7 @@ public class NativePersistenceService extends BaseService {
     }
 
     public boolean isAggregationField(String field) {
-        return field.startsWith("SUM(") || field.startsWith("COUNT(") || field.startsWith("AVG(")
-                || field.startsWith("MAX(") || field.startsWith("MIN(") || field.startsWith("COALESCE(SUM(");
+        return field.startsWith("SUM(") || field.startsWith("COUNT(") || field.startsWith("AVG(") || field.startsWith("MAX(") || field.startsWith("MIN(") || field.startsWith("COALESCE(SUM(");
     }
 
     private boolean isCustomField(String field) {
@@ -1817,17 +1791,11 @@ public class NativePersistenceService extends BaseService {
     }
 
     public boolean isCustomFieldQuery(Set<String> genericFields) {
-        return genericFields.stream()
-                .filter(genericField -> isCustomField(genericField))
-                .findFirst()
-                .isPresent();
+        return genericFields.stream().filter(genericField -> isCustomField(genericField)).findFirst().isPresent();
     }
 
     private boolean isAggregationQueries(Set<String> genericFields) {
-        return genericFields.stream()
-                .filter(genericField -> isAggregationField(genericField))
-                .findFirst()
-                .isPresent();
+        return genericFields.stream().filter(genericField -> isAggregationField(genericField)).findFirst().isPresent();
     }
 
     /**
@@ -1889,8 +1857,8 @@ public class NativePersistenceService extends BaseService {
      * Execute the provided query builder with the provided filters
      *
      * @param updateQueryBuilder the update query builder
-     * @param entityClassName    the entity class name
-     * @param filters            the filters
+     * @param entityClassName the entity class name
+     * @param filters the filters
      */
     public void update(QueryBuilder updateQueryBuilder, String entityClassName, Map<String, Object> filters) {
         if (updateQueryBuilder != null) {
@@ -1915,7 +1883,7 @@ public class NativePersistenceService extends BaseService {
      * Execute the provided update query with the provided ids
      *
      * @param updateQuery the update query to be executed
-     * @param ids         the ids of records to be updated
+     * @param ids the ids of records to be updated
      * @return the number of updated records
      */
     public int update(StringBuilder updateQuery, List<Long> ids) {
@@ -1925,9 +1893,7 @@ public class NativePersistenceService extends BaseService {
             List<List<Long>> listOfSubListIds = partition(ids, maxValue);
             listOfSubListIds.forEach(sublist -> {
                 if (sublist != null && !sublist.isEmpty()) {
-                    updateQuery.append(" WHERE id in (")
-                            .append(sublist.stream().map(String::valueOf).collect(joining(",")))
-                            .append(")");
+                    updateQuery.append(" WHERE id in (").append(sublist.stream().map(String::valueOf).collect(joining(","))).append(")");
                     updated.addAndGet(getEntityManager().createQuery(updateQuery.toString()).executeUpdate());
                 }
             });

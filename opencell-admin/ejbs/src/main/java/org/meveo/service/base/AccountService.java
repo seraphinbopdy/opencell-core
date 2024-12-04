@@ -23,8 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.AccountEntity;
@@ -33,6 +31,8 @@ import org.meveo.model.billing.CounterPeriod;
 import org.meveo.model.shared.Address;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.model.shared.Name;
+
+import jakarta.persistence.Query;
 
 /**
  * @author phung

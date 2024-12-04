@@ -23,10 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ext.Provider;
 
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
@@ -55,7 +56,7 @@ public class RESTCorsResponseFilter implements ContainerResponseFilter {
         if (originHeader != null && !originHeader.isEmpty()) {
             if (ALLOWED_ORIGINS.isEmpty()) {
                 // If no cors config is defined in properties then allow all origins
-                responseCtx.getHeaders().add("Access-Control-Allow-Origin", "*");
+            responseCtx.getHeaders().add("Access-Control-Allow-Origin", "*");
                 // add others necessary CORS headers to the response
                 addOthersCORSHeaders(responseCtx);
 
@@ -73,8 +74,8 @@ public class RESTCorsResponseFilter implements ContainerResponseFilter {
     }
 
     private void addOthersCORSHeaders(ContainerResponseContext responseCtx) {
-        responseCtx.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH");
-        responseCtx.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
-        responseCtx.getHeaders().add("Access-Control-Allow-Credentials", true);
+            responseCtx.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH");
+            responseCtx.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            responseCtx.getHeaders().add("Access-Control-Allow-Credentials", true);
+        }
     }
-}

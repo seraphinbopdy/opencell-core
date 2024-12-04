@@ -21,10 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityGraph;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.WalletCacheContainerProvider;
 import org.meveo.commons.utils.QueryBuilder;
@@ -38,7 +34,11 @@ import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.catalog.ServiceChargeTemplateUsage;
 import org.meveo.model.catalog.WalletTemplate;
+import org.meveo.model.rating.EDR;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author khalid HORRI
@@ -168,4 +168,16 @@ public class UsageChargeInstanceService extends BusinessService<UsageChargeInsta
                                 (ci.getTerminationDate() == null || ci.getTerminationDate().after(date))))
                 .collect(Collectors.toList());
     }
+    
+    /**
+     * Get a list of usage charge instances valid for a given subscription and a date, and matching edrs params (1 to 4)
+     *
+     * @param EDR edr
+     * @return An ordered list by priority (ascended) of usage charge instances
+     */
+	public List<UsageChargeInstance> getUsageChargeInstancesValidForDateBySubscriptionIdAndParams( EDR edr) {
+        return getEntityManager().createNamedQuery("UsageChargeInstance.getActiveUsageChargesByDateAndSubscription", UsageChargeInstance.class)
+        		.setParameter("param1", edr.getParameter1()).setParameter("param2", edr.getParameter2()).setParameter("param3", edr.getParameter3()).setParameter("param4", edr.getParameter4())
+        		.setParameter("date", edr.getEventDate()).setParameter("subscriptionId", edr.getSubscription().getId()).getResultList();
+	}
 }

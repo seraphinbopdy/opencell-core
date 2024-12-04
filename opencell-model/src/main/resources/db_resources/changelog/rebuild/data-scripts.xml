@@ -333,4 +333,146 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </insert>
     </changeSet>
     
+
+    <changeSet id="INTRD-22954_20240521-scripts" author="ZBariki">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq" />
+            <column name="code" value="org.meveo.service.script.payment.ApplyChargeScript" />
+            <column name="script">
+                <![CDATA[package org.meveo.service.script.payment;
+                public class ApplyChargeScript extends Script {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="version" valueNumeric="0" />
+            <column name="src_type" value="JAVA" />
+            <column name="description" value="Applies a charge to a subscription of the billing account"/>
+            <column name="description_i18n">
+                <![CDATA[{"FRA":"<p> Applique un frais à un abonnement du compte de facturation. </p><p>Vous devrez sélectionner une charge exceptionnelle (type “autre”) à appliquer, avec la possibilité de remplacer le montant (cela générera une erreur si la charge ne permettent pas la surcharge du montant) et le libellé.</p><p>Nous devrons sélectionner un abonnement actif auquel appliquer le frais. Par défaut, nous utiliserons l&apos;abonnement actif le plus récent facturé sur les factures impayées. Vous pouvez fournir un filtre supplémentaire pour affiner la liste des abonnements. Ce filtre est en fait une expression qui doit s&apos;évaluée en une chaîne qui sera comparée au code des abonnements dans la portée de recherche d&apos;abonnement, à l&apos;aide de l&apos;opérateur fourni. L’expression aura accès au rejet de paiement, au paiement, aux entités du périmètre (liste des factures, compte de facturation, compte client) et à la liste des abonnements dans le périmètre. Si aucun abonnement actif n&apos;est trouvé, le script échouera et une erreur sera remontée.</p>", "ENG":"<p>Applies a charge to a subscription of the billing account.</p><p>For the invoice to be valid, tested amount must pass the test.</p><p>You will have to select a one shot charge (type “other”) to apply, with the ability to override the amount (will raise an error if the charge doesn’t allow amount override) and label.</p> <p>We will need to select an active subscription to apply the charge to. By default, we will use the most recent active subscription invoiced on the unpaid invoices. You can provide an additional filter to narrow down the list of subscriptions. This filter is actually an expression that must evaluate to a string that will be compared to the code of subscriptions in the subscription search scope, using the provided operator. Expression will have access to the rejected payment, the payment, and the scope entities (list of invoices, billing account, customer account) and the list of subscriptions in the scope. If no active subscription is found, the script will fail and an error will be raised.</p>"}]]>
+            </column>
+            <column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')" />
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="chargeTemplate" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+            <column name="description_i18n" value='{"FRA":"Charge à appliquer","ENG":"Charge to apply"}'/>
+            <column name="class_name" value="org.meveo.model.catalog.OneShotChargeTemplate" />
+            <column name="mandatory" valueNumeric="1" />
+            <column name="filters" value ='{"oneShotChargeTemplateType" : "OTHER", "status" : "ACTIVE"}'>
+            </column>
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="amountOverride" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+            <column name="description_i18n" value='{"FRA":"Surcharge du montant","ENG":"Amount override"}'/>
+            <column name="class_name" value="java.math.BigDecimal" />
+            <column name="mandatory" valueNumeric="0" />
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="descriptionOverride" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+            <column name="description_i18n" value='{"FRA":"Surcharge du libellé de la charge","ENG":"Charge label override"}'/>
+            <column name="mandatory" valueNumeric="0" />
+            <column name="class_name" value="java.lang.String" />
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="subscriptionSearchScope" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+            <column name="description_i18n" value='{"FRA":"Périmètre de la recherche de souscription","ENG":"Subscription search scope"}'/>
+            <column name="mandatory" valueNumeric="0" />
+            <column name="class_name" value="java.lang.String" />
+            <column name="collection" valueNumeric="1" />
+            <column name="allowed_values" value="invoices|billing accounts|customer account" />
+            <column name="default_value" value="invoices" />
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="subscriptionSelection" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+            <column name="description_i18n" value='{"FRA":"Selection de la souscription","ENG":"Subscription selection"}'/>
+            <column name="mandatory" valueNumeric="0" />
+            <column name="class_name" value="java.lang.String" />
+            <column name="collection" valueNumeric="1" />
+            <column name="allowed_values" value="oldest|newest" />
+            <column name="default_value" value="newest" />
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="subscriptionFilter" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+            <column name="description_i18n" value='{"FRA":"Filtre code de souscription","ENG":"Subscription code filter"}'/>
+            <column name="mandatory" valueNumeric="0" />
+            <column name="class_name" value="java.lang.String" />
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="subscriptionOperator" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+            <column name="description_i18n" value='{"FRA":"Opérateur du filtre de souscription (insensible à la casse)","ENG":"Subscription filter operator (case insensitive)"}'/>
+            <column name="mandatory" valueNumeric="0" />
+            <column name="class_name" value="java.lang.String" />
+            <column name="collection" valueNumeric="1" />
+            <column name="allowed_values" value="equals|begins with|contains|ends with" />
+            <column name="default_value" value="equals" />
+        </insert>
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="code" value="generateRTs" />
+            <column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.payment.ApplyChargeScript')" />
+            <column name="description_i18n" value='{"FRA":"Générer l’élément valorisé (de manière à ce que la charge soit immédiatement facturable) ?","ENG":"Generate rated item (so the charge will be ready for invoicing)?"}'/>
+            <column name="mandatory" valueNumeric="0" />
+            <column name="class_name" value="java.lang.Boolean" />
+            <column name="default_value" value="true" />
+        </insert>
+    </changeSet>
+    
+    
+    <changeSet id="#INTRD-21018_20240723-scripts" author="ZakariaB">
+        <insert tableName="meveo_script_instance">
+            <column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+            <column name="code" value="org.meveo.service.script.EnterLitigation"/>
+            <column name="script">
+                <![CDATA[package org.meveo.service.script;
+ public class EnterLitigation extends EnterLitigationScript {}]]>
+            </column>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="src_type" value="JAVA"/>
+            <column name="description" value="This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason."/>
+            <column name="description_i18n">
+                <![CDATA[{"ENG":"This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason.", "FRA":"Cette action passera inconditionnellement les factures liées au rejet de paiement en litige, avec le motif fourni."}]]>
+            </column>
+            <column name="script_instance_cat_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"/>
+        </insert>
+
+        <insert tableName="meveo_script_parameter">
+            <column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="code" value="litigationReason"/>
+            <column name="description_i18n" value='{"FRA":"Motif de mise en litige","ENG":"Litigation reason"}'/>
+            <column name="mandatory" valueNumeric="1"/>
+            <column name="class_name" value="java.lang.String"/>
+            <column name="default_value" value=""/>
+            <column name="values_separator" value="\|"/>
+            <column name="collection" valueNumeric="0"/>
+            <column name="script_instance_id"
+                    valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.EnterLitigation')"/>
+        </insert>
+    </changeSet>
+        
 </databaseChangeLog>

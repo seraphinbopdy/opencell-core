@@ -20,24 +20,25 @@ package org.meveo.model.catalog;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 
 /**
  * Unit Of Measure
@@ -48,114 +49,109 @@ import org.meveo.model.ExportIdentifier;
 @Cacheable
 @ExportIdentifier({ "code" })
 @Table(name = "cat_unit_of_measure", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-		@Parameter(name = "sequence_name", value = "cat_unit_of_measure_seq"), })
-@NamedQueries({
-		@NamedQuery(name = "unitOfMeasure.listBaseUnits", query = "from UnitOfMeasure UOM where UOM.parentUnitOfMeasure is null"),
-		@NamedQuery(name = "unitOfMeasure.listChildUnits", query = "from UnitOfMeasure UOM where UOM.parentUnitOfMeasure=:parentUnitOfMeasure") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_unit_of_measure_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "unitOfMeasure.listBaseUnits", query = "select UOM from UnitOfMeasure UOM where UOM.parentUnitOfMeasure is null"),
+        @NamedQuery(name = "unitOfMeasure.listChildUnits", query = "select UOM from UnitOfMeasure UOM where UOM.parentUnitOfMeasure=:parentUnitOfMeasure") })
 public class UnitOfMeasure extends BusinessEntity {
 
-	private static final long serialVersionUID = 1278336655583944747L;
+    private static final long serialVersionUID = 1278336655583944747L;
 
-	/**
-	 * symbol
-	 */
-	@Column(name = "symbol", length = 100)
-	@Size(max = 100)
-	private String symbol;
+    /**
+     * symbol
+     */
+    @Column(name = "symbol", length = 100)
+    @Size(max = 100)
+    private String symbol;
 
-	/**
-	 * Translated descriptions in JSON format with language code as a key and
-	 * translated description as a value
-	 */
-    @Type(type = "json")
+    /**
+     * Translated descriptions in JSON format with language code as a key and translated description as a value
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
-	private Map<String, String> descriptionI18n;
+    private Map<String, String> descriptionI18n;
 
-	/**
-	 * multiplicator
-	 */
-	@Column(name = "multiplicator")
-	private Long multiplicator = 1l;
+    /**
+     * multiplicator
+     */
+    @Column(name = "multiplicator")
+    private Long multiplicator = 1l;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "parent_id")
-	private UnitOfMeasure parentUnitOfMeasure;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private UnitOfMeasure parentUnitOfMeasure;
 
-	public UnitOfMeasure() {
+    public UnitOfMeasure() {
 
-	}
+    }
 
-	public UnitOfMeasure(String code, String symbol) {
-		this.code = code;
-		this.symbol = symbol;
-	}
+    public UnitOfMeasure(String code, String symbol) {
+        this.code = code;
+        this.symbol = symbol;
+    }
 
-	public String getSymbol() {
-		return symbol;
-	}
+    public String getSymbol() {
+        return symbol;
+    }
 
-	public void setSymbol(String symbol) {
-		this.symbol = symbol;
-	}
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
 
-	public Map<String, String> getDescriptionI18n() {
-		return descriptionI18n;
-	}
+    public Map<String, String> getDescriptionI18n() {
+        return descriptionI18n;
+    }
 
-	public void setDescriptionI18n(Map<String, String> descriptionI18n) {
-		this.descriptionI18n = descriptionI18n;
-	}
+    public void setDescriptionI18n(Map<String, String> descriptionI18n) {
+        this.descriptionI18n = descriptionI18n;
+    }
 
-	public Long getMultiplicator() {
-		return multiplicator;
-	}
+    public Long getMultiplicator() {
+        return multiplicator;
+    }
 
-	public void setMultiplicator(Long multiplicator) {
-		this.multiplicator = multiplicator;
-	}
+    public void setMultiplicator(Long multiplicator) {
+        this.multiplicator = multiplicator;
+    }
 
-	public String getDescriptionNotNull() {
-		return StringUtils.isBlank(super.getDescription()) ? getCode() : super.getDescription();
-	}
+    public String getDescriptionNotNull() {
+        return StringUtils.isBlank(super.getDescription()) ? getCode() : super.getDescription();
+    }
 
-	/**
-	 * Instantiate descriptionI18n field if it is null. NOTE: do not use this method
-	 * unless you have an intention to modify it's value, as entity will be marked
-	 * dirty and record will be updated in DB
-	 *
-	 * @return descriptionI18n value or instantiated descriptionI18n field value
-	 */
-	public Map<String, String> getDescriptionI18nNullSafe() {
-		if (descriptionI18n == null) {
-			descriptionI18n = new HashMap<>();
-		}
-		return descriptionI18n;
-	}
+    /**
+     * Instantiate descriptionI18n field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record will be updated in DB
+     *
+     * @return descriptionI18n value or instantiated descriptionI18n field value
+     */
+    public Map<String, String> getDescriptionI18nNullSafe() {
+        if (descriptionI18n == null) {
+            descriptionI18n = new HashMap<>();
+        }
+        return descriptionI18n;
+    }
 
-	public UnitOfMeasure getParentUnitOfMeasure() {
-		return parentUnitOfMeasure;
-	}
+    public UnitOfMeasure getParentUnitOfMeasure() {
+        return parentUnitOfMeasure;
+    }
 
-	public void setParentUnitOfMeasure(UnitOfMeasure parentUnitOfMeasure) {
-		this.parentUnitOfMeasure = parentUnitOfMeasure;
-	}
+    public void setParentUnitOfMeasure(UnitOfMeasure parentUnitOfMeasure) {
+        this.parentUnitOfMeasure = parentUnitOfMeasure;
+    }
 
-	public boolean isCompatibleWith(UnitOfMeasure ratingUnitOfMeasure) {
-		if (ratingUnitOfMeasure != null) {
-			UnitOfMeasure ratingParentUOM = ratingUnitOfMeasure.getParentUnitOfMeasure();
-			UnitOfMeasure parentUOM = this.getParentUnitOfMeasure();
-			if (ratingParentUOM != null && (ratingParentUOM.equals(this) || ratingParentUOM.equals(parentUOM))) {
-				return true;
-			} else {
-				return parentUOM != null && parentUOM.equals(ratingUnitOfMeasure);
-			}
-		}
-		return false;
-	}
+    public boolean isCompatibleWith(UnitOfMeasure ratingUnitOfMeasure) {
+        if (ratingUnitOfMeasure != null) {
+            UnitOfMeasure ratingParentUOM = ratingUnitOfMeasure.getParentUnitOfMeasure();
+            UnitOfMeasure parentUOM = this.getParentUnitOfMeasure();
+            if (ratingParentUOM != null && (ratingParentUOM.equals(this) || ratingParentUOM.equals(parentUOM))) {
+                return true;
+            } else {
+                return parentUOM != null && parentUOM.equals(ratingUnitOfMeasure);
+            }
+        }
+        return false;
+    }
 
-	public boolean isBaseUnit() {
-		return this.parentUnitOfMeasure == null;
-	}
+    public boolean isBaseUnit() {
+        return this.parentUnitOfMeasure == null;
+    }
 
 }

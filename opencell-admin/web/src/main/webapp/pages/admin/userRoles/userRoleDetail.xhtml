@@ -1,11 +1,9 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html"
 	xmlns:hftl="http://hftl.org" xmlns:p="http://primefaces.org/ui" xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags" template="/layout/template.xhtml">
 
-	<ui:define name="metadata">
 		<f:metadata>
 			<f:viewParam name="objectId" value="#{userRoleBean.objectId}" />
 		</f:metadata>
-	</ui:define>
 
 	<ui:define name="body">
 		<h:form id="crumbmenuForm">
@@ -43,15 +41,15 @@
 								<f:facet name="header">
 									<h:outputText value="#{messages['commons.actions']}" />
 								</f:facet>
-								<p:commandButton action="#{userRoleBean.deleteSecuredEntity(securedEntity)}" rendered="#{userRoleBean.canUserUpdateEntity()}" icon="ui-icon-trash"
+								<p:commandButton action="#{userRoleBean.deleteSecuredEntity(securedEntity)}" rendered="#{userRoleBean.canUserUpdateEntity()}" icon="pi pi-trash"
 									update=":roleFormId:tabView:selectedEntitiesPanel" />
 
-								<p:commandButton icon="ui-icon-circle-check" rendered="#{securedEntity.disabled and userRoleBean.canUserUpdateEntity()}"
+								<p:commandButton icon="pi pi-check-circle" rendered="#{securedEntity.disabled and userRoleBean.canUserUpdateEntity()}"
 									action="#{userRoleBean.enableOrDisable(securedEntity, false)}" update=":roleFormId:tabView:selectedEntitiesPanel" process="@this">
 									<p:confirm header="#{messages['commons.enable']}" message="#{messages['commons.confirmEnable']}" />
 								</p:commandButton>
 
-								<p:commandButton icon="ui-icon-circle-close" rendered="#{!securedEntity.disabled and userRoleBean.canUserUpdateEntity()}"
+								<p:commandButton icon="pi pi-stop-circle" rendered="#{!securedEntity.disabled and userRoleBean.canUserUpdateEntity()}"
 									action="#{userRoleBean.enableOrDisable(securedEntity, true)}" update=":roleFormId:tabView:selectedEntitiesPanel" process="@this">
 									<p:confirm header="#{messages['commons.disable']}" message="#{messages['commons.confirmDisable']}" />
 								</p:commandButton>
@@ -76,7 +74,7 @@
 											<p:selectOneMenu id="securedEntityType" value="#{userRoleBean.securedEntityType}">
 												<f:selectItem itemLabel="" />
 												<f:selectItems value="#{userRoleBean.securedEntityTypes.entrySet()}" var="item" itemLabel="#{item.key}" itemValue="#{item.value}" />
-												<p:ajax listener="#{userRoleBean.updateSelectedAccountBean}" update=":#{p:component('securedEntitiesDialogPanel')}" />
+												<p:ajax listener="#{userRoleBean.updateSelectedAccountBean}" update="@([id$=securedEntitiesDialogPanel])" />
 											</p:selectOneMenu>
 										</hftl:decorateFormField>
 										<hftl:decorateFormField fieldId="codeSearchField" label="#{messages['BusinessEntity.code']}" rendered="#{userRoleBean.selectedAccountBean != null}">
@@ -86,7 +84,7 @@
 									<h:panelGroup layout="block" styleClass="search-panel-actions" rendered="#{userRoleBean.selectedAccountBean != null}">
 										<p:commandButton id="buttonSearch" value="#{messages['commons.search']}" action="#{userRoleBean.filterAccounts}" process="codeSearchField @this" update="@form" />
 										<p:commandButton id="buttonClear" action="#{userRoleBean.cleanAccountsFilter}" process="@this" value="#{messages['commons.clean']}"
-											update=":#{p:component('securedEntitiesDialogPanel')}" />
+											update="@([id$=securedEntitiesDialogPanel])" />
 									</h:panelGroup>
 								</h:panelGroup>
 
@@ -94,7 +92,7 @@
 									<p:dataTable id="securedEntitiesDialogDatatable" var="e" paginator="true" resizableColumns="true" value="#{userRoleBean.selectedAccountBean.lazyDataModel}" rows="10"
 										selection="#{userRoleBean.selectedEntity}" selectionMode="single" rowKey="#{e.id}" lazy="true">
 										<p:ajax event="rowSelect" listener="#{userRoleBean.saveSecuredEntity}" oncomplete="PF('securedEntitiesDialog').hide()"
-											update=":#{p:component('securedEntitiesDialogPanel')} :#{p:component('selectedEntitiesPanel')}" />
+											update="@([id$=securedEntitiesDialogPanel]) @([id$=selectedEntitiesPanel])" />
 										<p:column headerText="#{messages['BusinessEntity.code']}">
 											<h:outputText value="#{e.code}" />
 										</p:column>

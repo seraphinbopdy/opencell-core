@@ -25,12 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-
 import org.infinispan.Cache;
 import org.infinispan.commons.util.CloseableIterator;
 import org.infinispan.context.Flag;
@@ -50,6 +44,12 @@ import org.meveo.service.billing.impl.ChargeInstanceService;
 import org.meveo.service.billing.impl.WalletService;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Resource;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+
 /**
  * Provides cache related services (loading, update) for wallet related operations
  * 
@@ -58,13 +58,13 @@ import org.slf4j.Logger;
  * @lastModifiedVersion 5.0
  * 
  */
-public class WalletCacheContainerProvider implements Serializable { 
+public class WalletCacheContainerProvider implements CacheContainerProvider, Serializable {
 
     private static final long serialVersionUID = -4969288143287203121L;
 
     @Inject
     protected Logger log;
-    
+
     @Inject
     private ChargeInstanceService<ChargeInstance> chargeInstanceService;
 
@@ -88,8 +88,7 @@ public class WalletCacheContainerProvider implements Serializable {
     private Cache<CacheKeyLong, BigDecimal> reservedBalanceCache;
 
     /**
-     * Contains association between usage chargeInstance and wallets ids (if it is not the only principal one). Key format: &lt;UsageChargeInstance.id&gt;, value: List of
-     * &lt;WalletInstance.id&gt;
+     * Contains association between usage chargeInstance and wallets ids (if it is not the only principal one). Key format: &lt;UsageChargeInstance.id&gt;, value: List of &lt;WalletInstance.id&gt;
      */
     @Resource(lookup = "java:jboss/infinispan/cache/opencell/opencell-usageChargeInstanceWallet")
     private Cache<CacheKeyLong, Map<Long, BigDecimal>> chargeInstanceWalletCache;
@@ -184,12 +183,12 @@ public class WalletCacheContainerProvider implements Serializable {
 
         for (WalletInstance wallet : chargeInstance.getWalletInstances()) {
             WalletTemplate walletTemplate = wallet.getWalletTemplate();
-			if (walletTemplate != null && walletTemplate.getWalletType() == BillingWalletTypeEnum.PREPAID) {
+            if (walletTemplate != null && walletTemplate.getWalletType() == BillingWalletTypeEnum.PREPAID) {
                 BigDecimal rejectLevel = wallet.getRejectLevel();
-                if(walletTemplate!=null && walletTemplate.getRejectLevelEl()!=null) {
-					rejectLevel = walletService.evaluateElExpressionValue(walletTemplate.getRejectLevelEl(), wallet, chargeInstance);
-    			}
-				walletLimits.put(wallet.getId(), rejectLevel);
+                if (walletTemplate != null && walletTemplate.getRejectLevelEl() != null) {
+                    rejectLevel = walletService.evaluateElExpressionValue(walletTemplate.getRejectLevelEl(), wallet, chargeInstance);
+                }
+                walletLimits.put(wallet.getId(), rejectLevel);
             }
         }
 
@@ -219,14 +218,14 @@ public class WalletCacheContainerProvider implements Serializable {
         String currentProvider = currentUser.getProviderCode();
 
         for (WalletInstance wallet : usageChargeInstance.getWalletInstances()) {
-        	WalletTemplate walletTemplate = wallet.getWalletTemplate();
-			if (walletTemplate != null && walletTemplate.getWalletType() == BillingWalletTypeEnum.PREPAID) {
+            WalletTemplate walletTemplate = wallet.getWalletTemplate();
+            if (walletTemplate != null && walletTemplate.getWalletType() == BillingWalletTypeEnum.PREPAID) {
                 BigDecimal rejectLevel = wallet.getRejectLevel();
-                if(walletTemplate!=null && walletTemplate.getRejectLevelEl()!=null) {
-					rejectLevel = walletService.evaluateElExpressionValue(walletTemplate.getRejectLevelEl(), wallet, usageChargeInstance);
-					
+                if (walletTemplate != null && walletTemplate.getRejectLevelEl() != null) {
+                    rejectLevel = walletService.evaluateElExpressionValue(walletTemplate.getRejectLevelEl(), wallet, usageChargeInstance);
+
                 }
-				walletLimits.put(wallet.getId(), rejectLevel);
+                walletLimits.put(wallet.getId(), rejectLevel);
                 if (!balanceCache.containsKey(new CacheKeyLong(currentProvider, wallet.getId()))) {
                     initializeBalanceCachesForWallet(wallet.getId());
                 }
@@ -294,7 +293,7 @@ public class WalletCacheContainerProvider implements Serializable {
         BigDecimal newValue = null;
 
         WalletInstance wallet = op.getWallet();
-		CacheKeyLong cacheKey = new CacheKeyLong(currentUser.getProviderCode(), wallet.getId());
+        CacheKeyLong cacheKey = new CacheKeyLong(currentUser.getProviderCode(), wallet.getId());
 
         // Either of caches is not initialized. By doing so, last operation will be included, no need to update it separatelly
         if (!reservedBalanceCache.containsKey(cacheKey) || !balanceCache.containsKey(cacheKey)) {
@@ -302,7 +301,8 @@ public class WalletCacheContainerProvider implements Serializable {
             return;
         }
 
-        if (!(op instanceof WalletReservation) || (op.getStatus() == WalletOperationStatusEnum.RESERVED) || (op.getStatus() == WalletOperationStatusEnum.CANCELED) || (op.getStatus() == WalletOperationStatusEnum.REJECTED) ) {
+        if (!(op instanceof WalletReservation) || (op.getStatus() == WalletOperationStatusEnum.RESERVED) || (op.getStatus() == WalletOperationStatusEnum.CANCELED)
+                || (op.getStatus() == WalletOperationStatusEnum.REJECTED)) {
 
             oldValue = reservedBalanceCache.getAdvancedCache().withFlags(Flag.FORCE_WRITE_LOCK).get(cacheKey);
 
@@ -324,14 +324,14 @@ public class WalletCacheContainerProvider implements Serializable {
 
             BigDecimal lowBalanceLevel = wallet.getLowBalanceLevel();
             WalletTemplate walletTemplate = wallet.getWalletTemplate();
-			if(walletTemplate!=null && walletTemplate.getLowBalanceLevelEl()!=null) {
-				lowBalanceLevel = walletService.evaluateElExpressionValue(walletTemplate.getLowBalanceLevelEl(), wallet, op.getChargeInstance());
-			}
-			log.debug("Update balance Cache for wallet {} {}->{} lowBalanceLevel:{} rejectLevel: {}", wallet.getId(), oldValue, newValue, lowBalanceLevel, wallet.getRejectLevel());
+            if (walletTemplate != null && walletTemplate.getLowBalanceLevelEl() != null) {
+                lowBalanceLevel = walletService.evaluateElExpressionValue(walletTemplate.getLowBalanceLevelEl(), wallet, op.getChargeInstance());
+            }
+            log.debug("Update balance Cache for wallet {} {}->{} lowBalanceLevel:{} rejectLevel: {}", wallet.getId(), oldValue, newValue, lowBalanceLevel, wallet.getRejectLevel());
 
             balanceCache.getAdvancedCache().withFlags(Flag.IGNORE_RETURN_VALUES).put(cacheKey, newValue);
 
-            if ( lowBalanceLevel != null) {
+            if (lowBalanceLevel != null) {
                 if (lowBalanceLevel.compareTo(newValue) <= 0 && lowBalanceLevel.compareTo(oldValue) > 0) {
                     lowBalanceEventProducer.fire(wallet);
                 }
@@ -339,7 +339,7 @@ public class WalletCacheContainerProvider implements Serializable {
 
         }
     }
-    
+
     /**
      * Get cached balance for a given wallet id
      * 
@@ -377,7 +377,7 @@ public class WalletCacheContainerProvider implements Serializable {
      * 
      * @return A list of a map containing cache information with cache name as a key and cache as a value
      */
-    // @Override
+    @Override
     @SuppressWarnings("rawtypes")
     public Map<String, Cache> getCaches() {
         Map<String, Cache> summaryOfCaches = new HashMap<String, Cache>();
@@ -393,7 +393,7 @@ public class WalletCacheContainerProvider implements Serializable {
      * 
      * @param cacheName Name of cache to refresh or null to refresh all caches
      */
-    // @Override
+    @Override
     @Asynchronous
     public void refreshCache(String cacheName) {
 
@@ -414,7 +414,7 @@ public class WalletCacheContainerProvider implements Serializable {
      * 
      * @param cacheName Name of cache to populate or null to populate all caches
      */
-    // @Override
+    @Override
     public void populateCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(chargeInstanceWalletCache.getName()) || cacheName.contains(chargeInstanceWalletCache.getName())) {

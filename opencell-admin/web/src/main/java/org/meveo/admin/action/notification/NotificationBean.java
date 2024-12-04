@@ -31,9 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.seam.international.status.builder.BundleKey;
@@ -51,7 +51,7 @@ import org.meveo.service.base.local.IPersistenceService;
 import org.meveo.service.notification.NotificationService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 
 /**
  * @author Wassim Drira
@@ -149,7 +149,7 @@ public class NotificationBean extends BaseNotificationBean<ScriptNotification> {
         if (file == null) {
             return;
         }
-        csvReader = new CsvReader(file.getInputstream(), ';', Charset.forName("ISO-8859-1"));
+        csvReader = new CsvReader(file.getInputStream(), ';', Charset.forName("ISO-8859-1"));
         csvReader.readHeaders();
 
         ParamBean paramBean = paramBeanFactory.getInstance();

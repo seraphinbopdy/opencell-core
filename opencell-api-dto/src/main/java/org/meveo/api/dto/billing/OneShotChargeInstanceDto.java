@@ -18,15 +18,16 @@
 
 package org.meveo.api.dto.billing;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.model.billing.InstanceStatusEnum;
 import org.meveo.model.billing.OneShotChargeInstance;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import java.math.BigDecimal;
-import java.util.Date;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 
 /**
  * @author Abdellatif BARI

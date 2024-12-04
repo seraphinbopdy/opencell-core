@@ -22,16 +22,18 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.meveo.model.admin.User;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Notification by sending instant message
@@ -47,7 +49,8 @@ public class InstantMessagingNotification extends Notification {
     /**
      * Instant message provider
      */
-    @Column(name = "im_provider", length = 20)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "im_provider_name", length = 20)
     @NotNull
     private InstantMessagingProviderEnum imProvider;
 
@@ -123,8 +126,7 @@ public class InstantMessagingNotification extends Notification {
     @Override
     public String toString() {
         final int maxLen = 10;
-        return String.format("InstantMessagingNotification [imProvider=%s, idEl=%s, ids=%s,  message=%s, notification=%s]", imProvider, idEl,
-            ids != null ? toString(ids, maxLen) : null, message, super.toString());
+        return String.format("InstantMessagingNotification [imProvider=%s, idEl=%s, ids=%s,  message=%s, notification=%s]", imProvider, idEl, ids != null ? toString(ids, maxLen) : null, message, super.toString());
     }
 
     private String toString(Collection<?> collection, int maxLen) {

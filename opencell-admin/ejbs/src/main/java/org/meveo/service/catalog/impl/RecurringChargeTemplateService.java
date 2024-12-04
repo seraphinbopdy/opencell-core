@@ -21,9 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.RecurringChargeInstance;
@@ -34,6 +31,9 @@ import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.cpq.CpqQuote;
 import org.meveo.model.quote.QuoteVersion;
 import org.meveo.service.base.ValueExpressionWrapper;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * Charge Template service implementation.

@@ -4,11 +4,9 @@
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
 	xmlns:p="http://primefaces.org/ui" template="/layout/template.xhtml"
 	xmlns:hftl="http://hftl.org">
-	<ui:define name="metadata">
 		<f:metadata>
 			<f:event type="preRenderView" listener="#{paramActionBean.preRenderView()}" />
 		</f:metadata>
-	</ui:define>
 
 	<ui:define name="body">
 		<p:panel>
@@ -49,10 +47,10 @@
 
 					<p:row>
 						<p:commandButton action="#{paramActionBean.add}" process="@form"
-										 value="#{messages['action.add']}" update="@form" icon="ui-icon-plus">
+										 value="#{messages['action.add']}" update="@form" icon="pi pi-plus">
 						</p:commandButton>
 					<p:commandButton action="#{paramActionBean.save}"  update="@form" process="@this"
-									 value="#{messages['action.save']}"  icon="ui-icon-check">
+									 value="#{messages['action.save']}"  icon="pi pi-check">
 					</p:commandButton>
 					<p:commandButton action="#{paramActionBean.reset}" update="@form" process="@this"
 									 value="#{messages['action.reset']}" ></p:commandButton>

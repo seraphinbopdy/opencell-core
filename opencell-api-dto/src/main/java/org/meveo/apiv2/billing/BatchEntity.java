@@ -17,12 +17,13 @@
  */
 package org.meveo.apiv2.billing;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.immutables.value.Value;
 import org.meveo.apiv2.common.HugeEntity;
 
-import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * A Batch entity definition.
@@ -31,7 +32,7 @@ import javax.validation.constraints.NotNull;
  * @since 15.1.0
  */
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableBatchEntity.class)
 public interface BatchEntity extends HugeEntity {
 

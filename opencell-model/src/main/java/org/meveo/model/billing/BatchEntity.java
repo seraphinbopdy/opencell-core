@@ -17,25 +17,29 @@
  */
 package org.meveo.model.billing;
 
+import java.util.Map;
+
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.EnableBusinessEntity;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
-import java.util.Map;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 /**
  * Batch entity
@@ -45,15 +49,10 @@ import java.util.Map;
  */
 @Entity
 @Table(name = "batch_entity")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-        parameters = {@Parameter(name = "sequence_name", value = "batch_entity_seq"),})
-@NamedQueries({
-        @NamedQuery(name = "BatchEntity.getOpenedBatchEntityIds",
-                query = "SELECT b.id FROM BatchEntity b WHERE b.status=org.meveo.model.billing.BatchEntityStatusEnum.OPEN and b.targetJob=:targetJob"),
-        @NamedQuery(name = "BatchEntity.cancelOpenedBatchEntity",
-                query = "UPDATE BatchEntity b set b.status=org.meveo.model.billing.BatchEntityStatusEnum.CANCELED where b.id=:id " +
-                        "and b.status=org.meveo.model.billing.BatchEntityStatusEnum.OPEN")
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "batch_entity_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "BatchEntity.getOpenedBatchEntityIds", query = "SELECT b.id FROM BatchEntity b WHERE b.status=org.meveo.model.billing.BatchEntityStatusEnum.OPEN and b.targetJob=:targetJob"),
+        @NamedQuery(name = "BatchEntity.cancelOpenedBatchEntity", query = "UPDATE BatchEntity b set b.status=org.meveo.model.billing.BatchEntityStatusEnum.CANCELED where b.id=:id "
+                + "and b.status=org.meveo.model.billing.BatchEntityStatusEnum.OPEN") })
 public class BatchEntity extends EnableBusinessEntity {
 
     private static final long serialVersionUID = 1L;
@@ -75,14 +74,14 @@ public class BatchEntity extends EnableBusinessEntity {
     /**
      * Filtering option.
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "filters", columnDefinition = "jsonb")
     private Map<String, Object> filters;
 
     /**
      * if it's true, then an email is sent to the creator in the user’s language if available (or default, if not)
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "notify")
     private boolean notify;
 

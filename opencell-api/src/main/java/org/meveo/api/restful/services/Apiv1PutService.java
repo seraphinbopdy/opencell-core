@@ -9,15 +9,15 @@ import org.meveo.api.dto.billing.*;
 import org.meveo.api.dto.catalog.DiscountPlanItemDto;
 import org.meveo.api.dto.invoice.CancelInvoiceRequestDto;
 import org.meveo.api.dto.invoice.ValidateInvoiceRequestDto;
-import org.meveo.api.restful.GenericOpencellRestfulAPIv1;
+import org.meveo.api.restful.JaxRsActivatorGenericApiV1;
 import org.meveo.api.restful.filter.AuthenticationFilter;
 import org.meveo.apiv2.generic.core.GenericHelper;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.PathSegment;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -44,9 +44,9 @@ public class Apiv1PutService {
     public Response updateService(UriInfo uriInfo, String putPath, String jsonDto) throws URISyntaxException, JsonProcessingException {
         URI redirectURI;
         segmentsOfPathAPIv1 = uriInfo.getPathSegments();
-        pathIBaseRS = GenericOpencellRestfulAPIv1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.get( putPath );
+        pathIBaseRS = JaxRsActivatorGenericApiV1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.get( putPath );
 
-        Class entityDtoClass = GenericOpencellRestfulAPIv1.MAP_SPECIAL_IBASE_RS_PATH_AND_DTO_CLASS.get( pathIBaseRS );
+        Class entityDtoClass = JaxRsActivatorGenericApiV1.MAP_SPECIAL_IBASE_RS_PATH_AND_DTO_CLASS.get( pathIBaseRS );
         Object aDto = null;
 
         if ( entityDtoClass != null ) {
@@ -90,7 +90,7 @@ public class Apiv1PutService {
         URI redirectURI;
         segmentsOfPathAPIv1 = uriInfo.getPathSegments();
 
-        pathIBaseRS = GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get( pathUpdate );
+        pathIBaseRS = JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.get( pathUpdate );
         entityClassName = pathIBaseRS.split( FORWARD_SLASH )[ pathIBaseRS.split( FORWARD_SLASH ).length - 1 ];
 
         if ( entityClassName.equals( "job" ) )

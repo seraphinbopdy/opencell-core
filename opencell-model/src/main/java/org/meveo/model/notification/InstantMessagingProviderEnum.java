@@ -19,8 +19,8 @@
 package org.meveo.model.notification;
 
 public enum InstantMessagingProviderEnum {
-    FACEBOOK(2, "enum.InstantMessagingProviderEnum.FACEBOOK"), TWITTER(3, "enum.InstantMessagingProviderEnum.TWITTER"), GTALK(
-            4, "enum.InstantMessagingProviderEnum.GTALK"), YAHOO_MESSENGER(5, "enum.InstantMessagingProviderEnum.YAHOO_MESSENGER");
+    FACEBOOK(2, "enum.InstantMessagingProviderEnum.FACEBOOK"), TWITTER(3, "enum.InstantMessagingProviderEnum.TWITTER"), GTALK(4, "enum.InstantMessagingProviderEnum.GTALK"), YAHOO_MESSENGER(5,
+            "enum.InstantMessagingProviderEnum.YAHOO_MESSENGER");
 
     private Integer id;
     private String label;

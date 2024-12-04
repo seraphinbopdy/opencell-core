@@ -21,13 +21,6 @@ package org.meveo.api.dto.payment;
 import java.util.Date;
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import org.meveo.api.dto.BaseEntityDto;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.IEnableDto;
@@ -44,12 +37,18 @@ import org.meveo.model.payments.DDPaymentMethod;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaypalPaymentMethod;
-import org.meveo.model.payments.StripePaymentMethod;
 import org.meveo.model.payments.SipsPaymentMethod;
+import org.meveo.model.payments.StripePaymentMethod;
 import org.meveo.model.payments.WirePaymentMethod;
 import org.meveo.security.MeveoUser;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
  * The PaymentMethod Dto.

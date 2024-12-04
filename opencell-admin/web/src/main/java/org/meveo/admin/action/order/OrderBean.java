@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.jboss.seam.international.status.builder.BundleKey;
@@ -282,7 +282,7 @@ public class OrderBean extends CustomFieldBean<Order> {
             // Save products and services when main offer is an offer
             if (selectedOrderItem.getMainOffering() instanceof OfferTemplate) {
 
-                TreeNode offerNode = offersTree.getChildren().get(0);
+                TreeNode offerNode = ((List<TreeNode>)offersTree.getChildren()).get(0);
 
                 // Save main offer as offering and product
                 orderItemDto.getProductOffering().setId(selectedOrderItem.getMainOffering().getCode());
@@ -299,20 +299,22 @@ public class OrderBean extends CustomFieldBean<Order> {
                 List<List<ProductCharacteristic>> productCharacteristics = new ArrayList<>();
                 List<List<ProductCharacteristic>> serviceCharacteristics = new ArrayList<>();
 
-                for (TreeNode groupingNode : offerNode.getChildren()) { // service or product grouping node
-                    for (TreeNode serviceOrProduct : groupingNode.getChildren()) {
+                for (Object groupingObj : offerNode.getChildren()) { // service or product grouping node
+                    TreeNode groupingNode = (TreeNode) groupingObj;
+                    for (Object serviceOrProduct : groupingNode.getChildren()) {
+                        TreeNode serviceOrProductNode = (TreeNode) serviceOrProduct;
 
-                        if (!(serviceOrProduct.getData() instanceof OfferItemInfo) || !((OfferItemInfo) serviceOrProduct.getData()).isSelected()) {
+                        if (!(serviceOrProductNode.getData() instanceof OfferItemInfo) || !((OfferItemInfo) serviceOrProductNode.getData()).isSelected()) {
                             continue;
                         }
 
-                        OfferItemInfo offerItemInfo = ((OfferItemInfo) serviceOrProduct.getData());
+                        OfferItemInfo offerItemInfo = ((OfferItemInfo) serviceOrProductNode.getData());
 
                         if (offerItemInfo.getTemplate() instanceof ProductTemplate) {
                             productTemplates.add((ProductTemplate) offerItemInfo.getTemplate());
 
                             List<ProductCharacteristic> productTemplateCharacteristics = mapToProductCharacteristics(offerItemInfo.getCharacteristics());
-                            productTemplateCharacteristics.addAll(customFieldsAsCharacteristics(((OfferItemInfo) serviceOrProduct.getData()).getEntityForCFValues()));
+                            productTemplateCharacteristics.addAll(customFieldsAsCharacteristics(((OfferItemInfo) serviceOrProductNode.getData()).getEntityForCFValues()));
 
                             productCharacteristics.add(productTemplateCharacteristics);
 
@@ -320,7 +322,7 @@ public class OrderBean extends CustomFieldBean<Order> {
                             serviceTemplates.add((ServiceTemplate) offerItemInfo.getTemplate());
 
                             List<ProductCharacteristic> serviceTemplateCharacteristics = mapToProductCharacteristics(offerItemInfo.getCharacteristics());
-                            serviceTemplateCharacteristics.addAll(customFieldsAsCharacteristics(((OfferItemInfo) serviceOrProduct.getData()).getEntityForCFValues()));
+                            serviceTemplateCharacteristics.addAll(customFieldsAsCharacteristics(((OfferItemInfo) serviceOrProductNode.getData()).getEntityForCFValues()));
 
                             serviceCharacteristics.add(serviceTemplateCharacteristics);
                         }
@@ -890,11 +892,11 @@ public class OrderBean extends CustomFieldBean<Order> {
         if (selectedOrderItem.getMainOffering() instanceof OfferTemplate) {
 
             // Add offer configuration
-            TreeNode offerNode = offersTree.getChildren().get(0);
+            TreeNode offerNode = ((List<TreeNode>)offersTree.getChildren()).get(0);
             offerConfigurations.add((OfferItemInfo) offerNode.getData());
 
-            for (TreeNode groupingNode : offerNode.getChildren()) { // service or product grouping node
-                for (TreeNode serviceOrProduct : groupingNode.getChildren()) {
+            for (TreeNode groupingNode : (List<TreeNode>) offerNode.getChildren()) { // service or product grouping node
+                for (TreeNode serviceOrProduct : (List<TreeNode>) groupingNode.getChildren()) {
 
                     if (serviceOrProduct.getData() instanceof OfferItemInfo && ((OfferItemInfo) serviceOrProduct.getData()).isSelected()) {
                         offerConfigurations.add((OfferItemInfo) serviceOrProduct.getData());

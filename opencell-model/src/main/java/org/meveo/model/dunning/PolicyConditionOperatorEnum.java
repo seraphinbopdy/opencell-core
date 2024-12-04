@@ -4,12 +4,7 @@ import static java.util.Arrays.stream;
 
 public enum PolicyConditionOperatorEnum {
 
-    EQUALS("="),
-    NOT_EQUALS("<>"),
-    HIGHER_THAN(">"),
-    HIGHER_THAN_OR_EQUAL(">="),
-    LOWER_THAN("<"),
-    LOWER_THAN_OR_EQUAL("<=");
+    EQUALS("="), NOT_EQUALS("<>"), HIGHER_THAN(">"), HIGHER_THAN_OR_EQUAL(">="), LOWER_THAN("<"), LOWER_THAN_OR_EQUAL("<=");
 
     private String operator;
 
@@ -22,9 +17,6 @@ public enum PolicyConditionOperatorEnum {
     }
 
     public static PolicyConditionOperatorEnum fromValue(String value) {
-        return stream(values())
-                        .filter(operator -> operator.operator.equalsIgnoreCase(value))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("No operator " + value + " found"));
+        return stream(values()).filter(operator -> operator.operator.equalsIgnoreCase(value)).findFirst().orElseThrow(() -> new IllegalArgumentException("No operator " + value + " found"));
     }
 }

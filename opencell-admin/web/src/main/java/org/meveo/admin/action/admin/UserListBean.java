@@ -21,14 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.ConversationScoped;
-import javax.inject.Named;
-
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.model.admin.User;
 import org.meveo.util.view.LazyDataModelWSize;
 import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.SortOrder;
+
+import jakarta.enterprise.context.ConversationScoped;
+import jakarta.inject.Named;
 
 @Named
 @ConversationScoped
@@ -48,9 +47,7 @@ public class UserListBean extends UserBean {
 
                 @Override
                 @SuppressWarnings("rawtypes")
-                public List<User> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map mapfilters) {
-                    filters.put("firstName", filters.get("name.firstName"));
-                    filters.put("lastName", filters.get("name.lastName"));
+                public List load(int first, int pageSize, Map sortBy, Map filterBy) {
 
                     PaginationConfiguration paginationConfig = new PaginationConfiguration(first, pageSize, filters, null, null);
                     setRowCount(Long.valueOf(userService.count(paginationConfig)).intValue());

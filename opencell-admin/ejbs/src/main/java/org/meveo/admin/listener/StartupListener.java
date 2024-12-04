@@ -17,13 +17,13 @@
  */
 package org.meveo.admin.listener;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
-
 import org.meveo.service.job.JobExecutionService;
 import org.slf4j.Logger;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.inject.Inject;
 
 @Startup
 @Singleton

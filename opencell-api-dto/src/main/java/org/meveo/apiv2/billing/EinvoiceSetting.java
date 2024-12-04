@@ -1,16 +1,18 @@
 package org.meveo.apiv2.billing;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.billing.CustomizationIDEnum;
 import org.meveo.model.billing.VatDateCodeEnum;
 
-import javax.annotation.Nullable;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableEinvoiceSetting.class)
 public interface EinvoiceSetting extends Resource {
 	

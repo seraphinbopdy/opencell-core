@@ -21,17 +21,17 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OrderBy;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OrderBy;
 
 @Entity
 @DiscriminatorValue("DAILY")
@@ -56,8 +56,8 @@ public class CalendarDaily extends Calendar {
     }
 
     /**
-     * Checks for next calendar date. If not found in this day checks next day hours. Calendar has list of hours (hour:min), so if calendar has at least one hour it will be found
-     * in this or next day. For example today is 2010.12.06T08:45:02. Calendar has only one hour - 07:15. So nextCalendarDate will return for 2010.12.07T07:15:00.
+     * Checks for next calendar date. If not found in this day checks next day hours. Calendar has list of hours (hour:min), so if calendar has at least one hour it will be found in this or next day. For example today is
+     * 2010.12.06T08:45:02. Calendar has only one hour - 07:15. So nextCalendarDate will return for 2010.12.07T07:15:00.
      * 
      * @param date Current date.
      * @return Next calendar date.
@@ -99,8 +99,8 @@ public class CalendarDaily extends Calendar {
     }
 
     /**
-     * Checks for previous calendar date. If not found in this day checks previous day hours. Calendar has list of hours (hour:min), so if calendar has at least one hour it will be
-     * found in this or previous day. For example today is 2010.12.06T08:45:02. Calendar has only one hour - 07:15. So previousCalendarDate will return 2010.12.06T07:15:00.
+     * Checks for previous calendar date. If not found in this day checks previous day hours. Calendar has list of hours (hour:min), so if calendar has at least one hour it will be found in this or previous day. For
+     * example today is 2010.12.06T08:45:02. Calendar has only one hour - 07:15. So previousCalendarDate will return 2010.12.06T07:15:00.
      * 
      * @param date Current date.
      * @return Next calendar date.

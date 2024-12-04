@@ -4,14 +4,22 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.*;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableEntity;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
 
 /**
  * 
@@ -21,55 +29,52 @@ import org.meveo.model.AuditableEntity;
  */
 @Entity
 @Table(name = "mediation_setting")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "mediation_setting_seq")})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "mediation_setting_seq"), @Parameter(name = "increment_size", value = "1") })
 @Cacheable
 @SuppressWarnings("serial")
 public class MediationSetting extends AuditableEntity {
 
     @Column(name = "enable_edr_versioning")
-    @Type(type = "numeric_boolean")
-	private boolean enableEdrVersioning = Boolean.FALSE;
+    @Convert(converter = NumericBooleanConverter.class)
+    private boolean enableEdrVersioning = Boolean.FALSE;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "mediationSetting", orphanRemoval = true)
     @OrderBy("priority")
-    @Cache(usage =  CacheConcurrencyStrategy.READ_WRITE)
-	private Set<EdrVersioningRule> rules = new HashSet<>();
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    private Set<EdrVersioningRule> rules = new HashSet<>();
 
-	public boolean isEnableEdrVersioning() {
-		return enableEdrVersioning;
-	}
+    public boolean isEnableEdrVersioning() {
+        return enableEdrVersioning;
+    }
 
-	public void setEnableEdrVersioning(boolean enableEdrVersioning) {
-		this.enableEdrVersioning = enableEdrVersioning;
-	}
+    public void setEnableEdrVersioning(boolean enableEdrVersioning) {
+        this.enableEdrVersioning = enableEdrVersioning;
+    }
 
-	public Set<EdrVersioningRule> getRules() {
-		return rules;
-	}
+    public Set<EdrVersioningRule> getRules() {
+        return rules;
+    }
 
-	public void setRules(Set<EdrVersioningRule> rules) {
-		this.rules = rules;
-	}
+    public void setRules(Set<EdrVersioningRule> rules) {
+        this.rules = rules;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(enableEdrVersioning);
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(enableEdrVersioning);
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (getClass() != obj.getClass())
-			return false;
-		MediationSetting other = (MediationSetting) obj;
-		return enableEdrVersioning == other.enableEdrVersioning;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+        MediationSetting other = (MediationSetting) obj;
+        return enableEdrVersioning == other.enableEdrVersioning;
+    }
 
-
-    
-    
 }

@@ -24,27 +24,28 @@ package org.meveo.model.payments;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.EnableEntity;
 import org.meveo.model.audit.AuditChangeTypeEnum;
 import org.meveo.model.audit.AuditTarget;
 import org.meveo.model.billing.Invoice;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * @author anasseh
@@ -55,8 +56,7 @@ import org.meveo.model.billing.Invoice;
 @Entity
 @Table(name = "ar_payment_schedule_inst_item")
 @AttributeOverrides({ @AttributeOverride(name = "code", column = @Column(name = "code", unique = false)) })
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_payment_schedule_inst_item_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_payment_schedule_inst_item_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "PaymentScheduleInstanceItem.listItemsToProcess", query = "Select psii  from PaymentScheduleInstanceItem as psii where psii.invoice is null and  psii.recordedInvoice is null and psii.paymentScheduleInstance.status ='IN_PROGRESS' and psii.requestPaymentDate <=:requestPaymentDateIN  "),
         @NamedQuery(name = "PaymentScheduleInstanceItem.countPaidItems", query = "Select count(*) from PaymentScheduleInstanceItem as psii where   psii.recordedInvoice is not null and psii.recordedInvoice.matchingStatus ='L'and psii.paymentScheduleInstance.serviceInstance.id=:serviceInstanceIdIN "),
@@ -92,7 +92,7 @@ public class PaymentScheduleInstanceItem extends EnableEntity {
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_last", nullable = false)
     @NotNull
     private boolean last;

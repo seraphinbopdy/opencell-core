@@ -1,14 +1,16 @@
 package org.meveo.apiv2.securityDeposit;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.math.BigDecimal;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableSecurityDepositPaymentInput.class)
 public interface SecurityDepositPaymentInput extends Resource {
 

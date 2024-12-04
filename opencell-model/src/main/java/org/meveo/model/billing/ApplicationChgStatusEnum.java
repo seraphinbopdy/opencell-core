@@ -19,8 +19,7 @@ package org.meveo.model.billing;
 
 public enum ApplicationChgStatusEnum {
 
-    WAITING(1, "ApplicationChgStatusEnum.waiting"), TREATED(2, "ApplicationChgStatusEnum.treated"), REJECTED(3, "ApplicationChgStatusEnum.rejected"), CANCELED(4,
-            "ApplicationChgStatusEnum.canceled");
+    WAITING(1, "ApplicationChgStatusEnum.waiting"), TREATED(2, "ApplicationChgStatusEnum.treated"), REJECTED(3, "ApplicationChgStatusEnum.rejected"), CANCELED(4, "ApplicationChgStatusEnum.canceled");
 
     private Integer id;
     private String label;

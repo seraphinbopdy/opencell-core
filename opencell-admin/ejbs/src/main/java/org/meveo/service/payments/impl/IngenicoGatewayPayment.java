@@ -50,7 +50,6 @@ import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.util.PaymentGatewayClass;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,16 +114,11 @@ import com.ingenico.connect.gateway.sdk.java.domain.payout.definitions.PayoutRef
 import com.ingenico.connect.gateway.sdk.java.domain.token.ApproveTokenRequest;
 import com.ingenico.connect.gateway.sdk.java.domain.token.CreateTokenRequest;
 import com.ingenico.connect.gateway.sdk.java.domain.token.CreateTokenResponse;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.ContactDetailsToken;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.CustomerToken;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.CustomerTokenWithContactDetails;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.Debtor;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.MandateSepaDirectDebitWithoutCreditor;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.PersonalInformationToken;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.PersonalNameToken;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenCard;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenCardData;
-import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenSepaDirectDebitWithoutCreditor;
 
 /**
  * The Class IngenicoGatewayPayment.
@@ -134,6 +128,8 @@ import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenSepaD
  * @author Mbarek-Ay
  * @lastModifiedVersion 10.0.0 
  */
+
+@Deprecated //use IngenicoDirectGatewayPayment
 @PaymentGatewayClass
 public class IngenicoGatewayPayment implements GatewayPaymentInterface {
 
@@ -516,7 +512,7 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
 			context.put("CardPaymentMethod", paymentCardToken);
 			context.put("ctsAmount", ctsAmount);
 			context.put("CustomerAccount", customerAccount);
-			context = getScriptInstanceService().executeCached( scriptInstanceCode, context);
+			context = getScriptInstanceService().executePooled( scriptInstanceCode, context);
 			body = (CreatePaymentRequest)context.get("CreatePaymentRequest");
 		}
 		return body;
@@ -1038,4 +1034,17 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
 
         return customerAccountService;
     }
+
+	@Override
+	public String createCardCvvToken(CustomerAccount customerAccount, String alias, String cardNumber,
+			String cardHolderName, String expirayDate, String issueNumber, CreditCardTypeEnum cardType, String cvv)
+			throws BusinessException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public PaymentResponseDto capturePayment(String preAuthorisationId, Long ctsAmount, String merchantParameters)
+			throws BusinessException {
+		throw new UnsupportedOperationException();
+	}
 }

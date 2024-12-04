@@ -8,11 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-
 import org.assertj.core.util.VisibleForTesting;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -21,6 +16,11 @@ import org.meveo.model.document.DocumentCategory;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 @Stateless
 public class DocumentFileService {

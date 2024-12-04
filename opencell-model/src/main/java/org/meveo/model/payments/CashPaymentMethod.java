@@ -18,10 +18,10 @@
 
 package org.meveo.model.payments;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 import org.meveo.commons.utils.StringUtils;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 /**
  * Payment by check payment method
@@ -47,17 +47,17 @@ public class CashPaymentMethod extends PaymentMethod {
         this.customerAccount = customerAccount;
     }
 
-    public CashPaymentMethod(boolean isDisabled, String alias, boolean preferred, CustomerAccount customerAccount,String userId) {
+    public CashPaymentMethod(boolean isDisabled, String alias, boolean preferred, CustomerAccount customerAccount, String userId) {
         super();
         setDisabled(isDisabled);
         this.paymentType = PaymentMethodEnum.CASH;
         this.alias = alias;
         this.preferred = preferred;
         this.customerAccount = customerAccount;
-        if(StringUtils.isBlank(userId)) {
-        	this.userId = customerAccount.getContactInformationNullSafe().getEmail();
-        }else {
-        	this.userId = userId;
+        if (StringUtils.isBlank(userId)) {
+            this.userId = customerAccount.getContactInformationNullSafe().getEmail();
+        } else {
+            this.userId = userId;
         }
     }
 

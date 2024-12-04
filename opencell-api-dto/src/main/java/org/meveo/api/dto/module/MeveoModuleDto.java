@@ -18,11 +18,32 @@
 
 package org.meveo.api.dto.module;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
-import org.meveo.api.dto.*;
+import org.meveo.api.dto.BaseEntityDto;
+import org.meveo.api.dto.CustomEntityTemplateDto;
+import org.meveo.api.dto.CustomFieldTemplateDto;
+import org.meveo.api.dto.EnableBusinessDto;
+import org.meveo.api.dto.EntityCustomActionDto;
+import org.meveo.api.dto.FilterDto;
+import org.meveo.api.dto.ScriptInstanceDto;
 import org.meveo.api.dto.account.BusinessAccountModelDto;
-import org.meveo.api.dto.catalog.*;
+import org.meveo.api.dto.catalog.BundleTemplateDto;
+import org.meveo.api.dto.catalog.BusinessOfferModelDto;
+import org.meveo.api.dto.catalog.BusinessProductModelDto;
+import org.meveo.api.dto.catalog.BusinessServiceModelDto;
+import org.meveo.api.dto.catalog.CounterTemplateDto;
+import org.meveo.api.dto.catalog.OfferTemplateCategoryDto;
+import org.meveo.api.dto.catalog.OfferTemplateDto;
+import org.meveo.api.dto.catalog.OneShotChargeTemplateDto;
+import org.meveo.api.dto.catalog.PricePlanMatrixDto;
+import org.meveo.api.dto.catalog.ProductChargeTemplateDto;
+import org.meveo.api.dto.catalog.ProductTemplateDto;
+import org.meveo.api.dto.catalog.RecurringChargeTemplateDto;
+import org.meveo.api.dto.catalog.ServiceTemplateDto;
+import org.meveo.api.dto.catalog.UsageChargeTemplateDto;
 import org.meveo.api.dto.dwh.BarChartDto;
 import org.meveo.api.dto.dwh.LineChartDto;
 import org.meveo.api.dto.dwh.MeasurableQuantityDto;
@@ -41,9 +62,15 @@ import org.meveo.model.IEntity;
 import org.meveo.model.module.MeveoModule;
 import org.meveo.model.module.ModuleLicenseEnum;
 
-import javax.xml.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlElements;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class MeveoModuleDto.

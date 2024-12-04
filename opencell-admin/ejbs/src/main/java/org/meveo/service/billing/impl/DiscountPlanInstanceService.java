@@ -27,9 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
@@ -46,6 +43,9 @@ import org.meveo.model.catalog.DiscountPlanTypeEnum;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.catalog.impl.DiscountPlanService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi
@@ -149,16 +149,17 @@ public class DiscountPlanInstanceService extends PersistenceService<DiscountPlan
 			discountPlanInstance.setDiscountPlan(dp);
 			discountPlanInstance.copyEffectivityDates(dp);
 			discountPlanInstance.setDiscountPlanInstanceStatus(dp);
-			discountPlanInstance.setCfValues(dp.getCfValues());
-			if(!isVirtual)
+			discountPlanInstance.setCfValuesAsJson(dp.getCfValuesAsJson());
+			if(!isVirtual) {
 			    this.create(discountPlanInstance, dp);
+			}
 			entity.addDiscountPlanInstances(discountPlanInstance);
 
 		} else {
 			boolean found = false;
 			DiscountPlanInstance dpiMatched = null;
 			for (DiscountPlanInstance dpi : entity.getAllDiscountPlanInstances()) {
-				dpi.setCfValues(dp.getCfValues());
+				dpi.setCfValuesAsJson(dp.getCfValuesAsJson());
 				if (dp.equals(dpi.getDiscountPlan())) {
 					found = true;
 					dpiMatched = dpi;

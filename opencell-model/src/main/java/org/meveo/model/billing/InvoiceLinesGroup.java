@@ -1,13 +1,13 @@
 package org.meveo.model.billing;
 
-import org.meveo.model.admin.Seller;
-import org.meveo.model.payments.PaymentMethod;
+import static java.lang.String.format;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.String.format;
+import org.meveo.model.admin.Seller;
+import org.meveo.model.payments.PaymentMethod;
 
 public class InvoiceLinesGroup implements Serializable {
 
@@ -21,10 +21,10 @@ public class InvoiceLinesGroup implements Serializable {
     private String openOrderNumber;
     private List<InvoiceLine> invoiceLines = new ArrayList<>();
 
-    public InvoiceLinesGroup() { }
+    public InvoiceLinesGroup() {
+    }
 
-    public InvoiceLinesGroup(BillingAccount billingAccount, BillingCycle billingCycle, Seller seller, InvoiceType invoiceType,
-                             boolean prepaid, String invoiceKey, PaymentMethod paymentMethod, String openOrderNumber) {
+    public InvoiceLinesGroup(BillingAccount billingAccount, BillingCycle billingCycle, Seller seller, InvoiceType invoiceType, boolean prepaid, String invoiceKey, PaymentMethod paymentMethod, String openOrderNumber) {
         this.billingAccount = billingAccount;
         this.billingCycle = billingCycle;
         this.seller = seller;
@@ -34,11 +34,11 @@ public class InvoiceLinesGroup implements Serializable {
         this.paymentMethod = paymentMethod;
         this.openOrderNumber = openOrderNumber;
     }
-    
-	public InvoiceLinesGroup(String invoiceKey, List<InvoiceLine> invoiceLines) {
-		this.invoiceLines = invoiceLines;
-		this.invoiceKey = invoiceKey;
-	}
+
+    public InvoiceLinesGroup(String invoiceKey, List<InvoiceLine> invoiceLines) {
+        this.invoiceLines = invoiceLines;
+        this.invoiceKey = invoiceKey;
+    }
 
     public BillingAccount getBillingAccount() {
         return billingAccount;
@@ -82,8 +82,7 @@ public class InvoiceLinesGroup implements Serializable {
 
     public String getInvoiceKey() {
         if (invoiceKey == null) {
-            invoiceKey = format("%d_%d_%d_%s_%d_%s", billingAccount.getId(), seller.getId(), invoiceType.getId(),
-                    prepaid, getPaymentMethod().getId(), openOrderNumber);
+            invoiceKey = format("%d_%d_%d_%s_%d_%s", billingAccount.getId(), seller.getId(), invoiceType.getId(), prepaid, getPaymentMethod().getId(), openOrderNumber);
         }
         return invoiceKey;
     }
@@ -111,12 +110,12 @@ public class InvoiceLinesGroup implements Serializable {
         this.invoiceLines = invoiceLines;
     }
 
-	public String getOpenOrderNumber() {
-		return openOrderNumber;
-	}
+    public String getOpenOrderNumber() {
+        return openOrderNumber;
+    }
 
-	public void setOpenOrderNumber(String openOrderNumber) {
-		this.openOrderNumber = openOrderNumber;
-	}
-    
+    public void setOpenOrderNumber(String openOrderNumber) {
+        this.openOrderNumber = openOrderNumber;
+    }
+
 }

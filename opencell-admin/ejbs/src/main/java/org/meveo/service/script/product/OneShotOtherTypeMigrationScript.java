@@ -1,5 +1,11 @@
 package org.meveo.service.script.product;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.catalog.ChargeTemplate;
@@ -19,13 +25,8 @@ import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.cpq.order.OrderProductService;
 import org.meveo.service.script.Script;
 
-import javax.transaction.Transactional;
-import javax.xml.bind.ValidationException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import jakarta.transaction.Transactional;
+import jakarta.xml.bind.ValidationException;
 
 public class OneShotOtherTypeMigrationScript extends Script {
 

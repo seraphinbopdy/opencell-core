@@ -3,18 +3,21 @@ package org.meveo.apiv2.payments;
 import static java.lang.Boolean.FALSE;
 import static java.util.Optional.ofNullable;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Date;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.immutables.value.Value.Default;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.payments.RejectedPayment;
 
-import javax.annotation.Nullable;
-import java.util.Date;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableRejectionPayment.class)
 public interface RejectionPayment extends Resource {
 

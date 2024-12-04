@@ -5,9 +5,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-import javax.persistence.Entity;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.commons.utils.EjbUtils;
@@ -25,6 +22,9 @@ import org.meveo.service.job.Job;
 import org.meveo.util.EntityCustomizationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.inject.Inject;
+import jakarta.persistence.Entity;
 
 public class DeletionService {
     private static final String CANNOT_REMOVE_ENTITY_CUSTOM_TABLE_REFERENCE_ERROR_MESSAGE = "Cannot remove entity: reference to the entity exists";
@@ -107,7 +107,24 @@ public class DeletionService {
     }
 
     private Stream<Optional<Object>> getCodeAsStream(IEntity dependency) {
-        return Stream.of(ReflectionUtils.getPropertyValueOrNull(dependency, "code"), ReflectionUtils.getMethodValue(dependency, "getCode"));
+
+        Optional<Object> codeProperty = Optional.empty();
+        Optional<Object> codeMethod = Optional.empty();
+        try {
+            codeProperty = ReflectionUtils.getPropertyValueOrNull(dependency, "code");
+
+        } catch (Exception e) {
+            log.error("Failed to get code field value for entity {}", dependency, e);
+        }
+        
+        try {
+            codeMethod = ReflectionUtils.getMethodValue(dependency, "getCode");
+        
+        } catch (Exception e) {
+            log.error("Failed to get code field value for entity {}", dependency, e);
+        }
+       
+        return Stream.of(codeProperty, codeMethod);
     }
 
     private boolean existsAsRecordInCustomTable(CustomFieldTemplate customField, IEntity entity) {

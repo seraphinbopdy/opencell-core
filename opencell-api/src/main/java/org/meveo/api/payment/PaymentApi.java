@@ -40,13 +40,14 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -163,7 +164,7 @@ public class PaymentApi extends BaseApi {
 	private RejectedPaymentService rejectedPaymentService;
 	@Inject
 	private InvoiceService invoiceService;
-	
+
 	@Inject
 	private AdvancedSettingsApiService advancedSettingsApiService;
 
@@ -172,7 +173,7 @@ public class PaymentApi extends BaseApi {
 	private final RejectionCodeMapper rejectionCodeMapper = new RejectionCodeMapper();
 	private final RejectionActionMapper rejectionActionMapper = new RejectionActionMapper();
 	private final RejectionGroupMapper groupMapper = new RejectionGroupMapper();
-	
+
 	/**
      * @param paymentDto payment object which encapsulates the input data sent by client
      * @return the id of payment if created successful otherwise null
@@ -464,33 +465,33 @@ public class PaymentApi extends BaseApi {
 		if (Boolean.TRUE.equals(payment.getIsManualPayment())) {
 			paymentService.createManualPaymentFromRejectedPayment(payment, retryPayment.getCollectionDate(), idsToPay);
 		} else {
-			// Get customer account
-			CustomerAccount customerAccount = payment.getCustomerAccount();
-			// Get preferred payment method
-			PaymentMethod preferredPaymentMethod = customerAccount
-					.getPaymentMethods()
-					.stream()
-					.filter(PaymentMethod::isPreferred)
-					.findFirst()
-					.orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
-							+ customerAccount.getCode()));
+		// Get customer account
+		CustomerAccount customerAccount = payment.getCustomerAccount();
+		// Get preferred payment method
+		PaymentMethod preferredPaymentMethod = customerAccount
+				.getPaymentMethods()
+				.stream()
+				.filter(PaymentMethod::isPreferred)
+				.findFirst()
+				.orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
+						+ customerAccount.getCode()));
 
-			// Get payment gateway
-			PaymentGateway paymentGateway = paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
+		// Get payment gateway
+		PaymentGateway paymentGateway = paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
 
-			if (payment.getPaymentMethod().equals(CARD) && preferredPaymentMethod.getPaymentType().equals(CARD)) {
-				CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
+		if (payment.getPaymentMethod().equals(CARD) && preferredPaymentMethod.getPaymentType().equals(CARD)) {
+			CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
 				paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), idsToPay,
-						Boolean.TRUE, Boolean.TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
-						paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
-						paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
+					Boolean.TRUE, Boolean.TRUE, paymentGateway, paymentMethod.getHiddenCardNumber(),
+					paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
+					paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
 						Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false, retryPayment.getCollectionDate());
-			} else {
+		} else {
 				paymentService.doPayment(customerAccount, paymentHistory.getAmountCts(), idsToPay,
-						Boolean.TRUE, Boolean.TRUE, paymentGateway, null, null,
+					Boolean.TRUE, Boolean.TRUE, paymentGateway, null, null,
 						null, null, null, Boolean.TRUE, preferredPaymentMethod.getPaymentType(), false, retryPayment.getCollectionDate());
-			}
 		}
+	}
 	}
 	
 	

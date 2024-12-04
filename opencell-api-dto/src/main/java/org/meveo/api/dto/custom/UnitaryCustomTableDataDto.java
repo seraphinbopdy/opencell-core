@@ -21,12 +21,12 @@ package org.meveo.api.dto.custom;
 import java.util.LinkedHashMap;
 import java.util.Optional;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.api.dto.BaseEntityDto;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Represents data in custom table - custom entity data stored in a separate table

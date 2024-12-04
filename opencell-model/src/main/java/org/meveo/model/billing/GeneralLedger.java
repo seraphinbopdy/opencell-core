@@ -20,22 +20,20 @@ package org.meveo.model.billing;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.payments.OtherTransaction;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * General Ledger
@@ -46,12 +44,11 @@ import org.meveo.model.payments.OtherTransaction;
 @Entity
 @Cacheable
 @Table(name = "billing_general_ledger", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_general_ledger_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_general_ledger_seq"), @Parameter(name = "increment_size", value = "1") })
 public class GeneralLedger extends BusinessEntity {
 
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * A list of OT
      */

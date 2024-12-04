@@ -25,8 +25,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
@@ -35,6 +33,8 @@ import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.payments.PaymentScheduleTemplate;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.ValueExpressionWrapper;
+
+import jakarta.ejb.Stateless;
 
 /**
  * The Class PaymentScheduleTemplateService.

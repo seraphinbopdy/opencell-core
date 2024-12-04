@@ -33,81 +33,72 @@ import org.slf4j.LoggerFactory;
 
 public class EnumBuilder {
 
-	private static final Logger log = LoggerFactory.getLogger(EnumBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(EnumBuilder.class);
 
-	/**
-	 * MAP_EXTENSIBLE_ENUMs is initialized by Opencell extensible enum values.
-	 * Other values could be added from outside for custom needs, by a Singleton & Startup bean for example :
-	 *
-	 * @Startup
-	 * @Singleton
-	 * public class CustomBean implements Serializable {
-	 * @Inject
-	 * private Logger log;
-	 *
-	 * @PostConstruct
-	 * public void init() {
-	 * EnumBuilder.put(JobCategoryEnum.class, Arrays.stream(CustomJobCategoryEnum.values()).collect(Collectors.toMap(item -> item.name(), item -> item)));
-	 * }
-	 * }
-	 *
-	 */
-	private static Map<String, Map<String, Object>> MAP_EXTENSIBLE_ENUMs = new HashMap<>();
+    /**
+     * MAP_EXTENSIBLE_ENUMs is initialized by Opencell extensible enum values. Other values could be added from outside for custom needs, by a Singleton & Startup bean for example :
+     *
+     * @Startup
+     * @Singleton public class CustomBean implements Serializable {
+     * @Inject private Logger log;
+     *
+     * @PostConstruct public void init() { EnumBuilder.put(JobCategoryEnum.class, Arrays.stream(CustomJobCategoryEnum.values()).collect(Collectors.toMap(item -> item.name(), item -> item))); } }
+     *
+     */
+    private static Map<String, Map<String, Object>> MAP_EXTENSIBLE_ENUMs = new HashMap<>();
 
-	static {
-		put(JobCategoryEnum.class, Arrays.stream(MeveoJobCategoryEnum.values())
-				.collect(Collectors.toMap(item -> item.name(), item -> item)));
-	}
+    static {
+        put(JobCategoryEnum.class, Arrays.stream(MeveoJobCategoryEnum.values()).collect(Collectors.toMap(item -> item.name(), item -> item)));
+    }
 
-	public static void put(Class enumType, Map<String, Object> newItems) {
+    public static void put(Class enumType, Map<String, Object> newItems) {
 
-		final String enumName = enumType.getName();
-		Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumName);
-		if (enumItems == null) {
-			enumItems = new HashMap<>();
-		}
-		enumItems.putAll(newItems);
-		MAP_EXTENSIBLE_ENUMs.put(enumName, enumItems);
-	}
+        final String enumName = enumType.getName();
+        Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumName);
+        if (enumItems == null) {
+            enumItems = new HashMap<>();
+        }
+        enumItems.putAll(newItems);
+        MAP_EXTENSIBLE_ENUMs.put(enumName, enumItems);
+    }
 
-	public static void put(Class enumType, String key, Object value) {
-		final String enumName = enumType.getName();
-		Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumName);
-		if (enumItems == null) {
-			enumItems = new HashMap<>();
-		}
-		enumItems.put(key, value);
-		MAP_EXTENSIBLE_ENUMs.put(enumName, enumItems);
-	}
+    public static void put(Class enumType, String key, Object value) {
+        final String enumName = enumType.getName();
+        Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumName);
+        if (enumItems == null) {
+            enumItems = new HashMap<>();
+        }
+        enumItems.put(key, value);
+        MAP_EXTENSIBLE_ENUMs.put(enumName, enumItems);
+    }
 
-	public static Object[] values(String enumName) {
+    public static Object[] values(String enumName) {
 
-		Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumName);
-		if (enumItems == null) {
-			log.error("no enum found for enumName={} MAP_EXTENSIBLE_ENUMs={}", enumName, MAP_EXTENSIBLE_ENUMs);
-			return null;
-		}
-		return enumItems.values().toArray();
-	}
+        Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumName);
+        if (enumItems == null) {
+            log.error("no enum found for enumName={} MAP_EXTENSIBLE_ENUMs={}", enumName, MAP_EXTENSIBLE_ENUMs);
+            return null;
+        }
+        return enumItems.values().toArray();
+    }
 
-	public static Object build(String code, Class enumType) {
+    public static Object build(String code, Class enumType) {
 
-		final String enumName = enumType.getName();
-		Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumName);
-		if (enumItems == null) {
-			log.error("no enum found for enumType={} and code={}, MAP_EXTENSIBLE_ENUMs={}", enumType, code,
-					MAP_EXTENSIBLE_ENUMs);
-			return null;
-		}
-		return enumItems.get(code);
-	}
+        final String enumName = enumType.getName();
+        Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumName);
+        if (enumItems == null) {
+            log.error("no enum found for enumType={} and code={}, MAP_EXTENSIBLE_ENUMs={}", enumType, code, MAP_EXTENSIBLE_ENUMs);
+            return null;
+        }
+        return enumItems.get(code);
+    }
 
-	public static List<Object> values(Class enumType) {
-		Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumType.getName());
-		if (MapUtils.isNotEmpty(enumItems)) {
-			return new ArrayList<>(enumItems.values());
-		}
-		return null;
-	}
-	
+    public static List<Object> values(Class enumType) {
+        Map<String, Object> enumItems = MAP_EXTENSIBLE_ENUMs.get(enumType.getName());
+        if (MapUtils.isNotEmpty(enumItems)) {
+            return new ArrayList<>(enumItems.values());
+        }
+        return null;
+    }
+
 }

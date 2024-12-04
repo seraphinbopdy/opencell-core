@@ -29,30 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AccountEntity;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.CustomFieldEntity;
@@ -75,6 +52,30 @@ import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.pricelist.PriceList;
 import org.meveo.model.tax.TaxCategory;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Billing account
@@ -101,32 +102,25 @@ import org.meveo.model.tax.TaxCategory;
         @NamedQuery(name = "BillingAccount.getCountByParent", query = "select count(*) from BillingAccount ba where ba.customerAccount=:parent"),
         @NamedQuery(name = "BillingAccount.listByOpenILFromBillingRun", query = "select distinct b from InvoiceLine il join il.billingAccount b where il.billingRun=:billingRun and il.status='OPEN'"),
         @NamedQuery(name = "BillingAccount.linkToBillingRunByInvoice", query = "update BillingAccount set billingRun.id=:billingRunId where id in(select distinct inv.billingAccount.id from Invoice inv where inv.billingRun.id=:billingRunId)"),
-		@NamedQuery(name = "BillingAccount.getBillingAccountDetailsItems", query = "select distinct b.id, s.id, b.tradingLanguage.id, b.nextInvoiceDate, b.electronicBilling, ca.dueDateDelayEL, cc.exoneratedFromTaxes, cc.exonerationTaxEl, m.id, m.paymentType, m2.id, m2.paymentType, string_agg(concat(CAST(dpi.discountPlan.id as string),'|',CAST(dpi.startDate AS string),'|',CAST(dpi.endDate AS string)),','),"
-				+ " sum(case when ao.transactionCategory = 'DEBIT' then ao.unMatchingAmount else (-1 * ao.unMatchingAmount) end) "
-				+ " FROM BillingAccount b left join b.customerAccount ca left join ca.customer c left join c.customerCategory cc left join c.seller s "
-				+ " left join ca.paymentMethods m "
-				+ " left join ca.accountOperations ao "
-				+ " left join b.paymentMethod m2 "
-				+ " left join b.discountPlanInstances dpi "
-				+ " where b.id IN (:baIDs) and (m is null or m.preferred=true) and (ao is null or (ao.matchingStatus in (:aoStatus)))"
-				+ " group by b.id, s.id, b.tradingLanguage.id, b.nextInvoiceDate, b.electronicBilling, ca.dueDateDelayEL, cc.exoneratedFromTaxes, cc.exonerationTaxEl, m.id, m.paymentType, m2.id, m2.paymentType"
-				+ " order by b.id"),
-		@NamedQuery(name = "BillingAccount.getBillingAccountDetailsItemsLimitAOsByDate", query = "select distinct b.id, s.id, b.tradingLanguage.id, b.nextInvoiceDate, b.electronicBilling, ca.dueDateDelayEL, cc.exoneratedFromTaxes, cc.exonerationTaxEl, m.id, m.paymentType, m2.id, m2.paymentType, string_agg(concat(CAST(dpi.discountPlan.id as string),'|',CAST(dpi.startDate AS string),'|',CAST(dpi.endDate AS string)),','),"
-				+ " sum(case when ao.transactionCategory = 'DEBIT' then ao.unMatchingAmount else (-1 * ao.unMatchingAmount) end) "
-				+ " FROM BillingAccount b left join b.customerAccount ca left join ca.customer c left join c.customerCategory cc left join c.seller s "
-				+ " left join ca.paymentMethods m "
-				+ " left join ca.accountOperations ao on ao.customerAccount.id=ca.id and (ao.matchingStatus in (:aoStatus) and ao.dueDate<:dueDate) "
-				+ " left join b.paymentMethod m2 "
-				+ " left join b.discountPlanInstances dpi "
-				+ " where b.id IN (:baIDs) and (m is null or m.preferred=true) "
-				+ " group by b.id, s.id, b.tradingLanguage.id, b.nextInvoiceDate, b.electronicBilling, ca.dueDateDelayEL, cc.exoneratedFromTaxes, cc.exonerationTaxEl, m.id, m.paymentType, m2.id, m2.paymentType"
-				+ " order by b.id"),
-		@NamedQuery(name = "BillingAccount.getCountByCreditCategory", query = "select count(*) from BillingAccount ba where ba.id=:id and ba.customerAccount.creditCategory.id in (:creditCategoryIds)"),
-        @NamedQuery(name = "BillingAccount.getBaFetchCaAndCustomer",
-                query = "select ba from BillingAccount ba left join fetch ba.customerAccount as ca left join fetch ca.customer as c left join fetch c.parentCustomer where ba.id = :id "),
-		@NamedQuery(name = "BillingAccount.fetchIdByCode", query = "SELECT b.id FROM BillingAccount b where b.code=:code", hints = {@QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
-		@NamedQuery(name = "BillingAccount.listIdByCode", query = "SELECT b.code, b.id FROM BillingAccount b "),
-        @NamedQuery(name = "BillingAccount.unlinkPriceList", query = "update BillingAccount set priceList = null where priceList.id = :priceListId")})
+        @NamedQuery(name = "BillingAccount.getBillingAccountDetailsItems", query = "select distinct b.id, s.id, b.tradingLanguage.id, b.nextInvoiceDate, b.electronicBilling, ca.dueDateDelayEL, cc.exoneratedFromTaxes, cc.exonerationTaxEl, m.id, m.paymentType, m2.id, m2.paymentType, string_agg(concat(CAST(dpi.discountPlan.id as string),'|',CAST(dpi.startDate AS string),'|',CAST(dpi.endDate AS string)),','),"
+                + " sum(case when ao.transactionCategory = 'DEBIT' then ao.unMatchingAmount else (-1 * ao.unMatchingAmount) end) "
+                + " FROM BillingAccount b left join b.customerAccount ca left join ca.customer c left join c.customerCategory cc left join c.seller s " + " left join ca.paymentMethods m "
+                + " left join ca.accountOperations ao " + " left join b.paymentMethod m2 " + " left join b.discountPlanInstances dpi "
+                + " where b.id IN (:baIDs) and (m is null or m.preferred=true) and (ao is null or (ao.matchingStatus in (:aoStatus)))"
+                + " group by b.id, s.id, b.tradingLanguage.id, b.nextInvoiceDate, b.electronicBilling, ca.dueDateDelayEL, cc.exoneratedFromTaxes, cc.exonerationTaxEl, m.id, m.paymentType, m2.id, m2.paymentType"
+                + " order by b.id"),
+        @NamedQuery(name = "BillingAccount.getBillingAccountDetailsItemsLimitAOsByDate", query = "select distinct b.id, s.id, b.tradingLanguage.id, b.nextInvoiceDate, b.electronicBilling, ca.dueDateDelayEL, cc.exoneratedFromTaxes, cc.exonerationTaxEl, m.id, m.paymentType, m2.id, m2.paymentType, string_agg(concat(CAST(dpi.discountPlan.id as string),'|',CAST(dpi.startDate AS string),'|',CAST(dpi.endDate AS string)),','),"
+                + " sum(case when ao.transactionCategory = 'DEBIT' then ao.unMatchingAmount else (-1 * ao.unMatchingAmount) end) "
+                + " FROM BillingAccount b left join b.customerAccount ca left join ca.customer c left join c.customerCategory cc left join c.seller s " + " left join ca.paymentMethods m "
+                + " left join ca.accountOperations ao on ao.customerAccount.id=ca.id and (ao.matchingStatus in (:aoStatus) and ao.dueDate<:dueDate) " + " left join b.paymentMethod m2 "
+                + " left join b.discountPlanInstances dpi " + " where b.id IN (:baIDs) and (m is null or m.preferred=true) "
+                + " group by b.id, s.id, b.tradingLanguage.id, b.nextInvoiceDate, b.electronicBilling, ca.dueDateDelayEL, cc.exoneratedFromTaxes, cc.exonerationTaxEl, m.id, m.paymentType, m2.id, m2.paymentType"
+                + " order by b.id"),
+        @NamedQuery(name = "BillingAccount.getCountByCreditCategory", query = "select count(*) from BillingAccount ba where ba.id=:id and ba.customerAccount.creditCategory.id in (:creditCategoryIds)"),
+        @NamedQuery(name = "BillingAccount.getBaFetchCaAndCustomer", query = "select ba from BillingAccount ba left join fetch ba.customerAccount as ca left join fetch ca.customer as c left join fetch c.parentCustomer where ba.id = :id "),
+        @NamedQuery(name = "BillingAccount.fetchIdByCode", query = "SELECT b.id FROM BillingAccount b where b.code=:code", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
+        @NamedQuery(name = "BillingAccount.listIdByCode", query = "SELECT b.code, b.id FROM BillingAccount b "),
+        @NamedQuery(name = "BillingAccount.unlinkPriceList", query = "update BillingAccount set priceList = null where priceList.id = :priceListId") })
 public class BillingAccount extends AccountEntity implements IInvoicingMinimumApplicable, IBillableEntity, IWFEntity, IDiscountable, ICounterEntity {
 
     private static final long serialVersionUID = 1L;
@@ -148,7 +142,7 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     /**
      * Use electronic billing?
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "electronic_billing")
     private boolean electronicBilling;
 
@@ -282,7 +276,7 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
      */
     @OneToMany(mappedBy = "billingAccount", fetch = FetchType.LAZY)
     private List<Contract> contracts = new ArrayList<>();
-    
+
     /**
      * A list of rated transactions
      */
@@ -356,7 +350,7 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     @Enumerated(EnumType.STRING)
     @Column(name = "check_threshold")
     private ThresholdOptionsEnum checkThreshold;
-    
+
     /**
      * A flag to indicate that account is exonerated from taxes
      */
@@ -368,31 +362,30 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
      */
     @Transient
     private TaxCategory taxCategoryResolved;
-    
+
     /**
      * check threshold per entity?
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "threshold_per_entity")
     private boolean thresholdPerEntity;
-    
+
     /**
      * list of tag attached
-     */    
+     */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "cpq_billing_account_tags", joinColumns = @JoinColumn(name = "billing_account_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
     private List<Tag> tags = new ArrayList<>();
 
-	/**
-	 * Currency of account
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "trading_currency_id", nullable = false)
-	private TradingCurrency tradingCurrency;
+    /**
+     * Currency of account
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trading_currency_id", nullable = false)
+    private TradingCurrency tradingCurrency;
 
     @Transient
     private List<InvoiceLine> minInvoiceLines;
-
 
     /**
      * Default PriceList (Optional)
@@ -400,29 +393,30 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "price_list_id")
     private PriceList priceList;
-	
-	@OneToMany
-	@JoinColumn(name = "billing_account_id")
-	private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
-    
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "billing_account_id")
+    private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
+
     /** MRR. */
     @Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal mrr;
 	
-	public List<RegistrationNumber> getRegistrationNumbers() {
-		return registrationNumbers;
-	}
-	
-	public void setRegistrationNumbers(List<RegistrationNumber> registrationNumbers) {
-		this.registrationNumbers = registrationNumbers;
-	}
-	public boolean isThresholdPerEntity() {
-    	return thresholdPerEntity;
-	}
-    
-	public void setThresholdPerEntity(boolean thresholdPerEntity) {
-		this.thresholdPerEntity = thresholdPerEntity;
-	}
+    public List<RegistrationNumber> getRegistrationNumbers() {
+        return registrationNumbers;
+    }
+
+    public void setRegistrationNumbers(List<RegistrationNumber> registrationNumbers) {
+        this.registrationNumbers = registrationNumbers;
+    }
+
+    public boolean isThresholdPerEntity() {
+        return thresholdPerEntity;
+    }
+
+    public void setThresholdPerEntity(boolean thresholdPerEntity) {
+        this.thresholdPerEntity = thresholdPerEntity;
+    }
 
     public List<UserAccount> getUsersAccounts() {
         return usersAccounts;
@@ -824,39 +818,39 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
         this.paymentMethod = paymentMethod;
     }
 
-	/**
-	 * @return the tags
-	 */
-	public List<Tag> getTags() {
-		return tags;
-	}
+    /**
+     * @return the tags
+     */
+    public List<Tag> getTags() {
+        return tags;
+    }
 
-	/**
-	 * @param tags the tags to set
-	 */
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
-	}
+    /**
+     * @param tags the tags to set
+     */
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
 
-	public TradingCurrency getTradingCurrency() {
-		return tradingCurrency;
-	}
+    public TradingCurrency getTradingCurrency() {
+        return tradingCurrency;
+    }
 
-	public void setTradingCurrency(TradingCurrency tradingCurrency) {
-		this.tradingCurrency = tradingCurrency;
-	}
+    public void setTradingCurrency(TradingCurrency tradingCurrency) {
+        this.tradingCurrency = tradingCurrency;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		BillingAccount other = (BillingAccount) obj;
-		return Objects.equals(id, other.id);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        BillingAccount other = (BillingAccount) obj;
+        return Objects.equals(id, other.id);
+    }
 
     @Override
     public List<InvoiceLine> getMinInvoiceLines() {
@@ -869,23 +863,18 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     }
 
     public List<UserAccount> getParentUserAccounts() {
-        return getUsersAccounts()
-                .stream()
-                .filter(userAccount -> userAccount.getParentUserAccount() == null)
-                .collect(toList());
+        return getUsersAccounts().stream().filter(userAccount -> userAccount.getParentUserAccount() == null).collect(toList());
     }
-    
+
     public Seller getSeller() {
-    	if(customerAccount==null) {
-    		return null;
-    	}
-    	return customerAccount.getSeller();
+        if (customerAccount == null) {
+            return null;
+        }
+        return customerAccount.getSeller();
     }
 
     public String getBillingAccountTradingLanguageCode() {
-        return ofNullable(tradingLanguage)
-                .map(TradingLanguage::getLanguageCode)
-                .orElse(null);
+        return ofNullable(tradingLanguage).map(TradingLanguage::getLanguageCode).orElse(null);
     }
 
     public String getExemptionReason() {
@@ -896,9 +885,9 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
         this.exemptionReason = exemptionReason;
     }
 
-
     /**
      * PriceList Getter
+     * 
      * @return the value
      */
     public PriceList getPriceList() {
@@ -907,6 +896,7 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
 
     /**
      * PriceList Setter
+     * 
      * @param priceList : value to Set
      */
     public void setPriceList(PriceList priceList) {
@@ -922,11 +912,11 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     }
 
     // check if the list of registration numbers is not empty
-	// get all registration numbers and join them with a comma
-	public String getRegistrationNo(){
-		if (isNotEmpty(registrationNumbers)) {
-			registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
-		}
-		return registrationNo;
-	}
+    // get all registration numbers and join them with a comma
+    public String getRegistrationNo() {
+        if (isNotEmpty(registrationNumbers)) {
+            registrationNo = registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(toList()).toString();
+        }
+        return registrationNo;
+    }
 }

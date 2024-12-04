@@ -19,7 +19,6 @@
 package org.meveo.admin.wf.types;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.meveo.admin.exception.BusinessException;

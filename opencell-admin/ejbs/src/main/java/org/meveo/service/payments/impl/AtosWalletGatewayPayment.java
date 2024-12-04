@@ -1,12 +1,9 @@
 package org.meveo.service.payments.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 import org.apache.http.HttpHeaders;
@@ -41,7 +38,6 @@ import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.worldline.sips.checkout.WalletOrderRequest;
 import org.meveo.model.worldline.sips.checkout.WalletOrderResponse;
-import org.meveo.model.worldline.sips.wallet.WalletAction;
 import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.util.PaymentGatewayClass;
@@ -183,7 +179,7 @@ public class AtosWalletGatewayPayment implements GatewayPaymentInterface {
 			context.put("interfaceVersion", interfaceVersion);
 			context.put("PaymentGateway", paymentGateway);
 
-			context = getScriptInstanceService().executeCached(scriptInstanceCode, context);
+			context = getScriptInstanceService().executePooled(scriptInstanceCode, context);
 			request = (WalletOrderRequest) context.get("WalletOrderRequest");
 
 		}
@@ -586,4 +582,17 @@ public class AtosWalletGatewayPayment implements GatewayPaymentInterface {
     public HostedCheckoutStatusResponseDto getHostedCheckoutStatus(String id) throws BusinessException {
         throw new UnsupportedOperationException();
     }
+
+	@Override
+	public String createCardCvvToken(CustomerAccount customerAccount, String alias, String cardNumber,
+			String cardHolderName, String expirayDate, String issueNumber, CreditCardTypeEnum cardType, String cvv)
+			throws BusinessException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public PaymentResponseDto capturePayment(String preAuthorisationId, Long ctsAmount, String merchantParameters)
+			throws BusinessException {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -22,8 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.SortOrder;
+import org.primefaces.model.SortMeta;
 
 public class LazyDataModelWSize<T> extends LazyDataModel<T> {
 
@@ -34,7 +35,12 @@ public class LazyDataModelWSize<T> extends LazyDataModel<T> {
     }
 
     @Override
-    public List<T> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+    public List<T> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
         return new ArrayList<>();
+    }
+
+    @Override
+    public int count(Map<String, FilterMeta> filterBy) {
+        return getRowCount();
     }
 }

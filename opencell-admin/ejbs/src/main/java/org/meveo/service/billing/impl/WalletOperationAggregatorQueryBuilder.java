@@ -177,14 +177,14 @@ public class WalletOperationAggregatorQueryBuilder {
 		}
 		if (aggregationLine.getGroupBy() != null) {
 			if (aggregationLine.getGroupByParameter() != null) {
-				return aggregationLine.getGroupBy() + "(varcharFromJson(op.cfValues, " + field + ", " + cf.getFieldType().name().toLowerCase() + "), " + aggregationLine
+				return aggregationLine.getGroupBy() + "(varcharFromJson(op.cfValuesAsJson, '" + field + "', '" + cf.getFieldType().name().toLowerCase() + "'), " + aggregationLine
 						.getGroupByParameter() + "), ";
 			} else {
-				return aggregationLine.getGroupBy() + "(varcharFromJson(op.cfValues, " + field + ", " + cf.getFieldType().name().toLowerCase() + ")), ";
+				return aggregationLine.getGroupBy() + "(varcharFromJson(op.cfValuesAsJson, '" + field + "', '" + cf.getFieldType().name().toLowerCase() + "')), ";
 			}
 		}
 		if (aggregationLine.getAction().equals(WalletOperationAggregationActionEnum.KEY)) {
-			return "varcharFromJson(op.cfValues, " + field + ", " + cf.getFieldType().name().toLowerCase() + "), ";
+			return "varcharFromJson(op.cfValuesAsJson, '" + field + "', '" + cf.getFieldType().name().toLowerCase() + "'), ";
 		}
 		return "";
 	}
@@ -242,7 +242,7 @@ public class WalletOperationAggregatorQueryBuilder {
 				if (cf == null) {
 					throw new BusinessException("Custom field '" + fieldName + "' not found");
 				}
-				return "varcharFromJson(op.cfValues, " + fieldName + ", " + cf.getFieldType().name().toLowerCase() + ") ";
+				return "varcharFromJson(op.cfValuesAsJson, '" + fieldName + "', '" + cf.getFieldType().name().toLowerCase() + "') ";
 			}
 			if (!fieldName.contains(".")) {
 				Field field = WalletOperation.class.getDeclaredField(fieldName);

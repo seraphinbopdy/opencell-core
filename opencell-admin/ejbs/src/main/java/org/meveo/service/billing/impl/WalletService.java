@@ -24,27 +24,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.WalletCacheContainerProvider;
 import org.meveo.commons.utils.ListUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.QueryBuilder;
-import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.BillingWalletTypeEnum;
 import org.meveo.model.billing.ChargeInstance;
-import org.meveo.model.billing.ServiceInstance;
-import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.UserAccount;
 import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.catalog.WalletTemplate;
-import org.meveo.model.mediation.Access;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * Wallet service implementation.

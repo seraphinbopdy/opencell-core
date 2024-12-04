@@ -18,13 +18,13 @@
 
 package org.meveo.audit.logging.core;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
-
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 
 /**
  * @author Edward P. Legaspi

@@ -1,9 +1,25 @@
 package org.meveo.apiv2.generic.core.mapper;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.meveo.apiv2.generic.GenericPaginatedResource;
+import org.meveo.apiv2.generic.core.mapper.module.GenericModule;
+import org.meveo.model.IEntity;
+import org.meveo.model.crm.custom.CustomFieldValue;
+import org.meveo.model.crm.custom.CustomFieldValues;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -14,20 +30,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import org.hibernate.collection.internal.AbstractPersistentCollection;
-import org.hibernate.collection.internal.PersistentBag;
-import org.hibernate.collection.internal.PersistentSet;
-import org.meveo.apiv2.generic.GenericPaginatedResource;
-import org.meveo.apiv2.generic.core.mapper.module.GenericModule;
-import org.meveo.model.IEntity;
-import org.meveo.model.crm.custom.CustomFieldValue;
-import org.meveo.model.crm.custom.CustomFieldValues;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-public class JsonGenericMapper extends ObjectMapper{
+public class JsonGenericMapper extends ObjectMapper {
     private SimpleFilterProvider simpleFilterProvider;
 
     public JsonGenericMapper(Module module, SimpleFilterProvider simpleFilterProvider) {
@@ -35,7 +39,7 @@ public class JsonGenericMapper extends ObjectMapper{
         registerModule(module);
         this.simpleFilterProvider = simpleFilterProvider;
         addMixIn(IEntity.class, CollectionMixIn.class);
-        //addMixIn(IEntity.class, BaseEntityMixIn.class);
+        // addMixIn(IEntity.class, BaseEntityMixIn.class);
         addMixIn(GenericPaginatedResource.class, GenericPaginatedResourceMixIn.class);
         addMixIn(CustomFieldValues.class, EntityCustomFieldValuesFilterMixIn.class);
         addMixIn(CustomFieldValue.class, EntityCustomFieldValueFilterMixIn.class);
@@ -43,26 +47,27 @@ public class JsonGenericMapper extends ObjectMapper{
 
     private void setUpConfig() {
         setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        setVisibility(PropertyAccessor.FIELD, Visibility.ANY); // AK added, so that in case of immutable classes, private fields, that do not have setters, are also serialized
         configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
-        configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true);
+        configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true); // AK Do not change to false, as it will serialize all getXXX() methods, which might not be related to actual fields
     }
 
     public String toJson(Set<String> fields, Class entityClass, Object dtoToSerialize, Set<String> excludedFields) {
-    	if(fields != null && !fields.isEmpty()){
+        if (fields != null && !fields.isEmpty()) {
             addMixIn(entityClass, EntityFieldsFilterMixIn.class);
             Set<String> simpleFields = fields.stream().filter(f -> !f.contains(".")).collect(Collectors.toSet());
             fields.stream().filter(f -> f.contains(".")).forEach(f -> {
-            	simpleFields.addAll(Arrays.asList(f.substring(0, f.lastIndexOf(".")).split("\\.")));
+                simpleFields.addAll(Arrays.asList(f.substring(0, f.lastIndexOf(".")).split("\\.")));
             });
-            
+
             simpleFilterProvider.addFilter("EntityFieldsFilter", SimpleBeanPropertyFilter.filterOutAllExcept(simpleFields));
             addMixIn(IEntity.class, EntitySubObjectFieldFilterMixIn.class);
             this.simpleFilterProvider.addFilter("EntitySubObjectFieldFilter", new GenericSimpleBeanPropertyFilter(getEntitySubFieldsToInclude(fields)));
-        }   
-    	if((fields == null || fields.isEmpty())  && excludedFields != null && !excludedFields.isEmpty()){
+        }
+        if ((fields == null || fields.isEmpty()) && excludedFields != null && !excludedFields.isEmpty()) {
             addMixIn(entityClass, EntityFieldsFilterMixIn.class);
             simpleFilterProvider.addFilter("EntityFieldsFilter", SimpleBeanPropertyFilter.serializeAllExcept(excludedFields));
-        }	
+        }
         setFilterProvider(this.simpleFilterProvider);
         try {
             return writeValueAsString(dtoToSerialize);
@@ -72,11 +77,11 @@ public class JsonGenericMapper extends ObjectMapper{
     }
 
     public IEntity parseFromJson(String jsonDto, Class entityClass) {
-        return  (IEntity) readValue(jsonDto, entityClass);
+        return (IEntity) readValue(jsonDto, entityClass);
     }
 
     @Override
-    public <T> T readValue(String content, Class<T> valueType){
+    public <T> T readValue(String content, Class<T> valueType) {
         try {
             return super.readValue(regularizeJsonDtoArrayIds(content), valueType);
         } catch (IOException e) {
@@ -87,37 +92,36 @@ public class JsonGenericMapper extends ObjectMapper{
     private String regularizeJsonDtoArrayIds(String jsonDto) throws IOException {
         JsonNode rootJsonNode = readTree(jsonDto);
         Iterator<JsonNode> elements = rootJsonNode.elements();
-        while(elements.hasNext()){
+        while (elements.hasNext()) {
             JsonNode next = elements.next();
-            if(next.isArray()){
+            if (next.isArray()) {
                 ArrayNode arrayJsonNodes = JsonNodeFactory.instance.arrayNode();
                 Iterator<JsonNode> subNext = next.elements();
-                while(subNext.hasNext()){
+                while (subNext.hasNext()) {
                     JsonNode jsonNode = subNext.next();
-                    if(jsonNode.isInt()){
+                    if (jsonNode.isInt()) {
                         ObjectNode objectJsonNode = JsonNodeFactory.instance.objectNode();
                         objectJsonNode.put("id", jsonNode.intValue());
                         arrayJsonNodes.add(objectJsonNode);
                     }
                 }
-                if(arrayJsonNodes.size()>0){
-                    ((ArrayNode)next).removeAll();
-                    ((ArrayNode)next).addAll(arrayJsonNodes);
+                if (arrayJsonNodes.size() > 0) {
+                    ((ArrayNode) next).removeAll();
+                    ((ArrayNode) next).addAll(arrayJsonNodes);
                 }
             }
         }
         return rootJsonNode.toString();
     }
 
-
-    private Set<String>  getEntitySubFieldsToInclude(Set<String> fields) {
-        if(fields == null ){
+    private Set<String> getEntitySubFieldsToInclude(Set<String> fields) {
+        if (fields == null) {
             return Collections.emptySet();
         }
         Set<String> filteredSubFields = new HashSet<>();
         Iterator<String> iterator = fields.iterator();
         iterator.forEachRemaining(s -> {
-            if(s.contains(".")){
+            if (s.contains(".")) {
                 filteredSubFields.add(s);
             }
         });
@@ -125,28 +129,36 @@ public class JsonGenericMapper extends ObjectMapper{
     }
 
     @JsonFilter("EntityFieldsFilter")
-    private abstract class EntityFieldsFilterMixIn {}
+    private abstract class EntityFieldsFilterMixIn {
+    }
 
     @JsonFilter("EntityCustomFieldValuesFilter")
-    private abstract class EntityCustomFieldValuesFilterMixIn {}
+    private abstract class EntityCustomFieldValuesFilterMixIn {
+    }
 
     @JsonFilter("EntityCustomFieldValueFilter")
-    private abstract class EntityCustomFieldValueFilterMixIn {}
+    private abstract class EntityCustomFieldValueFilterMixIn {
+    }
 
     @JsonFilter("EntitySubObjectFieldFilter")
-    private abstract class EntitySubObjectFieldFilterMixIn {}
+    private abstract class EntitySubObjectFieldFilterMixIn {
+    }
 
     @JsonFilter("CollectionFilter")
-    private abstract class CollectionMixIn {}
+    private abstract class CollectionMixIn {
+    }
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    private interface InfiniteRecursionMixIn {}
+    private interface InfiniteRecursionMixIn {
+    }
 
     @JsonFilter("EntityForbiddenFieldsFilter")
-    private class BaseEntityMixIn{}
+    private class BaseEntityMixIn {
+    }
 
     @JsonFilter("GenericPaginatedResourceFilter")
-    private abstract class GenericPaginatedResourceMixIn {}
+    private abstract class GenericPaginatedResourceMixIn {
+    }
 
     public static class Builder {
         private SimpleFilterProvider simpleFilterProvider;
@@ -155,31 +167,28 @@ public class JsonGenericMapper extends ObjectMapper{
         private Long nestedDepth;
         private boolean shouldExtractList;
 
-        public static Builder getBuilder(){
+        public static Builder getBuilder() {
             return new Builder();
         }
 
-        public Builder withNestedEntities(Set<String> nestedEntities){
+        public Builder withNestedEntities(Set<String> nestedEntities) {
             this.nestedEntities = nestedEntities;
             return this;
         }
 
-        public Builder withNestedDepth(Long nestedDepth){
+        public Builder withNestedDepth(Long nestedDepth) {
             this.nestedDepth = nestedDepth;
             return this;
         }
 
-        public Builder withExtractList(boolean shouldExtractList){
+        public Builder withExtractList(boolean shouldExtractList) {
             this.shouldExtractList = shouldExtractList;
             return this;
         }
 
-        public JsonGenericMapper build(){
-            module = GenericModule.Builder.getBuilder()
-                    .withEntityToLoad(nestedEntities)
-                    .withNestedDepth(nestedDepth)
-                    .build();
-            if(simpleFilterProvider == null){
+        public JsonGenericMapper build() {
+            module = GenericModule.Builder.getBuilder().withEntityToLoad(nestedEntities).withNestedDepth(nestedDepth).build();
+            if (simpleFilterProvider == null) {
                 simpleFilterProvider = new GenericSimpleFilterProvider(shouldExtractList, nestedEntities);
             }
             return new JsonGenericMapper(module, simpleFilterProvider);

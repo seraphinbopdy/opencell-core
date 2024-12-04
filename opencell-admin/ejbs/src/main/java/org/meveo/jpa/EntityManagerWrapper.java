@@ -20,10 +20,10 @@ package org.meveo.jpa;
 
 import java.io.Serializable;
 
-import javax.persistence.EntityManager;
-
 import org.meveo.model.audit.ChangeOriginEnum;
 import org.meveo.service.audit.AuditOrigin;
+
+import jakarta.persistence.EntityManager;
 
 /**
  * A wrapper for Entity manager injection and its manipulation in application manager persistence context. Only one level of depth is supported. That is, can not nest two interceptors.

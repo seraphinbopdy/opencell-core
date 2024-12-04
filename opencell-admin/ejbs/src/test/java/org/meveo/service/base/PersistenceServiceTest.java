@@ -16,350 +16,382 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.meveo.admin.util.pagination.FilterOperatorEnum;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.Invoice;
+import org.meveo.model.shared.DateUtils;
+import org.meveo.service.billing.impl.InvoiceService;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PersistenceServiceTest {
 
-    private PersistenceService persistenceService;
-    private Map<String, Object> filters = new HashMap<>();
-
-    @Before
-    public void setUp() throws Exception {
-        persistenceService = new PersistenceServiceMock();
-    }
+    @Spy
+    @InjectMocks
+    private InvoiceService invoiceService;
 
     @Test
     public void test_empty_filters() {
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField");
+        assertThat(getQuery(null)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField");
     }
 
     @Test
     public void test_search_att_type_class_list_class() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("eq " + SEARCH_ATTR_TYPE_CLASS, List.of("org.meveo.model.billing.Invoice"));
 
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "type(a) in (:typeClass) Param name:typeClass value:[class org.meveo.model.billing.Invoice]");
+        assertThat(getQuery(filters)).isEqualTo(
+            "select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "type(a) in (:typeClass) Param name:typeClass value:[class org.meveo.model.billing.Invoice]");
     }
 
     @Test
     public void test_search_att_type_class_class() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("eq " + SEARCH_ATTR_TYPE_CLASS, Invoice.class);
 
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where type(a) = :typeClass Param name:typeClass value:class org.meveo.model.billing.Invoice");
+        assertThat(getQuery(filters))
+            .isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where type(a) = :typeClass Param name:typeClass value:class org.meveo.model.billing.Invoice");
     }
 
     @Test
     public void test_search_att_type_class_string() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("eq " + SEARCH_ATTR_TYPE_CLASS, "org.meveo.model.billing.Invoice");
 
-        assertThat(getQuery()).isEqualTo("" +
-                "from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where type(a) = :typeClass Param name:typeClass value:class org.meveo.model.billing.Invoice");
+        assertThat(getQuery(filters))
+            .isEqualTo("" + "select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where type(a) = :typeClass Param name:typeClass value:class org.meveo.model.billing.Invoice");
     }
 
     @Test
     public void test_from_range() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("fromRange fromRangeField", 1);
 
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "a.fromRangeField >= :a_fromRangeField " +
-                "Param name:a_fromRangeField value:1");
+        assertThat(getQuery(filters))
+            .isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "a.fromRangeField >= :a_fromRangeField " + "Param name:a_fromRangeField value:1");
     }
 
     @Test
     public void test_to_range() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("toRange toRangeField", 1);
 
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "a.toRangeField < :a_toRangeField " +
-                "Param name:a_toRangeField value:1");
+        assertThat(getQuery(filters))
+            .isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "a.toRangeField < :a_toRangeField " + "Param name:a_toRangeField value:1");
     }
 
     @Test
     public void test_to_range_inclusive() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("toRangeInclusive toRangeInclusiveField", 1);
 
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "a.toRangeInclusiveField <= :a_toRangeInclusiveField " +
-                "Param name:a_toRangeInclusiveField value:1");
+        assertThat(getQuery(filters)).isEqualTo(
+            "select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "a.toRangeInclusiveField <= :a_toRangeInclusiveField " + "Param name:a_toRangeInclusiveField value:1");
     }
 
     @Test
     public void test_to_range_optional() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("toOptionalRange toRangeInclusiveField", 1);
 
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "(" +
-                "a.toRangeInclusiveField IS NULL " +
-                "or (a.toRangeInclusiveField < :a_toRangeInclusiveField)" +
-                ") " +
-                "Param name:a_toRangeInclusiveField value:1");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "(" + "a.toRangeInclusiveField IS NULL "
+                + "or (a.toRangeInclusiveField < :a_toRangeInclusiveField)" + ") " + "Param name:a_toRangeInclusiveField value:1");
     }
 
     @Test
     public void test_to_optional_range_inclusive() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("toOptionalRangeInclusive toOptionalRangeInclusiveField", 1);
 
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "(" +
-                "a.toOptionalRangeInclusiveField IS NULL " +
-                "or (a.toOptionalRangeInclusiveField <= :a_toOptionalRangeInclusiveField)" +
-                ") " +
-                "Param name:a_toOptionalRangeInclusiveField value:1");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "(" + "a.toOptionalRangeInclusiveField IS NULL "
+                + "or (a.toOptionalRangeInclusiveField <= :a_toOptionalRangeInclusiveField)" + ") " + "Param name:a_toOptionalRangeInclusiveField value:1");
     }
 
     @Test
     public void test_list() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("list listField1", 1);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                ":listField1 in elements(a.listField1) " +
-                "Param name:listField1 value:1");
+        assertThat(getQuery(filters))
+            .isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + ":a_listField1 in elements(a.listField1) " + "Param name:a_listField1 value:1");
     }
 
     @Test
-    public void inner_join_for_is_equal_requests() {
+    public void inner_join_for_is_equal_requests_fetch_field() {
+
         QueryBuilder query = new QueryBuilder(Invoice.class, "I", List.of("billingAccount.id"));
         query.addValueIsEqualToField("a.b.c", "value", false, true);
-        assertThat(query.toString()).contains("left join fetch I.a a_", "INNER join fetch a_");
+        assertThat(query.toString())
+            .isEqualTo("select I.billingAccount.id from org.meveo.model.billing.Invoice I left join I.a a_0 left join a_0.b b_1  where (b_1.c IS NULL or (lower(b_1.c) = :b_1_c)) Param name:b_1_c value:value");
+    }
+
+    @Test
+    public void inner_join_for_is_equal_requests_fetch_entity() {
+
+        QueryBuilder query = new QueryBuilder(Invoice.class, "I", List.of("billingAccount"));
+        query.addValueIsEqualToField("a.b.c", "value", false, true);
+        assertThat(query.toString()).isEqualTo(
+            "select I from org.meveo.model.billing.Invoice I left join fetch I.billingAccount as I_billingAccount left join I.a a_0 left join a_0.b b_1  where (b_1.c IS NULL or (lower(b_1.c) = :b_1_c)) Param name:b_1_c value:value");
     }
 
     @Test
     public void inner_join_for_is_list_requests() {
         QueryBuilder query = new QueryBuilder(Invoice.class, "I", List.of("billingAccount.id"));
         query.addListFilters("a.b.c", "Value");
-        assertThat(query.toString()).contains("left join fetch I.a a_");
+        assertThat(query.toString()).isEqualTo("select I.billingAccount.id from org.meveo.model.billing.Invoice I left join I.a a_0 left join a_0.b b_1  where :b_1_c in elements(b_1.c) Param name:b_1_c value:Value");
     }
 
     @Test
     public void test_in_list() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("inList invoiceAgregates", List.of("hello", "test"));
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where  " +
-                "exists " +
-                "(" +
-                    "select invoiceAgregatesItemAlias from org.meveo.model.billing.Invoice invoiceAgregatesItemAlias,IN (invoiceAgregatesItemAlias.invoiceAgregates) as invoiceAgregatesItem where" +
-                        " invoiceAgregatesItemAlias=a and invoiceAgregatesItem IN (:invoiceAgregates)" +
-                ") " +
-                "Param name:invoiceAgregates value:[hello, test]");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where  " + "exists " + "("
+                + "select invoiceAgregatesItemAlias from org.meveo.model.billing.Invoice invoiceAgregatesItemAlias,IN (invoiceAgregatesItemAlias.invoiceAgregates) as invoiceAgregatesItem where"
+                + " invoiceAgregatesItemAlias=a and invoiceAgregatesItem IN (:invoiceAgregates)" + ") " + "Param name:invoiceAgregates value:[hello, test]");
     }
 
     @Test
     public void test_not_in_list_json() {
-        filters.put("not-inList " + FROM_JSON_FUNCTION + "jsonField)", List.of("hello", "test"));
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "lower(FromJson(a.jsonField)) NOT  IN (:FromJson_a_jsonField_) Param name:FromJson_a_jsonField_ value:[hello, test]");
+
+        Map<String, Object> filters = new HashMap<>();
+        filters.put("not-inList varcharFromJson(a.jsonField,testCFT)", List.of("hello", "test"));
+        assertThat(getQuery(filters)).isEqualTo(
+            "select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where lower(varcharFromJson(a.jsonField,testCFT)) NOT  IN (:varcharFromJson_a_jsonField_testCFT_) Param name:varcharFromJson_a_jsonField_testCFT_ value:[hello, test]");
     }
 
     @Test
     public void test_not_in_list_collection() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("not-inList invoiceAgregates", List.of("hello", "test"));
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where  " +
-                "exists " +
-                "(" +
-                    "select invoiceAgregatesItemAlias from org.meveo.model.billing.Invoice invoiceAgregatesItemAlias," +
-                        "IN (invoiceAgregatesItemAlias.invoiceAgregates) as invoiceAgregatesItem where invoiceAgregatesItemAlias=a " +
-                        "and invoiceAgregatesItem NOT  IN (:invoiceAgregates)" +
-                ") Param name:invoiceAgregates value:[hello, test]");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where  " + "exists " + "("
+                + "select invoiceAgregatesItemAlias from org.meveo.model.billing.Invoice invoiceAgregatesItemAlias,"
+                + "IN (invoiceAgregatesItemAlias.invoiceAgregates) as invoiceAgregatesItem where invoiceAgregatesItemAlias=a " + "and invoiceAgregatesItem NOT  IN (:invoiceAgregates)"
+                + ") Param name:invoiceAgregates value:[hello, test]");
     }
 
     @Test
     public void test_min_max_range() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("minmaxRange minmaxRangeField1 minmaxRangeField2", 3);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "a.minmaxRangeField1<=:a_minmaxRangeField1 and a.minmaxRangeField2 > :a_minmaxRangeField2 " +
-                "Param name:a_minmaxRangeField1 value:3 Param name:a_minmaxRangeField2 value:3");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where "
+                + "a.minmaxRangeField1<=:a_minmaxRangeField1 and a.minmaxRangeField2 > :a_minmaxRangeField2 " + "Param name:a_minmaxRangeField1 value:3 Param name:a_minmaxRangeField2 value:3");
     }
 
     @Test
     public void test_min_max_range_inclusive() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("minmaxRangeInclusive minmaxRangeInclusiveField1 minmaxRangeInclusiveField2", 3);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "a.minmaxRangeInclusiveField1<=:a_minmaxRangeInclusiveField1 and a.minmaxRangeInclusiveField2 >= :a_minmaxRangeInclusiveField2 " +
-                "Param name:a_minmaxRangeInclusiveField2 value:3 Param name:a_minmaxRangeInclusiveField1 value:3");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where "
+                + "a.minmaxRangeInclusiveField1<=:a_minmaxRangeInclusiveField1 and a.minmaxRangeInclusiveField2 >= :a_minmaxRangeInclusiveField2 "
+                + "Param name:a_minmaxRangeInclusiveField2 value:3 Param name:a_minmaxRangeInclusiveField1 value:3");
     }
 
     @Test
     public void test_min_max_range_optional() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("minmaxOptionalRange minmaxOptionalRangeField1 minmaxOptionalRangeField2", 3);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "(" +
-                "(a.minmaxOptionalRangeField1 IS NULL and a.minmaxOptionalRangeField2 IS NULL) " +
-                "or (a.minmaxOptionalRangeField1<=:a_minmaxOptionalRangeField1 and :a_minmaxOptionalRangeField1<a.minmaxOptionalRangeField2) " +
-                "or (a.minmaxOptionalRangeField1<=:a_minmaxOptionalRangeField1 and a.minmaxOptionalRangeField2 IS NULL) " +
-                "or (a.minmaxOptionalRangeField1 IS NULL and :a_minmaxOptionalRangeField1<a.minmaxOptionalRangeField2)" +
-                ") " +
-                "Param name:a_minmaxOptionalRangeField1 value:3");
+        assertThat(getQuery(filters))
+            .isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "(" + "(a.minmaxOptionalRangeField1 IS NULL and a.minmaxOptionalRangeField2 IS NULL) "
+                    + "or (a.minmaxOptionalRangeField1<=:a_minmaxOptionalRangeField1 and :a_minmaxOptionalRangeField1<a.minmaxOptionalRangeField2) "
+                    + "or (a.minmaxOptionalRangeField1<=:a_minmaxOptionalRangeField1 and a.minmaxOptionalRangeField2 IS NULL) "
+                    + "or (a.minmaxOptionalRangeField1 IS NULL and :a_minmaxOptionalRangeField1<a.minmaxOptionalRangeField2)" + ") " + "Param name:a_minmaxOptionalRangeField1 value:3");
     }
 
     @Test
     public void test_min_max_range_optional_inclusive() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("minmaxOptionalRangeInclusive minmaxOptionalRangeInclusiveField1 minmaxOptionalRangeInclusiveField2", 3);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "(" +
-                "(a.minmaxOptionalRangeInclusiveField1 IS NULL and a.minmaxOptionalRangeInclusiveField2 IS NULL) " +
-                "or (a.minmaxOptionalRangeInclusiveField1<=:a_minmaxOptionalRangeInclusiveField1 and :a_minmaxOptionalRangeInclusiveField1<=a.minmaxOptionalRangeInclusiveField2) or (a.minmaxOptionalRangeInclusiveField1<=:a_minmaxOptionalRangeInclusiveField1 and a.minmaxOptionalRangeInclusiveField2 IS NULL) " +
-                "or (a.minmaxOptionalRangeInclusiveField1 IS NULL and :a_minmaxOptionalRangeInclusiveField1<=a.minmaxOptionalRangeInclusiveField2)" +
-                ") " +
-                "Param name:a_minmaxOptionalRangeInclusiveField1 value:3");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "("
+                + "(a.minmaxOptionalRangeInclusiveField1 IS NULL and a.minmaxOptionalRangeInclusiveField2 IS NULL) "
+                + "or (a.minmaxOptionalRangeInclusiveField1<=:a_minmaxOptionalRangeInclusiveField1 and :a_minmaxOptionalRangeInclusiveField1<=a.minmaxOptionalRangeInclusiveField2) or (a.minmaxOptionalRangeInclusiveField1<=:a_minmaxOptionalRangeInclusiveField1 and a.minmaxOptionalRangeInclusiveField2 IS NULL) "
+                + "or (a.minmaxOptionalRangeInclusiveField1 IS NULL and :a_minmaxOptionalRangeInclusiveField1<=a.minmaxOptionalRangeInclusiveField2)" + ") " + "Param name:a_minmaxOptionalRangeInclusiveField1 value:3");
     }
 
     @Test
     public void test_from_range_optional() {
-        filters.put("fromOptionalRange fromOptionalRangeField", 1);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where "
-        		+ "("
-        		+ "a.fromOptionalRangeField IS NULL "
-        		+ "or (a.fromOptionalRangeField > :a_fromOptionalRangeField)" +
-                ") " +
-                "Param name:a_fromOptionalRangeField value:1");
 
+        Map<String, Object> filters = new HashMap<>();
+        filters.put("fromOptionalRange fromOptionalRangeField", 1);
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where (a.fromOptionalRangeField IS NULL "
+                + "or (a.fromOptionalRangeField >= :a_fromOptionalRangeField)) Param name:a_fromOptionalRangeField value:1");
 
     }
 
     @Test
     public void test_overlap_optional_range() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("overlapOptionalRange overlapOptionalRangeFiled1 overlapOptionalRangeField2", List.of(10, 20));
-        String query = getQuery();
-        assertThat(query).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "(" +
-                "( a.overlapOptionalRangeFiled1 IS NULL and a.overlapOptionalRangeField2 IS NULL) " +
-                "or  ( a.overlapOptionalRangeFiled1 IS NULL and :a_overlapOptionalRangeFiled1<a.overlapOptionalRangeField2) " +
-                "or (a.overlapOptionalRangeField2 IS NULL and a.overlapOptionalRangeFiled1<:a_overlapOptionalRangeField2) " +
-                "or (a.overlapOptionalRangeFiled1 IS NOT NULL and a.overlapOptionalRangeField2 IS NOT NULL " +
-                "and (" +
-                "(a.overlapOptionalRangeFiled1<=:a_overlapOptionalRangeFiled1 and :a_overlapOptionalRangeFiled1<a.overlapOptionalRangeField2) " +
-                "or (:a_overlapOptionalRangeFiled1<=a.overlapOptionalRangeFiled1 and a.overlapOptionalRangeFiled1<:a_overlapOptionalRangeField2)" +
-                ")" +
-                ")" +
-                ") Param name:a_overlapOptionalRangeFiled1 value:10 Param name:a_overlapOptionalRangeField2 value:20");
+        String query = getQuery(filters);
+        assertThat(query).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "("
+                + "( a.overlapOptionalRangeFiled1 IS NULL and a.overlapOptionalRangeField2 IS NULL) " + "or  ( a.overlapOptionalRangeFiled1 IS NULL and :a_overlapOptionalRangeFiled1<a.overlapOptionalRangeField2) "
+                + "or (a.overlapOptionalRangeField2 IS NULL and a.overlapOptionalRangeFiled1<:a_overlapOptionalRangeField2) " + "or (a.overlapOptionalRangeFiled1 IS NOT NULL and a.overlapOptionalRangeField2 IS NOT NULL "
+                + "and (" + "(a.overlapOptionalRangeFiled1<=:a_overlapOptionalRangeFiled1 and :a_overlapOptionalRangeFiled1<a.overlapOptionalRangeField2) "
+                + "or (:a_overlapOptionalRangeFiled1<=a.overlapOptionalRangeFiled1 and a.overlapOptionalRangeFiled1<:a_overlapOptionalRangeField2)" + ")" + ")"
+                + ") Param name:a_overlapOptionalRangeFiled1 value:10 Param name:a_overlapOptionalRangeField2 value:20");
     }
 
     @Test
     public void test_overlap_optional_range_inclusive() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("overlapOptionalRangeInclusive overlapOptionalRangeFiled1 overlapOptionalRangeField2", List.of(10, 20));
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "(" +
-                "( a.overlapOptionalRangeFiled1 IS NULL and a.overlapOptionalRangeField2 IS NULL) " +
-                "or  ( a.overlapOptionalRangeFiled1 IS NULL and :a_overlapOptionalRangeFiled1<=a.overlapOptionalRangeField2) " +
-                "or (a.overlapOptionalRangeField2 IS NULL and a.overlapOptionalRangeFiled1<=:a_overlapOptionalRangeField2) " +
-                "or (a.overlapOptionalRangeFiled1 IS NOT NULL and a.overlapOptionalRangeField2 IS NOT NULL " +
-                "and (" +
-                "(a.overlapOptionalRangeFiled1<=:a_overlapOptionalRangeFiled1 and :a_overlapOptionalRangeFiled1<=a.overlapOptionalRangeField2) " +
-                "or (:a_overlapOptionalRangeFiled1<=a.overlapOptionalRangeFiled1 and a.overlapOptionalRangeFiled1<=:a_overlapOptionalRangeField2)" +
-                ")" +
-                ")" +
-                ") Param name:a_overlapOptionalRangeFiled1 value:10 Param name:a_overlapOptionalRangeField2 value:20");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "("
+                + "( a.overlapOptionalRangeFiled1 IS NULL and a.overlapOptionalRangeField2 IS NULL) " + "or  ( a.overlapOptionalRangeFiled1 IS NULL and :a_overlapOptionalRangeFiled1<=a.overlapOptionalRangeField2) "
+                + "or (a.overlapOptionalRangeField2 IS NULL and a.overlapOptionalRangeFiled1<=:a_overlapOptionalRangeField2) "
+                + "or (a.overlapOptionalRangeFiled1 IS NOT NULL and a.overlapOptionalRangeField2 IS NOT NULL " + "and ("
+                + "(a.overlapOptionalRangeFiled1<=:a_overlapOptionalRangeFiled1 and :a_overlapOptionalRangeFiled1<=a.overlapOptionalRangeField2) "
+                + "or (:a_overlapOptionalRangeFiled1<=a.overlapOptionalRangeFiled1 and a.overlapOptionalRangeFiled1<=:a_overlapOptionalRangeField2)" + ")" + ")"
+                + ") Param name:a_overlapOptionalRangeFiled1 value:10 Param name:a_overlapOptionalRangeField2 value:20");
     }
 
     @Test
     public void test_like_criterias() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("likeCriterias likeCriteriasField1 likeCriteriasField2 likeCriteriasField3", "%abc");
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "(" +
-                "lower(a.likeCriteriasField1) = :a_likeCriteriasField1 " +
-                "or lower(a.likeCriteriasField2) = :a_likeCriteriasField2 " +
-                "or lower(a.likeCriteriasField3) = :a_likeCriteriasField3" +
-                ") " +
-                "Param name:a_likeCriteriasField3 value:%abc Param name:a_likeCriteriasField2 value:%abc Param name:a_likeCriteriasField1 value:%abc");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "(" + "lower(a.likeCriteriasField1) = :a_likeCriteriasField1 "
+                + "or lower(a.likeCriteriasField2) = :a_likeCriteriasField2 " + "or lower(a.likeCriteriasField3) = :a_likeCriteriasField3" + ") "
+                + "Param name:a_likeCriteriasField3 value:%abc Param name:a_likeCriteriasField2 value:%abc Param name:a_likeCriteriasField1 value:%abc");
     }
 
     @Test
     public void test_search_wild_card() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put(PersistenceService.SEARCH_WILDCARD_OR + " wildcardOrField1 wildcardOrField2 wildcardOrField3", "*abc");
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where "
-        		+ "(a.wildcardOrField1 like :a_wildcardOrField1 "
-        		+ "or a.wildcardOrField2 like :a_wildcardOrField2 "
-        		+ "or a.wildcardOrField3 like :a_wildcardOrField3) "
-        		+ "Param name:a_wildcardOrField3 value:%*abc% Param name:a_wildcardOrField1 value:%*abc% Param name:a_wildcardOrField2 value:%*abc%");
+        assertThat(getQuery(filters)).isEqualTo(
+            "select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "(a.wildcardOrField1 like :a_wildcardOrField1 " + "or a.wildcardOrField2 like :a_wildcardOrField2 "
+                    + "or a.wildcardOrField3 like :a_wildcardOrField3) " + "Param name:a_wildcardOrField3 value:%*abc% Param name:a_wildcardOrField1 value:%*abc% Param name:a_wildcardOrField2 value:%*abc%");
     }
 
     @Test
     public void test_search_wild_card_ignore_case() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put(SEARCH_WILDCARD_OR_IGNORE_CAS + " wildcardOrField1 wildcardOrField2 wildcardOrField3", "*abc");
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "(" +
-                "lower(a.wildcardOrField1) like :a_wildcardOrField1 "
-                + "or lower(a.wildcardOrField2) like :a_wildcardOrField2 "
-                + "or lower(a.wildcardOrField3) like :a_wildcardOrField3"
-                + ") "
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "(" + "lower(a.wildcardOrField1) like :a_wildcardOrField1 "
+                + "or lower(a.wildcardOrField2) like :a_wildcardOrField2 " + "or lower(a.wildcardOrField3) like :a_wildcardOrField3" + ") "
                 + "Param name:a_wildcardOrField3 value:%*abc% Param name:a_wildcardOrField1 value:%*abc% Param name:a_wildcardOrField2 value:%*abc%");
     }
 
     @Test
     public void test_search_SQL() {
-        String[] data = {"select  a.selectField1 from tableName a  where a.selectField1 = a", "selectField2"};
+
+        Map<String, Object> filters = new HashMap<>();
+        String[] data = { "select  a.selectField1 from tableName a  where a.selectField1 = a", "selectField2" };
         filters.put(SEARCH_SQL, data);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "select  a.selectField1 from tableName a  where a.selectField1 = a");
+        assertThat(getQuery(filters))
+            .isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "select  a.selectField1 from tableName a  where a.selectField1 = a");
     }
 
     @Test
     public void test_search_by_is_null_json() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("key" + FROM_JSON_FUNCTION + "jsonField)", SEARCH_IS_NULL);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where keyFromJson(a.jsonField) is null ");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where keyFromJson(a.jsonField) is null ");
     }
 
     @Test
     public void test_search_by_is_null_collection() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("key invoiceAgregates", SEARCH_IS_NULL);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where a.invoiceAgregates is empty ");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where a.invoiceAgregates is empty ");
     }
 
     @Test
     public void test_search_by_is_not_null() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("key" + FROM_JSON_FUNCTION + "jsonField)", SEARCH_IS_NOT_NULL);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where keyFromJson(a.jsonField) is not null ");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where keyFromJson(a.jsonField) is not null ");
     }
 
     @Test
     public void test_search_by_is_not_null_collections() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("key invoiceAgregates", SEARCH_IS_NOT_NULL);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where a.invoiceAgregates is not empty ");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where a.invoiceAgregates is not empty ");
     }
 
     @Test
     public void test_not_equal() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("ne notEqualField", 1);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where a.notEqualField != :a_notEqualField Param name:a_notEqualField value:1");
+        assertThat(getQuery(filters))
+            .isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where a.notEqualField != :a_notEqualField Param name:a_notEqualField value:1");
     }
 
     @Test
     public void test_optional_not_equal() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("neOptional notEqualField", 1);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "(" +
-                "a.notEqualField IS NULL " +
-                "or (a.notEqualField != :a_notEqualField)" +
-                ") Param name:a_notEqualField value:1");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "(" + "a.notEqualField IS NULL "
+                + "or (a.notEqualField != :a_notEqualField)" + ") Param name:a_notEqualField value:1");
     }
 
     @Test
     public void test_base_entity() {
+
         Invoice invoice = new Invoice();
         invoice.setId(1L);
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("eq", invoice);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where a.eq = :a_eq Param name:a_eq value:Invoice[id=1, invoiceNumber=null, invoiceType=null]");
+        assertThat(getQuery(filters))
+            .isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where a.eq = :a_eq Param name:a_eq value:Invoice[id=1, invoiceNumber=null, invoiceType=null]");
     }
 
     @Test
     public void test_auditable_hash_map() {
         Map<Object, Object> map = new HashMap<>();
-        map.put(1, Date.from(LocalDate.of(2020, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        Date date = Date.from(LocalDate.of(2020, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date dateEnd = Date.from(LocalDate.of(2020, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        map.put(1, date);
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("eq auditable", map);
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where (a.auditable.1>=:startaauditable1 and a.auditable.1<:endaauditable1) Param name:startaauditable1 value:Wed Jan 01 00:00:00 WEST 2020 Param name:endaauditable1 value:Thu Jan 02 00:00:00 WEST 2020");
+        assertThat(getQuery(filters)).isEqualTo(
+            "select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where (a.auditable.1>=:startaauditable1 and a.auditable.1<:endaauditable1) Param name:startaauditable1 value:"
+                    + DateUtils.formatAsTime(date) + " Param name:endaauditable1 value:" + DateUtils.formatAsTime(dateEnd));
     }
 
     @Test
     public void equal_string() {
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("code", "value");
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where lower(a.code) = :a_code Param name:a_code value:value");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where lower(a.code) = :a_code Param name:a_code value:value");
     }
 
     @Test
     public void test() {
+
+        Map<String, Object> filters = new HashMap<>();
 //    	filters.put("$operator", 'O');
         filters.put("defaultEqualFilter", 1);
         filters.put("eq equalFilter", 2);
@@ -372,73 +404,55 @@ public class PersistenceServiceTest {
         filters.put(SEARCH_WILDCARD_OR + " wildcardOrFilter", "wildCard*");
         filters.put(SEARCH_WILDCARD_OR_IGNORE_CAS + " wildcardOrIgnoreCaseFilter", "wildCardIngoreCase*");
 
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " +
-                "a.defaultEqualFilter = :a_defaultEqualFilter " +
-                "and (" +
-                "( a.overlapOptionalRangeFilter1 IS NULL and a.overlapOptionalRangeFilter2 IS NULL) " +
-                "or  ( a.overlapOptionalRangeFilter1 IS NULL and :a_overlapOptionalRangeFilter1<a.overlapOptionalRangeFilter2) " +
-                "or (a.overlapOptionalRangeFilter2 IS NULL and a.overlapOptionalRangeFilter1<:a_overlapOptionalRangeFilter2) " +
-                "or (a.overlapOptionalRangeFilter1 IS NOT NULL and a.overlapOptionalRangeFilter2 IS NOT NULL " +
-                "and (" +
-                "(a.overlapOptionalRangeFilter1<=:a_overlapOptionalRangeFilter1 and :a_overlapOptionalRangeFilter1<a.overlapOptionalRangeFilter2) " +
-                "or (:a_overlapOptionalRangeFilter1<=a.overlapOptionalRangeFilter1 and a.overlapOptionalRangeFilter1<:a_overlapOptionalRangeFilter2)" +
-                ")" +
-                ")" +
-                ") " +
-                "and (lower(a.likeCriteriasFilter) = :a_likeCriteriasFilter) " +
-                "and (lower(a.wildcardOrIgnoreCaseFilter) like :a_wildcardOrIgnoreCaseFilter) " +
-                "and (a.wildcardOrFilter like :a_wildcardOrFilter) " +
-                "and :listFilter in elements(a.listFilter) " +
-                "and a.toRangeFilter < :a_toRangeFilter " +
-                "and a.minmaxRangeFilter1<=:a_minmaxRangeFilter1 " +
-                "and a.minmaxRangeFilter2 > :a_minmaxRangeFilter2 " +
-                "and a.fromRangeFilter >= :a_fromRangeFilter " +
-                "and a.equalFilter = :a_equalFilter " +
-                "Param name:a_equalFilter value:2 Param name:a_defaultEqualFilter value:1 Param name:listFilter value:10 Param name:a_toRangeFilter value:10 Param name:a_wildcardOrFilter value:%wildCard*% Param name:a_minmaxRangeFilter2 value:10 Param name:a_minmaxRangeFilter1 value:10 Param name:a_likeCriteriasFilter value:likeword Param name:a_fromRangeFilter value:10 Param name:a_overlapOptionalRangeFilter1 value:10 Param name:a_wildcardOrIgnoreCaseFilter value:%wildcardingorecase*% Param name:a_overlapOptionalRangeFilter2 value:15");
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a left join fetch a.fetchField as a_fetchField where " + "a.defaultEqualFilter = :a_defaultEqualFilter " + "and ("
+                + "( a.overlapOptionalRangeFilter1 IS NULL and a.overlapOptionalRangeFilter2 IS NULL) " + "or  ( a.overlapOptionalRangeFilter1 IS NULL and :a_overlapOptionalRangeFilter1<a.overlapOptionalRangeFilter2) "
+                + "or (a.overlapOptionalRangeFilter2 IS NULL and a.overlapOptionalRangeFilter1<:a_overlapOptionalRangeFilter2) "
+                + "or (a.overlapOptionalRangeFilter1 IS NOT NULL and a.overlapOptionalRangeFilter2 IS NOT NULL " + "and ("
+                + "(a.overlapOptionalRangeFilter1<=:a_overlapOptionalRangeFilter1 and :a_overlapOptionalRangeFilter1<a.overlapOptionalRangeFilter2) "
+                + "or (:a_overlapOptionalRangeFilter1<=a.overlapOptionalRangeFilter1 and a.overlapOptionalRangeFilter1<:a_overlapOptionalRangeFilter2)" + ")" + ")" + ") "
+                + "and (lower(a.likeCriteriasFilter) = :a_likeCriteriasFilter) " + "and (lower(a.wildcardOrIgnoreCaseFilter) like :a_wildcardOrIgnoreCaseFilter) " + "and (a.wildcardOrFilter like :a_wildcardOrFilter) "
+                + "and :a_listFilter in elements(a.listFilter) " + "and a.toRangeFilter < :a_toRangeFilter " + "and a.minmaxRangeFilter1<=:a_minmaxRangeFilter1 " + "and a.minmaxRangeFilter2 > :a_minmaxRangeFilter2 "
+                + "and a.fromRangeFilter >= :a_fromRangeFilter " + "and a.equalFilter = :a_equalFilter "
+                + "Param name:a_equalFilter value:2 Param name:a_defaultEqualFilter value:1 Param name:a_toRangeFilter value:10 Param name:a_wildcardOrFilter value:%wildCard*% Param name:a_minmaxRangeFilter2 value:10 Param name:a_minmaxRangeFilter1 value:10 Param name:a_listFilter value:10 Param name:a_likeCriteriasFilter value:likeword Param name:a_fromRangeFilter value:10 Param name:a_overlapOptionalRangeFilter1 value:10 Param name:a_wildcardOrIgnoreCaseFilter value:%wildcardingorecase*% Param name:a_overlapOptionalRangeFilter2 value:15");
     }
-    
+
     @Test
     public void test_filter_OR() {
-    	filters.clear();
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("$operator", FilterOperatorEnum.OR);
         filters.put("eq code", "code");
         filters.put("eq invoiceNumber", "number");
-        
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a "
-        								+ "left join fetch a.fetchField as a_fetchField "
-        								+ "where lower(a.code) = :a_code "
-        								+ "or lower(a.invoiceNumber) = :a_invoiceNumber "
-        								+ "Param name:a_code value:code Param name:a_invoiceNumber value:number");
+
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a " + "left join fetch a.fetchField as a_fetchField " + "where lower(a.code) = :a_code "
+                + "or lower(a.invoiceNumber) = :a_invoiceNumber " + "Param name:a_code value:code Param name:a_invoiceNumber value:number");
     }
 
     @Test
     public void test_filter_AND() {
-    	filters.clear();
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("$operator", FilterOperatorEnum.AND);
         filters.put("eq code", "code");
         filters.put("eq invoiceNumber", "number");
-        
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a "
-        								+ "left join fetch a.fetchField as a_fetchField "
-        								+ "where lower(a.code) = :a_code "
-        								+ "and lower(a.invoiceNumber) = :a_invoiceNumber "
-        								+ "Param name:a_code value:code Param name:a_invoiceNumber value:number");
+
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a " + "left join fetch a.fetchField as a_fetchField " + "where lower(a.code) = :a_code "
+                + "and lower(a.invoiceNumber) = :a_invoiceNumber " + "Param name:a_code value:code Param name:a_invoiceNumber value:number");
     }
 
     @Test
     public void test_filter_default() {
-    	filters.clear();
+
+        Map<String, Object> filters = new HashMap<>();
         filters.put("eq code", "code");
         filters.put("eq invoiceNumber", "number");
-        
-        assertThat(getQuery()).isEqualTo("from org.meveo.model.billing.Invoice a "
-        								+ "left join fetch a.fetchField as a_fetchField "
-        								+ "where lower(a.code) = :a_code "
-        								+ "and lower(a.invoiceNumber) = :a_invoiceNumber "
-        								+ "Param name:a_code value:code Param name:a_invoiceNumber value:number");
+
+        assertThat(getQuery(filters)).isEqualTo("select a from org.meveo.model.billing.Invoice a " + "left join fetch a.fetchField as a_fetchField " + "where lower(a.code) = :a_code "
+                + "and lower(a.invoiceNumber) = :a_invoiceNumber " + "Param name:a_code value:code Param name:a_invoiceNumber value:number");
     }
 
-    private String getQuery() {
-        return persistenceService.getQuery(new PaginationConfiguration(10, 40, filters, "text", List.of("fetchField"), "fetchField", "desc")).toString();
+    private String getQuery(Map<String, Object> filters) {
+
+        return invoiceService.getQuery(new PaginationConfiguration(10, 40, filters, "text", List.of("fetchField"), "fetchField", "desc")).toString();
     }
 }

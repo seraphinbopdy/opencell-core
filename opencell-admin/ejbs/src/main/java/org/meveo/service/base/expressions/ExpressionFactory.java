@@ -1,14 +1,18 @@
 package org.meveo.service.base.expressions;
 
+import static org.meveo.service.base.PersistenceService.FROM_JSON_FUNCTION;
+import static org.meveo.service.base.PersistenceService.SEARCH_ATTR_TYPE_CLASS;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.commons.utils.StringUtils;
-
-import java.lang.reflect.Field;
-import java.util.*;
-
-import static org.meveo.service.base.PersistenceService.FROM_JSON_FUNCTION;
-import static org.meveo.service.base.PersistenceService.SEARCH_ATTR_TYPE_CLASS;
 
 public class ExpressionFactory extends NativeExpressionFactory {
 

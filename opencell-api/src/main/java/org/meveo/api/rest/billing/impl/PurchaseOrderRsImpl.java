@@ -1,18 +1,15 @@
 package org.meveo.api.rest.billing.impl;
 
 import org.meveo.api.billing.PurchaseOrderApi;
-import org.meveo.api.dto.ActionStatus;
-import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.billing.PurchaseOrderDto;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.rest.billing.PurchaseOrderRs;
 import org.meveo.api.rest.impl.BaseRs;
-import org.meveo.model.billing.PurchaseOrder;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 
 @RequestScoped
 @Interceptors({ WsRestApiInterceptor.class })

@@ -21,30 +21,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.I18nDescripted;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.payments.OCCTemplate;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Invoice category
@@ -58,14 +59,13 @@ import org.meveo.model.payments.OCCTemplate;
 @ObservableEntity
 @ExportIdentifier({ "code" })
 @Table(name = "billing_invoice_cat", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_invoice_cat_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_cat_seq"), @Parameter(name = "increment_size", value = "1") })
 @CustomFieldEntity(cftCodePrefix = "InvoiceCategory")
 @NamedQueries({
         @NamedQuery(name = "invoiceCategory.getNbrInvoiceCatNotAssociated", query = "select count(*) from InvoiceCategory v where v.id not in (select sub.invoiceCategory.id from InvoiceSubCategory sub where sub.invoiceCategory.id is not null)", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
 
-        @NamedQuery(name = "invoiceCategory.getInvoiceCatNotAssociated", query = "from InvoiceCategory v where v.id not in (select sub.invoiceCategory.id from InvoiceSubCategory sub where sub.invoiceCategory.id is not null) ") })
+        @NamedQuery(name = "invoiceCategory.getInvoiceCatNotAssociated", query = "select v from InvoiceCategory v where v.id not in (select sub.invoiceCategory.id from InvoiceSubCategory sub where sub.invoiceCategory.id is not null) ") })
 public class InvoiceCategory extends BusinessCFEntity implements I18nDescripted {
 
     private static final long serialVersionUID = 1L;
@@ -86,7 +86,7 @@ public class InvoiceCategory extends BusinessCFEntity implements I18nDescripted 
     /**
      * Translated descriptions in JSON format with language code as a key and translated description as a value
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 
@@ -129,8 +129,7 @@ public class InvoiceCategory extends BusinessCFEntity implements I18nDescripted 
     }
 
     /**
-     * Instantiate descriptionI18n field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record
-     * will be updated in DB
+     * Instantiate descriptionI18n field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record will be updated in DB
      * 
      * @return descriptionI18n value or instantiated descriptionI18n field value
      */

@@ -30,6 +30,8 @@ import org.meveo.model.catalog.CalendarYearly;
 import org.meveo.model.catalog.DayInYear;
 import org.meveo.model.catalog.MonthEnum;
 import org.meveo.model.catalog.RecurringChargeTemplate;
+import org.meveo.model.catalog.RoundingModeEnum;
+import org.meveo.model.crm.Provider;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.billing.impl.RecurringRatingService;
 import org.meveo.service.billing.impl.WalletOperationService;
@@ -49,6 +51,9 @@ public class RecurringRatingServiceTest {
 
     @Mock
     private WalletOperationService walletOperationService;
+    
+    @Mock
+    private Provider appProvider;
 
     private CalendarYearly calendar = null;
 
@@ -103,13 +108,15 @@ public class RecurringRatingServiceTest {
                 return ratingResult;
             }
         }).when(recurringRatingService).rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                anyBoolean(), anyBoolean(), null);
+                anyBoolean(), anyBoolean(), any());
 
         doAnswer(new Answer<List<WalletOperation>>() {
             public List<WalletOperation> answer(InvocationOnMock invocation) throws Throwable {
                 return Arrays.asList((WalletOperation) invocation.getArguments()[0]);
             }
         }).when(walletOperationService).chargeWalletOperation(any());
+
+        when(appProvider.getRoundingMode()).thenReturn(RoundingModeEnum.HALF_EVEN);
 
     }
 
@@ -481,7 +488,7 @@ public class RecurringRatingServiceTest {
         newCalendar.setDays(days);
 
         when(recurringRatingService.rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(),
-                anyBoolean(), null)).thenAnswer(new Answer<RatingResult>() {
+                anyBoolean(), any())).thenAnswer(new Answer<RatingResult>() {
             public RatingResult answer(InvocationOnMock invocation) throws Throwable {
 
                 WalletOperation wo = new WalletOperation();
@@ -541,7 +548,7 @@ public class RecurringRatingServiceTest {
         newCalendar.setDays(days);
 
         when(recurringRatingService.rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(),
-                anyBoolean(), null)).thenAnswer(new Answer<RatingResult>() {
+                anyBoolean(), any())).thenAnswer(new Answer<RatingResult>() {
             public RatingResult answer(InvocationOnMock invocation) throws Throwable {
 
                 WalletOperation wo = new WalletOperation();

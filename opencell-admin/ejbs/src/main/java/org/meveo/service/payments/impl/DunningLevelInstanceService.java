@@ -1,5 +1,8 @@
 package org.meveo.service.payments.impl;
 
+import static org.meveo.model.dunning.DunningLevelInstanceStatusEnum.DONE;
+import static org.meveo.model.shared.DateUtils.addDaysToDate;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,17 +10,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.model.billing.Invoice;
-import org.meveo.model.dunning.*;
+import org.meveo.model.dunning.DunningActionInstanceStatusEnum;
+import org.meveo.model.dunning.DunningCollectionPlan;
+import org.meveo.model.dunning.DunningCollectionPlanStatus;
+import org.meveo.model.dunning.DunningLevel;
+import org.meveo.model.dunning.DunningLevelInstance;
+import org.meveo.model.dunning.DunningLevelInstanceStatusEnum;
+import org.meveo.model.dunning.DunningPolicy;
+import org.meveo.model.dunning.DunningPolicyLevel;
 import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.PersistenceService;
 
-import static org.meveo.model.dunning.DunningLevelInstanceStatusEnum.DONE;
-import static org.meveo.model.dunning.DunningLevelInstanceStatusEnum.TO_BE_DONE;
-import static org.meveo.model.shared.DateUtils.addDaysToDate;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class DunningLevelInstanceService extends PersistenceService<DunningLevelInstance> {
@@ -176,7 +183,7 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
         if (pDunningPolicyLevel.getDunningLevel().getDunningActions() != null && !pDunningPolicyLevel.getDunningLevel().getDunningActions().isEmpty()) {
             levelInstance.setActions(dunningActionInstanceService.createDunningActionInstances(null, pDunningPolicyLevel, levelInstance));
             this.update(levelInstance);
-        }
+}
 
         if (levelInstance.getLevelStatus().equals(DunningLevelInstanceStatusEnum.DONE) || levelInstance.getLevelStatus().equals(DunningLevelInstanceStatusEnum.IN_PROGRESS)) {
             levelInstance.setExecutionDate(new Date());
@@ -291,10 +298,10 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
 
                 if (reminderLevel != null && reminderLevel.isReminder()) {
                     // If the current level is reminder level, we check if the due date of the invoice is equal to the reminder level days overdue
-                    Date dateToCompare = addDaysToDate(pInvoice.getDueDate(), reminderLevel.getDaysOverdue());
+                    Date dateToCompare = DateUtils.addDaysToDate(pInvoice.getDueDate(), reminderLevel.getDaysOverdue());
 
                     if (simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today)) && !pInvoice.isReminderLevelTriggered()) {
-                        DunningLevelInstance levelInstance = createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, TO_BE_DONE);
+                        DunningLevelInstance levelInstance = createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, DunningLevelInstanceStatusEnum.TO_BE_DONE);
                         levelInstances.add(levelInstance);
                     } else {
                         DunningLevelInstance ignoredDunningLevelInstance = this.createIgnoredDunningLevelInstance(customerAccount, pInvoice, policyLevel);
@@ -302,7 +309,7 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
                         levelInstances.add(ignoredDunningLevelInstance);
                     }
                 } else {
-                    DunningLevelInstance dunningLevelInstanceWithCollectionPlan = this.createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, TO_BE_DONE);
+                    DunningLevelInstance dunningLevelInstanceWithCollectionPlan = this.createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, DunningLevelInstanceStatusEnum.TO_BE_DONE);
                     levelInstances.add(dunningLevelInstanceWithCollectionPlan);
                 }
             } else {
@@ -355,10 +362,10 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
 
                 if (reminderLevel != null && reminderLevel.isReminder()) {
                     // If the current level is reminder level, we check if the due date of the invoice is equal to the reminder level days overdue
-                    Date dateToCompare = addDaysToDate(collectionPlan.getStartDate(), reminderLevel.getDaysOverdue());
+                    Date dateToCompare = DateUtils.addDaysToDate(collectionPlan.getStartDate(), reminderLevel.getDaysOverdue());
 
                     if (simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today))) {
-                        DunningLevelInstance levelInstance = createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, TO_BE_DONE);
+                        DunningLevelInstance levelInstance = createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, DunningLevelInstanceStatusEnum.TO_BE_DONE);
                         levelInstances.add(levelInstance);
                     } else {
                         DunningLevelInstance ignoredDunningLevelInstance = this.createIgnoredDunningLevelInstance(customerAccount, policyLevel);
@@ -366,7 +373,7 @@ public class DunningLevelInstanceService extends PersistenceService<DunningLevel
                         levelInstances.add(ignoredDunningLevelInstance);
                     }
                 } else {
-                    DunningLevelInstance dunningLevelInstanceWithCollectionPlan = this.createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, TO_BE_DONE);
+                    DunningLevelInstance dunningLevelInstanceWithCollectionPlan = this.createDunningLevelInstanceWithCollectionPlan(collectionPlan, collectionPlanStatus, policyLevel, DunningLevelInstanceStatusEnum.TO_BE_DONE);
                     levelInstances.add(dunningLevelInstanceWithCollectionPlan);
                 }
             } else {

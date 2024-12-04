@@ -1,13 +1,13 @@
 package org.meveo.service.script;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
-
-import java.util.ArrayList;
-import java.util.Map;
 
 public class GenericMassImportScript extends GenericImportScript {
 

@@ -27,10 +27,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -100,6 +96,12 @@ import org.meveo.service.payments.impl.PaymentScheduleInstanceService;
 import org.meveo.service.payments.impl.PaymentScheduleTemplateService;
 import org.meveo.service.script.service.ServiceModelScriptService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * ServiceInstanceService.

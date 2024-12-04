@@ -18,10 +18,10 @@
 
 package org.meveo.service.billing.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.payments.Journal;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 
 @Stateless

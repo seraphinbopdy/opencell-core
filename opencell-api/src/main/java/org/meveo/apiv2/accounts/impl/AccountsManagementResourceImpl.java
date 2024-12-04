@@ -1,12 +1,12 @@
 package org.meveo.apiv2.accounts.impl;
 
-import static javax.ws.rs.core.Response.ok;
+import static jakarta.ws.rs.core.Response.ok;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;

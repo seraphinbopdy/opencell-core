@@ -17,15 +17,15 @@
  */
 package org.meveo.admin.util.pagination;
 
-import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.criteria.JoinType;
+import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
+
+import jakarta.persistence.criteria.JoinType;
 
 /**
  * @author Andrius
@@ -409,5 +409,22 @@ public class PaginationConfiguration implements Serializable {
      */
     public void setSelectFields(String selectFields) {
         this.selectFields = selectFields;
+    }
+    
+    /**
+     * Remove filters
+     *
+     * @param pKeys A list of keys to remove. If none provided, all filters will be removed
+     */
+    public void removeFilters(String... pKeys) {
+
+        if (pKeys.length == 0) {
+            getFilters().clear();
+
+        } else {
+            for (String key : pKeys) {
+                getFilters().remove(key);
+            }
+        }
     }
 }

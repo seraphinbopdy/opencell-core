@@ -5,12 +5,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
 
 import org.meveo.api.dto.AgedReceivableDto;
 import org.meveo.api.exception.BusinessApiException;

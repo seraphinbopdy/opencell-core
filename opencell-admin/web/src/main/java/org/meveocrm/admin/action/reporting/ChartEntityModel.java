@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.meveo.model.dwh.Chart;
-import org.primefaces.model.chart.ChartModel;
+import org.primefaces.model.charts.ChartModel;
 
 public class ChartEntityModel <C extends Chart,M extends ChartModel>{
 

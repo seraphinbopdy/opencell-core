@@ -18,9 +18,26 @@
 
 package org.meveo.service.billing.impl;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
-import org.meveo.model.billing.*;
+import org.meveo.model.billing.AccountingCode;
+import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.InvoiceSubCategory;
+import org.meveo.model.billing.ServiceInstance;
+import org.meveo.model.billing.Subscription;
+import org.meveo.model.billing.Tax;
+import org.meveo.model.billing.TradingCurrency;
+import org.meveo.model.billing.UserAccount;
+import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
@@ -31,15 +48,6 @@ import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.tax.TaxClass;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Aggregated wallet operation.

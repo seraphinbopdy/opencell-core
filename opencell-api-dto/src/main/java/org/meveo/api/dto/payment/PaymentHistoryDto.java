@@ -23,11 +23,6 @@ package org.meveo.api.dto.payment;
 
 import java.util.Date;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import org.meveo.api.dto.AuditableEntityDto;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.PaymentErrorTypeEnum;
@@ -35,6 +30,10 @@ import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentStatusEnum;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
  * Class to represent payments that was initiated from OC, we find payment done, ,pending,rejected and error.

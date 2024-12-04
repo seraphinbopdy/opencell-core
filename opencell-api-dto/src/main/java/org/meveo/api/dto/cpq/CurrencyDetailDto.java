@@ -1,9 +1,10 @@
 package org.meveo.api.dto.cpq;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
+
 import org.meveo.api.dto.BaseEntityDto;
 
-import java.math.BigDecimal;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class CurrencyDetailDto extends BaseEntityDto {
 

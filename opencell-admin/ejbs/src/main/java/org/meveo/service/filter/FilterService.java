@@ -27,14 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
-
 import org.apache.commons.lang3.EnumUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.FilteredQueryBuilder;
@@ -71,6 +63,14 @@ import com.thoughtworks.xstream.hibernate.converter.HibernateProxyConverter;
 import com.thoughtworks.xstream.hibernate.mapper.HibernateMapper;
 import com.thoughtworks.xstream.mapper.ClassAliasingMapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 
 /**
  * @author Edward P. Legaspi
@@ -287,7 +287,8 @@ public class FilterService extends BusinessService<Filter> {
         QueryBuilder qb = new QueryBuilder(Filter.class, "f", null);
         qb.addCriterion("primarySelector.targetEntity", "=", className, true);
         qb.startOrClause();
-        qb.addBooleanCriterion("shared", true);
+        qb.addCriterion("shared", "=", true, false);
+        qb.addBooleanCriterion("shared", true); 
         qb.addCriterionEntity("f.auditable.creator", currentUser.getUserName());
         qb.endOrClause();
 

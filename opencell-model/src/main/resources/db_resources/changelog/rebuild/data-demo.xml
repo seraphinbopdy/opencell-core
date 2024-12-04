@@ -1989,66 +1989,7 @@
             <column name="creator" value="OPENCELL.ADMIN" />
             <column name="timerentity_id" valueNumeric="-1" />
             <column name="uuid" value="Article_Mapp_Job_V2" />
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="ArticleMappingJob_billingRun"/>
-            <column name="applies_to" value="JobInstance_ArticleMappingJob"/>
-            <column name="description" value="Billing Runs"/>
-            <column name="field_type" value="ENTITY"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="versionable" value="0"/>
-            <column name="entity_clazz" value="org.meveo.model.billing.BillingRun"/>
-            <column name="storage_type" value="LIST"/>
-            <column name="allow_edit" value="1"/>
-            <column name="hide_on_new" value="0"/>
-            <column name="inh_as_def_value" value="0"/>
-            <column name="cf_protectable" value="0"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FirstTransactionDate"/>
-            <column name="description" value="First transaction date"/>
-            <column name="field_type" value="DATE"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="versionable" value="0"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="trigger_end_period_event" value="0"/>
-            <column name="applies_to" value="JobInstance_ArticleMappingJob"/>
-            <column name="allow_edit" value="1"/>
-            <column name="max_value" value="9223372036854775807"/>
-            <column name="hide_on_new" value="0"/>
-            <column name="inh_as_def_value" value="0"/>
-            <column name="cf_protectable" value="0"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="LastTransactionDate"/>
-            <column name="description" value="Last transaction date"/>
-            <column name="field_type" value="DATE"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="versionable" value="0"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="trigger_end_period_event" value="0"/>
-            <column name="applies_to" value="JobInstance_ArticleMappingJob"/>
-            <column name="allow_edit" value="1"/>
-            <column name="max_value" value="9223372036854775807"/>
-            <column name="hide_on_new" value="0"/>
-            <column name="inh_as_def_value" value="0"/>
-            <column name="cf_protectable" value="0"/>
-        </insert>                
+        </insert>          
         
         <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
@@ -2090,284 +2031,6 @@
                         ,"FlatFileProcessingJob_outputDir":[{"string":"imports/payment/output"}]
                         ,"FlatFileProcessingJob_inputDir":[{"string":"imports/payment/input"}]}]]>
             </column>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="oneFilePerJob"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Process files separately"/>
-            <column name="field_type" value="BOOLEAN"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="value_required" value="0"/>
-            <column name="default_value" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Execution configuration:0;field:2"/>
-
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_outputDir"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Output directory"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="default_value" value="imports/payment/output"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:4"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_mappingConf"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Record descriptor"/>
-            <column name="field_type" value="TEXT_AREA"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Record configuration:2;field:0"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_recordVariableName"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Record variable name"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="record"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="50"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Data processing configuration:3;field:2"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_originFilename"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Filename variable name"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="origin_filename"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Data processing configuration:3;field:3"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_archiveDir"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Archive directory"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="imports/payment/archive"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:2"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_inputDir"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Input directory"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="imports/payment/input"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:1"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="waitingMillis"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Waiting before next launch (ms)"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="0"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Execution configuration:0;field:1"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_variables"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Init and finalize variables"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="MAP"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="mapkey_type" value="STRING"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Dataprocessing configuration:3;field:1"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_errorAction"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Error action"/>
-            <column name="field_type" value="LIST"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="CONTINUE"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Data processing configuration:3;field:5"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_fileFormat"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="File format"/>
-            <column name="field_type" value="ENTITY"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="entity_clazz" value="org.meveo.model.admin.FileFormat"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:0"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_fileNameFilter"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="File name filter"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:5"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_fileNameExtension"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Extension"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="csv"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:6"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_formatTransfo"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Format transformation"/>
-            <column name="field_type" value="LIST"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="None"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Data processing configuration:3;field:4"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_rejectDir"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Reject directory"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:3"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_scriptsFlow"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Script flow"/>
-            <column name="field_type" value="STRING"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="value_required" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Data processing configuration:3;field:0"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="nbRuns"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Number of parallel execution"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="1"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Execution configuration:0;field:0"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="FlatFileProcessingJob_nbLinesToProcess"/>
-            <column name="applies_to" value="JobInstance_ProcessCustomerPaymentsFileJob"/>
-            <column name="description" value="Nb of lines to process"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="1"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:File configuration:1;field:7"/>
         </insert>
     </changeSet>
     
@@ -4808,27 +4471,7 @@
     </changeSet>
     
     <changeSet id="#OUTRD-49_20220913" author="HamzaBiadi">
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="user"/>
-            <column name="description" value="User"/>
-            <column name="field_type" value="STRING"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="opencell.admin"/>
-            <column name="versionable" value="0"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="trigger_end_period_event" value="0"/>
-            <column name="applies_to" value="JobInstance_FlatFileProcessingJob"/>
-            <column name="allow_edit" value="1"/>
-            <column name="max_value" value="50"/>
-            <column name="hide_on_new" value="0"/>
-            <column name="inh_as_def_value" value="0"/>
-            <column name="gui_position" value="tab:Configuration:1;fieldGroup:Execution configuration:0;field:3"/>
-            <column name="cf_protectable" value="0"/>
-        </insert>
+
         <!-- USER_ACCOUNT -->
         <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq" />
@@ -5635,47 +5278,6 @@
                 ]]>
             </column>
         </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="pathFile"/>
-            <column name="applies_to" value="JobInstance_ScriptingJob"/>
-            <column name="description" value="pathFile"/>
-            <column name="field_type" value="STRING"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="versionable" value="0"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="gui_position" value=""/>
-            <column name="allow_edit" value="1"/>
-            <column name="hide_on_new" value="0"/>
-            <column name="inh_as_def_value" value="0"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="cf_protectable" value="0"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="mapping"/>
-            <column name="applies_to" value="JobInstance_ScriptingJob"/>
-            <column name="description" value="mapping"/>
-            <column name="field_type" value="STRING"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="versionable" value="0"/>
-            <column name="storage_type" value="MAP"/>
-            <column name="gui_position" value=""/>
-            <column name="allow_edit" value="1"/>
-            <column name="hide_on_new" value="0"/>
-            <column name="inh_as_def_value" value="0"/>
-            <column name="mapkey_type" value="STRING"/>
-            <column name="max_value" valueNumeric="256"/>
-            <column name="cf_protectable" value="0"/>
-        </insert>
     </changeSet>
 
 
@@ -5894,7 +5496,7 @@
             <column name="creator" value="OPENCELL.ADMIN" />
             <column name="version" valueNumeric="1" />
             <column name="src_type" value="JAVA_CLASS" />
-			<column name="description" value="Amount of each invoice line coming from offers in the list will be compared to the provided value using the selected operator. Only offer from the list actually present on invoice will be tested. If offer list is empty, then all invoice lines will be tested regardless of their offer. For the test to pass, all tested invoice lines must pass the test."/>
+			<column name="description" value="Amount of each invoice line coming from offers in the list will be compared to the provided value using the selected operator. More details in the translated descriptions..."/>
 			<column name="description_i18n">
 				<![CDATA[{"ENG":"<p>Amount of each invoice line coming from offers in the list will be compared to the provided value using the selected operator.</p><p>Only offer from the list actually present on invoice will be tested</p><p>If offer list is empty, then all invoice lines will be tested regardless of their offer.</p><p>For the test to pass, all tested invoice lines must pass the test.</p>",
 				"FRA":"<p>Le montant de chaque ligne de facture provenant d’une offre de la liste sera comparé à la valeur indiquée, en utilisant l’opérateur sélectionné.</p><p>Seule les offres de la liste effectivement présentes sur la facture seront testées.</p><p>Si la liste des offres est vide, alors toutes les lignes de facture seront testées, quelle que soit leur offre.</p><p>Pour que le teste passe, toutes les lignes de facture testées doivent passer le test.</p>"}]]>
@@ -6326,34 +5928,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="INTRD-2698-20211028" author="AbdelkaderBouazza" />    
-    <changeSet id="#INTRD-4950-20220208-script" author="MohammedSTITANE"/>
-    <changeSet id="#INTRD-12546_20221230_rebuild" author="aeljaouhari"/>
-    <changeSet id="#INTRD-12891_20230105" author="aeljaouhari"/>
-    <changeSet id="#INTRD-6283_20220404" author="AbdelmounaimAkadid"/>
-    <changeSet id="#INTRD-6291_20220406" author="AbdelmounaimAkadid"/>
-    <changeSet id="INTRD-6162_20220407" author="TarikRabeh" />
-    <changeSet id="#INTRD-6283_20220422" author="HichamELHALOUI" />
-    <changeSet id="INTRD-6908_20220503" author="HichamELHALOUI"/>
-    <changeSet id="#INTRD-8004_210622" author="AbdelkaderBouazza"/>
-	<changeSet id="#INTRD-10199_20221010" author="TarikFA." />
-	<changeSet id="#INTRD-10592_20221014" author="TarikFA." />
-    <changeSet id="INTRD-11122_20221104" author="HichamELHALOUI" />
-    <changeSet id="INTRD-13237_20230119" author="HichamELHALOUI" />
-    <changeSet id="INTRD-13608_20230130" author="HichamELHALOUI" />
-    <changeSet id="INTRD-13629_20230203" author="HichamELHALOUI" />
-    <changeSet id="#INTRD-4267_20220108" author="AmineBENAICHA" />
-    <changeSet id="#OUTRD-3_20221006-custom-field" author="MohamedChaouki"/>
-    <changeSet id="#OUTRD-63-SUB_20220926-scripts" author="Ilham-Chafik"/>
-    <changeSet id="#OUTRD-56-SUB_20220926-scripts" author="Ilham-Chafik"/>
-    <changeSet id="#INTRD-6075_20220330" author="aelmalki"/>
-    <changeSet id="#INTRD-8420_20220708" author="hichamHANINE"/>
-    <changeSet id="#4082_20190404" author="SaidRamli"/>
-    <changeSet id="#5308_20200618 - Add script" author="AndriusKarpavicius"/>
-    <changeSet id="#INTRD-12906_20230112" author="hichamELHALOUI"/>
-   	<changeSet id="#INTRD-15189_20230327" author="hichamELHALOUI"/>
-    <changeSet id="#INTRD-14750_20230331" author="TarikFA." />
-    <changeSet id="#INTRD-13682_20230510" author="AbdellatifBARI" />
+
 
     <changeSet id="#INTRD-16066_20230515" author="AbdellatifBARI.">
         <insert tableName="billing_accounting_article">
@@ -6888,113 +6463,6 @@
         </insert>
     </changeSet>
     
-    <changeSet id="#INTRD-22810_20240514_build" author="TarikFA.">
-        <insert tableName="ar_occ_template">
-            <column name="id" valueSequenceNext="ar_occ_template_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="creator" value="applicationInitializer" />
-            <column name="code" value="PPL_CREATION" />
-            <column name="description" value="PPL_CREATION" />
-            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
-            <column name="occ_category" value="CREDIT" />
-            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
-            <column name="account_code_client_side" value="null" />
-            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '416000000')" />
-            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
-        </insert>
-    </changeSet>
-    
-    <changeSet id="#INTRD-23038_20240515_build" author="TarikFA." >
-        <insert tableName="ar_occ_template" >
-            <column name="id" valueSequenceNext="ar_occ_template_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="creator" value="applicationInitializer" />
-            <column name="code" value="PPL_INSTALLMENT" />
-            <column name="description" value="Payment plan Installment" />
-            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
-            <column name="occ_category" value="DEBIT" />
-            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
-            <column name="manual_creation_enabled" valueNumeric="0" />
-        </insert>
-    </changeSet>
-
-    <changeSet id="#INTRD-23734_20240715_build" author="TarikFA.">
-        <insert tableName="advanced_settings">
-            <column name="id" valueSequenceNext="advanced_settings_seq"/>
-            <column name="version" value="0"/>
-            <column name="disabled" valueNumeric="0"/>
-            <column name="created" valueComputed="${db.current.time}"/>
-            <column name="category" value="AccountReceivable"/>
-            <column name="property_group" value="callForAdvancePayment"/>
-            <column name="property_type" value="java.lang.Boolean"/>
-            <column name="property_value" value="false"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="code" value="allowUsingUnpaidAdvance"/>
-            <column name="description" value="If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
-Usually, you’ll want that only if you don’t manage customer balance in Opencell."/>
-            <column name="description_i18n" value='{"FRA":"Si ce paramètre est activé, alors Opencell n’attendra pas qu’un appel acompte validé soit effectivement payé pour l’utiliser sur une facture.
-Habituellement, ce comportement n’est souhaitable que si vous ne gérez pas la balance client dans Opencell.","ENG":"If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
-Usually, you’ll want that only if you don’t manage customer balance in Opencell."}'/>
-        </insert>
-
-        <insert tableName="advanced_settings">
-            <column name="id" valueSequenceNext="advanced_settings_seq"/>
-            <column name="version" value="0"/>
-            <column name="disabled" valueNumeric="0"/>
-            <column name="created" valueComputed="${db.current.time}"/>
-            <column name="category" value="AccountReceivable"/>
-            <column name="property_group" value="callForAdvancePayment"/>
-            <column name="property_type" value="java.lang.Boolean"/>
-            <column name="property_value" value="false"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="code" value="autoCloseAdvanceAfterInvoiceValidation"/>
-            <column name="description" value="Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.
-Meaning that advances won’t be available for further invoices."/>
-            <column name="description_i18n">
-                <![CDATA[{
-	"FRA": "Les appels d’acompte liés à la facture seront automatiquement closes quand la facture est validée.Cela signifie que les acomptes ne seront pas disponibles pour de futures factures.",
-	"ENG": "Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.Meaning that advances won’t be available for further invoices."
-}]]>
-            </column>
-        </insert>
-    </changeSet>
-    <changeSet id="INTRD-23733_rebuild" author="TarikFA.">
-        <insert tableName="ar_occ_template">
-            <column name="id" valueSequenceNext="ar_occ_template_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="PAY_ADV" />
-            <column name="description" value="Payment account operation to match a call for advance payment. Doesn’t export to accounting entries." />
-            <column name="occ_category" value="CREDIT" />
-            <column name="manual_creation_enabled" value="1"/>
-            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
-            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
-        </insert>
-        <insert tableName="ar_occ_template">
-            <column name="id" valueSequenceNext="ar_occ_template_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="CLOSED_ADV" />
-            <column name="description" value="Payment account operation to match a call for advance payment that has been closed while still having unmatched amount. Doesn’t export to accounting entries." />
-            <column name="occ_category" value="CREDIT" />
-            <column name="manual_creation_enabled" value="1"/>
-            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
-            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
-        </insert>
-        <insert tableName="ar_occ_template">
-            <column name="id" valueSequenceNext="ar_occ_template_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="REJ_ADV" />
-            <column name="description" value="Dummy payment rejection account operation to match and negate the payment account operation (PAY_ADV) for call for advance payment. Doesn’t export to accounting entries." />
-            <column name="occ_category" value="DEBIT" />
-            <column name="manual_creation_enabled" value="1"/>
-            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
-            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
-        </insert>
-    </changeSet>
     <changeSet id="#INTRD-24686_20240807_build" author="TarikFa.">
         <insert tableName="ar_customer_balance_templates">
             <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
@@ -7006,10 +6474,73 @@ Meaning that advances won’t be available for further invoices."/>
         </insert>
     </changeSet>
 
-	<changeSet id="#INTRD-22516_20240503" author="aeljaouhari" />
-    <changeSet id="#INTRD-23734_20240715" author="TarikFA." />
-    <changeSet id="INTRD-23733" author="TarikFA." />
-    <changeSet id="#INTRD-23038_20240515" author="TarikFA." />
+    <changeSet id="INTRD-26180_20241105_rebuild" author="ZakariaB">
+        <insert tableName="billing_accounting_code">
+            <column name="id" valueSequenceNext="billing_accounting_code_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="44587" />
+            <column name="description" value="Output VAT on invoices to be issued (FAE TAX)" />
+            <column name="chart_of_account_type" value="LIABILITIES" />
+            <column name="chart_of_account_view_type" value="REGULAR" />
+        </insert>
+        <insert tableName="billing_accounting_code">
+            <column name="id" valueSequenceNext="billing_accounting_code_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="4181" />
+            <column name="description" value="Customers - Invoices to be issued (FAE)" />
+            <column name="chart_of_account_type" value="ASSET" />
+            <column name="chart_of_account_view_type" value="REGULAR" />
+        </insert>
+
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="INV_FAE"/>
+            <column name="description" value="Standard invoices to be issued"/>
+            <column name="account_code_client_side" value="701000000"/>
+            <column name="occ_category" value="DEBIT"/>
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="CRN_FAE"/>
+            <column name="description" value="Invoice - credit note sub-item to be issued"/>
+            <column name="account_code_client_side" value="701000000"/>
+            <column name="occ_category" value="CREDIT"/>
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="ADJ_FAE"/>
+            <column name="description" value="Adjustment on invoice to be issued"/>
+            <column name="account_code_client_side" value="701000000"/>
+            <column name="occ_category" value="CREDIT"/>
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="REF_FAE"/>
+            <column name="description" value="Refundable adjustment to be issued"/>
+            <column name="account_code_client_side" value="701000000"/>
+            <column name="occ_category" value="DEBIT"/>
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
+        </insert>
+    </changeSet>
 
 
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->

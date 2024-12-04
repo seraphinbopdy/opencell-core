@@ -1,9 +1,9 @@
 package org.meveo.apiv2.quote.impl;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.transaction.Transactional;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.Response;
 
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.logging.WsRestApiInterceptor;

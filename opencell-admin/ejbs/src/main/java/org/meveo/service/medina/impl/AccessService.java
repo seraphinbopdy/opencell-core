@@ -17,6 +17,11 @@
  */
 package org.meveo.service.medina.impl;
 
+import static org.meveo.model.shared.DateUtils.isPeriodsOverlap;
+
+import java.util.Date;
+import java.util.List;
+
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.Subscription;
@@ -24,13 +29,9 @@ import org.meveo.model.mediation.Access;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import java.util.Date;
-import java.util.List;
-
-import static org.meveo.model.shared.DateUtils.isPeriodsOverlap;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 @Stateless
 public class AccessService extends PersistenceService<Access> {
@@ -72,7 +73,7 @@ public class AccessService extends PersistenceService<Access> {
     private List<Access> retrieveAccessByUserIdAndSubscription(String accessUserId, Subscription subscription) {
         String selectAccessByUserIdSubscriptionIdStartEndDateQuery ="SELECT a FROM " + Access.class.getName() +" a"
                 + " WHERE a.accessUserId=:accessUserId AND a.subscription.id=:subscriptionId";
-        Query query = getEntityManager().createQuery(selectAccessByUserIdSubscriptionIdStartEndDateQuery);
+        Query query = getEntityManager().createQuery(selectAccessByUserIdSubscriptionIdStartEndDateQuery, Access.class);
         query.setParameter("accessUserId", accessUserId);
         query.setParameter("subscriptionId", subscription.getId());
         return query.getResultList();

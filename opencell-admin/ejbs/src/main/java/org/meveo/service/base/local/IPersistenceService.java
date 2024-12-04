@@ -20,12 +20,12 @@ package org.meveo.service.base.local;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.IEntity;
+
+import jakarta.persistence.EntityManager;
 
 /**
  * Generic interface that defines the methods to implement for every persistence service.

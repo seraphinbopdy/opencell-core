@@ -1,13 +1,12 @@
 package org.meveo.api.dto.cpq;
 
-import javax.validation.constraints.NotNull;
-
 import org.meveo.api.dto.BaseEntityDto;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.model.cpq.Media;
 import org.meveo.model.cpq.enums.MediaTypeEnum;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * 

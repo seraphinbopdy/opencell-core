@@ -17,18 +17,18 @@
  */
 package org.meveo.model.catalog;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.ExportIdentifier;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Days in year entry for yearly calendar
@@ -39,8 +39,7 @@ import org.meveo.model.ExportIdentifier;
 @Cacheable
 @ExportIdentifier({ "day", "month" })
 @Table(name = "cat_day_in_year", uniqueConstraints = @UniqueConstraint(columnNames = { "day", "month" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cat_day_in_year_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_day_in_year_seq"), @Parameter(name = "increment_size", value = "1") })
 public class DayInYear extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;

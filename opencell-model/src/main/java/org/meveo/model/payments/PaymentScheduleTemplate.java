@@ -24,20 +24,9 @@ package org.meveo.model.payments;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ISearchable;
@@ -48,6 +37,17 @@ import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.tax.TaxClass;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * The Class PaymentScheduleTemplate.
@@ -60,8 +60,7 @@ import org.meveo.model.tax.TaxClass;
 @Entity
 @CustomFieldEntity(cftCodePrefix = "PaymentScheduleTemplate")
 @Table(name = "ar_payment_schedule_tmpl")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_payment_schedule_tmpl_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_payment_schedule_tmpl_seq"), @Parameter(name = "increment_size", value = "1") })
 public class PaymentScheduleTemplate extends EnableBusinessCFEntity implements ISearchable {
 
     /** The Constant serialVersionUID. */
@@ -103,7 +102,7 @@ public class PaymentScheduleTemplate extends EnableBusinessCFEntity implements I
     /**
      * The generate advance payment invoice.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_generate_adv_pay_inv", nullable = false)
     @NotNull
     private boolean generateAdvancePaymentInvoice = true;
@@ -119,7 +118,7 @@ public class PaymentScheduleTemplate extends EnableBusinessCFEntity implements I
     /**
      * The do payment.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_do_payment", nullable = false)
     @NotNull
     private boolean doPayment;
@@ -133,7 +132,7 @@ public class PaymentScheduleTemplate extends EnableBusinessCFEntity implements I
     /**
      * The apply agreement.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "apply_agreement")
     private boolean applyAgreement = false;
 
@@ -174,7 +173,7 @@ public class PaymentScheduleTemplate extends EnableBusinessCFEntity implements I
     /**
      * Use the banking calender.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "use_banking_calender")
     private Boolean useBankingCalendar = Boolean.TRUE;
 

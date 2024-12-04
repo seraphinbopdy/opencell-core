@@ -1,5 +1,9 @@
 package org.meveo.admin.job;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.jobs.JobExecutionResultImpl;
@@ -12,11 +16,8 @@ import org.meveo.service.cpq.CpqQuoteService;
 import org.meveo.service.cpq.order.CommercialOrderService;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * Job definition to calculate MRR

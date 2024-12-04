@@ -24,9 +24,9 @@ import org.meveo.apiv2.admin.FilesPagingAndFiltering;
 import org.meveo.apiv2.admin.resource.FilesResource;
 import org.meveo.apiv2.admin.service.FilesApiService;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 import java.util.Map;
 
 /**

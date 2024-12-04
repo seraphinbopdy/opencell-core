@@ -1,17 +1,18 @@
 package org.meveo.model.dunning;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 /**
  * @author Mbarek-Ay
@@ -20,8 +21,7 @@ import org.meveo.model.AuditableEntity;
  */
 @Entity
 @Table(name = "dunning_agent")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "dunning_agent_seq") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_agent_seq"), @Parameter(name = "increment_size", value = "1") })
 public class DunningAgent extends AuditableEntity {
 
     private static final long serialVersionUID = -2094816912162086909L;
@@ -30,8 +30,8 @@ public class DunningAgent extends AuditableEntity {
         super();
     }
 
-    public DunningAgent(boolean external, @Size(max = 100) String collectionAgency, @Size(max = 100) String agentFirstNameItem, @Size(max = 100) String agentLastNameItem,
-            @Size(max = 100) String agentEmailItem, DunningSettings dunningSettings) {
+    public DunningAgent(boolean external, @Size(max = 100) String collectionAgency, @Size(max = 100) String agentFirstNameItem, @Size(max = 100) String agentLastNameItem, @Size(max = 100) String agentEmailItem,
+            DunningSettings dunningSettings) {
         super();
         this.external = external;
         this.collectionAgency = collectionAgency;
@@ -44,7 +44,7 @@ public class DunningAgent extends AuditableEntity {
     /**
      * include collection agency
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "external")
     private boolean external = false;
 

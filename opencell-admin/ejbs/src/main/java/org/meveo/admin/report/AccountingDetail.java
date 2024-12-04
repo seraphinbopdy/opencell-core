@@ -26,10 +26,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.CacheKeyStr;
@@ -45,7 +41,9 @@ import org.meveo.security.MeveoUser;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.reporting.impl.DWHAccountOperationService;
-import org.slf4j.Logger;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Wassim Drira

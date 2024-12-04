@@ -21,10 +21,6 @@ package org.meveo.service.catalog.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.CustomFieldDto;
 import org.meveo.commons.utils.QueryBuilder;
@@ -35,6 +31,10 @@ import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.service.admin.impl.GenericModuleService;
 import org.meveo.service.script.service.ServiceModelScriptService;
 import org.meveo.service.script.service.ServiceScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * @author Edward P. Legaspi

@@ -13,9 +13,9 @@ import org.meveo.apiv2.esignature.resource.SignatureRequestResource;
 import org.meveo.apiv2.esignature.service.SignatureRequestApiService;
 import org.meveo.model.esignature.Operator;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 import java.util.Map;
 
 @Interceptors({ WsRestApiInterceptor.class })

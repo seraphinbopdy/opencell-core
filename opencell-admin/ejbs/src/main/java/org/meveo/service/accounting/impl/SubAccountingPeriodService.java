@@ -2,19 +2,15 @@ package org.meveo.service.accounting.impl;
 
 import static java.time.LocalTime.MAX;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.TemporalType;
-import javax.persistence.TypedQuery;
-import javax.ws.rs.NotFoundException;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
@@ -27,6 +23,13 @@ import org.meveo.model.audit.logging.AuditLog;
 import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.payments.impl.AccountOperationService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.TypedQuery;
+import jakarta.ws.rs.NotFoundException;
 
 @Stateless
 public class SubAccountingPeriodService extends PersistenceService<SubAccountingPeriod> {

@@ -18,30 +18,33 @@
 package org.meveo.model.billing;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
-import org.meveo.model.crm.custom.CustomFieldValues;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Consumption operation
@@ -222,7 +225,7 @@ public class WalletOperationNative extends BaseEntity {
     /**
      * Additional rating parameter
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "parameter_extra")
     private String parameterExtra;
 
@@ -390,9 +393,9 @@ public class WalletOperationNative extends BaseEntity {
     /**
      * Custom field values in JSON format
      */
-    @Type(type = "cfjson")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "cf_values", columnDefinition = "jsonb")
-    private CustomFieldValues cfValues;
+    protected String cfValuesAsJson;
 
     /**
      * Unique identifier - UUID
@@ -417,7 +420,7 @@ public class WalletOperationNative extends BaseEntity {
     /**
      * Processing error reason
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "reject_reason")
     private String rejectReason;
 
@@ -454,7 +457,7 @@ public class WalletOperationNative extends BaseEntity {
     private BigDecimal discountedAmount;
 
     @Column(name = "use_specific_price_conversion")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean useSpecificPriceConversion;
 
     @Column(name = "transactional_amount_without_tax", precision = NB_PRECISION, scale = NB_DECIMALS)
@@ -496,10 +499,10 @@ public class WalletOperationNative extends BaseEntity {
 
     @Column(name = "contract_line_id")
     private Long contractLineId;
-    
+
     @Column(name = "business_key")
     private String businessKey;
-    
+
     @Column(name = "order_product_id")
     private Long orderProductId;
 
@@ -995,12 +998,12 @@ public class WalletOperationNative extends BaseEntity {
         this.taxClassId = taxClassId;
     }
 
-    public CustomFieldValues getCfValues() {
-        return cfValues;
+    public String getCfValuesAsJson() {
+        return cfValuesAsJson;
     }
 
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
+    public void setCfValuesAsJson(String cfValuesAsJson) {
+        this.cfValuesAsJson = cfValuesAsJson;
     }
 
     public String getUuid() {
@@ -1090,14 +1093,14 @@ public class WalletOperationNative extends BaseEntity {
     }
 
     public Long getDiscountedWalletOperation() {
-		return discountedWalletOperation;
-	}
+        return discountedWalletOperation;
+    }
 
-	public void setDiscountedWalletOperation(Long discountedWalletOperation) {
-		this.discountedWalletOperation = discountedWalletOperation;
-	}
+    public void setDiscountedWalletOperation(Long discountedWalletOperation) {
+        this.discountedWalletOperation = discountedWalletOperation;
+    }
 
-	public Long getDiscountPlanId() {
+    public Long getDiscountPlanId() {
         return discountPlanId;
     }
 
@@ -1209,36 +1212,36 @@ public class WalletOperationNative extends BaseEntity {
         this.rulesContractId = rulesContractId;
     }
 
-	public Long getContractId() {
-		return contractId;
-	}
+    public Long getContractId() {
+        return contractId;
+    }
 
-	public void setContractId(Long contractId) {
-		this.contractId = contractId;
-	}
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
+    }
 
-	public Long getContractLineId() {
-		return contractLineId;
-	}
+    public Long getContractLineId() {
+        return contractLineId;
+    }
 
-	public void setContractLineId(Long contractLineId) {
-		this.contractLineId = contractLineId;
-	}
+    public void setContractLineId(Long contractLineId) {
+        this.contractLineId = contractLineId;
+    }
 
-	public String getBusinessKey() {
-		return businessKey;
-	}
+    public String getBusinessKey() {
+        return businessKey;
+    }
 
-	public void setBusinessKey(String businessKey) {
-		this.businessKey = businessKey;
-	}
+    public void setBusinessKey(String businessKey) {
+        this.businessKey = businessKey;
+    }
 
-	public Long getOrderProductId() {
-		return orderProductId;
-	}
+    public Long getOrderProductId() {
+        return orderProductId;
+    }
 
-	public void setOrderProductId(Long orderProductId) {
-		this.orderProductId = orderProductId;
-	}
-    
+    public void setOrderProductId(Long orderProductId) {
+        this.orderProductId = orderProductId;
+    }
+
 }

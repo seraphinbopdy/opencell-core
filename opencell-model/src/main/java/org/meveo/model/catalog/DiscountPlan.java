@@ -23,22 +23,42 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.HugeEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.ObservableEntity;
-import org.hibernate.annotations.Type;
 import org.meveo.model.billing.UntdidAllowanceCode;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Discount plan
@@ -55,474 +75,450 @@ import org.meveo.model.billing.UntdidAllowanceCode;
 @ExportIdentifier({ "code" })
 @CustomFieldEntity(cftCodePrefix = "DiscountPlan")
 @Table(name = "cat_discount_plan", uniqueConstraints = { @UniqueConstraint(columnNames = { "code" }) })
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-		@Parameter(name = "sequence_name", value = "cat_discount_plan_seq"), })
-@NamedQueries({
-	@NamedQuery(name = "DiscountPlan.getAll", query = "select dp from DiscountPlan dp left join fetch dp.discountPlanItems"),
-	@NamedQuery(name = "discountPlan.getExpired", query = "select d.id from DiscountPlan d where d.endDate is not null and d.endDate<=:date and d.status in (:statuses)"),
-	@NamedQuery(name = "DiscountPlan.getBySequence", query = "select dp from DiscountPlan dp where dp.sequence = :sequence and dp.status in (:statuses)")})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_discount_plan_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "DiscountPlan.getAll", query = "select dp from DiscountPlan dp left join fetch dp.discountPlanItems"),
+        @NamedQuery(name = "discountPlan.getExpired", query = "select d.id from DiscountPlan d where d.endDate is not null and d.endDate<=:date and d.status in (:statuses)"),
+        @NamedQuery(name = "DiscountPlan.getBySequence", query = "select dp from DiscountPlan dp where dp.sequence = :sequence and dp.status in (:statuses)") })
 
 public class DiscountPlan extends EnableBusinessCFEntity implements ISearchable {
 
-	private static final long serialVersionUID = -2762453947446654646L;
+    private static final long serialVersionUID = -2762453947446654646L;
 
-	/**
-	 * Minimum duration. Deprecated in 5.3 for not use.
-	 */
-	@Deprecated
-	@Column(name = "min_duration")
-	private int minDuration = 0;
+    /**
+     * Minimum duration. Deprecated in 5.3 for not use.
+     */
+    @Deprecated
+    @Column(name = "min_duration")
+    private int minDuration = 0;
 
-	/**
-	 * Maximum duration. Deprecated in 5.3 for not use.
-	 */
-	@Deprecated
-	@Column(name = "max_duration")
-	private int maxDuration = 99999;
+    /**
+     * Maximum duration. Deprecated in 5.3 for not use.
+     */
+    @Deprecated
+    @Column(name = "max_duration")
+    private int maxDuration = 99999;
 
-	// @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-	/**
-	 * Discount plan items. Must not be eager to reload in GUI.
-	 */
-	@OneToMany(mappedBy = "discountPlan", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<DiscountPlanItem> discountPlanItems;
+    // @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    /**
+     * Discount plan items. Must not be eager to reload in GUI.
+     */
+    @OneToMany(mappedBy = "discountPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DiscountPlanItem> discountPlanItems;
 
-	/**
-	 * Effectivity start date
-	 */
-	@Temporal(TemporalType.DATE)
-	@Column(name = "start_date")
-	private Date startDate;
+    /**
+     * Effectivity start date
+     */
+    @Temporal(TemporalType.DATE)
+    @Column(name = "start_date")
+    private Date startDate;
 
-	/**
-	 * Effectivity end date
-	 */
-	@Temporal(TemporalType.DATE)
-	@Column(name = "end_date")
-	private Date endDate;
-	
-	/**
-	 * 
-	 * Length of effectivity. If start date is not null and end date is null, we use
-	 * the defaultDuration from the discount plan. If start date is null, and
-	 * defaultDuration is not null, defaultDuration is ignored.
-	 */
-	@Column(name = "default_duration")
-	private Integer defaultDuration;
+    /**
+     * Effectivity end date
+     */
+    @Temporal(TemporalType.DATE)
+    @Column(name = "end_date")
+    private Date endDate;
 
-	/**
-	 * Unit of duration
-	 */
-	@Enumerated(EnumType.STRING)
-	@Column(name = "duration_unit", length = 50)
-	private DurationPeriodUnitEnum durationUnit = DurationPeriodUnitEnum.DAY;
+    /**
+     * 
+     * Length of effectivity. If start date is not null and end date is null, we use the defaultDuration from the discount plan. If start date is null, and defaultDuration is not null, defaultDuration is ignored.
+     */
+    @Column(name = "default_duration")
+    private Integer defaultDuration;
 
-	/**
-	 * DP type
-	 */
-	@Enumerated(EnumType.STRING)
-	@Column(name = "discount_plan_type", length = 50)
-	private DiscountPlanTypeEnum discountPlanType;
+    /**
+     * Unit of duration
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "duration_unit", length = 50)
+    private DurationPeriodUnitEnum durationUnit = DurationPeriodUnitEnum.DAY;
 
+    /**
+     * DP type
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_plan_type", length = 50)
+    private DiscountPlanTypeEnum discountPlanType;
 
-	/**
-	 * Status of the discount plan:
-	 * <p>
-	 * DRAFT “Draft”: The discount plan is being configured and is waiting for validation
-	 * ACTIVE “Active”: the discount plan is available and can be set used
-	 * IN_USE “In use”: the discount plan is currently in use / it has been applied at least once
-	 * EXPIRED “Expired”: the discount plan has expired. Either because the end of validity date has been reach, or the used quantity has is equal to initial quantity.
-	 * <p>
-	 * Initialized with DRAFT
-	 */
-	@Enumerated(EnumType.STRING)
-	@Column(name = "status", nullable = false)
-	@NotNull
-	private DiscountPlanStatusEnum status = DiscountPlanStatusEnum.DRAFT;
+    /**
+     * Status of the discount plan:
+     * <p>
+     * DRAFT “Draft”: The discount plan is being configured and is waiting for validation ACTIVE “Active”: the discount plan is available and can be set used IN_USE “In use”: the discount plan is currently in use / it
+     * has been applied at least once EXPIRED “Expired”: the discount plan has expired. Either because the end of validity date has been reach, or the used quantity has is equal to initial quantity.
+     * <p>
+     * Initialized with DRAFT
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    @NotNull
+    private DiscountPlanStatusEnum status = DiscountPlanStatusEnum.DRAFT;
 
-	/**
-	 * Datetime of last status update
-	 * Automatically filed at creation and status update
-	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "status_date")
-	private Date statusDate;
+    /**
+     * Datetime of last status update Automatically filed at creation and status update
+     */
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "status_date")
+    private Date statusDate;
 
-	/**
-	 * The initial available quantity for the discount plan.
-	 * Default value is 0 = infinite.
-	 * For types QUOTE, INVOICE, INVOICE_LINE, the value is forced to 0.
-	 */
-	@Column(name = "initial_quantity")
-	private Long initialQuantity = 0L;
+    /**
+     * The initial available quantity for the discount plan. Default value is 0 = infinite. For types QUOTE, INVOICE, INVOICE_LINE, the value is forced to 0.
+     */
+    @Column(name = "initial_quantity")
+    private Long initialQuantity = 0L;
 
-	/**
-	 * How many times the discount plan has been used.
-	 * Initialized to 0.
-	 * If intialQuantity is not 0, then reaching the initialQuantity expires the discount plan.
-	 * The value is incremented every time the discountPlan is instantiated on any Billing Account, Subscription, or ProductInstance
-	 */
-	@Column(name = "used_quantity")
-	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
-	private Long usedQuantity = 0L;
+    /**
+     * How many times the discount plan has been used. Initialized to 0. If intialQuantity is not 0, then reaching the initialQuantity expires the discount plan. The value is incremented every time the discountPlan is
+     * instantiated on any Billing Account, Subscription, or ProductInstance
+     */
+    @Column(name = "used_quantity")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long usedQuantity = 0L;
 
-	/**
-	 * How many times the discount can be applied on a given entity (BillingAccount, Subscription, Product Instance).
-	 * Default value is 0 = infinite.
-	 * Useful for one-time discounts.
-	 * See DiscountPlanInstance below for more details.
-	 * This has no real meaning for discounts applied to invoices or invoice lines.
-	 */
-	@Column(name = "application_limit", nullable = false)
-	private Long applicationLimit = 0L;
+    /**
+     * How many times the discount can be applied on a given entity (BillingAccount, Subscription, Product Instance). Default value is 0 = infinite. Useful for one-time discounts. See DiscountPlanInstance below for more
+     * details. This has no real meaning for discounts applied to invoices or invoice lines.
+     */
+    @Column(name = "application_limit", nullable = false)
+    private Long applicationLimit = 0L;
 
-	/**
-	 * A boolean EL that must evaluate to true to allow the discount plan to be applied.
-	 * It will have access to the variables:
-	 * entity: the entity on which we want to apply the discount
-	 * discountPlan: the discount plan itself
-	 */
-	@Column(name = "application_filter_el")
-	private String applicationFilterEL;
+    /**
+     * A boolean EL that must evaluate to true to allow the discount plan to be applied. It will have access to the variables: entity: the entity on which we want to apply the discount discountPlan: the discount plan
+     * itself
+     */
+    @Column(name = "application_filter_el")
+    private String applicationFilterEL;
 
-	/**
-	 * A list of entities (CustomerCategory, Offer, Product, Article).
-	 * Only instances (Customer/BillingAccount, Subscription, ProductInstance, InvoiceLine) of these entities can have the discount applied to them.
-	 */
+    /**
+     * A list of entities (CustomerCategory, Offer, Product, Article). Only instances (Customer/BillingAccount, Subscription, ProductInstance, InvoiceLine) of these entities can have the discount applied to them.
+     */
 
-	@ElementCollection(fetch = FetchType.LAZY)
-	@CollectionTable(name = "cat_discount_applicable_entity", joinColumns = { @JoinColumn(name = "disount_plan_id") })
-	@AttributeOverrides(value = { @AttributeOverride(name = "code", column = @Column(name = "code", nullable = false, length = 255)),
-			@AttributeOverride(name = "entityClass", column = @Column(name = "entity_class", nullable = false, length = 255)) })
-	private List<ApplicableEntity> discountPlanaApplicableEntities;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "cat_discount_applicable_entity", joinColumns = { @JoinColumn(name = "disount_plan_id") })
+    @AttributeOverrides(value = { @AttributeOverride(name = "code", column = @Column(name = "code", nullable = false, length = 255)),
+            @AttributeOverride(name = "entityClass", column = @Column(name = "entity_class", nullable = false, length = 255)) })
+    private List<ApplicableEntity> discountPlanaApplicableEntities;
 
-	/**
-	 * A list of discounts plans that cannot be active at the same time on an entity instance.
-	 */
-	@OneToMany(fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "discount_plan_id")
-	private List<DiscountPlan> incompatibleDiscountPlans;
+    /**
+     * A list of discounts plans that cannot be active at the same time on an entity instance.
+     */
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "discount_plan_id")
+    private List<DiscountPlan> incompatibleDiscountPlans;
 
-	@Type(type = "numeric_boolean")
-	@Column(name = "applicable_on_overridden_price")
-	private boolean applicableOnOverriddenPrice;
-	
-	/**
-	 *determines whether the discount plan is applicable on the gross or discounted amount
-	 */
-	@Type(type = "numeric_boolean")
-	@Column(name = "applicable_on_discounted_price")
-	private Boolean applicableOnDiscountedPrice;
-	
-	/**
-	 *determines whether the discount plan is applicable on the gross or discounted amount
-	 */
-	@Column(name = "sequence")
-	private Integer sequence;
-	
-	
-	public enum DurationPeriodUnitEnum {
-		/**
-		 * Month: 2
-		 */
-		MONTH(Calendar.MONTH),
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "applicable_on_overridden_price")
+    private boolean applicableOnOverriddenPrice;
 
-		/**
-		 * Day: 5
-		 */
-		DAY(Calendar.DAY_OF_MONTH),
+    /**
+     * determines whether the discount plan is applicable on the gross or discounted amount
+     */
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "applicable_on_discounted_price")
+    private Boolean applicableOnDiscountedPrice;
 
-		/**
-		 * Year: 1
-		 */
-		YEAR(Calendar.YEAR);
+    /**
+     * determines whether the discount plan is applicable on the gross or discounted amount
+     */
+    @Column(name = "sequence")
+    private Integer sequence;
 
-		int calendarField;
+    public enum DurationPeriodUnitEnum {
+        /**
+         * Month: 2
+         */
+        MONTH(Calendar.MONTH),
 
-		DurationPeriodUnitEnum(int calendarField) {
-			this.calendarField = calendarField;
-		}
+        /**
+         * Day: 5
+         */
+        DAY(Calendar.DAY_OF_MONTH),
 
-		public String getLabel() {
-			return "DiscountPlanItem" + "." + this.name();
-		}
+        /**
+         * Year: 1
+         */
+        YEAR(Calendar.YEAR);
 
-		public int getCalendarField() {
-			return calendarField;
-		}
-	}
-	
+        int calendarField;
 
-	/**
-	 * Expression to determine if discount applies
-	 */
-	@Column(name = "expression_el", length = 2000)
-	@Size(max = 2000)
-	private String expressionEl;
+        DurationPeriodUnitEnum(int calendarField) {
+            this.calendarField = calendarField;
+        }
 
-	/**
-	 *determines whether the discount plan will automatically be applied to an offer or a product upon instantiation
-	 */
-    @Type(type = "numeric_boolean")
+        public String getLabel() {
+            return "DiscountPlanItem" + "." + this.name();
+        }
+
+        public int getCalendarField() {
+            return calendarField;
+        }
+    }
+
+    /**
+     * Expression to determine if discount applies
+     */
+    @Column(name = "expression_el", length = 2000)
+    @Size(max = 2000)
+    private String expressionEl;
+
+    /**
+     * determines whether the discount plan will automatically be applied to an offer or a product upon instantiation
+     */
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "automatic_application")
     private boolean automaticApplication = false;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "allowance_code_id")
     private UntdidAllowanceCode allowanceCode;
-	
 
-	/**
-	 *If false then discount plan will be ignored if event price comes from a contract.
-	 */
-	@Type(type = "numeric_boolean")
-	@Column(name = "applicable_on_contract_price")
-	private boolean applicableOnContractPrice=true;
-	
-	public DiscountPlan() {
-	}
-	
-	public DiscountPlan(DiscountPlan dp) {
+    /**
+     * If false then discount plan will be ignored if event price comes from a contract.
+     */
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "applicable_on_contract_price")
+    private boolean applicableOnContractPrice = true;
 
-		this.setActive(dp.isActive());
-		this.setStartDate(dp.getStartDate());
-		this.setEndDate(dp.getEndDate());
-		this.setDefaultDuration(dp.getDefaultDuration());
-		this.setDurationUnit(dp.getDurationUnit());
-		this.setUUIDIfNull();
-		this.setCode(dp.getCode());
-		this.setMaxDuration(dp.getMaxDuration());
-		this.setDescription(dp.getDescription());
-		this.setMinDuration(dp.getMinDuration());
-		this.setCfValues(dp.getCfValues());
-		this.setCfAccumulatedValues(dp.getCfAccumulatedValues());
-		this.setDiscountPlanItems(new ArrayList<>(dp.getDiscountPlanItems()));
-		this.sequence=dp.getSequence();
-		this.applicableOnDiscountedPrice=dp.getApplicableOnDiscountedPrice();
-		this.allowanceCode=dp.getAllowanceCode();
-		this.applicableOnContractPrice=dp.isApplicableOnContractPrice();
-	}
-	
-	public boolean isValid() {
-		return (startDate == null || endDate == null || startDate.before(endDate));
-	}
+    public DiscountPlan() {
+    }
 
-	public int getMinDuration() {
-		return minDuration;
-	}
+    public DiscountPlan(DiscountPlan dp) {
 
-	public void setMinDuration(int minDuration) {
-		this.minDuration = minDuration;
-	}
+        this.setActive(dp.isActive());
+        this.setStartDate(dp.getStartDate());
+        this.setEndDate(dp.getEndDate());
+        this.setDefaultDuration(dp.getDefaultDuration());
+        this.setDurationUnit(dp.getDurationUnit());
+        this.setUUIDIfNull();
+        this.setCode(dp.getCode());
+        this.setMaxDuration(dp.getMaxDuration());
+        this.setDescription(dp.getDescription());
+        this.setMinDuration(dp.getMinDuration());
+        this.setCfValuesAsJson(dp.getCfValuesAsJson());
+//        this.setCfAccumulatedValues(dp.getCfAccumulatedValues());
+        this.setDiscountPlanItems(new ArrayList<>(dp.getDiscountPlanItems()));
+        this.sequence = dp.getSequence();
+        this.applicableOnDiscountedPrice = dp.getApplicableOnDiscountedPrice();
+        this.allowanceCode = dp.getAllowanceCode();
+        this.applicableOnContractPrice = dp.isApplicableOnContractPrice();
+    }
 
-	public int getMaxDuration() {
-		return maxDuration;
-	}
+    public boolean isValid() {
+        return (startDate == null || endDate == null || startDate.before(endDate));
+    }
 
-	public void setMaxDuration(int maxDuration) {
-		this.maxDuration = maxDuration;
-	}
+    public int getMinDuration() {
+        return minDuration;
+    }
 
-	public List<DiscountPlanItem> getDiscountPlanItems() {
-		return discountPlanItems;
-	}
+    public void setMinDuration(int minDuration) {
+        this.minDuration = minDuration;
+    }
 
-	public void setDiscountPlanItems(List<DiscountPlanItem> discountPlanItems) {
-		this.discountPlanItems = discountPlanItems;
-	}
+    public int getMaxDuration() {
+        return maxDuration;
+    }
 
-	public void addDiscountPlanItem(DiscountPlanItem di) {
-		if (discountPlanItems == null) {
-			discountPlanItems = new ArrayList<>();
-		}
+    public void setMaxDuration(int maxDuration) {
+        this.maxDuration = maxDuration;
+    }
 
-		discountPlanItems.add(di);
-	}
+    public List<DiscountPlanItem> getDiscountPlanItems() {
+        return discountPlanItems;
+    }
 
-	@Override
-	public String toString() {
-		return "DiscountPlan [minDuration=" + minDuration + ", maxDuration=" + maxDuration + ", startDate=" + startDate
-				+ ", endDate=" + endDate + ", defaultDuration=" + defaultDuration + ", durationUnit=" + durationUnit
-				+ "]";
-	}
+    public void setDiscountPlanItems(List<DiscountPlanItem> discountPlanItems) {
+        this.discountPlanItems = discountPlanItems;
+    }
 
-	public Date getStartDate() {
-		return startDate;
-	}
+    public void addDiscountPlanItem(DiscountPlanItem di) {
+        if (discountPlanItems == null) {
+            discountPlanItems = new ArrayList<>();
+        }
 
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
+        discountPlanItems.add(di);
+    }
 
-	public Date getEndDate() {
-		return endDate;
-	}
+    @Override
+    public String toString() {
+        return "DiscountPlan [minDuration=" + minDuration + ", maxDuration=" + maxDuration + ", startDate=" + startDate + ", endDate=" + endDate + ", defaultDuration=" + defaultDuration + ", durationUnit=" + durationUnit
+                + "]";
+    }
 
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+    public Date getStartDate() {
+        return startDate;
+    }
 
-	public Integer getDefaultDuration() {
-		return defaultDuration;
-	}
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
 
-	public void setDefaultDuration(Integer defaultDuration) {
-		this.defaultDuration = defaultDuration;
-	}
+    public Date getEndDate() {
+        return endDate;
+    }
 
-	public DurationPeriodUnitEnum getDurationUnit() {
-		return durationUnit;
-	}
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
 
-	public void setDurationUnit(DurationPeriodUnitEnum durationUnit) {
-		this.durationUnit = durationUnit;
-	}
+    public Integer getDefaultDuration() {
+        return defaultDuration;
+    }
 
-	/**
-	 * @return the discountPlanType
-	 */
-	public DiscountPlanTypeEnum getDiscountPlanType() {
-		return discountPlanType;
-	}
+    public void setDefaultDuration(Integer defaultDuration) {
+        this.defaultDuration = defaultDuration;
+    }
 
-	/**
-	 * @param discountPlanType the discountPlanType to set
-	 */
-	public void setDiscountPlanType(DiscountPlanTypeEnum discountPlanType) {
-		this.discountPlanType = discountPlanType;
-	}
+    public DurationPeriodUnitEnum getDurationUnit() {
+        return durationUnit;
+    }
 
-	public DiscountPlanStatusEnum getStatus() {
-		return status;
-	}
+    public void setDurationUnit(DurationPeriodUnitEnum durationUnit) {
+        this.durationUnit = durationUnit;
+    }
 
-	public void setStatus(DiscountPlanStatusEnum status) {
-		this.status = status;
-	}
+    /**
+     * @return the discountPlanType
+     */
+    public DiscountPlanTypeEnum getDiscountPlanType() {
+        return discountPlanType;
+    }
 
-	public Date getStatusDate() {
-		return statusDate;
-	}
+    /**
+     * @param discountPlanType the discountPlanType to set
+     */
+    public void setDiscountPlanType(DiscountPlanTypeEnum discountPlanType) {
+        this.discountPlanType = discountPlanType;
+    }
 
-	public void setStatusDate(Date statusDate) {
-		this.statusDate = statusDate;
-	}
+    public DiscountPlanStatusEnum getStatus() {
+        return status;
+    }
 
-	public Long getInitialQuantity() {
-		if (initialQuantity == null) {
-			initialQuantity = 0L;
-		}
-		return initialQuantity;
-	}
+    public void setStatus(DiscountPlanStatusEnum status) {
+        this.status = status;
+    }
 
-	public void setInitialQuantity(Long initialQuantity) {
-		this.initialQuantity = initialQuantity;
-	}
+    public Date getStatusDate() {
+        return statusDate;
+    }
 
-	public Long getUsedQuantity() {
-		if (usedQuantity == null) {
-			usedQuantity = 0L;
-		}
-		return usedQuantity;
-	}
+    public void setStatusDate(Date statusDate) {
+        this.statusDate = statusDate;
+    }
 
-	public void setUsedQuantity(Long usedQuantity) {
-		this.usedQuantity = usedQuantity;
-	}
+    public Long getInitialQuantity() {
+        if (initialQuantity == null) {
+            initialQuantity = 0L;
+        }
+        return initialQuantity;
+    }
 
-	public Long getApplicationLimit() {
-		if (applicationLimit == null) {
-			applicationLimit = 0L;
-		}
-		return applicationLimit;
-	}
+    public void setInitialQuantity(Long initialQuantity) {
+        this.initialQuantity = initialQuantity;
+    }
 
-	public void setApplicationLimit(Long applicationLimit) {
-		this.applicationLimit = applicationLimit;
-	}
+    public Long getUsedQuantity() {
+        if (usedQuantity == null) {
+            usedQuantity = 0L;
+        }
+        return usedQuantity;
+    }
 
-	public String getApplicationFilterEL() {
-		return applicationFilterEL;
-	}
+    public void setUsedQuantity(Long usedQuantity) {
+        this.usedQuantity = usedQuantity;
+    }
 
-	public void setApplicationFilterEL(String applicationFilterEL) {
-		this.applicationFilterEL = applicationFilterEL;
-	}
+    public Long getApplicationLimit() {
+        if (applicationLimit == null) {
+            applicationLimit = 0L;
+        }
+        return applicationLimit;
+    }
 
-	public List<ApplicableEntity> getDiscountPlanaApplicableEntities() {
-		return discountPlanaApplicableEntities;
-	}
+    public void setApplicationLimit(Long applicationLimit) {
+        this.applicationLimit = applicationLimit;
+    }
 
-	public void setDiscountPlanaApplicableEntities(List<ApplicableEntity> applicableEntities) {
-		this.discountPlanaApplicableEntities = applicableEntities;
-	}
+    public String getApplicationFilterEL() {
+        return applicationFilterEL;
+    }
 
-	public List<DiscountPlan> getIncompatibleDiscountPlans() {
-		return incompatibleDiscountPlans;
-	}
+    public void setApplicationFilterEL(String applicationFilterEL) {
+        this.applicationFilterEL = applicationFilterEL;
+    }
 
-	public void setIncompatibleDiscountPlans(List<DiscountPlan> incompatibleDiscountPlans) {
-		this.incompatibleDiscountPlans = incompatibleDiscountPlans;
-	}
+    public List<ApplicableEntity> getDiscountPlanaApplicableEntities() {
+        return discountPlanaApplicableEntities;
+    }
 
-	/**
-	 * @return the expressionEl
-	 */
-	public String getExpressionEl() {
-		return expressionEl;
-	}
+    public void setDiscountPlanaApplicableEntities(List<ApplicableEntity> applicableEntities) {
+        this.discountPlanaApplicableEntities = applicableEntities;
+    }
 
-	/**
-	 * @param expressionEl the expressionEl to set
-	 */
-	public void setExpressionEl(String expressionEl) {
-		this.expressionEl = expressionEl;
-	}
-	
+    public List<DiscountPlan> getIncompatibleDiscountPlans() {
+        return incompatibleDiscountPlans;
+    }
+
+    public void setIncompatibleDiscountPlans(List<DiscountPlan> incompatibleDiscountPlans) {
+        this.incompatibleDiscountPlans = incompatibleDiscountPlans;
+    }
+
+    /**
+     * @return the expressionEl
+     */
+    public String getExpressionEl() {
+        return expressionEl;
+    }
+
+    /**
+     * @param expressionEl the expressionEl to set
+     */
+    public void setExpressionEl(String expressionEl) {
+        this.expressionEl = expressionEl;
+    }
+
     public boolean getApplicableOnOverriddenPrice() {
-		return applicableOnOverriddenPrice;
-	}
+        return applicableOnOverriddenPrice;
+    }
 
-	public void setApplicableOnOverriddenPrice(boolean applicableOnOverriddenPrice) {
-		this.applicableOnOverriddenPrice = applicableOnOverriddenPrice;
-	}
-	
+    public void setApplicableOnOverriddenPrice(boolean applicableOnOverriddenPrice) {
+        this.applicableOnOverriddenPrice = applicableOnOverriddenPrice;
+    }
 
-	public Boolean getApplicableOnDiscountedPrice() {
-		return applicableOnDiscountedPrice;
-	}
+    public Boolean getApplicableOnDiscountedPrice() {
+        return applicableOnDiscountedPrice;
+    }
 
-	public void setApplicableOnDiscountedPrice(Boolean applicableOnDiscountedPrice) {
-		this.applicableOnDiscountedPrice = applicableOnDiscountedPrice;
-	}
+    public void setApplicableOnDiscountedPrice(Boolean applicableOnDiscountedPrice) {
+        this.applicableOnDiscountedPrice = applicableOnDiscountedPrice;
+    }
 
-	public Integer getSequence() {
-		return sequence;
-	}
+    public Integer getSequence() {
+        return sequence;
+    }
 
-	public void setSequence(Integer sequence) {
-		this.sequence = sequence;
-	}
-	
-	public boolean isAutomaticApplication() {
-		return automaticApplication;
-	}
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
+    }
 
-	public void setAutomaticApplication(boolean autmaticApplication) {
-		this.automaticApplication = autmaticApplication;
-	}
+    public boolean isAutomaticApplication() {
+        return automaticApplication;
+    }
 
-	/**
-     * Check if a date is within this Discount's effective date. Exclusive of the endDate. If startDate is null, it returns true. If startDate is not null and endDate is null,
-     * endDate is computed from the given duration.
+    public void setAutomaticApplication(boolean autmaticApplication) {
+        this.automaticApplication = autmaticApplication;
+    }
+
+    /**
+     * Check if a date is within this Discount's effective date. Exclusive of the endDate. If startDate is null, it returns true. If startDate is not null and endDate is null, endDate is computed from the given duration.
      *
      * @param date the given date
      * @return returns true if this DiscountItem is to be applied
      */
     public boolean isEffective(Date date) {
-    	if(date==null) {
-    		return true;
-    	}
+        if (date == null) {
+            return true;
+        }
         if (startDate == null && endDate == null) {
             return true;
         }
@@ -535,22 +531,20 @@ public class DiscountPlan extends EnableBusinessCFEntity implements ISearchable 
         return (date.compareTo(startDate) >= 0) && (date.before(endDate));
     }
 
+    public UntdidAllowanceCode getAllowanceCode() {
+        return allowanceCode;
+    }
 
-	public UntdidAllowanceCode getAllowanceCode() {
-		return allowanceCode;
-	}
+    public void setAllowanceCode(UntdidAllowanceCode allowanceCode) {
+        this.allowanceCode = allowanceCode;
+    }
 
-	public void setAllowanceCode(UntdidAllowanceCode allowanceCode) {
-		this.allowanceCode = allowanceCode;
-	}
+    public boolean isApplicableOnContractPrice() {
+        return applicableOnContractPrice;
+    }
 
-	public boolean isApplicableOnContractPrice() {
-		return applicableOnContractPrice;
-	}
+    public void setApplicableOnContractPrice(boolean applicableOnContractPrice) {
+        this.applicableOnContractPrice = applicableOnContractPrice;
+    }
 
-	public void setApplicableOnContractPrice(boolean applicableOnContractPrice) {
-		this.applicableOnContractPrice = applicableOnContractPrice;
-	}
-
-	
 }

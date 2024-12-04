@@ -60,12 +60,12 @@ public class MinAmountData {
     /**
      * The constructor.
      *
-     * @param minAmount                 The minimum amount
-     * @param minAmountLabel            The minimum amount label
-     * @param amounts                   The Amounts
+     * @param minAmount The minimum amount
+     * @param minAmountLabel The minimum amount label
+     * @param amounts The Amounts
      * @param invoiceSubCategoryAmounts The amounts grouped by invoiceSubCategory
-     * @param entity                    the entity
-     * @param seller                    the seller
+     * @param entity the entity
+     * @param seller the seller
      */
     public MinAmountData(BigDecimal minAmount, String minAmountLabel, Amounts amounts, Map<Long, Amounts> invoiceSubCategoryAmounts, IInvoicingMinimumApplicable entity, Seller seller) {
         this.minAmount = minAmount;

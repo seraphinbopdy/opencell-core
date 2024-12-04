@@ -18,12 +18,12 @@
 
 package org.meveo.service.custom;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.HashMap;
 
 import org.junit.Test;
 import org.meveo.model.customEntities.CustomEntityInstance;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class CustomEntityInstanceServiceTest {
 

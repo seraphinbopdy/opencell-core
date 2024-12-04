@@ -22,27 +22,25 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.inject.Inject;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.meveo.cache.MetricsConfigurationCacheContainerProvider;
+import org.meveo.commons.utils.EjbUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
-import org.eclipse.microprofile.metrics.Histogram;
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetadataBuilder;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.Timer;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
-import org.meveo.cache.MetricsConfigurationCacheContainerProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.Timer;
+import jakarta.inject.Inject;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @WebFilter(urlPatterns = "/*")
 public class RequestMonitoringFilter extends HttpFilter {
@@ -50,8 +48,7 @@ public class RequestMonitoringFilter extends HttpFilter {
     private Logger log = LoggerFactory.getLogger(RequestMonitoringFilter.class);
 
     @Inject
-    @RegistryType(type = MetricRegistry.Type.APPLICATION)
-    MetricRegistry registry;
+    private MeterRegistry meterRegistry;
 
     @Inject
     MetricsConfigurationCacheContainerProvider metricsConfigCache;
@@ -63,7 +60,7 @@ public class RequestMonitoringFilter extends HttpFilter {
         registerMetricsForRequest(req, millis);
     }
 
-    private void registerMetricsForRequest(HttpServletRequest req, long millis) {
+    private void registerMetricsForRequest(HttpServletRequest req, long startTime) {
         try {
             if (req.getRequestURI() != null) {
                 String uri = req.getRequestURI();
@@ -82,8 +79,8 @@ public class RequestMonitoringFilter extends HttpFilter {
                         String metricsType = metrics.get("metrics_type");
                         String unit = metrics.get("metrics_unit");
 
-                        log.info("Register {} metrics for {} in {}", metricsType, req.getMethod(), name);
-                        registerMetricsForMethod(name, metricsType, millis, unit);
+                        log.debug("Register {} metrics for {} in {}", metricsType, req.getMethod(), name);
+                        registerMetricsForMethod(name, metricsType, startTime, unit);
                     }
                 } else {
                     log.debug("Name {} in uri {} not found ", name, uri);
@@ -94,35 +91,41 @@ public class RequestMonitoringFilter extends HttpFilter {
         }
     }
 
-    private void registerMetricsForMethod(String name, String metrics, long start, String unit) {
-        name = metrics + name.replace("/", "_");
+    private void registerMetricsForMethod(String name, String metrics, long startTime, String unit) {
+        name = metrics + name.replace("/", ".");
 
         if ("counter".equalsIgnoreCase(metrics)) {
-            registry.counter(name).inc();
+            meterRegistry.counter(name, "node", EjbUtils.getCurrentClusterNode()).increment();
+
         } else if ("gauge".equalsIgnoreCase(metrics)) {
-            registry.concurrentGauge(name).inc();
-        } else if ("histogram".equalsIgnoreCase(metrics)) {
-            Histogram histogram = registry.histogram(name);
-            long count = histogram.getCount();
-            histogram.update(count + 1);
-        } else if ("meter".equalsIgnoreCase(metrics)) {
-            registry.meter(name).mark();
+            AtomicInteger value = meterRegistry.gauge(name, Tags.of("node", EjbUtils.getCurrentClusterNode()), new AtomicInteger(0));
+            value.set(value.get() + 1);
+
+            // Akk migrate me
+
+            // } else if ("histogram".equalsIgnoreCase(metrics)) {
+
+            // Histogram histogram = registry.histogram(name);
+            // long count = histogram.getCount();
+            // histogram.update(count + 1);
+
+            // } else if ("meter".equalsIgnoreCase(metrics)) {
+
+            // registry.meter(name).mark();
+
         } else if ("timer".equalsIgnoreCase(metrics)) {
-            createTimerMetrics(name, start, unit);
+            createTimerMetrics(name, startTime, unit);
         } else {
             log.debug("unknown metrics {} , must from list [counter, gauge, histogram, meter, timer]", metrics);
         }
     }
 
-    private void createTimerMetrics(String name, long start, String unit) {
-        long end = System.currentTimeMillis();
-        long duration = end - start;
-        Metadata metadata = new MetadataBuilder()
-                .withName(name)
-                .withUnit(unit)
-                .build();
-        Timer timer = registry.timer(metadata);
+    private void createTimerMetrics(String name, long startTime, String unit) {
 
-        timer.update(Duration.ofMillis(duration));
+        long end = System.currentTimeMillis();
+        long duration = end - startTime;
+        Timer timer = meterRegistry.timer(name, "node", EjbUtils.getCurrentClusterNode());
+        // .withUnit(unit) Akk migrate me
+        timer.record(Duration.ofMillis(duration));
     }
 }

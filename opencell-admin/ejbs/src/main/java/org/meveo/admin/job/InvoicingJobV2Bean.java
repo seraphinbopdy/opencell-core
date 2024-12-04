@@ -22,13 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.BadRequestException;
-
 import org.apache.commons.collections.map.HashedMap;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
@@ -41,7 +34,6 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.interceptor.PerformanceInterceptor;
 import org.meveo.model.billing.BillingProcessTypesEnum;
 import org.meveo.model.billing.BillingRun;
-import org.meveo.model.billing.BillingRunAutomaticActionEnum;
 import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.billing.InvoiceSequence;
 import org.meveo.model.billing.InvoiceStatusEnum;
@@ -55,6 +47,13 @@ import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoicesToNumberInfo;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.job.JobInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.BadRequestException;
 
 
 @Stateless

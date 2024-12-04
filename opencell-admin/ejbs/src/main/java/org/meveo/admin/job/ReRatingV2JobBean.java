@@ -11,12 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -34,6 +28,12 @@ import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.TablesPartitioningService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 @Stateless
 public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
@@ -63,7 +63,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 	
     @Inject
     private ReratingService reratingService;
-    
+
     private String lastEDRPartition;
 
 	@Override
@@ -88,9 +88,9 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		if (nbThreads == -1) {
 			nbThreads = (long) Runtime.getRuntime().availableProcessors();
 		}
-		
-		lastEDRPartition = getOperationDate(jobInstance);
 
+		lastEDRPartition = getOperationDate(jobInstance);
+		
 		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_NR_ITEMS_PER_TX, 10000L);
 		
 		entityManager = emWrapper.getEntityManager();
@@ -157,7 +157,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		String edrDateCondition = lastEDRPartition != null ? " AND edr.eventDate>'" + lastEDRPartition+"'" : "";
 		subList.forEach(ids -> reratingService.applyMassRerate(ids, useSamePricePlan, jobExecutionResult, edrDateCondition));
 	}
-	
+
 	private String getOperationDate(JobInstance jobInstance) {
 		String operationDateConfig = (String) this.getParamOrCFValue(jobInstance,
 				ReRatingV2Job.CF_OPERATIONS_STARTING_DATE, ReRatingV2Job.NO_DATE_LIMITE);
@@ -210,7 +210,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		Object[] count = (Object[]) entityManager.createNativeQuery(sql).getSingleResult();
 		nrOfInitialWOs = count[0] != null ? ((Number) count[0]).longValue() : 0;
 	}
-	
+
 	@Override
     protected boolean isProcessItemInNewTx() {
         return false;

@@ -1,5 +1,9 @@
 package org.meveo.service.script.dunning;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceLine;
@@ -9,8 +13,6 @@ import org.meveo.model.dunning.DunningModeEnum;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.script.Script;
-
-import java.util.*;
 
 public class DunningSuspendSubscriptionScript extends Script {
 

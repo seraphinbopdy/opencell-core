@@ -54,7 +54,7 @@
                     </p:column>
                     <c:if test="#{deleteButton and edit}">
                         <p:column width="10%">
-                            <p:commandButton id="deletelink" action="#{backingBean.deleteItemFromCollection(fieldItem, rowIndex)}" partialSubmit="true" icon="ui-icon-trash"
+                            <p:commandButton id="deletelink" action="#{backingBean.deleteItemFromCollection(fieldItem, rowIndex)}" partialSubmit="true" icon="pi pi-trash"
                                 process="@this #{id}" update="#{id}">
                             </p:commandButton>
                         </p:column>

@@ -1,23 +1,23 @@
 package org.meveo.apiv2.dunning;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.immutables.value.Value;
-import org.meveo.api.dto.cpq.xml.PaymentMethod;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.dunning.PayRetryFrequencyUnitEnum;
 import org.meveo.model.payments.PaymentMethodEnum;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableDunningPaymentRetry.class)
 public interface DunningPaymentRetry extends Resource {
 
     @Schema(description = "The payment method")
-    @Nonnull
+    @NotNull
     PaymentMethodEnum getPaymentMethod();
 
     @Schema(description = "The payment service provider")
@@ -25,18 +25,18 @@ public interface DunningPaymentRetry extends Resource {
     String getPsp();
 
     @Schema(description = "The number of payment retries")
-    @Nonnull
+    @NotNull
     Integer getNumPayRetries();
 
     @Schema(description = "The unit's frequency of retry")
-    @Nonnull
+    @NotNull
     PayRetryFrequencyUnitEnum getPayRetryFrequencyUnit();
 
     @Schema(description = "The retry's frequency")
-    @Nonnull
+    @NotNull
     Integer getPayRetryFrequency();
 
     @Schema(description = "The dunning settings associated to stop reason")
-    @Nonnull
+    @NotNull
 	Resource getDunningSettings();
 }

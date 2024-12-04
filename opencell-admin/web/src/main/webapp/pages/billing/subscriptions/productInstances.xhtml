@@ -18,7 +18,7 @@
                     <hftl:column label="#{messages['chargeApplication.applicationDate']}" field="applicationDate" isDate="true" />
                     <hftl:column label="#{messages['commons.quantity']}" field="quantity" converter="bigDecimal4DigitsConverter" />
                     <p:column styleClass="actions-column" headerText="#{messages['commons.actions']}">
-                        <p:commandButton id="viewProductInstanceDetailLink" action="#{parentBackingBean.editProductInstance(entity)}" update="#{parentIdPath}:applyProductPanel" icon="ui-icon-document">
+                        <p:commandButton id="viewProductInstanceDetailLink" action="#{parentBackingBean.editProductInstance(entity)}" update="#{parentIdPath}:applyProductPanel" icon="pi pi-file-edit">
                         </p:commandButton>
                     </p:column>
                 </p:dataTable>

@@ -17,11 +17,11 @@
 		</div>
 
 		<h:form id="primary-nav-form">
-			<div class="pull-right" id="primary_nav_wrap">
-				<ul id="top-right-menu">
+			<div  class="pull-right"> <!-- <div class="pull-right" id="primary_nav_wrap"> -->
+				<ul  id="top-right-menu">
 					<li><c:if test="#{currentUser.authenticated}">
 							<a href="#" id="menu1"><i class="fa fa-2x fa-cog"></i></a>
-							<ul style="display: none; z-index: 1">
+							<ul > <!-- <ul style="display: none; z-index: 1"> -->
 								<li><h:commandLink id="logout" action="#{authenticationProvider.logout}" value="#{messages['menutop.logout']}" /></li>
 							</ul>
 						</c:if></li>

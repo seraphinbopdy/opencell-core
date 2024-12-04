@@ -21,10 +21,10 @@ package org.meveo.model.billing;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 import org.meveo.model.catalog.OneShotChargeTemplate;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("T")
@@ -68,7 +68,7 @@ public class TerminationChargeInstance extends OneShotChargeInstance {
             OneShotChargeTemplate chargeTemplate) {
         super(description, chargeDate, amountWithoutTax, amountWithTax, quantity, orderNumberOverride, serviceInstance, chargeTemplate);
     }
-    
+
     /**
      * Constructor
      * 
@@ -83,7 +83,6 @@ public class TerminationChargeInstance extends OneShotChargeInstance {
      */
     public TerminationChargeInstance(String description, Date chargeDate, BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal quantity, String orderNumberOverride, Subscription subscription,
             OneShotChargeTemplate chargeTemplate) {
-        super(description,  chargeDate,  amountWithoutTax,  amountWithTax,  quantity,  orderNumberOverride,  subscription,
-             chargeTemplate);
+        super(description, chargeDate, amountWithoutTax, amountWithTax, quantity, orderNumberOverride, subscription, chargeTemplate);
     }
 }

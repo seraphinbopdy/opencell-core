@@ -6,11 +6,9 @@
 	xmlns:o="http://omnifaces.org/ui"
 	xmlns:p="http://primefaces.org/ui" template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{calendarBean.objectId}" />
         </f:metadata>
-    </ui:define>
 
 	<ui:define name="body">
 
@@ -85,369 +83,374 @@
 			<hftl:formField label="#{messages['calendar.description']}"
 				field="description" useConverter="false" id="description" />
 
+            <c:if test="#{calendarBean.entity['class'].simpleName eq 'CalendarYearly'}">
+    			<hftl:formField label="#{messages['calendar.days']}" field="days"
+    				listType="pickUpList" valueLabelField="day" valueLabelField2="month"
+    				dualListModel="#{calendarBean.dayInYearModel}"
+    				newLine="true" />
+            </c:if>
+            <c:if test="#{calendarBean.entity['class'].simpleName eq 'CalendarFixed'}">
+    			<h:panelGrid columns="2" 
+    				styleClass="clearLeft">
+    				<h:panelGrid id="calendarFixed">
+    					<h:panelGrid columns="2">
+    						<p:inputMask id="fixed-date" value="#{calendarBean.timeToAdd}" size="50"
+    							mask="99/99/9999 99:99    -    99/99/9999 99:99" rendered="#{calendarBean.edit}" />
+    						<p:commandButton icon="pi pi-plus"
+    							action="#{calendarBean.addFixedDate()}" partialSubmit="true"
+    							process=":formId:fixed-date, @this"
+    							update=":formId:fixed-date, :formId:calendarFixedDates"
+    							rendered="#{calendarBean.edit}" />
+    					</h:panelGrid>
+    					<p:dataTable id="calendarFixedDates" resizableColumns="true"
+    						value="#{calendarBean.entity.fixedDates}" var="record"
+    						paginator="false" styleClass="paginated" style="width:30%">
+    						<f:facet name="header">#{messages['calendar.fixedDates']}</f:facet>
+    						<p:column width="80%">
+    							<h:outputText value="#{calendarBean.getFixedDate(record.datePeriod)}"
+    								style="display:inline-block" />
+    						</p:column>
+    						<p:column width="20%">
+    							<p:commandLink styleClass="pi pi-trash"
+    								style="float:right;margin-right:10px"
+    								action="#{calendarBean.removeFixedDate(record.datePeriod)}"
+    								partialSubmit="true" process="@this"
+    								update=":formId:calendarFixedDates"
+    								rendered="#{calendarBean.edit}">
+    							</p:commandLink>
+    						</p:column>
+    					</p:dataTable>
+    				</h:panelGrid>
+    			</h:panelGrid>
+            </c:if>
 
-			<hftl:formField label="#{messages['calendar.days']}" field="days"
-				listType="pickUpList" valueLabelField="day" valueLabelField2="month"
-				dualListModel="#{calendarBean.dayInYearModel}"
-				rendered="#{calendarBean.entity['class'].simpleName eq 'CalendarYearly'}"
-				newLine="true" />
-			<h:panelGrid columns="2" 
-				rendered="#{calendarBean.entity['class'].simpleName eq 'CalendarFixed'}"
-				styleClass="clearLeft">
-				<h:panelGrid id="calendarFixed">
-					<h:panelGrid columns="2">
-						<p:inputMask id="fixed-date" value="#{calendarBean.timeToAdd}" size="50"
-							mask="99/99/9999 99:99    -    99/99/9999 99:99" rendered="#{calendarBean.edit}" />
-						<p:commandButton icon="ui-icon-plus"
-							action="#{calendarBean.addFixedDate()}" partialSubmit="true"
-							process=":formId:fixed-date, @this"
-							update=":formId:fixed-date, :formId:calendarFixedDates"
-							rendered="#{calendarBean.edit}" />
-					</h:panelGrid>
-					<p:dataTable id="calendarFixedDates" resizableColumns="true"
-						value="#{calendarBean.entity.fixedDates}" var="record"
-						paginator="false" styleClass="paginated" style="width:30%">
-						<f:facet name="header">#{messages['calendar.fixedDates']}</f:facet>
-						<p:column width="80%">
-							<h:outputText value="#{calendarBean.getFixedDate(record.datePeriod)}"
-								style="display:inline-block" />
-						</p:column>
-						<p:column width="20%">
-							<p:commandLink styleClass="ui-icon ui-icon-trash"
-								style="float:right;margin-right:10px"
-								action="#{calendarBean.removeFixedDate(record.datePeriod)}"
-								partialSubmit="true" process="@this"
-								update=":formId:calendarFixedDates"
-								rendered="#{calendarBean.edit}">
-							</p:commandLink>
-						</p:column>
-					</p:dataTable>
-				</h:panelGrid>
-			</h:panelGrid>
+            <c:if test="#{calendarBean.entity['class'].simpleName eq 'CalendarDaily'}">
+    			<h:panelGrid columns="2"
+    				styleClass="clearLeft">
+    				<p:outputLabel value="#{messages['calendar.hours']}" />
+    				<h:panelGrid id="calendarHourMin">
+    					<h:panelGrid columns="2">
+    						<p:inputMask id="date" value="#{calendarBean.timeToAdd}"
+    							mask="99:99" rendered="#{calendarBean.edit}" />
+    						<p:commandButton icon="pi pi-plus"
+    							action="#{calendarBean.addTime()}" partialSubmit="true"
+    							process=":formId:date, @this"
+    							update=":formId:date, :formId:calendarHours"
+    							rendered="#{calendarBean.edit}" />
+    					</h:panelGrid>
+    					<p:dataTable id="calendarHours" resizableColumns="true"
+    						value="#{calendarBean.entity.hours}" var="hourMin"
+    						paginator="false" styleClass="paginated" style="width:25%">
+    						<f:facet name="header">#{messages['calendar.time']}</f:facet>
+    						<p:column width="90%">
+    							<h:outputText value="#{hourMin.hourAsString}"
+    								style="display:inline-block" />
+    						</p:column>
+    						<p:column width="10%">
+    							<p:commandLink styleClass="pi pi-trash"
+    								style="float:right;margin-right:10px"
+    								action="#{calendarBean.removeTime(hourMin)}"
+    								partialSubmit="true" process="@this"
+    								update=":formId:calendarHours"
+    								rendered="#{calendarBean.edit}">
+    							</p:commandLink>
+    						</p:column>
+    					</p:dataTable>
+    				</h:panelGrid>
+    			</h:panelGrid>
+            </c:if>
 
-			<h:panelGrid columns="2"
-				rendered="#{calendarBean.entity['class'].simpleName eq 'CalendarDaily'}"
-				styleClass="clearLeft">
-				<p:outputLabel value="#{messages['calendar.hours']}" />
-				<h:panelGrid id="calendarHourMin">
-					<h:panelGrid columns="2">
-						<p:inputMask id="date" value="#{calendarBean.timeToAdd}"
-							mask="99:99" rendered="#{calendarBean.edit}" />
-						<p:commandButton icon="ui-icon-plus"
-							action="#{calendarBean.addTime()}" partialSubmit="true"
-							process=":formId:date, @this"
-							update=":formId:date, :formId:calendarHours"
-							rendered="#{calendarBean.edit}" />
-					</h:panelGrid>
-					<p:dataTable id="calendarHours" resizableColumns="true"
-						value="#{calendarBean.entity.hours}" var="hourMin"
-						paginator="false" styleClass="paginated" style="width:25%">
-						<f:facet name="header">#{messages['calendar.time']}</f:facet>
-						<p:column width="90%">
-							<h:outputText value="#{hourMin.hourAsString}"
-								style="display:inline-block" />
-						</p:column>
-						<p:column width="10%">
-							<p:commandLink styleClass="ui-icon ui-icon-trash"
-								style="float:right;margin-right:10px"
-								action="#{calendarBean.removeTime(hourMin)}"
-								partialSubmit="true" process="@this"
-								update=":formId:calendarHours"
-								rendered="#{calendarBean.edit}">
-							</p:commandLink>
-						</p:column>
-					</p:dataTable>
-				</h:panelGrid>
-			</h:panelGrid>
+            <c:if test="#{calendarBean.entity['class'].simpleName eq 'CalendarPeriod'}">
+    			<h:panelGroup>    
+    				<hftl:formField label="#{messages['calendar.periodLength']}"
+    					field="periodLength" required="true" newLine="true" />
+    				<hftl:formField label="#{messages['calendar.periodUnit']}"
+    					field="periodUnit" required="true"
+    					listValues="#{calendarBean.periodTypes}"
+    					rendered="#{ calendarBean.edit}" />
+    				<hftl:formField id="periodUnit2" label="#{messages['calendar.periodUnit']}"
+    					field="periodUnit" isMessage="true"
+    					messagePrefix="calendar.periodUnit"
+    					rendered="#{ not calendarBean.edit}" />
+    				<hftl:formField label="#{messages['calendar.nbPeriods']}"
+    					field="nbPeriods" required="true" />
+                    <hftl:formField label="#{messages['calendar.initDateEL']}" field="initDateEL" id="initDateEL" textArea="true" rows="1" maxlength="2000" componentWidth="50" />                   
+    			</h:panelGroup>
+            </c:if>
 
-			<h:panelGroup
-				rendered="#{calendarBean.entity['class'].simpleName eq 'CalendarPeriod'}">
+            <c:if test="#{calendarBean.entity['class'].simpleName eq 'CalendarJoin'}">
+    			<h:panelGroup>
+    				<hftl:formField id="joinType" label="#{messages['calendar.joinType']}"
+    					field="joinType" newLine="true" required="true" />
+    				<hftl:formField id="joinCalendar1"
+    					label="#{messages['calendar.joinCalendar1']}" field="joinCalendar1"
+    					valueLabelField="code" required="true" popup="true"
+    					popupId="searchCalendarPopup1" />
+    
+    				<hftl:formField id="joinCalendar2"
+    					label="#{messages['calendar.joinCalendar2']}" field="joinCalendar2"
+    					valueLabelField="code" required="true" popup="true"
+    					popupId="searchCalendarPopup2" />
+    			</h:panelGroup>
+            </c:if>
 
-				<hftl:formField label="#{messages['calendar.periodLength']}"
-					field="periodLength" required="true" newLine="true" />
-				<hftl:formField label="#{messages['calendar.periodUnit']}"
-					field="periodUnit" required="true"
-					listValues="#{calendarBean.periodTypes}"
-					rendered="#{ calendarBean.edit}" />
-				<hftl:formField id="periodUnit2" label="#{messages['calendar.periodUnit']}"
-					field="periodUnit" isMessage="true"
-					messagePrefix="calendar.periodUnit"
-					rendered="#{ not calendarBean.edit}" />
-				<hftl:formField label="#{messages['calendar.nbPeriods']}"
-					field="nbPeriods" required="true" />
-                <hftl:formField label="#{messages['calendar.initDateEL']}" field="initDateEL" id="initDateEL" textArea="true" rows="1" maxlength="2000" componentWidth="50" />                   
-			</h:panelGroup>
-
-			<h:panelGroup rendered="#{calendarBean.entity['class'].simpleName eq 'CalendarJoin'}">
-				<hftl:formField id="joinType" label="#{messages['calendar.joinType']}"
-					field="joinType" newLine="true" required="true" />
-				<hftl:formField id="joinCalendar1"
-					label="#{messages['calendar.joinCalendar1']}" field="joinCalendar1"
-					valueLabelField="code" required="true" popup="true"
-					popupId="searchCalendarPopup1" />
-
-				<hftl:formField id="joinCalendar2"
-					label="#{messages['calendar.joinCalendar2']}" field="joinCalendar2"
-					valueLabelField="code" required="true" popup="true"
-					popupId="searchCalendarPopup2" />
-			</h:panelGroup>
-
-
-			<h:panelGroup
-				rendered="#{calendarBean.entity['class'].simpleName eq 'CalendarInterval'}">
-
-				<hftl:decorateFormField fieldId="intervalType"
-					label="#{messages['calendar.intervalType']}" newLine="true">
-					<p:selectOneMenu id="intervalType"
-						value="#{calendarBean.entity.intervalType}" required="true"
-						rendered="#{calendarBean.entity.id==null}">
-						<f:selectItem itemValue="#{null}" itemLabel="" />
-						<f:selectItems
-							value="#{calendarBean.calendarIntervalTypeEnumValues}"
-							var="enumElement" itemValue="#{enumElement}"
-							itemLabel="#{messages[enumElement.label]}" />
-						<f:converter converterId="enumConverter" />
-						<p:ajax event="change"
-							listener="#{calendarBean.changeIntervalType}"
-							partialSubmit="true" process="@this" update="@form" />
-					</p:selectOneMenu>
-					<h:outputText
-						value="#{messages[calendarBean.entity.intervalType.label]}"
-						styleClass="field-value"
-						rendered="#{calendarBean.entity.id!=null}" />
-				</hftl:decorateFormField>
-
-
-				<h:panelGrid columns="2"
-					rendered="#{calendarBean.entity.intervalType=='HOUR'}"
-					styleClass="clearLeft">
-					<p:outputLabel value="#{messages['calendar.hourInterval']}" />
-					<h:panelGrid width="20%">
-						<h:panelGrid columns="2">
-							<p:inputMask id="hourIntervalToAdd"
-								value="#{calendarBean.timeToAdd}" mask="99:99 - 99:99"
-								rendered="#{calendarBean.edit}" />
-							<p:commandButton icon="ui-icon-plus"
-								action="#{calendarBean.addInterval()}" partialSubmit="true"
-								process=":formId:hourIntervalToAdd, @this"
-								update=":formId:hourIntervalToAdd, :formId:intervalHours"
-								rendered="#{calendarBean.edit}" />
-						</h:panelGrid>
-						<p:dataTable id="intervalHours" resizableColumns="true"
-							value="#{calendarBean.entity.intervals}" var="interval"
-							paginator="false" styleClass="paginated">
-							<f:facet name="header">#{messages['calendar.hourIntervals']}</f:facet>
-							<p:column width="70%">
-								<h:outputText value="#{interval.intervalAsString}"
-									style="display:inline-block" />
-							</p:column>
-							<p:column width="30%">
-								<p:commandLink styleClass="ui-icon ui-icon-trash"
-									style="float:right;margin-right:10px"
-									action="#{calendarBean.removeInterval(interval)}"
-									partialSubmit="true" process="@this"
-									update=":formId:intervalHours"
-									rendered="#{calendarBean.edit}">
-								</p:commandLink>
-							</p:column>
-						</p:dataTable>
-					</h:panelGrid>
-				</h:panelGrid>
-
-				<h:panelGrid columns="2"
-					rendered="#{calendarBean.entity.intervalType=='DAY'}"
-					styleClass="clearLeft">
-					<p:outputLabel value="#{messages['calendar.dayInterval']}" />
-					<h:panelGrid width="20%">
-						<h:panelGrid columns="2">
-							<p:inputMask id="dayIntervalToAdd"
-								value="#{calendarBean.timeToAdd}" mask="99/99 - 99/99"
-								rendered="#{calendarBean.edit}" />
-							<p:commandButton icon="ui-icon-plus"
-								action="#{calendarBean.addInterval()}" partialSubmit="true"
-								process=":formId:dayIntervalToAdd, @this"
-								update=":formId:dayIntervalToAdd, :formId:intervalDays"
-								rendered="#{calendarBean.edit}" />
-						</h:panelGrid>
-						<p:dataTable id="intervalDays" resizableColumns="true"
-							value="#{calendarBean.entity.intervals}" var="interval"
-							paginator="false" styleClass="paginated" reflow="true">
-							<f:facet name="header">#{messages['calendar.dayIntervals']}</f:facet>
-							<p:column width="70%">
-								<h:outputText value="#{interval.intervalAsString}"
-									style="display:inline-block" />
-							</p:column>
-							<p:column width="30%">
-								<p:commandLink styleClass="ui-icon ui-icon-trash"
-									style="float:right;margin-right:10px"
-									action="#{calendarBean.removeInterval(interval)}"
-									partialSubmit="true" process="@this"
-									update=":formId:intervalDays"
-									rendered="#{calendarBean.edit}">
-								</p:commandLink>
-							</p:column>
-						</p:dataTable>
-					</h:panelGrid>
-				</h:panelGrid>
-
-				<h:panelGrid columns="2"
-					rendered="#{calendarBean.entity.intervalType=='WDAY'}"
-					styleClass="clearLeft">
-					<p:outputLabel value="#{messages['calendar.weekdayInterval']}" />
-					<h:panelGrid width="30%">
-						<h:panelGrid columns="3">
-							<p:selectOneMenu id="weekdayIntervalFrom"
-								value="#{calendarBean.weekdayIntervalFrom}"
-								rendered="#{calendarBean.edit}">
-								<f:selectItem itemValue="#{null}" itemLabel="" />
-								<f:selectItem itemValue="1"
-									itemLabel="#{messages['calendar.weekday.1']}" />
-								<f:selectItem itemValue="2"
-									itemLabel="#{messages['calendar.weekday.2']}" />
-								<f:selectItem itemValue="3"
-									itemLabel="#{messages['calendar.weekday.3']}" />
-								<f:selectItem itemValue="4"
-									itemLabel="#{messages['calendar.weekday.4']}" />
-								<f:selectItem itemValue="5"
-									itemLabel="#{messages['calendar.weekday.5']}" />
-								<f:selectItem itemValue="6"
-									itemLabel="#{messages['calendar.weekday.6']}" />
-								<f:selectItem itemValue="7"
-									itemLabel="#{messages['calendar.weekday.7']}" />
-							</p:selectOneMenu>
-							<p:selectOneMenu id="weekdayIntervalTo"
-								value="#{calendarBean.weekdayIntervalTo}"
-								rendered="#{calendarBean.edit}">
-								<f:selectItem itemValue="#{null}" itemLabel="" />
-								<f:selectItem itemValue="1"
-									itemLabel="#{messages['calendar.weekday.1']}" />
-								<f:selectItem itemValue="2"
-									itemLabel="#{messages['calendar.weekday.2']}" />
-								<f:selectItem itemValue="3"
-									itemLabel="#{messages['calendar.weekday.3']}" />
-								<f:selectItem itemValue="4"
-									itemLabel="#{messages['calendar.weekday.4']}" />
-								<f:selectItem itemValue="5"
-									itemLabel="#{messages['calendar.weekday.5']}" />
-								<f:selectItem itemValue="6"
-									itemLabel="#{messages['calendar.weekday.6']}" />
-								<f:selectItem itemValue="7"
-									itemLabel="#{messages['calendar.weekday.7']}" />
-							</p:selectOneMenu>
-							<p:commandButton icon="ui-icon-plus"
-								action="#{calendarBean.addInterval()}" partialSubmit="true"
-								process=":formId:weekdayIntervalFrom, :formId:weekdayIntervalTo, @this"
-								update=":formId:weekdayIntervalFrom, :formId:weekdayIntervalTo, :formId:intervalWeekdays"
-								rendered="#{calendarBean.edit}" />
-						</h:panelGrid>
-						<p:dataTable id="intervalWeekdays" resizableColumns="true"
-							value="#{calendarBean.entity.intervals}" var="interval"
-							paginator="false" styleClass="paginated">
-							<f:facet name="header">#{messages['calendar.weekdayIntervals']}</f:facet>
-							<p:column width="70%">
-								<h:outputText
-									value="#{messages['calendar.weekday.'.concat(interval.intervalBegin)]} - #{messages['calendar.weekday.'.concat(interval.intervalEnd)]}"
-									style="display:inline-block" />
-							</p:column>
-							<p:column width="30%">
-								<p:commandLink styleClass="ui-icon ui-icon-trash"
-									style="float:right;margin-right:10px"
-									action="#{calendarBean.removeInterval(interval)}"
-									partialSubmit="true" process="@this"
-									update=":formId:intervalWeekdays"
-									rendered="#{calendarBean.edit}">
-								</p:commandLink>
-							</p:column>
-						</p:dataTable>
-					</h:panelGrid>
-				</h:panelGrid>
-
-			</h:panelGroup>
+            <c:if test="#{calendarBean.entity['class'].simpleName eq 'CalendarInterval'}">
+    			<h:panelGroup>
+    
+    				<hftl:decorateFormField fieldId="intervalType"
+    					label="#{messages['calendar.intervalType']}" newLine="true">
+    					<p:selectOneMenu id="intervalType"
+    						value="#{calendarBean.entity.intervalType}" required="true"
+    						rendered="#{calendarBean.entity.id==null}">
+    						<f:selectItem itemValue="#{null}" itemLabel="" />
+    						<f:selectItems
+    							value="#{calendarBean.calendarIntervalTypeEnumValues}"
+    							var="enumElement" itemValue="#{enumElement}"
+    							itemLabel="#{messages[enumElement.label]}" />
+    						<f:converter converterId="enumConverter" />
+    						<p:ajax event="change"
+    							listener="#{calendarBean.changeIntervalType}"
+    							partialSubmit="true" process="@this" update="@form" />
+    					</p:selectOneMenu>
+    					<h:outputText
+    						value="#{messages[calendarBean.entity.intervalType.label]}"
+    						styleClass="field-value"
+    						rendered="#{calendarBean.entity.id!=null}" />
+    				</hftl:decorateFormField>
+    
+    
+    				<h:panelGrid columns="2"
+    					rendered="#{calendarBean.entity.intervalType=='HOUR'}"
+    					styleClass="clearLeft">
+    					<p:outputLabel value="#{messages['calendar.hourInterval']}" />
+    					<h:panelGrid width="20%">
+    						<h:panelGrid columns="2">
+    							<p:inputMask id="hourIntervalToAdd"
+    								value="#{calendarBean.timeToAdd}" mask="99:99 - 99:99"
+    								rendered="#{calendarBean.edit}" />
+    							<p:commandButton icon="pi pi-plus"
+    								action="#{calendarBean.addInterval()}" partialSubmit="true"
+    								process=":formId:hourIntervalToAdd, @this"
+    								update=":formId:hourIntervalToAdd, :formId:intervalHours"
+    								rendered="#{calendarBean.edit}" />
+    						</h:panelGrid>
+    						<p:dataTable id="intervalHours" resizableColumns="true"
+    							value="#{calendarBean.entity.intervals}" var="interval"
+    							paginator="false" styleClass="paginated">
+    							<f:facet name="header">#{messages['calendar.hourIntervals']}</f:facet>
+    							<p:column width="70%">
+    								<h:outputText value="#{interval.intervalAsString}"
+    									style="display:inline-block" />
+    							</p:column>
+    							<p:column width="30%">
+    								<p:commandLink styleClass="pi pi-trash"
+    									style="float:right;margin-right:10px"
+    									action="#{calendarBean.removeInterval(interval)}"
+    									partialSubmit="true" process="@this"
+    									update=":formId:intervalHours"
+    									rendered="#{calendarBean.edit}">
+    								</p:commandLink>
+    							</p:column>
+    						</p:dataTable>
+    					</h:panelGrid>
+    				</h:panelGrid>
+    
+    				<h:panelGrid columns="2"
+    					rendered="#{calendarBean.entity.intervalType=='DAY'}"
+    					styleClass="clearLeft">
+    					<p:outputLabel value="#{messages['calendar.dayInterval']}" />
+    					<h:panelGrid width="20%">
+    						<h:panelGrid columns="2">
+    							<p:inputMask id="dayIntervalToAdd"
+    								value="#{calendarBean.timeToAdd}" mask="99/99 - 99/99"
+    								rendered="#{calendarBean.edit}" />
+    							<p:commandButton icon="pi pi-plus"
+    								action="#{calendarBean.addInterval()}" partialSubmit="true"
+    								process=":formId:dayIntervalToAdd, @this"
+    								update=":formId:dayIntervalToAdd, :formId:intervalDays"
+    								rendered="#{calendarBean.edit}" />
+    						</h:panelGrid>
+    						<p:dataTable id="intervalDays" resizableColumns="true"
+    							value="#{calendarBean.entity.intervals}" var="interval"
+    							paginator="false" styleClass="paginated" reflow="true">
+    							<f:facet name="header">#{messages['calendar.dayIntervals']}</f:facet>
+    							<p:column width="70%">
+    								<h:outputText value="#{interval.intervalAsString}"
+    									style="display:inline-block" />
+    							</p:column>
+    							<p:column width="30%">
+    								<p:commandLink styleClass="pi pi-trash"
+    									style="float:right;margin-right:10px"
+    									action="#{calendarBean.removeInterval(interval)}"
+    									partialSubmit="true" process="@this"
+    									update=":formId:intervalDays"
+    									rendered="#{calendarBean.edit}">
+    								</p:commandLink>
+    							</p:column>
+    						</p:dataTable>
+    					</h:panelGrid>
+    				</h:panelGrid>
+    
+    				<h:panelGrid columns="2"
+    					rendered="#{calendarBean.entity.intervalType=='WDAY'}"
+    					styleClass="clearLeft">
+    					<p:outputLabel value="#{messages['calendar.weekdayInterval']}" />
+    					<h:panelGrid width="30%">
+    						<h:panelGrid columns="3">
+    							<p:selectOneMenu id="weekdayIntervalFrom"
+    								value="#{calendarBean.weekdayIntervalFrom}"
+    								rendered="#{calendarBean.edit}">
+    								<f:selectItem itemValue="#{null}" itemLabel="" />
+    								<f:selectItem itemValue="1"
+    									itemLabel="#{messages['calendar.weekday.1']}" />
+    								<f:selectItem itemValue="2"
+    									itemLabel="#{messages['calendar.weekday.2']}" />
+    								<f:selectItem itemValue="3"
+    									itemLabel="#{messages['calendar.weekday.3']}" />
+    								<f:selectItem itemValue="4"
+    									itemLabel="#{messages['calendar.weekday.4']}" />
+    								<f:selectItem itemValue="5"
+    									itemLabel="#{messages['calendar.weekday.5']}" />
+    								<f:selectItem itemValue="6"
+    									itemLabel="#{messages['calendar.weekday.6']}" />
+    								<f:selectItem itemValue="7"
+    									itemLabel="#{messages['calendar.weekday.7']}" />
+    							</p:selectOneMenu>
+    							<p:selectOneMenu id="weekdayIntervalTo"
+    								value="#{calendarBean.weekdayIntervalTo}"
+    								rendered="#{calendarBean.edit}">
+    								<f:selectItem itemValue="#{null}" itemLabel="" />
+    								<f:selectItem itemValue="1"
+    									itemLabel="#{messages['calendar.weekday.1']}" />
+    								<f:selectItem itemValue="2"
+    									itemLabel="#{messages['calendar.weekday.2']}" />
+    								<f:selectItem itemValue="3"
+    									itemLabel="#{messages['calendar.weekday.3']}" />
+    								<f:selectItem itemValue="4"
+    									itemLabel="#{messages['calendar.weekday.4']}" />
+    								<f:selectItem itemValue="5"
+    									itemLabel="#{messages['calendar.weekday.5']}" />
+    								<f:selectItem itemValue="6"
+    									itemLabel="#{messages['calendar.weekday.6']}" />
+    								<f:selectItem itemValue="7"
+    									itemLabel="#{messages['calendar.weekday.7']}" />
+    							</p:selectOneMenu>
+    							<p:commandButton icon="pi pi-plus"
+    								action="#{calendarBean.addInterval()}" partialSubmit="true"
+    								process=":formId:weekdayIntervalFrom, :formId:weekdayIntervalTo, @this"
+    								update=":formId:weekdayIntervalFrom, :formId:weekdayIntervalTo, :formId:intervalWeekdays"
+    								rendered="#{calendarBean.edit}" />
+    						</h:panelGrid>
+    						<p:dataTable id="intervalWeekdays" resizableColumns="true"
+    							value="#{calendarBean.entity.intervals}" var="interval"
+    							paginator="false" styleClass="paginated">
+    							<f:facet name="header">#{messages['calendar.weekdayIntervals']}</f:facet>
+    							<p:column width="70%">
+    								<h:outputText
+    									value="#{messages['calendar.weekday.'.concat(interval.intervalBegin)]} - #{messages['calendar.weekday.'.concat(interval.intervalEnd)]}"
+    									style="display:inline-block" />
+    							</p:column>
+    							<p:column width="30%">
+    								<p:commandLink styleClass="pi pi-trash"
+    									style="float:right;margin-right:10px"
+    									action="#{calendarBean.removeInterval(interval)}"
+    									partialSubmit="true" process="@this"
+    									update=":formId:intervalWeekdays"
+    									rendered="#{calendarBean.edit}">
+    								</p:commandLink>
+    							</p:column>
+    						</p:dataTable>
+    					</h:panelGrid>
+    				</h:panelGrid>
+    
+    			</h:panelGroup>
+            </c:if>
 			
-			<h:panelGroup
-				rendered="#{calendarBean.entity['class'].simpleName eq 'CalendarBanking'}">
-				<o:validateMultiple components="startDate endDate" validator="#{calendarBean.validateDateRange}" message="#{messages['validator.dateRange.incorrectOrder']}" />
-				<hftl:formField label="#{messages['calendar.startDate']}" field="startDate" 
-				required="true" useConverter="false"
-				newLine="true" id="startDate"/>
-				<hftl:formField label="#{messages['calendar.endDate']}"
-				field="endDate" useConverter="false" id="endDate" />
-
-				<hftl:decorateFormField fieldId="weekendPeriod"
-					label="#{messages['calendar.weekendPeriod']}" newLine="true">
-					<h:panelGrid columns="3">
-							<p:selectOneMenu id="weekendPeriod"
-								value="#{calendarBean.entity.weekendBegin}"
-								rendered="#{calendarBean.edit}">
-								<f:selectItem itemValue="#{null}" itemLabel="" />
-								<f:selectItem itemValue="1"
-									itemLabel="#{messages['calendar.weekday.1']}" />
-								<f:selectItem itemValue="2"
-									itemLabel="#{messages['calendar.weekday.2']}" />
-								<f:selectItem itemValue="3"
-									itemLabel="#{messages['calendar.weekday.3']}" />
-								<f:selectItem itemValue="4"
-									itemLabel="#{messages['calendar.weekday.4']}" />
-								<f:selectItem itemValue="5"
-									itemLabel="#{messages['calendar.weekday.5']}" />
-								<f:selectItem itemValue="6"
-									itemLabel="#{messages['calendar.weekday.6']}" />
-								<f:selectItem itemValue="7"
-									itemLabel="#{messages['calendar.weekday.7']}" />
-							</p:selectOneMenu>
-							<p:selectOneMenu id="weekendTo"
-								value="#{calendarBean.entity.weekendEnd}"
-								rendered="#{calendarBean.edit}">
-								<f:selectItem itemValue="#{null}" itemLabel="" />
-								<f:selectItem itemValue="1"
-									itemLabel="#{messages['calendar.weekday.1']}" />
-								<f:selectItem itemValue="2"
-									itemLabel="#{messages['calendar.weekday.2']}" />
-								<f:selectItem itemValue="3"
-									itemLabel="#{messages['calendar.weekday.3']}" />
-								<f:selectItem itemValue="4"
-									itemLabel="#{messages['calendar.weekday.4']}" />
-								<f:selectItem itemValue="5"
-									itemLabel="#{messages['calendar.weekday.5']}" />
-								<f:selectItem itemValue="6"
-									itemLabel="#{messages['calendar.weekday.6']}" />
-								<f:selectItem itemValue="7"
-									itemLabel="#{messages['calendar.weekday.7']}" />
-							</p:selectOneMenu>
-						</h:panelGrid>
-				</hftl:decorateFormField>
-
-				<hftl:decorateFormField fieldId="holidayPeriodToAdd"
-					label="#{messages['calendar.addHoliday']}" newLine="false">
-					<h:panelGrid columns="2">
-						<p:inputMask id="holidayPeriodToAdd"
-							value="#{calendarBean.holidayToAdd}" mask="99/99 - 99/99"
-							rendered="#{calendarBean.edit}" />
-						<p:commandButton icon="ui-icon-plus"
-							action="#{calendarBean.addHoliday()}" partialSubmit="true"
-							process=":formId:holidayPeriodToAdd, @this"
-							update=":formId:holidayPeriodToAdd, :formId:holidays"
-							rendered="#{calendarBean.edit}" />
-					</h:panelGrid>
-					<p:dataTable id="holidays" resizableColumns="true"
-							value="#{calendarBean.entity.holidays}" var="holiday"
-							paginator="false" styleClass="paginated" reflow="true">
-							<f:facet name="header">#{messages['calendar.holidays']}</f:facet>
-							<p:column width="70%">
-								<h:outputText value="#{holiday.holidayAsString}"
-									style="display:inline-block" />
-							</p:column>
-							<p:column width="30%">
-								<p:commandLink styleClass="ui-icon ui-icon-trash"
-									style="float:right;margin-right:10px"
-									action="#{calendarBean.removeHoliday(holiday)}"
-									partialSubmit="true" process="@this" update=":formId:holidays"
-									rendered="#{calendarBean.edit}">
-								</p:commandLink>
-							</p:column>
-						</p:dataTable>
-				</hftl:decorateFormField>
-			</h:panelGroup>
+            <c:if test="#{calendarBean.entity['class'].simpleName eq 'CalendarBanking'}">
+    			<h:panelGroup>
+    				<o:validateMultiple components="startDate endDate" validator="#{calendarBean.validateDateRange}" message="#{messages['validator.dateRange.incorrectOrder']}" />
+    				<hftl:formField label="#{messages['calendar.startDate']}" field="startDate" 
+    				required="true" useConverter="false"
+    				newLine="true" id="startDate"/>
+    				<hftl:formField label="#{messages['calendar.endDate']}"
+    				field="endDate" useConverter="false" id="endDate" />
+    
+    				<hftl:decorateFormField fieldId="weekendPeriod"
+    					label="#{messages['calendar.weekendPeriod']}" newLine="true">
+    					<h:panelGrid columns="3">
+    							<p:selectOneMenu id="weekendPeriod"
+    								value="#{calendarBean.entity.weekendBegin}"
+    								rendered="#{calendarBean.edit}">
+    								<f:selectItem itemValue="#{null}" itemLabel="" />
+    								<f:selectItem itemValue="1"
+    									itemLabel="#{messages['calendar.weekday.1']}" />
+    								<f:selectItem itemValue="2"
+    									itemLabel="#{messages['calendar.weekday.2']}" />
+    								<f:selectItem itemValue="3"
+    									itemLabel="#{messages['calendar.weekday.3']}" />
+    								<f:selectItem itemValue="4"
+    									itemLabel="#{messages['calendar.weekday.4']}" />
+    								<f:selectItem itemValue="5"
+    									itemLabel="#{messages['calendar.weekday.5']}" />
+    								<f:selectItem itemValue="6"
+    									itemLabel="#{messages['calendar.weekday.6']}" />
+    								<f:selectItem itemValue="7"
+    									itemLabel="#{messages['calendar.weekday.7']}" />
+    							</p:selectOneMenu>
+    							<p:selectOneMenu id="weekendTo"
+    								value="#{calendarBean.entity.weekendEnd}"
+    								rendered="#{calendarBean.edit}">
+    								<f:selectItem itemValue="#{null}" itemLabel="" />
+    								<f:selectItem itemValue="1"
+    									itemLabel="#{messages['calendar.weekday.1']}" />
+    								<f:selectItem itemValue="2"
+    									itemLabel="#{messages['calendar.weekday.2']}" />
+    								<f:selectItem itemValue="3"
+    									itemLabel="#{messages['calendar.weekday.3']}" />
+    								<f:selectItem itemValue="4"
+    									itemLabel="#{messages['calendar.weekday.4']}" />
+    								<f:selectItem itemValue="5"
+    									itemLabel="#{messages['calendar.weekday.5']}" />
+    								<f:selectItem itemValue="6"
+    									itemLabel="#{messages['calendar.weekday.6']}" />
+    								<f:selectItem itemValue="7"
+    									itemLabel="#{messages['calendar.weekday.7']}" />
+    							</p:selectOneMenu>
+    						</h:panelGrid>
+    				</hftl:decorateFormField>
+    
+    				<hftl:decorateFormField fieldId="holidayPeriodToAdd"
+    					label="#{messages['calendar.addHoliday']}" newLine="false">
+    					<h:panelGrid columns="2">
+    						<p:inputMask id="holidayPeriodToAdd"
+    							value="#{calendarBean.holidayToAdd}" mask="99/99 - 99/99"
+    							rendered="#{calendarBean.edit}" />
+    						<p:commandButton icon="pi pi-plus"
+    							action="#{calendarBean.addHoliday()}" partialSubmit="true"
+    							process=":formId:holidayPeriodToAdd, @this"
+    							update=":formId:holidayPeriodToAdd, :formId:holidays"
+    							rendered="#{calendarBean.edit}" />
+    					</h:panelGrid>
+    					<p:dataTable id="holidays" resizableColumns="true"
+    							value="#{calendarBean.entity.holidays}" var="holiday"
+    							paginator="false" styleClass="paginated" reflow="true">
+    							<f:facet name="header">#{messages['calendar.holidays']}</f:facet>
+    							<p:column width="70%">
+    								<h:outputText value="#{holiday.holidayAsString}"
+    									style="display:inline-block" />
+    							</p:column>
+    							<p:column width="30%">
+    								<p:commandLink styleClass="pi pi-trash"
+    									style="float:right;margin-right:10px"
+    									action="#{calendarBean.removeHoliday(holiday)}"
+    									partialSubmit="true" process="@this" update=":formId:holidays"
+    									rendered="#{calendarBean.edit}">
+    								</p:commandLink>
+    							</p:column>
+    						</p:dataTable>
+    				</hftl:decorateFormField>
+    			</h:panelGroup>
+            </c:if>
 
 		</hftl:formPanel>
 	</ui:define>

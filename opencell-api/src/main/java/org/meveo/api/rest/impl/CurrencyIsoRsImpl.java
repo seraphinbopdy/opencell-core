@@ -29,9 +29,9 @@ import org.meveo.api.rest.CurrencyIsoRs;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.model.admin.Currency;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 /**
  * @author Edward P. Legaspi

@@ -1,17 +1,17 @@
 package org.meveo.apiv2.generic;
 
-import javax.ejb.Stateless;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-import org.meveo.apiv2.GenericOpencellRestful;
+import org.meveo.apiv2.JaxRsActivatorApiV2;
 
 @Stateless
 public class VersionImpl implements Version {
 
 	@Override
 	public Response getVersions() {
-		return Response.ok().entity(GenericOpencellRestful.VERSION_INFO).type(MediaType.APPLICATION_JSON_TYPE).build();
+		return Response.ok().entity(JaxRsActivatorApiV2.VERSION_INFO).type(MediaType.APPLICATION_JSON_TYPE).build();
 	}
 
 }

@@ -3,10 +3,10 @@ package org.meveo.apiv2.finance.impl;
 import java.util.Date;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
 
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.finance.ImmutableTrialBalancesResult;

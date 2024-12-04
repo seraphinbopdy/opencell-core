@@ -26,7 +26,6 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
 import org.meveo.service.admin.impl.SequenceService;
-import org.meveo.service.base.BusinessEntityService;
 import org.meveo.service.base.BusinessService;
 
 /**

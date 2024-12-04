@@ -1,11 +1,10 @@
 package org.meveo.service.cpq.order;
 
-import javax.ejb.Stateless;
-
-import org.apache.logging.log4j.util.Strings;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.cpq.commercial.OrderAttribute;
 import org.meveo.service.cpq.AttributeValueService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Tarik FAKHOURI

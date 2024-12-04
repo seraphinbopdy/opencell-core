@@ -18,14 +18,14 @@
 
 package org.meveo.api.dto;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 import org.meveo.model.billing.OverrideProrataEnum;
 import org.meveo.model.billing.SubscriptionTerminationReason;
 
-import java.util.List;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class TerminationReasonDto.

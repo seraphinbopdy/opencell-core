@@ -30,32 +30,30 @@ import org.meveo.commons.utils.ParamBean;
  */
 public class BankDataEncryptor implements IEncryptionConverter {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.persistence.AttributeConverter#convertToDatabaseColumn(java.lang.
-	 * Object) Checks if encryption is enabled before performing encryption
-	 */
-	@Override
-	public String convertToDatabaseColumn(String attribute) {
-		if (TRUE_STR.equalsIgnoreCase(ParamBean.getInstance().getProperty(ENCRYPT_BANK_DATA_PROPERTY, FALSE_STR))) {
-			return encrypt(attribute);
-		}
-		return attribute;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see jakarta.persistence.AttributeConverter#convertToDatabaseColumn(java.lang. Object) Checks if encryption is enabled before performing encryption
+     */
+    @Override
+    public String convertToDatabaseColumn(String attribute) {
+        if (TRUE_STR.equalsIgnoreCase(ParamBean.getInstance().getProperty(ENCRYPT_BANK_DATA_PROPERTY, FALSE_STR))) {
+            return encrypt(attribute);
+        }
+        return attribute;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.persistence.AttributeConverter#convertToEntityAttribute(java.lang.
-	 * Object) Checks if encryption is enabled before performing decryption
-	 */
-	@Override
-	public String convertToEntityAttribute(String dbData) {
-		if (TRUE_STR.equalsIgnoreCase(ParamBean.getInstance().getProperty(ENCRYPT_BANK_DATA_PROPERTY, FALSE_STR))) {
-			return decrypt(dbData);
-		}
-		return dbData;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see jakarta.persistence.AttributeConverter#convertToEntityAttribute(java.lang. Object) Checks if encryption is enabled before performing decryption
+     */
+    @Override
+    public String convertToEntityAttribute(String dbData) {
+        if (TRUE_STR.equalsIgnoreCase(ParamBean.getInstance().getProperty(ENCRYPT_BANK_DATA_PROPERTY, FALSE_STR))) {
+            return decrypt(dbData);
+        }
+        return dbData;
+    }
 
 }

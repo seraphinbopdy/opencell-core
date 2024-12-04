@@ -1,10 +1,12 @@
 package org.meveo.service.securityDeposit.impl;
 
+import java.util.Date;
+import java.util.Set;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.model.admin.Currency;
-import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.model.securityDeposit.SecurityDepositTemplate;
 import org.meveo.model.securityDeposit.SecurityTemplateStatusEnum;
@@ -13,12 +15,9 @@ import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.crm.impl.ProviderService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
-import java.util.Date;
-import java.util.Set;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class SecurityDepositTemplateService extends BusinessService<SecurityDepositTemplate> {

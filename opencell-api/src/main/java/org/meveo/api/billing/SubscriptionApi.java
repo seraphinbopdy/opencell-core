@@ -18,6 +18,26 @@
 
 package org.meveo.api.billing;
 
+import static java.util.EnumSet.of;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.meveo.commons.utils.StringUtils.isNotBlank;
+import static org.meveo.model.billing.SubscriptionStatusEnum.ACTIVE;
+import static org.meveo.model.billing.SubscriptionStatusEnum.CREATED;
+import static org.meveo.model.billing.SubscriptionStatusEnum.PENDING;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.Hibernate;
@@ -178,26 +198,13 @@ import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.order.OrderService;
 import org.meveo.service.payments.impl.PaymentMethodService;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.persistence.EntityNotFoundException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static org.meveo.commons.utils.StringUtils.isNotBlank;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * @author Edward P. Legaspi
@@ -220,7 +227,7 @@ public class SubscriptionApi extends BaseApi {
     private static final String DEFAULT_SORT_ORDER_ID = "id";
     private static final String ADMINISTRATION_VISUALIZATION = "administrationVisualization";
     private static final String ADMINISTRATION_MANAGEMENT = "administrationManagement";
-
+    private static final EnumSet<SubscriptionStatusEnum> VALID_STATUES = of(PENDING, ACTIVE, CREATED);
     @Inject
     private SubscriptionService subscriptionService;
 
@@ -433,11 +440,16 @@ public class SubscriptionApi extends BaseApi {
 
         handleMissingParametersAndValidate(postData);
 
+
         Subscription subscription = Optional.ofNullable(postData.getId())
 				.map(id -> subscriptionService.findById(id))
 				.orElse(subscriptionService.findByCodeAndValidityDate(postData.getCode(), postData.getValidityDate()));
         if (subscription == null) {
             throw new EntityDoesNotExistsException(Subscription.class, postData.getCode(), postData.getValidityDate());
+        }
+
+        if (isNotEmpty(postData.getProductsToInstantiate()) && !(VALID_STATUES.contains(subscription.getStatus()))) {
+            throw new BusinessApiException("Products can only be added to instantiated, activated or pending subscription");
         }
 
       //Get the administration roles
@@ -827,7 +839,7 @@ public class SubscriptionApi extends BaseApi {
                     }
                 }
 
-                ServiceCharge serviceCharge = serviceTemplate != null ? serviceTemplate : productVersion.get().getProduct();
+                ServiceCharge serviceCharge = serviceTemplate != null ? serviceTemplate : productVersion.get().getProduct(); 
 
                 log.debug("Will instantiate as part of activation service {} for subscription {} quantity {}", serviceCharge.getCode(), subscription.getCode(), serviceToActivateDto.getQuantity());
 
@@ -1150,8 +1162,8 @@ public class SubscriptionApi extends BaseApi {
             }
 
             serviceToInstantiateDto.setServiceTemplate(serviceTemplate);
-            if(productVersion!=null) {
-            serviceToInstantiateDto.setProductVersion(productVersion.get());
+            if(productVersion.isPresent()) {
+                serviceToInstantiateDto.setProductVersion(productVersion.get());
             }
             serviceToInstantiateDtos.add(serviceToInstantiateDto);
         }
@@ -1332,7 +1344,7 @@ public class SubscriptionApi extends BaseApi {
             throw new EntityDoesNotExistsException(Subscription.class, postData.getSubscription(), postData.getSubscriptionValidityDate());
         }
 
-        if ((subscription.getStatus() != SubscriptionStatusEnum.ACTIVE) && (subscription.getStatus() != SubscriptionStatusEnum.CREATED)) {
+        if ((subscription.getStatus() != ACTIVE) && (subscription.getStatus() != SubscriptionStatusEnum.CREATED)) {
             throw new MeveoApiException("subscription is not ACTIVE or CREATED: [" + subscription.getStatus() + "]");
         }
 
@@ -2288,7 +2300,7 @@ public class SubscriptionApi extends BaseApi {
                 }
             }
             serviceInstanceService.update(serviceToUpdate);
-            if(CollectionUtils.isNotEmpty(serviceToUpdateDto.getDiscountPlanForTermination())){
+            if(isNotEmpty(serviceToUpdateDto.getDiscountPlanForTermination())){
                 serviceToUpdateDto.getDiscountPlanForTermination().forEach(discountPlanCode -> {
                     DiscountPlan discountPlan = discountPlanService.findByCode(discountPlanCode);
                     if(discountPlan != null) {
@@ -3045,7 +3057,7 @@ public class SubscriptionApi extends BaseApi {
             }
         }
         if (subscription.getSubscriptionDate().after(new Date())) {
-            subscription.setStatus(SubscriptionStatusEnum.PENDING);
+            subscription.setStatus(PENDING);
         } else {
             subscription.setStatus(SubscriptionStatusEnum.CREATED);
         }
@@ -3100,7 +3112,7 @@ public class SubscriptionApi extends BaseApi {
     }
     
     private void removeDiscountPlanInstanceForSubscription(Subscription subscription, List<String> discountPlanInstanceToRemove) {
-        if(CollectionUtils.isNotEmpty(discountPlanInstanceToRemove)) {
+        if(isNotEmpty(discountPlanInstanceToRemove)) {
             discountPlanInstanceToRemove.forEach(discountPlanCode -> {
                 DiscountPlanInstance discountPlanInstance = discountPlanInstanceService.findBySubscriptionAndCode(subscription, discountPlanCode);
                 if(discountPlanInstance != null) {

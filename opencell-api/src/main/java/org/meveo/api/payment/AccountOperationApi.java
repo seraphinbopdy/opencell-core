@@ -35,10 +35,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.BadRequestException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;

@@ -17,9 +17,8 @@
  */
 package org.meveo.service.billing.impl;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.List;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.InvoiceType;
@@ -29,8 +28,9 @@ import org.meveo.service.base.BusinessService;
 import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 
-import java.util.Arrays;
-import java.util.List;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * The Class InvoiceTypeService.

@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.apiv2.finance.ReportingPeriodEnum;
@@ -38,7 +38,7 @@ public class ReportingApiService implements ApiService<AccountOperation> {
 	@Inject
 	private GenericApiLoadService loadService;
 	
-	private static final String BALANCE_CRITERIA = "COALESCE(SUM(CASE WHEN (accountingDate >= '%s' AND  accountingDate < '%s' AND transactionCategory = '%s') THEN COALESCE(amountWithoutTax, amount) END), 0)";
+	private static final String BALANCE_CRITERIA = "COALESCE(SUM(CASE WHEN (accountingDate >= to_date('%s','YYYY/MM/DD') AND  accountingDate < to_date('%s','YYYY/MM/DD') AND transactionCategory = '%s') THEN COALESCE(amountWithoutTax, amount) END), 0)";
 
 	
 	public List<TrialBalance> list(ReportingPeriodEnum period, String codeOrLabel, Date startDate, Date endDate, String sortBy, SortOrderEnum sortOrder, Long offset, Long limit) {
@@ -89,7 +89,7 @@ public class ReportingApiService implements ApiService<AccountOperation> {
 		if(codeOrLabel != null && !codeOrLabel.isEmpty()){
 			filters.put("SQL", "(a.accountingCode.code like '" + codeOrLabel + "%' OR a.accountingCode.description like '" + codeOrLabel + "%')");
 		}
-
+		filters.put("SQL", "(a.code not like '%_FAE%')");
 		String initalBalanceDebit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDate, "DEBIT");
 		String initalBalanceCredit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDate, "CREDIT");
 		String currentBalanceDebit = String.format(BALANCE_CRITERIA, reportStartDate, reportEndDateInclusive, "DEBIT");

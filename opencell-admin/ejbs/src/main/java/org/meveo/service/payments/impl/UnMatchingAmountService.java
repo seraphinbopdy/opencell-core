@@ -20,7 +20,7 @@ package org.meveo.service.payments.impl;
 import org.meveo.model.payments.UnMatchingAmount;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 
 /**
  * @since 15.0

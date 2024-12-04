@@ -10,12 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.FlushModeType;
-import javax.persistence.Query;
-import javax.ws.rs.NotFoundException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.article.AccountingArticle;
@@ -28,6 +22,12 @@ import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.enums.RuleOperatorEnum;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.Query;
+import jakarta.ws.rs.NotFoundException;
 
 @Stateless
 public class ArticleMappingLineService extends BusinessService<ArticleMappingLine> {

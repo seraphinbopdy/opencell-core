@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.validation.ValidationException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -49,6 +48,8 @@ import org.meveo.model.DatePeriod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.validation.ValidationException;
+
 /**
  * @author Edward P. Legaspi
  * @author Said Ramli
@@ -62,7 +63,7 @@ public class DateUtils {
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssXXX";
     private static final String START_DATE_DELIMITER = "[";
     private static final String END_DATE_DELIMITER = "]";
-    
+
     private static final Logger log = LoggerFactory.getLogger(DateUtils.class);
 
     public static synchronized Date getCurrentDateWithUniqueSeconds() {
@@ -147,8 +148,7 @@ public class DateUtils {
     }
 
     /**
-     * Parse date. Will consider formats in the following order: number of miliseconds, "yyyy-MM-dd'T'hh:mm:ssXXX", meveo.dateTimeFormat configuration value, "yyyy-MM-dd",
-     * meveo.dateFormat configuration value
+     * Parse date. Will consider formats in the following order: number of miliseconds, "yyyy-MM-dd'T'hh:mm:ssXXX", meveo.dateTimeFormat configuration value, "yyyy-MM-dd", meveo.dateFormat configuration value
      *
      * @param dateValue The date/timestamp as a number of miliseconds or a date/tiestamp string to parse
      * @return Date object
@@ -177,7 +177,7 @@ public class DateUtils {
     public static Date parseDate(String dateValue, String[] datePatterns) {
         return parseDate(dateValue, datePatterns, true);
     }
-    
+
     /**
      * Parse date
      *
@@ -197,20 +197,20 @@ public class DateUtils {
         }
         return null;
     }
-    
+
     /**
-     * Validate and parse date. Will consider formats in the following order: number of miliseconds, "yyyy-MM-dd'T'hh:mm:ssXXX", meveo.dateTimeFormat configuration value, "yyyy-MM-dd",
-     * meveo.dateFormat configuration value
+     * Validate and parse date. Will consider formats in the following order: number of miliseconds, "yyyy-MM-dd'T'hh:mm:ssXXX", meveo.dateTimeFormat configuration value, "yyyy-MM-dd", meveo.dateFormat configuration
+     * value
      *
      * @param dateValue The date/timestamp as a number of miliseconds or a date/tiestamp string to parse
      * @return Date object
      */
     public static Date validateParseDate(Object dateValue) {
-    	if (dateValue instanceof Number) {
+        if (dateValue instanceof Number) {
             return new Date(((Number) dateValue).longValue());
         } else if (dateValue instanceof String) {
-        	if(StringUtils.isBlank((String) dateValue)) {
-            	return null;
+            if (StringUtils.isBlank((String) dateValue)) {
+                return null;
             }
             Long time = NumberUtils.toLong((String) dateValue);
             if (time > 0L) {
@@ -218,10 +218,10 @@ public class DateUtils {
             }
             String[] datePatterns = new String[] { DateUtils.DATE_TIME_PATTERN, ParamBean.getInstance().getDateTimeFormat(), DateUtils.DATE_PATTERN, ParamBean.getInstance().getDateFormat() };
             final Date date = parseDate((String) dateValue, datePatterns, false);
-            if(date==null) {
-            	throw new ValidationException("Wrong date format : " + dateValue);
+            if (date == null) {
+                throw new ValidationException("Wrong date format : " + dateValue);
             }
-			return date;
+            return date;
         }
         return null;
     }
@@ -234,9 +234,9 @@ public class DateUtils {
      * @return Date object
      */
     public static Date parseDateWithPattern(String dateValue, String pattern) {
-    	return parseDateWithPattern(dateValue, pattern, true);
+        return parseDateWithPattern(dateValue, pattern, true);
     }
-    
+
     /**
      * Parse date with a given pattern
      * 
@@ -455,20 +455,20 @@ public class DateUtils {
         return result;
     }
 
-	public static Date setDayOfWeekToDate(Date date, Integer dayOfWeek) {
-		Date result = null;
+    public static Date setDayOfWeekToDate(Date date, Integer dayOfWeek) {
+        Date result = null;
 
-		if (date != null) {
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(date);
-			calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
-			calendar.set(Calendar.DAY_OF_WEEK_IN_MONTH, 1);
-			result = calendar.getTime();
-		}
+        if (date != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+            calendar.set(Calendar.DAY_OF_WEEK_IN_MONTH, 1);
+            result = calendar.getTime();
+        }
 
-		return result;
-	}
-	
+        return result;
+    }
+
     public static Date setHourToDate(Date date, Integer hour) {
         Date result = null;
 
@@ -569,31 +569,31 @@ public class DateUtils {
         return result;
     }
 
-	public static Integer getActualMaximumDayForDate(Date date) {
-		Integer result = null;
+    public static Integer getActualMaximumDayForDate(Date date) {
+        Integer result = null;
 
-		if (date != null) {
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(date);
-			result = calendar.getActualMaximum(Calendar.DATE);
-		}
+        if (date != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            result = calendar.getActualMaximum(Calendar.DATE);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public static Integer getActualMinimumDayForDate(Date date) {
-		Integer result = null;
+    public static Integer getActualMinimumDayForDate(Date date) {
+        Integer result = null;
 
-		if (date != null) {
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(date);
-			result = calendar.getActualMinimum(Calendar.DATE);
-		}
+        if (date != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            result = calendar.getActualMinimum(Calendar.DATE);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public static Integer getMonthFromDate(Date date) {
+    public static Integer getMonthFromDate(Date date) {
         Integer result = null;
 
         if (date != null) {
@@ -841,7 +841,7 @@ public class DateUtils {
     public static boolean isWithinDateWithoutTime(Date dateToCheck, Date startDate, Date endDate) {
         return isWithinDate(setTimeToZero(dateToCheck), setTimeToZero(startDate), setTimeToZero(endDate));
     }
-    
+
     /**
      * Determine overlap between two date period. Null date values in both input and calculated date period mean open dates.
      * 
@@ -964,15 +964,15 @@ public class DateUtils {
 
     public static DatePeriod truncateTime(DatePeriod date) {
         Date dFrom = DateUtils.truncateTime(date.getFrom());
-        Date dTo = DateUtils.truncateTime(date.getTo());        
-        
+        Date dTo = DateUtils.truncateTime(date.getTo());
+
         DatePeriod result = new DatePeriod();
         result.setFrom(dFrom);
         result.setTo(dTo);
 
         return result;
     }
-    
+
     public static Date truncateTime(Date date) {
         try {
             if (date == null) {
@@ -1059,7 +1059,8 @@ public class DateUtils {
 
     /**
      * return the first day of the week.
-     *  @param year a year
+     * 
+     * @param year a year
      * @param week a week number
      * @return a date
      */
@@ -1271,9 +1272,9 @@ public class DateUtils {
             return calendar.getCode() + " #" + priority + " value:" + value;
         }
     }
-    
+
     public static Date parseDefaultDate(String dateValue) {
-    	return parseDateWithPattern(dateValue, DATE_PATTERN);
+        return parseDateWithPattern(dateValue, DATE_PATTERN);
     }
 
     public static Date fromLocalDate(LocalDate localDate) {

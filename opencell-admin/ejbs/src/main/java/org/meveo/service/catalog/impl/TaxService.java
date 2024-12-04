@@ -20,14 +20,14 @@ package org.meveo.service.catalog.impl;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.Tax;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 /**
  * Tax service implementation

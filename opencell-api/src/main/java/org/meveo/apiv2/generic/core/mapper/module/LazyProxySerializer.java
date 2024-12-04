@@ -10,7 +10,7 @@ import org.hibernate.proxy.HibernateProxy;
 import org.meveo.model.IEntity;
 import org.slf4j.Logger;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.Set;
 

@@ -20,48 +20,45 @@ package org.meveo.model.payments;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "journal")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-		@Parameter(name = "sequence_name", value = "journal_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "journal_seq"), @Parameter(name = "increment_size", value = "1") })
 public class Journal extends BusinessEntity {
 
     private static final long serialVersionUID = 1L;
-    
+
     @OneToMany(mappedBy = "journal", fetch = FetchType.LAZY)
-	private List<OCCTemplate> occTemplates = new ArrayList<>();
-    
+    private List<OCCTemplate> occTemplates = new ArrayList<>();
+
     @OneToMany(mappedBy = "journal", fetch = FetchType.LAZY)
-	private List<AccountOperation> accountOperations = new ArrayList<>();
-    
+    private List<AccountOperation> accountOperations = new ArrayList<>();
+
     public Journal() {
-		super();
-	}
+        super();
+    }
 
-	public List<OCCTemplate> getOccTemplates() {
-		return occTemplates;
-	}
+    public List<OCCTemplate> getOccTemplates() {
+        return occTemplates;
+    }
 
-	public void setOccTemplates(List<OCCTemplate> occTemplates) {
-		this.occTemplates = occTemplates;
-	}
+    public void setOccTemplates(List<OCCTemplate> occTemplates) {
+        this.occTemplates = occTemplates;
+    }
 
-	public List<AccountOperation> getAccountOperations() {
-		return accountOperations;
-	}
+    public List<AccountOperation> getAccountOperations() {
+        return accountOperations;
+    }
 
-	public void setAccountOperations(List<AccountOperation> accountOperations) {
-		this.accountOperations = accountOperations;
-	}
+    public void setAccountOperations(List<AccountOperation> accountOperations) {
+        this.accountOperations = accountOperations;
+    }
 }

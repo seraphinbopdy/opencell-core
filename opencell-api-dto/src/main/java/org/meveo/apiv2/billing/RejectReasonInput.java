@@ -18,15 +18,15 @@
 
 package org.meveo.apiv2.billing;
 
+import org.immutables.value.Value;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import org.immutables.value.Value;
-
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableRejectReasonInput.class)
 public interface RejectReasonInput {
     @Schema(description = "invoice reject reason")

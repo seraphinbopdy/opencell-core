@@ -21,42 +21,40 @@ package org.meveo.model.catalog;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.CustomFieldEntity;
-import org.meveo.model.EnableEntity;
+import org.meveo.model.EnableCFEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.HugeEntity;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.billing.InvoiceCategory;
 import org.meveo.model.billing.InvoiceSubCategory;
-import org.meveo.model.crm.custom.CustomFieldValues;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Discount plan item/details
@@ -70,438 +68,347 @@ import org.meveo.model.crm.custom.CustomFieldValues;
 @Cacheable
 @CustomFieldEntity(cftCodePrefix = "DiscountPlanItem", inheritCFValuesFrom = { "discountPlan" })
 @ExportIdentifier({ "discountPlan.code", "code" })
-@Table(name = "cat_discount_plan_item", uniqueConstraints = {
-		@UniqueConstraint(columnNames = { "discount_plan_id", "code" }) })
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-		@Parameter(name = "sequence_name", value = "cat_discount_plan_item_seq"), })
+@Table(name = "cat_discount_plan_item", uniqueConstraints = { @UniqueConstraint(columnNames = { "discount_plan_id", "code" }) })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_discount_plan_item_seq"),
+        @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
-		@NamedQuery(name = "DiscountPlanItem.getActiveDiscountPlanItem", query = "SELECT dpi from DiscountPlanItem dpi where dpi.disabled is false and dpi.discountPlan.id=:discountPlanId order by dpi.priority ASC, id", hints = {
-            @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-		@NamedQuery(name = "DiscountPlanItem.getFixedDiscountPlanItemsByDP", query = "SELECT dpi from DiscountPlanItem dpi where dpi.disabled is false and dpi.discountPlan.id=:discountPlanId AND dpi.discountPlanItemType='FIXED' order by dpi.priority ASC, id", hints = {
-	            @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-	    @NamedQuery(name = "DiscountPlanItem.getMaxSequence", query = "SELECT max(dpi.sequence) from DiscountPlanItem dpi where dpi.discountPlan.id=:discountPlanId"),
-		@NamedQuery(name = "DiscountPlanItem.findBySequence", query = "Select dpi from DiscountPlanItem  dpi where  dpi.discountPlan.id=:discountPlanId and dpi.sequence=:sequence")
-})
-public class DiscountPlanItem extends EnableEntity implements ICustomFieldEntity {
+        @NamedQuery(name = "DiscountPlanItem.getActiveDiscountPlanItem", query = "SELECT dpi from DiscountPlanItem dpi where dpi.disabled = false and dpi.discountPlan.id=:discountPlanId order by dpi.priority ASC, id", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "DiscountPlanItem.getFixedDiscountPlanItemsByDP", query = "SELECT dpi from DiscountPlanItem dpi where dpi.disabled = false and dpi.discountPlan.id=:discountPlanId AND dpi.discountPlanItemType='FIXED' order by dpi.priority ASC, id", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "DiscountPlanItem.getMaxSequence", query = "SELECT max(dpi.sequence) from DiscountPlanItem dpi where dpi.discountPlan.id=:discountPlanId"),
+        @NamedQuery(name = "DiscountPlanItem.findBySequence", query = "Select dpi from DiscountPlanItem  dpi where  dpi.discountPlan.id=:discountPlanId and dpi.sequence=:sequence") })
+public class DiscountPlanItem extends EnableCFEntity {
 
-	private static final long serialVersionUID = 4543503736567841084L;
-
-	/**
-	 * Code
-	 */
-	@Column(name = "code", length = 255, nullable = false)
-	@Size(max = 255, min = 1)
-	@NotNull
-	private String code;
-
-	/**
-	 * Parent discount plan
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "discount_plan_id", nullable = false)
-	@NotNull
-	private DiscountPlan discountPlan;
-
-	/**
-	 * Apply discount to a given invoice category. If not specified, discount will
-	 * be applied to any invoice category.
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "invoice_category_id")
-	@Deprecated
-	private InvoiceCategory invoiceCategory;
-
-	/**
-	 * Apply discount to a given invoice subcategory.
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "invoice_sub_category_id")
-	@Deprecated
-	private InvoiceSubCategory invoiceSubCategory;
-
-	/**
-	 * Expression to determine if discount applies
-	 */
-	@Column(name = "expression_el", length = 2000)
-	@Size(max = 2000)
-	private String expressionEl;
-
-	/**
-	 * The absolute or percentage discount amount.
-	 */
-	@Column(name = "discount_value", precision = NB_PRECISION, scale = NB_DECIMALS)
-	@Digits(integer = NB_PRECISION, fraction = NB_DECIMALS)
-	private BigDecimal discountValue;
-
-	/**
-	 * The absolute or percentage discount amount EL.
-	 */
-	@Column(name = "discount_value_el", length = 2000)
-	@Size(max = 2000)
-	private String discountValueEL;
-
-	/**
-	 * Type of discount, default is percent.
-	 */
-	@Enumerated(EnumType.STRING)
-	@Column(name = "discount_plan_item_type", length = 50)
-	private DiscountPlanItemTypeEnum discountPlanItemType = DiscountPlanItemTypeEnum.PERCENTAGE;
-
-	/**
-	 * Unique identifier UUID
-	 */
-	@Column(name = "uuid", nullable = false, updatable = false, length = 60)
-	@Size(max = 60)
-	@NotNull
-	protected String uuid;
-
-	/**
-	 * Custom field values in JSON format
-	 */
-	@Type(type = "cfjson")
-	@Column(name = "cf_values", columnDefinition = "jsonb")
-	protected CustomFieldValues cfValues;
+    private static final long serialVersionUID = 4543503736567841084L;
 
     /**
-     * Accumulated custom field values in JSON format
+     * Code
      */
-//    @Type(type = "cfjson")
-//    @Column(name = "cf_values_accum", columnDefinition = "TEXT")
-    @Transient
-    protected CustomFieldValues cfAccumulatedValues;
-    
+    @Column(name = "code", length = 255, nullable = false)
+    @Size(max = 255, min = 1)
+    @NotNull
+    private String code;
+
+    /**
+     * Parent discount plan
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "discount_plan_id", nullable = false)
+    @NotNull
+    private DiscountPlan discountPlan;
+
+    /**
+     * Apply discount to a given invoice category. If not specified, discount will be applied to any invoice category.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_category_id")
+    @Deprecated
+    private InvoiceCategory invoiceCategory;
+
+    /**
+     * Apply discount to a given invoice subcategory.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_sub_category_id")
+    @Deprecated
+    private InvoiceSubCategory invoiceSubCategory;
+
+    /**
+     * Expression to determine if discount applies
+     */
+    @Column(name = "expression_el", length = 2000)
+    @Size(max = 2000)
+    private String expressionEl;
+
+    /**
+     * The absolute or percentage discount amount.
+     */
+    @Column(name = "discount_value", precision = NB_PRECISION, scale = NB_DECIMALS)
+    @Digits(integer = NB_PRECISION, fraction = NB_DECIMALS)
+    private BigDecimal discountValue;
+
+    /**
+     * The absolute or percentage discount amount EL.
+     */
+    @Column(name = "discount_value_el", length = 2000)
+    @Size(max = 2000)
+    private String discountValueEL;
+
+    /**
+     * Type of discount, default is percent.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_plan_item_type", length = 50)
+    private DiscountPlanItemTypeEnum discountPlanItemType = DiscountPlanItemTypeEnum.PERCENTAGE;
+
     @Column(name = "priorty")
-    private Long priority=0L;
-    
-    
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "accounting_article_id")
+    private Long priority = 0L;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "accounting_article_id")
     private AccountingArticle accountingArticle;
 
-	/**
+    /**
      * list of accountingArticle attached
      */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "discount_plan_item_articles", joinColumns = @JoinColumn(name = "discount_plan_item_id"), inverseJoinColumns = @JoinColumn(name = "accounting_article_id"))
     private Set<AccountingArticle> targetAccountingArticle = new HashSet<>();
 
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "price_plan_matrix_id", nullable = true, referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "price_plan_matrix_id", nullable = true, referencedColumnName = "id")
     private PricePlanMatrix pricePlanMatrix;
 
-	/**
-	 * If true, then allows to negate the amount of affected invoice lines.
-	 * If fase, then amount for the discount line produce by the discount plan item cannot exceed the amount of discounted lines.
-	 * Default: false
-	 */
-	@Type(type = "numeric_boolean")
-	@Column(name = "allow_to_negate")
-	@NotNull
-	private boolean allowToNegate = false;
-	
-	@Type(type = "numeric_boolean")
-	@Column(name = "apply_by_article")
-	private boolean applyByArticle = true;
-	
-	/**
-	 * 
-	 *defines the order in which discount plans are applied
-	 */
-	@Column(name = "sequence")
-	private Integer sequence;
-	
-	/**
-	 * determines if the following discounts ordered by sequence is applicable
-	 */
-	@Type(type = "numeric_boolean")
-	@Column(name = "last_discount")
-	private Boolean lastDiscount;
-	
-	 
-	@Transient
-	private Integer finalSequence;
-	
-	/**
-	 * Code
-	 */
-	@Column(name = "description", length = 255)
-	private String description;
-	
-	/**
+    /**
+     * If true, then allows to negate the amount of affected invoice lines. If fase, then amount for the discount line produce by the discount plan item cannot exceed the amount of discounted lines. Default: false
+     */
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "allow_to_negate")
+    @NotNull
+    private boolean allowToNegate = false;
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "apply_by_article")
+    private boolean applyByArticle = true;
+
+    /**
+     * 
+     * defines the order in which discount plans are applied
+     */
+    @Column(name = "sequence")
+    private Integer sequence;
+
+    /**
+     * determines if the following discounts ordered by sequence is applicable
+     */
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "last_discount")
+    private Boolean lastDiscount;
+
+    @Transient
+    private Integer finalSequence;
+
+    /**
+     * Code
+     */
+    @Column(name = "description", length = 255)
+    private String description;
+
+    /**
      * list of trading discount plan item attached
      */
-	@OneToMany(mappedBy = "discountPlanItem", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "discountPlanItem", fetch = FetchType.LAZY)
     private Set<TradingDiscountPlanItem> tradingDiscountPlanItems = new HashSet<>();
 
-	public DiscountPlan getDiscountPlan() {
-		return discountPlan;
-	}
-
-	public void setDiscountPlan(DiscountPlan discountPlan) {
-		this.discountPlan = discountPlan;
-	}
-
-	@Deprecated
-	public InvoiceCategory getInvoiceCategory() {
-		return invoiceCategory;
-	}
-
-	@Deprecated
-	public void setInvoiceCategory(InvoiceCategory invoiceCategory) {
-		this.invoiceCategory = invoiceCategory;
-	}
-
-	@Deprecated
-	public InvoiceSubCategory getInvoiceSubCategory() {
-		return invoiceSubCategory;
-	}
-
-	@Deprecated
-	public void setInvoiceSubCategory(InvoiceSubCategory invoiceSubCategory) {
-		this.invoiceSubCategory = invoiceSubCategory;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	/**
-	 * @return Expression to determine if discount applies
-	 */
-	public String getExpressionEl() {
-		return expressionEl;
-	}
-
-	/**
-	 * @param expressionEl
-	 *            Expression to determine if discount applies
-	 */
-	public void setExpressionEl(String expressionEl) {
-		this.expressionEl = expressionEl;
-	}
-
-	@Override
-	public int hashCode() {
-		return 961 + (("DiscountPlanItem" + (code == null ? "" : code)).hashCode());
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-
-		if (this == obj) {
-			return true;
-		} else if (obj == null) {
-			return false;
-		} else if (!(obj instanceof DiscountPlanItem)) {
-			return false;
-		}
-
-		DiscountPlanItem other = (DiscountPlanItem) obj;
-		if (id != null && other.getId() != null && id.equals(other.getId())) {
-			return true;
-		}
-		if (code == null) {
-			if (other.getCode() != null) {
-				return false;
-			}
-		} else if (!code.equals(other.getCode())) {
-			return false;
-		}
-		return true;
-	}
-
-	public DiscountPlanItemTypeEnum getDiscountPlanItemType() {
-		return discountPlanItemType;
-	}
-
-	public void setDiscountPlanItemType(DiscountPlanItemTypeEnum discountPlanItemType) {
-		this.discountPlanItemType = discountPlanItemType;
-	}
-
-	public BigDecimal getDiscountValue() {
-		return discountValue;
-	}
-
-	public void setDiscountValue(BigDecimal discountValue) {
-		this.discountValue = discountValue;
-	}
-
-	public void setDiscountValueEL(String discountValueEL) {
-		this.discountValueEL = discountValueEL;
-	}
-
-	public String getDiscountValueEL() {
-		return discountValueEL;
-	}
-
-	/**
-     * setting uuid if null
-     */
-    @PrePersist
-    public void setUUIDIfNull() {
-    	if (uuid == null) {
-    		uuid = UUID.randomUUID().toString();
-    	}
+    public DiscountPlan getDiscountPlan() {
+        return discountPlan;
     }
-    
-    @Override
-    public String getUuid() {
-    	setUUIDIfNull(); // setting uuid if null to be sure that the existing code expecting uuid not null will not be impacted
-        return uuid;
+
+    public void setDiscountPlan(DiscountPlan discountPlan) {
+        this.discountPlan = discountPlan;
+    }
+
+    @Deprecated
+    public InvoiceCategory getInvoiceCategory() {
+        return invoiceCategory;
+    }
+
+    @Deprecated
+    public void setInvoiceCategory(InvoiceCategory invoiceCategory) {
+        this.invoiceCategory = invoiceCategory;
+    }
+
+    @Deprecated
+    public InvoiceSubCategory getInvoiceSubCategory() {
+        return invoiceSubCategory;
+    }
+
+    @Deprecated
+    public void setInvoiceSubCategory(InvoiceSubCategory invoiceSubCategory) {
+        this.invoiceSubCategory = invoiceSubCategory;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     /**
-     * @param uuid Unique identifier
+     * @return Expression to determine if discount applies
      */
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    @Override
-    public CustomFieldValues getCfValues() {
-        return cfValues;
-    }
-
-    @Override
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
-    }
-
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfAccumulatedValues) {
-        this.cfAccumulatedValues = cfAccumulatedValues;
+    public String getExpressionEl() {
+        return expressionEl;
     }
 
     /**
-     * Change UUID value. Return old value
-     * 
-     * @return Old UUID value
+     * @param expressionEl Expression to determine if discount applies
      */
+    public void setExpressionEl(String expressionEl) {
+        this.expressionEl = expressionEl;
+    }
+
     @Override
-    public String clearUuid() {
-        String oldUuid = uuid;
-        uuid = UUID.randomUUID().toString();
-        return oldUuid;
+    public int hashCode() {
+        return 961 + (("DiscountPlanItem" + (code == null ? "" : code)).hashCode());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        } else if (obj == null) {
+            return false;
+        } else if (!(obj instanceof DiscountPlanItem)) {
+            return false;
+        }
+
+        DiscountPlanItem other = (DiscountPlanItem) obj;
+        if (id != null && other.getId() != null && id.equals(other.getId())) {
+            return true;
+        }
+        if (code == null) {
+            if (other.getCode() != null) {
+                return false;
+            }
+        } else if (!code.equals(other.getCode())) {
+            return false;
+        }
+        return true;
+    }
+
+    public DiscountPlanItemTypeEnum getDiscountPlanItemType() {
+        return discountPlanItemType;
+    }
+
+    public void setDiscountPlanItemType(DiscountPlanItemTypeEnum discountPlanItemType) {
+        this.discountPlanItemType = discountPlanItemType;
+    }
+
+    public BigDecimal getDiscountValue() {
+        return discountValue;
+    }
+
+    public void setDiscountValue(BigDecimal discountValue) {
+        this.discountValue = discountValue;
+    }
+
+    public void setDiscountValueEL(String discountValueEL) {
+        this.discountValueEL = discountValueEL;
+    }
+
+    public String getDiscountValueEL() {
+        return discountValueEL;
     }
 
     @Override
     public ICustomFieldEntity[] getParentCFEntities() {
-    	return new ICustomFieldEntity[] { discountPlan };
+        return new ICustomFieldEntity[] { discountPlan };
     }
-    
 
+    /**
+     * @return the priority
+     */
+    public Long getPriority() {
+        return priority;
+    }
 
-	/**
-	 * @return the priority
-	 */
-	public Long getPriority() {
-		return priority;
-	}
+    /**
+     * @param priority the priority to set
+     */
+    public void setPriority(Long priority) {
+        this.priority = priority;
+    }
 
-	/**
-	 * @param priority the priority to set
-	 */
-	public void setPriority(Long priority) {
-		this.priority = priority;
-	}
+    public boolean isAllowToNegate() {
+        return allowToNegate;
+    }
 
-	public boolean isAllowToNegate() {
-		return allowToNegate;
-	}
+    public void setAllowToNegate(boolean allowToNegate) {
+        this.allowToNegate = allowToNegate;
+    }
 
-	public void setAllowToNegate(boolean allowToNegate) {
-		this.allowToNegate = allowToNegate;
-	}
+    /**
+     * @return the targetAccountingArticle
+     */
+    public Set<AccountingArticle> getTargetAccountingArticle() {
+        return targetAccountingArticle;
+    }
 
+    /**
+     * @param targetAccountingArticle the targetAccountingArticle to set
+     */
+    public void setTargetAccountingArticle(Set<AccountingArticle> targetAccountingArticle) {
+        this.targetAccountingArticle = targetAccountingArticle;
+    }
 
+    /**
+     * @return the pricePlanMatrix
+     */
+    public PricePlanMatrix getPricePlanMatrix() {
+        return pricePlanMatrix;
+    }
 
-	/**
-	 * @return the targetAccountingArticle
-	 */
-	public Set<AccountingArticle> getTargetAccountingArticle() {
-		return targetAccountingArticle;
-	}
+    /**
+     * @param pricePlanMatrix the pricePlanMatrix to set
+     */
+    public void setPricePlanMatrix(PricePlanMatrix pricePlanMatrix) {
+        this.pricePlanMatrix = pricePlanMatrix;
+    }
 
-	/**
-	 * @param targetAccountingArticle the targetAccountingArticle to set
-	 */
-	public void setTargetAccountingArticle(Set<AccountingArticle> targetAccountingArticle) {
-		this.targetAccountingArticle = targetAccountingArticle;
-	}
+    public AccountingArticle getAccountingArticle() {
+        return accountingArticle;
+    }
 
-	/**
-	 * @return the pricePlanMatrix
-	 */
-	public PricePlanMatrix getPricePlanMatrix() {
-		return pricePlanMatrix;
-	}
+    public void setAccountingArticle(AccountingArticle accountingArticle) {
+        this.accountingArticle = accountingArticle;
+    }
 
-	/**
-	 * @param pricePlanMatrix the pricePlanMatrix to set
-	 */
-	public void setPricePlanMatrix(PricePlanMatrix pricePlanMatrix) {
-		this.pricePlanMatrix = pricePlanMatrix;
-	}
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
 
-	public AccountingArticle getAccountingArticle() {
-		return accountingArticle;
-	}
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public void setAccountingArticle(AccountingArticle accountingArticle) {
-		this.accountingArticle = accountingArticle;
-	}
+    public boolean isApplyByArticle() {
+        return applyByArticle;
+    }
 
-	/**
-	 * @return the description
-	 */
-	public String getDescription() {
-		return description;
-	}
+    public void setApplyByArticle(boolean applyByArticle) {
+        this.applyByArticle = applyByArticle;
+    }
 
-	/**
-	 * @param description the description to set
-	 */
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public Integer getSequence() {
+        return sequence;
+    }
 
-	public boolean isApplyByArticle() {
-		return applyByArticle;
-	}
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
+    }
 
-	public void setApplyByArticle(boolean applyByArticle) {
-		this.applyByArticle = applyByArticle;
-	}
+    public Boolean getLastDiscount() {
+        return lastDiscount;
+    }
 
-	public Integer getSequence() {
-		return sequence;
-	}
+    public void setLastDiscount(Boolean lastDiscount) {
+        this.lastDiscount = lastDiscount;
+    }
 
-	public void setSequence(Integer sequence) {
-		this.sequence = sequence;
-	}
-
-	public Boolean getLastDiscount() {
-		return lastDiscount;
-	}
-
-	public void setLastDiscount(Boolean lastDiscount) {
-		this.lastDiscount = lastDiscount;
-	}
-
-	public void setFinalSequence(Integer finalSequence) {
-		this.finalSequence = finalSequence;
-	}
+    public void setFinalSequence(Integer finalSequence) {
+        this.finalSequence = finalSequence;
+    }
 
     public Integer getFinalSequence() {
         if (getDiscountPlan() != null) {
@@ -510,12 +417,12 @@ public class DiscountPlanItem extends EnableEntity implements ICustomFieldEntity
         return finalSequence;
     }
 
-	public Set<TradingDiscountPlanItem> getTradingDiscountPlanItems() {
-		return tradingDiscountPlanItems;
-	}
+    public Set<TradingDiscountPlanItem> getTradingDiscountPlanItems() {
+        return tradingDiscountPlanItems;
+    }
 
-	public void setTradingDiscountPlanItems(Set<TradingDiscountPlanItem> tradingDiscountPlanItems) {
-		this.tradingDiscountPlanItems = tradingDiscountPlanItems;
-	}
+    public void setTradingDiscountPlanItems(Set<TradingDiscountPlanItem> tradingDiscountPlanItems) {
+        this.tradingDiscountPlanItems = tradingDiscountPlanItems;
+    }
 
 }

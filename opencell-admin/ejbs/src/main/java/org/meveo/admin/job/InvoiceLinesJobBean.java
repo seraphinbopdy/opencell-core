@@ -17,17 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
-import org.hibernate.collection.internal.PersistentBag;
+import org.hibernate.collection.spi.PersistentBag;
 import org.meveo.admin.async.SynchronizedIteratorGrouped;
 import org.meveo.admin.async.SynchronizedMultiItemIterator;
 import org.meveo.admin.exception.BusinessException;
@@ -55,6 +49,12 @@ import org.meveo.service.billing.impl.InvoiceLineService.InvoiceLineCreationStat
 import org.meveo.service.job.Job;
 import org.meveo.service.job.JobInstanceService;
 import org.primefaces.model.SortOrder;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 @Stateless
 public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<String, Object>>> {
@@ -85,7 +85,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
 
     @Inject
     private JobInstanceService jobInstanceService;
-    
+
     private AggregationConfiguration aggregationConfiguration;
     private boolean incrementalInvoiceLines;
 
@@ -354,7 +354,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
         try {
             JobInstance jobInstance = jobInstanceService.findByCode(BILLING_RUN_REPORT_JOB_CODE);
             jobInstance.setRunTimeValues(jobParams);
-            jobExecutionService.executeJob(jobInstance, jobParams, JobLauncherEnum.TRIGGER);
+            jobExecutionService.executeJobWithWait(jobInstance, jobParams, JobLauncherEnum.TRIGGER);
         } catch (Exception exception) {
             throw new BusinessException("Exception occurred during billing run report job execution : " + exception.getMessage(), exception.getCause());
         }
@@ -420,7 +420,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
             billingRunExtensionService.updateBillingRun(billingRun.getId(), null, null, BillingRunStatusEnum.CREATING_INVOICE_LINES, null);
 
             // Determine aggregation options from Billing run
-            if(currentBillingRun.getAdditionalAggregationFields() != null
+            if (currentBillingRun.getAdditionalAggregationFields() != null
                     && currentBillingRun.getAdditionalAggregationFields() instanceof PersistentBag) {
                 currentBillingRun = billingRunService.findById(currentBillingRun.getId(), of("additionalAggregationFields"));
             }
@@ -453,7 +453,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
         minId = (Long) convertSummary[0];
         maxId = (Long) convertSummary[1];
 
-        scrollableResults = aggregationQueryInfo.getQuery().setReadOnly(true).setCacheable(false).setMaxResults(processNrInJobRun > jobItemsLimit ? jobItemsLimit : processNrInJobRun).setFetchSize(fetchSize)
+        scrollableResults = aggregationQueryInfo.getQuery().setReadOnly(true).setCacheable(false).setMaxResults(processNrInJobRun > jobItemsLimit && jobItemsLimit > 0 ? jobItemsLimit : processNrInJobRun).setFetchSize(fetchSize)
             .scroll(ScrollMode.FORWARD_ONLY);
 
         Long nrOfRecords = aggregationQueryInfo.getNumberOfIL();
@@ -517,7 +517,7 @@ public class InvoiceLinesJobBean extends IteratorBasedScopedJobBean<List<Map<Str
         JobInstance jobInstance = jobExecutionResult.getJobInstance();
 
         Long brId = (Long) jobInstance.getParamValue(BR_CURRENT);
-        if (brId== null) {
+        if (brId == null) {
             jobExecutionResult.addReportToBeginning("No billing run ID received in job execution parameters");
             return;
         }

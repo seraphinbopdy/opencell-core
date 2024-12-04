@@ -429,8 +429,8 @@ public class CustomFieldValueHolder implements Serializable {
         for (int i = periodValues.size() - 1; i >= 0; i--) {
             CustomFieldValue periodValue = periodValues.get(i);
 
-            if ((periodValue.getPeriod() != null && periodValue.getPeriod().equals(valuePeriodToRemove.getPeriod())
-                    || (periodValue.getPeriod() == null && valuePeriodToRemove.getPeriod() == null)) && periodValue.getPriority() == valuePeriodToRemove.getPriority()) {
+            if ((periodValue.getPeriod() != null && periodValue.getPeriod().equals(valuePeriodToRemove.getPeriod()) || (periodValue.getPeriod() == null && valuePeriodToRemove.getPeriod() == null))
+                    && periodValue.getPriority() == valuePeriodToRemove.getPriority()) {
                 periodValues.remove(i);
                 removed = true;
                 break;
@@ -472,8 +472,8 @@ public class CustomFieldValueHolder implements Serializable {
         for (int i = periodValues.size() - 1; i >= 0; i--) {
             CustomFieldValue periodValue = periodValues.get(i);
 
-            if ((periodValue.getPeriod() != null && periodValue.getPeriod().equals(valuePeriodToChange.getPeriod())
-                    || (periodValue.getPeriod() == null && valuePeriodToChange.getPeriod() == null)) && periodValue.getPriority() == valuePeriodToChange.getPriority()) {
+            if ((periodValue.getPeriod() != null && periodValue.getPeriod().equals(valuePeriodToChange.getPeriod()) || (periodValue.getPeriod() == null && valuePeriodToChange.getPeriod() == null))
+                    && periodValue.getPriority() == valuePeriodToChange.getPriority()) {
                 currentIndex = i;
                 break;
             }

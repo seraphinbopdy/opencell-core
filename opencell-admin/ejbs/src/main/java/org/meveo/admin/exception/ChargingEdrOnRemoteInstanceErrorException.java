@@ -17,9 +17,9 @@
  */
 package org.meveo.admin.exception;
 
-import javax.ejb.ApplicationException;
-
 import org.meveo.model.rating.EDRRejectReasonEnum;
+
+import jakarta.ejb.ApplicationException;
 
 /**
  * Failed to communicate or send CDRs to a remote Opencell instance

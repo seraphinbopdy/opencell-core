@@ -18,9 +18,9 @@
 
 package org.meveo.model.quote;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlEnumValue;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * Quote status lifecycle
@@ -61,8 +61,8 @@ public enum QuoteStatusEnum {
     ACCEPTED("Accepted"),
 
     /**
-     * the customer does not wish to progress with the quotation. It could his final decision and no other quote will be initiated from this quote or it could be during negotiation
-     * phase and a new quote version is triggered from this quote. This new version of the quote is created with the in Progress state.
+     * the customer does not wish to progress with the quotation. It could his final decision and no other quote will be initiated from this quote or it could be during negotiation phase and a new quote version is
+     * triggered from this quote. This new version of the quote is created with the in Progress state.
      */
     @XmlEnumValue("Rejected")
     REJECTED("Rejected");

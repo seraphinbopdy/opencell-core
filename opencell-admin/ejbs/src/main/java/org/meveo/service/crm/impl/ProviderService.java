@@ -19,18 +19,7 @@ package org.meveo.service.crm.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.keycloak.KeycloakSecurityContext;
@@ -39,12 +28,25 @@ import org.meveo.cache.TenantCacheContainerProvider;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.JpaAmpNewTx;
+import org.meveo.model.admin.User;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.sequence.GenericSequence;
 import org.meveo.model.sequence.SequenceTypeEnum;
 import org.meveo.security.client.KeycloakAdminClientService;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.ServiceSingleton;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Lock;
+import jakarta.ejb.LockType;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Provider service implementation.
@@ -182,7 +184,7 @@ public class ProviderService extends PersistenceService<Provider> {
         appProvider.setInvoiceConfiguration(provider.getInvoiceConfiguration() != null ? provider.getInvoiceConfiguration() : null);
         appProvider.setPaymentMethods(provider.getPaymentMethods());
         appProvider.setOrderLineTypes(provider.getOrderLineTypes());
-        appProvider.setCfValues(provider.getCFValuesCopy());
+        appProvider.setCfValuesAsJson(provider.getCfValuesAsJson());
 
         tenantCacheContainerProvider.addUpdateTenant(provider, true);
 
@@ -231,7 +233,7 @@ public class ProviderService extends PersistenceService<Provider> {
         }
 
         try {
-            kcService.createUser(name, null, null, email, name, null, Arrays.asList("CUSTOMER_CARE_USER", "CC_ADMIN", "superAdministrator"), provider.getCode());
+            kcService.createUser(name, null, null, email, name, null, Map.of(User.REALM_LEVEL_ROLES, Arrays.asList("CUSTOMER_CARE_USER", "CC_ADMIN", "superAdministrator")), provider.getCode(), null);
         } catch (BusinessException e) {
             log.error("Failed to create a user in Keycloak", e);
             throw e;

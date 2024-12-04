@@ -21,10 +21,6 @@ package org.meveo.service.billing.impl;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.TypedQuery;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.Amounts;
@@ -40,6 +36,10 @@ import org.meveo.model.crm.Customer;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.catalog.impl.CalendarService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.TypedQuery;
 
 /**
  * Service class for WalletReservation entity

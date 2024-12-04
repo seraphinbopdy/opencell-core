@@ -18,7 +18,11 @@
 
 package org.meveo.service.tax;
 
-import org.hibernate.Hibernate;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
@@ -51,14 +55,11 @@ import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.catalog.impl.TaxService;
 import org.meveo.service.script.billing.TaxScriptService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.FlushModeType;
-import javax.persistence.NoResultException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.NoResultException;
 
 /**
  * Tax mapping service implementation.
@@ -81,12 +82,19 @@ public class TaxMappingService extends PersistenceService<TaxMapping> {
     @Inject
     private AccountingArticleService accountingArticleService;
     
-    private static boolean IS_DETERMINE_TAX_CLASS_FROM_AA = true;
+    private static Boolean IS_DETERMINE_TAX_CLASS_FROM_AA = null;
 
-    static {
-        IS_DETERMINE_TAX_CLASS_FROM_AA = ParamBean.getInstance().getBooleanValue("taxes.determineTaxClassFromAA", true);
+    /**
+     * As for testing purpose IS_DETERMINE_TAX_CLASS_FROM_AA can not be set via static variable initiation, it has to be done in a @PostConstruct method. 
+     */
+    @PostConstruct
+    public void init() {
+        if (IS_DETERMINE_TAX_CLASS_FROM_AA == null) {
+            IS_DETERMINE_TAX_CLASS_FROM_AA = ParamBean.getInstance().getProperty("tax.determineTaxClassFromAA", "true").equals("true");
+        }
     }
-
+    
+    
     @Override
     public void create(TaxMapping entity) throws InvalidParameterException {
         validateValidityDates(entity);

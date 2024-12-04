@@ -17,10 +17,10 @@
  */
 package org.meveo.service.billing.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * BillingCycle service implementation.

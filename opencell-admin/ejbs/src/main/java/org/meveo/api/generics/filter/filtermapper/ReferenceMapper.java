@@ -1,9 +1,9 @@
 package org.meveo.api.generics.filter.filtermapper;
 
+import java.util.function.Function;
+
 import org.meveo.api.generics.filter.FilterMapper;
 import org.meveo.service.base.PersistenceService;
-
-import java.util.function.Function;
 
 public class ReferenceMapper extends FilterMapper {
 

@@ -18,28 +18,28 @@
 package org.meveo.service.payments.impl;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.account.TransferAccountOperationDto;
 import org.meveo.api.dto.account.TransferCustomerAccountDto;
 import org.meveo.api.exception.BusinessApiException;
-import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
@@ -50,10 +50,23 @@ import org.meveo.model.accounting.AccountingPeriodForceEnum;
 import org.meveo.model.accounting.AccountingPeriodStatusEnum;
 import org.meveo.model.accounting.SubAccountingPeriod;
 import org.meveo.model.admin.Seller;
-import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.crm.Provider;
-import org.meveo.model.payments.*;
+import org.meveo.model.payments.AccountOperation;
+import org.meveo.model.payments.AccountOperationRejectionReason;
+import org.meveo.model.payments.AccountOperationStatus;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.MatchingStatusEnum;
+import org.meveo.model.payments.OCCTemplate;
+import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.payments.OtherCreditAndCharge;
+import org.meveo.model.payments.Payment;
+import org.meveo.model.payments.PaymentActionEnum;
+import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.RecordedInvoice;
+import org.meveo.model.payments.Refund;
+import org.meveo.model.payments.RejectedPayment;
+import org.meveo.model.payments.RejectionActionStatus;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.accounting.impl.AccountingPeriodService;
 import org.meveo.service.accounting.impl.SubAccountingPeriodService;
@@ -62,6 +75,15 @@ import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 
 /**
  * AccountOperation service implementation.
@@ -98,7 +120,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 
     @Inject
     private SubAccountingPeriodService subAccountingPeriodService;
-	
+
 	@Inject
 	private InvoiceService invoiceService;
 	@Inject
@@ -300,7 +322,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
                     .append(" AND ao.customerAccount.excludedFromPayment = FALSE ")
                     .append(" AND ao.customerAccount.id = pm.customerAccount.id ")
                     .append(" AND pm.paymentType =:paymentMethodIN ")
-                    .append(" AND pm.preferred IS TRUE ")
+                    .append(" AND pm.preferred = true ")
                     .append(" AND ao.unMatchingAmount <> 0 ")
                     .append(" AND ao.collectionDate >=:fromDueDateIN ")
                     .append(" AND ao.collectionDate <:toDueDateIN ");
@@ -845,8 +867,8 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 
     public void fillOperationNumber(AccountOperation accountOperation)
     {
-        BigInteger operationNumber =(BigInteger) getEntityManager().createNativeQuery("select nextval('account_operation_number_seq')").getSingleResult();
-        accountOperation.setOperationNumber(operationNumber.longValue());
+        Long operationNumber = (Long) getEntityManager().createNativeQuery("select nextval('account_operation_number_seq')").getSingleResult();
+        accountOperation.setOperationNumber(operationNumber);
     }
 
     @Override
@@ -922,7 +944,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
         // execlude account operation with status closed
 	    queryString.append(" AND ao.status != :status");
 		parameters.put("status", AccountOperationStatus.CLOSED);
-		
+
         // Creating the query
         Query query = getEntityManager().createQuery(queryString.toString());
 
@@ -969,7 +991,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 				"and mc.id in (:matchingCodeId) ");
 		if(StringUtils.isNotBlank(type)){
 			query.append(" and ao.type = :type");
-		}
+}
 		var sqlQuery = getEntityManager().createQuery("SELECT ao FROM AccountOperation ao left join ao.matchingAmounts mas " +
 						"left join mas.matchingCode mc " +
 						"WHERE  ao.matchingStatus in (org.meveo.model.payments.MatchingStatusEnum.L, org.meveo.model.payments.MatchingStatusEnum.P) " +

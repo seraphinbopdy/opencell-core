@@ -1,5 +1,18 @@
 package org.meveo.apiv2.payments;
 
+import static org.mockito.ArgumentMatchers.any;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,20 +40,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.mockito.ArgumentMatchers.any;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentPlanActivateApiTest {
@@ -243,7 +244,7 @@ public class PaymentPlanActivateApiTest {
         Optional.ofNullable(idAos).orElse(Collections.emptySet())
                 .forEach(idAo -> {
                     aos.add(new InstallmentAccountOperation() {
-                        @Nonnull
+                        @NotNull
                         @Override
                         public Long getId() {
                             return idAo;

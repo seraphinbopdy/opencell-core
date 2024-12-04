@@ -4,16 +4,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.transaction.Transactional;
-import javax.ws.rs.core.Response;
-
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.cpq.resource.CpqQuoteResource;
 import org.meveo.apiv2.cpq.service.CpqQuoteApiService;
 import org.meveo.apiv2.ordering.resource.oo.ImmutableAvailableOpenOrder;
 import org.meveo.apiv2.quote.QuoteEmailInput;
+
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.Response;
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class CpqQuoteResourceImpl implements CpqQuoteResource {

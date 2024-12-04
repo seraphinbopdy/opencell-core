@@ -22,15 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.billing.EDRDto;
 import org.meveo.cache.CdrEdrProcessingCacheContainerProvider;
@@ -42,6 +33,15 @@ import org.meveo.model.billing.Subscription;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 /**
  * @author Wassim Drira
@@ -119,7 +119,7 @@ public class EdrService extends PersistenceService<EDR> {
  	        if(parameter2!=null) {
  	        	strQuery.append(" AND lower(e.parameter2)=:parameter2");
  	        }
- 	        strQuery.append(" order by e.subscription.id");
+ 	        strQuery.append(" order by e.subscription.id, e.id");
  	        
  	        TypedQuery<Long> query = getEntityManager().createQuery(strQuery.toString(),Long.class);
  	        if(rateUntilDate != null) {

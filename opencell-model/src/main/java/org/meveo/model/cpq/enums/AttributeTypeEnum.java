@@ -1,10 +1,10 @@
 package org.meveo.model.cpq.enums;
 
-import org.meveo.model.catalog.ColumnTypeEnum;
-import org.meveo.model.cpq.AttributeValue;
-
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.meveo.model.catalog.ColumnTypeEnum;
+import org.meveo.model.cpq.AttributeValue;
 
 /**
  * 
@@ -13,24 +13,25 @@ import java.util.stream.Collectors;
  */
 public enum AttributeTypeEnum {
 
-    /** No value to enter, a message entered during the configuration of the service (for example a secondary description) 
-     * is available to be used in the CPQ or in the estimate **/
+    /**
+     * No value to enter, a message entered during the configuration of the service (for example a secondary description) is available to be used in the CPQ or in the estimate
+     **/
     INFO {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
             return ColumnTypeEnum.String;
         }
     },
-    
-    /**  List of text values: Choice of a value from a predefined list **/
+
+    /** List of text values: Choice of a value from a predefined list **/
     LIST_TEXT {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
             return ColumnTypeEnum.String;
         }
     },
-    /** List of multiple text value: choice of multiple values from a predefined list**/
-    LIST_MULTIPLE_TEXT{
+    /** List of multiple text value: choice of multiple values from a predefined list **/
+    LIST_MULTIPLE_TEXT {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
             return ColumnTypeEnum.String;
@@ -48,15 +49,15 @@ public enum AttributeTypeEnum {
             return attributeValue.getDoubleValue() != null ? attributeValue.getDoubleValue() : attributeValue.getStringValue();
         }
     },
-    
+
     /** List of multiple numerical value: choice of a multiple values among a list of numbers **/
-    LIST_MULTIPLE_NUMERIC{
+    LIST_MULTIPLE_NUMERIC {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
             return ColumnTypeEnum.Double;
         }
     }, // "; ; "
-    
+
     /** Text value: Entering a text **/
     TEXT {
         @Override
@@ -64,9 +65,9 @@ public enum AttributeTypeEnum {
             return ColumnTypeEnum.String;
         }
     },
-    
+
     /** Numeric value: Entry of a number **/
-    NUMERIC{
+    NUMERIC {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
             return isRange ? ColumnTypeEnum.Range_Numeric : ColumnTypeEnum.Double;
@@ -77,9 +78,9 @@ public enum AttributeTypeEnum {
             return attributeValue.getDoubleValue() != null ? attributeValue.getDoubleValue() : attributeValue.getStringValue();
         }
     },
-    
+
     /** numeric with predefined decimale **/
-    INTEGER{
+    INTEGER {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
             return isRange ? ColumnTypeEnum.Range_Numeric : ColumnTypeEnum.Double;
@@ -90,8 +91,8 @@ public enum AttributeTypeEnum {
             return attributeValue.getDoubleValue() != null ? attributeValue.getDoubleValue() : attributeValue.getStringValue();
         }
     },
-    
-    /** Date type**/
+
+    /** Date type **/
     DATE {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
@@ -103,15 +104,15 @@ public enum AttributeTypeEnum {
             return attributeValue.getDateValue();
         }
     },
-    
-    /** choice of calendar of opencell's calendar**/
-    CALENDAR{
+
+    /** choice of calendar of opencell's calendar **/
+    CALENDAR {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
             return ColumnTypeEnum.Range_Date;
         }
     }, // To analyze
-    
+
     /** Email format **/
     EMAIL {
         @Override
@@ -119,7 +120,7 @@ public enum AttributeTypeEnum {
             return ColumnTypeEnum.String;
         }
     },
-    
+
     /** phone number format **/
     PHONE {
         @Override
@@ -127,9 +128,9 @@ public enum AttributeTypeEnum {
             return ColumnTypeEnum.String;
         }
     },
-    
+
     /** display some of list of numerics **/
-    TOTAL{
+    TOTAL {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
             return isRange ? ColumnTypeEnum.Range_Numeric : ColumnTypeEnum.Double;
@@ -150,14 +151,12 @@ public enum AttributeTypeEnum {
 
         @Override
         public Object getValue(AttributeValue attributeValue) {
-            Set<Double> values = (Set<Double>) attributeValue.getAssignedAttributeValue()
-                    .stream()
-                    .map(att -> ((AttributeValue) att).getAttribute().getAttributeType().getValue((AttributeValue) att))
-                    .collect(Collectors.toSet());
+            Set<Double> values = (Set<Double>) attributeValue.getAssignedAttributeValue().stream().map(att -> ((AttributeValue) att).getAttribute().getAttributeType().getValue((AttributeValue) att))
+                .collect(Collectors.toSet());
             return values.size();
         }
     },
-    
+
     EXPRESSION_LANGUAGE {
         @Override
         public ColumnTypeEnum getColumnType(Boolean isRange) {
@@ -178,7 +177,7 @@ public enum AttributeTypeEnum {
 
     public abstract ColumnTypeEnum getColumnType(Boolean isRange);
 
-    public Object  getValue(AttributeValue attributeValue) {
+    public Object getValue(AttributeValue attributeValue) {
         return attributeValue.getStringValue();
     }
 }

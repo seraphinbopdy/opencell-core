@@ -24,24 +24,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.InstanceStatusEnum;
-import org.meveo.model.billing.RatingStatus;
-import org.meveo.model.billing.RatingStatusEnum;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.BillingCycleService;
 import org.meveo.service.billing.impl.RecurringChargeInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job implementation to apply recurring charges for next billing cycle

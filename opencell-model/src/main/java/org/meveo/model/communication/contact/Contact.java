@@ -22,24 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.HugeEntity;
@@ -54,6 +39,22 @@ import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
+
 /**
  * Contact information
  * 
@@ -63,7 +64,7 @@ import org.meveo.model.shared.Title;
 @HugeEntity
 @ExportIdentifier({ "code" })
 @Table(name = "com_contact")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "com_contact_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "com_contact_seq"), @Parameter(name = "increment_size", value = "1") })
 public class Contact extends BusinessCFEntity implements ISearchable {
 
     private static final long serialVersionUID = 3772773449495155646L;
@@ -98,7 +99,7 @@ public class Contact extends BusinessCFEntity implements ISearchable {
      * Deprecated in 5.3 for not use
      */
     @Deprecated
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "default_level")
     protected Boolean defaultLevel = true;
 
@@ -142,11 +143,11 @@ public class Contact extends BusinessCFEntity implements ISearchable {
     private String registrationNo;
 
     @Column(name = "company")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     protected Boolean isCompany = Boolean.FALSE;
 
     @Column(name = "entreprise")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     protected Boolean isEnterprise = Boolean.FALSE;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -168,8 +169,7 @@ public class Contact extends BusinessCFEntity implements ISearchable {
     private String assistantPhone;
 
     /**
-     * Position
-     * deprecated, please use the AddressBookContact position field instead
+     * Position deprecated, please use the AddressBookContact position field instead
      */
     @Deprecated
     @Column(name = "position", length = 200)
@@ -214,21 +214,21 @@ public class Contact extends BusinessCFEntity implements ISearchable {
     /**
      * Is it VIP contact
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_vip")
     private boolean isVip;
 
     /**
      * Is it a prospect
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_prospect")
     private boolean isProspect;
 
     /**
      * Was user agreement accepted
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "agreed_ua")
     private boolean agreedToUA;
 
@@ -264,7 +264,6 @@ public class Contact extends BusinessCFEntity implements ISearchable {
     @Size(max = 80)
     private String reference;
 
-
     @Column(name = "comment", length = 2000)
     @Size(max = 2000)
     private String comment;
@@ -274,8 +273,8 @@ public class Contact extends BusinessCFEntity implements ISearchable {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "com_contact_category_contact", joinColumns = @JoinColumn(name = "contact_id"), inverseJoinColumns = @JoinColumn(name = "contact_category_id"))
-    private List<ContactCategory> contactCategories = new ArrayList<>(); 
-    
+    private List<ContactCategory> contactCategories = new ArrayList<>();
+
     public String getAssistantName() {
         return assistantName;
     }
@@ -504,7 +503,6 @@ public class Contact extends BusinessCFEntity implements ISearchable {
         this.isCompany = isCompany;
     }
 
-
     public Boolean getEnterprise() {
         return isEnterprise;
     }
@@ -551,12 +549,12 @@ public class Contact extends BusinessCFEntity implements ISearchable {
         this.addressBookContacts = addressBookContacts;
     }
 
-	public List<ContactCategory> getContactCategories() {
-		return contactCategories;
-	}
+    public List<ContactCategory> getContactCategories() {
+        return contactCategories;
+    }
 
-	public void setContactCategories(List<ContactCategory> contactCategories) {
-		this.contactCategories = contactCategories;
-	}
+    public void setContactCategories(List<ContactCategory> contactCategories) {
+        this.contactCategories = contactCategories;
+    }
 
 }

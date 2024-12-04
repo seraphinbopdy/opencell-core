@@ -20,23 +20,24 @@ package org.meveo.model.billing;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.catalog.Calendar;
-import org.meveo.model.catalog.RecurringChargeTemplate;
 import org.meveo.model.catalog.ChargeTemplate.ChargeMainTypeEnum;
+import org.meveo.model.catalog.RecurringChargeTemplate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * One shot charge as part of subscribed service
@@ -49,7 +50,8 @@ import org.meveo.model.catalog.ChargeTemplate.ChargeMainTypeEnum;
 @Entity
 @DiscriminatorValue("R")
 
-@NamedQueries({ @NamedQuery(name = "RecurringChargeInstance.listToRateByStatusAndDate", query = "SELECT c.id FROM RecurringChargeInstance c where c.status=:status and (c.nextChargeDate is null OR c.nextChargeDate<:maxNextChargeDate)"),
+@NamedQueries({
+        @NamedQuery(name = "RecurringChargeInstance.listToRateByStatusAndDate", query = "SELECT c.id FROM RecurringChargeInstance c where c.status=:status and (c.nextChargeDate is null OR c.nextChargeDate<:maxNextChargeDate)"),
         @NamedQuery(name = "RecurringChargeInstance.listToRateByStatusBCAndDate", query = "SELECT c.id FROM RecurringChargeInstance c where c.status=:status and (c.nextChargeDate is null OR c.nextChargeDate<:maxNextChargeDate) and c.userAccount.billingAccount.billingCycle in :billingCycles") })
 public class RecurringChargeInstance extends ChargeInstance {
 
@@ -104,7 +106,7 @@ public class RecurringChargeInstance extends ChargeInstance {
     /**
      * Apply charge in advance - at the beginning of the period. If false, charge will be applied at the end of the period
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "apply_in_advance")
     private Boolean applyInAdvance;
 
@@ -114,9 +116,9 @@ public class RecurringChargeInstance extends ChargeInstance {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "charge_to_date_on_termination")
     private Date chargeToDateOnTermination;
-    
+
     @Column(name = "anticipate_end_of_subscription")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean anticipateEndOfSubscription;
 
     public RecurringChargeInstance() {
@@ -206,14 +208,13 @@ public class RecurringChargeInstance extends ChargeInstance {
     public Date getChargedToDate() {
         return chargedToDate;
     }
-    
+
     /**
      * @return calculate the date to which charge was applied to.
      */
-	public Date calculateChargedToDate() {
-		return getChargedToDate() != null ? getChargedToDate()
-				: getApplyInAdvance() == true ? getNextChargeDate() : getChargeDate();
-	}
+    public Date calculateChargedToDate() {
+        return getChargedToDate() != null ? getChargedToDate() : getApplyInAdvance() == true ? getNextChargeDate() : getChargeDate();
+    }
 
     /**
      * @param chargedToDate The date to which charge was applied to.
@@ -312,18 +313,18 @@ public class RecurringChargeInstance extends ChargeInstance {
         this.chargeToDateOnTermination = chargeToDateOnTermination;
     }
 
-	/**
-	 * @return the anticipateEndOfSubscription
-	 */
-	public boolean isAnticipateEndOfSubscription() {
-		return anticipateEndOfSubscription;
-	}
+    /**
+     * @return the anticipateEndOfSubscription
+     */
+    public boolean isAnticipateEndOfSubscription() {
+        return anticipateEndOfSubscription;
+    }
 
-	/**
-	 * @param anticipateEndOfSubscription the anticipateEndOfSubscription to set
-	 */
-	public void setAnticipateEndOfSubscription(boolean anticipateEndOfSubscription) {
-		this.anticipateEndOfSubscription = anticipateEndOfSubscription;
-	}
-    
+    /**
+     * @param anticipateEndOfSubscription the anticipateEndOfSubscription to set
+     */
+    public void setAnticipateEndOfSubscription(boolean anticipateEndOfSubscription) {
+        this.anticipateEndOfSubscription = anticipateEndOfSubscription;
+    }
+
 }

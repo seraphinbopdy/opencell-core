@@ -20,28 +20,30 @@ package org.meveo.model.communication;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.descriptor.jdbc.IntegerJdbcType;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @ExportIdentifier({ "campaign" })
 @Table(name = "com_campaign", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "com_campaign_seq") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "com_campaign_seq"), @Parameter(name = "increment_size", value = "1") })
 public class Campaign extends BusinessEntity {
 
     private static final long serialVersionUID = -5865150907978275819L;
@@ -61,6 +63,7 @@ public class Campaign extends BusinessEntity {
     @Column(name = "end_date")
     private Date endDate;
 
+    @JdbcType(IntegerJdbcType.class)
     @Enumerated(value = EnumType.ORDINAL)
     @Column(name = "priority")
     private PriorityEnum priority;
@@ -73,7 +76,7 @@ public class Campaign extends BusinessEntity {
     @Size(max = 255)
     private String subMedia;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "use_any_media")
     private Boolean useAnyMedia;
 

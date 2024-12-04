@@ -21,14 +21,14 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.EntityManagerFactory;
-
 import org.dbunit.IDatabaseTester;
 import org.dbunit.JdbcDatabaseTester;
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.ext.oracle.OracleDataTypeFactory;
+
+import jakarta.persistence.EntityManagerFactory;
 
 public class BeforeDBTest {
 

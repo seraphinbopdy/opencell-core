@@ -29,9 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.el.FunctionMapper;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -77,6 +74,10 @@ import org.slf4j.LoggerFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+
+import jakarta.el.FunctionMapper;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
 
 /**
  * Provides custom functions for Meveo application. The following functions are provided:

@@ -18,24 +18,25 @@
 
 package org.meveo.model.payments;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import java.util.Map;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ISearchable;
 import org.meveo.model.crm.Provider;
 
-import java.util.Map;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Credit category
@@ -46,8 +47,7 @@ import java.util.Map;
 @Cacheable
 @ExportIdentifier({ "code" })
 @Table(name = "ar_credit_category", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_credit_category_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_credit_category_seq"), @Parameter(name = "increment_size", value = "1") })
 public class CreditCategory extends BusinessEntity implements ISearchable {
 
     private static final long serialVersionUID = 3517517101499066805L;
@@ -55,7 +55,7 @@ public class CreditCategory extends BusinessEntity implements ISearchable {
     /**
      * Translated descriptions in JSON format with language code as a key and translated description as a value
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 
@@ -68,26 +68,25 @@ public class CreditCategory extends BusinessEntity implements ISearchable {
     }
 
     public String getLocalizedDescription(String lang) {
-        if(descriptionI18n != null) {
+        if (descriptionI18n != null) {
             return descriptionI18n.getOrDefault(lang, this.description);
         } else {
             return this.description;
         }
     }
-    
-	/**
-	 * PaymentPlanPolicy associated to the entity
-	 */	
+
+    /**
+     * PaymentPlanPolicy associated to the entity
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id")
-    protected Provider provider; 
-    
-	
-	public Provider getProvider() {
-		return provider;
-	}
+    protected Provider provider;
 
-	public void setProvider(Provider provider) {
-		this.provider = provider;
-	}
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
 }

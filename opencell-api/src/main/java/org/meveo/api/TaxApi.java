@@ -40,10 +40,10 @@ import org.meveo.service.billing.impl.UntdidTaxationCategoryService;
 import org.meveo.service.billing.impl.UntdidVatexService;
 import org.meveo.service.catalog.impl.TaxService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;

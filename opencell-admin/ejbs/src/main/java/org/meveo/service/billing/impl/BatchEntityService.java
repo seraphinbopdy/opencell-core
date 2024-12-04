@@ -17,9 +17,25 @@
  */
 package org.meveo.service.billing.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
+import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.MassUpdaterJob;
 import org.meveo.admin.job.UpdateHugeEntityJob;
@@ -53,26 +69,12 @@ import org.meveo.service.communication.impl.EmailTemplateService;
 import org.meveo.service.communication.impl.InternationalSettingsService;
 import org.meveo.service.crm.impl.ProviderService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static java.util.Arrays.asList;
-import static java.util.Optional.ofNullable;
-import static org.apache.commons.collections4.ListUtils.partition;
-import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * A class for Batch entity persistence services.
@@ -122,8 +124,8 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     /**
      * Create the new batch entity
      *
-     * @param filters      the filters
-     * @param targetJob    the target job
+     * @param filters the filters
+     * @param targetJob the target job
      * @param targetEntity the target entity
      */
     @Deprecated()
@@ -141,8 +143,8 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     /**
      * Create the new batch entity
      *
-     * @param hugeEntity   the huge entity
-     * @param filters      the filters
+     * @param hugeEntity the huge entity
+     * @param filters the filters
      * @param targetEntity the target entity
      */
     public void create(HugeEntity hugeEntity, Map<String, Object> filters, String targetEntity) {
@@ -183,9 +185,9 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Process a batch entity
      *
      * @param jobExecutionResult job execution result
-     * @param jobInstance        job instance
-     * @param batchEntityId      batch entity id
-     * @param hugeEntityClass    huge entity class
+     * @param jobInstance job instance
+     * @param batchEntityId batch entity id
+     * @param hugeEntityClass huge entity class
      */
     private void processBatchEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, Long batchEntityId, Class hugeEntityClass) {
         BatchEntity batchEntity = findById(batchEntityId);
@@ -216,8 +218,8 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Update batch entity
      *
      * @param jobExecutionResult the job execution result
-     * @param jobInstance        the job instance
-     * @param batchEntity        the batch entity
+     * @param jobInstance the job instance
+     * @param batchEntity the batch entity
      */
     private void update(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity) {
         if (isRunningAsJobManager(jobExecutionResult)) {
@@ -279,16 +281,16 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Update a multiple Wallet operations to rerate for one batch entity
      *
      * @param jobExecutionResult job execution result
-     * @param jobInstance        job instance
-     * @param batchEntity        batch entity
-     * @param hugeEntityClass    huge entity class
+     * @param jobInstance job instance
+     * @param batchEntity batch entity
+     * @param hugeEntityClass huge entity class
      */
     private void checkAndUpdateHugeEntity(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
         executeMassUpdaterJob(jobExecutionResult, jobInstance, batchEntity, hugeEntityClass);
         if (isRunningAsJobManager(jobExecutionResult)) {
             update(jobExecutionResult, jobInstance, batchEntity);
             if (jobExecutionResult.getNbItemsCorrectlyProcessed() > 0) {
-                //Execute the email sending in an isolated transaction ==> if there is an exception, we don't position the batch in FAILURE status.
+                // Execute the email sending in an isolated transaction ==> if there is an exception, we don't position the batch in FAILURE status.
                 methodCallingUtils.callMethodInNewTx(() -> sendEmail(batchEntity, jobExecutionResult));
             }
         }
@@ -298,7 +300,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Add the default filter to batch filters
      *
      * @param defaultFilter the default filter
-     * @param filters       batch filters
+     * @param filters batch filters
      * @return all filters (new + default)
      */
     public Map<String, Object> addFilters(String defaultFilter, Map<String, Object> filters) {
@@ -327,9 +329,9 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Execute the mass updater job
      *
      * @param jobExecutionResult the job execution result
-     * @param jobInstance        the job instance
-     * @param batchEntity        the batch entity
-     * @param hugeEntityClass    huge entity class
+     * @param jobInstance the job instance
+     * @param batchEntity the batch entity
+     * @param hugeEntityClass huge entity class
      */
     private void executeMassUpdaterJob(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity, Class hugeEntityClass) {
         Long selectFetchSize = (Long) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_SELECT_FETCH_SIZE);
@@ -344,20 +346,18 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         String selectQuery = getSelectQuery(hugeEntityClass, batchEntity.getFilters(), defaultFilter, isCaseSensitive);
         String updateQuery = getUpdateQuery(jobExecutionResult, batchEntity, hugeEntityClass.getSimpleName());
 
-        massUpdaterJob.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunkSize, selectQuery, selectFetchSize, selectMaxResults,
-                false, isPessimisticUpdateLock, isUsingView, isOpenCursor);
+        massUpdaterJob.execute(jobExecutionResult, jobInstance, null, updateQuery, updateChunkSize, selectQuery, selectFetchSize, selectMaxResults, false, isPessimisticUpdateLock, isUsingView, isOpenCursor);
     }
 
     /**
      * Build the update query with the provided fields
      *
      * @param jobExecutionResult the job execution result
-     * @param batchEntity        the batch entity
-     * @param entityClassName    the entity class name
+     * @param batchEntity the batch entity
+     * @param entityClassName the entity class name
      */
     public String getUpdateQuery(JobExecutionResultImpl jobExecutionResult, BatchEntity batchEntity, String entityClassName) {
-        StringBuilder updateQuery = new StringBuilder("UPDATE ").append(entityClassName).append(" SET ")
-                .append("updated=").append(QueryBuilder.paramToString(new Date()));
+        StringBuilder updateQuery = new StringBuilder("UPDATE ").append(entityClassName).append(" SET ").append("updated=").append(QueryBuilder.paramToString(new Date()));
 
         if (batchEntity != null) {
             updateQuery.append(", reratingBatch.id=").append(batchEntity.getId());
@@ -374,8 +374,8 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Gets the select query
      *
      * @param hugeEntityClass the hug entity class
-     * @param filters         the filters
-     * @param defaultFilter   the default filter
+     * @param filters the filters
+     * @param defaultFilter the default filter
      * @param isCaseSensitive Indicates if the select query should use strict checking to compare two strings or not.
      * @return the select query
      */
@@ -393,7 +393,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     /**
      * Send Email to the creator
      *
-     * @param batchEntity        Batch entity
+     * @param batchEntity Batch entity
      * @param jobExecutionResult Job execution result
      */
     private void sendEmail(BatchEntity batchEntity, JobExecutionResultImpl jobExecutionResult) {
@@ -401,8 +401,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         if (batchEntity.isNotify() && emailTemplateWrapper != null && !StringUtils.isBlank(emailTemplateWrapper.getCode())) {
             try {
                 String emailTemplateCode = emailTemplateWrapper.getCode();
-                EmailTemplate emailTemplate = ofNullable(emailTemplateService.findByCode(emailTemplateCode))
-                        .orElseThrow(() -> new EntityDoesNotExistsException(EmailTemplate.class, emailTemplateCode));
+                EmailTemplate emailTemplate = ofNullable(emailTemplateService.findByCode(emailTemplateCode)).orElseThrow(() -> new EntityDoesNotExistsException(EmailTemplate.class, emailTemplateCode));
 
                 String from = DEFAULT_EMAIL_ADDRESS;
                 Provider provider = providerService.getProvider();
@@ -410,7 +409,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
                     from = provider.getEmail();
                 }
                 String username = batchEntity.getAuditable().getCreator();
-                User user = userService.findByUsername(username, false);
+                User user = userService.findByUsername(username, false, false);
                 if (user == null) {
                     log.warn("No user with username {} was found", username);
                     throw new BusinessException("No user with username " + username + " was found");
@@ -428,7 +427,6 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
                 String emailContent = internationalSettingsService.resolveEmailContent(emailTemplate, languageCode);
                 String htmlContent = internationalSettingsService.resolveHtmlContent(emailTemplate, languageCode);
 
-
                 Map<Object, Object> params = new HashMap<>();
                 params.put("batchEntityId", batchEntity.getId());
                 params.put("batchEntityStatus", batchEntity.getStatus());
@@ -442,7 +440,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
                 String contentHtml = StringUtils.isNotBlank(emailTemplate.getHtmlContent()) ? evaluateExpression(htmlContent, params, String.class) : "";
 
                 emailSender.send(from, asList(from), asList(to), subject, content, contentHtml);
-                //in the case of an exception, don't reject the batch entity and don't record an error or a warning but rather add a message in the reports.
+                // in the case of an exception, don't reject the batch entity and don't record an error or a warning but rather add a message in the reports.
             } catch (Exception e) {
                 jobExecutionResult.addReport("Warning : can not send email (" + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()) + ")");
             }
@@ -460,7 +458,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         String code = defaultCode;
         if (StringUtils.isBlank(code)) {
             CustomGenericEntityCode customGenericEntityCode = ofNullable(customGenericEntityCodeService.findByClass(BatchEntity.class.getName()))
-                    .orElseThrow(() -> new BusinessException("Generic code does not exist for the BatchEntity class."));
+                .orElseThrow(() -> new BusinessException("Generic code does not exist for the BatchEntity class."));
             code = serviceSingleton.getGenericCode(customGenericEntityCode);
         }
         return code;
@@ -470,7 +468,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Update entities through their ids
      *
      * @param updateQuery the update query which will be executed
-     * @param ids         the ids of entities to be updated
+     * @param ids the ids of entities to be updated
      * @return the number of updated Wallet operations
      */
     public int update(StringBuilder updateQuery, List<Long> ids) {
@@ -484,19 +482,17 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * @return true if the job will use the open cursor.
      */
     protected boolean isOpenCursor(JobExecutionResultImpl jobExecutionResult) {
-        return jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_OPEN_CURSOR) != null ?
-                (boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_OPEN_CURSOR) : false;
+        return jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_OPEN_CURSOR) != null ? (boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_OPEN_CURSOR) : false;
     }
 
     /**
      * Indicates if the select query should use strict checking to compare two strings or not.
      *
      * @param jobExecutionResult the job execution result
-     * @return true  if the select query should use strict checking to compare two strings or not.
+     * @return true if the select query should use strict checking to compare two strings or not.
      */
     protected boolean isCaseSensitive(JobExecutionResultImpl jobExecutionResult) {
-        return jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE) != null ?
-                (boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE) : false;
+        return jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE) != null ? (boolean) jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_IS_CASE_SENSITIVE) : false;
     }
 
     public List<BatchEntity> getBatchEntitiesToProcess(JobExecutionResultImpl jobExecutionResult) {
@@ -508,18 +504,15 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         if (batchEntities != null) {
             return new ArrayList<>(batchEntities);
         }
-        List<BatchEntity> batchsToProcess = getEntityManager().createQuery("FROM BatchEntity be WHERE be.status=:status AND be.targetJob=:targetJob", BatchEntity.class)
-                .setParameter("status", BatchEntityStatusEnum.OPEN)
-                .setParameter("targetJob", jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_TARGET_JOB))
-                .getResultList();
+        List<BatchEntity> batchsToProcess = getEntityManager().createQuery("FROM BatchEntity be WHERE be.status=:status AND be.targetJob=:targetJob", BatchEntity.class).setParameter("status", BatchEntityStatusEnum.OPEN)
+            .setParameter("targetJob", jobExecutionResult.getJobParam(UpdateHugeEntityJob.CF_TARGET_JOB)).getResultList();
         return batchsToProcess;
     }
 
     public List<IEntity> getDataToProcessByBatchEntity(BatchEntity batchEntity, Class hugeEntityClass, String defaultFilter, boolean isCaseSensitive) {
         String selectQuery = getSelectQuery(hugeEntityClass, batchEntity.getFilters(), defaultFilter, isCaseSensitive);
 
-        List<Long> ids = getEntityManager().createQuery(selectQuery, Long.class)
-                .getResultList();
+        List<Long> ids = getEntityManager().createQuery(selectQuery, Long.class).getResultList();
 
         if (ids.isEmpty()) {
             return Collections.emptyList();
@@ -532,9 +525,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         if (ids.isEmpty()) {
             return Collections.emptyList();
         }
-        return getEntityManager().createQuery("FROM " + hugeEntityClass.getSimpleName() + " WHERE id IN (:ids)", IEntity.class)
-                .setParameter("ids", ids)
-                .getResultList();
+        return getEntityManager().createQuery("FROM " + hugeEntityClass.getSimpleName() + " WHERE id IN (:ids)", IEntity.class).setParameter("ids", ids).getResultList();
     }
 
     public boolean checkAndUpdateHugeEntity(IEntity entity, JobExecutionResultImpl jobExecutionResult) {
@@ -560,7 +551,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Finalize Batch processing - (main usage from UpdateHugeEntityJobBean)
      *
      * @param jobExecutionResult the job execution result
-     * @param batchEntity        the batch entity
+     * @param batchEntity the batch entity
      */
     public void finalizeProcess(JobExecutionResultImpl jobExecutionResult, BatchEntity batchEntity) {
         log.info("finalizeProcess for batchEntity {} for the jobInstance {}", batchEntity.getId(), jobExecutionResult.getJobInstance().getId());
@@ -572,7 +563,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
      * Get batch entity ids to process
      *
      * @param jobExecutionResult the job execution result
-     * @param targetJob          the targetJob
+     * @param targetJob the targetJob
      * @return the batch entity ids to process
      */
     public Set<BatchEntity> getBatchEntities(JobExecutionResultImpl jobExecutionResult, String targetJob) {
@@ -585,12 +576,10 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         List<String> selectedBatchEntityCodes = batchEntityWrappers.stream().map(EntityReferenceWrapper::getCode).collect(Collectors.toList());
 
         String jobInstanceCode = jobExecutionResult.getJobInstance().getCode();
-        List<List<String>> listOfSubListCodes = partition(selectedBatchEntityCodes, SHORT_MAX_VALUE);
+        List<List<String>> listOfSubListCodes = ListUtils.partition(selectedBatchEntityCodes, SHORT_MAX_VALUE);
         listOfSubListCodes.forEach(sublist -> {
             if (sublist != null && !sublist.isEmpty()) {
-                List<BatchEntity> batchsToProcess = getEntityManager().createQuery("FROM BatchEntity be WHERE be.code in (:codes)", BatchEntity.class)
-                        .setParameter("codes", sublist)
-                        .getResultList();
+                List<BatchEntity> batchsToProcess = getEntityManager().createQuery("FROM BatchEntity be WHERE be.code in (:codes)", BatchEntity.class).setParameter("codes", sublist).getResultList();
 
                 for (BatchEntity batchEntity : batchsToProcess) {
                     if (targetJob.equals(batchEntity.getTargetJob()) && batchEntity.getStatus() == BatchEntityStatusEnum.OPEN) {
@@ -624,8 +613,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
         if (batchEntities != null) {
             return batchEntities.stream().map(BatchEntity::getId).collect(Collectors.toSet());
         } else {
-            return new HashSet<Long>(getEntityManager().createNamedQuery("BatchEntity.getOpenedBatchEntityIds")
-                    .setParameter("targetJob", targetJob).getResultList());
+            return new HashSet<Long>(getEntityManager().createNamedQuery("BatchEntity.getOpenedBatchEntityIds").setParameter("targetJob", targetJob).getResultList());
         }
     }
 }

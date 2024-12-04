@@ -21,11 +21,6 @@ package org.meveo.api.dto.billing;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.api.dto.AuditableEntityDto;
 import org.meveo.api.dto.BillingCycleDto;
 import org.meveo.api.dto.CustomFieldsDto;
@@ -36,6 +31,10 @@ import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.billing.ReferenceDateEnum;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class BillingRunDto.

@@ -9,12 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.commons.utils.ListUtils;
@@ -28,6 +22,12 @@ import org.meveo.service.audit.AuditFieldInfo;
 import org.meveo.service.audit.AuditableFieldConfiguration;
 import org.meveo.service.audit.AuditableFieldService;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 
 /**
  * A CRUD service class for AuditDataLog entity
@@ -154,7 +154,7 @@ public class AuditDataLogService extends PersistenceService<AuditDataLog> {
     }
 
     /**
-     * Create Audit Field logs and fire events if required
+     * Create Audit Field logs and fire events if required. Audit Field logs are created for entity fields annotated with @AuditTarget(history=true) and event are fired for fields annotated with @AuditTarget(notif=true)
      * 
      * @param auditDataLogs Audit data logs
      * @param auditableFieldsInfo Information about field to audit

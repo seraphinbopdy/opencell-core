@@ -19,8 +19,8 @@
 package org.meveo.model.notification;
 
 public enum NotificationHistoryStatusEnum {
-    SENT(1, "enum.notificationHistoryStatusEnum.SENT"), TO_RETRY(2, "enum.notificationHistoryStatusEnum.TO_RETRY"), FAILED(3,
-            "enum.notificationHistoryStatusEnum.FAILED"), CANCELED(4, "enum.notificationHistoryStatusEnum.CANCELED");
+    SENT(1, "enum.notificationHistoryStatusEnum.SENT"), TO_RETRY(2, "enum.notificationHistoryStatusEnum.TO_RETRY"), FAILED(3, "enum.notificationHistoryStatusEnum.FAILED"), CANCELED(4,
+            "enum.notificationHistoryStatusEnum.CANCELED");
 
     private Integer id;
     private String label;

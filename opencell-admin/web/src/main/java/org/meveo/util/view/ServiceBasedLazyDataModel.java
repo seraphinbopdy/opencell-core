@@ -18,14 +18,16 @@
 package org.meveo.util.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.model.IEntity;
 import org.meveo.service.base.local.IPersistenceService;
+import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
+import org.primefaces.model.SortMeta;
 import org.primefaces.model.SortOrder;
 
 public abstract class ServiceBasedLazyDataModel<T extends IEntity> extends LazyDataModel<T> {
@@ -37,17 +39,22 @@ public abstract class ServiceBasedLazyDataModel<T extends IEntity> extends LazyD
     private Integer rowIndex;
 
     @Override
-    public List<T> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> loadingFilters) {
+    public List<T> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
 
-        if (StringUtils.isBlank(sortField) && !StringUtils.isBlank(getDefaultSortImpl())) {
-            sortField = getDefaultSortImpl();
+        String sortField = getDefaultSortImpl();
+        SortOrder sortOrder = getDefaultSortOrderImpl();
+
+        if (sortBy != null && !sortBy.isEmpty()) {
+            for (SortMeta sortMeta : sortBy.values()) {
+                if (sortMeta.getOrder() != SortOrder.UNSORTED) {
+                    sortField = sortMeta.getField();
+                    sortOrder = sortMeta.getOrder();
+                    break;
+                }
+            }
         }
 
-        if ((sortOrder == null || sortOrder == SortOrder.UNSORTED) && getDefaultSortOrderImpl() != null) {
-            sortOrder = getDefaultSortOrderImpl();
-        }
-
-        PaginationConfiguration paginationConfig = new PaginationConfiguration(first, pageSize, getSearchCriteria(loadingFilters), null, getListFieldsToFetchImpl(), sortField, sortOrder);
+        PaginationConfiguration paginationConfig = new PaginationConfiguration(first, pageSize, getSearchCriteria(extractFilters(filterBy)), null, getListFieldsToFetchImpl(), sortField, sortOrder);
 
         if (first == 0) {
             setRowCount(countRecords(paginationConfig));
@@ -61,13 +68,38 @@ public abstract class ServiceBasedLazyDataModel<T extends IEntity> extends LazyD
     }
 
     @Override
+    public int count(Map<String, FilterMeta> filterBy) {
+        PaginationConfiguration paginationConfig = new PaginationConfiguration(getSearchCriteria(extractFilters(filterBy)));
+
+        return countRecords(paginationConfig);
+    }
+
+    /**
+     * Simplify filters into a simple map of field=value pairs
+     * 
+     * @param filterBy Filtering meta information
+     * @return A map of field=value pairs
+     */
+    public static Map<String, Object> extractFilters(Map<String, FilterMeta> filterBy) {
+
+        // Convert a map of FilterMeta to a map of field=value pairs
+        Map<String, Object> filters = new HashMap<>();
+        for (Map.Entry<String, FilterMeta> filter : filterBy.entrySet()) {
+            FilterMeta filterMeta = filter.getValue();
+            filters.put(filter.getKey(), filterMeta.getFilterValue());
+        }
+
+        return filters;
+    }
+
+    @Override
     public T getRowData(String rowKey) {
         return getPersistenceServiceImpl().findById(Long.valueOf(rowKey));
     }
 
     @Override
-    public Object getRowKey(T object) {
-        return object.getId();
+    public String getRowKey(T object) {
+        return object.getId().toString();
     }
 
     @Override
@@ -135,21 +167,19 @@ public abstract class ServiceBasedLazyDataModel<T extends IEntity> extends LazyD
     }
 
     /**
-     * Get search criteria for data searching.&lt;br/&gt; Search criteria is a map with filter criteria name as a key and value as a value. &lt;br/&gt; Criteria name consist of
-     * [&lt;condition&gt; ]&lt;field name&gt; (e.g. "like firstName") where &lt;condition&gt; is a condition to apply to field value comparison and &lt;field name&gt; is an entity
-     * attribute name.
+     * Get search criteria for data searching.&lt;br/&gt; Search criteria is a map with filter criteria name as a key and value as a value. &lt;br/&gt; Criteria name consist of [&lt;condition&gt; ]&lt;field name&gt;
+     * (e.g. "like firstName") where &lt;condition&gt; is a condition to apply to field value comparison and &lt;field name&gt; is an entity attribute name.
      *
-     * @param filters the filters
+     * @param filterBy the filters
      * @return the search criteria
      */
-    protected Map<String, Object> getSearchCriteria(Map<String, Object> filters) {
+    protected Map<String, Object> getSearchCriteria(Map<String, Object> filterBy) {
         return getSearchCriteria();
     }
 
     /**
-     * Get search criteria for data searching.&lt;br/&gt; Search criteria is a map with filter criteria name as a key and value as a value. &lt;br/&gt; Criteria name consist of
-     * [&lt;condition&gt; ]&lt;field name&gt; (e.g. "like firstName") where &lt;condition&gt; is a condition to apply to field value comparison and &lt;field name&gt; is an entity
-     * attribute name.
+     * Get search criteria for data searching.&lt;br/&gt; Search criteria is a map with filter criteria name as a key and value as a value. &lt;br/&gt; Criteria name consist of [&lt;condition&gt; ]&lt;field name&gt;
+     * (e.g. "like firstName") where &lt;condition&gt; is a condition to apply to field value comparison and &lt;field name&gt; is an entity attribute name.
      * 
      * @return Map of search criteria
      */

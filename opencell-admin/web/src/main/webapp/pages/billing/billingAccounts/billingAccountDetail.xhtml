@@ -3,7 +3,6 @@
     xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:hftl="http://hftl.org" xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
     xmlns:o="http://omnifaces.org/ui" template="/layout/template.xhtml" xmlns:p="http://primefaces.org/ui">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView" listener="#{billingAccountBean.preRenderView}" />
 
@@ -14,7 +13,6 @@
             <f:viewParam name="mainTab" value="#{billingAccountBean.activeMainTab}" />
             <f:viewParam name="tab" value="#{billingAccountBean.activeTab}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
         <h:form id="crumbmenuForm">
@@ -261,7 +259,7 @@
                                                 <hftl:column label="#{messages['discountPlanItem.startDate']}" field="startDate" isDate="true" />
                                                 <hftl:column label="#{messages['discountPlanItem.endDate']}" field="endDate" isDate="true" />
                                                 <p:column style="width: 5%">
-                                                    <p:commandButton icon="ui-icon-trash" update=":#{p:component('discountPanel')}"
+                                                    <p:commandButton icon="pi pi-trash" update="@([id$=discountPanel])"
                                                         action="#{billingAccountBean.deleteDiscountPlanInstance(entity)}" process="@this"></p:commandButton>
                                                 </p:column>
                                             </p:dataTable>
@@ -298,7 +296,7 @@
                                                 <p:inputText id="email_select" rendered="#{billingAccountBean.edit}"
                                                     value="#{billingAccountBean.entity.contactInformationNullSafe.email}" size="20" maxlength="100"
                                                     converter="nullableStringConverter" required="#{billingAccountBean.entity.electronicBilling == true}">
-                                                    <o:validator validatorId="javax.faces.RegularExpression" pattern="([^.@]+)(\.[^.@]+)*@([^.@]+\.)+([^.@]+)"
+                                                    <o:validator validatorId="jakarta.faces.RegularExpression" pattern="([^.@]+)(\.[^.@]+)*@([^.@]+\.)+([^.@]+)"
                                                         message="#{messages['validator.email.invalid']}" />
                                                 </p:inputText>
                                                 <h:outputText rendered="#{!billingAccountBean.edit}" id="emailText"
@@ -346,7 +344,7 @@
                                             disabled="#{billingAccountBean.entity.status.toString() != 'TERMINATED' and entity.status.toString() != 'CANCELLED'}" />
                                         <p:button outcome="addNewUserAccountAction" value="#{messages['billingAccount.addUserAccount']}"
                                             disabled="#{billingAccountBean.entity.status.toString() != 'ACTIVE'}">
-                                            <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                                            <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                                         </p:button>
                                         <p:commandButton action="#{billingAccountBean.generateProformaInvoice()}" value="#{messages['account.generateProformaInvoice']}"
                                             immediate="true" disabled="#{billingAccountBean.entity.status.toString() != 'ACTIVE'}" ajax="false" />
@@ -445,7 +443,7 @@
                                             <f:param name="adjustedInvoiceIdParam" value="#{entity.id}" />
                                             <f:param name="objectId" value="#{obj.id}" />
                                             <f:param name="edit" value="true" />
-                                            <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                                            <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                                             <f:param name="detailedParam" value="#{obj.detailedInvoice}" />
                                         </h:link>
                                     </p:column>
@@ -466,7 +464,7 @@
                 <hftl:formField label="#{messages['serviceInstance.terminationDate']}" field="terminationDate" required="true" edit="true" componentWidth="25" />
                 <hftl:formField label="Motifs " field="terminationReason" valueLabelField="descriptionOrCode" required="true" listBean="#{subscriptionTerminationReasonBean}"
                     styleClass="clearLeft" />
-                <!-- update=":#{p:component('formBillingAccountPanel')}" -->
+                <!-- update="@([id$=formBillingAccountPanel])" -->
                 <p:panel styleClass="action-buttons">
                     <p:commandButton action="#{billingAccountBean.terminateAccount()}" value="#{messages['button.terminateButton']}"
                         oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlg_billingAccountTerminationPopup').hide()" update="@form">
@@ -488,7 +486,7 @@
                         <hftl:formField label="#{messages['discountPlanItem.durationUnit']}" field="durationUnit" />
                         <p:panel styleClass="action-buttons">
                             <p:commandButton action="#{billingAccountBean.instantiateDiscountPlan()}" value="#{messages['button.instanciateButton']}"
-                                update=":#{p:component('discountPanel')}" oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlg_instantiateDiscountPlanDialog').hide()">
+                                update="@([id$=discountPanel])" oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlg_instantiateDiscountPlanDialog').hide()">
     								<f:param name="billingAccountId" value="#{billingAccountBean.objectId}" />
                             </p:commandButton>
                             <p:commandButton immediate="true" onclick="PF('dlg_instantiateDiscountPlanDialog').hide()" type="button" value="#{messages['management.close']}" />

@@ -20,11 +20,10 @@ package org.meveo.api.dto.sequence;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Pattern;
-
 import org.meveo.model.sequence.GenericSequence;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * Sequence value DTO representation.

@@ -9,7 +9,7 @@ import org.meveo.apiv2.accounts.resource.CustomerV2Resource;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.crm.Customer;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class CustomerV2ResourceImpl extends BaseRs implements CustomerV2Resource {
     

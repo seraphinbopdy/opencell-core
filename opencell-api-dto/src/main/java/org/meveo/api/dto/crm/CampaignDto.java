@@ -19,6 +19,7 @@
 package org.meveo.api.dto.crm;
 
 import java.util.Date;
+
 import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.model.communication.Campaign;
 import org.meveo.model.communication.CampaignStatusEnum;

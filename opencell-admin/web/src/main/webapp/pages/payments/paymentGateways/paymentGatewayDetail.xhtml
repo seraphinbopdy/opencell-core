@@ -6,11 +6,9 @@
 	xmlns:hftl="http://hftl.org"
 	template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{paymentGatewayBean.objectId}" />
         </f:metadata>
-    </ui:define>
 
 	<ui:define name="body">
 	    <p:importEnum type="org.meveo.model.payments.PaymentGatewayTypeEnum" var="PaymentGatewayTypeEnum" />
@@ -93,8 +91,8 @@
                                 <h:outputText value="#{pgRumSeq.genericSequence.currentSequenceNb}" />
                             </p:column>
                             <p:column width="60px;" headerText="#{messages['commons.actions']}">
-                                <p:commandButton action="#{paymentGatewayBean.selectRumSequence(pgRumSeq)}" update=":formPaymentGateway:tabView:rumSequenceDetails" icon="ui-icon-document" immediate="true" />
-                                <p:commandButton action="#{paymentGatewayBean.deleteRumSequence(pgRumSeq)}" icon="ui-icon-trash" update="@form" />
+                                <p:commandButton action="#{paymentGatewayBean.selectRumSequence(pgRumSeq)}" update=":formPaymentGateway:tabView:rumSequenceDetails" icon="pi pi-file-edit" immediate="true" />
+                                <p:commandButton action="#{paymentGatewayBean.deleteRumSequence(pgRumSeq)}" icon="pi pi-trash" update="@form" />
                             </p:column>
                         </p:dataTable>
                         <p:commandButton rendered="#{paymentGatewayBean.entity.rumSequence == null}" value="#{messages['commons.addNew']}" update=":formPaymentGateway:tabView:rumSequenceDetails" action="#{paymentGatewayBean.newRumSequence}">

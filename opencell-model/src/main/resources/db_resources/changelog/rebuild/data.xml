@@ -9813,6 +9813,66 @@
             <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'SAL')" />
             <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '701000000')" />
 		</insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="PAY_ADV" />
+            <column name="description" value="Payment account operation to match a call for advance payment. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="CREDIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="CLOSED_ADV" />
+            <column name="description" value="Payment account operation to match a call for advance payment that has been closed while still having unmatched amount. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="CREDIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="REJ_ADV" />
+            <column name="description" value="Dummy payment rejection account operation to match and negate the payment account operation (PAY_ADV) for call for advance payment. Doesn’t export to accounting entries." />
+            <column name="occ_category" value="DEBIT" />
+            <column name="manual_creation_enabled" value="1"/>
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'BAN')" />
+        </insert>        
+        <insert tableName="ar_occ_template" >
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="PPL_INSTALLMENT" />
+            <column name="description" value="Payment plan Installment" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="occ_category" value="DEBIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <column name="manual_creation_enabled" valueNumeric="0" />
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="PPL_CREATION" />
+            <column name="description" value="PPL_CREATION" />
+            <column name="accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '411000000')" />
+            <column name="occ_category" value="CREDIT" />
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')" />
+            <column name="account_code_client_side" value="null" />
+            <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '416000000')" />
+            <column name="accounting_scheme_id" valueComputed="(SELECT id FROM ar_accounting_scheme WHERE code = 'Dual entry scheme')" />
+        </insert>        
+        
         <insert tableName="billing_invoice_type">
            <column name="id" valueNumeric="-5" />
            <column name="version" valueNumeric="0" />
@@ -13815,6 +13875,44 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="description" value="Allow past delivery dates on orders"/>
             <column name="description_i18n" value='{"FRA":"Autoriser les dates de livraison dans le passé pour les commandes","ENG":"Allow past delivery dates on orders"}'/>
         </insert>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="CallForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="allowUsingUnpaidAdvance"/>
+            <column name="description" value="If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."/>
+            <column name="description_i18n" value='{"FRA":"Si ce paramètre est activé, alors Opencell n’attendra pas qu’un appel acompte validé soit effectivement payé pour l’utiliser sur une facture.
+Habituellement, ce comportement n’est souhaitable que si vous ne gérez pas la balance client dans Opencell.","ENG":"If this setting is set, then Opencell will not wait for a validated call for advance payment to be actually paid to use it on invoice.
+Usually, you’ll want that only if you donc manage customer balance in Opencell."}'/>
+        </insert>
+
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="CallForAdvancePayment"/>
+            <column name="property_group" value="callForAdvancePayment"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="autoCloseAdvanceAfterInvoiceValidation"/>
+            <column name="description" value="Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.
+Meaning that advances won’t be available for further invoices."/>
+            <column name="description_i18n">
+                <![CDATA[{
+    "FRA": "Les appels d’acompte liés à la facture seront automatiquement closes quand la facture est validée.Cela signifie que les acomptes ne seront pas disponibles pour de futures factures.",
+    "ENG": "Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.Meaning that advances won’t be available for further invoices."
+}]]>
+            </column>
+        </insert>        
 	</changeSet>
 
     <changeSet id="rebuild-customer-balance" author="zelmeliani">
@@ -13871,114 +13969,6 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		</insert>
 	</changeSet>
 
-	<changeSet id="INTRD-22954_20240521" author="ZBariki">
-		<insert tableName="meveo_script_instance">
-			<column name="id" valueSequenceNext="meveo_script_instance_seq" />
-			<column name="code" value="org.meveo.service.script.ApplyChargeScript" />
-			<column name="script">
-				<![CDATA[package org.meveo.service.script;
-				public class ApplyChargeScript extends ApplyChargePaymentScript {}]]>
-			</column>
-			<column name="created" valueDate="${db.current.time}" />
-			<column name="creator" value="applicationInitializer" />
-			<column name="version" valueNumeric="0" />
-			<column name="src_type" value="JAVA" />
-			<column name="description" value="Applies a charge to a subscription of the billing account"/>
-			<column name="description_i18n">
-				<![CDATA[{"FRA":"<b> Applique un frais à un abonnement du compte de facturation. </b><p>Vous devrez sélectionner une charge exceptionnelle (type “autre”) à appliquer, avec la possibilité de remplacer le montant (cela générera une erreur si la charge ne permettent pas la surcharge du montant) et le libellé.</p><p>Nous devrons sélectionner un abonnement actif auquel appliquer le frais. Par défaut, nous utiliserons l&apos;abonnement actif le plus récent facturé sur les factures impayées. Vous pouvez fournir un filtre supplémentaire pour affiner la liste des abonnements. Ce filtre est en fait une expression qui doit s&apos;évaluée en une chaîne qui sera comparée au code des abonnements dans la portée de recherche d&apos;abonnement, à l&apos;aide de l&apos;opérateur fourni. L’expression aura accès au rejet de paiement, au paiement, aux entités du périmètre (liste des factures, compte de facturation, compte client) et à la liste des abonnements dans le périmètre. Si aucun abonnement actif n&apos;est trouvé, le script échouera et une erreur sera remontée.</p>", "ENG":"<b>Applies a charge to a subscription of the billing account.</b><p>You will have to select a one shot charge (type “other”) to apply, with the ability to override the amount (will raise an error if the charge doesn’t allow amount override) and label.</p> <p>We will need to select an active subscription to apply the charge to. By default, we will use the most recent active subscription invoiced on the unpaid invoices. You can provide an additional filter to narrow down the list of subscriptions. This filter is actually an expression that must evaluate to a string that will be compared to the code of subscriptions in the subscription search scope, using the provided operator. Expression will have access to the rejected payment, the payment, and the scope entities (list of invoices, billing account, customer account) and the list of subscriptions in the scope. If no active subscription is found, the script will fail and an error will be raised.</p>"}]]>
-			</column>
-			<column name="script_instance_cat_id" valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')" />
-		</insert>
-
-		<insert tableName="meveo_script_parameter">
-			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="code" value="chargeTemplate" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
-			<column name="description_i18n" value='{"FRA":"Charge à appliquer","ENG":"Charge to apply"}'/>
-			<column name="class_name" value="org.meveo.model.catalog.OneShotChargeTemplate" />
-			<column name="mandatory" valueNumeric="1" />
-			<column name="filters">
-				<![CDATA[{"oneShotChargeTemplateType" : "OTHER", "status": "ACTIVE"}]]>
-			</column>
-		</insert>
-		<insert tableName="meveo_script_parameter">
-			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="code" value="amountOverride" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
-			<column name="description_i18n" value='{"FRA":"Surcharge du montant","ENG":"Amount override"}'/>
-			<column name="class_name" value="java.math.BigDecimal" />
-			<column name="mandatory" valueNumeric="0" />
-		</insert>
-		<insert tableName="meveo_script_parameter">
-			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="code" value="descriptionOverride" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
-			<column name="description_i18n" value='{"FRA":"Surcharge du libellé de la charge","ENG":"Charge label override"}'/>
-			<column name="mandatory" valueNumeric="0" />
-			<column name="class_name" value="java.lang.String" />
-		</insert>
-		<insert tableName="meveo_script_parameter">
-			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="code" value="subscriptionSearchScope" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
-			<column name="description_i18n" value='{"FRA":"Périmètre de la recherche de souscription","ENG":"Subscription search scope"}'/>
-			<column name="mandatory" valueNumeric="0" />
-			<column name="class_name" value="java.lang.String" />
-			<column name="collection" valueNumeric="0" />
-			<column name="allowed_values" value="invoices|billing accounts|customer account" />
-			<column name="default_value" value="invoices" />
-			<column name="values_separator" value="\|" />
-		</insert>
-		<insert tableName="meveo_script_parameter">
-			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="code" value="subscriptionSelection" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
-			<column name="description_i18n" value='{"FRA":"Selection de la souscription","ENG":"Subscription selection"}'/>
-			<column name="mandatory" valueNumeric="0" />
-			<column name="class_name" value="java.lang.String" />
-			<column name="collection" valueNumeric="0" />
-			<column name="allowed_values" value="oldest|newest" />
-			<column name="default_value" value="newest" />
-			<column name="values_separator" value="\|" />
-		</insert>
-		<insert tableName="meveo_script_parameter">
-			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="code" value="subscriptionFilter" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
-			<column name="description_i18n" value='{"FRA":"Filtre code de souscription","ENG":"Subscription code filter"}'/>
-			<column name="mandatory" valueNumeric="0" />
-			<column name="class_name" value="java.lang.String" />
-		</insert>
-		<insert tableName="meveo_script_parameter">
-			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="code" value="subscriptionOperator" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
-			<column name="description_i18n" value='{"FRA":"Opérateur du filtre de souscription (insensible à la casse)","ENG":"Subscription filter operator (case insensitive)"}'/>
-			<column name="mandatory" valueNumeric="0" />
-			<column name="class_name" value="java.lang.String" />
-			<column name="collection" valueNumeric="0" />
-			<column name="allowed_values" value="equals|begins with|contains|ends with" />
-			<column name="default_value" value="equals" />
-			<column name="values_separator" value="\|" />
-		</insert>
-		<insert tableName="meveo_script_parameter">
-			<column name="id" valueSequenceNext="meveo_script_parameter_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="code" value="generateRTs" />
-			<column name="script_instance_id" valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.ApplyChargeScript')" />
-			<column name="description_i18n" value='{"FRA":"Générer l’élément valorisé (de manière à ce que la charge soit immédiatement facturable) ?","ENG":"Generate rated item (so the charge will be ready for invoicing)?"}'/>
-			<column name="mandatory" valueNumeric="0" />
-			<column name="class_name" value="java.lang.Boolean" />
-			<column name="default_value" value="true" />
-		</insert>
-	</changeSet>
     <changeSet id="INTRD-23392_20240604_data" author="TarikFA.">
         <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq" />
@@ -14019,9 +14009,9 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
             <column name="description" value="taking input csv file and instantiating a discount on existants subscription or billing accounts called by a job"/>
         </insert>
     </changeSet>
+
     
-    
-    <changeSet id="#INTRD-24779_MASS_REOPEN_EDR_ZERO" author="a.rouaguebe">
+    <changeSet id="#INTRD-24779_MASS_REOPEN_EDR_ZERO_data" author="a.rouaguebe">
         <insert tableName="com_message_template">
             <column name="media" value="EMAIL" />
             <column name="id" valueSequenceNext="com_msg_tmpl_seq" />
@@ -14130,142 +14120,6 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.RetryPaymentScript')"/>
 		</insert>
 	</changeSet>
-	
-	<changeSet id="INTRD-24052_ReRateV2_filter_data" author="a.rouaguebe">
-
-	<insert tableName="crm_custom_field_tmpl">
-		<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-		<column name="version" valueNumeric="0" />
-		<column name="disabled" valueNumeric="0" />
-		<column name="created" valueDate="${db.current.time}" />
-		<column name="code" value="ReRatingJobBean_reratingTarget"/>
-		<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
-		<column name="description" value="Rerating Target"/>
-		<column name="field_type" value="LIST"/>
-		<column name="storage_type" value="SINGLE"/>
-		<column name="default_value" value="ALL"/>
-		<column name="value_required" value="0"/>
-		<column name="creator" value="applicationInitializer"/>
-		<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:4"/>
-	</insert>
-
-	<insert tableName="crm_custom_field_tmpl_val">
-		<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
-		<column name="listvalues" value="ALL" />
-		<column name="listvalues_key" value="ALL" />
-	</insert>
-	<insert tableName="crm_custom_field_tmpl_val">
-		<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
-		<column name="listvalues" value="NO_BATCH" />
-		<column name="listvalues_key" value="NO BATCH" />
-	</insert>
-	<insert tableName="crm_custom_field_tmpl_val">
-		<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
-		<column name="listvalues" value="WITH_BATCH" />
-		<column name="listvalues_key" value="WITH BATCH" />
-	</insert>
-
-	<insert tableName="crm_custom_field_tmpl">
-		<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-		<column name="version" valueNumeric="0" />
-		<column name="disabled" valueNumeric="0" />
-		<column name="created" valueDate="${db.current.time}" />
-		<column name="code" value="ReRatingJobBean_targetBatches"/>
-		<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
-		<column name="description" value="Target batches"/>
-		<column name="field_type" value="ENTITY"/>
-		<column name="storage_type" value="LIST"/>
-		<column name="value_required" value="0"/>
-		<column name="entity_clazz" value="org.meveo.model.billing.BatchEntity" />
-		<column name="creator" value="applicationInitializer"/>
-		<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
-	</insert>
-</changeSet>
-	<changeSet id="INTRD-24052_ReRateV2_filter_data" author="a.rouaguebe">
-
-		<insert tableName="crm_custom_field_tmpl">
-			<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="disabled" valueNumeric="0" />
-			<column name="created" valueDate="${db.current.time}" />
-			<column name="code" value="ReRatingJobBean_reratingTarget"/>
-			<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
-			<column name="description" value="Rerating Target"/>
-			<column name="field_type" value="LIST"/>
-			<column name="storage_type" value="SINGLE"/>
-			<column name="default_value" value="ALL"/>
-			<column name="value_required" value="0"/>
-			<column name="creator" value="applicationInitializer"/>
-			<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:4"/>
-		</insert>
-
-		<insert tableName="crm_custom_field_tmpl_val">
-			<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
-			<column name="listvalues" value="ALL" />
-			<column name="listvalues_key" value="ALL" />
-		</insert>
-		<insert tableName="crm_custom_field_tmpl_val">
-			<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
-			<column name="listvalues" value="NO_BATCH" />
-			<column name="listvalues_key" value="NO BATCH" />
-		</insert>
-		<insert tableName="crm_custom_field_tmpl_val">
-			<column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
-			<column name="listvalues" value="WITH_BATCH" />
-			<column name="listvalues_key" value="WITH BATCH" />
-		</insert>
-
-		<insert tableName="crm_custom_field_tmpl">
-			<column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-			<column name="version" valueNumeric="0" />
-			<column name="disabled" valueNumeric="0" />
-			<column name="created" valueDate="${db.current.time}" />
-			<column name="code" value="ReRatingJobBean_targetBatches"/>
-			<column name="applies_to" value="JobInstance_RatingCancellationJob"/>
-			<column name="description" value="Target batches"/>
-			<column name="field_type" value="ENTITY"/>
-			<column name="storage_type" value="LIST"/>
-			<column name="value_required" value="0"/>
-			<column name="entity_clazz" value="org.meveo.model.billing.BatchEntity" />
-			<column name="creator" value="applicationInitializer"/>
-			<column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
-		</insert>
-	</changeSet>
-
-	<changeSet id="#INTRD-21018_20240723" author="ZakariaB">
-		<insert tableName="meveo_script_instance">
-			<column name="id" valueSequenceNext="meveo_script_instance_seq"/>
-			<column name="code" value="org.meveo.service.script.EnterLitigation"/>
-			<column name="script">
-				<![CDATA[package org.meveo.service.script;
- public class EnterLitigation extends EnterLitigationScript {}]]>
-			</column>
-			<column name="created" valueDate="${db.current.time}"/>
-			<column name="creator" value="applicationInitializer"/>
-			<column name="version" valueNumeric="0"/>
-			<column name="src_type" value="JAVA"/>
-			<column name="description" value="This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason."/>
-			<column name="description_i18n">
-				<![CDATA[{"ENG":"This action will unconditionally send the invoices linked to the payment rejection to litigation, using the provided reason.", "FRA":"Cette action passera inconditionnellement les factures liées au rejet de paiement en litige, avec le motif fourni."}]]>
-			</column>
-			<column name="script_instance_cat_id"
-					valueComputed="(SELECT id FROM meveo_script_instance_cat WHERE code='PAYMENT_REJECTION_ACTIONS')"/>
-		</insert>
-
-		<insert tableName="meveo_script_parameter">
-			<column name="id" valueSequenceNext="meveo_script_parameter_seq"/>
-			<column name="version" valueNumeric="0"/>
-			<column name="code" value="litigationReason"/>
-			<column name="description_i18n" value='{"FRA":"Motif de mise en litige","ENG":"Litigation reason"}'/>
-			<column name="mandatory" valueNumeric="1"/>
-			<column name="class_name" value="java.lang.String"/>
-			<column name="default_value" value=""/>
-			<column name="values_separator" value="\|"/>
-			<column name="collection" valueNumeric="0"/>
-			<column name="script_instance_id"
-					valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.EnterLitigation')"/>
-		</insert>
-	</changeSet>
 
 	<changeSet id="#INTRD-24543_reopenEdrZeroJob-rebuild" author="a.rouaguebe">
 		<insert tableName="meveo_job_instance">
@@ -14336,317 +14190,6 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 		</insert>
 	</changeSet>
 	
-	<changeSet id="#INTRD-24624_explicit_job_cf" author="a.rouaguebe">
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="nbRuns"/>
-            <column name="applies_to" value="JobInstance_PDFInvoiceGenerationJob"/>
-            <column name="description" value="Number of parallel execution"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="-1"/>
-            <column name="value_required" value="0"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:0" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="waitingMillis"/>
-            <column name="applies_to" value="JobInstance_PDFInvoiceGenerationJob"/>
-            <column name="description" value="Waiting before next launch (ms)"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="-1"/>
-            <column name="value_required" value="0"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:1" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="nbPublishers"/>
-            <column name="applies_to" value="JobInstance_PDFInvoiceGenerationJob"/>
-            <column name="description" value="Number of data publishing threads"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="value_required" value="0"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:2" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="batchSize"/>
-            <column name="applies_to" value="JobInstance_PDFInvoiceGenerationJob"/>
-            <column name="description" value="Batch size for optimistic processing"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="100"/>
-            <column name="value_required" value="1"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:3" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="invoicesToProcess"/>
-            <column name="applies_to" value="JobInstance_PDFInvoiceGenerationJob"/>
-            <column name="description" value="Invoices To Process"/>
-            <column name="field_type" value="LIST"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="FinalOnly"/>
-            <column name="value_required" value="1"/>
-            <column name="gui_position" value="tab:Configuration:0;field:4" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'invoicesToProcess' and applies_to = 'JobInstance_PDFInvoiceGenerationJob') "/>
-            <column name="listvalues" value="All"/>
-            <column name="listvalues_key" value="All"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'invoicesToProcess' and applies_to = 'JobInstance_PDFInvoiceGenerationJob') "/>
-            <column name="listvalues" value="DraftOnly"/>
-            <column name="listvalues_key" value="DraftOnly"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'invoicesToProcess' and applies_to = 'JobInstance_PDFInvoiceGenerationJob') "/>
-            <column name="listvalues" value="FinalOnly"/>
-            <column name="listvalues_key" value="FinalOnly"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="nbRuns"/>
-            <column name="applies_to" value="JobInstance_XMLInvoiceGenerationJob"/>
-            <column name="description" value="Number of parallel execution"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="-1"/>
-            <column name="value_required" value="0"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:0" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="waitingMillis"/>
-            <column name="applies_to" value="JobInstance_XMLInvoiceGenerationJob"/>
-            <column name="description" value="Waiting before next launch (ms)"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="-1"/>
-            <column name="value_required" value="0"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:1" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="nbPublishers"/>
-            <column name="applies_to" value="JobInstance_XMLInvoiceGenerationJob"/>
-            <column name="description" value="Number of data publishing threads"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="value_required" value="0"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:2" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="batchSize"/>
-            <column name="applies_to" value="JobInstance_XMLInvoiceGenerationJob"/>
-            <column name="description" value="Batch size for optimistic processing"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="0"/>
-            <column name="value_required" value="1"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:3" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="invoicesToProcess"/>
-            <column name="applies_to" value="JobInstance_XMLInvoiceGenerationJob"/>
-            <column name="description" value="Invoices To Process"/>
-            <column name="field_type" value="CHECKBOX_LIST"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="VALIDATED"/>
-            <column name="value_required" value="0"/>
-            <column name="gui_position" value="tab:Configuration:0;field:4" />
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'invoicesToProcess' and applies_to = 'JobInstance_XMLInvoiceGenerationJob') "/>
-            <column name="listvalues" value="New"/>
-            <column name="listvalues_key" value="NEW"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'invoicesToProcess' and applies_to = 'JobInstance_XMLInvoiceGenerationJob') "/>
-            <column name="listvalues" value="Draft"/>
-            <column name="listvalues_key" value="DRAFT"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'invoicesToProcess' and applies_to = 'JobInstance_XMLInvoiceGenerationJob') "/>
-            <column name="listvalues" value="invoiceStatusEnum.canceled"/>
-            <column name="listvalues_key" value="CANCELED"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'invoicesToProcess' and applies_to = 'JobInstance_XMLInvoiceGenerationJob') "/>
-            <column name="listvalues" value="Validated"/>
-            <column name="listvalues_key" value="VALIDATED"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'invoicesToProcess' and applies_to = 'JobInstance_XMLInvoiceGenerationJob') "/>
-            <column name="listvalues" value="Suspect"/>
-            <column name="listvalues_key" value="SUSPECT"/>
-        </insert>
-
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'invoicesToProcess' and applies_to = 'JobInstance_XMLInvoiceGenerationJob') "/>
-            <column name="listvalues" value="Rejected"/>
-            <column name="listvalues_key" value="REJECTED"/>
-        </insert>
-    </changeSet>
-	
-	<changeSet id="#INTRD-25415_20240919_rebuild" author="zelmeliani">
-	    <!-- BillingRun - Automatic action on reject -->
-	    <insert tableName="crm_custom_field_tmpl">
-	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-	        <column name="version" valueNumeric="0" />
-	        <column name="disabled" valueNumeric="0" />
-	        <column name="created" valueDate="${db.current.time}" />
-	        <column name="code" value="BillingRunJob_rejectAutoAction"/>
-	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
-	        <column name="description" value="Automatic action on reject"/>
-	        <column name="field_type" value="LIST"/>
-	        <column name="storage_type" value="SINGLE"/>
-	        <column name="value_required" value="0"/>
-	        <column name="creator" value="applicationInitializer"/>
-	        <column name="gui_position" value="tab:Configuration:0;field:4"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="CANCEL"/>
-	        <column name="listvalues_key" value="1"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="MOVE"/>
-	        <column name="listvalues_key" value="2"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="MANUAL_ACTION"/>
-	        <column name="listvalues_key" value="3"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="AUTOMATIC_VALIDATION"/>
-	        <column name="listvalues_key" value="4"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="CANCEL_RT"/>
-	        <column name="listvalues_key" value="5"/>
-	    </insert>
-	    <!-- BillingRun - Automatic action on suspect -->
-	    <insert tableName="crm_custom_field_tmpl">
-	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-	        <column name="version" valueNumeric="0" />
-	        <column name="disabled" valueNumeric="0" />
-	        <column name="created" valueDate="${db.current.time}" />
-	        <column name="code" value="BillingRunJob_suspectAutoAction"/>
-	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
-	        <column name="description" value="Automatic action on suspect"/>
-	        <column name="field_type" value="LIST"/>
-	        <column name="storage_type" value="SINGLE"/>
-	        <column name="value_required" value="0"/>
-	        <column name="creator" value="applicationInitializer"/>
-	        <column name="gui_position" value="tab:Configuration:0;field:5"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="CANCEL"/>
-	        <column name="listvalues_key" value="1"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="MOVE"/>
-	        <column name="listvalues_key" value="2"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="MANUAL_ACTION"/>
-	        <column name="listvalues_key" value="3"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="AUTOMATIC_VALIDATION"/>
-	        <column name="listvalues_key" value="4"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="CANCEL_RT"/>
-	        <column name="listvalues_key" value="5"/>
-	    </insert>
-	    <!-- BillingRun - Generate AO -->
-	    <insert tableName="crm_custom_field_tmpl">
-	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-	        <column name="version" valueNumeric="0" />
-	        <column name="disabled" valueNumeric="0" />
-	        <column name="created" valueDate="${db.current.time}" />
-	        <column name="code" value="BillingRunJob_generateAO"/>
-	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
-	        <column name="description" value="Generate account operation"/>
-	        <column name="field_type" value="BOOLEAN"/>
-	        <column name="storage_type" value="SINGLE"/>
-	        <column name="value_required" value="0"/>
-	        <column name="default_value" value="0"/>
-	        <column name="creator" value="applicationInitializer"/>
-	        <column name="gui_position" value="tab:Configuration:0;field:6"/>
-	    </insert>
-	    <!-- BillingRun - Compute date at validation -->
-	    <insert tableName="crm_custom_field_tmpl">
-	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-	        <column name="version" valueNumeric="0" />
-	        <column name="disabled" valueNumeric="0" />
-	        <column name="created" valueDate="${db.current.time}" />
-	        <column name="code" value="BillingRunJob_computeDatesAtValidation"/>
-	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
-	        <column name="description" value="compute dates at invoicing validation"/>
-	        <column name="field_type" value="BOOLEAN"/>
-	        <column name="storage_type" value="SINGLE"/>
-	        <column name="value_required" value="0"/>
-	        <column name="default_value" value="0"/>
-	        <column name="creator" value="applicationInitializer"/>
-	        <column name="gui_position" value="tab:Configuration:0;field:7"/>
-	    </insert>
-	</changeSet>
 	<changeSet id="#INTRD-26159_20241029-data" author="TarikFA.">
 		<insert tableName="com_message_template">
 			<column name="media" value="EMAIL" />
@@ -14744,7 +14287,7 @@ Veuillez ne pas tenir compte de cette lettre si votre règlement nous a été ad
 			<where>code = 'Rerate_Job'</where>
 		</update>
 	</changeSet>
-	<changeSet id="#INTRD-25948_disableSynchronousMrrUpdate" author="a.rouaguebe">
+	<changeSet id="#INTRD-25948_rbld_disableSynchronousMrrUpdate" author="a.rouaguebe">
 		<insert tableName="advanced_settings">
 			<column name="id" valueSequenceNext="advanced_settings_seq"/>
 			<column name="version" value="0"/>

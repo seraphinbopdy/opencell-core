@@ -21,22 +21,22 @@ package org.meveo.model.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-
 import org.meveo.model.BusinessEntity;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 
 /**
  * @author Edward P. Legaspi
  **/
 // @Entity
 // @Table(name = "meveo_projector")
-// @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {@Parameter(name = "sequence_name", value =
-// "meveo_projector_seq"), })
+// @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {@Parameter(name = "sequence_name", value =
+// "meveo_projector_seq"), @Parameter(name = "increment_size", value = "1") })
 public class Projector extends BusinessEntity {
 
     private static final long serialVersionUID = -6179228494065206254L;

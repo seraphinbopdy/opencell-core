@@ -96,7 +96,7 @@ public class AccountOperationApiTest {
 
         when(accountOperationService.findById(any())).thenReturn(accountOperation);
 //        when(currentUser.getUserName()).thenReturn(CURRENT_USER_NAME);
-//        when(userService.findByUsername(any(), anyBoolean())).thenReturn(user);
+//        when(userService.findByUsername(any(), anyBoolean(), anyBoolean())).thenReturn(user);
         when(accountOperationService.update(any())).thenReturn(accountOperation);
     }
 
@@ -132,7 +132,7 @@ public class AccountOperationApiTest {
 //        User user = createUserWithRoles(false);
 //
 //        when(accountOperationService.findById(any())).thenReturn(accountOperation);
-//        when(userService.findByUsername(any(), anyBoolean())).thenReturn(user);
+//        when(userService.findByUsername(any(), anyBoolean(), anyBoolean())).thenReturn(user);
 //
 //        AccountOperation updatedAccountOperation = accountOperationApi.updateAccountingDate(1l, newAccountingDate);
 //        assertEquals(newAccountingDate, updatedAccountOperation.getAccountingDate());

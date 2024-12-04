@@ -30,7 +30,7 @@ public interface CacheContainerProvider {
     public static String SYSTEM_PROPERTY_CACHES_TO_LOAD = "opencell.caches.load";
 
     /**
-     * Refresh cache identified by a particular name, or all caches if not provider. Should be @Asynchronous implementation
+     * Refresh cache identified by a particular name, or all caches if not provided. Should be @Asynchronous implementation
      * 
      * @param cacheName Cache name (optional)
      */
@@ -45,4 +45,10 @@ public interface CacheContainerProvider {
     // @SuppressWarnings("rawtypes")
     public Map<String, Cache> getCaches();
 
+    /**
+     * Populate cache, identified by a particular name, or all caches if not provided, with data
+     * 
+     * @param cacheName
+     */
+    public void populateCache(String cacheName);
 }

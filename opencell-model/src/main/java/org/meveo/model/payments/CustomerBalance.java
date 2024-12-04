@@ -1,49 +1,47 @@
 package org.meveo.model.payments;
 
+import java.util.List;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
-import java.util.List;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "ar_customer_balance")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_customer_balance_seq"), })
-@NamedQueries({
-    @NamedQuery(name = "CustomerBalance.findDefaultOne", query = "select c from CustomerBalance c where c.defaultBalance = :default"),
-    @NamedQuery(name = "CustomerBalance.findDefaultCustomerBalance", query = "SELECT cb FROM CustomerBalance cb WHERE cb.defaultBalance = true") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_customer_balance_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "CustomerBalance.findDefaultOne", query = "select c from CustomerBalance c where c.defaultBalance = :default"),
+        @NamedQuery(name = "CustomerBalance.findDefaultCustomerBalance", query = "SELECT cb FROM CustomerBalance cb WHERE cb.defaultBalance = true") })
 public class CustomerBalance extends BusinessEntity {
 
     /** */
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "default_balance")
     private boolean defaultBalance;
 
     /**
-     * 	An expression to decide whether the balance should be applied or not.
+     * An expression to decide whether the balance should be applied or not.
      */
     @Column(name = "balance_el", length = 2000)
     @Size(max = 2000)
     private String balanceEl;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "ar_customer_balance_templates",
-            joinColumns = @JoinColumn(name = "customer_balance_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "template_id", referencedColumnName = "id"))
+    @JoinTable(name = "ar_customer_balance_templates", joinColumns = @JoinColumn(name = "customer_balance_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "template_id", referencedColumnName = "id"))
     private List<OCCTemplate> occTemplates;
 
     public boolean isDefaultBalance() {

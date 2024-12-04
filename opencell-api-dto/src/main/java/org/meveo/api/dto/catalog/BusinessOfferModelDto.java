@@ -18,17 +18,17 @@
 
 package org.meveo.api.dto.catalog;
 
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 import org.meveo.api.dto.LanguageDescriptionDto;
 import org.meveo.api.dto.module.MeveoModuleDto;
 import org.meveo.model.module.MeveoModule;
 
-import java.util.List;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class BusinessOfferModelDto.

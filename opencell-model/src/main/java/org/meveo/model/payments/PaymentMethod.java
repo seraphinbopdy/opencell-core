@@ -18,30 +18,34 @@
 
 package org.meveo.model.payments;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import java.sql.Types;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableCFEntity;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.billing.UntdidPaymentMeans;
 import org.meveo.model.document.Document;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Payment method
@@ -55,24 +59,22 @@ import org.meveo.model.document.Document;
 @Table(name = "ar_payment_token")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "token_type")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_payment_token_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_payment_token_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
-		@NamedQuery(name = "PaymentMethod.updatePreferredPaymentMethod", query = "UPDATE PaymentMethod pm set pm.preferred = false ,pm.auditable.updated = :dateIN where pm.id <> :id and pm.customerAccount = :ca and pm.preferred =true"),
-		@NamedQuery(name = "PaymentMethod.updateFirstPaymentMethodToPreferred1", query = "select min(pmg.id) from PaymentMethod pmg where pmg.customerAccount.id = :caId and pmg.disabled = false"),
-		@NamedQuery(name = "PaymentMethod.updateFirstPaymentMethodToPreferred2", query = "UPDATE PaymentMethod pm set pm.preferred = true ,pm.auditable.updated = :dateIN where pm.customerAccount.id = :caId and pm.id =:id"),
-		@NamedQuery(name = "PaymentMethod.updateFirstPaymentMethodToPreferred3", query = "UPDATE PaymentMethod pm set pm.preferred = false ,pm.auditable.updated = :dateIN where pm.customerAccount.id = :caId and pm.id <>:id and pm.preferred =true"),
+        @NamedQuery(name = "PaymentMethod.updatePreferredPaymentMethod", query = "UPDATE PaymentMethod pm set pm.preferred = false ,pm.auditable.updated = :dateIN where pm.id <> :id and pm.customerAccount = :ca and pm.preferred =true"),
+        @NamedQuery(name = "PaymentMethod.updateFirstPaymentMethodToPreferred1", query = "select min(pmg.id) from PaymentMethod pmg where pmg.customerAccount.id = :caId and pmg.disabled = false"),
+        @NamedQuery(name = "PaymentMethod.updateFirstPaymentMethodToPreferred2", query = "UPDATE PaymentMethod pm set pm.preferred = true ,pm.auditable.updated = :dateIN where pm.customerAccount.id = :caId and pm.id =:id"),
+        @NamedQuery(name = "PaymentMethod.updateFirstPaymentMethodToPreferred3", query = "UPDATE PaymentMethod pm set pm.preferred = false ,pm.auditable.updated = :dateIN where pm.customerAccount.id = :caId and pm.id <>:id and pm.preferred =true"),
         @NamedQuery(name = "PaymentMethod.getNumberOfPaymentMethods", query = "select count(*) from  PaymentMethod pm where pm.customerAccount.id = :caId and pm.disabled = false"),
         @NamedQuery(name = "PaymentMethod.getPreferredPaymentMethodForCA", query = "select m from PaymentMethod m where m.customerAccount.id =:caId and m.preferred=true"),
         @NamedQuery(name = "PaymentMethod.listByCustomerAccount", query = "select m from PaymentMethod m inner join m.customerAccount ca where ca=:customerAccount"),
-        @NamedQuery(name = "PaymentMethod.listByIbanAndBicFi", query = "select m from PaymentMethod m where m.bankCoordinates.iban=:Iban and m.bankCoordinates.bic=:Bic and m.disabled is :Disable"),
+        @NamedQuery(name = "PaymentMethod.listByIbanAndBicFi", query = "select m from PaymentMethod m where m.bankCoordinates.iban=:Iban and m.bankCoordinates.bic=:Bic and m.disabled = :Disable"),
         @NamedQuery(name = "PaymentMethod.listByIbanAndBicFiAll", query = "select m from PaymentMethod m where m.bankCoordinates.iban=:Iban and m.bankCoordinates.bic=:Bic"),
-        @NamedQuery(name = "PaymentMethod.isReferenced", query = "select count(pm) from PaymentMethod pm " +
-                "left join Subscription sub on sub.paymentMethod.id = pm.id " +
-                "left join BillingAccount ba on ba.paymentMethod.id = pm.id " +
-                "left join Invoice inv on inv.paymentMethod.id = pm.id where pm.id = :pmId and pm.disabled = false and inv.status = org.meveo.model.billing.InvoiceStatusEnum.VALIDATED"),
+        @NamedQuery(name = "PaymentMethod.isReferenced", query = "select count(pm) from PaymentMethod pm " + "left join Subscription sub on sub.paymentMethod.id = pm.id "
+                + "left join BillingAccount ba on ba.paymentMethod.id = pm.id "
+                + "left join Invoice inv on inv.paymentMethod.id = pm.id where pm.id = :pmId and pm.disabled = false and inv.status = org.meveo.model.billing.InvoiceStatusEnum.VALIDATED"),
         @NamedQuery(name = "PaymentMethod.getPreferredPaymentMethodForDDRequestItem", query = "SELECT ca.id, ca.code, ca.description, pm.class, pm.bankCoordinates.bic, pm.bankCoordinates.iban, pm.alias, pm.mandateIdentification, pm.mandateDate, pm.mandateChangeAction, pm.id FROM CustomerAccount ca JOIN DDPaymentMethod pm on ca.id = pm.customerAccount.id JOIN AccountOperation ao on ca.id = ao.customerAccount.id  WHERE ao.ddRequestItem.id = :id AND pm.preferred = true ORDER BY ao.id ASC"),
-        @NamedQuery(name = "PaymentMethod.getNumberOfTokenId", query = "select count(*) from  PaymentMethod pm where pm.tokenId = :tokenId and pm.disabled = false")})
+        @NamedQuery(name = "PaymentMethod.getNumberOfTokenId", query = "select count(*) from  PaymentMethod pm where pm.tokenId = :tokenId and pm.disabled = false") })
 public abstract class PaymentMethod extends EnableCFEntity {
 
     private static final long serialVersionUID = 8726571628074346184L;
@@ -86,7 +88,7 @@ public abstract class PaymentMethod extends EnableCFEntity {
     /**
      * Is it a preferred payment method
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_default")
     protected boolean preferred;
 
@@ -113,35 +115,35 @@ public abstract class PaymentMethod extends EnableCFEntity {
     /**
      * Additional information
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "info_1")
     private String info1;
 
     /**
      * Additional information
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "info_2")
     private String info2;
 
     /**
      * Additional information
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "info_3")
     private String info3;
 
     /**
      * Additional information
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "info_4")
     private String info4;
 
     /**
      * Additional information
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "info_5")
     private String info5;
 
@@ -150,7 +152,7 @@ public abstract class PaymentMethod extends EnableCFEntity {
      */
     @Column(name = "token_id")
     private String tokenId;
-    
+
     /**
      * Token 3DS identifier
      */
@@ -163,7 +165,7 @@ public abstract class PaymentMethod extends EnableCFEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id")
     private Document referenceDocument;
-    
+
     /**
      * UntdidPaymentMeans
      */
@@ -308,14 +310,14 @@ public abstract class PaymentMethod extends EnableCFEntity {
     public void setReferenceDocument(Document referenceDocument) {
         this.referenceDocument = referenceDocument;
     }
-    
-	public String getToken3DsId() {
-		return token3DsId;
-	}
 
-	public void setToken3DsId(String token3DsId) {
-		this.token3DsId = token3DsId;
-	}
+    public String getToken3DsId() {
+        return token3DsId;
+    }
+
+    public void setToken3DsId(String token3DsId) {
+        this.token3DsId = token3DsId;
+    }
 
     public MandateChangeAction getMandateChangeAction() {
         return mandateChangeAction;
@@ -339,9 +341,9 @@ public abstract class PaymentMethod extends EnableCFEntity {
     @Override
     public boolean equals(Object obj) {
 
-        if(obj == null || this.getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
-        } 
+        }
 
         if (this == obj) {
             return true;
@@ -354,19 +356,16 @@ public abstract class PaymentMethod extends EnableCFEntity {
 
             if (thisCardPaymentMethod == other) {
                 return true;
-            } 
+            }
 
-            if (thisCardPaymentMethod.getId() != null && other.getId() != null
-                    && thisCardPaymentMethod.getId().equals(other.getId())) {
+            if (thisCardPaymentMethod.getId() != null && other.getId() != null && thisCardPaymentMethod.getId().equals(other.getId())) {
                 return true;
             }
 
-            return StringUtils.compare(thisCardPaymentMethod.getHiddenCardNumber(),
-                other.getHiddenCardNumber()) == 0
-                && thisCardPaymentMethod.getMonthExpiration().equals(other.getMonthExpiration())
-                && thisCardPaymentMethod.getYearExpiration().equals(other.getYearExpiration());
+            return StringUtils.compare(thisCardPaymentMethod.getHiddenCardNumber(), other.getHiddenCardNumber()) == 0 && thisCardPaymentMethod.getMonthExpiration().equals(other.getMonthExpiration())
+                    && thisCardPaymentMethod.getYearExpiration().equals(other.getYearExpiration());
         }
-        
+
         if (this.getClass() == DDPaymentMethod.class) {
 
             DDPaymentMethod thisDDPaymentMethod = (DDPaymentMethod) this;
@@ -374,23 +373,21 @@ public abstract class PaymentMethod extends EnableCFEntity {
 
             if (thisDDPaymentMethod == other) {
                 return true;
-            } 
+            }
 
-            if (thisDDPaymentMethod.getId() != null && other.getId() != null
-                    && thisDDPaymentMethod.getId().equals(other.getId())) {
+            if (thisDDPaymentMethod.getId() != null && other.getId() != null && thisDDPaymentMethod.getId().equals(other.getId())) {
                 return true;
             }
-            if (thisDDPaymentMethod.getMandateIdentification() != null && thisDDPaymentMethod
-                    .getMandateIdentification().equals(other.getMandateIdentification())) {
+            if (thisDDPaymentMethod.getMandateIdentification() != null && thisDDPaymentMethod.getMandateIdentification().equals(other.getMandateIdentification())) {
                 return true;
             }
             if (thisDDPaymentMethod.getBankCoordinates() != null) {
                 return thisDDPaymentMethod.getBankCoordinates().equals(other.getBankCoordinates());
             }
-            
+
             return false;
         }
-        
+
         return true;
     }
 

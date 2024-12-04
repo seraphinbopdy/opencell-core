@@ -21,11 +21,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.DiscriminatorValue;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.audit.logging.annotations.MeveoAudit;
 import org.meveo.model.payments.AccountOperation;
@@ -35,6 +30,11 @@ import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.OCCTemplate;
 import org.meveo.model.payments.OtherCreditAndCharge;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.DiscriminatorValue;
 
 /**
  * OtherCreditAndCharge service implementation.

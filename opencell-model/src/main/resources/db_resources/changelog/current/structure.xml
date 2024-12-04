@@ -3380,7 +3380,7 @@
                                  referencedTableName="billing_user_account"
                                  referencedColumnNames="id"/>
     </changeSet>
-    
+
     <changeSet id="#INTRD-18995_20231107" author="zelmeliani">
         <update tableName="crm_seller">
             <column name="trading_country_id" valueComputed="(select id from billing_trading_country where code = 'US')" />
@@ -4930,7 +4930,7 @@ Your name and surname
             </column>
         </insert>
     </changeSet>
-
+    
     <changeSet id="INTRD-18045_20230829" author="zelmeliani">
         <update tableName="com_message_template">
             <column name="htmlcontent">
@@ -6071,7 +6071,12 @@ Your name and surname
         <!-- END Dunning Policy B2B -->
     </changeSet>
     
-    <changeSet id="#INTRD-22810_20240514" author="TarikFA." failOnError="false">
+    <changeSet id="#INTRD-22810_20240514" author="TarikFA.">
+    	<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM ar_occ_template WHERE code = 'PPL_CREATION'
+            </sqlCheck>
+	    </preConditions>
         <insert tableName="ar_occ_template">
             <column name="id" valueSequenceNext="ar_occ_template_seq" />
             <column name="version" valueNumeric="0" />
@@ -6088,7 +6093,12 @@ Your name and surname
         </insert>
     </changeSet>
     
-    <changeSet id="#INTRD-23038_20240515" author="TarikFA." failOnError="false">
+    <changeSet id="#INTRD-23038_20240515" author="TarikFA.">
+    	<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM ar_occ_template WHERE code = 'PPL_INSTALLMENT'
+            </sqlCheck>
+	    </preConditions>
         <insert tableName="ar_occ_template" >
             <column name="id" valueSequenceNext="ar_occ_template_seq" />
             <column name="version" valueNumeric="0" />
@@ -9211,66 +9221,6 @@ Your name and surname
         <sql>SELECT setval('untdid_2475_vat_payment_option_seq', 3, true)</sql> 
     </changeSet>
     
-        <changeSet id="#INTRD-5882__23-03-2022" author="Mohammed_ELAZZOUZI">
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="waitingMillis"/>
-            <column name="applies_to" value="JobInstance_InvoiceLinesJob"/>
-            <column name="description" value="Waiting before next launch (ms)"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="0"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Execution configuration:0;field:1"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="nbRuns"/>
-            <column name="applies_to" value="JobInstance_InvoiceLinesJob"/>
-            <column name="description" value="Number of parallel execution"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="1"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Execution configuration:0;field:0"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="maxInvoiceLinesPerTransaction"/>
-            <column name="applies_to" value="JobInstance_InvoiceLinesJob"/>
-            <column name="description" value="Maximum of maxInvoiceLines generated per transaction"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="0"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="maxBAsPerTransaction"/>
-            <column name="applies_to" value="JobInstance_InvoicingJobV2"/>
-            <column name="description" value="commit interval"/>
-            <column name="field_type" value="LONG"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" valueNumeric="1000"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-        </insert>
-    </changeSet>
 
     <changeSet id="#INTRD-14750_20230331" author="TarikFA.">
         <insert tableName="meveo_job_instance">
@@ -13170,7 +13120,7 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="contra_accounting_code_id" valueComputed="(SELECT id FROM billing_accounting_code WHERE code = '512000000')" />
         </insert>
     </changeSet>
-
+    
     <changeSet id="USAGE_RERATE_RT_JOB" author="Mohammed_ElAzzouzi">
         <sql>create index billing_redirection_rule__idx_contract_id_priority on ${db.schema.adapted}billing_redirection_rule using btree (contract_id, priority)</sql>
         <sql>create index cpq_attribute_instance__service_instance_index on ${db.schema.adapted}cpq_attribute_instance using btree (service_instance_id)</sql>
@@ -13352,7 +13302,7 @@ public class DummyPaymentGatewayScript extends Script {
             <column name="uuid" value="Invoicing_Threshold" />
         </insert>
     </changeSet>
-
+    
   	<changeSet id="#INTRD-22583_20240509" author="aeljaouhari">
         <update tableName="iso_icd" >
             <column name="scheme_name" value="SIRENE" />
@@ -13364,7 +13314,7 @@ public class DummyPaymentGatewayScript extends Script {
             <where>code = '0009'</where>
         </update>
     </changeSet>
-
+    
     <changeSet id="#INTRD-14889_20240509-2" author="AbdelmounaimAkadid">
 		<update tableName="meveo_job_instance" >
             <column name="job_category" value="INVOICING" />
@@ -13756,58 +13706,7 @@ public class DummyPaymentGatewayScript extends Script {
             <where>code='RatingCancellationJob'</where>
         </update>
     </changeSet>
-    
-    <changeSet id="INTRD-24052_ReRateV2_filter" author="a.rouaguebe">
-
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="ReRatingJobBean_reratingTarget"/>
-            <column name="applies_to" value="JobInstance_RatingCancellationJob"/>
-            <column name="description" value="Rerating Target"/>
-            <column name="field_type" value="LIST"/>
-            <column name="storage_type" value="SINGLE"/>
-            <column name="default_value" value="ALL"/>
-            <column name="value_required" value="0"/>
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:4"/>
-        </insert>
         
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
-            <column name="listvalues" value="ALL" />
-            <column name="listvalues_key" value="ALL" />
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
-            <column name="listvalues" value="NO_BATCH" />
-            <column name="listvalues_key" value="NO BATCH" />
-        </insert>
-        <insert tableName="crm_custom_field_tmpl_val">
-            <column name="customfieldtemplate_id" valueComputed="(SELECT id FROM crm_custom_field_tmpl WHERE code = 'ReRatingJobBean_reratingTarget' AND applies_to = 'JobInstance_RatingCancellationJob')" />
-            <column name="listvalues" value="WITH_BATCH" />
-            <column name="listvalues_key" value="WITH BATCH" />
-        </insert>
-
-        <insert tableName="crm_custom_field_tmpl">
-            <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-            <column name="version" valueNumeric="0" />
-            <column name="disabled" valueNumeric="0" />
-            <column name="created" valueDate="${db.current.time}" />
-            <column name="code" value="ReRatingJobBean_targetBatches"/>
-            <column name="applies_to" value="JobInstance_RatingCancellationJob"/>
-            <column name="description" value="Target batches"/>
-            <column name="field_type" value="ENTITY"/>
-            <column name="storage_type" value="LIST"/>
-            <column name="value_required" value="0"/>
-            <column name="entity_clazz" value="org.meveo.model.billing.BatchEntity" />
-            <column name="creator" value="applicationInitializer"/>
-            <column name="gui_position" value="tab:Configuration:0;fieldGroup:Configuration:0;field:5"/>
-        </insert>
-    </changeSet>
-    
     <changeSet id="INTRD-23881_20240702" author="TarikFA." failOnError="false">
         <addColumn tableName="advanced_settings">
             <column name="description_i18n" type="${type.json}" />
@@ -14155,7 +14054,7 @@ Meaning that advances won’t be available for further invoices."/>
                     valueComputed="(SELECT id FROM meveo_script_instance WHERE code='org.meveo.service.script.EnterLitigation')"/>
         </insert>
     </changeSet>
-    
+
     <changeSet id="#INTRD-24686_20240807" author="TarikFa.">
         <insert tableName="ar_customer_balance_templates">
             <column name="customer_balance_id" valueComputed="(select id from ar_customer_balance where code = 'default_customer_balance')" />
@@ -14799,6 +14698,11 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
     </changeSet>
     
     <changeSet id="#INTRD-25474_new_cg_20241003" author="a.rouaguebe">
+    	<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM billing_tax_category WHERE id = -3
+            </sqlCheck>
+	    </preConditions>
         <insert tableName="crm_customer_category">
             <column name="id" valueNumeric="-5" />
             <column name="version" valueNumeric="0" />
@@ -14866,121 +14770,6 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>id = -3</where>
         </update>
     </changeSet>
-
-    <changeSet id="#INTRD-25415_20240919" author="zelmeliani">
-	    <!-- BillingRun - Automatic action on reject -->
-	    <insert tableName="crm_custom_field_tmpl">
-	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-	        <column name="version" valueNumeric="0" />
-	        <column name="disabled" valueNumeric="0" />
-	        <column name="created" valueDate="${db.current.time}" />
-	        <column name="code" value="BillingRunJob_rejectAutoAction"/>
-	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
-	        <column name="description" value="Automatic action on reject"/>
-	        <column name="field_type" value="LIST"/>
-	        <column name="storage_type" value="SINGLE"/>
-	        <column name="value_required" value="0"/>
-	        <column name="creator" value="applicationInitializer"/>
-	        <column name="gui_position" value="tab:Configuration:0;field:4"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="CANCEL"/>
-	        <column name="listvalues_key" value="1"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="MOVE"/>
-	        <column name="listvalues_key" value="2"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="MANUAL_ACTION"/>
-	        <column name="listvalues_key" value="3"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="AUTOMATIC_VALIDATION"/>
-	        <column name="listvalues_key" value="4"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_rejectAutoAction')"/>
-	        <column name="listvalues" value="CANCEL_RT"/>
-	        <column name="listvalues_key" value="5"/>
-	    </insert>
-	    <!-- BillingRun - Automatic action on suspect -->
-	    <insert tableName="crm_custom_field_tmpl">
-	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-	        <column name="version" valueNumeric="0" />
-	        <column name="disabled" valueNumeric="0" />
-	        <column name="created" valueDate="${db.current.time}" />
-	        <column name="code" value="BillingRunJob_suspectAutoAction"/>
-	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
-	        <column name="description" value="Automatic action on suspect"/>
-	        <column name="field_type" value="LIST"/>
-	        <column name="storage_type" value="SINGLE"/>
-	        <column name="value_required" value="0"/>
-	        <column name="creator" value="applicationInitializer"/>
-	        <column name="gui_position" value="tab:Configuration:0;field:5"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="CANCEL"/>
-	        <column name="listvalues_key" value="1"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="MOVE"/>
-	        <column name="listvalues_key" value="2"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="MANUAL_ACTION"/>
-	        <column name="listvalues_key" value="3"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="AUTOMATIC_VALIDATION"/>
-	        <column name="listvalues_key" value="4"/>
-	    </insert>
-	    <insert tableName="crm_custom_field_tmpl_val">
-	        <column name="customfieldtemplate_id" valueComputed="(SELECT id from crm_custom_field_tmpl where code = 'BillingRunJob_suspectAutoAction')"/>
-	        <column name="listvalues" value="CANCEL_RT"/>
-	        <column name="listvalues_key" value="5"/>
-	    </insert>
-	    <!-- BillingRun - Generate AO -->
-	    <insert tableName="crm_custom_field_tmpl">
-	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-	        <column name="version" valueNumeric="0" />
-	        <column name="disabled" valueNumeric="0" />
-	        <column name="created" valueDate="${db.current.time}" />
-	        <column name="code" value="BillingRunJob_generateAO"/>
-	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
-	        <column name="description" value="Generate account operation"/>
-	        <column name="field_type" value="BOOLEAN"/>
-	        <column name="storage_type" value="SINGLE"/>
-	        <column name="value_required" value="0"/>
-	        <column name="default_value" value="0"/>
-	        <column name="creator" value="applicationInitializer"/>
-	        <column name="gui_position" value="tab:Configuration:0;field:6"/>
-	    </insert>
-	    <!-- BillingRun - Compute date at validation -->
-	    <insert tableName="crm_custom_field_tmpl">
-	        <column name="id" valueSequenceNext="crm_custom_fld_tmp_seq" />
-	        <column name="version" valueNumeric="0" />
-	        <column name="disabled" valueNumeric="0" />
-	        <column name="created" valueDate="${db.current.time}" />
-	        <column name="code" value="BillingRunJob_computeDatesAtValidation"/>
-	        <column name="applies_to" value="JobInstance_BillingRunJob"/>
-	        <column name="description" value="compute dates at invoicing validation"/>
-	        <column name="field_type" value="BOOLEAN"/>
-	        <column name="storage_type" value="SINGLE"/>
-	        <column name="value_required" value="0"/>
-	        <column name="default_value" value="0"/>
-	        <column name="creator" value="applicationInitializer"/>
-	        <column name="gui_position" value="tab:Configuration:0;field:7"/>
-	    </insert>
-	</changeSet>
 
     <changeSet id="#INTRD-25118_2024_09_24" author="ZakariaB">
         <addColumn tableName="billing_cycle">
@@ -15348,7 +15137,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>code = 'default_customer_balance'</where>
         </update>
     </changeSet>
-
+    
     <changeSet id="INTRD-26317_20241031" author="Mohammed_ElAzzouzi">
         <addColumn tableName="meveo_job_instance">
             <column name="process_next_job_on_error" type="${type.boolean}" defaultValueNumeric="0"/>
@@ -15389,7 +15178,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             </column>
         </insert>
     </changeSet>
-
+        
     <changeSet id="#INTRD-26054_20241101" author="TarikFA.">
         <createSequence sequenceName="billing_purchase_order_seq" startValue="1" />
         <createTable tableName="billing_purchase_order">
@@ -15644,6 +15433,203 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </addColumn>
     </changeSet>
 
+    <changeSet id="INTRD-26180_20241105" author="ZakariaB">
+        <insert tableName="billing_accounting_code">
+            <column name="id" valueSequenceNext="billing_accounting_code_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="44587" />
+            <column name="description" value="Output VAT on invoices to be issued (FAE TAX)" />
+            <column name="chart_of_account_type" value="LIABILITIES" />
+            <column name="chart_of_account_view_type" value="REGULAR" />
+        </insert>
+        <insert tableName="billing_accounting_code">
+            <column name="id" valueSequenceNext="billing_accounting_code_seq" />
+            <column name="version" valueNumeric="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="4181" />
+            <column name="description" value="Customers - Invoices to be issued (FAE)" />
+            <column name="chart_of_account_type" value="ASSET" />
+            <column name="chart_of_account_view_type" value="REGULAR" />
+        </insert>
+
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="INV_FAE"/>
+            <column name="description" value="Standard invoices to be issued"/>
+            <column name="account_code_client_side" value="701000000"/>
+            <column name="occ_category" value="DEBIT"/>
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="CRN_FAE"/>
+            <column name="description" value="Invoice - credit note sub-item to be issued"/>
+            <column name="account_code_client_side" value="701000000"/>
+            <column name="occ_category" value="CREDIT"/>
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="ADJ_FAE"/>
+            <column name="description" value="Adjustment on invoice to be issued"/>
+            <column name="account_code_client_side" value="701000000"/>
+            <column name="occ_category" value="CREDIT"/>
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
+        </insert>
+        <insert tableName="ar_occ_template">
+            <column name="id" valueSequenceNext="ar_occ_template_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="REF_FAE"/>
+            <column name="description" value="Refundable adjustment to be issued"/>
+            <column name="account_code_client_side" value="701000000"/>
+            <column name="occ_category" value="DEBIT"/>
+            <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
+        </insert>
+    </changeSet>
+        
+    <changeSet id="#INTRD-22676" author="AndriusKarpavicius">
+     	<createSequence sequenceName="adm_endpoint_seq" startValue="1"/>                              
+
+        <createTable tableName="adm_endpoint">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="adm_endpoint_pkey" />
+            </column>
+            <column name="version" type="int4"/>
+            <column name="disabled" type="${type.boolean}" defaultValueNumeric="0"/>
+            <column name="created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="updated" type="datetime" />
+            <column name="description" type="VARCHAR(255)" />
+            <column name="code" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="creator" type="varchar(255)"/>
+            <column name="updater" type="varchar(255)"/>
+            <column name="script_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secured" type="${type.boolean}" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="synchronous" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="method" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="returned_variable_name" type="varchar(50)"/>
+            <column name="returned_value_example" type="varchar(500)"/>
+            <column name="jsonata_transformer" type="varchar(255)"/>
+            <column name="serialize_result" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_type" type="varchar(16)" defaultValue="application/json">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_path" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="path" type="varchar(255)"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="adm_endpoint" baseColumnNames="script_id"
+                                 constraintName="fk_adm_endpoint_script_id" referencedTableName="meveo_script_instance"
+                                 referencedColumnNames="id" />
+
+        <createTable tableName="adm_endpoint_path_parameter">
+            <column name="endpoint_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="script_parameter" type="varchar(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="position" type="int4">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey constraintName="pk_adm_endpoint_path_parameter" tableName="adm_endpoint_path_parameter" columnNames="endpoint_id,script_parameter"/>
+        <sql>
+            ALTER TABLE adm_endpoint_path_parameter
+            ADD CONSTRAINT adm_endpoint_path_parameter_pos_gt_zero
+            CHECK (position >= 0);
+        </sql>
+        <addForeignKeyConstraint baseTableName="adm_endpoint_path_parameter" baseColumnNames="endpoint_id"
+                                 constraintName="fk_adm_endpoint_path_parameter_endpoint_id" referencedTableName="adm_endpoint"
+                                 referencedColumnNames="id" />
+
+        <createTable tableName="adm_endpoint_parameters">
+            <column name="endpoint_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="script_parameter" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parameter_name" type="varchar(50)" />
+            <column name="multivalued" type="int4" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>              
+            <column name="default_value" type="varchar(255)"/>
+            <column name="value_required" type="int4" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="example" type="varchar(500)"/>
+        </createTable>
+        <addPrimaryKey constraintName="pk_adm_endpoint_parameters" tableName="adm_endpoint_parameters" columnNames="endpoint_id,script_parameter"/>
+        <addForeignKeyConstraint baseTableName="adm_endpoint_parameters" baseColumnNames="endpoint_id"
+                                 constraintName="fk_adm_endpoint_parameters_endpoint_id" referencedTableName="adm_endpoint"
+                                 referencedColumnNames="id" />
+                                 
+        <addColumn tableName="meveo_script_instance">
+            <column name="use_pool" type="${type.boolean}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_pool" type="int4"/>
+            <column name="max_pool" type="int4"/>
+            <column name="max_idle_time_pool" type="int4"/>
+        </addColumn>                         
+                              
+	</changeSet>
+	
+	<changeSet id="INTRD-24987" author="AndriusKarpavicius">
+		<addColumn tableName="adm_notif_im">
+			<column name="im_provider_name" type="varchar(20)"/>
+		</addColumn>
+		<sql>update ${db.schema.adapted}adm_notif_im set im_provider_name='FACEBOOK' where im_provider=1</sql>
+		<sql>update ${db.schema.adapted}adm_notif_im set im_provider_name='TWITTER' where im_provider=2</sql>
+		<sql>update ${db.schema.adapted}adm_notif_im set im_provider_name='GTALK' where im_provider=3</sql>
+		<sql>update ${db.schema.adapted}adm_notif_im set im_provider_name='YAHOO_MESSENGER' where im_provider=4</sql>
+		<dropColumn tableName="adm_notif_im" columnName="im_provider" />
+		<addNotNullConstraint tableName="adm_notif_im" columnName="im_provider_name" />
+	</changeSet>
+    
+    <changeSet id="INTRD-26817_20241126" author="AndriusKarpavicius">
+        <sql>update ${db.schema.adapted}meveo_script_instance set description = substring(description, 1,255)</sql>
+        <sql>update ${db.schema.adapted}batch_entity set description = substring(description, 1,255)</sql>
+        <modifyDataType tableName="meveo_script_instance" columnName="description" newDataType="varchar(255)"/>
+        <modifyDataType tableName="batch_entity" columnName="description" newDataType="varchar(255)"/>
+    </changeSet>
+    
+    <changeSet id="#INTRD-25643-202401011" author="anasseh">
+       <addColumn tableName="ar_payment_token">
+            <column name="pre_authorisation_id" type="varchar(255)"  />
+        </addColumn>
+    </changeSet>
+
     <changeSet id="#INTRD-25948_disableSynchronousMrrUpdate" author="a.rouaguebe">
         <insert tableName="advanced_settings">
             <column name="id" valueSequenceNext="advanced_settings_seq"/>
@@ -15660,5 +15646,6 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="description_i18n" value='{"FRA":"Désactiver la mise à jour synchrone du MRR","ENG":"Disable synchronous MRR update"}'/>
         </insert>
     </changeSet>
+
 
 </databaseChangeLog>

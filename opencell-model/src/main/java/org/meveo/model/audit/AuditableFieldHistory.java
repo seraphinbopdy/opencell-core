@@ -71,23 +71,21 @@ public class AuditableFieldHistory implements Serializable {
      */
     private boolean notified;
 
-
     /**
      * Instantiate
      */
     public AuditableFieldHistory() {
     }
 
-
     /**
      * Instantiate with given parameters
      *
-     * @param fieldName     Field name
+     * @param fieldName Field name
      * @param previousState Previous state of field
-     * @param currentState  Current state of field
-     * @param auditType     Type of audit
-     * @param historable    Is historable field
-     * @param notfiable     Is notfiable field
+     * @param currentState Current state of field
+     * @param auditType Type of audit
+     * @param historable Is historable field
+     * @param notfiable Is notfiable field
      */
     public AuditableFieldHistory(String fieldName, Object previousState, Object currentState, AuditChangeTypeEnum auditType, boolean historable, boolean notfiable) {
         super();
@@ -245,12 +243,12 @@ public class AuditableFieldHistory implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         AuditableFieldHistory that = (AuditableFieldHistory) o;
-        return Objects.equals(fieldName, that.fieldName) &&
-                Objects.equals(previousState, that.previousState) &&
-                Objects.equals(currentState, that.currentState);
+        return Objects.equals(fieldName, that.fieldName) && Objects.equals(previousState, that.previousState) && Objects.equals(currentState, that.currentState);
     }
 
     @Override
@@ -260,15 +258,7 @@ public class AuditableFieldHistory implements Serializable {
 
     @Override
     public String toString() {
-        return "AuditableFieldHistory{" +
-                "fieldName='" + fieldName + '\'' +
-                ", previousState=" + previousState +
-                ", currentState=" + currentState +
-                ", auditType=" + auditType +
-                ", historable=" + historable +
-                ", notfiable=" + notfiable +
-                ", historized=" + historized +
-                ", notified=" + notified +
-                '}';
+        return "AuditableFieldHistory{" + "fieldName='" + fieldName + '\'' + ", previousState=" + previousState + ", currentState=" + currentState + ", auditType=" + auditType + ", historable=" + historable
+                + ", notfiable=" + notfiable + ", historized=" + historized + ", notified=" + notified + '}';
     }
 }

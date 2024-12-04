@@ -18,11 +18,10 @@
 
 package org.meveo.api.dto.sequence;
 
-import javax.validation.constraints.NotNull;
-
 import org.meveo.api.dto.BusinessEntityDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Customer Sequence value DTO representation.

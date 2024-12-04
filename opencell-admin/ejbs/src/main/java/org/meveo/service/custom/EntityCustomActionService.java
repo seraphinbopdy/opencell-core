@@ -22,15 +22,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.custom.EntityCustomAction;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.crm.impl.CustomFieldException;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class EntityCustomActionService extends BusinessService<EntityCustomAction> {

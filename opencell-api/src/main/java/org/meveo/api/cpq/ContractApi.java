@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.HashedMap;
@@ -651,7 +651,7 @@ public class ContractApi extends BaseApi{
 						contractItem.setContract(entityToSave);
 						contractItem.updateAudit(currentUser);
 
-						contractItem.setCfValues(ci.getCFValuesCopy());
+						contractItem.setCfValuesAsJson(ci.getCfValuesAsJson());
 
 						if(ci.getPricePlan() != null) {
 							contractItem.setPricePlan(duplicatePricePlan(ci.getPricePlan()));
@@ -663,7 +663,7 @@ public class ContractApi extends BaseApi{
 			entityToSave.setContractItems(duplicatedCIs);
 		}
 
-		entityToSave.setCfValues(contractToDuplicate.getCFValuesCopy());
+		entityToSave.setCfValuesAsJson(contractToDuplicate.getCfValuesAsJson());
 		contractService.create(entityToSave);
 
 		return entityToSave.getId();

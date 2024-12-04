@@ -17,6 +17,24 @@
  */
 package org.meveo.service.accountingscheme;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Optional.ofNullable;
+import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXILIARY_ACCOUNT_CODE;
+import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXILIARY_ACCOUNT_LABEL;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -51,32 +69,14 @@ import org.meveo.model.securityDeposit.FinanceSettings;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.billing.impl.AccountingCodeService;
 import org.meveo.service.billing.impl.InvoiceService;
-import org.meveo.service.billing.impl.JournalService;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-import javax.transaction.Transactional;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import static java.util.Collections.emptyMap;
-import static java.util.Optional.ofNullable;
-import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXILIARY_ACCOUNT_CODE;
-import static org.meveo.service.securityDeposit.impl.FinanceSettingsService.AUXILIARY_ACCOUNT_LABEL;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 
 @Stateless
 public class JournalEntryService extends PersistenceService<JournalEntry> {

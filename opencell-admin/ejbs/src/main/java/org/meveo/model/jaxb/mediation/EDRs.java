@@ -24,25 +24,18 @@
 
 package org.meveo.model.jaxb.mediation;
 
-import org.meveo.api.dto.billing.EDRDto;
-import org.meveo.model.jaxb.subscription.Errors;
-import org.meveo.model.jaxb.subscription.Subscription;
-import org.meveo.model.jaxb.subscription.Warnings;
-import org.meveo.model.rating.EDR;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.SchemaOutputResolver;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.transform.Result;
-import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.meveo.api.dto.billing.EDRDto;
+import org.meveo.model.jaxb.subscription.Errors;
+import org.meveo.model.jaxb.subscription.Warnings;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * A class used to generate EDR in XML document

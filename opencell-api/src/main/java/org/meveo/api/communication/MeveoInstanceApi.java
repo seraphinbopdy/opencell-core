@@ -33,8 +33,8 @@ import org.meveo.service.admin.impl.UserService;
 import org.meveo.service.communication.impl.MeveoInstanceService;
 import org.meveo.service.crm.impl.CustomerService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,7 +106,7 @@ public class MeveoInstanceApi extends BaseApi{
   			meveoInstance.setCustomer(customer);
   		}
   		if(!StringUtils.isBlank(postData.getUser())){
-  			User user=userService.findByUsername(postData.getUser(), false);
+  			User user=userService.findByUsername(postData.getUser(), false, false);
   			if(user==null){
   				throw new EntityDoesNotExistsException(User.class, postData.getUser());
   			}
@@ -161,7 +161,7 @@ public class MeveoInstanceApi extends BaseApi{
   			meveoInstance.setCustomer(customer);
   		}
   		if(!StringUtils.isBlank(postData.getUser())){
-  			User user=userService.findByUsername(postData.getUser(), false);
+  			User user=userService.findByUsername(postData.getUser(), false, false);
   			if(user==null){
   				throw new EntityDoesNotExistsException(User.class, postData.getUser());
   			}

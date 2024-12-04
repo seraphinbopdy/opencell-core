@@ -7,10 +7,10 @@ import org.meveo.apiv2.catalog.PriceListLineDto;
 import org.meveo.apiv2.catalog.service.pricelist.PriceListLineApiService;
 import org.meveo.apiv2.generic.common.LinkGenerator;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 
 @Stateless
 @Interceptors({ WsRestApiInterceptor.class })

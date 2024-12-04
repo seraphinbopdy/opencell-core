@@ -1,7 +1,8 @@
 package org.meveo.model.worldline.sips.checkout;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.meveo.model.worldline.sips.BaseResponse;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WalletOrderResponse extends BaseResponse {

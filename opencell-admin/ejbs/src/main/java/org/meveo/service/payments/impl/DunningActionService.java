@@ -4,15 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.model.communication.email.EmailTemplate;
-import org.meveo.model.dunning.*;
+import org.meveo.model.dunning.DunningAction;
+import org.meveo.model.dunning.DunningAgent;
+import org.meveo.model.dunning.DunningLevel;
+import org.meveo.model.dunning.DunningSettings;
 import org.meveo.model.payments.ActionChannelEnum;
 import org.meveo.model.payments.ActionModeEnum;
 import org.meveo.model.payments.ActionTypeEnum;
@@ -21,6 +20,10 @@ import org.meveo.service.base.BaseEntityService;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.communication.impl.EmailTemplateService;
 import org.meveo.service.script.ScriptInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 @Stateless
 public class DunningActionService  extends BusinessService<DunningAction> {

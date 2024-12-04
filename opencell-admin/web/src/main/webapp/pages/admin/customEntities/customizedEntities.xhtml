@@ -2,11 +2,9 @@
     xmlns:hftl="http://hftl.org" xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:p="http://primefaces.org/ui"
     template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView" listener="#{customEntityTemplateListBean.preRenderView}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
             <h:form id="crumbmenuForm">
@@ -32,7 +30,7 @@
                 </p:commandButton>
                 <p:button id="buttonNew" value="#{messages['commons.new']}" outcome="customizedEntity"
                     rendered="#{customEntityTemplateListBean.canUserUpdateEntity()}">
-                    <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                    <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                     <f:param name="edit" value="true" />
                 </p:button>
             </ui:define>
@@ -54,13 +52,13 @@
                                 <f:param name="entityClass" value="#{entity.entityClass.name}" />
                                 <f:param name="cetId" value="#{entity.customEntityId}" />
                                 <f:param name="backView" value="customizedEntities" />
-                                <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                                <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                             </h:link>
                             <h:link outcome="customizedEntity" rendered="#{!entity.customEntity}">
                                 <h:outputText value="#{entity.classnameToDisplayHuman}" />
                                 <f:param name="entityClass" value="#{entity.entityClass.name}" />
                                 <f:param name="backView" value="customizedEntities" />
-                                <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                                <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                             </h:link>
                         </c:if>
                     </p:column>

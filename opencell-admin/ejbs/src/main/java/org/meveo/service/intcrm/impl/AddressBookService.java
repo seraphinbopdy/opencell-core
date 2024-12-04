@@ -22,9 +22,6 @@ package org.meveo.service.intcrm.impl;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.admin.User;
 import org.meveo.model.communication.contact.Contact;
@@ -35,6 +32,9 @@ import org.meveo.service.admin.impl.UserService;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.payments.impl.CustomerAccountService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class AddressBookService extends BusinessService<AddressBook> {

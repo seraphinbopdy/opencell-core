@@ -1,12 +1,10 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:hftl="http://hftl.org" xmlns:p="http://primefaces.org/ui" template="/layout/template.xhtml">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{invoiceSubCategoryBean.objectId}" />
             <f:viewParam name="tab" value="#{invoiceSubCategoryBean.activeTab}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
 
@@ -20,17 +18,6 @@
             backingBean="#{occTemplateBean}" searchField1Label="#{messages['businessEntity.code']}" searchField1="code" column1Label="#{messages['businessEntity.code']}" column1="code"
             column2Label="#{messages['businessEntity.description']}" column2="description">
         </hftl:entityPopup>    
-
-		<hftl:entityPopup id="taxScriptPopup"
-			header="#{messages['scriptInstance.popup.header']}"
-			backingBean="#{scriptInstanceBean}"
-			selection="#{invoiceSubCategoryBean.entity.taxScript}"
-			searchField1Label="#{messages['businessEntity.code']}"
-			searchField1="code" column1Label="#{messages['businessEntity.code']}"
-			column1="code"
-			column2Label="#{messages['businessEntity.description']}"
-			column2="description" eventBackingBean="#{invoiceSubCategoryBean}"
-			updateField=":#{p:component('taxScriptSelectId')} :#{p:component('taxScriptSelectId_text')}"></hftl:entityPopup>
 
 		<hftl:entityPopup id="accountingCodePopup"
 			header="#{messages['accountingCode']}"
@@ -69,8 +56,7 @@
                                         valueLabelField="code" listenerUpdate="@this" popup="true"
                                         popupId="accountingCodePopup" showResetButton="true"/>
                         <hftl:formLanguageFields field="description"/>
-                        <hftl:formField id="taxScriptSelectId" label="#{messages['invoiceSubCategory.taxScript']}" field="taxScript" valueLabelField="code" required="false"
-                                        popup="true" popupId="taxScriptPopup" showResetButton="true"/>
+
                         <hftl:formField label="#{messages['invoiceType.occTemplate']}" id="occTemplateSelectedId" field="occTemplate" valueLabelField="code" showResetButton="true"
                                         popup="true" popupId="searchOccTemplatePopup"
                         />

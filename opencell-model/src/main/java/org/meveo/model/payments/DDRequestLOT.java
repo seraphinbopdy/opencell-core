@@ -18,28 +18,31 @@
 package org.meveo.model.payments;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.admin.Seller;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.Size;
 
 /**
  * 
@@ -48,13 +51,12 @@ import org.meveo.model.admin.Seller;
  */
 @Entity
 @Table(name = "ar_ddrequest_lot")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_ddrequest_lot_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_ddrequest_lot_seq"), @Parameter(name = "increment_size", value = "1") })
 public class DDRequestLOT extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "file_name")
     private String fileName;
 
@@ -69,7 +71,7 @@ public class DDRequestLOT extends AuditableEntity {
     @Column(name = "invoice_number")
     private Integer nbItemsOk;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_payment_created")
     private boolean paymentCreated;
 
@@ -93,12 +95,12 @@ public class DDRequestLOT extends AuditableEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ddrequest_builder_id")
     private DDRequestBuilder ddRequestBuilder;
-    
+
     /** The Payment Or Refund Enum. */
     @Column(name = "payment_or_refund")
     @Enumerated(EnumType.STRING)
     PaymentOrRefundEnum paymentOrRefundEnum;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
@@ -197,8 +199,6 @@ public class DDRequestLOT extends AuditableEntity {
         this.ddRequestBuilder = ddRequestBuilder;
     }
 
-  
-
     /**
      * @return the paymentOrRefundEnum
      */
@@ -226,7 +226,5 @@ public class DDRequestLOT extends AuditableEntity {
     public void setSeller(Seller seller) {
         this.seller = seller;
     }
-    
-    
 
 }

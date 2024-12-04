@@ -33,9 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.admin.Seller;
@@ -59,6 +56,9 @@ import org.meveo.service.crm.impl.CustomerService;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 
 @Stateless

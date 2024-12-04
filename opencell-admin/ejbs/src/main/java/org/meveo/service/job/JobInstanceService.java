@@ -28,10 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.ScheduleExpression;
-import javax.ejb.Stateless;
-import javax.ejb.Timer;
-import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -42,7 +38,7 @@ import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.jobs.JobCategoryEnum;
@@ -55,6 +51,11 @@ import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.util.EntityCustomizationUtils;
+
+import jakarta.ejb.ScheduleExpression;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.Timer;
+import jakarta.inject.Inject;
 
 @Stateless
 public class JobInstanceService extends BusinessService<JobInstance> {
@@ -208,7 +209,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
         jobCacheContainerProvider.addUpdateJobInstance(jobInstance, true);
         scheduleJob(jobInstance, null);
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.create);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.create);
     }
 
     @Override
@@ -222,7 +223,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
         jobCacheContainerProvider.addUpdateJobInstance(jobInstance, true);
         scheduleUnscheduleJob(jobInstance);
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.update);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.update);
 
         return jobInstance;
     }
@@ -241,7 +242,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
 
         jobCacheContainerProvider.removeJobInstance(jobInstance.getId());
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.remove);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.remove);
     }
 
     @Override
@@ -251,7 +252,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
         log.info("Enabling jobInstance {}, id={}", jobInstance.getJobTemplate(), jobInstance.getId());
         scheduleUnscheduleJob(jobInstance);
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.enable);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.enable);
 
         return jobInstance;
     }
@@ -263,7 +264,7 @@ public class JobInstanceService extends BusinessService<JobInstance> {
         log.info("Disabling jobInstance {}, id={}", jobInstance.getJobTemplate(), jobInstance.getId());
         unscheduleJob(jobInstance.getId());
 
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.disable);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.disable);
 
         return jobInstance;
     }

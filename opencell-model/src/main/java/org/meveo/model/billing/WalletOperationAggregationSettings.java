@@ -1,25 +1,26 @@
 package org.meveo.model.billing;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.catalog.RoundingModeEnum;
 import org.meveo.model.filter.Filter;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 /**
  * Aggregation Settings.
@@ -30,28 +31,27 @@ import java.util.List;
 @Entity
 @Cacheable
 @Table(name = "wo_aggregation_settings")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "wo_aggregation_matrix_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "wo_aggregation_matrix_seq"), @Parameter(name = "increment_size", value = "1") })
 public class WalletOperationAggregationSettings extends BusinessEntity {
     /**
      * Global aggregation rather than by job.
      */
     @Column(name = "global_aggregation")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean globalAggregation;
 
     /**
      * Aggregate by continuous periods.
      */
     @Column(name = "period_aggregation")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean periodAggregation;
 
     /**
      * If periodEndDateIncluded=true, the rule used to aggregate period is wo1.endDate = wo2.startDate. If not wo1.endDate + 1 day = wo2.startDate
      */
     @Column(name = "period_end_date_included")
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean periodEndDateIncluded;
 
     /**

@@ -33,6 +33,10 @@ public class InvalidScriptException extends BusinessException {
         super(scriptClassname + " with code=" + code + " failed to compile or instantiate");
     }
 
+    public InvalidScriptException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public InvalidScriptException(String message) {
         super(message);
     }

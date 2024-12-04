@@ -18,21 +18,22 @@
 
 package org.meveo.model.audit.logging;
 
+import java.sql.Types;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.HugeEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 /**
  * Audit log of user performed actions
@@ -42,10 +43,8 @@ import org.meveo.model.HugeEntity;
 @Entity
 @HugeEntity
 @Table(name = "audit_log")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "audit_log_seq"), })
-@NamedQueries({
-        @NamedQuery(name = "AuditLog.purgeAuditLog", query = "delete from AuditLog a where a.created < :purgeDate")})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "audit_log_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "AuditLog.purgeAuditLog", query = "delete from AuditLog a where a.created < :purgeDate") })
 public class AuditLog extends BaseEntity {
 
     private static final long serialVersionUID = -8920671560100707762L;
@@ -84,10 +83,10 @@ public class AuditLog extends BaseEntity {
     /**
      * Action parameters
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "parameters")
     private String parameters;
-    
+
     /**
      * Source of action e.g. API or IMPORT
      */

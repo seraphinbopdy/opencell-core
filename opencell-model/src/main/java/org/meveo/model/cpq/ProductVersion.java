@@ -1,49 +1,47 @@
 package org.meveo.model.cpq;
 
-import java.util.ArrayList;
+import java.sql.Types;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import org.apache.commons.collections.map.HashedMap;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.DatePeriod;
 import org.meveo.model.HugeEntity;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
 import org.meveo.model.cpq.tags.Tag;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * @author Tarik FAKHOURI.
@@ -52,37 +50,38 @@ import org.meveo.model.cpq.tags.Tag;
  */
 @Entity
 @HugeEntity
-@Table(name = "cpq_product_version",uniqueConstraints = @UniqueConstraint(columnNames = { "product_id", "current_version" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_product_version_seq"), })
-@NamedQueries({ 
-	@NamedQuery(name = "ProductVersion.findByProductAndVersion", query = "SELECT pv FROM ProductVersion pv left join pv.product where pv.product.code=:productCode and pv.currentVersion=:currentVersion"),
-	@NamedQuery(name = "ProductVersion.findByTags", query = "select p from ProductVersion p LEFT JOIN p.tags as tag WHERE p.status='PUBLISHED' and tag.code IN (:tagCodes)"),
-	@NamedQuery(name = "ProductVersion.getProductVerionsByStatusAndProduct", query = "SELECT pv FROM ProductVersion pv  left join pv.product as p where pv.status=:status and p.code=:productCode"),
-	@NamedQuery(name = "ProductVersion.findTagsByTagType", query = "select tag from ProductVersion p LEFT JOIN p.tags as tag left join tag.tagType tp where tp.code IN (:tagTypeCodes)") ,
-	@NamedQuery(name = "ProductVersion.findByCode", query = "select pv from ProductVersion pv LEFT JOIN pv.product pp where pp.code=:code order by pv.currentVersion desc") 
-})
+@Table(name = "cpq_product_version", uniqueConstraints = @UniqueConstraint(columnNames = { "product_id", "current_version" }))
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_product_version_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "ProductVersion.findByProductAndVersion", query = "SELECT pv FROM ProductVersion pv left join pv.product where pv.product.code=:productCode and pv.currentVersion=:currentVersion"),
+        @NamedQuery(name = "ProductVersion.findByTags", query = "select p from ProductVersion p LEFT JOIN p.tags as tag WHERE p.status='PUBLISHED' and tag.code IN (:tagCodes)"),
+        @NamedQuery(name = "ProductVersion.getProductVerionsByStatusAndProduct", query = "SELECT pv FROM ProductVersion pv  left join pv.product as p where pv.status=:status and p.code=:productCode"),
+        @NamedQuery(name = "ProductVersion.findTagsByTagType", query = "select tag from ProductVersion p LEFT JOIN p.tags as tag left join tag.tagType tp where tp.code IN (:tagTypeCodes)"),
+        @NamedQuery(name = "ProductVersion.findByCode", query = "select pv from ProductVersion pv LEFT JOIN pv.product pp where pp.code=:code order by pv.currentVersion desc") })
 @Cacheable
-public class ProductVersion extends AuditableEntity{
+public class ProductVersion extends AuditableEntity {
 
+    private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 1L;
-	
-	/**
+    /**
      * Record/entity identifier
      */
-   /* @Id
-    @GeneratedValue(generator = "ID_GENERATOR", strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    @Access(AccessType.PROPERTY) // Access is set to property so a call to getId() wont trigger hibernate proxy loading
-    @JsonProperty
-    protected Long id;*/
-    
+    /*
+     * @Id
+     * 
+     * @GeneratedValue(generator = "ID_GENERATOR", strategy = GenerationType.AUTO)
+     * 
+     * @Column(name = "id")
+     * 
+     * @Access(AccessType.PROPERTY) // Access is set to property so a call to getId() wont trigger hibernate proxy loading
+     * 
+     * @JsonProperty protected Long id;
+     */
+
     @ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "product_id", nullable = false, referencedColumnName = "id")
-	@NotNull
+    @JoinColumn(name = "product_id", nullable = false, referencedColumnName = "id")
+    @NotNull
     private Product product;
-    
+
     /**
      * version of the product<br />
      * this value is auto increment, do not use its method setVersion
@@ -90,23 +89,23 @@ public class ProductVersion extends AuditableEntity{
     @Column(name = "current_version", nullable = false)
     @Min(1)
     private int currentVersion;
-    
+
     /**
-     * status . it can be DRAFT / PUBLIED / CLOSED  
+     * status . it can be DRAFT / PUBLIED / CLOSED
      */
     @Column(name = "status", nullable = false)
     @NotNull
     @Enumerated(EnumType.STRING)
     private VersionStatusEnum status;
-    
+
     /**
      * date of status : it set automatically when ever the status of product is changed
      */
     @Column(name = "status_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @NotNull    
+    @NotNull
     private Date statusDate;
-    
+
     /**
      * short description. must not be null
      */
@@ -114,203 +113,185 @@ public class ProductVersion extends AuditableEntity{
     @Size(max = 255)
     @NotNull
     private String shortDescription;
-    
+
     /**
      * long description
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "long_description")
     private String longDescription;
-    
+
     /**
      * validity dates
      */
     @Embedded
     @AttributeOverrides(value = { @AttributeOverride(name = "from", column = @Column(name = "valid_from", nullable = false)), @AttributeOverride(name = "to", column = @Column(name = "valid_to")) })
     private DatePeriod validity = new DatePeriod();
-     
-    
+
     /**
      * list of tag attached
-     */   
+     */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "cpq_product_version_tags", joinColumns = @JoinColumn(name = "product_version_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Set<Tag> tags = new HashSet<Tag>();
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "productVersion", orphanRemoval = true)
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Set<ProductVersionAttribute> attributes = new HashSet<ProductVersionAttribute>();
-	
-	/**
-	 * list of grouped attribute attached to this product version
-	 */
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(
-				name = "cpq_product_version_grouped_attributes",
-				joinColumns = @JoinColumn(name = "product_version_id"),
-				inverseJoinColumns = @JoinColumn(name = "grouped_attributes_id")
-			)
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+
+    /**
+     * list of grouped attribute attached to this product version
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "cpq_product_version_grouped_attributes", joinColumns = @JoinColumn(name = "product_version_id"), inverseJoinColumns = @JoinColumn(name = "grouped_attributes_id"))
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Set<GroupedAttributes> groupedAttributes = new HashSet<GroupedAttributes>();
-    
-    
-	public ProductVersion() {}
-	
-	public ProductVersion(ProductVersion copy, Product product) {
-		this.setId(null);
-		this.setStatus(VersionStatusEnum.DRAFT);
-		this.setCurrentVersion(1);
-		this.setStatusDate(Calendar.getInstance().getTime());
-		if(product != null) {
-			this.setProduct(product);
-		} else {
-			this.setProduct(copy.getProduct());
-		}
-		this.setTags(new HashSet<>());
-		this.setAttributes(new HashSet<>());
-		this.setShortDescription(copy.getShortDescription());
-		this.setLongDescription(copy.getLongDescription());
-		this.setValidity(copy.getValidity()); 
-	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public ProductVersion() {
+    }
 
+    public ProductVersion(ProductVersion copy, Product product) {
+        this.setId(null);
+        this.setStatus(VersionStatusEnum.DRAFT);
+        this.setCurrentVersion(1);
+        this.setStatusDate(Calendar.getInstance().getTime());
+        if (product != null) {
+            this.setProduct(product);
+        } else {
+            this.setProduct(copy.getProduct());
+        }
+        this.setTags(new HashSet<>());
+        this.setAttributes(new HashSet<>());
+        this.setShortDescription(copy.getShortDescription());
+        this.setLongDescription(copy.getLongDescription());
+        this.setValidity(copy.getValidity());
+    }
 
-	public int getCurrentVersion() {
-		return currentVersion;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setCurrentVersion(int currentVersion) {
-		this.currentVersion = currentVersion;
-	}
+    public int getCurrentVersion() {
+        return currentVersion;
+    }
 
-	public VersionStatusEnum getStatus() {
-		return status;
-	}
+    public void setCurrentVersion(int currentVersion) {
+        this.currentVersion = currentVersion;
+    }
 
-	public void setStatus(VersionStatusEnum status) {
-		this.status = status;
-	}
+    public VersionStatusEnum getStatus() {
+        return status;
+    }
 
-	public Date getStatusDate() {
-		return statusDate;
-	}
+    public void setStatus(VersionStatusEnum status) {
+        this.status = status;
+    }
 
-	public void setStatusDate(Date statusDate) {
-		this.statusDate = statusDate;
-	}
+    public Date getStatusDate() {
+        return statusDate;
+    }
 
-	public String getShortDescription() {
-		return shortDescription;
-	}
+    public void setStatusDate(Date statusDate) {
+        this.statusDate = statusDate;
+    }
 
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = shortDescription;
-	}
+    public String getShortDescription() {
+        return shortDescription;
+    }
 
-	public String getLongDescription() {
-		return longDescription;
-	}
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
+    }
 
-	public void setLongDescription(String longDescription) {
-		this.longDescription = longDescription;
-	}
+    public String getLongDescription() {
+        return longDescription;
+    }
 
-	 
+    public void setLongDescription(String longDescription) {
+        this.longDescription = longDescription;
+    }
 
-	public Product getProduct() {
-		return product;
-	}
+    public Product getProduct() {
+        return product;
+    }
 
-	public void setProduct(Product product) {
-		this.product = product;
-	}
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 
+    /**
+     * @return the tags
+     */
+    public Set<Tag> getTags() {
+        return tags;
+    }
 
-	/**
-	 * @return the tags
-	 */
-	public Set<Tag> getTags() {
-		return tags;
-	}
+    /**
+     * @param tags the tags to set
+     */
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
 
+    /**
+     * @return the groupedAttributes
+     */
+    public Set<GroupedAttributes> getGroupedAttributes() {
+        return groupedAttributes;
+    }
 
-	/**
-	 * @param tags the tags to set
-	 */
-	public void setTags(Set<Tag> tags) {
-		this.tags = tags;
-	}
-	 
+    /**
+     * @param groupedAttributes the groupedAttributes to set
+     */
+    public void setGroupedAttributes(Set<GroupedAttributes> groupedAttributes) {
+        this.groupedAttributes = groupedAttributes;
+    }
 
-	/**
-	 * @return the groupedAttributes
-	 */
-	public Set<GroupedAttributes> getGroupedAttributes() {
-		return groupedAttributes;
-	}
+    /**
+     * @return the validity
+     */
+    public DatePeriod getValidity() {
+        return validity;
+    }
 
-	/**
-	 * @param groupedAttributes the groupedAttributes to set
-	 */
-	public void setGroupedAttributes(Set<GroupedAttributes> groupedAttributes) {
-		this.groupedAttributes = groupedAttributes;
-	}
-	
-	
+    /**
+     * @param validity the validity to set
+     */
+    public void setValidity(DatePeriod validity) {
+        this.validity = validity;
+    }
 
-	/**
-	 * @return the validity
-	 */
-	public DatePeriod getValidity() {
-		return validity;
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, longDescription, product, shortDescription, validity, status, statusDate, version);
+    }
 
-	/**
-	 * @param validity the validity to set
-	 */
-	public void setValidity(DatePeriod validity) {
-		this.validity = validity;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ProductVersion other = (ProductVersion) obj;
+        return Objects.equals(validity, other.validity) && Objects.equals(id, other.id) && Objects.equals(longDescription, other.longDescription) && Objects.equals(product, other.product)
+                && Objects.equals(shortDescription, other.shortDescription) && status == other.status && Objects.equals(statusDate, other.statusDate) && Objects.equals(tags, other.tags) && version == other.version;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, longDescription, product, shortDescription, validity, status, statusDate, version);
-	}
+    /**
+     * @return the productAttributes
+     */
+    public Set<ProductVersionAttribute> getAttributes() {
+        return attributes;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ProductVersion other = (ProductVersion) obj;
-		return Objects.equals(validity, other.validity) && Objects.equals(id, other.id)
-				&& Objects.equals(longDescription, other.longDescription) && Objects.equals(product, other.product)
-				&& Objects.equals(shortDescription, other.shortDescription) && status == other.status
-				&& Objects.equals(statusDate, other.statusDate) && Objects.equals(tags, other.tags)
-				&& version == other.version;
-	}
+    /**
+     * @param productAttributes the productAttributes to set
+     */
+    public void setAttributes(Set<ProductVersionAttribute> productAttributes) {
+        this.attributes = productAttributes;
+    }
 
-	/**
-	 * @return the productAttributes
-	 */
-	public Set<ProductVersionAttribute> getAttributes() {
-		return attributes;
-	}
-
-	/**
-	 * @param productAttributes the productAttributes to set
-	 */
-	public void setAttributes(Set<ProductVersionAttribute> productAttributes) {
-		this.attributes = productAttributes;
-	}
-
-	
-	
 }

@@ -1,11 +1,11 @@
 package org.meveo.service.payments.impl;
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-
 import org.meveo.model.dunning.DunningSettings;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
 /**
  * Service implementation to manage DunningAgent entity.

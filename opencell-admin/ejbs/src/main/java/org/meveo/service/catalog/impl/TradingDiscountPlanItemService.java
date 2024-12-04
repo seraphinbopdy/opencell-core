@@ -1,14 +1,14 @@
 package org.meveo.service.catalog.impl;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.TradingDiscountPlanItem;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
 
 /**
  * Persistence service for entity TradingDiscountPlanItem

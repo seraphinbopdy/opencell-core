@@ -2,18 +2,10 @@
 	xmlns:p="http://primefaces.org/ui" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:hftl="http://hftl.org" xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags"
 	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:o="http://omnifaces.org/ui" template="/layout/template.xhtml">
 
-	<ui:define name="metadata">
 		<f:metadata>
 			<f:viewParam name="objectId" value="#{customTableBean.objectId}" />
 			<f:event type="preRenderView" listener="#{customTableBean.preRenderView}" />
 		</f:metadata>
-	</ui:define>
-
-	<ui:define name="metadata">
-		<f:metadata>
-			<f:viewParam name="objectId" value="#{titleBean.objectId}" />
-		</f:metadata>
-	</ui:define>
 
 	<ui:define name="body">
 
@@ -136,11 +128,11 @@
 						label="#{field.getDescription(customTableBean.currentLocale.ISO3Language)}" datePattern="#{paramBean.dateFormat}" rangeSearch="true" componentWidth="25" />
 				</c:if>
 				<c:if test="#{field.fieldType eq CustomFieldTypeEnum.DOUBLE}">
-					<hftl:searchNumberField id="#{field.dbFieldname}" converterId="javax.faces.Double" backingBean="#{customTableBean}" field="${field.dbFieldname}"
+					<hftl:searchNumberField id="#{field.dbFieldname}" converterId="jakarta.faces.Double" backingBean="#{customTableBean}" field="${field.dbFieldname}"
 						label="#{field.getDescription(customTableBean.currentLocale.ISO3Language)}" componentWidth="25" rangeSearch="true" />
 				</c:if>
 				<c:if test="#{field.fieldType eq CustomFieldTypeEnum.LONG}">
-					<hftl:searchNumberField id="#{field.dbFieldname}" converterId="javax.faces.Long" backingBean="#{customTableBean}" field="${field.dbFieldname}"
+					<hftl:searchNumberField id="#{field.dbFieldname}" converterId="jakarta.faces.Long" backingBean="#{customTableBean}" field="${field.dbFieldname}"
 						label="#{field.getDescription(customTableBean.currentLocale.ISO3Language)}" componentWidth="25" rangeSearch="true" />
 				</c:if>
 
@@ -169,15 +161,15 @@
 				<p:dataTable id="ctSearchResults" value="#{customTableBean.dataModel}" var="entity" lazy="true" widgetVar="ctTable"
 					paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}" paginator="true" rows="10"
 					rowsPerPageTemplate="10,15,20,50" resizableColumns="true" styleClass="custom-grid" reflow="true" editable="#{customTableBean.edit}" editMode="cell"
-					selection="#{customTableBean.selectedValues}" sortBy="id">
+					selection="#{customTableBean.selectedValues}">
 					<p:ajax event="cellEdit" listener="#{customTableBean.onCellEdit}" update="@form" partialSubmit="true" partialSubmitFilter=":not([name*='addUpdateFields'])" />/>
                     <p:ajax event="cellEditCancel" partialSubmit="true" partialSubmitFilter=":not([name*='addUpdateFields'])" />/>
 
                     <p:column id="multiSelect" selectionMode="multiple" width="4%" exportable="false" toggleable="false" />
-					<p:column headerText="id" sortBy="#{id}">
+					<p:column headerText="id">
 						<h:outputText value="#{entity['id']}" />
 					</p:column>
-					<p:columns value="#{customTableBean.fields}" var="field" headerText="#{field.getDescription(customTableBean.currentLocale.ISO3Language)}" sortBy="#{field.dbFieldname}">
+					<p:columns value="#{customTableBean.fields}" var="field" headerText="#{field.getDescription(customTableBean.currentLocale.ISO3Language)}">
 						<p:cellEditor>
 							<f:facet name="output">
 								<h:outputText id="#{entity[field.dbFieldname]}_out_date" value="#{entity[field.dbFieldname]}" styleClass="field-value"
@@ -192,15 +184,15 @@
 
 								<h:outputText id="#{entity[field.dbFieldname]}_out_double" value="#{entity[field.dbFieldname]}" styleClass="field-value"
 									rendered="#{field.fieldType eq CustomFieldTypeEnum.DOUBLE}">
-									<f:converter converterId="javax.faces.Double" />
+									<f:converter converterId="jakarta.faces.Double" />
 								</h:outputText>
 								<h:outputText id="#{entity[field.dbFieldname]}_out_boolean" value="#{entity[field.dbFieldname]}" styleClass="field-value"
 									rendered="#{field.fieldType eq CustomFieldTypeEnum.BOOLEAN}">
-									<f:converter converterId="javax.faces.Boolean" />
+									<f:converter converterId="jakarta.faces.Boolean" />
 								</h:outputText>
 								<h:outputText id="#{entity[field.dbFieldname]}_out_entity" value="#{entity[field.dbFieldname.concat('_TXTlabel')]}" styleClass="field-value"
 									rendered="#{field.fieldType eq CustomFieldTypeEnum.ENTITY}">
-									<!-- 									<f:converter converterId="javax.faces.Long" /> -->
+									<!-- 									<f:converter converterId="jakarta.faces.Long" /> -->
 								</h:outputText>
 							</f:facet>
 							<f:facet name="input">
@@ -252,29 +244,29 @@
 									<f:selectItem itemValue="#{null}" itemLabel="" />
 									<f:selectItem itemValue="#{true}" itemLabel="true" />
 									<f:selectItem itemValue="#{false}" itemLabel="false" />
-									<f:converter converterId="javax.faces.Boolean" />
+									<f:converter converterId="jakarta.faces.Boolean" />
 								</p:selectOneMenu>
 
 							</f:facet>
 						</p:cellEditor>
 					</p:columns>
 					<p:column headerText="#{messages['commons.actions']}" exportable="false">
-						<p:commandButton icon="ui-icon-search" oncomplete="PF('ctRowDetailsDialog').show()" update=":ctRowDetailsDialog" title="#{messages['commons.view']}">
+						<p:commandButton icon="pi pi-search" oncomplete="PF('ctRowDetailsDialog').show()" update=":ctRowDetailsDialog" title="#{messages['commons.view']}">
 							<f:setPropertyActionListener target="#{customTableBean.rowValues}" value="#{entity}" />
 							<f:setPropertyActionListener target="#{customTableBean.newEntity}" value="false" />
 						</p:commandButton>
-						<p:commandButton id="deletelink" icon="ui-icon-trash" action="#{customTableBean.delete(entity['id'])}" rendered="#{customTableBean.edit}" update=":ctForm:ctSearchResults"
+						<p:commandButton id="deletelink" icon="pi pi-trash" action="#{customTableBean.delete(entity['id'])}" rendered="#{customTableBean.edit}" update=":ctForm:ctSearchResults"
 							process="@this" immediate="true">
-							<p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert" />
+							<p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle" />
 						</p:commandButton>
 					</p:column>
 
 					<c:if test="#{customTableBean.edit}">
 						<f:facet name="footer" layout="block">
 							<h:panelGroup styleClass="clearLeft" style="margin-top:20px" layout="block">
-								<p:commandButton id="deleteMany" value="#{messages['commons.deleteMultiple']}" action="#{customTableBean.deleteMany()}" icon="ui-icon-trash"
+								<p:commandButton id="deleteMany" value="#{messages['commons.deleteMultiple']}" action="#{customTableBean.deleteMany()}" icon="pi pi-trash"
 									process=":ctForm:ctSearchResults" partialSubmit="true" partialSubmitFilter=":not([name*='addUpdateFields'])" update=":ctForm:ctSearchResults">
-									<p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDeleteMultiple']}" icon="ui-icon-alert" />
+									<p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDeleteMultiple']}" icon="pi pi-exclamation-triangle" />
 								</p:commandButton>
 							</h:panelGroup>
 						</f:facet>
@@ -357,11 +349,11 @@
 									</c:if>
 									<c:if test="#{field.fieldType eq CustomFieldTypeEnum.ENTITY}">
 										<!-- 										<p:inputText id="#{field.dbFieldname}" value="#{customTableBean.rowValues[field.dbFieldname]}" required="#{field.valueRequired}" disabled="true"> -->
-										<!-- 											<f:converter converterId="javax.faces.Long" /> -->
+										<!-- 											<f:converter converterId="jakarta.faces.Long" /> -->
 										<!-- 										</p:inputText> -->
 										<p:inputText id="#{field.dbFieldname}_TXTlabel" value="#{customTableBean.rowValues[field.dbFieldname.concat('_TXTlabel')]}" disabled="true" />
-										<p:commandButton disabled="#{!customTableBean.newEntity and !field.allowEdit}" immediate="true" onclick="PF('#{field.dbFieldname}_dlg').show()" icon="ui-icon-search" type="button" />
-										<p:commandButton disabled="#{!customTableBean.newEntity and !field.allowEdit}" immediate="true" rendered="#{!field.valueRequired}" update="#{field.dbFieldname}_TXTlabel" icon="ui-icon-close">
+										<p:commandButton disabled="#{!customTableBean.newEntity and !field.allowEdit}" immediate="true" onclick="PF('#{field.dbFieldname}_dlg').show()" icon="pi pi-search" type="button" />
+										<p:commandButton disabled="#{!customTableBean.newEntity and !field.allowEdit}" immediate="true" rendered="#{!field.valueRequired}" update="#{field.dbFieldname}_TXTlabel" icon="pi pi-times">
 											<f:setPropertyActionListener target="#{customTableBean.rowValues[field.dbFieldname]}" value="#{null}" />
 											<f:setPropertyActionListener target="#{customTableBean.rowValues[field.dbFieldname.concat('_TXTlabel')]}" value="#{null}" />
 										</p:commandButton>

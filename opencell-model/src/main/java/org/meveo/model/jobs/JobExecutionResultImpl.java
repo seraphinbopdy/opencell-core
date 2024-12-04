@@ -19,35 +19,36 @@
 package org.meveo.model.jobs;
 
 import java.io.Serializable;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 import org.meveo.model.CFEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.NotifiableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 
 /**
  * Job execution statistics
@@ -58,39 +59,39 @@ import org.meveo.model.NotifiableEntity;
 @CustomFieldEntity(cftCodePrefix = "JobExecutionResultImpl")
 @Table(name = "job_execution")
 @NotifiableEntity
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "job_execution_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "job_execution_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "JobExecutionResult.countHistoryToPurgeByDate", query = "select count(*) FROM JobExecutionResultImpl hist WHERE hist.startDate<=:date"),
         @NamedQuery(name = "JobExecutionResult.purgeHistoryByDate", query = "delete JobExecutionResultImpl hist WHERE hist.startDate<=:date"),
         @NamedQuery(name = "JobExecutionResult.countHistoryToPurgeByDateAndJobInstance", query = "select count(*) FROM JobExecutionResultImpl hist WHERE hist.startDate<=:date and hist.jobInstance=:jobInstance"),
         @NamedQuery(name = "JobExecutionResult.purgeHistoryByDateAndJobInstance", query = "delete JobExecutionResultImpl hist WHERE hist.startDate<=:date and hist.jobInstance=:jobInstance"),
         @NamedQuery(name = "JobExecutionResult.updateProgress", query = "update JobExecutionResultImpl set endDate=:endDate, nbItemsToProcess=:nbItemsToProcess, nbItemsCorrectlyProcessed=:nbItemsCorrectlyProcessed, nbItemsProcessedWithError=:nbItemsProcessedWithError, nbItemsProcessedWithWarning=:nbItemsProcessedWithWarning, report=:report, status=:status where id=:id"),
-        @NamedQuery(name = "JobExecutionResult.cancelUnfinishedJobsByNode", query = "update JobExecutionResultImpl je set je.status='SHUTDOWN', je.endDate=NOW(), je.report=CONCAT('Job cancelled due to the server was shutdown in the middle of job execution/n', je.report) where je.status = 'RUNNING' and je.nodeName=:nodeName"),
-        @NamedQuery(name = "JobExecutionResult.listUnfinishedJobs", query = "select jr from JobExecutionResultImpl jr where jr.id in (select distinct (case when je.parentJobExecutionResult is null then je.id else je.parentJobExecutionResult end) from JobExecutionResultImpl je where je.status = 'RUNNING' or je.status = 'SHUTDOWN')", hints = {@QueryHint(name = "org.hibernate.readOnly", value = "true")}) })
+        @NamedQuery(name = "JobExecutionResult.cancelUnfinishedJobsByNode", query = "update JobExecutionResultImpl je set je.status='SHUTDOWN', je.endDate=function('NOW'), je.report=CONCAT('Job cancelled due to the server was shutdown in the middle of job execution/n', je.report) where je.status = 'RUNNING' and je.nodeName=:nodeName"),
+        @NamedQuery(name = "JobExecutionResult.listUnfinishedJobs", query = "select jr from JobExecutionResultImpl jr where jr.id in (select distinct (case when je.parentJobExecutionResult is null then je.id else je.parentJobExecutionResult end) from JobExecutionResultImpl je where je.status = 'RUNNING' or je.status = 'SHUTDOWN')", hints = {
+                @QueryHint(name = "org.hibernate.readOnly", value = "true") }) })
 
 public class JobExecutionResultImpl extends CFEntity {
 
     private static final long serialVersionUID = 430457580612075457L;
 
     @Transient
-    Map<String,Object> jobParams = new TreeMap<>();
+    Map<String, Object> jobParams = new TreeMap<>();
 
     @Transient
     private int invoiceCount = 0;
 
-    public Object getJobParam(String key){
+    public Object getJobParam(String key) {
         return jobParams.get(key);
     }
 
-
-    public void addJobParam(String key, Object value){
-        jobParams.put(key,value);
+    public void addJobParam(String key, Object value) {
+        jobParams.put(key, value);
     }
 
-    public void setJobParams(Map<String,Object> jobParams){
-        this.jobParams=jobParams;
+    public void setJobParams(Map<String, Object> jobParams) {
+        this.jobParams = jobParams;
     }
 
-    public Map<String,Object> getJobParams(){
+    public Map<String, Object> getJobParams() {
         return this.jobParams;
     }
 
@@ -174,7 +175,7 @@ public class JobExecutionResultImpl extends CFEntity {
     /**
      * General report displayed in GUI, put here info that do not fit other places
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "report")
     private String report;
 
@@ -191,8 +192,7 @@ public class JobExecutionResultImpl extends CFEntity {
     private boolean moreToProcess = false;
 
     /**
-     * Indicates that job has not completed fully because is reached the maximum number of items to process,
-     * the maximum run duration in minutes or the maximum time at which it must be stopped.
+     * Indicates that job has not completed fully because is reached the maximum number of items to process, the maximum run duration in minutes or the maximum time at which it must be stopped.
      */
     @Transient
     private boolean limitExceeded = false;
@@ -553,7 +553,7 @@ public class JobExecutionResultImpl extends CFEntity {
     public synchronized void addReport(String messageToAppend) {
         this.report = (this.report == null ? "" : (this.report + " \n ")) + messageToAppend;
     }
-    
+
     /**
      * Append message to report to the beginning
      * 
@@ -650,16 +650,15 @@ public class JobExecutionResultImpl extends CFEntity {
     }
 
     /**
-     * @return True if the that job has not completed fully because is reached the maximum number of items to process,
-     * he maximum run duration in minutes or the maximum time at which it must be stopped.
+     * @return True if the that job has not completed fully because is reached the maximum number of items to process, he maximum run duration in minutes or the maximum time at which it must be stopped.
      */
     public boolean isLimitExceeded() {
         return limitExceeded;
     }
 
     /**
-     * @param limitExceeded Set to true to indicate that job has not completed fully because is reached the maximum number of items to process,
-     *                          the maximum run duration in minutes or the maximum time at which it must be stopped.
+     * @param limitExceeded Set to true to indicate that job has not completed fully because is reached the maximum number of items to process, the maximum run duration in minutes or the maximum time at which it must be
+     *        stopped.
      */
     public void setLimitExceeded(boolean limitExceeded) {
         this.limitExceeded = limitExceeded;
@@ -793,6 +792,7 @@ public class JobExecutionResultImpl extends CFEntity {
     public void setInvoiceCount(int invoiceCount) {
         this.invoiceCount = invoiceCount;
     }
+
     public void incrementInvoiceNumber(int count) {
         this.invoiceCount += count;
     }

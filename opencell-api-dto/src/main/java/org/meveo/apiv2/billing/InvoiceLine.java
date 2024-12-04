@@ -6,8 +6,7 @@ package org.meveo.apiv2.billing;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
 import org.meveo.api.dto.CustomFieldsDto;
@@ -17,9 +16,10 @@ import org.meveo.model.billing.InvoiceLineStatusEnum;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableInvoiceLine.class)
 public interface InvoiceLine extends Resource {
 

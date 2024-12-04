@@ -82,7 +82,7 @@ public class ParamBean {
      * Is multitenancy enabled
      */
     private static Boolean multiTenancyEnabled;
-    
+
     /**
      * Just a static object for synchronized method
      */
@@ -156,8 +156,7 @@ public class ParamBean {
     }
 
     /**
-     * Return an application configuration instance of the specific provider, if it does not exists, it will be created By the default the file name is
-     * &gt;providerCode.properties&lt;
+     * Return an application configuration instance of the specific provider, if it does not exists, it will be created By the default the file name is &gt;providerCode.properties&lt;
      * 
      * @param provider Provider code
      * @return Application configuration instance
@@ -202,12 +201,12 @@ public class ParamBean {
     public static boolean isMultitenancyEnabled() {
 
         if (multiTenancyEnabled == null) {
-            
+
             ParamBean currentInstance = getInstance();
             if (currentInstance == null) {
                 return multiTenancyEnabled;
             }
-            
+
             multiTenancyEnabled = Boolean.valueOf(currentInstance.getProperty("meveo.multiTenancy", "false"));
         }
         return multiTenancyEnabled;
@@ -240,7 +239,7 @@ public class ParamBean {
     }
 
     public String getProvidersRootDir() {
-    	ParamBean currentInstance = getInstance();
+        ParamBean currentInstance = getInstance();
         if (currentInstance == null) {
             return null;
         }
@@ -284,7 +283,7 @@ public class ParamBean {
                 saveProperties(file);
                 result = true;
             } else {
-                try(FileInputStream propertyFileInputStream = new FileInputStream(_propertyFile)){
+                try (FileInputStream propertyFileInputStream = new FileInputStream(_propertyFile)) {
                     pr.load(propertyFileInputStream);
                     setProperties(pr);
                     result = true;
@@ -293,7 +292,7 @@ public class ParamBean {
             loadDefaultProperties();
         } catch (IOException e1) {
             log.error("Impossible to create :" + _propertyFile);
-        }finally {
+        } finally {
 
         }
         // log.debug("-Fin initialize , result:" + result
@@ -617,8 +616,7 @@ public class ParamBean {
     }
 
     /**
-     * Get a property value for a given provider or if not set - from a main provider. Sets the property to a default value in main provider's configuration if value was not set
-     * previously.
+     * Get a property value for a given provider or if not set - from a main provider. Sets the property to a default value in main provider's configuration if value was not set previously.
      * 
      * @param key Property key
      * @param defaultValue Default value
@@ -712,23 +710,23 @@ public class ParamBean {
         }
         return false;
     }
-    
+
     /**
      * Check if boolean property is filled, the boolean value will be returned. if the value is not filled or not well spelled, null value is returned
      *
      * @param key Property key
      * @return true/false/null
      */
-	public Boolean getBooleanValue(String key) {
-		if (getProperty(key, "").equalsIgnoreCase("true")) {
-			return true;
-		}
-		if (getProperty(key, "").equalsIgnoreCase("false")) {
-			return false;
-		}
-		return null;
-	}
-	
+    public Boolean getBooleanValue(String key) {
+        if (getProperty(key, "").equalsIgnoreCase("true")) {
+            return true;
+        }
+        if (getProperty(key, "").equalsIgnoreCase("false")) {
+            return false;
+        }
+        return null;
+    }
+
     /**
      * Check if boolean property is filled, the boolean value will be returned. if the value is not filled or not well spelled, defaultValue value is returned
      *
@@ -736,8 +734,8 @@ public class ParamBean {
      * @param defaultValue Default value
      * @return true/false/null
      */
-	public boolean getBooleanValue(String key, boolean defaultValue) {
-		return getBooleanValue(key) != null ? getBooleanValue(key) : defaultValue;
-	}
-	
+    public boolean getBooleanValue(String key, boolean defaultValue) {
+        return getBooleanValue(key) != null ? getBooleanValue(key) : defaultValue;
+    }
+
 }

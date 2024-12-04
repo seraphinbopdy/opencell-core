@@ -2,25 +2,26 @@
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 
+<!--  See org.hibernate.cfg.AvailableSettings class for hibernate/JPA configuration properties -->
+<!--  See hibernate.default_batch_fetch_size parameter in FetchSettings and @BatchSize annotation -->
+
     <persistence-unit name="MeveoAdmin">
         <jta-data-source>java:jboss/datasources/MeveoAdminDatasource</jta-data-source>
         <!-- <jta-data-source>java:jboss/datasources/MeveoAdminMariaDBDatasource</jta-data-source> -->
         <jar-file>lib/opencell-model-${project.version}.jar</jar-file>
+        <jar-file>lib/opencell-custom-api-${project.version}.jar</jar-file>
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
             <property name="hibernate.archive.autodetection" value="class" />
             <!-- hibernate.hbm2ddl.auto=validate will only validate DB schema. DB migration must be done manually.
                  hibernate.hbm2ddl.auto=update will migrate DB schema at application startup and will validate DB chema. Use environment variable "DB_MIGRATION_MANUAL=true" to turn off automatic database update at application startup. Db schema validation would still occur. -->
             <property name="hibernate.hbm2ddl.auto" value="update" />
-            <property name="hibernate.show_sql" value="false" />
-            <property name="format_sql" value="false" />
-            <property name="show_sql" value="false" />
-            <property name="use_sql_comments" value="false" />
             <!-- <property name="hibernate.default_schema" value="public" /> Disable for Mysql/mariaDB instalation -->
+            
             <property name="hibernate.cache.use_second_level_cache" value="true" />
             <property name="hibernate.cache.use_query_cache" value="true" />
-            <property name="hibernate.cache.use_minimal_puts" value="true" />
             <property name="hibernate.cache.default_cache_concurrency_strategy" value="read-write" />
+            
             <property name="hibernate.generate_statistics" value="false" />
             <property name="hibernate.discriminator.ignore_explicit_for_joined" value="true" />
             <property name="hibernate.proc.param_null_passing" value="true" />
@@ -34,16 +35,18 @@
             <property name="hibernate.order_updates" value="true" />
             <property name="hibernate.jdbc.batch_versioned_data" value="true" />
 
-            <!-- Revert that @ManyToOne wont result in related entity select after the update call -->
+            <!-- Revert that @ManyToOne wont result in related entity select after the update call. Revert that query compliance is not checked. Skip duplicate ID_GENERATOR ERROR   -->
+            <property name="hibernate.jpa.compliance" value="false" />
+            <property name="hibernate.jpa.compliance.query" value="false" />
             <property name="hibernate.jpa.compliance.proxy" value="false" />
-
-            <property name="hibernate.ejb.event.create" value="org.meveo.jpa.event.CreateEventListener" />
-
-            <!--skip duplicate ID_GENERATOR ERROR IN WF17 -->
             <property name="hibernate.jpa.compliance.global_id_generators" value="false" />
+            <property name="hibernate.query.jpaql_strict_compliance" value="false" />
+            <property name="hibernate.query.plan_cache_max_size" value="4096" />
+
+            <property name="hibernate.event.listener.create" value="org.meveo.jpa.event.CreateEventListener" />
 
             <!-- Additional query functions for accessing JSON -->
-            <property name="hibernate.dialect" value="org.meveo.commons.persistence.postgresql.MeveoPostgreSQLDialect" />
+<!--             <property name="hibernate.dialect" value="org.meveo.commons.persistence.postgresql.MeveoPostgreSQLDialect" /> -->
 
             <!-- Flush mode to COMMIT for hibernate -->
             <property name="org.hibernate.flushMode" value="COMMIT"/>
@@ -56,18 +59,18 @@
         <!-- <jar-file>C:\\project\\git\\meveo\\opencell-model\\target\\opencell-model-${project.version}.jar</jar-file> -->
         <!-- <jar-file>C:\\mvn_repository\\com\\opencellsoft\\opencell-model\\5.0.1-SNAPSHOT\\opencell-model-${project.version}.jar</jar-file> -->
         <jar-file>/opt/jboss/opencell-model.jar</jar-file>
+        <jar-file>/opt/jboss/opencell-custom-api.jar</jar-file>
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
             <property name="hibernate.archive.autodetection" value="class" />
-            <property name="hibernate.show_sql" value="false" />
-            <property name="format_sql" value="false" />
-            <property name="use_sql_comments" value="false" />
+            
+            <!-- <property name="hibernate.default_schema" value="public" /> -->
+            
             <property name="hibernate.cache.use_second_level_cache" value="true" />
             <property name="hibernate.cache.use_query_cache" value="true" />
-            <!-- <property name="hibernate.default_schema" value="public" /> -->
-            <property name="hibernate.cache.use_minimal_puts" value="true" />
             <property name="hibernate.cache.default_cache_concurrency_strategy" value="read-write" />
             <property name="hibernate.cache.region.factory_class" value="org.jboss.as.jpa.hibernate5.infinispan.SharedInfinispanRegionFactory" />
+            
             <property name="hibernate.generate_statistics" value="false" />
             <property name="hibernate.discriminator.ignore_explicit_for_joined" value="true" />
             <property name="hibernate.proc.param_null_passing" value="true" />
@@ -80,17 +83,19 @@
             <property name="hibernate.order_inserts" value="true" />
             <property name="hibernate.order_updates" value="true" />
             <property name="hibernate.jdbc.batch_versioned_data" value="true" />
-
-            <!-- Revert that @ManyToOne wont result in related entity select after the update call -->
+            
+            <!-- Revert that @ManyToOne wont result in related entity select after the update call. Revert that query compliance is not checked. Skip duplicate ID_GENERATOR ERROR   -->
+            <property name="hibernate.jpa.compliance" value="false" />
+            <property name="hibernate.jpa.compliance.query" value="false" />
             <property name="hibernate.jpa.compliance.proxy" value="false" />
-
-            <property name="hibernate.ejb.event.create" value="org.meveo.jpa.event.CreateEventListener" />
-
-            <!--skip duplicate ID_GENERATOR ERROR IN WF17 -->
             <property name="hibernate.jpa.compliance.global_id_generators" value="false" />
+            <property name="hibernate.query.jpaql_strict_compliance" value="false" />
+            <property name="hibernate.query.plan_cache_max_size" value="4096" />
+
+            <property name="hibernate.event.listener.create" value="org.meveo.jpa.event.CreateEventListener" />
 
             <!-- Additional query functions for accessing JSON -->
-            <property name="hibernate.dialect" value="org.meveo.commons.persistence.postgresql.MeveoPostgreSQLDialect" />
+<!--             <property name="hibernate.dialect" value="org.meveo.commons.persistence.postgresql.MeveoPostgreSQLDialect" /> -->
 
             <!-- Flush mode to COMMIT for hibernate -->
             <property name="org.hibernate.flushMode" value="COMMIT"/>

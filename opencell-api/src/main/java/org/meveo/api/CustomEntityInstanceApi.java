@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -202,7 +202,7 @@ public class CustomEntityInstanceApi extends BaseApi {
         handleMissingParameters();
 
         if(!currentUser.isForcedAuthentication() && currentUser.getRoles().isEmpty()) {
-            Set<String> roles = userService.findByUsername(currentUser.getUserName(), true, false, true).getRoles();
+            Set<String> roles = userService.findByUsername(currentUser.getUserName(), true, true).getRoles();
             if(!roles.contains(CustomEntityTemplate.getReadPermission(cetCode)) && !roles.contains("ReadAllCE")) {
                 if (!currentUser.hasRoles(CustomEntityTemplate.getReadPermission(cetCode), "ReadAllCE")) {
                     throw new ActionForbiddenException("User does not have permission '" + CustomEntityTemplate.getReadPermission(cetCode) + "'");

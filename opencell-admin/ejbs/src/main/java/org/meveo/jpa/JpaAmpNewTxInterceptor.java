@@ -18,10 +18,11 @@
 
 package org.meveo.jpa;
 
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
 import java.io.Serializable;
+
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * Interceptor that in case of application managed persistence context, a new EM will be instantiated for the period of a method call

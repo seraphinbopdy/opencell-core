@@ -18,9 +18,9 @@
 
 package org.meveo.admin.exception;
 
-import javax.ejb.ApplicationException;
-
 import org.meveo.model.rating.EDRRejectReasonEnum;
+
+import jakarta.ejb.ApplicationException;
 
 /**
  * Groups rating related exceptions

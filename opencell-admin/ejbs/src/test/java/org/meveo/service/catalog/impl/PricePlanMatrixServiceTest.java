@@ -18,45 +18,39 @@
 
 package org.meveo.service.catalog.impl;
 
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.api.dto.catalog.PricePlanMatrixDto;
-import org.meveo.model.catalog.ColumnTypeEnum;
-import org.meveo.model.catalog.PricePlanMatrix;
-import org.meveo.model.catalog.PricePlanMatrixColumn;
-import org.meveo.model.catalog.PricePlanMatrixLine;
-import org.meveo.model.catalog.PricePlanMatrixValue;
-import org.meveo.model.catalog.PricePlanMatrixVersion;
-import org.meveo.model.catalog.ProductChargeTemplate;
-import org.meveo.model.catalog.RecurringChargeTemplate;
-import org.meveo.model.cpq.Attribute;
-import org.meveo.model.cpq.Product;
-import org.meveo.model.cpq.ProductVersion;
-import org.meveo.model.cpq.QuoteAttribute;
-import org.meveo.model.cpq.enums.AttributeTypeEnum;
-import org.meveo.model.cpq.enums.VersionStatusEnum;
-import org.meveo.service.base.PersistenceService;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.List;
 
-import static java.math.BigDecimal.valueOf;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.model.catalog.PricePlanMatrix;
+import org.meveo.model.catalog.RecurringChargeTemplate;
+import org.meveo.service.base.PersistenceService;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PricePlanMatrixServiceTest {
 
+    @Spy
+    @InjectMocks
+    private PricePlanMatrixService spyPricePlanMatrixService;
+
     @Test
     public void create_test() throws ParseException {
-        PricePlanMatrixService spyPricePlanMatrixService = spy(new PricePlanMatrixService());
         RecurringChargeTemplate recurringChargeTemplate = new RecurringChargeTemplate();
         recurringChargeTemplate.setCode("REC_CODE");
 
@@ -72,21 +66,26 @@ public class PricePlanMatrixServiceTest {
         pricePlanMatrix2.setValidityFrom(new SimpleDateFormat("yyyy-MM-dd").parse("2018-01-01"));
         pricePlanMatrix2.setValidityDate(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
 
-
         PricePlanMatrix pricePlanMatrix3 = spy(new PricePlanMatrix());
         pricePlanMatrix3.setId(3L);
         pricePlanMatrix3.setValidityFrom(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
         pricePlanMatrix3.setValidityDate(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
 
-        doNothing().when((PersistenceService)spyPricePlanMatrixService).create(pricePlanMatrix3);
+        doNothing().when(spyPricePlanMatrixService).create(pricePlanMatrix3);
         doReturn(Arrays.asList(pricePlanMatrix1, pricePlanMatrix2)).when(spyPricePlanMatrixService).listByChargeCode("REC_CODE");
+
+        // Use the form "doAnswer().when().method" instead of "when().thenAnswer()" because on spied object the later will call a real method at the setup time, which will fail because of null values being passed.
+        doAnswer(new Answer<PricePlanMatrix>() {
+            public PricePlanMatrix answer(InvocationOnMock invocation) throws Throwable {
+                return pricePlanMatrix3;
+            }
+        }).when(spyPricePlanMatrixService).findById(eq(3L));
 
         spyPricePlanMatrixService.createPP(pricePlanMatrix3);
     }
 
     @Test(expected = BusinessException.class)
     public void create_price_plan_overlapped_validity_date_test() throws ParseException {
-        PricePlanMatrixService spyPricePlanMatrixService = spy(new PricePlanMatrixService());
         RecurringChargeTemplate recurringChargeTemplate = new RecurringChargeTemplate();
         recurringChargeTemplate.setCode("REC_CODE");
 
@@ -108,6 +107,13 @@ public class PricePlanMatrixServiceTest {
         pricePlanMatrix3.setValidityDate(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
 
         doReturn(Arrays.asList(pricePlanMatrix1, pricePlanMatrix2)).when(spyPricePlanMatrixService).listByChargeCode("REC_CODE");
+
+        // Use the form "doAnswer().when().method" instead of "when().thenAnswer()" because on spied object the later will call a real method at the setup time, which will fail because of null values being passed.
+        doAnswer(new Answer<PricePlanMatrix>() {
+            public PricePlanMatrix answer(InvocationOnMock invocation) throws Throwable {
+                return pricePlanMatrix1;
+            }
+        }).when(spyPricePlanMatrixService).findById(eq(1L));
 
         spyPricePlanMatrixService.createPP(pricePlanMatrix3);
     }

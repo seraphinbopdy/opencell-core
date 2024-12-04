@@ -18,12 +18,12 @@
 
 package org.meveo.service.payments.impl;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.model.payments.PaymentGatewayRumSequence;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.billing.impl.ServiceSingleton;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi

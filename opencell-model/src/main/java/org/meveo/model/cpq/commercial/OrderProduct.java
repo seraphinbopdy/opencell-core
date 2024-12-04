@@ -1,6 +1,6 @@
 package org.meveo.model.cpq.commercial;
 
-import static javax.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.LAZY;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -8,27 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ColumnResult;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SqlResultSetMapping;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
-
+import jakarta.persistence.NamedNativeQuery;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableCFEntity;
@@ -41,344 +21,340 @@ import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.cpq.ProductVersion;
 import org.meveo.model.quote.QuoteProduct;
 
-/** 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
+
+/**
  * @author Tarik F.
  * @version 11.0
  *
  */
 @Entity
 @Table(name = "cpq_order_product")
-@CustomFieldEntity(cftCodePrefix = "OrderProduct",inheritCFValuesFrom = "quoteProduct")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cpq_order_product_seq")})
-@NamedQueries({
-	@NamedQuery(name = "OrderProduct.findOrderProductByOrder", query = "FROM OrderProduct op WHERE op.order.id = :commercialOrderId")
-})
+@CustomFieldEntity(cftCodePrefix = "OrderProduct", inheritCFValuesFrom = "quoteProduct")
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_order_product_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "OrderProduct.findOrderProductByOrder", query = "select op FROM OrderProduct op WHERE op.order.id = :commercialOrderId") })
 
 @NamedNativeQuery(name = "OrderProduct.calculateMrr", query = "SELECT " +
-		"                        SUM(" +
-		"                            CASE " +
-		"                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN " +
-		"                                    price.amount_with_tax / NULLIF(cal.period_length, 0)" +
-		"                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN " +
-		"                                    (price.amount_with_tax * 365 / 12) / NULLIF(cal.period_length, 0)" +
-		"                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN " +
-		"                                    price.amount_with_tax * (select count(*) from {h-schema}cat_calendar_days d where  d.calendar_id = cal.id) / 12" +
-		"                                ELSE price.amount_with_tax" +
-		"                            END" +
-		"                        ) AS amount" +
-		"                    FROM {h-schema}cpq_order_product p" +
-		"                    JOIN {h-schema}order_article_line art ON art.order_product_id = p.id" +
-		"                    JOIN {h-schema}order_price price ON price.order_article_line_id = art.id" +
-		"                    JOIN {h-schema}cat_charge_template ch ON ch.id = price.charge_template_id" +
-		"                    JOIN {h-schema}cat_calendar cal ON cal.id = ch.calendar_id" +
-		"                    WHERE price.price_type = 'RECURRING'" +
-		"                    AND price.price_level = 'PRODUCT'" +
-		"                    AND (cal.period_unit IS NULL OR cal.period_unit IN (2, 5))" +
-		"                    AND p.id = :orderProductId" +
-		"                    GROUP BY p.id",
-		resultSetMapping = "BigDecimalMapping")
+        "                        SUM(" +
+        "                            CASE " +
+        "                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN " +
+        "                                    price.amount_with_tax / NULLIF(cal.period_length, 0)" +
+        "                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN " +
+        "                                    (price.amount_with_tax * 365 / 12) / NULLIF(cal.period_length, 0)" +
+        "                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN " +
+        "                                    price.amount_with_tax * (select count(*) from {h-schema}cat_calendar_days d where  d.calendar_id = cal.id) / 12" +
+        "                                ELSE price.amount_with_tax" +
+        "                            END" +
+        "                        ) AS amount" +
+        "                    FROM {h-schema}cpq_order_product p" +
+        "                    JOIN {h-schema}order_article_line art ON art.order_product_id = p.id" +
+        "                    JOIN {h-schema}order_price price ON price.order_article_line_id = art.id" +
+        "                    JOIN {h-schema}cat_charge_template ch ON ch.id = price.charge_template_id" +
+        "                    JOIN {h-schema}cat_calendar cal ON cal.id = ch.calendar_id" +
+        "                    WHERE price.price_type = 'RECURRING'" +
+        "                    AND price.price_level = 'PRODUCT'" +
+        "                    AND (cal.period_unit IS NULL OR cal.period_unit IN (2, 5))" +
+        "                    AND p.id = :orderProductId" +
+        "                    GROUP BY p.id",
+        resultSetMapping = "BigDecimalMapping")
+
 public class OrderProduct extends AuditableCFEntity {
 
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1316379006709425156L;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id", nullable = false)
-	@NotNull
-	private CommercialOrder order;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_service_commercial_id")
-	private OrderLot orderServiceCommercial;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_offer_id",referencedColumnName = "id") 
-	private OrderOffer orderOffer;
-	 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "product_version_id")
-	private ProductVersion productVersion;
-
-    
-	@Column(name = "quantity", nullable = false, scale = NB_DECIMALS, precision = NB_PRECISION)
-	@NotNull
-	private BigDecimal quantity;
-
-	@OneToMany(mappedBy = "orderProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<OrderAttribute> orderAttributes=new ArrayList<>();
-
-	/**
-	 * discountPlan attached to this orderProduct
-	 */
-    @ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "discount_plan_id", referencedColumnName = "id")
-	private DiscountPlan discountPlan;
-    
-    
     /**
-   	 * quote product attached to this OrderProduct
-   	 */
-       
-   	@OneToOne(fetch = FetchType.LAZY)
+     * 
+     */
+    private static final long serialVersionUID = 1316379006709425156L;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    @NotNull
+    private CommercialOrder order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_service_commercial_id")
+    private OrderLot orderServiceCommercial;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_offer_id", referencedColumnName = "id")
+    private OrderOffer orderOffer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_version_id")
+    private ProductVersion productVersion;
+
+    @Column(name = "quantity", nullable = false, scale = NB_DECIMALS, precision = NB_PRECISION)
+    @NotNull
+    private BigDecimal quantity;
+
+    @OneToMany(mappedBy = "orderProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderAttribute> orderAttributes = new ArrayList<>();
+
+    /**
+     * discountPlan attached to this orderProduct
+     */
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "discount_plan_id", referencedColumnName = "id")
+    private DiscountPlan discountPlan;
+
+    /**
+     * quote product attached to this OrderProduct
+     */
+
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quote_product_id")
-   	private QuoteProduct quoteProduct;
-   	
+    private QuoteProduct quoteProduct;
+
     /** Delivery timestamp. */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "delivery_date")
     private Date deliveryDate;
-    
-    /**production action type */
+
+    /** production action type */
     @Enumerated(EnumType.STRING)
     @Column(name = "production_action_type", length = 10)
-   	private ProductActionTypeEnum productActionType = ProductActionTypeEnum.MODIFY;
-    
+    private ProductActionTypeEnum productActionType = ProductActionTypeEnum.MODIFY;
+
     /** termination timestamp. */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "termination_date")
     private Date terminationDate;
-    
+
     /** Termination reason. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sub_termin_reason_id")
     private SubscriptionTerminationReason terminationReason;
-    
+
     /** Current product status */
     @Enumerated(EnumType.STRING)
     @Column(name = "instance_status", length = 10)
-   	private InstanceStatusEnum status;
+    private InstanceStatusEnum status;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "service_instance_id")
-	private ServiceInstance serviceInstance;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_instance_id")
+    private ServiceInstance serviceInstance;
 
-	@OneToMany(mappedBy = "orderProduct", fetch = FetchType.LAZY)
-	private List<OrderArticleLine> orderArticleLines;
+    @OneToMany(mappedBy = "orderProduct", fetch = FetchType.LAZY)
+    private List<OrderArticleLine> orderArticleLines;
 
 	/** MRR. */
 	@Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
 	private BigDecimal mrr;
 
-	public void update(OrderProduct other) {
-    	this.orderOffer = other.orderOffer;
-    	this.order = other.order;
-		this.orderServiceCommercial = other.orderServiceCommercial;
-		this.productVersion = other.productVersion;
-		this.quantity = other.quantity;
-		this.orderAttributes.clear();
-		this.orderAttributes.addAll(other.orderAttributes);
-        this.discountPlan=other.getDiscountPlan();
-        this.quoteProduct=other.getQuoteProduct();
-        this.deliveryDate=other.deliveryDate;
-        this.productActionType=other.productActionType;
-        this.terminationDate=other.terminationDate;
-        this.terminationReason=other.terminationReason;
-		this.serviceInstance = other.serviceInstance;
+    public void update(OrderProduct other) {
+        this.orderOffer = other.orderOffer;
+        this.order = other.order;
+        this.orderServiceCommercial = other.orderServiceCommercial;
+        this.productVersion = other.productVersion;
+        this.quantity = other.quantity;
+        this.orderAttributes.clear();
+        this.orderAttributes.addAll(other.orderAttributes);
+        this.discountPlan = other.getDiscountPlan();
+        this.quoteProduct = other.getQuoteProduct();
+        this.deliveryDate = other.deliveryDate;
+        this.productActionType = other.productActionType;
+        this.terminationDate = other.terminationDate;
+        this.terminationReason = other.terminationReason;
+        this.serviceInstance = other.serviceInstance;
 		this.mrr = other.mrr;
     }
 
-	@Override
-	public ICustomFieldEntity[] getParentCFEntities() {
-		if (quoteProduct != null) {
-			return new ICustomFieldEntity[] { quoteProduct };
-		}
-		return null;
-	}
-	
-	/**
-	 * @return the order
-	 */
-	public CommercialOrder getOrder() {
-		return order;
-	}
+    @Override
+    public ICustomFieldEntity[] getParentCFEntities() {
+        if (quoteProduct != null) {
+            return new ICustomFieldEntity[] { quoteProduct };
+        }
+        return null;
+    }
 
+    /**
+     * @return the order
+     */
+    public CommercialOrder getOrder() {
+        return order;
+    }
 
-	/**
-	 * @param order the order to set
-	 */
-	public void setOrder(CommercialOrder order) {
-		this.order = order;
-	}
+    /**
+     * @param order the order to set
+     */
+    public void setOrder(CommercialOrder order) {
+        this.order = order;
+    }
 
+    /**
+     * @return the orderServiceCommercial
+     */
+    public OrderLot getOrderServiceCommercial() {
+        return orderServiceCommercial;
+    }
 
-	/**
-	 * @return the orderServiceCommercial
-	 */
-	public OrderLot getOrderServiceCommercial() {
-		return orderServiceCommercial;
-	}
+    /**
+     * @param orderServiceCommercial the orderServiceCommercial to set
+     */
+    public void setOrderServiceCommercial(OrderLot orderServiceCommercial) {
+        this.orderServiceCommercial = orderServiceCommercial;
+    }
 
+    /**
+     * @return the orderOffer
+     */
+    public OrderOffer getOrderOffer() {
+        return orderOffer;
+    }
 
-	/**
-	 * @param orderServiceCommercial the orderServiceCommercial to set
-	 */
-	public void setOrderServiceCommercial(OrderLot orderServiceCommercial) {
-		this.orderServiceCommercial = orderServiceCommercial;
-	}
+    /**
+     * @param orderOffer the orderOffer to set
+     */
+    public void setOrderOffer(OrderOffer orderOffer) {
+        this.orderOffer = orderOffer;
+    }
 
+    /**
+     * @return the quantity
+     */
+    public BigDecimal getQuantity() {
+        return quantity;
+    }
 
-	/**
-	 * @return the orderOffer
-	 */
-	public OrderOffer getOrderOffer() {
-		return orderOffer;
-	}
+    /**
+     * @param quantity the quantity to set
+     */
+    public void setQuantity(BigDecimal quantity) {
+        this.quantity = quantity;
+    }
 
+    /**
+     * @return the productVersion
+     */
+    public ProductVersion getProductVersion() {
+        return productVersion;
+    }
 
-	/**
-	 * @param orderOffer the orderOffer to set
-	 */
-	public void setOrderOffer(OrderOffer orderOffer) {
-		this.orderOffer = orderOffer;
-	}
+    /**
+     * @param productVersion the productVersion to set
+     */
+    public void setProductVersion(ProductVersion productVersion) {
+        this.productVersion = productVersion;
+    }
 
-	/**
-	 * @return the quantity
-	 */
-	public BigDecimal getQuantity() {
-		return quantity;
-	}
+    public List<OrderAttribute> getOrderAttributes() {
+        return orderAttributes;
+    }
 
+    public void setOrderAttributes(List<OrderAttribute> orderAttributes) {
+        this.orderAttributes = orderAttributes;
+    }
 
-	/**
-	 * @param quantity the quantity to set
-	 */
-	public void setQuantity(BigDecimal quantity) {
-		this.quantity = quantity;
-	}
+    public DiscountPlan getDiscountPlan() {
+        return discountPlan;
+    }
 
+    public void setDiscountPlan(DiscountPlan discountPlan) {
+        this.discountPlan = discountPlan;
+    }
 
-	/**
-	 * @return the productVersion
-	 */
-	public ProductVersion getProductVersion() {
-		return productVersion;
-	}
+    public QuoteProduct getQuoteProduct() {
+        return quoteProduct;
+    }
 
+    public void setQuoteProduct(QuoteProduct quoteProduct) {
+        this.quoteProduct = quoteProduct;
+    }
 
-	/**
-	 * @param productVersion the productVersion to set
-	 */
-	public void setProductVersion(ProductVersion productVersion) {
-		this.productVersion = productVersion;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(productVersion, quantity, order, orderOffer, orderServiceCommercial, quantity, discountPlan, serviceInstance);
+        return result;
+    }
 
-	public List<OrderAttribute> getOrderAttributes() {
-		return orderAttributes;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+        OrderProduct other = (OrderProduct) obj;
+        return Objects.equals(productVersion, other.productVersion) && Objects.equals(quantity, other.quantity) && Objects.equals(order, other.order) && Objects.equals(orderOffer, other.orderOffer)
+                && Objects.equals(orderServiceCommercial, other.orderServiceCommercial) && Objects.equals(discountPlan, other.discountPlan) && Objects.equals(serviceInstance, other.serviceInstance);
+    }
 
-	public void setOrderAttributes(List<OrderAttribute> orderAttributes) {
-		this.orderAttributes = orderAttributes;
-	}
+    public Date getDeliveryDate() {
+        return deliveryDate;
+    }
 
+    public void setDeliveryDate(Date deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
 
+    public ProductActionTypeEnum getProductActionType() {
+        return productActionType;
+    }
 
-	public DiscountPlan getDiscountPlan() {
-		return discountPlan;
-	}
+    public void setProductActionType(ProductActionTypeEnum productActionType) {
+        this.productActionType = productActionType;
+    }
 
-	public void setDiscountPlan(DiscountPlan discountPlan) {
-		this.discountPlan = discountPlan;
-	}
+    public Date getTerminationDate() {
+        return terminationDate;
+    }
 
+    public void setTerminationDate(Date terminationDate) {
+        this.terminationDate = terminationDate;
+    }
 
+    public SubscriptionTerminationReason getTerminationReason() {
+        return terminationReason;
+    }
 
-	public QuoteProduct getQuoteProduct() {
-		return quoteProduct;
-	}
+    public void setTerminationReason(SubscriptionTerminationReason terminationReason) {
+        this.terminationReason = terminationReason;
+    }
 
-	public void setQuoteProduct(QuoteProduct quoteProduct) {
-		this.quoteProduct = quoteProduct;
-	}
+    public InstanceStatusEnum getStatus() {
+        return status;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result
-				+ Objects.hash(productVersion, quantity, order, orderOffer, orderServiceCommercial,quantity,discountPlan, serviceInstance);
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (getClass() != obj.getClass())
-			return false;
-		OrderProduct other = (OrderProduct) obj;
-		return  Objects.equals(productVersion, other.productVersion) && Objects.equals(quantity, other.quantity)
-				&& Objects.equals(order, other.order)
-				&& Objects.equals(orderOffer, other.orderOffer) && Objects.equals(orderServiceCommercial, other.orderServiceCommercial)
-				&& Objects.equals(discountPlan, other.discountPlan) && Objects.equals(serviceInstance, other.serviceInstance);
-	}
+    public void setStatus(InstanceStatusEnum status) {
+        this.status = status;
+    }
 
+    /**
+     * @return Service instance that order product is associated to
+     */
+    public ServiceInstance getServiceInstance() {
+        return serviceInstance;
+    }
 
-	public Date getDeliveryDate() {
-		return deliveryDate;
-	}
+    /**
+     * @param serviceInstance Service instance that order product is associated to
+     */
+    public void setServiceInstance(ServiceInstance serviceInstance) {
+        this.serviceInstance = serviceInstance;
+    }
 
+    public List<OrderArticleLine> getOrderArticleLines() {
+        return orderArticleLines;
+    }
 
-	public void setDeliveryDate(Date deliveryDate) {
-		this.deliveryDate = deliveryDate;
-	}
-
-	public ProductActionTypeEnum getProductActionType() {
-		return productActionType;
-	}
-
-	public void setProductActionType(ProductActionTypeEnum productActionType) {
-		this.productActionType = productActionType;
-	}
-
-	public Date getTerminationDate() {
-		return terminationDate;
-	}
-
-	public void setTerminationDate(Date terminationDate) {
-		this.terminationDate = terminationDate;
-	}
-
-	public SubscriptionTerminationReason getTerminationReason() {
-		return terminationReason;
-	}
-
-	public void setTerminationReason(SubscriptionTerminationReason terminationReason) {
-		this.terminationReason = terminationReason;
-	}
-
-	public InstanceStatusEnum getStatus() {
-		return status;
-	}
-
-	public void setStatus(InstanceStatusEnum status) {
-		this.status = status;
-	}
-
-	/**
-	 * @return Service instance that order product is associated to
-	 */
-	public ServiceInstance getServiceInstance() {
-		return serviceInstance;
-	}
-
-	/**
-	 * @param serviceInstance Service instance that order product is associated to
-	 */
-	public void setServiceInstance(ServiceInstance serviceInstance) {
-		this.serviceInstance = serviceInstance;
-	}
-
-	public List<OrderArticleLine> getOrderArticleLines() {
-		return orderArticleLines;
-	}
-
-	public void setOrderArticleLines(List<OrderArticleLine> orderArticleLines) {
-		this.orderArticleLines = orderArticleLines;
-	}
+    public void setOrderArticleLines(List<OrderArticleLine> orderArticleLines) {
+        this.orderArticleLines = orderArticleLines;
+    }
 
 	public BigDecimal getMrr() {
 		return mrr;

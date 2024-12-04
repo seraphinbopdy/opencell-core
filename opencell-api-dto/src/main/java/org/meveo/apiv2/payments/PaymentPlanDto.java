@@ -1,21 +1,24 @@
 package org.meveo.apiv2.payments;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Set;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.model.payments.ActionOnRemainingAmountEnum;
 import org.meveo.model.payments.RecurrenceUnitEnum;
 import org.meveo.model.payments.plan.PaymentPlanStatusEnum;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Set;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutablePaymentPlanDto.class)
 public interface PaymentPlanDto {
 

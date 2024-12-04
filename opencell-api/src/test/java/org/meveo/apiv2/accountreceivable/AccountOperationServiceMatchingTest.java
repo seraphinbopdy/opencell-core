@@ -1,5 +1,12 @@
 package org.meveo.apiv2.accountreceivable;
 
+import static org.mockito.ArgumentMatchers.any;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,15 +24,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountOperationServiceMatchingTest {
@@ -125,13 +125,13 @@ public class AccountOperationServiceMatchingTest {
         for (int i = 0; i < aoIds.size(); i++) {
             final int indice = i;
             AccountOperationAndSequence accountOperationAndSequence = new AccountOperationAndSequence() {
-                @Nonnull
+                @NotNull
                 @Override
                 public Integer getSequence() {
                     return seqs.get(indice);
                 }
 
-                @Nonnull
+                @NotNull
                 @Override
                 public Long getId() {
                     return aoIds.get(indice);

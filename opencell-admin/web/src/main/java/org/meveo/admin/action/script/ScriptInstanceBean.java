@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.jboss.seam.international.status.builder.BundleKey;
 import org.meveo.admin.action.BaseBean;
@@ -250,5 +250,14 @@ public class ScriptInstanceBean extends BaseBean<ScriptInstance> {
         }
 
         return null;
+    }
+
+    public void onUsePoolChange() {
+
+        if (!entity.isUsePool()) {
+            entity.getPool().setMin(null);
+            entity.getPool().setMax(null);
+            entity.getPool().setMaxIdleTime(null);
+        }
     }
 }

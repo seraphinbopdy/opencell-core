@@ -20,15 +20,15 @@ package org.meveo.service.catalog.impl;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ExistsRelatedEntityException;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.catalog.OfferTemplateCategory;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 /**
  * @author Edward P. Legaspi

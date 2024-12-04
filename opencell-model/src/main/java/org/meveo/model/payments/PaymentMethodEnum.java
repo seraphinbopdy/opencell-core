@@ -25,23 +25,21 @@ package org.meveo.model.payments;
  */
 public enum PaymentMethodEnum {
 
-	CHECK, DIRECTDEBIT, WIRETRANSFER, CARD, PAYPALPAYMENTLINK, STRIPEDIRECTLINK, CASH ,SIPS;
+    CHECK, DIRECTDEBIT, WIRETRANSFER, CARD, PAYPALPAYMENTLINK, STRIPEDIRECTLINK, CASH, SIPS;
 
-	/**
-	 * @return label
-	 */
-	public String getLabel() {
-		return this.getClass().getSimpleName() + "." + this.name();
-	}
+    /**
+     * @return label
+     */
+    public String getLabel() {
+        return this.getClass().getSimpleName() + "." + this.name();
+    }
 
-	/**
-	 * Is it as simple payment method that does not required any additional
-	 * information.
-	 * 
-	 * @return true/fale
-	 */
-	public boolean isSimple() {
-		return this == CHECK || this == PaymentMethodEnum.WIRETRANSFER || this == PaymentMethodEnum.PAYPALPAYMENTLINK
-				|| this == PaymentMethodEnum.STRIPEDIRECTLINK || this == PaymentMethodEnum.CASH;
-	}
+    /**
+     * Is it as simple payment method that does not required any additional information.
+     * 
+     * @return true/fale
+     */
+    public boolean isSimple() {
+        return this == CHECK || this == PaymentMethodEnum.WIRETRANSFER || this == PaymentMethodEnum.PAYPALPAYMENTLINK || this == PaymentMethodEnum.STRIPEDIRECTLINK || this == PaymentMethodEnum.CASH;
+    }
 }

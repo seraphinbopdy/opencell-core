@@ -25,9 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.InvalidScriptException;
@@ -37,6 +34,9 @@ import org.meveo.model.billing.SubscriptionTerminationReason;
 import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi

@@ -7,6 +7,9 @@ import static org.meveo.model.billing.BillingRunReportTypeEnum.OPEN_RATED_TRANSA
 import static org.meveo.model.billing.BillingRunStatusEnum.NEW;
 import static org.meveo.model.billing.BillingRunStatusEnum.OPEN;
 
+import java.util.List;
+import java.util.Map;
+
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.BillingRunReport;
 import org.meveo.model.billing.BillingRunReportTypeEnum;
@@ -16,10 +19,8 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.BillingRunReportService;
 import org.meveo.service.billing.impl.BillingRunService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class BillingRunReportJobBean extends BaseJobBean {

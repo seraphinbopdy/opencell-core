@@ -32,18 +32,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ejb.Timeout;
-import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
-import javax.ejb.TimerService;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -78,6 +66,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import jakarta.annotation.Resource;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.Timeout;
+import jakarta.ejb.Timer;
+import jakarta.ejb.TimerConfig;
+import jakarta.ejb.TimerService;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
 /**
  * @author Wassim Drira
@@ -404,11 +403,11 @@ public class CustomFieldInstanceService extends BaseService {
         Map<String, CustomFieldTemplate> cfts = null;
 
         if (accumulateCF && includeParent) {
-            if (entity.getCfAccumulatedValues() != null) {
-                cfts = cfTemplateService.findByAppliesTo(entity);
-                result = entity.getCfAccumulatedValues().asJson(cfts);
-                sep = ",";
-            }
+//            if (entity.getCfAccumulatedValues() != null) {
+//                cfts = cfTemplateService.findByAppliesTo(entity);
+//                result = entity.getCfAccumulatedValues().asJson(cfts);
+//                sep = ",";
+//            }
 
         } else {
             if (entity.getCfValues() != null) {
@@ -465,9 +464,9 @@ public class CustomFieldInstanceService extends BaseService {
         Map<String, CustomFieldTemplate> cfts = cfTemplateService.findByAppliesTo(entity);
 
         if (accumulateCF && includeParent) {
-            if (entity.getCfAccumulatedValues() != null) {
-                entity.getCfAccumulatedValues().asDomElement(doc, customFieldsTag, cfts);
-            }
+//            if (entity.getCfAccumulatedValues() != null) {
+//                entity.getCfAccumulatedValues().asDomElement(doc, customFieldsTag, cfts);
+//            }
 
         } else {
             if (entity.getCfValues() == null) {
@@ -739,12 +738,12 @@ public class CustomFieldInstanceService extends BaseService {
         List<CustomFieldValue> allValues = new ArrayList<>();
 
         if (accumulateCF) {
-            if (entity.getCfAccumulatedValues() != null) {
-                List<CustomFieldValue> entityValues = entity.getCfAccumulatedValues().getValuesByCode().get(cfCode);
-                if (entityValues != null) {
-                    allValues.addAll(entityValues);
-                }
-            }
+//            if (entity.getCfAccumulatedValues() != null) {
+//                List<CustomFieldValue> entityValues = entity.getCfAccumulatedValues().getValuesByCode().get(cfCode);
+//                if (entityValues != null) {
+//                    allValues.addAll(entityValues);
+//                }
+//            }
 
         } else {
 
@@ -859,9 +858,9 @@ public class CustomFieldInstanceService extends BaseService {
 //        }
 
         if (accumulateCF) {
-            if (entity.getCfAccumulatedValues() != null) {
-                return entity.getCfAccumulatedValues().hasCfValue(cfCode);
-            }
+//            if (entity.getCfAccumulatedValues() != null) {
+//                return entity.getCfAccumulatedValues().hasCfValue(cfCode);
+//            }
         } else {
 
             boolean hasValue = hasCFValue(entity, cfCode);
@@ -964,18 +963,18 @@ public class CustomFieldInstanceService extends BaseService {
         List<Object> cfValues = new ArrayList<>();
 
         if (accumulateCF) {
-            ICustomFieldEntity[] parentCfEntities = entity.getParentCFEntities();
-            if (parentCfEntities != null) {
-                for (ICustomFieldEntity parentCfEntity : parentCfEntities) {
-                    if (parentCfEntity == null) {
-                        continue;
-                    }
-                    Object value = parentCfEntity.getCfAccumulatedValue(cfCode);
-                    if (value != null) {
-                        cfValues.add(value);
-                    }
-                }
-            }
+//            ICustomFieldEntity[] parentCfEntities = entity.getParentCFEntities();
+//            if (parentCfEntities != null) {
+//                for (ICustomFieldEntity parentCfEntity : parentCfEntities) {
+//                    if (parentCfEntity == null) {
+//                        continue;
+//                    }
+//                    Object value = parentCfEntity.getCfAccumulatedValue(cfCode);
+//                    if (value != null) {
+//                        cfValues.add(value);
+//                    }
+//                }
+//            }
 
         } else {
             ICustomFieldEntity[] parentCfEntities = getHierarchyParentCFEntities(entity);
@@ -1066,12 +1065,12 @@ public class CustomFieldInstanceService extends BaseService {
 //        }
 
         if (accumulateCF) {
-            if (entity.getCfAccumulatedValues() != null) {
-                Object value = entity.getCfAccumulatedValues().getValue(cfCode);
-                if (value != null) {
-                    return value;
-                }
-            }
+//            if (entity.getCfAccumulatedValues() != null) {
+//                Object value = entity.getCfAccumulatedValues().getValue(cfCode);
+//                if (value != null) {
+//                    return value;
+//                }
+//            }
 
         } else {
 
@@ -1122,10 +1121,10 @@ public class CustomFieldInstanceService extends BaseService {
 //        }
 
         if (accumulateCF) {
-            Object value = entity.getCfAccumulatedValue(cfCode, date);
-            if (value != null) {
-                return value;
-            }
+//            Object value = entity.getCfAccumulatedValue(cfCode, date);
+//            if (value != null) {
+//                return value;
+//            }
 
         } else {
 
@@ -1552,11 +1551,12 @@ public class CustomFieldInstanceService extends BaseService {
 //            entity = providerService.findById(appProvider.getId());
 //        }
 
-        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
-            return null;
-        }
+//        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
+//            return null;
+//        }
 
-        Object valueMatched = accumulated ? entity.getCFAccumulatedValueByClosestMatch(cfCode, keyToMatch) : entity.getCFValueByClosestMatch(cfCode, keyToMatch);
+//        Object valueMatched = accumulated ? entity.getCFAccumulatedValueByClosestMatch(cfCode, keyToMatch) : entity.getCFValueByClosestMatch(cfCode, keyToMatch);
+        Object valueMatched = entity.getCFValueByClosestMatch(cfCode, keyToMatch);
         log.trace("Found closest match value {} for keyToMatch={}", valueMatched, keyToMatch);
 
         // Need to check if it is a multi-value type value and convert it to a map
@@ -1606,11 +1606,12 @@ public class CustomFieldInstanceService extends BaseService {
 //            entity = providerService.findById(appProvider.getId());
 //        }
 
-        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
-            return null;
-        }
+//        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
+//            return null;
+//        }
 
-        Object valueMatched = accumulated ? entity.getCFAccumulatedValueByClosestMatch(cfCode, date, keyToMatch) : entity.getCFValueByClosestMatch(cfCode, date, keyToMatch);
+//        Object valueMatched = accumulated ? entity.getCFAccumulatedValueByClosestMatch(cfCode, date, keyToMatch) : entity.getCFValueByClosestMatch(cfCode, date, keyToMatch);
+        Object valueMatched = entity.getCFValueByClosestMatch(cfCode, date, keyToMatch);
         log.trace("Found closest match value {} for period {} and keyToMatch={}", valueMatched, date, keyToMatch);
 
         // Need to check if it is a multi-value type value and convert it to a map
@@ -1661,9 +1662,9 @@ public class CustomFieldInstanceService extends BaseService {
 //            entity = providerService.findById(appProvider.getId());
 //        }
 
-        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
-            return null;
-        }
+//        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
+//            return null;
+//        }
 
         CustomFieldTemplate cft = cfTemplateService.findByCodeAndAppliesTo(cfCode, entity);
         if (cft == null) {
@@ -1680,7 +1681,8 @@ public class CustomFieldInstanceService extends BaseService {
             return null;
         }
 
-        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode) : (Map<String, Object>) entity.getCfValue(cfCode);
+//        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode) : (Map<String, Object>) entity.getCfValue(cfCode);
+        Map<String, Object> value = (Map<String, Object>) entity.getCfValue(cfCode);
         if (value == null) {
             return null;
         }
@@ -1757,9 +1759,9 @@ public class CustomFieldInstanceService extends BaseService {
 //            entity = providerService.findById(appProvider.getId());
 //        }
 
-        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
-            return null;
-        }
+//        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
+//            return null;
+//        }
 
         CustomFieldTemplate cft = cfTemplateService.findByCodeAndAppliesTo(cfCode, entity);
         if (cft == null) {
@@ -1776,7 +1778,8 @@ public class CustomFieldInstanceService extends BaseService {
             return null;
         }
 
-        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode, date) : (Map<String, Object>) entity.getCfValue(cfCode, date);
+//        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode, date) : (Map<String, Object>) entity.getCfValue(cfCode, date);
+        Map<String, Object> value = (Map<String, Object>) entity.getCfValue(cfCode, date);
         if (value == null) {
             return null;
         }
@@ -1846,9 +1849,9 @@ public class CustomFieldInstanceService extends BaseService {
 //            entity = providerService.findById(appProvider.getId());
 //        }
 
-        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
-            return null;
-        }
+//        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
+//            return null;
+//        }
 
         CustomFieldTemplate cft = cfTemplateService.findByCodeAndAppliesTo(cfCode, entity);
         if (cft == null) {
@@ -1861,7 +1864,8 @@ public class CustomFieldInstanceService extends BaseService {
             return null;
         }
 
-        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode) : (Map<String, Object>) entity.getCfValue(cfCode);
+//        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode) : (Map<String, Object>) entity.getCfValue(cfCode);
+        Map<String, Object> value = (Map<String, Object>) entity.getCfValue(cfCode);
         Object valueMatched = CustomFieldInstanceService.matchRangeOfNumbersValue(value, numberToMatch);
 
         log.trace("Found map value match {} for numberToMatch={}", valueMatched, numberToMatch);
@@ -1903,9 +1907,9 @@ public class CustomFieldInstanceService extends BaseService {
 //            entity = providerService.findById(appProvider.getId());
 //        }
 
-        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
-            return null;
-        }
+//        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
+//            return null;
+//        }
 
         CustomFieldTemplate cft = cfTemplateService.findByCodeAndAppliesTo(cfCode, entity);
         if (cft == null) {
@@ -1918,7 +1922,8 @@ public class CustomFieldInstanceService extends BaseService {
             return null;
         }
 
-        Object value = accumulated ? entity.getCfAccumulatedValue(cfCode, date) : entity.getCfValue(cfCode, date);
+//        Object value = accumulated ? entity.getCfAccumulatedValue(cfCode, date) : entity.getCfValue(cfCode, date);
+        Object value = entity.getCfValue(cfCode, date);
         Object valueMatched = CustomFieldInstanceService.matchRangeOfNumbersValue(value, numberToMatch);
 
         log.trace("Found matrix value match {} for period {} and numberToMatch={}", valueMatched, date, numberToMatch);
@@ -2350,9 +2355,9 @@ public class CustomFieldInstanceService extends BaseService {
 //            entity = providerService.findById(appProvider.getId());
 //        }
 
-        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
-            return false;
-        }
+//        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
+//            return false;
+//        }
 
         CustomFieldTemplate cft = cfTemplateService.findByCodeAndAppliesTo(cfCode, entity);
         if (cft == null) {
@@ -2369,7 +2374,8 @@ public class CustomFieldInstanceService extends BaseService {
             return false;
         }
 
-        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode) : (Map<String, Object>) entity.getCfValue(cfCode);
+//        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode) : (Map<String, Object>) entity.getCfValue(cfCode);
+        Map<String, Object> value = (Map<String, Object>) entity.getCfValue(cfCode);
         if (value == null) {
             return false;
         }
@@ -2430,9 +2436,9 @@ public class CustomFieldInstanceService extends BaseService {
 //            entity = providerService.findById(appProvider.getId());
 //        }
 
-        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
-            return false;
-        }
+//        if ((accumulated && entity.getCfAccumulatedValues() == null) || (!accumulated && entity.getCfValues() == null)) {
+//            return false;
+//        }
 
         CustomFieldTemplate cft = cfTemplateService.findByCodeAndAppliesTo(cfCode, entity);
         if (cft == null) {
@@ -2449,7 +2455,8 @@ public class CustomFieldInstanceService extends BaseService {
             return false;
         }
 
-        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode, date) : (Map<String, Object>) entity.getCfValue(cfCode, date);
+//        Map<String, Object> value = accumulated ? (Map<String, Object>) entity.getCfAccumulatedValue(cfCode, date) : (Map<String, Object>) entity.getCfValue(cfCode, date);
+        Map<String, Object> value = (Map<String, Object>) entity.getCfValue(cfCode, date);
         if (value == null) {
             return false;
         }

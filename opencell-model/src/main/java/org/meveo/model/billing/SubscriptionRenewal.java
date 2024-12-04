@@ -23,22 +23,23 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.commons.utils.CustomDateSerializer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 /**
  * Embeddable set of renewal fields. Use in ServiceTemplate and Subscription.
@@ -140,7 +141,7 @@ public class SubscriptionRenewal implements Serializable {
     /**
      * Should subscription be renewed automatically
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "auto_renew")
     private boolean autoRenew = false;
 
@@ -194,7 +195,7 @@ public class SubscriptionRenewal implements Serializable {
     /**
      * Whether end of agreement date should be matched to the active till date
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "match_end_aggr_date")
     private boolean extendAgreementPeriodToSubscribedTillDate;
 
@@ -373,19 +374,15 @@ public class SubscriptionRenewal implements Serializable {
             return false;
         }
         SubscriptionRenewal that = (SubscriptionRenewal) o;
-        return this.isAutoRenew() == that.autoRenew && this.isExtendAgreementPeriodToSubscribedTillDate() == that.extendAgreementPeriodToSubscribedTillDate
-                && Objects.equals(this.getAutoRenewDate(), that.autoRenewDate) && this.getEndOfTermAction() == that.endOfTermAction &&
-                this.getInitialyActiveForUnit() == that.initialyActiveForUnit
-                && Objects.equals(this.getInitialyActiveFor(), that.initialyActiveFor) && this.getRenewForUnit() == that.renewForUnit
-                && Objects.equals(this.getRenewFor(), that.renewFor)
-                && this.getInitialTermType() == that.initialTermType;
+        return this.isAutoRenew() == that.autoRenew && this.isExtendAgreementPeriodToSubscribedTillDate() == that.extendAgreementPeriodToSubscribedTillDate && Objects.equals(this.getAutoRenewDate(), that.autoRenewDate)
+                && this.getEndOfTermAction() == that.endOfTermAction && this.getInitialyActiveForUnit() == that.initialyActiveForUnit && Objects.equals(this.getInitialyActiveFor(), that.initialyActiveFor)
+                && this.getRenewForUnit() == that.renewForUnit && Objects.equals(this.getRenewFor(), that.renewFor) && this.getInitialTermType() == that.initialTermType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.isAutoRenew(), this.getAutoRenewDate(), this.getEndOfTermAction(), this.getInitialyActiveForUnit(),
-                this.getInitialyActiveFor(), this.isExtendAgreementPeriodToSubscribedTillDate(), this.getRenewForUnit(),
-                this.getRenewFor(), this.getInitialTermType());
+        return Objects.hash(this.isAutoRenew(), this.getAutoRenewDate(), this.getEndOfTermAction(), this.getInitialyActiveForUnit(), this.getInitialyActiveFor(), this.isExtendAgreementPeriodToSubscribedTillDate(),
+            this.getRenewForUnit(), this.getRenewFor(), this.getInitialTermType());
     }
 
     public SubscriptionRenewal copy() {

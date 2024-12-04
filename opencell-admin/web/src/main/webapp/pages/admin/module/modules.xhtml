@@ -2,11 +2,9 @@
     xmlns:hftl="http://hftl.org" template="/layout/template.xhtml" xmlns:p="http://primefaces.org/ui" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:o="http://omnifaces.org/ui"
     xmlns:s="http://jboss.org/seam/faces">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView" listener="#{meveoModuleListBean.preRenderView}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
             <h:form id="crumbmenuForm">
@@ -43,7 +41,7 @@
             <hftl:actionsColumn useCustomIdParam="true" renderEnableLink="false" />
             <ui:define name="add-on-buttons">
                 <p:commandButton id="downloadMeveoModuleButton" rendered="#{meveoModuleListBean.canUserUpdateEntity()}" value="#{messages['meveoModule.downloadAndInstallModules']}"
-                    update=":#{p:component('meveoModulesDialog')}" oncomplete="PF('meveoModulesDialog').show()">
+                    update="@([id$=meveoModulesDialog])" oncomplete="PF('meveoModulesDialog').show()">
                 </p:commandButton>
             </ui:define>
         </hftl:dataList>
@@ -65,7 +63,7 @@
                             paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
                             rowsPerPageTemplate="10,20,30,50" styleClass="custom-grid" resizableColumns="true">
                             <p:column headerText="#{messages['businessEntity.code']}" sortBy="#{module.code}">
-                                <p:commandLink value="#{module.code}" update=":#{p:component('meveoModuleDialog')}"
+                                <p:commandLink value="#{module.code}" update="@([id$=meveoModuleDialog])"
                                     oncomplete="PF('meveoModulesDialog').hide();PF('meveoModuleDialog').show()">
                                     <f:setPropertyActionListener value="#{module}" target="#{meveoModuleListBean.selectedModuleDto}" />
                                 </p:commandLink>
@@ -116,11 +114,11 @@
                 <ui:define name="buttons">
                     <p:commandButton id="download" value="#{messages['meveoModule.download']}" rendered="#{meveoModuleListBean.canUserUpdateEntity()}"
                         oncomplete="PF('meveoModuleDialog').hide();PF('meveoModulesDialog').show()" process="@this" action="#{meveoModuleListBean.downloadModule}"
-                        update="@this :#{p:component('meveoModulesDialog')}">
+                        update="@this @([id$=meveoModulesDialog])">
                     </p:commandButton>
                     <p:commandButton id="downloadAndInstall" value="#{messages['meveoModule.downloadAndInstall']}" rendered="#{meveoModuleListBean.canUserUpdateEntity()}"
                         oncomplete="PF('meveoModuleDialog').hide();PF('meveoModulesDialog').show()" process="@this" action="#{meveoModuleListBean.downloadAndInstallModule}"
-                        update="@this :#{p:component('meveoModulesDialog')}">
+                        update="@this @([id$=meveoModulesDialog])">
                     </p:commandButton>
                     <p:commandButton id="confirmKo" value="#{messages['action.cancel']}" onclick="PF('meveoModuleDialog').hide();PF('meveoModulesDialog').show()" type="button" />
                 </ui:define>

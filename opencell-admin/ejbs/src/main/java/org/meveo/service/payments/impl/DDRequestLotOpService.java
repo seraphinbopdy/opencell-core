@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-
 import org.meveo.api.dto.payment.DDRequestLotOpDto;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
@@ -34,6 +31,9 @@ import org.meveo.model.payments.DDRequestOpEnum;
 import org.meveo.model.payments.DDRequestOpStatusEnum;
 import org.meveo.model.payments.PaymentOrRefundEnum;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
 
 @Stateless
 public class DDRequestLotOpService extends PersistenceService<DDRequestLotOp> {

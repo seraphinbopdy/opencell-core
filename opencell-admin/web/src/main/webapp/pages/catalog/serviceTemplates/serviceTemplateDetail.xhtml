@@ -6,14 +6,12 @@
 				xmlns:c="http://java.sun.com/jsp/jstl/core"
 				template="/layout/template.xhtml">
 
-	<ui:define name="metadata">
 		<f:metadata>
 			<f:viewParam name="objectId" value="#{serviceTemplateBean.objectId}" />
 			<f:viewParam name="mainTab"
 				value="#{serviceTemplateBean.activeMainTab}" />
 			<f:viewParam name="tab" value="#{serviceTemplateBean.activeTab}" />
 		</f:metadata>
-	</ui:define>
 
 	<ui:define name="body">
         <o:importFunctions type="org.meveo.admin.action.admin.custom.CustomFieldDataEntryBean" var="cfde" />
@@ -294,10 +292,10 @@
 									</f:facet>
 									<p:commandButton update=":tabView:formRecurringCharge"
 													 action="#{serviceTemplateBean.editServiceRecurringChargeTemplate(entity)}"
-													 icon="ui-icon-document"/>
+													 icon="pi pi-file-edit"/>
 									<p:commandButton
 											action="#{serviceTemplateBean.deleteServiceRecurringChargeTemplate(entity.getId())}"
-											icon="ui-icon-trash" update=":tabView:formRecurringCharge"/>
+											icon="pi pi-trash" update=":tabView:formRecurringCharge"/>
 								</p:column>
 							</hftl:dataList>
 						</p:outputPanel>
@@ -347,8 +345,8 @@
 									outcome="#{serviceTemplateBean.back()}"
 									includeViewParams="true">
 									<c:if
-										test="#{javax.enterprise.context.conversation.id != null}">
-									<f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+										test="#{jakarta.enterprise.context.conversation.id != null}">
+									<f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
 									</c:if>
 								</p:button>
 							</ui:define>
@@ -403,10 +401,10 @@
 									</f:facet>
 									<p:commandButton update=":tabView:formSubscriptionCharge"
 													 action="#{serviceTemplateBean.editServiceSubscriptionChargeTemplate(entity)}"
-													 icon="ui-icon-document"/>
+													 icon="pi pi-file-edit"/>
 									<p:commandButton
 											action="#{serviceTemplateBean.deleteServiceSubscriptionChargeTemplate(entity.getId())}"
-											icon="ui-icon-trash" update=":tabView:formSubscriptionCharge"/>
+											icon="pi pi-trash" update=":tabView:formSubscriptionCharge"/>
 								</p:column>
 							</hftl:dataList>
 						</p:outputPanel>
@@ -451,8 +449,8 @@
 									outcome="#{serviceTemplateBean.back()}"
 									includeViewParams="true">
 									<c:if
-										test="#{javax.enterprise.context.conversation.id != null}">
-									<f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+										test="#{jakarta.enterprise.context.conversation.id != null}">
+									<f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
 									</c:if>
 								</p:button>
 							</ui:define>
@@ -505,10 +503,10 @@
 									</f:facet>
 									<p:commandButton update=":tabView:formTerminationCharge"
 													 action="#{serviceTemplateBean.editServiceTerminationChargeTemplate(entity)}"
-													 icon="ui-icon-document"/>
+													 icon="pi pi-file-edit"/>
 									<p:commandButton
 											action="#{serviceTemplateBean.deleteServiceTerminationChargeTemplate(entity.getId())}"
-										icon="ui-icon-trash" update=":tabView:formTerminationCharge" />
+										icon="pi pi-trash" update=":tabView:formTerminationCharge" />
 								</p:column>
 							</hftl:dataList>
 						</p:outputPanel>
@@ -553,8 +551,8 @@
 									outcome="#{serviceTemplateBean.back()}"
 									includeViewParams="true">
 									<c:if
-										test="#{javax.enterprise.context.conversation.id != null}">
-									<f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+										test="#{jakarta.enterprise.context.conversation.id != null}">
+									<f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
 									</c:if>
 								</p:button>
 							</ui:define>
@@ -608,10 +606,10 @@
 									</f:facet>
 									<p:commandButton update=":tabView:formUsageCharge"
 													 action="#{serviceTemplateBean.editServiceUsageChargeTemplate(entity)}"
-													 icon="ui-icon-document"/>
+													 icon="pi pi-file-edit"/>
 									<p:commandButton
 											action="#{serviceTemplateBean.deleteServiceUsageChargeTemplate(entity.getId())}"
-											icon="ui-icon-trash"
+											icon="pi pi-trash"
 											update=":tabView:serviceUsageChargeTempalte_panel,:tabView:formUsageCharge"/>
 								</p:column>
 							</hftl:dataList>
@@ -662,8 +660,8 @@
 									outcome="#{serviceTemplateBean.back()}"
 									includeViewParams="true">
 									<c:if
-										test="#{javax.enterprise.context.conversation.id != null}">
-									<f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+										test="#{jakarta.enterprise.context.conversation.id != null}">
+									<f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
 									</c:if>
 								</p:button>
 							</ui:define>

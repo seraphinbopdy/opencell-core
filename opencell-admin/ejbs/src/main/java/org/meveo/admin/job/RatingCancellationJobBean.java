@@ -12,13 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -38,6 +31,13 @@ import org.meveo.service.billing.impl.BatchEntityService;
 import org.meveo.service.job.Job;
 import org.meveo.service.job.TablesPartitioningService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
+
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 @Stateless
 public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[]>> {

@@ -1,5 +1,10 @@
 package org.meveo.admin.job;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
@@ -14,12 +19,8 @@ import org.meveo.service.job.Job;
 import org.meveo.service.job.TablesPartitioningService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * A job implementation to duplicate billed rated transactions

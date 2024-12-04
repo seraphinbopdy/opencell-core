@@ -18,25 +18,31 @@
 
 package org.meveo.apiv2.models;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.immutables.value.Value;
-
-import javax.annotation.Nullable;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import jakarta.annotation.Nullable;
+import jakarta.ws.rs.core.Response;
+
 @Value.Immutable
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonSerialize
 public interface ApiException extends Resource {
     @Nullable
     Long getId();
+
     @Nullable
     String getCode();
+
     @Nullable
     Response.Status getStatus();
+
     @Nullable
     String getDetails();
+
     @Nullable
     List<Cause> getCauses();
 }
-

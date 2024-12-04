@@ -18,8 +18,8 @@
 
 package org.meveo.api.rest.crm.impl;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 import org.meveo.api.crm.AddressBookApi;
 import org.meveo.api.dto.ActionStatus;

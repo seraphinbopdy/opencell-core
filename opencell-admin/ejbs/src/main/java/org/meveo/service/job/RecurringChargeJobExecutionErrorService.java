@@ -17,10 +17,10 @@
  */
 package org.meveo.service.job;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.jobs.RecurringChargeJobExecutionError;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Persistence service for RecurringChargeJobExecutionError entity

@@ -136,7 +136,7 @@ public abstract class SynchronizedMultiItemIterator<T> implements Iterator<List<
                             // Or mapped by a fieldname
                         } else {
 
-                            Object[] data = scrollableResults.get();
+                            Object[] data = (Object[]) scrollableResults.get();
 
                             Map<String, Object> mappedData = new HashMap<>();
                             for (int i = 0; i < data.length; i++) {
@@ -148,7 +148,7 @@ public abstract class SynchronizedMultiItemIterator<T> implements Iterator<List<
                         }
 
                     } else {
-                        return (T) scrollableResults.get(0);
+                        return (T) ((Object[]) scrollableResults.get())[0];
                     }
 
                 } else {

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.ActionStatus;

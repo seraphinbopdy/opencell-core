@@ -20,11 +20,11 @@ package org.meveo.service.hierarchy.impl;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.security.UserGroup;
 import org.meveo.security.client.KeycloakAdminClientService;
+
+import jakarta.inject.Inject;
 
 /**
  * User Hierarchy Level service implementation.

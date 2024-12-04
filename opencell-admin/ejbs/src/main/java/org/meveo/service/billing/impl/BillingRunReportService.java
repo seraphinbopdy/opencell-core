@@ -11,6 +11,13 @@ import static org.meveo.model.billing.BillingRunStatusEnum.NEW;
 import static org.meveo.model.billing.BillingRunStatusEnum.OPEN;
 import static org.meveo.model.jobs.JobLauncherEnum.API;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.model.billing.AccountingArticleAmount;
@@ -33,16 +40,9 @@ import org.meveo.service.cpq.ProductService;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 @Stateless
 public class BillingRunReportService extends PersistenceService<BillingRunReport> {
@@ -347,9 +347,9 @@ public class BillingRunReportService extends PersistenceService<BillingRunReport
         return billingRunReport;
     }
     
-	public void resetFinalStatus(List<Long> ids, List<BillingRunReportTypeEnum> types) {
+    public void resetFinalStatus(List<Long> ids, List<BillingRunReportTypeEnum> types) {
         Query query = getEntityManager().createNamedQuery("BillingRunReport.resetFinalStatus");
         query.setParameter("ids", ids).setParameter("types", types).executeUpdate();
-	}
-	
+    }
+
 }

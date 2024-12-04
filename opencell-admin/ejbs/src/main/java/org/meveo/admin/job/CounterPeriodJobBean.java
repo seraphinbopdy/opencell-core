@@ -24,11 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.ChargeInstance;
@@ -39,6 +34,11 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.CounterInstanceService;
 import org.meveo.service.billing.impl.GenericChargeInstanceService;
 import org.meveo.service.catalog.impl.CounterTemplateService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * The Class CounterPeriodJobBean.

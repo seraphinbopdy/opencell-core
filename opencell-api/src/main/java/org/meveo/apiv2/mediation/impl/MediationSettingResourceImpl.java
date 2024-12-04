@@ -2,12 +2,6 @@ package org.meveo.apiv2.mediation.impl;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.transaction.Transactional;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.Response;
-
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.mediation.EdrVersioningRuleSwapping;
 import org.meveo.apiv2.mediation.ImmutableEdrVersioningRule;
@@ -21,6 +15,12 @@ import org.meveo.apiv2.ordering.common.LinkGenerator;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.mediation.EdrVersioningRule;
 import org.meveo.model.mediation.MediationSetting;
+
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.Response;
 
 /**
  * 

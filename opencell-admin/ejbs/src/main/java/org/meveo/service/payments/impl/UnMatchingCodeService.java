@@ -20,7 +20,7 @@ package org.meveo.service.payments.impl;
 import org.meveo.model.payments.UnMatchingCode;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 
 /**
  * UnMatchingCode service implementation.

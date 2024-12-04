@@ -5,10 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.model.cpq.GroupedAttributes;
@@ -18,6 +14,10 @@ import org.meveo.model.cpq.enums.VersionStatusEnum;
 import org.meveo.model.cpq.tags.Tag;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.catalog.impl.CatalogHierarchyBuilderService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 /**
  * @author Tarik FAKHOURI.
  * @author Mbarek-Ay.

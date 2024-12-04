@@ -2,21 +2,6 @@ package org.meveo.model.cpq.trade;
 
 import java.util.Objects;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
@@ -28,310 +13,310 @@ import org.meveo.model.cpq.ProductVersion;
 import org.meveo.model.cpq.enums.RuleOperatorEnum;
 import org.meveo.model.cpq.tags.Tag;
 
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
+
 /**
- *  @author Tarik FAKHOURI.
- *  @author Mbarek-Ay
- *   @author Rachid.AIT
- *	@version 10.0
+ * @author Tarik FAKHOURI.
+ * @author Mbarek-Ay
+ * @author Rachid.AIT
+ * @version 10.0
  */
 @Entity
 @Cacheable
-@Table(name = "cpq_commercial_rule_line", uniqueConstraints = @UniqueConstraint(columnNames = {"id"}))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-@Parameter(name = "sequence_name", value = "cpq_commercial_rule_line_seq")})
-@NamedQueries({  
-	@NamedQuery(name = "CommercialRuleLine.getSourceAttributeRules", query = "select c.id from CommercialRuleLine c where c.sourceAttribute.code=:attributeCode", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true")}),
-	@NamedQuery(name = "CommercialRuleLine.getSourceProductAttributeRules", query = "select c.id from CommercialRuleLine c where c.sourceAttribute.code=:attributeCode and c.sourceProduct.code=:productCode", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-	@NamedQuery(name = "CommercialRuleLine.getSourceOfferAttributeRules", query = "select c.id from CommercialRuleLine c where c.sourceAttribute.code=:attributeCode and c.sourceOfferTemplate.code=:offerCode", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-	@NamedQuery(name = "CommercialRuleLine.getSourceProductRules", query = "select c.id from CommercialRuleLine c where c.sourceProduct.code=:productCode", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-	@NamedQuery(name = "CommercialRuleLine.getSourceProductRulesWithOffer", query = "select c.id from CommercialRuleLine c where c.sourceOfferTemplate.code=:offerCode and c.sourceProduct.code=:productCode", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
-	@NamedQuery(name = "CommercialRuleLine.getSourceGroupedAttributeRules", query = "select c.id from CommercialRuleLine c where c.sourceGroupedAttributes.code=:groupedAttributeCode and c.sourceProduct.code=:productCode", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") })
-})
+@Table(name = "cpq_commercial_rule_line", uniqueConstraints = @UniqueConstraint(columnNames = { "id" }))
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_commercial_rule_line_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({
+        @NamedQuery(name = "CommercialRuleLine.getSourceAttributeRules", query = "select c.id from CommercialRuleLine c where c.sourceAttribute.code=:attributeCode", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "CommercialRuleLine.getSourceProductAttributeRules", query = "select c.id from CommercialRuleLine c where c.sourceAttribute.code=:attributeCode and c.sourceProduct.code=:productCode", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "CommercialRuleLine.getSourceOfferAttributeRules", query = "select c.id from CommercialRuleLine c where c.sourceAttribute.code=:attributeCode and c.sourceOfferTemplate.code=:offerCode", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "CommercialRuleLine.getSourceProductRules", query = "select c.id from CommercialRuleLine c where c.sourceProduct.code=:productCode", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "CommercialRuleLine.getSourceProductRulesWithOffer", query = "select c.id from CommercialRuleLine c where c.sourceOfferTemplate.code=:offerCode and c.sourceProduct.code=:productCode", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
+        @NamedQuery(name = "CommercialRuleLine.getSourceGroupedAttributeRules", query = "select c.id from CommercialRuleLine c where c.sourceGroupedAttributes.code=:groupedAttributeCode and c.sourceProduct.code=:productCode", hints = {
+                @QueryHint(name = "org.hibernate.cacheable", value = "true") }) })
 public class CommercialRuleLine extends BaseEntity {
 
-	
-	public CommercialRuleLine(CommercialRuleLine copy) {
-		this.commercialRuleItem = copy.commercialRuleItem;
-		this.sourceOfferTemplate = copy.sourceOfferTemplate;
-		this.sourceProduct = copy.sourceProduct;
-		this.sourceProductVersion = copy.sourceProductVersion;
-		this.sourceAttribute = copy.sourceAttribute;
-		this.sourceGroupedAttributes = copy.sourceGroupedAttributes;
-		this.sourceTag = copy.sourceTag;
-		this.sourceAttributeValue = copy.sourceAttributeValue;
-		this.sourceGroupedAttributeValue = copy.sourceGroupedAttributeValue;
-		this.operator = copy.operator;
-	}
+    public CommercialRuleLine(CommercialRuleLine copy) {
+        this.commercialRuleItem = copy.commercialRuleItem;
+        this.sourceOfferTemplate = copy.sourceOfferTemplate;
+        this.sourceProduct = copy.sourceProduct;
+        this.sourceProductVersion = copy.sourceProductVersion;
+        this.sourceAttribute = copy.sourceAttribute;
+        this.sourceGroupedAttributes = copy.sourceGroupedAttributes;
+        this.sourceTag = copy.sourceTag;
+        this.sourceAttributeValue = copy.sourceAttributeValue;
+        this.sourceGroupedAttributeValue = copy.sourceGroupedAttributeValue;
+        this.operator = copy.operator;
+    }
 
-	public CommercialRuleLine() {
-	}
+    public CommercialRuleLine() {
+    }
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -7531793312686419097L;
-	
-	
-	/**
-	 * Trade rule header
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "commercial_rule_item_id", referencedColumnName = "id")
-	private CommercialRuleItem commercialRuleItem;
-	
-	/**
-	 * 
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "offer_template_id", referencedColumnName = "id")
-	private OfferTemplate sourceOfferTemplate;
-	
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -7531793312686419097L;
 
-	/**
-	 * product code
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "product_id", referencedColumnName = "id")
-	private Product sourceProduct;
-	
-	 
-	/**
-	 * version of the product
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "product_version_id", referencedColumnName = "id")
-	private  ProductVersion sourceProductVersion;
+    /**
+     * Trade rule header
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "commercial_rule_item_id", referencedColumnName = "id")
+    private CommercialRuleItem commercialRuleItem;
 
-	/**
-	 * attribute name
-	 */
-	@ManyToOne(fetch = FetchType.LAZY) 
-	@JoinColumn(name = "attribute_id", referencedColumnName = "id") 
-	private Attribute sourceAttribute;
-	
-	 /** 
+    /**
+     * 
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "offer_template_id", referencedColumnName = "id")
+    private OfferTemplate sourceOfferTemplate;
+
+    /**
+     * product code
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    private Product sourceProduct;
+
+    /**
+     * version of the product
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_version_id", referencedColumnName = "id")
+    private ProductVersion sourceProductVersion;
+
+    /**
+     * attribute name
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attribute_id", referencedColumnName = "id")
+    private Attribute sourceAttribute;
+
+    /**
      * grouped service
      */
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "grouped_attributes_id", referencedColumnName = "id")
-	private GroupedAttributes sourceGroupedAttributes;
-	
-	/**
-	 * tag source
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "tag_id", referencedColumnName = "id")
-	private Tag sourceTag;
-	
-	/**
-	 * attribute value
-	 */
-	@Column(name = "source_attribute_value", length = 255)
-	@Size(max = 255)
-	private String sourceAttributeValue;
-	
-	
-	
-	/**
-	 * grouped attribute value
-	 */
-	@Column(name = "source_grouped_attribute_value", length = 255)
-	@Size(max = 255)
-	private String sourceGroupedAttributeValue;
-	
- 
-	/**
-	 * rule operator
-	 */
-	@Column(name = "operator", nullable = false)
-	@Enumerated(EnumType.STRING) 
-	private RuleOperatorEnum operator;
-	 
-	/**
-	 * @return the sourceOfferTemplate
-	 */
-	public OfferTemplate getSourceOfferTemplate() {
-		return sourceOfferTemplate;
-	}
 
-	/**
-	 * @param sourceOfferTemplate the sourceOfferTemplate to set
-	 */
-	public void setSourceOfferTemplate(OfferTemplate sourceOfferTemplate) {
-		this.sourceOfferTemplate = sourceOfferTemplate;
-	}
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "grouped_attributes_id", referencedColumnName = "id")
+    private GroupedAttributes sourceGroupedAttributes;
 
-	/**
-	 * @return the sourceProduct
-	 */
-	public Product getSourceProduct() {
-		return sourceProduct;
-	}
+    /**
+     * tag source
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tag_id", referencedColumnName = "id")
+    private Tag sourceTag;
 
-	/**
-	 * @param sourceProduct the sourceProduct to set
-	 */
-	public void setSourceProduct(Product sourceProduct) {
-		this.sourceProduct = sourceProduct;
-	}
+    /**
+     * attribute value
+     */
+    @Column(name = "source_attribute_value", length = 255)
+    @Size(max = 255)
+    private String sourceAttributeValue;
 
-	/**
-	 * @return the sourceProductVersion
-	 */
-	public ProductVersion getSourceProductVersion() {
-		return sourceProductVersion;
-	}
+    /**
+     * grouped attribute value
+     */
+    @Column(name = "source_grouped_attribute_value", length = 255)
+    @Size(max = 255)
+    private String sourceGroupedAttributeValue;
 
-	/**
-	 * @param sourceProductVersion the sourceProductVersion to set
-	 */
-	public void setSourceProductVersion(ProductVersion sourceProductVersion) {
-		this.sourceProductVersion = sourceProductVersion;
-	}
-	 
+    /**
+     * rule operator
+     */
+    @Column(name = "operator", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RuleOperatorEnum operator;
 
-	/**
-	 * @return the sourceAttribute
-	 */
-	public Attribute getSourceAttribute() {
-		return sourceAttribute;
-	}
+    /**
+     * @return the sourceOfferTemplate
+     */
+    public OfferTemplate getSourceOfferTemplate() {
+        return sourceOfferTemplate;
+    }
 
-	/**
-	 * @param sourceAttribute the sourceAttribute to set
-	 */
-	public void setSourceAttribute(Attribute sourceAttribute) {
-		this.sourceAttribute = sourceAttribute;
-	}
+    /**
+     * @param sourceOfferTemplate the sourceOfferTemplate to set
+     */
+    public void setSourceOfferTemplate(OfferTemplate sourceOfferTemplate) {
+        this.sourceOfferTemplate = sourceOfferTemplate;
+    }
 
-	/**
-	 * @return the sourceGroupedAttributes
-	 */
-	public GroupedAttributes getSourceGroupedAttributes() {
-		return sourceGroupedAttributes;
-	}
+    /**
+     * @return the sourceProduct
+     */
+    public Product getSourceProduct() {
+        return sourceProduct;
+    }
 
-	/**
-	 * @param sourceGroupedAttributes the sourceGroupedAttributes to set
-	 */
-	public void setSourceGroupedAttributes(GroupedAttributes sourceGroupedAttributes) {
-		this.sourceGroupedAttributes = sourceGroupedAttributes;
-	}
+    /**
+     * @param sourceProduct the sourceProduct to set
+     */
+    public void setSourceProduct(Product sourceProduct) {
+        this.sourceProduct = sourceProduct;
+    }
 
-	/**
-	 * @return the sourceTag
-	 */
-	public Tag getSourceTag() {
-		return sourceTag;
-	}
+    /**
+     * @return the sourceProductVersion
+     */
+    public ProductVersion getSourceProductVersion() {
+        return sourceProductVersion;
+    }
 
-	/**
-	 * @param sourceTag the sourceTag to set
-	 */
-	public void setSourceTag(Tag sourceTag) {
-		this.sourceTag = sourceTag;
-	}
+    /**
+     * @param sourceProductVersion the sourceProductVersion to set
+     */
+    public void setSourceProductVersion(ProductVersion sourceProductVersion) {
+        this.sourceProductVersion = sourceProductVersion;
+    }
 
-	/**
-	 * @return the sourceAttributeValue
-	 */
-	public String getSourceAttributeValue() {
-		return sourceAttributeValue;
-	}
+    /**
+     * @return the sourceAttribute
+     */
+    public Attribute getSourceAttribute() {
+        return sourceAttribute;
+    }
 
-	/**
-	 * @param sourceAttributeValue the sourceAttributeValue to set
-	 */
-	public void setSourceAttributeValue(String sourceAttributeValue) {
-		this.sourceAttributeValue = sourceAttributeValue;
-	}
+    /**
+     * @param sourceAttribute the sourceAttribute to set
+     */
+    public void setSourceAttribute(Attribute sourceAttribute) {
+        this.sourceAttribute = sourceAttribute;
+    }
 
- 
-	/**
-	 * @return the operator
-	 */
-	public RuleOperatorEnum getOperator() {
-		return operator;
-	}
+    /**
+     * @return the sourceGroupedAttributes
+     */
+    public GroupedAttributes getSourceGroupedAttributes() {
+        return sourceGroupedAttributes;
+    }
 
-	/**
-	 * @param operator the operator to set
-	 */
-	public void setOperator(RuleOperatorEnum operator) {
-		this.operator = operator;
-	}
+    /**
+     * @param sourceGroupedAttributes the sourceGroupedAttributes to set
+     */
+    public void setSourceGroupedAttributes(GroupedAttributes sourceGroupedAttributes) {
+        this.sourceGroupedAttributes = sourceGroupedAttributes;
+    }
 
-	/**
-	 * @return the commercialRuleItem
-	 */
-	public CommercialRuleItem getCommercialRuleItem() {
-		return commercialRuleItem;
-	}
+    /**
+     * @return the sourceTag
+     */
+    public Tag getSourceTag() {
+        return sourceTag;
+    }
 
-	/**
-	 * @param commercialRuleItem the commercialRuleItem to set
-	 */
-	public void setCommercialRuleItem(CommercialRuleItem commercialRuleItem) {
-		this.commercialRuleItem = commercialRuleItem;
-	}
+    /**
+     * @param sourceTag the sourceTag to set
+     */
+    public void setSourceTag(Tag sourceTag) {
+        this.sourceTag = sourceTag;
+    }
 
-	/**
-	 * @return the sourceGroupedAttributeValue
-	 */
-	public String getSourceGroupedAttributeValue() {
-		return sourceGroupedAttributeValue;
-	}
+    /**
+     * @return the sourceAttributeValue
+     */
+    public String getSourceAttributeValue() {
+        return sourceAttributeValue;
+    }
 
-	/**
-	 * @param sourceGroupedAttributeValue the sourceGroupedAttributeValue to set
-	 */
-	public void setSourceGroupedAttributeValue(String sourceGroupedAttributeValue) {
-		this.sourceGroupedAttributeValue = sourceGroupedAttributeValue;
-	}
-	
-	public boolean isSourceOfferAttribute() {
-		return sourceProduct == null;
-	}
+    /**
+     * @param sourceAttributeValue the sourceAttributeValue to set
+     */
+    public void setSourceAttributeValue(String sourceAttributeValue) {
+        this.sourceAttributeValue = sourceAttributeValue;
+    }
 
-	public String getSourceOfferTemplateCode() {
-		return sourceOfferTemplate != null ? sourceOfferTemplate.getCode() : null;
-	}
+    /**
+     * @return the operator
+     */
+    public RuleOperatorEnum getOperator() {
+        return operator;
+    }
 
-	public String getSourceProductCode() {
-		return sourceProduct != null ? sourceProduct.getCode() : null;
-	}
+    /**
+     * @param operator the operator to set
+     */
+    public void setOperator(RuleOperatorEnum operator) {
+        this.operator = operator;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(commercialRuleItem, operator, sourceAttribute, sourceAttributeValue,
-				sourceGroupedAttributeValue, sourceGroupedAttributes, sourceOfferTemplate, sourceProduct,
-				sourceProductVersion, sourceTag);
-		return result;
-	}
+    /**
+     * @return the commercialRuleItem
+     */
+    public CommercialRuleItem getCommercialRuleItem() {
+        return commercialRuleItem;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (getClass() != obj.getClass())
-			return false;
-		CommercialRuleLine other = (CommercialRuleLine) obj;
-		return Objects.equals(commercialRuleItem, other.commercialRuleItem) && operator == other.operator
-				&& Objects.equals(sourceAttribute, other.sourceAttribute)
-				&& Objects.equals(sourceAttributeValue, other.sourceAttributeValue)
-				&& Objects.equals(sourceGroupedAttributeValue, other.sourceGroupedAttributeValue)
-				&& Objects.equals(sourceGroupedAttributes, other.sourceGroupedAttributes)
-				&& Objects.equals(sourceOfferTemplate, other.sourceOfferTemplate)
-				&& Objects.equals(sourceProduct, other.sourceProduct)
-				&& Objects.equals(sourceProductVersion, other.sourceProductVersion)
-				&& Objects.equals(sourceTag, other.sourceTag);
-	}
-	
-	
+    /**
+     * @param commercialRuleItem the commercialRuleItem to set
+     */
+    public void setCommercialRuleItem(CommercialRuleItem commercialRuleItem) {
+        this.commercialRuleItem = commercialRuleItem;
+    }
 
- 
+    /**
+     * @return the sourceGroupedAttributeValue
+     */
+    public String getSourceGroupedAttributeValue() {
+        return sourceGroupedAttributeValue;
+    }
+
+    /**
+     * @param sourceGroupedAttributeValue the sourceGroupedAttributeValue to set
+     */
+    public void setSourceGroupedAttributeValue(String sourceGroupedAttributeValue) {
+        this.sourceGroupedAttributeValue = sourceGroupedAttributeValue;
+    }
+
+    public boolean isSourceOfferAttribute() {
+        return sourceProduct == null;
+    }
+
+    public String getSourceOfferTemplateCode() {
+        return sourceOfferTemplate != null ? sourceOfferTemplate.getCode() : null;
+    }
+
+    public String getSourceProductCode() {
+        return sourceProduct != null ? sourceProduct.getCode() : null;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(commercialRuleItem, operator, sourceAttribute, sourceAttributeValue, sourceGroupedAttributeValue, sourceGroupedAttributes, sourceOfferTemplate, sourceProduct,
+            sourceProductVersion, sourceTag);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+        CommercialRuleLine other = (CommercialRuleLine) obj;
+        return Objects.equals(commercialRuleItem, other.commercialRuleItem) && operator == other.operator && Objects.equals(sourceAttribute, other.sourceAttribute)
+                && Objects.equals(sourceAttributeValue, other.sourceAttributeValue) && Objects.equals(sourceGroupedAttributeValue, other.sourceGroupedAttributeValue)
+                && Objects.equals(sourceGroupedAttributes, other.sourceGroupedAttributes) && Objects.equals(sourceOfferTemplate, other.sourceOfferTemplate) && Objects.equals(sourceProduct, other.sourceProduct)
+                && Objects.equals(sourceProductVersion, other.sourceProductVersion) && Objects.equals(sourceTag, other.sourceTag);
+    }
 
 }

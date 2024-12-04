@@ -1,8 +1,8 @@
 package org.meveo.apiv2.dunning.template;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.meveo.api.exception.BusinessApiException;

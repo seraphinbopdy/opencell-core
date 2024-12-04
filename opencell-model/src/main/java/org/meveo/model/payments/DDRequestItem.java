@@ -21,28 +21,27 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
+
 @Entity
 @Table(name = "ar_ddrequest_item")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_ddrequest_item_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_ddrequest_item_seq"), @Parameter(name = "increment_size", value = "1") })
 public class DDRequestItem extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;
@@ -104,15 +103,14 @@ public class DDRequestItem extends AuditableEntity {
     @OneToOne(optional = true)
     @JoinColumn(name = "payment_id")
     private AutomatedPayment automatedPayment;
-    
+
     @OneToOne(optional = true)
     @JoinColumn(name = "refund_id")
     private AutomatedRefund automatedRefund;
-    
-    @Column(name = "rejected_file_name", length = 1000)
-    @Size(max = 1000)    
-    private String rejectedFileName;
 
+    @Column(name = "rejected_file_name", length = 1000)
+    @Size(max = 1000)
+    private String rejectedFileName;
 
     public DDRequestItem() {
 
@@ -249,8 +247,6 @@ public class DDRequestItem extends AuditableEntity {
     public void setAccountOperations(List<AccountOperation> accountOperations) {
         this.accountOperations = accountOperations;
     }
-    
-    
 
     /**
      * @return the refund
@@ -266,18 +262,17 @@ public class DDRequestItem extends AuditableEntity {
         this.automatedRefund = refund;
     }
 
-    
     public String getRejectedFileName() {
-		return rejectedFileName;
-	}
+        return rejectedFileName;
+    }
 
-	public void setRejectedFileName(String rejectedFileName) {
-		this.rejectedFileName = rejectedFileName;
-	}
+    public void setRejectedFileName(String rejectedFileName) {
+        this.rejectedFileName = rejectedFileName;
+    }
 
-	@Transient
+    @Transient
     public boolean hasError() {
         return !(errorMsg == null || errorMsg.trim().length() == 0);
-    }	
+    }
 
 }

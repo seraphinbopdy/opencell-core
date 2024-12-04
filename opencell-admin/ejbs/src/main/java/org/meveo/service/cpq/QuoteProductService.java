@@ -3,14 +3,14 @@ package org.meveo.service.cpq;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.TypedQuery;
 import org.meveo.model.quote.QuoteProduct;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 
 /**
@@ -60,7 +60,7 @@ public class QuoteProductService extends PersistenceService<QuoteProduct> {
 	public QuoteProduct update(QuoteProduct quoteProduct) {
 		BigDecimal qpMRR = calculateMRR(quoteProduct);
 		log.info("QuoteProduct {} MRR: {}", quoteProduct.getId(), qpMRR);
-		// quoteProduct.setMrr(qpMRR);
+		quoteProduct.setMrr(qpMRR);
 		return super.update(quoteProduct);
 	}
 

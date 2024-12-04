@@ -1,22 +1,26 @@
 package org.meveo.service.payments.impl;
 
-import org.meveo.commons.utils.QueryBuilder;
-import org.meveo.model.dunning.*;
-import org.meveo.service.base.PersistenceService;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
+import org.meveo.commons.utils.QueryBuilder;
+import org.meveo.model.dunning.DunningAction;
+import org.meveo.model.dunning.DunningActionInstance;
+import org.meveo.model.dunning.DunningActionInstanceStatusEnum;
+import org.meveo.model.dunning.DunningCollectionPlan;
+import org.meveo.model.dunning.DunningLevelInstance;
+import org.meveo.model.dunning.DunningLevelInstanceStatusEnum;
+import org.meveo.model.dunning.DunningPolicyLevel;
+import org.meveo.service.base.PersistenceService;
 
-import static java.lang.System.currentTimeMillis;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class DunningActionInstanceService extends PersistenceService<DunningActionInstance> {
-
+	
     /**
      * Find a dunning action instance by code and dunning level instance
      *
@@ -71,7 +75,7 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
 
             if(collectionPlan != null) {
                 dunningActionInstance.setCollectionPlan(collectionPlan);
-            }
+}
 
             this.create(dunningActionInstance);
             actionInstances.add(dunningActionInstance);

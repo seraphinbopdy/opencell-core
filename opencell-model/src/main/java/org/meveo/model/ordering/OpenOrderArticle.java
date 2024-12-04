@@ -1,28 +1,27 @@
 package org.meveo.model.ordering;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableEntity;
 import org.meveo.model.article.AccountingArticle;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
-import static javax.persistence.FetchType.LAZY;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "open_order_article")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "open_order_article_seq"),})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "open_order_article_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
-        @NamedQuery(name = "OpenOrderArticle.findByCodeAndTemplate",
-                query = "SELECT ooa FROM OpenOrderArticle ooa WHERE ooa.openOrderTemplate.id=:TEMPLATE_ID AND ooa.accountingArticle.code=:ARTICLE_CODE AND ooa.active=TRUE") })
+        @NamedQuery(name = "OpenOrderArticle.findByCodeAndTemplate", query = "SELECT ooa FROM OpenOrderArticle ooa WHERE ooa.openOrderTemplate.id=:TEMPLATE_ID AND ooa.accountingArticle.code=:ARTICLE_CODE AND ooa.active=TRUE") })
 public class OpenOrderArticle extends AuditableEntity {
 
     @OneToOne(fetch = LAZY)
@@ -33,7 +32,7 @@ public class OpenOrderArticle extends AuditableEntity {
     @JoinColumn(name = "open_order_template_id")
     private OpenOrderTemplate openOrderTemplate;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "active")
     private Boolean active;
 

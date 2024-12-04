@@ -21,13 +21,13 @@ package org.meveo.api.dto.job;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.api.dto.CustomFieldsDto;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class JobInstanceInfoDto.
@@ -65,16 +65,21 @@ public class JobInstanceInfoDto implements Serializable {
 
     /** Ignore a check if job is currently running and launch it anyway. */
     private boolean forceExecution;
-    
+
     /** The run on nodes. */
     private String runOnNodes;
-    
+
     /** The parametres. */
     private String parameters;
-    
+
     /** The custom fields. */
     private CustomFieldsDto customFields;
-    
+
+    /**
+     * Shall API wait for job to complete before returning.
+     */
+    private boolean waitToComplete = false;
+
     /**
      * @return the parameters
      */
@@ -88,7 +93,6 @@ public class JobInstanceInfoDto implements Serializable {
     public void setParameters(String parameters) {
         this.parameters = parameters;
     }
-
 
     /**
      * Gets the last transaction date.
@@ -197,7 +201,7 @@ public class JobInstanceInfoDto implements Serializable {
     public void setForceExecution(boolean forceExecution) {
         this.forceExecution = forceExecution;
     }
-    
+
     /**
      * @return the runOnNodes
      */
@@ -233,10 +237,17 @@ public class JobInstanceInfoDto implements Serializable {
     public void setStart(boolean start) {
         this.start = start;
     }
+    
+    public boolean isWaitToComplete() {
+        return waitToComplete;
+    }
+    
+    public void setWaitToComplete(boolean waitToComplete) {
+        this.waitToComplete = waitToComplete;
+    }
 
     @Override
     public String toString() {
-        return "JobInstanceInfoDto [timerName=" + timerName + ", code=" + code + ", lastTransactionDate=" + lastTransactionDate + ", invoiceDate=" + invoiceDate + ", billingCycle="
-                + billingCycle + "]";
+        return "JobInstanceInfoDto [timerName=" + timerName + ", code=" + code + ", lastTransactionDate=" + lastTransactionDate + ", invoiceDate=" + invoiceDate + ", billingCycle=" + billingCycle + "]";
     }
 }

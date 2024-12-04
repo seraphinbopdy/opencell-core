@@ -21,25 +21,25 @@ package org.meveo.model.billing;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.IEntity;
 import org.meveo.model.admin.Seller;
+
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * A mapping between Invoice type, seller and invoice numbering sequence
@@ -49,8 +49,7 @@ import org.meveo.model.admin.Seller;
 @Entity
 @ExportIdentifier({ "invoiceType.code", "seller.code" })
 @Table(name = "billing_seq_invtyp_sell")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "bill_seq_it_sell_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "bill_seq_it_sell_seq"), @Parameter(name = "increment_size", value = "1") })
 public class InvoiceTypeSellerSequence implements IEntity {
 
     @Id
@@ -148,22 +147,21 @@ public class InvoiceTypeSellerSequence implements IEntity {
         this.prefixEL = prefixEL;
     }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, invoiceSequence, invoiceType, prefixEL, seller);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, invoiceSequence, invoiceType, prefixEL, seller);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		InvoiceTypeSellerSequence other = (InvoiceTypeSellerSequence) obj;
-		return Objects.equals(id, other.id) && Objects.equals(invoiceSequence, other.invoiceSequence)
-				&& Objects.equals(invoiceType, other.invoiceType) && Objects.equals(prefixEL, other.prefixEL);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        InvoiceTypeSellerSequence other = (InvoiceTypeSellerSequence) obj;
+        return Objects.equals(id, other.id) && Objects.equals(invoiceSequence, other.invoiceSequence) && Objects.equals(invoiceType, other.invoiceType) && Objects.equals(prefixEL, other.prefixEL);
+    }
 
 }

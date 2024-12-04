@@ -23,30 +23,30 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.ExportIdentifier;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Workflow status transition group
@@ -56,8 +56,7 @@ import org.meveo.model.ExportIdentifier;
 @Entity
 @ExportIdentifier({ "uuid" })
 @Table(name = "wf_transition", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "wf_transition_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "wf_transition_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "WFTransition.listByFromStatus", query = "SELECT wft FROM WFTransition wft where (wft.fromStatus=:fromStatusValue or wft.fromStatus='*') and workflow=:workflowValue order by priority ASC") })
 public class WFTransition extends BaseEntity implements Comparable<WFTransition> {
@@ -133,13 +132,13 @@ public class WFTransition extends BaseEntity implements Comparable<WFTransition>
      */
     @PrePersist
     public void setUUIDIfNull() {
-    	if (uuid == null) {
-    		uuid = UUID.randomUUID().toString();
-    	}
+        if (uuid == null) {
+            uuid = UUID.randomUUID().toString();
+        }
     }
-    
+
     public String getUuid() {
-    	setUUIDIfNull(); // setting uuid if null to be sure that the existing code expecting uuid not null will not be impacted
+        setUUIDIfNull(); // setting uuid if null to be sure that the existing code expecting uuid not null will not be impacted
         return uuid;
     }
 

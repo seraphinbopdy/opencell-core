@@ -3,13 +3,13 @@ package org.meveo.api.dto.cpq.xml;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.cpq.PriceDTO;
 import org.meveo.model.quote.QuoteProduct;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Product {

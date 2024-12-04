@@ -17,11 +17,11 @@
  */
 package org.meveo.service.catalog.impl;
 
-import javax.ejb.Stateless;
-import javax.inject.Named;
-
 import org.meveo.model.catalog.CalendarYearly;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Named;
 
 /**
  * Calendar service implementation.

@@ -15,11 +15,11 @@ import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.util.Version;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.*;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -65,24 +65,24 @@ public class GenericResourceAPIv1Impl implements GenericResourceAPIv1 {
      */
     @Override
     public Response getRequest( PagingAndFilteringRest pagingAndFiltering ) throws URISyntaxException, IOException {
-        String aGetPath = GenericOpencellRestfulAPIv1.REST_PATH + uriInfo.getPath();
+        String aGetPath = JaxRsActivatorGenericApiV1.REST_PATH + uriInfo.getPath();
 
         segmentsOfPathAPIv1 = uriInfo.getPathSegments();
         StringBuilder suffixPathBuilder = new StringBuilder();
         for (int i = 0; i < segmentsOfPathAPIv1.size() - 1; i++ )
             suffixPathBuilder.append( FORWARD_SLASH + segmentsOfPathAPIv1.get(i).getPath() );
-        String getAnEntityPath = GenericOpencellRestfulAPIv1.REST_PATH + suffixPathBuilder;
+        String getAnEntityPath = JaxRsActivatorGenericApiV1.REST_PATH + suffixPathBuilder;
 
         // to get all entities
-        if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( aGetPath ) ) {
+        if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( aGetPath ) ) {
             return getService.getAllEntities( pagingAndFiltering, uriInfo, aGetPath );
         }
         // to get a particular entity
-        else if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( getAnEntityPath ) ) {
+        else if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( getAnEntityPath ) ) {
             return getService.getEntity( uriInfo, getAnEntityPath );
         }
         // to handle get requests containing regular expressions
-        else if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.containsKey( aGetPath ) ) {
+        else if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.containsKey( aGetPath ) ) {
             return getService.getWithRegex( uriInfo, aGetPath );
         }
         else {
@@ -92,7 +92,7 @@ public class GenericResourceAPIv1Impl implements GenericResourceAPIv1 {
 
     @Override
     public Response postRequest( String jsonDto ) throws URISyntaxException, IOException {
-        String postPath = GenericOpencellRestfulAPIv1.REST_PATH + uriInfo.getPath();
+        String postPath = JaxRsActivatorGenericApiV1.REST_PATH + uriInfo.getPath();
         segmentsOfPathAPIv1 = uriInfo.getPathSegments();
         queryParamsMap = uriInfo.getQueryParameters();
         queryParams = new StringBuilder( QUERY_PARAM_SEPARATOR );
@@ -102,10 +102,10 @@ public class GenericResourceAPIv1Impl implements GenericResourceAPIv1 {
                     + PAIR_QUERY_PARAM_SEPARATOR );
         }
 
-        if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( postPath ) ) {
+        if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( postPath ) ) {
             return postService.createEntity( uriInfo, postPath, jsonDto );
         }
-        else if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.containsKey( postPath ) ) {
+        else if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.containsKey( postPath ) ) {
             return postService.enableOrDisableEntity( uriInfo, postPath, jsonDto );
         }
         else {
@@ -115,17 +115,17 @@ public class GenericResourceAPIv1Impl implements GenericResourceAPIv1 {
 
     @Override
     public Response putRequest( String jsonDto ) throws URISyntaxException, IOException {
-        String putPath = GenericOpencellRestfulAPIv1.REST_PATH + uriInfo.getPath();
+        String putPath = JaxRsActivatorGenericApiV1.REST_PATH + uriInfo.getPath();
         segmentsOfPathAPIv1 = uriInfo.getPathSegments();
         StringBuilder suffixPathBuilder = new StringBuilder();
         for (int i = 0; i < segmentsOfPathAPIv1.size() - 1; i++ )
             suffixPathBuilder.append( FORWARD_SLASH + segmentsOfPathAPIv1.get(i).getPath() );
-        String pathUpdateAnEntity = GenericOpencellRestfulAPIv1.REST_PATH + suffixPathBuilder;
+        String pathUpdateAnEntity = JaxRsActivatorGenericApiV1.REST_PATH + suffixPathBuilder;
 
-        if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.containsKey( putPath ) ) {
+        if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_REGEX_PATH_AND_IBASE_RS_PATH.containsKey( putPath ) ) {
             return putService.updateService( uriInfo, putPath, jsonDto );
         }
-        else if ( GenericOpencellRestfulAPIv1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( pathUpdateAnEntity ) ) {
+        else if ( JaxRsActivatorGenericApiV1.MAP_RESTFUL_PATH_AND_IBASE_RS_PATH.containsKey( pathUpdateAnEntity ) ) {
             return putService.updateEntity( uriInfo, pathUpdateAnEntity, jsonDto );
         }
 
@@ -144,15 +144,15 @@ public class GenericResourceAPIv1Impl implements GenericResourceAPIv1 {
 
     @Override
     public Response getListRestEndpoints() {
-        return Response.ok().entity(GenericOpencellRestfulAPIv1.RESTFUL_ENTITIES_MAP).type(MediaType.APPLICATION_JSON_TYPE).build();
+        return Response.ok().entity(JaxRsActivatorGenericApiV1.RESTFUL_ENTITIES_MAP).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
     @Override
     public Response getListRestEndpointsForEntity(String entityName) {
-        if ( GenericOpencellRestfulAPIv1.RESTFUL_ENTITIES_MAP.containsKey( StringUtils.capitalizeFirstLetter(entityName) ) ) {
+        if ( JaxRsActivatorGenericApiV1.RESTFUL_ENTITIES_MAP.containsKey( StringUtils.capitalizeFirstLetter(entityName) ) ) {
             entityName = StringUtils.capitalizeFirstLetter(entityName);
             Map<String, Object> responseMap = new HashMap<>();
-            responseMap.put( entityName, GenericOpencellRestfulAPIv1.RESTFUL_ENTITIES_MAP.get( entityName ) );
+            responseMap.put( entityName, JaxRsActivatorGenericApiV1.RESTFUL_ENTITIES_MAP.get( entityName ) );
             return Response.ok().entity(responseMap).type(MediaType.APPLICATION_JSON_TYPE).build();
         }
         else {
@@ -166,7 +166,7 @@ public class GenericResourceAPIv1Impl implements GenericResourceAPIv1 {
     @Override
     public Response getApiVersion() {
         ActionStatus successfulStatus = new ActionStatus(ActionStatusEnum.SUCCESS,
-                "Opencell core version " + Version.appVersion + ", Opencell Rest API version " + GenericOpencellRestfulAPIv1.REST_PATH.substring(1)
+                "Opencell core version " + Version.appVersion + ", Opencell Rest API version " + JaxRsActivatorGenericApiV1.REST_PATH.substring(1)
                         + ", commit " + Version.buildNumber + " , build at " + Version.build_time);
 
         return Response.status(Response.Status.OK).entity(successfulStatus).build();

@@ -17,9 +17,9 @@
  */
 package org.meveo.service.base;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.BusinessEntity;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class BusinessEntityService extends BusinessService<BusinessEntity> {

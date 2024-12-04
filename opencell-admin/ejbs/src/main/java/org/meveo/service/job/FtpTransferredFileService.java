@@ -17,10 +17,10 @@
  */
 package org.meveo.service.job;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.jobs.FtpTransferredFile;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class FtpTransferredFileService extends BusinessService<FtpTransferredFile> {

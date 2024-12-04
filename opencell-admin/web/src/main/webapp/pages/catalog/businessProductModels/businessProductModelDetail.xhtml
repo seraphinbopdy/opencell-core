@@ -5,12 +5,10 @@
 	xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags"
 	xmlns:p="http://primefaces.org/ui" template="/layout/template.xhtml">
 
-	<ui:define name="metadata">
 		<f:metadata>
 			<f:viewParam name="businessProductModelId"
 				value="#{businessProductModelBean.objectId}" />
 		</f:metadata>
-	</ui:define>
 
 	<ui:define name="body">
 		<hftl:entityPopup id="productTemplatePopup"

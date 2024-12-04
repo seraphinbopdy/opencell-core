@@ -18,16 +18,6 @@
 
 package org.meveo.api.rest.dwh;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Hidden;
-
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.dwh.BarChartDto;
 import org.meveo.api.dto.dwh.ChartDto;
@@ -37,15 +27,30 @@ import org.meveo.api.dto.response.ChartsResponseDto;
 import org.meveo.api.dto.response.dwh.GetChartResponse;
 import org.meveo.api.rest.IBaseRs;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("/chart")
 @Tag(name = "Chart", description = "@%Chart")
 @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @Deprecated
-@ApiOperation(value = "Obsolete. Use ChartApi instead")
+@OpenAPIDefinition(info = @Info(summary = "Obsolete. Use ChartApi instead"))
 public interface ChartRs extends IBaseRs {
 
     /**

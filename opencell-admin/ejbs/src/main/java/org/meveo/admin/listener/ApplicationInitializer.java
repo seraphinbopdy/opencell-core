@@ -22,26 +22,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.storage.StorageFactory;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
-import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
+import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
 import org.meveo.cache.CacheContainerProvider;
-import org.meveo.cache.CdrEdrProcessingCacheContainerProvider;
-import org.meveo.cache.CommercialRulesContainerProvider;
-import org.meveo.cache.CustomFieldsCacheContainerProvider;
-import org.meveo.cache.JobCacheContainerProvider;
-import org.meveo.cache.MetricsConfigurationCacheContainerProvider;
-import org.meveo.cache.NotificationCacheContainerProvider;
-import org.meveo.cache.TenantCacheContainerProvider;
-import org.meveo.cache.WalletCacheContainerProvider;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.jpa.EntityManagerProvider;
 import org.meveo.model.crm.Provider;
@@ -53,6 +38,13 @@ import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.script.ScriptCompilerService;
 import org.slf4j.Logger;
 
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 /**
@@ -91,35 +83,14 @@ public class ApplicationInitializer {
     private Logger log;
 
     @Inject
-    private WalletCacheContainerProvider walletCache;
-
-    @Inject
-    private CdrEdrProcessingCacheContainerProvider cdrEdrCache;
-
-    @Inject
-    private NotificationCacheContainerProvider notifCache;
-
-    @Inject
-    private CustomFieldsCacheContainerProvider cftCache;
-
-    @Inject
-    private JobCacheContainerProvider jobCache;
-
-    @Inject
-    private TenantCacheContainerProvider tenantCache;
-
-    @Inject
-    private MetricsConfigurationCacheContainerProvider metricsConfigurationCacheContainerProvider;
-
-    @Inject
     private StorageFactory storageFactory;
-    
-    @Inject
-    private CommercialRulesContainerProvider commercialRulesContainerProvider;
 
     @Inject
     @Named
     private NativePersistenceService nativePersistenceService;
+
+    @Inject
+    private Instance<CacheContainerProvider> cacheProviders;
 
     @Inject
     protected ParamBeanFactory paramBeanFactory;
@@ -154,7 +125,7 @@ public class ApplicationInitializer {
 
             } catch (InterruptedException | ExecutionException | BusinessException e) {
                 log.error("Failed to initialize a provider {}", provider.getCode(), e);
-                }
+            }
             i++;
         }
 
@@ -191,15 +162,13 @@ public class ApplicationInitializer {
         scriptCompilerService.compileAndInitializeAll();
 
         // Initialize caches
-        cftCache.populateCache(System.getProperty(CacheContainerProvider.SYSTEM_PROPERTY_CACHES_TO_LOAD));
-        notifCache.populateCache(System.getProperty(CacheContainerProvider.SYSTEM_PROPERTY_CACHES_TO_LOAD));
-        jobCache.populateCache(System.getProperty(CacheContainerProvider.SYSTEM_PROPERTY_CACHES_TO_LOAD));
-        walletCache.populateCache(System.getProperty(CacheContainerProvider.SYSTEM_PROPERTY_CACHES_TO_LOAD));
-        tenantCache.populateCache(System.getProperty(CacheContainerProvider.SYSTEM_PROPERTY_CACHES_TO_LOAD));
-        metricsConfigurationCacheContainerProvider.populateCache(System.getProperty(CacheContainerProvider.SYSTEM_PROPERTY_CACHES_TO_LOAD));
-        cdrEdrCache.populateCache(System.getProperty(CacheContainerProvider.SYSTEM_PROPERTY_CACHES_TO_LOAD));
-        commercialRulesContainerProvider.populateCache();
-        
+
+        String cachesToLoad = System.getProperty(CacheContainerProvider.SYSTEM_PROPERTY_CACHES_TO_LOAD);
+
+        for (CacheContainerProvider cacheContainerProvider : cacheProviders) {
+            cacheContainerProvider.populateCache(cachesToLoad);
+        }
+
         // cfValueAcumulator.loadCfAccumulationRules();
 
         log.info("Initialized application for provider {}", provider.getCode());

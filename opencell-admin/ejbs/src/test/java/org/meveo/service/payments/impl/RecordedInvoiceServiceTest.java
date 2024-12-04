@@ -24,6 +24,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,11 +47,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.enterprise.event.Event;
-import javax.persistence.EntityManager;
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.Date;
+import jakarta.enterprise.event.Event;
+import jakarta.persistence.EntityManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecordedInvoiceServiceTest {
@@ -75,6 +76,9 @@ public class RecordedInvoiceServiceTest {
     @Mock
     private EntityManagerWrapper emWrapper;
 
+    @Mock
+    private DunningCollectionPlanService dunningCollectionPlanService;
+    
     @Before
     public void setUp() {
         when(entityManager.contains(any())).thenReturn(true);

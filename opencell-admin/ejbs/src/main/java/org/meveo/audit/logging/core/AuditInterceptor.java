@@ -19,19 +19,17 @@
 package org.meveo.audit.logging.core;
 
 import java.io.Serializable;
-import java.util.List;
-
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.audit.logging.annotations.CustomMeveoAudit;
 import org.meveo.audit.logging.annotations.MeveoAudit;
 import org.meveo.audit.logging.custom.CustomAuditManagerService;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * @author Edward P. Legaspi

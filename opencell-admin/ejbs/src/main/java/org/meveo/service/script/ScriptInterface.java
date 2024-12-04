@@ -18,6 +18,7 @@
 
 package org.meveo.service.script;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
@@ -64,5 +65,18 @@ public interface ScriptInterface {
      */
     default String getLogMessages() {
         return null;
+    }
+
+    /**
+     * Immediatly stop the execution and return current results
+     */
+    default Map<String, Object> cancel() {
+        return new HashMap<>();
+    }
+
+    /**
+     * Usage in a pool - Method called before the object is borrowed from pool. Reset the inputs / state of a script to default
+     */
+    default void resetState() {
     }
 }

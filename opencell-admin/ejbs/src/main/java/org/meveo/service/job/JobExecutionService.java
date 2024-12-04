@@ -22,17 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.JobExecutionException;
 import org.meveo.admin.job.IteratorBasedJobBean;
@@ -42,7 +37,7 @@ import org.meveo.cache.JobRunningStatusEnum;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.PersistenceUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
@@ -55,9 +50,16 @@ import org.meveo.security.MeveoUser;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.base.BaseService;
 import org.meveo.service.base.ValueExpressionWrapper;
+import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.meveo.service.crm.impl.CustomFieldInstanceService;
+
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * The Class JobExecutionService.
@@ -110,6 +112,13 @@ public class JobExecutionService extends BaseService {
     protected CustomFieldInstanceService customFieldInstanceService;
 
     /**
+     * Tracks countDowns used to wait for job completion. Job identifier is a map key.<br/>
+     * When Job completes on main processing node, a MQ message is send to all nodes to inform about such event. If a node happen to be the one that originally initiated job execution via executeJobWithWait() method, it
+     * will reduce the countDown and original job execution executeJobWithWait() call will proceed.
+     */
+    private static final Map<Long, CountDownLatch> jobCompletionCountDowns = new HashMap<Long, CountDownLatch>();
+
+    /**
      * Execute a job and return job execution result ID to be able to query execution results later. Job execution result is persisted right away, while job is executed asynchronously.
      * 
      * @param jobInstance Job instance to execute.
@@ -119,7 +128,53 @@ public class JobExecutionService extends BaseService {
      * @throws BusinessException Any exception
      */
     public Long executeJob(JobInstance jobInstance, Map<String, Object> params, JobLauncherEnum jobLauncher) throws BusinessException {
+
+        // Clean up counter for job waiting purpose
+        CountDownLatch countDown = jobCompletionCountDowns.get(jobInstance.getId());
+        if (countDown != null) {
+            countDown.countDown();
+            jobCompletionCountDowns.remove(jobInstance.getId());
+        }
+
         return executeJob(jobInstance, params, jobLauncher, true);
+    }
+
+    /**
+     * Execute a job, wait untill its executed completely and return job execution result ID to be able to query execution results later. Job execution result is persisted right away, while job is executed
+     * asynchronously.
+     * 
+     * @param jobInstance Job instance to execute.
+     * @param params Parameters (currently not used)
+     * @param jobLauncher How job was launched
+     * @return Job execution result ID
+     * @throws BusinessException Any exception
+     */
+    public Long executeJobWithWait(JobInstance jobInstance, Map<String, Object> params, JobLauncherEnum jobLauncher) throws BusinessException {
+
+        // Clean up counter for job waiting purpose
+        CountDownLatch countDown = jobCompletionCountDowns.get(jobInstance.getId());
+        if (countDown != null) {
+            countDown.countDown();
+            jobCompletionCountDowns.remove(jobInstance.getId());
+        }
+
+        // Launch job execution
+        Long jobResultId = executeJob(jobInstance, params, jobLauncher);
+
+        // Wait for job to complete
+        log.info("Waiting for a job {} with result ID {} to complete", jobInstance.getCode(), jobResultId);
+
+        countDown = new CountDownLatch(1);
+        jobCompletionCountDowns.put(jobInstance.getId(), countDown);
+
+        try {
+            countDown.await();
+
+        } catch (InterruptedException e) {
+            log.error("Interrupted while waiting for job {} with result ID {} to complete", jobInstance.getCode(), jobResultId, e);
+        }
+
+        return jobResultId;
     }
 
     /**
@@ -187,8 +242,9 @@ public class JobExecutionService extends BaseService {
                 jobParameters.putAll(params);
             }
             jobParameters.put(Job.JOB_PARAM_LAUNCHER, jobLauncher);
-            jobExecutionResultId = (Long) clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.execute, jobParameters, true);
+            jobExecutionResultId = (Long) clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.execute, jobParameters, true, null, null);
         }
+
         return jobExecutionResultId;
     }
 
@@ -225,6 +281,10 @@ public class JobExecutionService extends BaseService {
                     jobExecutionResult.setStatus(JobExecutionResultStatusEnum.FAILED);
                     jobExecutionResult.addReportToBeginning("Job completed successfully with more data to process, but failed to complete on other nodes. Will stop further processing.");
                     jobExecutionResultService.persistResult(jobExecutionResult);
+
+                    // Inform via MQ message that job has completed it's execution
+                    clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.jobExecutionCompleted, Map.of(JobExecutionResultStatusEnum.class.getSimpleName(), JobExecutionResultStatusEnum.FAILED), false,
+                        null, null);
                     return;
                 }
 
@@ -234,6 +294,9 @@ public class JobExecutionService extends BaseService {
                 jobResultStatus = job.execute(jobInstance, jobExecutionResult, JobLauncherEnum.INCOMPLETE);
                 i++;
             }
+
+            // Inform via MQ message that job has completed it's execution
+            clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.jobExecutionCompleted, Map.of(JobExecutionResultStatusEnum.class.getSimpleName(), jobResultStatus), false, null, null);
 
             if (jobResultStatus == JobExecutionResultStatusEnum.COMPLETED && jobInstance.getFollowingJob() != null) {
             	JobInstance nextJob = jobInstanceService.refreshOrRetrieve(jobInstance.getFollowingJob());
@@ -282,10 +345,11 @@ public class JobExecutionService extends BaseService {
         IteratorBasedJobBean.markJobToStop(jobInstance.getId());
         jobCacheContainerProvider.markJobToStop(jobInstance);
         IteratorBasedJobBean.releaseJobDataProcessingThreads(jobInstance.getId());
+        JobExecutionService.releaseJobCompletionWaits(jobInstance.getId(), null);
 
         // Publish to other cluster nodes to cancel job execution
         if (triggerStopOnOtherNodes) {
-            clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.stop);
+            clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.stop);
         }
     }
 
@@ -314,6 +378,7 @@ public class JobExecutionService extends BaseService {
             jobCacheContainerProvider.markJobToStop(jobInstance);
         }
         IteratorBasedJobBean.releaseJobDataProcessingThreads(jobInstance.getId());
+        JobExecutionService.releaseJobCompletionWaits(jobInstance.getId(), null);
 
         List<Future> futures = jobCacheContainerProvider.getJobExecutionThreads(jobInstance.getId());
         if (futures.isEmpty()) {
@@ -336,7 +401,7 @@ public class JobExecutionService extends BaseService {
 
         // Publish to other cluster nodes to cancel job execution
         if (triggerStopOnOtherNodes) {
-            clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.stopByForce);
+            clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.stopByForce);
         }
     }
 
@@ -451,8 +516,7 @@ public class JobExecutionService extends BaseService {
         JobRunningStatusEnum isRunning = jobCacheContainerProvider.isJobRunning(jobInstance.getId());
         if (isRunning == JobRunningStatusEnum.NOT_RUNNING) {
             return true;
-        } else if (isRunning == JobRunningStatusEnum.RUNNING_THIS || isRunning == JobRunningStatusEnum.LOCKED_THIS
-                || isRunning == JobRunningStatusEnum.REQUEST_TO_STOP) {
+        } else if (isRunning == JobRunningStatusEnum.RUNNING_THIS || isRunning == JobRunningStatusEnum.LOCKED_THIS || isRunning == JobRunningStatusEnum.REQUEST_TO_STOP) {
             return false;
         } else {
             return JobExecutionService.isRunnableOnNode(jobInstance.getRunOnNodesResolved());
@@ -593,7 +657,7 @@ public class JobExecutionService extends BaseService {
 
         String currentNode = EjbUtils.getCurrentClusterNode();
 
-        if (currentNode == null || runOnNodes == null) {
+        if (currentNode == null || StringUtils.isBlank(runOnNodes)) {
             return true;
         }
 
@@ -622,5 +686,26 @@ public class JobExecutionService extends BaseService {
      */
     public static String getJobQueueName(String jobCode) {
         return "JOB_" + jobCode.replace(' ', '_');
+    }
+
+    /**
+     * Release waiting for job execution to finish, so original executeJobWithWait() method could continue.
+     * 
+     * @param jobInstanceId Job instance identifier
+     * @param jobResultStatus Job execution result status (currently not used)
+     */
+    public static void releaseJobCompletionWaits(Long jobInstanceId, JobExecutionResultStatusEnum jobResultStatus) {
+
+        // Clean up counter for job thread scheduling purpose
+        CountDownLatch countDown = jobCompletionCountDowns.get(jobInstanceId);
+        if (countDown != null) {
+            countDown.countDown();
+            jobCompletionCountDowns.remove(jobInstanceId);
+
+        } else {
+            // Not an error, as message is processed by all nodes and only one node will have a countDown
+            // Logger log = LoggerFactory.getLogger(JobExecutionService.class);
+            // log.trace("No job completion countDownLatch found for job{}", jobInstanceId);
+        }
     }
 }

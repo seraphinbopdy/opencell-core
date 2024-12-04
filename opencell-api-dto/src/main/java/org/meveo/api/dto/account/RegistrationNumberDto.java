@@ -1,9 +1,9 @@
 package org.meveo.api.dto.account;
 
-import org.meveo.model.RegistrationNumber;
-
 import java.io.Serializable;
 import java.util.Objects;
+
+import org.meveo.model.RegistrationNumber;
 
 public class RegistrationNumberDto  implements Serializable {
 	

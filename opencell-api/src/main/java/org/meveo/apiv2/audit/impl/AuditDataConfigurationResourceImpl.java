@@ -4,16 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.transaction.Transactional;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.logging.WsRestApiInterceptor;
@@ -24,6 +14,16 @@ import org.meveo.apiv2.audit.resource.AuditDataConfigurationResource;
 import org.meveo.apiv2.audit.service.AuditDataConfigurationApiService;
 import org.meveo.apiv2.ordering.common.LinkGenerator;
 import org.meveo.model.audit.AuditDataConfiguration;
+
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class AuditDataConfigurationResourceImpl implements AuditDataConfigurationResource {

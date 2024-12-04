@@ -19,6 +19,7 @@ package org.meveo.model.catalog;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,33 +27,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
-import javax.xml.bind.ValidationException;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
@@ -66,6 +47,29 @@ import org.meveo.model.cpq.Attribute;
 import org.meveo.model.finance.RevenueRecognitionRule;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.tax.TaxClass;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.Size;
 
 /**
  * Charge template/definition
@@ -82,7 +86,7 @@ import org.meveo.model.tax.TaxClass;
 @CustomFieldEntity(cftCodePrefix = "ChargeTemplate")
 @ExportIdentifier({ "code" })
 @Table(name = "cat_charge_template", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "cat_charge_template_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_charge_template_seq"), @Parameter(name = "increment_size", value = "1") })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "charge_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class ChargeTemplate extends EnableBusinessCFEntity {
@@ -92,7 +96,7 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(mappedBy = "chargeTemplate", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ProductChargeTemplateMapping> productCharges = new ArrayList<>();
-    
+
     public enum ChargeTypeEnum {
         RECURRING, USAGE, SUBSCRIPTION, TERMINATION
     }
@@ -125,9 +129,9 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     /**
      * Operation type - Credit/Debit
      */
-    @Column(name = "credit_debit_flag")
+    @Column(name = "credit_debit_flag", columnDefinition = "int4")
     protected OperationTypeEnum type;
-    
+
     /**
      * Operation type
      */
@@ -138,7 +142,7 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     /**
      * Is amount editable
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "amount_editable")
     protected Boolean amountEditable;
 
@@ -146,7 +150,7 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
      * Corresponding invoice subcategory
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_sub_category") 
+    @JoinColumn(name = "invoice_sub_category")
     protected InvoiceSubCategory invoiceSubCategory;
 
     /**
@@ -228,7 +232,7 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     /**
      * Translated descriptions in JSON format with language code as a key and translated description as a value.
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     protected Map<String, String> descriptionI18n;
 
@@ -263,7 +267,7 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     /**
      * Enable/disable removing rated WO to 0.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "drop_zero_wo")
     protected boolean dropZeroWo;
 
@@ -289,7 +293,7 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
 
     @Transient
     private int roundingEdrNbDecimal = BaseEntity.NB_DECIMALS;
-    
+
     /**
      * ChargeTemplate status
      */
@@ -297,26 +301,26 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     @Column(name = "status", nullable = false)
     private ChargeTemplateStatusEnum status = ChargeTemplateStatusEnum.DRAFT;
 
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "internal_note")
     private String internalNote;
-    
-    @Type(type = "json")
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameter1_translated_description", columnDefinition = "jsonb")
     private Map<String, String> parameter1TranslatedDescriptions = initParameterTranslatedDescriptions("1");
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameter2_translated_description", columnDefinition = "jsonb")
     private Map<String, String> parameter2TranslatedDescriptions = initParameterTranslatedDescriptions("2");
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameter3_translated_description", columnDefinition = "jsonb")
     private Map<String, String> parameter3TranslatedDescriptions = initParameterTranslatedDescriptions("3");
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameter_extra_translated_description", columnDefinition = "jsonb")
     private Map<String, String> parameterExtraTranslatedDescriptions = initParameterTranslatedDescriptions("extra");
-    
+
     @Column(name = "parameter1_description")
     private String parameter1Description = "Parameter 1";
 
@@ -325,111 +329,106 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
 
     @Column(name = "parameter3_description")
     private String parameter3Description = "Parameter 3";
-    
+
     @Column(name = "parameter_extra_description")
     private String parameterExtraDescription = "Parameter extra";
-    
+
     public enum ParameterFormat {
-        TEXT,
-        INTEGER,
-        DECIMAL,
-        DATE,
-        BOOLEAN
+        TEXT, INTEGER, DECIMAL, DATE, BOOLEAN
     }
-    
+
     @Column(name = "parameter1_format")
     @Enumerated(EnumType.STRING)
-    private ParameterFormat parameter1Format= ParameterFormat.TEXT;
-    
+    private ParameterFormat parameter1Format = ParameterFormat.TEXT;
+
     @Column(name = "parameter2_format")
     @Enumerated(EnumType.STRING)
-    private ParameterFormat parameter2Format= ParameterFormat.TEXT;
-    
+    private ParameterFormat parameter2Format = ParameterFormat.TEXT;
+
     @Column(name = "parameter3_format")
     @Enumerated(EnumType.STRING)
-    private ParameterFormat parameter3Format= ParameterFormat.TEXT;
-    
+    private ParameterFormat parameter3Format = ParameterFormat.TEXT;
+
     @Column(name = "parameter_extra_format")
     @Enumerated(EnumType.STRING)
-    private ParameterFormat parameterExtraFormat= ParameterFormat.TEXT;
-        
+    private ParameterFormat parameterExtraFormat = ParameterFormat.TEXT;
+
     @Column(name = "parameter1_is_mandatory")
-	@Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean parameter1IsMandatory;
 
     @Column(name = "parameter1_is_hidden")
-	@Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean parameter1IsHidden;
 
     @Column(name = "parameter2_is_mandatory")
-	@Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean parameter2IsMandatory;
 
     @Column(name = "parameter2_is_hidden")
-	@Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean parameter2IsHidden;
 
     @Column(name = "parameter3_is_mandatory")
-	@Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean parameter3IsMandatory;
 
     @Column(name = "parameter3_is_hidden")
-	@Type(type = "numeric_boolean")    
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean parameter3IsHidden;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "parameter_extra_is_mandatory")
     private boolean parameterExtraIsMandatory;
 
     @Column(name = "parameter_extra_is_hidden")
-	@Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     private boolean parameterExtraIsHidden;
-    
-    @Type(type = "json")
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameter1_translated_long_descriptions", columnDefinition = "jsonb")
     private Map<String, String> parameter1TranslatedLongDescriptions;
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameter2_translated_long_descriptions", columnDefinition = "jsonb")
     private Map<String, String> parameter2TranslatedLongDescriptions;
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameter3_translated_long_descriptions", columnDefinition = "jsonb")
     private Map<String, String> parameter3TranslatedLongDescriptions;
 
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameter_extra_translated_long_descriptions", columnDefinition = "jsonb")
     private Map<String, String> parameterExtraTranslatedLongDescriptions;
 
     public enum BusinessKeyFormat {
-        TEXT,
-        INTEGER
+        TEXT, INTEGER
     }
-    
+
     @Column(name = "business_key_el", length = 2000)
     @Size(max = 2000)
     private String businessKeyEl;
-    
+
     @Column(name = "business_key_description")
     private String businessKeyDescription = "Business key";
-    
-    @Type(type = "json")
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "business_key_translated_descriptions", columnDefinition = "jsonb")
     private Map<String, String> businessKeyTranslatedDescriptions = initBusinessKeyTranslatedDescriptions();
-    
-    @Type(type = "json")
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "business_key_translated_long_descriptions", columnDefinition = "jsonb")
     private Map<String, String> businessKeyTranslatedLongDescriptions = initBusinessKeyTranslatedLongDescriptions();
-    
+
     @Column(name = "business_key_format")
     @Enumerated(EnumType.STRING)
-    private BusinessKeyFormat businessKeyFormat= BusinessKeyFormat.TEXT;
-    
-    @Type(type = "numeric_boolean")
+    private BusinessKeyFormat businessKeyFormat = BusinessKeyFormat.TEXT;
+
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "business_key_is_mandatory")
     private boolean businessKeyIsMandatory = false;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "business_key_is_hidden")
     private boolean businessKeyIsHidden = false;
 
@@ -452,7 +451,7 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     public void setOutputUnitEL(String outputUnitEL) {
         this.outputUnitEL = outputUnitEL;
     }
-    
+
     /**
      * Get a charge main type
      * 
@@ -509,7 +508,7 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     }
 
     public BigDecimal getUnitMultiplicator() {
-    	return unitMultiplicator != null ? unitMultiplicator : calculateUnitMultiplicator(BigDecimal.ONE, ratingUnitOfMeasure, inputUnitOfMeasure);
+        return unitMultiplicator != null ? unitMultiplicator : calculateUnitMultiplicator(BigDecimal.ONE, ratingUnitOfMeasure, inputUnitOfMeasure);
     }
 
     public void setUnitMultiplicator(BigDecimal unitMultiplicator) {
@@ -561,8 +560,7 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     }
 
     /**
-     * Instantiate descriptionI18n field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record
-     * will be updated in DB
+     * Instantiate descriptionI18n field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record will be updated in DB
      * 
      * @return descriptionI18n value or instantiated descriptionI18n field value
      */
@@ -724,7 +722,6 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
         this.sortIndexEl = sortIndexEl;
     }
 
-
     public Set<Attribute> getAttributes() {
         return attributes;
     }
@@ -733,35 +730,33 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
         this.attributes = attributes;
     }
 
-	/**
-	 * @return the status
-	 */
-	public ChargeTemplateStatusEnum getStatus() {
-		return status;
-	}
-	
-	
+    /**
+     * @return the status
+     */
+    public ChargeTemplateStatusEnum getStatus() {
+        return status;
+    }
 
-	public String getChargeType() {
-		return chargeType;
-	}
+    public String getChargeType() {
+        return chargeType;
+    }
 
-	public void setChargeType(String chargeType) {
-		this.chargeType = chargeType;
-	}
+    public void setChargeType(String chargeType) {
+        this.chargeType = chargeType;
+    }
 
-	/**
-	 * @param status the status to set
-	 * @throws ValidationException 
-	 */
-	public void setStatus(ChargeTemplateStatusEnum status) throws ValidationException {
-		if ((ChargeTemplateStatusEnum.ACTIVE.equals(this.status) && ChargeTemplateStatusEnum.DRAFT.equals(status))
-				|| (ChargeTemplateStatusEnum.ARCHIVED.equals(this.status) && ChargeTemplateStatusEnum.ACTIVE.equals(status))
-				|| (ChargeTemplateStatusEnum.DRAFT.equals(this.status) && ChargeTemplateStatusEnum.ARCHIVED.equals(status))) {
-			throw new ValidationException("Could not change status from '" + this.status + "' to '" + status + "'");
-		}
-		this.status = status;
-	}
+    /**
+     * @param status the status to set
+     * @throws ValidationException
+     */
+    public void setStatus(ChargeTemplateStatusEnum status) throws ValidationException {
+        if ((ChargeTemplateStatusEnum.ACTIVE.equals(this.status) && ChargeTemplateStatusEnum.DRAFT.equals(status))
+                || (ChargeTemplateStatusEnum.ARCHIVED.equals(this.status) && ChargeTemplateStatusEnum.ACTIVE.equals(status))
+                || (ChargeTemplateStatusEnum.DRAFT.equals(this.status) && ChargeTemplateStatusEnum.ARCHIVED.equals(status))) {
+            throw new ValidationException("Could not change status from '" + this.status + "' to '" + status + "'");
+        }
+        this.status = status;
+    }
 
     public List<ProductChargeTemplateMapping> getProductCharges() {
         return productCharges;
@@ -787,13 +782,13 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
         this.roundingEdrNbDecimal = roundingEdrNbDecimal;
     }
 
-	public String getInternalNote() {
-		return internalNote;
-	}
+    public String getInternalNote() {
+        return internalNote;
+    }
 
-	public void setInternalNote(String internalNote) {
-		this.internalNote = internalNote;
-	}
+    public void setInternalNote(String internalNote) {
+        this.internalNote = internalNote;
+    }
 
     public Set<PricePlanMatrix> getPricePlans() {
         return pricePlans;
@@ -803,253 +798,253 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
         this.pricePlans = pricePlans;
     }
 
-	public String getParameter1Description() {
-		return parameter1Description;
-	}
+    public String getParameter1Description() {
+        return parameter1Description;
+    }
 
-	public void setParameter1Description(String parameter1Description) {
-		this.parameter1Description = parameter1Description;
-	}
+    public void setParameter1Description(String parameter1Description) {
+        this.parameter1Description = parameter1Description;
+    }
 
-	public String getParameter2Description() {
-		return parameter2Description;
-	}
+    public String getParameter2Description() {
+        return parameter2Description;
+    }
 
-	public void setParameter2Description(String parameter2Description) {
-		this.parameter2Description = parameter2Description;
-	}
+    public void setParameter2Description(String parameter2Description) {
+        this.parameter2Description = parameter2Description;
+    }
 
-	public String getParameter3Description() {
-		return parameter3Description;
-	}
+    public String getParameter3Description() {
+        return parameter3Description;
+    }
 
-	public void setParameter3Description(String parameter3Description) {
-		this.parameter3Description = parameter3Description;
-	}
+    public void setParameter3Description(String parameter3Description) {
+        this.parameter3Description = parameter3Description;
+    }
 
-	public String getParameterExtraDescription() {
-		return parameterExtraDescription;
-	}
+    public String getParameterExtraDescription() {
+        return parameterExtraDescription;
+    }
 
-	public void setParameterExtraDescription(String parameterExtraDescription) {
-		this.parameterExtraDescription = parameterExtraDescription;
-	}
+    public void setParameterExtraDescription(String parameterExtraDescription) {
+        this.parameterExtraDescription = parameterExtraDescription;
+    }
 
-	public ParameterFormat getParameter1Format() {
-		return parameter1Format;
-	}
+    public ParameterFormat getParameter1Format() {
+        return parameter1Format;
+    }
 
-	public void setParameter1Format(ParameterFormat parameter1Format) {
-		this.parameter1Format = parameter1Format;
-	}
+    public void setParameter1Format(ParameterFormat parameter1Format) {
+        this.parameter1Format = parameter1Format;
+    }
 
-	public ParameterFormat getParameter2Format() {
-		return parameter2Format;
-	}
+    public ParameterFormat getParameter2Format() {
+        return parameter2Format;
+    }
 
-	public void setParameter2Format(ParameterFormat parameter2Format) {
-		this.parameter2Format = parameter2Format;
-	}
+    public void setParameter2Format(ParameterFormat parameter2Format) {
+        this.parameter2Format = parameter2Format;
+    }
 
-	public ParameterFormat getParameter3Format() {
-		return parameter3Format;
-	}
+    public ParameterFormat getParameter3Format() {
+        return parameter3Format;
+    }
 
-	public void setParameter3Format(ParameterFormat parameter3Format) {
-		this.parameter3Format = parameter3Format;
-	}
+    public void setParameter3Format(ParameterFormat parameter3Format) {
+        this.parameter3Format = parameter3Format;
+    }
 
-	public ParameterFormat getParameterExtraFormat() {
-		return parameterExtraFormat;
-	}
+    public ParameterFormat getParameterExtraFormat() {
+        return parameterExtraFormat;
+    }
 
-	public void setParameterExtraFormat(ParameterFormat parameterExtraFormat) {
-		this.parameterExtraFormat = parameterExtraFormat;
-	}
+    public void setParameterExtraFormat(ParameterFormat parameterExtraFormat) {
+        this.parameterExtraFormat = parameterExtraFormat;
+    }
 
-	public boolean isParameter1IsMandatory() {
-		return parameter1IsMandatory;
-	}
+    public boolean isParameter1IsMandatory() {
+        return parameter1IsMandatory;
+    }
 
-	public void setParameter1IsMandatory(boolean parameter1IsMandatory) {
-		this.parameter1IsMandatory = parameter1IsMandatory;
-	}
+    public void setParameter1IsMandatory(boolean parameter1IsMandatory) {
+        this.parameter1IsMandatory = parameter1IsMandatory;
+    }
 
-	public boolean isParameter1IsHidden() {
-		return parameter1IsHidden;
-	}
+    public boolean isParameter1IsHidden() {
+        return parameter1IsHidden;
+    }
 
-	public void setParameter1IsHidden(boolean parameter1IsHidden) {
-		this.parameter1IsHidden = parameter1IsHidden;
-	}
+    public void setParameter1IsHidden(boolean parameter1IsHidden) {
+        this.parameter1IsHidden = parameter1IsHidden;
+    }
 
-	public boolean isParameter2IsMandatory() {
-		return parameter2IsMandatory;
-	}
+    public boolean isParameter2IsMandatory() {
+        return parameter2IsMandatory;
+    }
 
-	public void setParameter2IsMandatory(boolean parameter2IsMandatory) {
-		this.parameter2IsMandatory = parameter2IsMandatory;
-	}
+    public void setParameter2IsMandatory(boolean parameter2IsMandatory) {
+        this.parameter2IsMandatory = parameter2IsMandatory;
+    }
 
-	public boolean isParameter2IsHidden() {
-		return parameter2IsHidden;
-	}
+    public boolean isParameter2IsHidden() {
+        return parameter2IsHidden;
+    }
 
-	public void setParameter2IsHidden(boolean parameter2IsHidden) {
-		this.parameter2IsHidden = parameter2IsHidden;
-	}
+    public void setParameter2IsHidden(boolean parameter2IsHidden) {
+        this.parameter2IsHidden = parameter2IsHidden;
+    }
 
-	public boolean isParameter3IsMandatory() {
-		return parameter3IsMandatory;
-	}
+    public boolean isParameter3IsMandatory() {
+        return parameter3IsMandatory;
+    }
 
-	public void setParameter3IsMandatory(boolean parameter3IsMandatory) {
-		this.parameter3IsMandatory = parameter3IsMandatory;
-	}
+    public void setParameter3IsMandatory(boolean parameter3IsMandatory) {
+        this.parameter3IsMandatory = parameter3IsMandatory;
+    }
 
-	public boolean isParameter3IsHidden() {
-		return parameter3IsHidden;
-	}
+    public boolean isParameter3IsHidden() {
+        return parameter3IsHidden;
+    }
 
-	public void setParameter3IsHidden(boolean parameter3IsHidden) {
-		this.parameter3IsHidden = parameter3IsHidden;
-	}
+    public void setParameter3IsHidden(boolean parameter3IsHidden) {
+        this.parameter3IsHidden = parameter3IsHidden;
+    }
 
-	public boolean isParameterExtraIsHidden() {
-		return parameterExtraIsHidden;
-	}
+    public boolean isParameterExtraIsHidden() {
+        return parameterExtraIsHidden;
+    }
 
-	public void setParameterExtraIsHidden(boolean parameterExtraIsHidden) {
-		this.parameterExtraIsHidden = parameterExtraIsHidden;
-	}
+    public void setParameterExtraIsHidden(boolean parameterExtraIsHidden) {
+        this.parameterExtraIsHidden = parameterExtraIsHidden;
+    }
 
-	public boolean isParameterExtraIsMandatory() {
-		return parameterExtraIsMandatory;
-	}
+    public boolean isParameterExtraIsMandatory() {
+        return parameterExtraIsMandatory;
+    }
 
-	public void setParameterExtraIsMandatory(boolean parameterExtraIsMandatory) {
-		this.parameterExtraIsMandatory = parameterExtraIsMandatory;
-	}
+    public void setParameterExtraIsMandatory(boolean parameterExtraIsMandatory) {
+        this.parameterExtraIsMandatory = parameterExtraIsMandatory;
+    }
 
-	public Map<String, String> getParameter1TranslatedDescriptions() {
-		return parameter1TranslatedDescriptions;
-	}
+    public Map<String, String> getParameter1TranslatedDescriptions() {
+        return parameter1TranslatedDescriptions;
+    }
 
-	public void setParameter1TranslatedDescriptions(Map<String, String> parameter1TranslatedDescriptions) {
-		this.parameter1TranslatedDescriptions = parameter1TranslatedDescriptions;
-	}
+    public void setParameter1TranslatedDescriptions(Map<String, String> parameter1TranslatedDescriptions) {
+        this.parameter1TranslatedDescriptions = parameter1TranslatedDescriptions;
+    }
 
-	public Map<String, String> getParameter2TranslatedDescriptions() {
-		return parameter2TranslatedDescriptions;
-	}
+    public Map<String, String> getParameter2TranslatedDescriptions() {
+        return parameter2TranslatedDescriptions;
+    }
 
-	public void setParameter2TranslatedDescriptions(Map<String, String> parameter2TranslatedDescriptions) {
-		this.parameter2TranslatedDescriptions = parameter2TranslatedDescriptions;
-	}
+    public void setParameter2TranslatedDescriptions(Map<String, String> parameter2TranslatedDescriptions) {
+        this.parameter2TranslatedDescriptions = parameter2TranslatedDescriptions;
+    }
 
-	public Map<String, String> getParameter3TranslatedDescriptions() {
-		return parameter3TranslatedDescriptions;
-	}
+    public Map<String, String> getParameter3TranslatedDescriptions() {
+        return parameter3TranslatedDescriptions;
+    }
 
-	public void setParameter3TranslatedDescriptions(Map<String, String> parameter3TranslatedDescriptions) {
-		this.parameter3TranslatedDescriptions = parameter3TranslatedDescriptions;
-	}
+    public void setParameter3TranslatedDescriptions(Map<String, String> parameter3TranslatedDescriptions) {
+        this.parameter3TranslatedDescriptions = parameter3TranslatedDescriptions;
+    }
 
-	public Map<String, String> getParameterExtraTranslatedDescriptions() {
-		return parameterExtraTranslatedDescriptions;
-	}
+    public Map<String, String> getParameterExtraTranslatedDescriptions() {
+        return parameterExtraTranslatedDescriptions;
+    }
 
-	public void setParameterExtraTranslatedDescriptions(Map<String, String> parameterExtraTranslatedDescriptions) {
-		this.parameterExtraTranslatedDescriptions = parameterExtraTranslatedDescriptions;
-	}
+    public void setParameterExtraTranslatedDescriptions(Map<String, String> parameterExtraTranslatedDescriptions) {
+        this.parameterExtraTranslatedDescriptions = parameterExtraTranslatedDescriptions;
+    }
 
-	public Map<String, String> getParameter1TranslatedLongDescriptions() {
-		return parameter1TranslatedLongDescriptions;
-	}
+    public Map<String, String> getParameter1TranslatedLongDescriptions() {
+        return parameter1TranslatedLongDescriptions;
+    }
 
-	public void setParameter1TranslatedLongDescriptions(Map<String, String> parameter1TranslatedLongDescriptions) {
-		this.parameter1TranslatedLongDescriptions = parameter1TranslatedLongDescriptions;
-	}
+    public void setParameter1TranslatedLongDescriptions(Map<String, String> parameter1TranslatedLongDescriptions) {
+        this.parameter1TranslatedLongDescriptions = parameter1TranslatedLongDescriptions;
+    }
 
-	public Map<String, String> getParameter2TranslatedLongDescriptions() {
-		return parameter2TranslatedLongDescriptions;
-	}
+    public Map<String, String> getParameter2TranslatedLongDescriptions() {
+        return parameter2TranslatedLongDescriptions;
+    }
 
-	public void setParameter2TranslatedLongDescriptions(Map<String, String> parameter2TranslatedLongDescriptions) {
-		this.parameter2TranslatedLongDescriptions = parameter2TranslatedLongDescriptions;
-	}
+    public void setParameter2TranslatedLongDescriptions(Map<String, String> parameter2TranslatedLongDescriptions) {
+        this.parameter2TranslatedLongDescriptions = parameter2TranslatedLongDescriptions;
+    }
 
-	public Map<String, String> getParameter3TranslatedLongDescriptions() {
-		return parameter3TranslatedLongDescriptions;
-	}
+    public Map<String, String> getParameter3TranslatedLongDescriptions() {
+        return parameter3TranslatedLongDescriptions;
+    }
 
-	public void setParameter3TranslatedLongDescriptions(Map<String, String> parameter3TranslatedLongDescriptions) {
-		this.parameter3TranslatedLongDescriptions = parameter3TranslatedLongDescriptions;
-	}
+    public void setParameter3TranslatedLongDescriptions(Map<String, String> parameter3TranslatedLongDescriptions) {
+        this.parameter3TranslatedLongDescriptions = parameter3TranslatedLongDescriptions;
+    }
 
-	public Map<String, String> getParameterExtraTranslatedLongDescriptions() {
-		return parameterExtraTranslatedLongDescriptions;
-	}
+    public Map<String, String> getParameterExtraTranslatedLongDescriptions() {
+        return parameterExtraTranslatedLongDescriptions;
+    }
 
-	public void setParameterExtraTranslatedLongDescriptions(Map<String, String> parameterExtraTranslatedLongDescriptions) {
-		this.parameterExtraTranslatedLongDescriptions = parameterExtraTranslatedLongDescriptions;
-	}
+    public void setParameterExtraTranslatedLongDescriptions(Map<String, String> parameterExtraTranslatedLongDescriptions) {
+        this.parameterExtraTranslatedLongDescriptions = parameterExtraTranslatedLongDescriptions;
+    }
 
-	public String getBusinessKeyEl() {
-		return businessKeyEl;
-	}
+    public String getBusinessKeyEl() {
+        return businessKeyEl;
+    }
 
-	public void setBusinessKeyEl(String businessKeyEl) {
-		this.businessKeyEl = businessKeyEl;
-	}
+    public void setBusinessKeyEl(String businessKeyEl) {
+        this.businessKeyEl = businessKeyEl;
+    }
 
-	public String getBusinessKeyDescription() {
-		return businessKeyDescription;
-	}
+    public String getBusinessKeyDescription() {
+        return businessKeyDescription;
+    }
 
-	public void setBusinessKeyDescription(String businessKeyDescription) {
-		this.businessKeyDescription = businessKeyDescription;
-	}
+    public void setBusinessKeyDescription(String businessKeyDescription) {
+        this.businessKeyDescription = businessKeyDescription;
+    }
 
-	public Map<String, String> getBusinessKeyTranslatedDescriptions() {
-		return businessKeyTranslatedDescriptions;
-	}
+    public Map<String, String> getBusinessKeyTranslatedDescriptions() {
+        return businessKeyTranslatedDescriptions;
+    }
 
-	public void setBusinessKeyTranslatedDescriptions(Map<String, String> businessKeyTranslatedDescriptions) {
-		this.businessKeyTranslatedDescriptions = businessKeyTranslatedDescriptions;
-	}
+    public void setBusinessKeyTranslatedDescriptions(Map<String, String> businessKeyTranslatedDescriptions) {
+        this.businessKeyTranslatedDescriptions = businessKeyTranslatedDescriptions;
+    }
 
-	public Map<String, String> getBusinessKeyTranslatedLongDescriptions() {
-		return businessKeyTranslatedLongDescriptions;
-	}
+    public Map<String, String> getBusinessKeyTranslatedLongDescriptions() {
+        return businessKeyTranslatedLongDescriptions;
+    }
 
-	public void setBusinessKeyTranslatedLongDescriptions(Map<String, String> businessKeyTranslatedLongDescriptions) {
-		this.businessKeyTranslatedLongDescriptions = businessKeyTranslatedLongDescriptions;
-	}
+    public void setBusinessKeyTranslatedLongDescriptions(Map<String, String> businessKeyTranslatedLongDescriptions) {
+        this.businessKeyTranslatedLongDescriptions = businessKeyTranslatedLongDescriptions;
+    }
 
-	public BusinessKeyFormat getBusinessKeyFormat() {
-		return businessKeyFormat;
-	}
+    public BusinessKeyFormat getBusinessKeyFormat() {
+        return businessKeyFormat;
+    }
 
-	public void setBusinessKeyFormat(BusinessKeyFormat businessKeyFormat) {
-		this.businessKeyFormat = businessKeyFormat;
-	}
+    public void setBusinessKeyFormat(BusinessKeyFormat businessKeyFormat) {
+        this.businessKeyFormat = businessKeyFormat;
+    }
 
-	public boolean isBusinessKeyIsMandatory() {
-		return businessKeyIsMandatory;
-	}
+    public boolean isBusinessKeyIsMandatory() {
+        return businessKeyIsMandatory;
+    }
 
-	public void setBusinessKeyIsMandatory(boolean businessKeyIsMandatory) {
-		this.businessKeyIsMandatory = businessKeyIsMandatory;
-	}
+    public void setBusinessKeyIsMandatory(boolean businessKeyIsMandatory) {
+        this.businessKeyIsMandatory = businessKeyIsMandatory;
+    }
 
-	public boolean isBusinessKeyIsHidden() {
-		return businessKeyIsHidden;
-	}
+    public boolean isBusinessKeyIsHidden() {
+        return businessKeyIsHidden;
+    }
 
-	public void setBusinessKeyIsHidden(boolean businessKeyIsHidden) {
-		this.businessKeyIsHidden = businessKeyIsHidden;
-	}
+    public void setBusinessKeyIsHidden(boolean businessKeyIsHidden) {
+        this.businessKeyIsHidden = businessKeyIsHidden;
+    }
 
     public Attribute getQuantityAttribute() {
         return quantityAttribute;
@@ -1064,19 +1059,19 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
         tradingLanguageMap.put("ENG", "Parameter " + parameterNumber);
         tradingLanguageMap.put("FRA", "Paramètre " + parameterNumber);
         return tradingLanguageMap;
-	}
-	
-	private Map<String, String> initBusinessKeyTranslatedDescriptions() {
+    }
+
+    private Map<String, String> initBusinessKeyTranslatedDescriptions() {
         Map<String, String> tradingLanguageMap = new HashMap<>();
         tradingLanguageMap.put("ENG", "Business key");
         tradingLanguageMap.put("FRA", "Clé métier");
         return tradingLanguageMap;
-	}
-	
-	private Map<String, String> initBusinessKeyTranslatedLongDescriptions() {
+    }
+
+    private Map<String, String> initBusinessKeyTranslatedLongDescriptions() {
         Map<String, String> tradingLanguageMap = new HashMap<>();
         tradingLanguageMap.put("ENG", "Business key is computed at rating using a custom expression set on the charge");
         tradingLanguageMap.put("FRA", "La clé métier est calculé à la valorisation en utilisant une formule personnalisé enregistrée sur la charge");
         return tradingLanguageMap;
-	}
+    }
 }

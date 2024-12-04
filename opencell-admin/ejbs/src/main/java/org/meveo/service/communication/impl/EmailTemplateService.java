@@ -17,10 +17,10 @@
  */
 package org.meveo.service.communication.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * EmailTemplate service implementation.

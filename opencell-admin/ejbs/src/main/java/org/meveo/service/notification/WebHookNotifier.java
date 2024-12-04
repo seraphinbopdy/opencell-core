@@ -31,10 +31,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -47,6 +43,10 @@ import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.script.ScriptInstanceService;
 import org.slf4j.Logger;
+
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * @author Edward P. Legaspi
@@ -215,8 +215,8 @@ public class WebHookNotifier {
                         }
                         paramsEvaluated.put("response", result);
                         paramsEvaluated.put("event", entityOrEvent);
-                        if (webHook.getScriptInstance().isReuse()) {
-                            scriptInstanceService.executeCached(webHook.getScriptInstance().getCode(), paramsEvaluated);
+                        if (webHook.getScriptInstance().isUsePool()) {
+                            scriptInstanceService.executePooled(webHook.getScriptInstance().getCode(), paramsEvaluated);
                         } else {
                             scriptInstanceService.executeWInitAndFinalize(webHook.getScriptInstance().getCode(), paramsEvaluated);
                         }

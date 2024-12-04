@@ -1,11 +1,11 @@
 package org.meveo.service.payments.impl;
 
+import java.util.List;
+
 import org.meveo.model.dunning.DunningPolicyRuleLine;
 import org.meveo.service.base.PersistenceService;
 
-import java.util.List;
-
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class DunningPolicyRuleLineService extends PersistenceService<DunningPolicyRuleLine> {

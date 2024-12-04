@@ -1,11 +1,9 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html"
     xmlns:hftl="http://hftl.org" xmlns:hf="http://xmlns.jcp.org/jsf/composite/tags" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
     xmlns:p="http://primefaces.org/ui" xmlns:o="http://omnifaces.org/ui" template="/layout/template.xhtml">
-    <ui:define name="metadata">
         <f:metadata>
             <f:event type="preRenderView" listener="#{wfTransitionBean.preRenderView}" />
         </f:metadata>
-    </ui:define>
 
     <ui:define name="body">
 
@@ -35,7 +33,7 @@
                     <div class="btn-wrapper">
                         <i class="fa fa-plus text-blue"></i>
                         <p:link styleClass="no-text-decoration" outcome="mm_workflowDetail" value=" #{messages['mmTransition.addNew']}" disabled="#{wfTransitionBean.workflowOrder == null}">
-                            <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                            <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                             <f:param name="edit" value="true" />
                         </p:link>
                     </div>
@@ -57,21 +55,21 @@
                 <p:panel styleClass="clearLeft">
                     <h:panelGroup layout="block" styleClass="col2-set">
                         <h:panelGroup layout="block" styleClass="col1">
-                            <p:button id="editOperationBtn" icon="fa fa-edit" outcome="mm_workflowDetail">
+                            <p:button id="editOperationBtn" icon="pi pi-file-edit" outcome="mm_workflowDetail">
                                 <f:param name="objectId" value="#{transition.id}"></f:param>
-                                <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                                <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                                 <f:param name="edit" value="true" />
                             </p:button>
-                            <p:commandButton id="duplicateOperationBtn" icon="fa fa-plus" styleClass="no-text-decoration text-blue"
+                            <p:commandButton id="duplicateOperationBtn" icon="pi pi-plus" styleClass="no-text-decoration text-blue"
                                 action="#{wfTransitionBean.duplicateWfTransition(transition)}" update="messages">
                             </p:commandButton>
-                            <p:commandButton id="deleteOperationBtn" icon="fa fa-trash-o" styleClass="no-text-decoration text-blue"
+                            <p:commandButton id="deleteOperationBtn" icon="pi pi-trash" styleClass="no-text-decoration text-blue"
                                 action="#{wfTransitionBean.deleteWfTransition(transition)}" update="@all">
-                                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['mmTransition.confirmDelete']}" icon="ui-icon-alert" />
+                                <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['mmTransition.confirmDelete']}" icon="pi pi-exclamation-triangle" />
                             </p:commandButton>
-                            <p:commandButton id="moveUpBtn" icon="fa fa-arrow-up" styleClass="no-text-decoration text-blue"
+                            <p:commandButton id="moveUpBtn" icon="pi pi-arrow-up" styleClass="no-text-decoration text-blue"
                                 action="#{wfTransitionBean.moveUpOperation(transition)}" update="transitions" ajax="true" />
-                            <p:commandButton id="moveDownBtn" icon="fa fa-arrow-down" styleClass="no-text-decoration text-blue"
+                            <p:commandButton id="moveDownBtn" icon="pi pi-arrow-down" styleClass="no-text-decoration text-blue"
                                 action="#{wfTransitionBean.moveDownOperation(transition)}" update="transitions" ajax="true" />
                             <p:panel styleClass="clearLeft">
                                 <i class="fa fa-arrow-circle-right text-blue" style="font-size: 16px; padding: 10px 15px; font-weight: 300"></i>
@@ -120,9 +118,9 @@
                             <h:outputText value="#{messages['mmTransition.defaultTeam']}"></h:outputText>
                         </p:panel>
                         <p:panel>
-                            <p:button id="editDefaultBtn" icon="ui-icon-document" outcome="mm_workflowDefault" disabled="#{wfTransitionBean.catchAll == null}">
+                            <p:button id="editDefaultBtn" icon="pi pi-file-edit" outcome="mm_workflowDefault" disabled="#{wfTransitionBean.catchAll == null}">
                                 <f:param name="objectId" value="#{wfTransitionBean.catchAll.id}"></f:param>
-                                <f:param name="cid" value="#{javax.enterprise.context.conversation.id}" />
+                                <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                                 <f:param name="edit" value="true" />
                             </p:button>
                         </p:panel>

@@ -162,7 +162,6 @@ public class CustomFieldValue implements Serializable, Cloneable {
     @JsonProperty("url")
     private UrlReferenceWrapper urlReferenceValue;
 
-
     /**
      * List of Strings type value
      */
@@ -304,9 +303,9 @@ public class CustomFieldValue implements Serializable, Cloneable {
      */
     @JsonProperty("fields")
     private String fields;
-    
+
     @JsonProperty("mapCfValues")
-    private Map<String,String> mapCfValues;
+    private Map<String, String> mapCfValues;
 
     /**
      * Custom field value instance
@@ -688,11 +687,10 @@ public class CustomFieldValue implements Serializable, Cloneable {
             for (Entry<String, Object> mapItem : mapCopy.entrySet()) {
                 mapEntityValue.put(mapItem.getKey(), mapItem.getValue() == null ? null : (EntityReferenceWrapper) mapItem.getValue());
             }
-        }
-        else if (itemClass == Map.class) {
-        	mapCfValues = new LinkedHashMap<>();
+        } else if (itemClass == Map.class) {
+            mapCfValues = new LinkedHashMap<>();
             for (Entry<String, Object> mapItem : mapCopy.entrySet()) {
-            	mapCfValues.put(mapItem.getKey(), mapItem.getValue() == null ? null : (String) mapItem.getValue());
+                mapCfValues.put(mapItem.getKey(), mapItem.getValue() == null ? null : (String) mapItem.getValue());
             }
         }
     }
@@ -910,7 +908,7 @@ public class CustomFieldValue implements Serializable, Cloneable {
             setEntityReferenceValue(new EntityReferenceWrapper((BusinessEntity) value));
             break;
 
-            case URL:
+        case URL:
             setUrlReferenceValue((UrlReferenceWrapper) value);
             break;
         case CHILD_ENTITY:
@@ -1257,7 +1255,8 @@ public class CustomFieldValue implements Serializable, Cloneable {
                 && (listDateValue == null || listDateValue.isEmpty()) && (listLongValue == null || listLongValue.isEmpty()) && (listDoubleValue == null || listDoubleValue.isEmpty())
                 && (listBooleanValue == null || listBooleanValue.isEmpty()) && (listEntityValue == null || listEntityValue.isEmpty()) && (mapStringValue == null || mapStringValue.isEmpty())
                 && (mapDateValue == null || mapDateValue.isEmpty()) && (mapLongValue == null || mapLongValue.isEmpty()) && (mapDoubleValue == null || mapDoubleValue.isEmpty())
-                && (mapBooleanValue == null || mapBooleanValue.isEmpty()) && (mapEntityValue == null || mapEntityValue.isEmpty()) && (entityReferenceValue == null || entityReferenceValue.isEmpty()) && (urlReferenceValue == null || urlReferenceValue.isEmpty()));
+                && (mapBooleanValue == null || mapBooleanValue.isEmpty()) && (mapEntityValue == null || mapEntityValue.isEmpty()) && (entityReferenceValue == null || entityReferenceValue.isEmpty())
+                && (urlReferenceValue == null || urlReferenceValue.isEmpty()));
     }
 
     /**
@@ -1420,11 +1419,11 @@ public class CustomFieldValue implements Serializable, Cloneable {
             EntityReferenceWrapper entityReferenceValue = gson.fromJson(sValue, EntityReferenceWrapper.class);
             deserializedValue = entityReferenceValue;
 
-        } else if("url".equals(type)){
+        } else if ("url".equals(type)) {
             String sValue = serializedValue.substring(firstSeparatorIndex + 1);
             UrlReferenceWrapper urlReferenceValue = gson.fromJson(sValue, UrlReferenceWrapper.class);
             deserializedValue = urlReferenceValue;
-        }else if ("list".equals(type)) {
+        } else if ("list".equals(type)) {
 
             // Type defaults to String
             Type itemType = new TypeToken<List<String>>() {
@@ -1620,8 +1619,7 @@ public class CustomFieldValue implements Serializable, Cloneable {
         } else if (entityReferenceValue != null) {
             result.put("entity", entityReferenceValue);
             return result;
-        }
-        else if (urlReferenceValue != null) {
+        } else if (urlReferenceValue != null) {
             result.put("url", urlReferenceValue);
             return result;
         }

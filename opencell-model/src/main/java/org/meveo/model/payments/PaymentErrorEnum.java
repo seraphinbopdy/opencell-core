@@ -19,7 +19,8 @@
 package org.meveo.model.payments;
 
 /**
- * Payment error codes enum. 
+ * Payment error codes enum.
+ * 
  * @author Said Ramli
  */
 public enum PaymentErrorEnum {

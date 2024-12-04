@@ -2,16 +2,16 @@ package org.meveo.service.payments.impl;
 
 import java.util.Arrays;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-import javax.ws.rs.BadRequestException;
-
 import org.apache.logging.log4j.util.Strings;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.dunning.DunningAgent;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
+import jakarta.ws.rs.BadRequestException;
 
 /**
  * Service implementation to manage DunningSettiings entity. It extends {@link PersistenceService} class

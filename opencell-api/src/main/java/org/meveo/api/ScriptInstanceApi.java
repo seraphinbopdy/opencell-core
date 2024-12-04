@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ResourceBundle;
@@ -33,6 +33,7 @@ import org.meveo.api.dto.ScriptInstanceDto;
 import org.meveo.api.dto.ScriptInstanceErrorDto;
 import org.meveo.api.dto.ScriptParameterDto;
 import org.meveo.api.dto.script.CustomScriptDto;
+import org.meveo.api.dto.script.ScriptPoolDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
@@ -44,6 +45,7 @@ import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.scripts.ScriptInstanceCategory;
 import org.meveo.model.scripts.ScriptInstanceError;
 import org.meveo.model.scripts.ScriptParameter;
+import org.meveo.model.scripts.ScriptPool;
 import org.meveo.model.scripts.ScriptSourceTypeEnum;
 import org.meveo.service.script.ScriptInstanceCategoryService;
 import org.meveo.service.script.ScriptInstanceService;
@@ -231,7 +233,7 @@ public class ScriptInstanceApi extends BaseCrudApi<ScriptInstance, ScriptInstanc
             } else if (!ScriptUtils.isScriptInterfaceClass(dto.getCode())) {
                 throw new BusinessException(resourceMessages.getString("message.scriptInstance.classNotScriptInstance", dto.getCode()));
             }
-            
+
         } else {
 
             if (StringUtils.isBlank(dto.getScript())) {
@@ -275,10 +277,6 @@ public class ScriptInstanceApi extends BaseCrudApi<ScriptInstance, ScriptInstanc
         scriptInstance.setDescription(dto.getDescription());
         scriptInstance.setScript(dto.getScript());
 
-        if (dto.getReuse() != null) {
-            scriptInstance.setReuse(dto.getReuse());
-        }
-
         if (!StringUtils.isBlank(dto.getScriptInstanceCategoryCode())) {
             ScriptInstanceCategory scriptInstanceCategory = scriptInstanceCategoryService.findByCode(dto.getScriptInstanceCategoryCode());
             if (scriptInstanceCategory != null) {
@@ -294,21 +292,55 @@ public class ScriptInstanceApi extends BaseCrudApi<ScriptInstance, ScriptInstanc
 
         scriptInstance.getExecutionRoles().addAll(dto.getExecutionRoles());
         scriptInstance.getSourcingRoles().addAll(dto.getExecutionRoles());
-        
-        if(dto.getLanguageDescriptions() != null && !dto.getLanguageDescriptions().isEmpty()) {
+
+        if (dto.getLanguageDescriptions() != null && !dto.getLanguageDescriptions().isEmpty()) {
             scriptInstance.setDescriptionI18n(dto.getLanguageDescriptions().stream().collect(Collectors.toMap(LanguageDescriptionDto::getLanguageCode, LanguageDescriptionDto::getDescription)));
         }
-        
+
         List<ScriptParameter> existingScriptParamters = scriptInstance.getScriptParameters();
         if (existingScriptParamters != null && !existingScriptParamters.isEmpty()) {
-        	scriptInstance.getScriptParameters().removeAll(existingScriptParamters);
+            scriptInstance.getScriptParameters().removeAll(existingScriptParamters);
         }
-        
-        if(dto.getScriptParameters() != null && !dto.getScriptParameters().isEmpty()) {
+
+        if (dto.getScriptParameters() != null && !dto.getScriptParameters().isEmpty()) {
             scriptInstance.getScriptParameters().addAll(dto.getScriptParameters().stream().map(ScriptParameterDto::mapToEntity).collect(Collectors.toList()));
-            for (ScriptParameter sp : scriptInstance.getScriptParameters()) sp.setScriptInstance(scriptInstance);
+            for (ScriptParameter sp : scriptInstance.getScriptParameters())
+                sp.setScriptInstance(scriptInstance);
         }
-        
+
+        if (dto.getPool() != null) {
+            scriptInstance.setPool(scriptPoolFromDto(dto.getPool(), scriptInstance.getPool(), dto));
+        }
+
         return scriptInstance;
+    }
+
+    private ScriptPool scriptPoolFromDto(ScriptPoolDto dto, ScriptPool scriptPoolToUpdate, ScriptInstanceDto scriptInstanceDto) {
+        ScriptPool scriptPool = scriptPoolToUpdate;
+        if (scriptPoolToUpdate == null) {
+            scriptPool = new ScriptPool();
+        }
+        if (dto.getUsePool() != null) {
+            scriptPool.setUsePool(dto.getUsePool());
+        } else if (scriptInstanceDto.getReuse() != null) {
+            scriptPool.setUsePool(scriptInstanceDto.getReuse());
+        }
+
+        if (scriptPool.isUsePool()) {
+            if (dto.getMin() != null) {
+                scriptPool.setMin(dto.getMin());
+            }
+            if (dto.getMax() != null) {
+                scriptPool.setMax(dto.getMax());
+            }
+            if (dto.getMaxIdleTime() != null) {
+                scriptPool.setMaxIdleTime(dto.getMaxIdleTime());
+            }
+        } else {
+            scriptPool.setMin(null);
+            scriptPool.setMax(null);
+            scriptPool.setMaxIdleTime(null);
+        }
+        return scriptPool;
     }
 }

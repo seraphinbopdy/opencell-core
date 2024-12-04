@@ -18,9 +18,9 @@
 
 package org.meveo.api.crm;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.BaseApi;
@@ -112,7 +112,7 @@ public class AddressBookApi  extends BaseApi {
 			case "User":
 			case "u":
 			case "U":
-				user = userService.findByUsername(code, false);
+				user = userService.findByUsername(code, false, false);
 				if(user != null)
 					addressBook = null;//user.getAddressbook();
 				else throw new EntityDoesNotExistsException("User with UserName : " + code + " does not exist.");

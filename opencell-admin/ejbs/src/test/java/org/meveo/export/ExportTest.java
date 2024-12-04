@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.junit.Test;
 import org.meveo.export.EntityExportImportService.ReusingReferenceByIdMarshallingStrategy;
 import org.meveo.model.crm.Customer;
@@ -41,6 +39,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppReader;
 
+import jakarta.inject.Inject;
 import junit.framework.Assert;
 
 /**

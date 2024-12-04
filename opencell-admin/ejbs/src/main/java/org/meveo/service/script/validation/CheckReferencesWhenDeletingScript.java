@@ -4,10 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.ExistsRelatedEntityException;
 import org.meveo.admin.util.ResourceBundle;
@@ -15,6 +11,10 @@ import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.CustomTableEvent;
 import org.meveo.service.script.Script;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 /**
  * Script to perform data integrity check during record deletion. <br/>

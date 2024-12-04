@@ -18,29 +18,27 @@
 package org.meveo.service.admin.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
-import org.keycloak.representations.idm.UserRepresentation;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ElementNotFoundException;
 import org.meveo.admin.exception.InvalidParameterException;
 import org.meveo.admin.exception.UsernameAlreadyExistsException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.exception.EntityAlreadyExistsException;
+import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
-import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.User;
 import org.meveo.security.client.KeycloakAdminClientService;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.annotation.security.DeclareRoles;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 /**
  * User service implementation.
@@ -49,77 +47,189 @@ import org.meveo.service.base.PersistenceService;
 @DeclareRoles({ "userManagement", "userSelfManagement", "apiUserManagement", "apiUserSelfManagement" })
 public class UserService extends PersistenceService<User> {
 
-    static User systemUser = null;
-
     @Inject
     KeycloakAdminClientService keycloakAdminClientService;
 
     @Inject
     protected ParamBeanFactory paramBeanFactory;
-    
+
     /**
      * Identifies the source of user and role information
      * 
      * @author Andrius Karpavicius
      */
     public enum UserManagementMasterEnum {
-
         /**
-         * The primary source of users and roles is Opencell
+         * The primary source of users and role information is Opencell. Users and roles in Keycloak are limited to authentication purpose and user and role information in Keycloak should come from external systems e.g.
+         * LDAP <br/>
+         * Users are created/updated to KC, but for the consultation, we only retrieve the users that are in Opencell database.<br/>
+         * For the roles, we create them only on Opencell side as they are not authorization roles.
          */
-        OPENCELL,
+        OC(true, true, true, false, false, false),
 
         /**
          * The primary source of users and roles is Keycloak.<br/>
          * Opencell stores only custom field and secured entity information, records in adm_user nor adm_role table are not required.<br/>
-         * When Users and roles are managed from Opencell API/GUI side, and user and role information <b>is synchronized</b> to Keycloak
+         * When Users and roles are managed from Opencell API/GUI side, and user and role information <b>IS send</b> to Keycloak
          */
-        KC,
+        KC(false, false, false, true, true, true),
 
         /**
-         * The <b>ONLY</b> source of users and roles is Keycloak.<br/>
+         * The <b>ONLY</b> source of users and roles is Keycloak. User and role information in Keycloak should come from external systems e.g. LDAP<br/>
          * Opencell stores only custom field and secured entity information, records in adm_user nor adm_role table are not required.<br/>
-         * When Users and roles are managed from Opencell API/GUI side, and user and role information is <b>NOT synchronized</b> to Keycloak
+         * When Users and roles are managed from Opencell API/GUI side, and user and role information is <b>NOT send</b> to Keycloak
          */
-        KC_USER_READ_ONLY;
+        KC_USER_READ_ONLY(false, false, false, false, true, false);
+
+        /**
+         * Shall user information be duplicated in Opencell, and preferred over user information in Keycloak for consultation purpose.
+         */
+        private boolean isOcUserDuplicate;
+
+        /**
+         * Shall roles held by the user be duplicated in Opencell and "joined" with roles held by the user in Keycloak.
+         */
+        private boolean isOcUserRolesDuplicate;
+
+        /**
+         * Shall Opencell configure additional roles that are not required by Keycloak for authorization. E.g. business type roles used in local scripts, reports, etc..
+         */
+        private boolean isOcRoleDuplicate;
+
+        /**
+         * Is user information in Keycloak is writable from Opencell User api. If false, user in Keycloak should be created by some other means - created directly in Keycloak or federated from LDAP, etc.
+         */
+        private boolean isKcUserWrite;
+
+        /**
+         * Are roles held by the user in Keycloak are assignable from Opencell User api. If false, roles to the user in Keycloak should be assigned by some other means - assigned directly in Keycloak or federated from
+         * LDAP via groups, etc.
+         */
+        private boolean isKcUserRolesWrite;
+
+        /**
+         * Is role information in Keycloak is writable from Opencell Role api. If false, roles in Keycloak should be configured directly in Keycloak application.
+         */
+        private boolean isKcRoleWrite;
+
+        /**
+         * Constructor
+         * 
+         * @param isOcUserDuplicate Shall user information be duplicated in Opencell, and preferred over user information in Keycloak for consultation purpose.
+         * @param isOcUserRolesDuplicate Shall roles held by the user be duplicated in Opencell and "joined" with roles held by the user in Keycloak.
+         * @param isOcRolesDuplicate Shall Opencell configure additional roles that are not required by Keycloak for authorization. E.g. business type roles used in local scripts, reports, etc..
+         * @param isKcUserWrite Is user information in Keycloak is writable from Opencell User api. If false, user in Keycloak should be created by some other means - created directly in Keycloak or federated from LDAP,
+         *        etc.
+         * @param isKcUserRolesWrite Are roles held by the user in Keycloak are assignable from Opencell User api. If false, roles to the user in Keycloak should be assigned by some other means - assigned directly in
+         *        Keycloak or federated from LDAP via groups, etc.
+         * @param isKcRolesWrite Is role information in Keycloak is writable from Opencell Role api. If false, roles in Keycloak should be configured directly in Keycloak application.
+         */
+        private UserManagementMasterEnum(boolean isOcUserDuplicate, boolean isOcUserRolesDuplicate, boolean isOcRolesDuplicate, boolean isKcUserWrite, boolean isKcUserRolesWrite, boolean isKcRolesWrite) {
+            this.isOcUserDuplicate = isOcUserDuplicate;
+            this.isOcUserRolesDuplicate = isOcUserRolesDuplicate;
+            this.isOcRoleDuplicate = isOcRolesDuplicate;
+            this.isKcUserWrite = isKcUserWrite;
+            this.isKcUserRolesWrite = isKcUserRolesWrite;
+            this.isKcRoleWrite = isKcRolesWrite;
+        }
+
+        /**
+         * @return Shall user information be duplicated in Opencell, and preferred over user information in Keycloak for consultation purpose.
+         */
+        public boolean isOcUserDuplicate() {
+            return isOcUserDuplicate;
+        }
+
+        /**
+         * @return Shall roles held by the user be duplicated in Opencell and "joined" with roles held by the user in Keycloak.
+         */
+        public boolean isOcUserRolesDuplicate() {
+            return isOcUserRolesDuplicate;
+        }
+
+        /**
+         * @return Shall Opencell configure additional roles that are not required by Keycloak for authorization. E.g. business type roles used in local scripts, reports, etc..
+         */
+        public boolean isOcRoleDuplicate() {
+            return isOcRoleDuplicate;
+        }
+
+        /**
+         * @return Is user information in Keycloak is writable from Opencell User api. If false, user in Keycloak should be created by some other means - created directly in Keycloak or federated from LDAP, etc.
+         */
+        public boolean isKcUserWrite() {
+            return isKcUserWrite;
+        }
+
+        /**
+         * @return Are roles held by the user in Keycloak are assignable from Opencell User api. If false, roles to the user in Keycloak should be assigned by some other means - assigned directly in Keycloak or federated
+         *         from LDAP via groups, etc.
+         */
+        public boolean isKcUserRolesWrite() {
+            return isKcUserRolesWrite;
+        }
+
+        /**
+         * @return Is role information in Keycloak is writable from Opencell Role api. If false, roles in Keycloak should be configured directly in Keycloak application.
+         */
+        public boolean isKcRoleWrite() {
+            return isKcRoleWrite;
+        }
 
     }
 
     @Override
     @RolesAllowed({ "userManagement", "userSelfManagement", "apiUserManagement", "apiUserSelfManagement" })
     public void create(User user) throws UsernameAlreadyExistsException, InvalidParameterException {
+
         user.setUserName(user.getUserName().toUpperCase());
-        String userId =keycloakAdminClientService.createUser(user.getUserName(), user.getName().getFirstName(), user.getName().getLastName(), user.getEmail(), user.getPassword(), user.getUserLevel(), user.getRoles(), null);
-	    // check if the user already exists
-        if (findByUsername(user.getUserName(), false, false, false) != null) {
-        	if(userId==null) // when master=OC and user already exists in KC
-        		throw new EntityAlreadyExistsException(User.class, user.getUserName(), "username");
-        }else {
-        	super.create(user);
+
+        // Create user in in Keycloak if applicable
+        // If returned userId is null that means that user was not created in KC because a current user management source is configured to not create users in Keycloak
+        String userId = keycloakAdminClientService.createUser(user.getUserName(), user.getName().getFirstName(), user.getName().getLastName(), user.getEmail(), user.getPassword(), user.getUserLevel(),
+            user.getRolesByClient(), null, user.getAttributes());
+
+        User userInDb = getUserFromDatabase(user.getUserName());
+
+        // Create user in Opencell DB if applicable
+        if (userId == null && userInDb != null && getUserManagementMaster().isOcUserDuplicate()) {
+            throw new EntityAlreadyExistsException(User.class, user.getUserName(), "username");
+
+        } else if (userInDb == null) {
+            super.create(user);
         }
-	    
     }
 
     @Override
     @RolesAllowed({ "userManagement", "userSelfManagement", "apiUserManagement", "apiUserSelfManagement" })
     public User update(User user) throws ElementNotFoundException, InvalidParameterException {
+        return update(user, true);
+    }
+
+    /**
+     * Update user in Opencell DB and Keycloak
+     * 
+     * @param user User to update
+     * @param isReplaceRoles Is this a final list of roles held by user (True). False - roles will be appended to the currently assigned roles.
+     * @return User updated
+     * @throws ElementNotFoundException
+     * @throws InvalidParameterException
+     */
+    @RolesAllowed({ "userManagement", "userSelfManagement", "apiUserManagement", "apiUserSelfManagement" })
+    public User update(User user, boolean isReplaceRoles) throws ElementNotFoundException, InvalidParameterException {
+
         user.setUserName(user.getUserName().toUpperCase());
-		keycloakAdminClientService.updateUser(user.getUserName(), user.getName().getFirstName(), user.getName().getLastName(), user.getEmail(), user.getPassword(), user.getUserLevel(), user.getRoles(), null);
-        if(user.getId() != null) {
+        String firstName = user.getName() != null ? user.getName().getFirstName() : null;
+        String lastName = user.getName() != null ? user.getName().getLastName() : null;
+
+        // Update information in Keycloak
+        keycloakAdminClientService.updateUser(user.getUserName(), firstName, lastName, user.getEmail(), user.getPassword(), user.getUserLevel(), user.getRolesByClient(), isReplaceRoles, user.getAttributes());
+
+        // And in Opencell DB
+        if (user.getId() != null) {
             return super.update(user);
         } else {
             return user;
-        }
-    }
-
-    @RolesAllowed({ "userManagement", "userSelfManagement", "apiUserManagement", "apiUserSelfManagement" })
-    public void updateUserWithAttributes(User user, Map<String, String> attributes) throws ElementNotFoundException, InvalidParameterException {
-        user.setUserName(user.getUserName().toUpperCase());
-		String firstName = user.getName() != null ? user.getName().getFirstName() : null;
-		String lastName = user.getName() != null ? user.getName().getLastName() : null;
-		keycloakAdminClientService.updateUser(user.getUserName().toUpperCase(), firstName, lastName, user.getEmail(), user.getPassword(), user.getUserLevel(), user.getRoles(), attributes);
-		 if(user.getId() != null) {
-            super.update(user);
         }
     }
 
@@ -131,38 +241,71 @@ public class UserService extends PersistenceService<User> {
     }
 
     /**
-     * Lookup a user by a username. NOTE: Does not create a user record in Opencell if user already exists in Keycloak
+     * Lookup a user by a username in Keycloak or Opencell DB
      * 
      * @param username Username to lookup by
      * @param extendedInfo Shall group membership and roles be retrieved
      * @return User found
      */
-    public User findByUsername(String username, boolean extendedInfo) {
-        return findByUsername(username, extendedInfo, false, false);
+    public User findByUsername(String username, boolean extendedInfo, boolean extendedClientRoles) {
+        User lUser = null;
+
+        // Preference taken to user information from Opencell DB
+        if (getUserManagementMaster().isOcUserDuplicate()) {
+
+            lUser = getUserFromDatabase(username);
+            if (lUser == null) {
+                lUser = keycloakAdminClientService.findUser(username, extendedInfo, extendedClientRoles);
+
+            } else {
+
+                if (extendedInfo) {
+                    this.fillKeycloakUserInfo(lUser);
+                }
+                if (extendedClientRoles) {
+                    Map<String, List<String>> clientRoles = keycloakAdminClientService.getClientRoles(username);
+                    lUser.addClientLevelRoles(clientRoles);
+                }
+            }
+
+        } else {
+
+            lUser = keycloakAdminClientService.findUser(username, extendedInfo, extendedClientRoles);
+            if (lUser != null) {
+                lUser = getOrCreateDbUserFromKCUser(lUser);
+            }
+        }
+        return lUser;
     }
 
     /**
-     * Lookup a user by a username
-     * 
-     * @param username Username to lookup by
-     * @param extendedInfo Shall group membership and roles be retrieved
-     * @param syncWithKC Shall a user record be created in Opencell if a user already exists in Keycloak
-     * @return User found
+     * Lookup additional information from a user in database. If user is not found in the database, create a new with information from a keycloak user
+     *
+     * @param kcUser keycloak user to lookup by
+     * @return User with additional information filled in
      */
-    public User findByUsername(String username, boolean extendedInfo, boolean syncWithKC, boolean extendedClientRoles) {
-        User lUser = null;
-	    
-	    if(canSynchroWithKC()) {
-		    lUser = keycloakAdminClientService.findUser(username, extendedInfo, extendedClientRoles);
+    private User getOrCreateDbUserFromKCUser(User kcUser) {
+        User user = null;
+
+        // Look up a used
+        try {
+            user = getEntityManager().createNamedQuery("User.getByUsername", User.class).setParameter("username", kcUser.getUserName().toLowerCase()).getSingleResult();
+        } catch (NoResultException ex) {
+            user = new User();
+            // Set fields, even they are transient, so they can be used in a notification if any is fired uppon user creation
+            user.setEmail(kcUser.getEmail());
+            user.setName(kcUser.getName());
+            user.setUserName(kcUser.getUserName());
+            super.create(user);
         }
-		if(lUser == null) {
-			lUser = getUserFromDatabase(username);
-			
-			if (lUser != null && extendedInfo) {
-				this.fillKeycloakUserInfo(lUser);
-			}
-		}
-        return lUser;
+
+        user.setEmail(kcUser.getEmail());
+        user.setName(kcUser.getName());
+
+        user.setRolesByClient(kcUser.getRolesByClient());
+        user.setUserLevel(kcUser.getUserLevel());
+        user.setAttributes(kcUser.getAttributes());
+        return user;
     }
 
     public User getUserFromDatabase(String pUserName) {
@@ -170,7 +313,6 @@ public class UserService extends PersistenceService<User> {
         try {
             lUser = getEntityManager().createNamedQuery("User.getByUsername", User.class).setParameter("username", pUserName.toLowerCase()).getSingleResult();
         } catch (NoResultException ex) {
-            //ADD Log
         }
 
         return lUser;
@@ -179,39 +321,52 @@ public class UserService extends PersistenceService<User> {
     @Override
     public List<User> list(PaginationConfiguration config) {
         List<User> users = new ArrayList<>();
-	    if(!canSynchroWithKC()) {
+
+        // Preference is taken to the user information from Opencell DB when OC user duplicate mode is activated
+        if (getUserManagementMaster().isOcUserDuplicate()) {
             String firstName = (String) config.getFilters().get("name.firstName");
             String lastName = (String) config.getFilters().get("name.lastName");
-            String email = (String) config.getFilters().get("email");
-
-            if(StringUtils.isBlank(firstName)) {
-                this.removeFilters(config, "name.firstName");
+            if (firstName != null) {
+                config.getFilters().put("firstName", firstName);
             }
-
-            if(StringUtils.isBlank(lastName)) {
-                this.removeFilters(config, "name.lastName");
+            if (lastName != null) {
+                config.getFilters().put("lastName", lastName);
             }
-
-            if(StringUtils.isBlank(email)) {
-                this.removeFilters(config, "email");
-            }
+            config.removeFilters("name.firstName", "name.lastName");
 
             users = super.list(config);
-            users.forEach(this::fillKeycloakUserInfo);
-        } else {
-            //Get user from keycloak
-            users = keycloakAdminClientService.listUsers(config);
-            this.removeFilters(config, "name.firstName", "name.lastName", "email");
 
-            //Construct a list of names
+            // Load attributes and client roles if requested
+            for (User user : users) {
+                if (config.getFetchFields() != null && config.getFetchFields().contains("attributes")) {
+                    user.setAttributes(keycloakAdminClientService.getUserAttributesByUsername(user.getUserName()));
+                }
+                if (config.getFetchFields() != null && config.getFetchFields().contains("clientRoles")) {
+                    user.addClientLevelRoles(keycloakAdminClientService.getClientRoles(user.getUserName()));
+                }
+            }
+
+        } else {
+            // Get user from keycloak
+            users = keycloakAdminClientService.listUsers(config);
+
+            // Load client roles if requested
+            for (User user : users) {
+                if (config.getFetchFields() != null && config.getFetchFields().contains("clientRoles")) {
+                    user.addClientLevelRoles(keycloakAdminClientService.getClientRoles(user.getUserName()));
+                }
+            }
+
+            // Construct a list of names
             List<String> usernamesList = users.stream().map(User::getUserName).collect(Collectors.toList());
+            config.removeFilters();
             config.getFilters().put("inList userName", usernamesList);
 
-            //Get list of users from database and fill all fields
+            // Get list of users from database and fill all missing fields
             List<User> lDbUsers = super.list(config);
             users.forEach(keycloakUser -> {
                 lDbUsers.forEach(dbUser -> {
-                    if(keycloakUser.getUserName().equalsIgnoreCase(dbUser.getUserName())) {
+                    if (keycloakUser.getUserName().equalsIgnoreCase(dbUser.getUserName())) {
                         fillEmptyFields(keycloakUser, dbUser);
                     }
                 });
@@ -223,20 +378,23 @@ public class UserService extends PersistenceService<User> {
 
     @Override
     public long count(PaginationConfiguration config) {
-        List<User> users;
-	    if(!canSynchroWithKC()) {
+
+        // Preference is taken to the user information from Opencell DB when OC user duplicate mode is activated
+        if (getUserManagementMaster().isOcUserDuplicate()) {
             String firstName = (String) config.getFilters().get("name.firstName");
             String lastName = (String) config.getFilters().get("name.lastName");
-            String email = (String) config.getFilters().get("email");
-
-            if(StringUtils.isBlank(firstName) && StringUtils.isBlank(lastName) && StringUtils.isBlank(email)) {
-                this.removeFilters(config, "name.firstName", "name.lastName", "email");
-                return super.count(config);
-            } else {
-                return super.count(config);
+            if (firstName != null) {
+                config.getFilters().put("firstName", firstName);
             }
+            if (lastName != null) {
+                config.getFilters().put("lastName", lastName);
+            }
+            config.removeFilters("name.firstName", "name.lastName");
+
+            return super.count(config);
+
         } else {
-            users = keycloakAdminClientService.listUsers(config);
+            List<User> users = keycloakAdminClientService.listUsers(config);
             return users.size();
         }
     }
@@ -252,14 +410,6 @@ public class UserService extends PersistenceService<User> {
         return belongsToUserGroup.equalsIgnoreCase(currentUser.getUserGroup());
     }
 
-    public UserRepresentation getUserRepresentationByUsername(String username) throws ElementNotFoundException {
-	    if(canSynchroWithKC()) {
-            return keycloakAdminClientService.getUserRepresentationByUsername(username);
-        } else {
-            return null;
-        }
-    }
-
     /**
      * Lookup a user by an id
      *
@@ -268,16 +418,16 @@ public class UserService extends PersistenceService<User> {
      */
     @Override
     public User findById(Long id, boolean extendedInfo) {
-        if(id == null) {
+        if (id == null) {
             return null;
         }
 
         User user = findById(id);
         if (user == null) {
-             return null;
+            return null;
         }
 
-        if(extendedInfo) {
+        if (extendedInfo) {
             this.fillKeycloakUserInfo(user);
         }
 
@@ -285,91 +435,59 @@ public class UserService extends PersistenceService<User> {
     }
 
     /**
-     * Lookup a keycloak user in database
-     *
-     * @param kcUser keycloak user to lookup by
-     * @return User found
-     */
-    private User findKeycloakUser(User kcUser) {
-        User user = null;
-        try {
-            user = getEntityManager().createNamedQuery("User.getByUsername", User.class).setParameter("username", kcUser.getUserName().toLowerCase()).getSingleResult();
-        } catch (NoResultException ex) {
-            user = new User();
-            // Set fields, even they are transient, so they can be used in a notification if any is fired upon user creation
-            user.setEmail(kcUser.getEmail());
-            user.setName(kcUser.getName());
-            user.setRoles(kcUser.getRoles());
-            user.setUserLevel(kcUser.getUserLevel());
-            user.setUserName(kcUser.getUserName());
-            super.create(user);
-        }
-
-        user.setEmail(kcUser.getEmail());
-        user.setName(kcUser.getName());
-        user.setRoles(kcUser.getRoles());
-        user.setUserLevel(kcUser.getUserLevel());
-        return user;
-    }
-
-    /**
-     * Lookup a keycloak user info
+     * Lookup a keycloak user info - realm roles, attributes, user level
      *
      * @param user user
      */
     private void fillKeycloakUserInfo(User user) {
         User kcUser = keycloakAdminClientService.findUser(user.getUserName(), true, false);
         if (kcUser != null) {
-            user.setRoles(kcUser.getRoles());
+            user.addRealmLevelRoles(new ArrayList<String>(kcUser.getRoles()));
             user.setUserLevel(kcUser.getUserLevel());
-        }
-    }
-
-    /**
-     * Remove filters from config
-     *
-     * @param pConfig {@link PaginationConfiguration}
-     * @param pKeys A list of keys to remove
-     */
-    private void removeFilters(PaginationConfiguration pConfig, String ... pKeys) {
-        for(String key : pKeys) {
-            pConfig.getFilters().remove(key);
+            user.setAttributes(kcUser.getAttributes());
         }
     }
 
     /**
      * Fill Empty field to return it
+     * 
      * @param pKeycloakUser {@link User} User returned from keycloak
      * @param pDbUser {@link User} User returned from database
      */
     private void fillEmptyFields(User pKeycloakUser, User pDbUser) {
-        if(pKeycloakUser.getEmail() == null && pDbUser.getEmail() != null && !pDbUser.getEmail().isBlank()) {
+        if (pKeycloakUser.getEmail() == null && pDbUser.getEmail() != null && !pDbUser.getEmail().isBlank()) {
             pKeycloakUser.setEmail(pDbUser.getEmail());
         }
 
-        if(pKeycloakUser.getUuid() == null && pDbUser.getUuid() != null && !pDbUser.getUuid().isEmpty()) {
+        if (pKeycloakUser.getUuid() == null && pDbUser.getUuid() != null && !pDbUser.getUuid().isEmpty()) {
             pKeycloakUser.setUuid(pDbUser.getUuid());
         }
     }
 
+    /**
+     * Get a single attribute value from a user
+     * 
+     * @param username Username
+     * @param attributeName Name of attribute to retrieve
+     * @return A value of attribute. In case of multiple attribute values, values are concatenated by a comma.
+     */
     public String getUserAttributeValue(String username, String attributeName) {
-        UserRepresentation userRepresentation = getUserRepresentationByUsername(username);
-        if (userRepresentation != null) {
-            Map<String, List<String>> keycloakAttributes = userRepresentation.getAttributes();
-
-            if (keycloakAttributes != null && !keycloakAttributes.isEmpty()) {
-                for (Map.Entry<String, List<String>> entry : keycloakAttributes.entrySet()) {
-                    if (entry.getKey().equalsIgnoreCase(attributeName)) {
-                        return String.join(", ", entry.getValue());
-                    }
-                }
-            }
-        }
-        return null;
+        return keycloakAdminClientService.getUserAttributeValue(username, attributeName);
     }
-	
-	public boolean canSynchroWithKC(){
-		String lUserManagementSource = paramBeanFactory.getInstance().getProperty("userManagement.master", "KC");
-		return lUserManagementSource.equalsIgnoreCase("KC");
-	}
+
+    /**
+     * Get user/role management division between Opencell and Keycloak applications
+     * 
+     * @return userManagement.master configuration property value
+     */
+    public UserManagementMasterEnum getUserManagementMaster() {
+        String userManagementSource = ParamBean.getInstance().getProperty("userManagement.master", UserManagementMasterEnum.KC.name());
+        UserManagementMasterEnum master = UserManagementMasterEnum.KC;
+        try {
+            master = UserManagementMasterEnum.valueOf(userManagementSource);
+        } catch (Exception e) {
+            log.error("Unrecognized 'userManagement.master' property value. A default value of 'KC' will be used.");
+        }
+        return master;
+    }
 }

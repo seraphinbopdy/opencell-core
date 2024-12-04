@@ -2,9 +2,9 @@ package org.meveo.api.jaxb;
 
 import java.util.Date;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 import org.meveo.model.shared.DateUtils;
+
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * This is Adaptor class which has main responsibility to convert from java.util.Date to format string of date. For unmarshaling will support a number of formats:

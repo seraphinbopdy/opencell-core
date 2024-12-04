@@ -21,37 +21,32 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.meveo.model.AuditableEntity;
+import org.meveo.model.AuditableCFEntity;
 import org.meveo.model.CustomFieldEntity;
-import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.ISearchable;
 import org.meveo.model.ObservableEntity;
 import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.GeneralLedger;
-import org.meveo.model.crm.custom.CustomFieldValues;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Other transaction
@@ -64,10 +59,9 @@ import org.meveo.model.crm.custom.CustomFieldValues;
 @ObservableEntity
 @Table(name = "ar_other_transaction")
 @DiscriminatorColumn(name = "transaction_type")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_other_transaction_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_other_transaction_seq"), @Parameter(name = "increment_size", value = "1") })
 @CustomFieldEntity(cftCodePrefix = "OtherTransaction")
-public class OtherTransaction extends AuditableEntity implements ICustomFieldEntity, ISearchable {
+public class OtherTransaction extends AuditableCFEntity implements  ISearchable {
 
     private static final long serialVersionUID = 1L;
 
@@ -91,7 +85,7 @@ public class OtherTransaction extends AuditableEntity implements ICustomFieldEnt
     @Column(name = "transaction_category")
     @Enumerated(EnumType.STRING)
     private OperationCategoryEnum transactionCategory;
-    
+
     /**
      * Operation type
      */
@@ -177,28 +171,6 @@ public class OtherTransaction extends AuditableEntity implements ICustomFieldEnt
     @Column(name = "order_num")
     private String orderNumber;
 
-    /**
-     * Unique identifier - UUID
-     */
-    @Column(name = "uuid", nullable = false, updatable = false, length = 60)
-    @Size(max = 60)
-    @NotNull
-    private String uuid = UUID.randomUUID().toString();
-
-    /**
-     * Custom field values in JSON format
-     */
-    @Type(type = "cfjson")
-    @Column(name = "cf_values", columnDefinition = "jsonb")
-    private CustomFieldValues cfValues;
-
-    /**
-     * Accumulated custom field values in JSON format
-     */
-//    @Type(type = "cfjson")
-//    @Column(name = "cf_values_accum", columnDefinition = "TEXT")
-    @Transient
-    private CustomFieldValues cfAccumulatedValues;
 
     /**
      * Bank LOT number
@@ -296,7 +268,7 @@ public class OtherTransaction extends AuditableEntity implements ICustomFieldEnt
     @Column(name = "payment_info6", length = 255)
     @Size(max = 255)
     private String paymentInfo6;
-    
+
     /**
      * Additional payment information - AFB120 additional information
      */
@@ -310,13 +282,13 @@ public class OtherTransaction extends AuditableEntity implements ICustomFieldEnt
     @Column(name = "billing_account_name", length = 255)
     @Size(max = 255)
     private String billingAccountName;
-    
+
     @OneToOne(mappedBy = "newOT")
     private PaymentVentilation paymentVentilation;
-    
+
     @OneToMany(mappedBy = "originalOT", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<PaymentVentilation> paymentVentilations = new ArrayList<>();
-    
+
     public List<PaymentVentilation> getPaymentVentilations() {
         return paymentVentilations;
     }
@@ -332,7 +304,7 @@ public class OtherTransaction extends AuditableEntity implements ICustomFieldEnt
     public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
     }
-    
+
     public String getType() {
         return type;
     }
@@ -450,46 +422,7 @@ public class OtherTransaction extends AuditableEntity implements ICustomFieldEnt
         return true;
     }
 
-    @Override
-    public String getUuid() {
-        return uuid;
-    }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    @Override
-    public String clearUuid() {
-        String oldUuid = uuid;
-        uuid = UUID.randomUUID().toString();
-        return oldUuid;
-    }
-
-    @Override
-    public CustomFieldValues getCfValues() {
-        return cfValues;
-    }
-
-    @Override
-    public void setCfValues(CustomFieldValues cfValues) {
-        this.cfValues = cfValues;
-    }
-
-    @Override
-    public CustomFieldValues getCfAccumulatedValues() {
-        return cfAccumulatedValues;
-    }
-
-    @Override
-    public void setCfAccumulatedValues(CustomFieldValues cfAccumulatedValues) {
-        this.cfAccumulatedValues = cfAccumulatedValues;
-    }
-
-    @Override
-    public ICustomFieldEntity[] getParentCFEntities() {
-        return null;
-    }
 
     /**
      * @return the orderNumber

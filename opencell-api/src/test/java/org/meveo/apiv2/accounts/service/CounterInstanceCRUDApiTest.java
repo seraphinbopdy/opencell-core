@@ -1,5 +1,18 @@
 package org.meveo.apiv2.accounts.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,8 +20,8 @@ import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.apiv2.accounts.CounterInstanceDto;
 import org.meveo.apiv2.billing.CounterPeriodDto;
+import org.meveo.model.billing.ChargeInstance;
 import org.meveo.model.billing.CounterInstance;
-import org.meveo.model.billing.RecurringChargeInstance;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.UsageChargeInstance;
 import org.meveo.model.catalog.CounterTemplate;
@@ -30,19 +43,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import jakarta.annotation.Nullable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CounterInstanceCRUDApiTest {
@@ -62,7 +63,7 @@ public class CounterInstanceCRUDApiTest {
     @Mock
     private ServiceInstanceService serviceInstanceService;
     @Mock
-    private ChargeInstanceService chargeInstanceService;
+    private ChargeInstanceService<ChargeInstance> chargeInstanceService;
     @Mock
     private CounterInstanceService counterInstanceService;
     @Mock

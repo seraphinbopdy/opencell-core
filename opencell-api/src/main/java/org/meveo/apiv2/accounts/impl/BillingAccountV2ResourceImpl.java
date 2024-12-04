@@ -9,7 +9,7 @@ import org.meveo.apiv2.accounts.resource.BillingAccountV2Resource;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.BillingAccount;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class BillingAccountV2ResourceImpl extends BaseRs implements BillingAccountV2Resource {
     

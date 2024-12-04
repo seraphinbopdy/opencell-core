@@ -14,10 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.apache.commons.lang3.math.NumberUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.BusinessEntity;
@@ -35,6 +31,10 @@ import org.meveo.model.crm.IInvoicingMinimumApplicable;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 
 @Stateless
 public class MinAmountService extends PersistenceService<BusinessEntity> {

@@ -3,19 +3,19 @@ package org.meveo.service.notification.sms;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
+import java.util.ServiceLoader;
+
 import org.meveo.api.dto.response.notification.SMSInfoResponseDTO;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.shared.ContactInformation;
 import org.meveo.service.crm.impl.CustomerService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.ServiceLoader;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class SMSService {

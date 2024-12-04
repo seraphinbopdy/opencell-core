@@ -3,20 +3,6 @@ package org.meveo.model.securityDeposit;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
@@ -26,19 +12,29 @@ import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
-import org.meveo.model.cpq.Product;
 import org.meveo.model.payments.CustomerAccount;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "security_deposit")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "security_deposit_seq"), })
-@NamedQueries({
-    @NamedQuery(name = "SecurityDeposit.sumAmountPerClient", query = "SELECT SUM(s.amount) FROM SecurityDeposit s WHERE s.customerAccount=:customerAccount"),
-    @NamedQuery(name = "SecurityDeposit.countPerTemplate", query = "SELECT COUNT(s.id) FROM SecurityDeposit s WHERE s.template=:template"),
-    @NamedQuery(name = "SecurityDeposit.securityDepositsToRefundIds", query = "SELECT s.id FROM SecurityDeposit s WHERE (s.validityDate <:sysDate or (s.validityPeriodUnit IS NOT NULL and s.validityPeriod IS NOT NULL)) and (s.status = 'LOCKED' or s.status = 'UNLOCKED' or s.status = 'HOLD')"),
-    @NamedQuery(name = "SecurityDeposit.securityDepositsByInvoiceId", query = "SELECT s FROM SecurityDeposit s WHERE s.securityDepositInvoice.id = :invoiceId")
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "security_deposit_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "SecurityDeposit.sumAmountPerClient", query = "SELECT SUM(s.amount) FROM SecurityDeposit s WHERE s.customerAccount=:customerAccount"),
+        @NamedQuery(name = "SecurityDeposit.countPerTemplate", query = "SELECT COUNT(s.id) FROM SecurityDeposit s WHERE s.template=:template"),
+        @NamedQuery(name = "SecurityDeposit.securityDepositsToRefundIds", query = "SELECT s.id FROM SecurityDeposit s WHERE (s.validityDate <:sysDate or (s.validityPeriodUnit IS NOT NULL and s.validityPeriod IS NOT NULL)) and (s.status = 'LOCKED' or s.status = 'UNLOCKED' or s.status = 'HOLD')"),
+        @NamedQuery(name = "SecurityDeposit.securityDepositsByInvoiceId", query = "SELECT s FROM SecurityDeposit s WHERE s.securityDepositInvoice.id = :invoiceId") })
 public class SecurityDeposit extends BusinessCFEntity {
 
     /**
@@ -95,14 +91,14 @@ public class SecurityDeposit extends BusinessCFEntity {
 
     @Column(name = "refund_reason")
     private String refundReason;
-    
+
     @Column(name = "cancel_reason")
     private String cancelReason;
-    
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sd_invoice_id")
     private Invoice securityDepositInvoice;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "billing_account_id", nullable = false)
     private BillingAccount billingAccount;
@@ -114,7 +110,7 @@ public class SecurityDeposit extends BusinessCFEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     private Seller seller;
-    
+
     public BillingAccount getBillingAccount() {
         return billingAccount;
     }
@@ -234,7 +230,7 @@ public class SecurityDeposit extends BusinessCFEntity {
     public void setServiceInstance(ServiceInstance serviceInstance) {
         this.serviceInstance = serviceInstance;
     }
-    
+
     public String getRefundReason() {
         return refundReason;
     }

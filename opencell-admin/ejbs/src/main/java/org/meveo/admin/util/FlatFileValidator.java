@@ -18,14 +18,20 @@
 
 package org.meveo.admin.util;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import org.apache.commons.io.FilenameUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.JobCacheContainerProvider;
-import org.meveo.cache.JobRunningStatusEnum;
 import org.meveo.commons.parsers.FileParserBeanio;
 import org.meveo.commons.parsers.IFileParser;
 import org.meveo.commons.parsers.RecordContext;
-import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
@@ -43,19 +49,12 @@ import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
 import org.slf4j.Logger;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Flat file validator

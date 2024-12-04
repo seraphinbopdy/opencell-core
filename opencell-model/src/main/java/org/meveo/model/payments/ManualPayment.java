@@ -17,11 +17,11 @@
  */
 package org.meveo.model.payments;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 @Entity
-// @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {@Parameter(name = "sequence_name", value =
-// "ar_manual_payment_seq"), })
+// @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {@Parameter(name = "sequence_name", value =
+// "ar_manual_payment_seq"), @Parameter(name = "increment_size", value = "1") })
 public class ManualPayment extends Payment {
 
     private static final long serialVersionUID = 1L;

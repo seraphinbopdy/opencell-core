@@ -18,9 +18,9 @@
 
 package org.meveo.api.dto.custom;
 
-import javax.xml.bind.annotation.XmlAttribute;
-
 import org.meveo.api.dto.response.BaseResponse;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
 
 public class IdentityResponseDTO extends BaseResponse {
 

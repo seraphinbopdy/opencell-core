@@ -1,11 +1,10 @@
 package org.meveo.api.dto.cpq;
 
-import javax.validation.constraints.NotNull;
-
 import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.model.cpq.tags.Tag;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 public class TagDto extends BusinessEntityDto {
  

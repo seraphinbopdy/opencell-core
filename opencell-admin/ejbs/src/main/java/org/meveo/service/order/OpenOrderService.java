@@ -2,11 +2,14 @@ package org.meveo.service.order;
 
 import static java.math.BigDecimal.ZERO;
 import static java.util.Collections.emptyList;
-import static java.util.Optional.ofNullable;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
-import static org.meveo.model.ordering.OpenOrderStatusEnum.*;
+import static org.meveo.model.ordering.OpenOrderStatusEnum.EXPIRED;
+import static org.meveo.model.ordering.OpenOrderStatusEnum.IN_USE;
+import static org.meveo.model.ordering.OpenOrderStatusEnum.NEW;
+import static org.meveo.model.ordering.OpenOrderStatusEnum.SOLD_OUT;
 import static org.meveo.model.ordering.OpenOrderTypeEnum.ARTICLES;
 import static org.meveo.model.ordering.OpenOrderTypeEnum.PRODUCTS;
 import static org.meveo.model.shared.DateUtils.setTimeToZero;
@@ -16,28 +19,33 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.TypedQuery;
-
+import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.AggregationConfiguration;
 import org.meveo.commons.utils.ListUtils;
 import org.meveo.model.BaseEntity;
+import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.ServiceInstance;
+import org.meveo.model.cpq.Product;
 import org.meveo.model.ordering.OpenOrder;
+import org.meveo.model.ordering.OpenOrderArticle;
+import org.meveo.model.ordering.OpenOrderProduct;
+import org.meveo.model.ordering.OpenOrderQuote;
 import org.meveo.model.ordering.OpenOrderStatusEnum;
 import org.meveo.model.settings.OpenOrderSetting;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.settings.impl.OpenOrderSettingService;
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.model.article.AccountingArticle;
-import org.meveo.model.cpq.Product;
-import org.meveo.model.ordering.*;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.TypedQuery;
 
 @Stateless
 public class OpenOrderService extends BusinessService<OpenOrder> {

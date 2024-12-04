@@ -7,7 +7,7 @@ import org.meveo.api.dto.account.CustomerHierarchyDto;
 import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.apiv2.accounts.resource.AccountHierarchyV2Resource;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class AccountHierarchyV2ResourceImpl extends BaseRs implements AccountHierarchyV2Resource {
     

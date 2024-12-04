@@ -24,25 +24,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ImportInvoiceException;
 import org.meveo.admin.exception.InvoiceExistException;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.model.billing.Invoice;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
+import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * Job implementation to generate account operations for all invoices that don't have it yet.
@@ -120,14 +120,11 @@ public class AccountOperationsGenerationJobBean extends IteratorBasedJobBean<Lon
     private void createAccountOperations(Long invoiceId, JobExecutionResultImpl jobExecutionResult) throws BusinessException {
 
         try {
-            Invoice invoice = invoiceService.findById(invoiceId);
-            recordedInvoiceService.generateRecordedInvoice(invoice, null);
-
-            invoice = invoiceService.update(invoice);
+            RecordedInvoice recordedInvoice = recordedInvoiceService.generateRecordedInvoice(invoiceId, null);
 
             if (script != null) {
                 Map<String, Object> context = new HashMap<String, Object>();
-                context.put(Script.CONTEXT_ENTITY, invoice.getRecordedInvoice());
+                context.put(Script.CONTEXT_ENTITY, recordedInvoice);
                 context.put(Script.CONTEXT_CURRENT_USER, currentUser);
                 context.put(Script.CONTEXT_APP_PROVIDER, appProvider);
                 script.execute(context);

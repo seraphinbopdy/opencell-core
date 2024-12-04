@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.imageio.ImageIO;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -322,7 +322,7 @@ public abstract class GenericModuleBean<T extends MeveoModule> extends BaseBean<
             String tmpFolder = ModuleUtil.getTmpRootPath(currentUser.getProviderCode());
             String dest = tmpFolder + File.separator + filename;
             log.debug("output original module picture file to {}", dest);
-            in = event.getFile().getInputstream();
+            in = event.getFile().getInputStream();
             BufferedImage src = ImageIO.read(in);
             ImageIO.write(src, formatname, new File(dest));
             messages.info(new BundleKey("messages", "meveoModule.uploadPictureSuccess"), originFilename);
@@ -433,7 +433,7 @@ public abstract class GenericModuleBean<T extends MeveoModule> extends BaseBean<
 
         classname = classname.replaceAll("Dto", "");
         classname = classname.replaceAll("DTO", "");
-        for (TreeNode node : root.getChildren()) {
+        for (TreeNode node : (List<TreeNode>) root.getChildren()) {
             if (classname.equals(node.getType())) {
                 return node;
             }

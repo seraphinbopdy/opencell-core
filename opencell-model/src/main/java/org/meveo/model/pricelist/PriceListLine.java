@@ -1,6 +1,9 @@
 package org.meveo.model.pricelist;
 
+import java.math.BigDecimal;
+
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.catalog.ChargeTemplate;
@@ -10,15 +13,14 @@ import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.ProductLine;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import java.math.BigDecimal;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * PriceList Line Entity.
@@ -28,11 +30,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "cat_price_list_line")
 @CustomFieldEntity(cftCodePrefix = "PriceListLine")
-@GenericGenerator(
-        name = "ID_GENERATOR",
-        strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-        parameters = {@org.hibernate.annotations.Parameter(name = "sequence_name", value = "cat_price_list_line_seq")}
-)
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @org.hibernate.annotations.Parameter(name = "sequence_name", value = "cat_price_list_line_seq"), @Parameter(name = "increment_size", value = "1") })
 public class PriceListLine extends EnableBusinessCFEntity {
 
     /**

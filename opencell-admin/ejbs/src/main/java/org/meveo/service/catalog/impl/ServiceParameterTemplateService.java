@@ -17,10 +17,10 @@
  */
 package org.meveo.service.catalog.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.model.catalog.ServiceParameterTemplate;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Service Parameter Template service implementation.

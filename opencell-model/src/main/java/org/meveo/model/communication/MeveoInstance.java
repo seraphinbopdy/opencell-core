@@ -19,20 +19,6 @@ package org.meveo.model.communication;
 
 import java.util.Date;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostPersist;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.commons.keystore.KeystoreManager;
@@ -41,6 +27,20 @@ import org.meveo.model.ExportIdentifier;
 import org.meveo.model.admin.User;
 import org.meveo.model.billing.AuthenticationTypeEnum;
 import org.meveo.model.crm.Customer;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Another installation of application. Allows to:
@@ -56,8 +56,8 @@ import org.meveo.model.crm.Customer;
 @Cacheable
 @ExportIdentifier({ "code" })
 @Table(name = "com_meveo_instance", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "com_meveo_instance_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "com_meveo_instance_seq"),
+        @Parameter(name = "increment_size", value = "1") })
 public class MeveoInstance extends BusinessEntity {
 
     private static final long serialVersionUID = 1733186433208397850L;
@@ -266,7 +266,7 @@ public class MeveoInstance extends BusinessEntity {
      * transient authPassword in Keystore
      */
     transient private String authPasswordKS;
-    
+
     /**
      * Authentication client id
      */
@@ -280,15 +280,15 @@ public class MeveoInstance extends BusinessEntity {
     @Column(name = "client_secret", length = 60)
     @Size(max = 60)
     private String clientSecret;
-    
-	/**
+
+    /**
      * 
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "authentication_type")
     private AuthenticationTypeEnum authenticationType = AuthenticationTypeEnum.BASIC_AUTHENTICATION;
 
-	public MeveoInstance() {
+    public MeveoInstance() {
 
     }
 
@@ -669,8 +669,7 @@ public class MeveoInstance extends BusinessEntity {
     public String getAuthPassword() {
         if (KeystoreManager.existKeystore()) {
             return getAuthPasswordKS();
-        }
-        else {
+        } else {
             return getAuthPasswordDB();
         }
     }
@@ -680,8 +679,7 @@ public class MeveoInstance extends BusinessEntity {
             authPasswordDB = "";
             this.authPasswordKS = password;
             setAuthPasswordKS();
-        }
-        else {
+        } else {
             setAuthPasswordDB(password);
         }
     }
@@ -689,8 +687,7 @@ public class MeveoInstance extends BusinessEntity {
     public String getAuthPasswordKS() {
         if (KeystoreManager.existCredential(getClass().getSimpleName() + "." + getId())) {
             return KeystoreManager.retrieveCredential(getClass().getSimpleName() + "." + getId());
-        }
-        else {
+        } else {
             return "";
         }
     }
@@ -701,33 +698,32 @@ public class MeveoInstance extends BusinessEntity {
             this.authPasswordKS = "";
         }
 
-        if (getId() != null && KeystoreManager.existKeystore() &&! this.authPasswordKS.equals(getAuthPasswordKS())) {
+        if (getId() != null && KeystoreManager.existKeystore() && !this.authPasswordKS.equals(getAuthPasswordKS())) {
             KeystoreManager.addCredential(getClass().getSimpleName() + "." + getId(), this.authPasswordKS);
         }
     }
-    
+
     public String getClientId() {
-		return clientId;
-	}
+        return clientId;
+    }
 
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 
-	public String getClientSecret() {
-		return clientSecret;
-	}
+    public String getClientSecret() {
+        return clientSecret;
+    }
 
-	public void setClientSecret(String clientSecret) {
-		this.clientSecret = clientSecret;
-	}
-	
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
 
     public AuthenticationTypeEnum getAuthenticationType() {
-		return authenticationType;
-	}
+        return authenticationType;
+    }
 
-	public void setAuthenticationType(AuthenticationTypeEnum authenticationType) {
-		this.authenticationType = authenticationType;
-	}
+    public void setAuthenticationType(AuthenticationTypeEnum authenticationType) {
+        this.authenticationType = authenticationType;
+    }
 }

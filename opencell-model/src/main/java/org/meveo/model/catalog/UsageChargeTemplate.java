@@ -20,23 +20,21 @@ package org.meveo.model.catalog;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
-import javax.persistence.QueryHint;
-import javax.persistence.Transient;
-import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.cpq.Attribute;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostUpdate;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 
 /**
  * Usage charge template
@@ -47,15 +45,12 @@ import org.meveo.model.cpq.Attribute;
  */
 @Entity
 @DiscriminatorValue("U")
-@NamedQueries({
-        @NamedQuery(name = "UsageChargeTemplate.getWithTemplateEDR", query = "SELECT u FROM UsageChargeTemplate u join u.edrTemplates t WHERE :edrTemplate=t"
-                + " and u.disabled=false"),
+@NamedQueries({ @NamedQuery(name = "UsageChargeTemplate.getWithTemplateEDR", query = "SELECT u FROM UsageChargeTemplate u join u.edrTemplates t WHERE :edrTemplate=t" + " and u.disabled=false"),
 
         @NamedQuery(name = "usageChargeTemplate.getNbrUsagesChrgNotAssociated", query = "select count(*) from UsageChargeTemplate u where (u.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateUsage serv) "
-                + " OR not exists elements(u.pricePlans) ) ", hints = {
-                        @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
+                + " OR not exists elements(u.pricePlans) ) ", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
 
-        @NamedQuery(name = "usageChargeTemplate.getUsagesChrgNotAssociated", query = "from UsageChargeTemplate u where (u.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateUsage serv) "
+        @NamedQuery(name = "usageChargeTemplate.getUsagesChrgNotAssociated", query = "select u from UsageChargeTemplate u where (u.id not in (select distinct serv.chargeTemplate.id from ServiceChargeTemplateUsage serv) "
                 + " OR not exists elements(u.pricePlans) ) ") })
 public class UsageChargeTemplate extends ChargeTemplate {
 
@@ -104,7 +99,7 @@ public class UsageChargeTemplate extends ChargeTemplate {
     /**
      * If true and (charge has no counter associated) then the next matching charge with the full quantity of the EDR.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "trigger_next_charge")
     private boolean triggerNextCharge = false;
 
@@ -114,7 +109,7 @@ public class UsageChargeTemplate extends ChargeTemplate {
     @Column(name = "trigger_next_charge_el", length = 2000)
     @Size(max = 2000)
     private String triggerNextChargeEL;
-    
+
     @Deprecated
     @Transient
     private Attribute usageQuantityAttribute;
@@ -207,17 +202,17 @@ public class UsageChargeTemplate extends ChargeTemplate {
         this.triggerNextChargeEL = triggerNextChargeEL;
     }
 
-	/**
-	 * @return the usageQuantityAttribute
-	 */
-	public Attribute getUsageQuantityAttribute() {
+    /**
+     * @return the usageQuantityAttribute
+     */
+    public Attribute getUsageQuantityAttribute() {
 		return getQuantityAttribute();
-	}
+    }
 
-	/**
-	 * @param usageQuantityAttribute the usageQuantityAttribute to set
-	 */
-	public void setUsageQuantityAttribute(Attribute usageQuantityAttribute) {
+    /**
+     * @param usageQuantityAttribute the usageQuantityAttribute to set
+     */
+    public void setUsageQuantityAttribute(Attribute usageQuantityAttribute) {
 		setQuantityAttribute(usageQuantityAttribute);
-	}
+    }
 }

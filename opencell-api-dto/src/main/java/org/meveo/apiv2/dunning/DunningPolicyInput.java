@@ -1,17 +1,20 @@
 package org.meveo.apiv2.dunning;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.dunning.DunningDetermineLevelBy;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableDunningPolicyInput.class)
 public interface DunningPolicyInput extends Resource {
 

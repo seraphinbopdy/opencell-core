@@ -31,9 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.job.utils.BillinRunApplicationElFilterUtils;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.model.billing.BillingCycle;
@@ -48,6 +45,9 @@ import org.meveo.service.billing.impl.BillingRunReportService;
 import org.meveo.service.billing.impl.BillingRunService;
 import org.meveo.service.billing.impl.InvoicingThresholdService;
 import org.primefaces.model.SortOrder;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * A job implementation to apply the threshold rules for the invoice, billing account, customer account and customer.

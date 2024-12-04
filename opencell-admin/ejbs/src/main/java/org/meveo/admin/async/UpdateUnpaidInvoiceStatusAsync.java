@@ -18,16 +18,21 @@
 
 package org.meveo.admin.async;
 
+import java.util.List;
+import java.util.concurrent.Future;
+
 import org.meveo.admin.job.UnitUpdateUnpaidInvoiceStatusJobBean;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.security.MeveoUser;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.job.JobExecutionService;
 
-import javax.ejb.*;
-import javax.inject.Inject;
-import java.util.List;
-import java.util.concurrent.Future;
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * @author Mounir BOUKAYOUA

@@ -9,8 +9,6 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.Collections;
 
-import javax.persistence.EntityManager;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,12 +36,16 @@ import org.meveo.model.securityDeposit.ValidityPeriodUnit;
 import org.meveo.security.MeveoUser;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.payments.impl.AccountOperationService;
+import org.meveo.service.payments.impl.OCCTemplateService;
+import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.securityDeposit.impl.SecurityDepositService;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import jakarta.persistence.EntityManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityDepositServiceTest {
@@ -53,6 +55,9 @@ public class SecurityDepositServiceTest {
 
     @Mock
     private AccountOperationService accountOperationService;
+    
+    @Mock
+    private OCCTemplateService occTemplateService;
 
     @Mock
     private EntityManager entityManagerMock;
@@ -62,6 +67,9 @@ public class SecurityDepositServiceTest {
     
     @Mock
     private MeveoUser currentUser;
+    
+    @Mock
+    private PaymentService paymentService;
     
     @Mock
     private CustomFieldInstanceService customFieldInstanceService;

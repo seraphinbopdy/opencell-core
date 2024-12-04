@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -12,9 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.interceptor.InvocationContext;
-import javax.persistence.EntityManager;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +39,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import jakarta.interceptor.InvocationContext;
+import jakarta.persistence.EntityManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecuredBusinessEntityMethodInterceptorTest {

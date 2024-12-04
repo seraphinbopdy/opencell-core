@@ -25,8 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.DiscriminatorValue;
-
 import org.junit.Test;
 import org.meveo.admin.exception.FilterException;
 import org.meveo.commons.utils.FilteredQueryBuilder;
@@ -48,6 +46,8 @@ import org.slf4j.LoggerFactory;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.collections.CollectionConverter;
 import com.thoughtworks.xstream.mapper.ClassAliasingMapper;
+
+import jakarta.persistence.DiscriminatorValue;
 
 /**
  * @author Edward P. Legaspi

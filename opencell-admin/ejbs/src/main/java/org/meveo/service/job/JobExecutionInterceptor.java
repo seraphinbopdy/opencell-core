@@ -1,16 +1,19 @@
 package org.meveo.service.job;
 
-import org.eclipse.microprofile.metrics.*;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
+import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.meveo.commons.utils.EjbUtils;
 import org.meveo.model.jobs.JobInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
-import java.util.List;
-import java.util.concurrent.Future;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * Interceptor to update the Jobs number of threads in realtime
@@ -26,8 +29,7 @@ public class JobExecutionInterceptor {
     private static final Logger log = LoggerFactory.getLogger(JobExecutionInterceptor.class);
 
     @Inject
-    @RegistryType(type = MetricRegistry.Type.APPLICATION)
-    MetricRegistry registry;
+    private MeterRegistry meterRegistry;
 
     /**
      * Update metrics for Prometheus a method on an entity
@@ -45,6 +47,7 @@ public class JobExecutionInterceptor {
         long isStopped = 1;
 
         if (params.length == 3) {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             List<Future> futures = (List<Future>) params[2];
             if (futures != null && !futures.isEmpty()) {
                 numberOfThreads = futures.size();
@@ -52,9 +55,9 @@ public class JobExecutionInterceptor {
                 isStopped = 0;
             }
         }
-        counterInc((JobInstance) params[0], "number_of_Threads", numberOfThreads);
-        counterInc((JobInstance) params[0], "is_running", isRunning);
-        counterInc((JobInstance) params[0], "is_stopped", isStopped);
+        updateMetrics((JobInstance) params[0], "number_of_Threads", numberOfThreads);
+        updateMetrics((JobInstance) params[0], "is_running", isRunning);
+        updateMetrics((JobInstance) params[0], "is_stopped", isStopped);
         try {
             return context.proceed();
         } catch (Exception e) {
@@ -64,20 +67,17 @@ public class JobExecutionInterceptor {
     }
 
     /**
-     * Increment counter metric for JobExecution
+     * Update gauge metrics for Job execution statistics
      *
-     * @param value
+     * @param jobInstance Job instance
      * @param name the name of metric
+     * @param value Absolute value to set gauge value to.
      */
-    private void counterInc(JobInstance jobInstance, String name, Long value) {
-        Metadata metadata = new MetadataBuilder().withName(name + "_" + jobInstance.getJobTemplate() + "_" + jobInstance.getCode()).build();
-        Tag tgName = new Tag("name", jobInstance.getCode());
-        Counter counter = registry.counter(metadata, tgName);
-        if (value != null) {
-            counter.inc(value - counter.getCount());
-        } else {
-            counter.inc();
-        }
-    }
+    private void updateMetrics(JobInstance jobInstance, String name, Long value) {
 
+        AtomicInteger gaugeValue = meterRegistry.gauge(name + "." + jobInstance.getJobTemplate() + "." + jobInstance.getCode(), Tags.of("name", jobInstance.getCode(), "node", EjbUtils.getCurrentClusterNode()),
+            new AtomicInteger(0));
+
+        gaugeValue.set(value.intValue());
+    }
 }

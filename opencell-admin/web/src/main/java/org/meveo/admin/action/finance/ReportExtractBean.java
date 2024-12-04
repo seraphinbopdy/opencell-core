@@ -22,14 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.jboss.seam.international.status.builder.BundleKey;
 import org.meveo.admin.action.UpdateMapTypeFieldBean;
 import org.meveo.admin.exception.BusinessException;
@@ -43,8 +36,14 @@ import org.meveo.model.finance.ReportExtractResultTypeEnum;
 import org.meveo.model.finance.ReportExtractScriptTypeEnum;
 import org.meveo.service.base.local.IPersistenceService;
 import org.meveo.service.finance.ReportExtractService;
-import org.primefaces.model.ByteArrayContent;
+import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
+
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Controller to manage detail view of {@link ReportExtract}.
@@ -168,25 +167,21 @@ public class ReportExtractBean extends UpdateMapTypeFieldBean<ReportExtract> {
     }
 
     public StreamedContent getReportFile(ReportExtractExecutionResult reportResult) {
-        try {
-            String filePath = reportExtractService.getReporFilePath(reportResult);
-            File file = new File(filePath);
-            
-            String mimeType = "text/csv";
-            if (!FilenameUtils.getExtension(filePath).equals("csv")) {
-                mimeType = "text/html";
-            }
 
-            byte[] byteArrayContent;
-            try (FileInputStream input = new FileInputStream(file)) {
-                byteArrayContent = IOUtils.toByteArray(input);
-            }
-            return new ByteArrayContent(byteArrayContent, mimeType, filePath.substring(filePath.lastIndexOf(File.separator) + 1));
+        String filePath = reportExtractService.getReporFilePath(reportResult);
+        File file = new File(filePath);
+
+        String mimeType = "text/csv";
+        if (!FilenameUtils.getExtension(filePath).equals("csv")) {
+            mimeType = "text/html";
+        }
+
+        try (FileInputStream inStream = new FileInputStream(file)) {
+            return DefaultStreamedContent.builder().contentType(mimeType).name(filePath.substring(filePath.lastIndexOf(File.separator) + 1)).stream(() -> inStream).build();
 
         } catch (BusinessException | IOException e) {
             log.error("Failed loading report file", e);
             return null;
         }
     }
-
 }

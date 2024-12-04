@@ -19,14 +19,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import org.meveo.jpa.MeveoJpa;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.BadRequestException;
-
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.collections4.ListUtils;
 import org.meveo.admin.async.SynchronizedIterator;
@@ -59,6 +51,13 @@ import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoicesToNumberInfo;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.job.JobInstanceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.BadRequestException;
 
 @Stateless
 public class InvoicingJobV3Bean extends BaseJobBean {
@@ -178,8 +177,8 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			invoiceService.linkInvoicesToSubscriptionsByBR(billingRun);
 		}
         if(billingRun.getStatus() == DRAFT_INVOICES && billingRun.getProcessType() == FULL_AUTOMATIC) {
-            billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, POSTVALIDATED, null);
-        }
+		    billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, POSTVALIDATED, null);
+		}
 		if (billingRunValidationScript != null && billingRun.getBillingCycle() != null) {
 			billingRun.getBillingCycle().setBillingRunValidationScript(billingRunValidationScript);
 		}
@@ -209,7 +208,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 				billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, REJECTED, null);
 			}
 		}
-		
+
 		billingRun = billingRunService.refreshOrRetrieve(billingRun);
 		if (billingRun.getStatus() == POSTVALIDATED) {
 			if (!isFullAutomatic) {

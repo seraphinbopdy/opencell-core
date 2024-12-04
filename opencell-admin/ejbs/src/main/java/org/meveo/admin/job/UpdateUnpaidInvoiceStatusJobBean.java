@@ -18,6 +18,11 @@
 
 package org.meveo.admin.job;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.meveo.admin.async.SubListCreator;
 import org.meveo.admin.async.UpdateUnpaidInvoiceStatusAsync;
 import org.meveo.admin.exception.BusinessException;
@@ -30,14 +35,10 @@ import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.job.Job;
 import org.slf4j.Logger;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 /**
  * A bean used to update unpaid invoices status

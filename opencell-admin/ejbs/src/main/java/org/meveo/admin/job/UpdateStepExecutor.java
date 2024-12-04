@@ -6,12 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.Query;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.jpa.EntityManagerWrapper;
@@ -20,6 +14,12 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 @Stateless
 public class UpdateStepExecutor extends IteratorBasedJobBean<Long[]> {

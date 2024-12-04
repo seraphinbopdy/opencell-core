@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.persistence.criteria.JoinType;
-
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -24,6 +22,8 @@ import org.meveo.model.BaseEntity;
 import org.meveo.model.IEntity;
 import org.meveo.model.UniqueEntity;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.persistence.criteria.JoinType;
 
 public class NativeExpressionFactory {
 
@@ -65,7 +65,7 @@ public class NativeExpressionFactory {
                 queryBuilder.addValueIsGreaterThanField(extractFieldWithAlias(exp.getFieldName()), value, false);
                 break;
             case "fromOptionalRange":
-                queryBuilder.addValueIsGreaterThanField(extractFieldWithAlias(exp.getFieldName()), value, true);
+                queryBuilder.addValueIsGreaterThanOrEqualField(extractFieldWithAlias(exp.getFieldName()), value, true);
                 break;
             case "toRange":
                 queryBuilder.addValueIsLessThanField(extractFieldWithAlias(exp.getFieldName()), value, false, false);

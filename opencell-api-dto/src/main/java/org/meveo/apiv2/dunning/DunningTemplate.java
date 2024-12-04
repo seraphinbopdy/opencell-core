@@ -1,16 +1,18 @@
 package org.meveo.apiv2.dunning;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.Map;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.model.billing.TradingLanguage;
 import org.meveo.model.communication.MessageTemplateTypeEnum;
 import org.meveo.model.payments.ActionChannelEnum;
 
-import javax.annotation.Nullable;
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(builder = ImmutableDunningTemplate.Builder.class)
 public interface DunningTemplate {
 

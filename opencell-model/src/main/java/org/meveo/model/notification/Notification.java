@@ -21,33 +21,9 @@ package org.meveo.model.notification;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.enterprise.context.BeforeDestroyed;
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.EnableBusinessCFEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ModuleItem;
@@ -55,6 +31,30 @@ import org.meveo.model.billing.CounterInstance;
 import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.validation.constraint.ClassName;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Base notification information
@@ -67,12 +67,9 @@ import org.meveo.validation.constraint.ClassName;
 @ModuleItem
 @ExportIdentifier({ "code" })
 @Table(name = "adm_notification", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "adm_notification_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "adm_notification_seq"), @Parameter(name = "increment_size", value = "1") })
 @Inheritance(strategy = InheritanceType.JOINED)
-@NamedQueries({
-        @NamedQuery(name = "Notification.getNotificationsForCache", query = "SELECT n from Notification n where n.disabled=false", hints = {
-                @QueryHint(name = "org.hibernate.readOnly", value = "true") }),
+@NamedQueries({ @NamedQuery(name = "Notification.getNotificationsForCache", query = "SELECT n from Notification n where n.disabled=false", hints = { @QueryHint(name = "org.hibernate.readOnly", value = "true") }),
         @NamedQuery(name = "Notification.getActiveNotificationsByEventAndClasses", query = "SELECT n from Notification n where n.disabled=false and n.eventTypeFilter=:eventTypeFilter and n.classNameFilter in :classNameFilter order by priority ASC", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "true") }) })
 public class Notification extends EnableBusinessCFEntity {
@@ -140,33 +137,31 @@ public class Notification extends EnableBusinessCFEntity {
     /**
      * Run in async mode?
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "run_async", nullable = false)
     @NotNull
     private boolean runAsync = false;
 
-
     /**
      * Save successful notifications?
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "save_successful_notif", nullable = false)
     @NotNull
     private boolean saveSuccessfulNotifications = true;
-    
+
     @Transient
     protected String oldClassNameFilter;
-    
+
     @Transient
     protected NotificationEventTypeEnum oldEventTypeFilter;
-    
 
-	@PostLoad
-	private void loadOldClassAndOldEvent() {
-		this.getOldClassNameFilter();
-		this.getOldEventTypeFilter();
-	}
-	
+    @PostLoad
+    private void loadOldClassAndOldEvent() {
+        this.getOldClassNameFilter();
+        this.getOldEventTypeFilter();
+    }
+
     public String getClassNameFilter() {
         return classNameFilter;
     }
@@ -237,9 +232,8 @@ public class Notification extends EnableBusinessCFEntity {
 
     @Override
     public String toString() {
-        return String.format("Notification [%s, classNameFilter=%s, eventTypeFilter=%s, elFilter=%s, scriptInstance=%s, counterTemplate=%s, counterInstance=%s]", super.toString(),
-            classNameFilter, eventTypeFilter, elFilter, scriptInstance != null ? scriptInstance.getId() : null, counterTemplate != null ? counterTemplate.getId() : null,
-            counterInstance != null ? counterInstance.getId() : null);
+        return String.format("Notification [%s, classNameFilter=%s, eventTypeFilter=%s, elFilter=%s, scriptInstance=%s, counterTemplate=%s, counterInstance=%s]", super.toString(), classNameFilter, eventTypeFilter,
+            elFilter, scriptInstance != null ? scriptInstance.getId() : null, counterTemplate != null ? counterTemplate.getId() : null, counterInstance != null ? counterInstance.getId() : null);
     }
 
     public int getPriority() {
@@ -276,7 +270,6 @@ public class Notification extends EnableBusinessCFEntity {
     public void setRunAsync(boolean runAsync) {
         this.runAsync = runAsync;
     }
-    
 
     /**
      * Gets boolean value of whether this notification will be run in async mode.
@@ -291,22 +284,22 @@ public class Notification extends EnableBusinessCFEntity {
         this.saveSuccessfulNotifications = saveSuccessfulNotifications;
     }
 
-	/**
-	 * @return the oldClassNameFilter
-	 */
-	public String getOldClassNameFilter() {
-		if(oldClassNameFilter == null)
-			oldClassNameFilter = classNameFilter;
-		return oldClassNameFilter;
-	}
+    /**
+     * @return the oldClassNameFilter
+     */
+    public String getOldClassNameFilter() {
+        if (oldClassNameFilter == null)
+            oldClassNameFilter = classNameFilter;
+        return oldClassNameFilter;
+    }
 
-	/**
-	 * @return the oldEventTypeFilter
-	 */
-	public NotificationEventTypeEnum getOldEventTypeFilter() {
-		if(oldEventTypeFilter == null)
-			oldEventTypeFilter = eventTypeFilter;
-		return oldEventTypeFilter;
-	}
-    
+    /**
+     * @return the oldEventTypeFilter
+     */
+    public NotificationEventTypeEnum getOldEventTypeFilter() {
+        if (oldEventTypeFilter == null)
+            oldEventTypeFilter = eventTypeFilter;
+        return oldEventTypeFilter;
+    }
+
 }

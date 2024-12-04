@@ -6,23 +6,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.HibernateException;
 import org.hibernate.property.access.internal.PropertyAccessStrategyBasicImpl;
 import org.hibernate.property.access.internal.PropertyAccessStrategyChainedImpl;
 import org.hibernate.property.access.internal.PropertyAccessStrategyFieldImpl;
 import org.hibernate.property.access.internal.PropertyAccessStrategyMapImpl;
 import org.hibernate.property.access.spi.Setter;
 import org.hibernate.property.access.spi.SetterMethodImpl;
-import org.hibernate.transform.AliasedTupleSubsetResultTransformer;
+import org.hibernate.query.TupleTransformer;
 import org.meveo.model.BaseEntity;
-import org.meveo.model.crm.CustomFieldTemplate;
 
 /**
- * Result transformer that allows to transform a result to
- * a user specified class which will be populated via setter
- * methods or fields matching the alias names.
+ * Result transformer that allows to transform a result to a user specified class which will be populated via setter methods or fields matching the alias names.
  * <p/>
+ * 
  * <pre>
  * List resultWithAliasedBean = s.createCriteria(Enrolment.class)
  * 			.createAlias("student", "st")
@@ -34,23 +30,23 @@ import org.meveo.model.crm.CustomFieldTemplate;
  * 			.list();
  * <p/>
  *  StudentDTO dto = (StudentDTO)resultWithAliasedBean.get(0);
- * 	</pre>
+ * </pre>
  *
- * @author max
+ * @param <T> The class to transform the result to.
  */
-public class AliasToAggregatedWalletOperationResultTransformer extends AliasedTupleSubsetResultTransformer {
+public class AliasToAggregatedWalletOperationResultTransformer<T> implements TupleTransformer<T> {
 
     // IMPL NOTE : due to the delayed population of setters (setters cached
-    // 		for performance), we really cannot properly define equality for
-    // 		this transformer
+    // for performance), we really cannot properly define equality for
+    // this transformer
 
+    @SuppressWarnings("rawtypes")
     private final Class resultClass;
     private boolean isInitialized;
     private String[] aliases;
     private Setter[] setters;
 
-
-    public AliasToAggregatedWalletOperationResultTransformer(Class resultClass) {
+    public AliasToAggregatedWalletOperationResultTransformer(@SuppressWarnings("rawtypes") Class resultClass) {
         if (resultClass == null) {
             throw new IllegalArgumentException("resultClass cannot be null");
         }
@@ -58,14 +54,10 @@ public class AliasToAggregatedWalletOperationResultTransformer extends AliasedTu
         this.resultClass = resultClass;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public boolean isTransformedValueATupleElement(String[] aliases, int tupleLength) {
-        return false;
-    }
-
-    @Override
-    public Object transformTuple(Object[] tuple, String[] aliases) {
-        Object result;
+    public T transformTuple(Object[] tuple, String[] aliases) {
+        T result;
 
         try {
             if (!isInitialized) {
@@ -74,21 +66,21 @@ public class AliasToAggregatedWalletOperationResultTransformer extends AliasedTu
                 check(aliases);
             }
 
-            result = resultClass.newInstance();
+            result = (T) resultClass.getDeclaredConstructor().newInstance();
             Setter setterCustomField = null;
             Map<String, Object> cfValues = new HashMap<>();
             for (int i = 0; i < aliases.length; i++) {
                 SetterMethodImpl setter = (SetterMethodImpl) setters[i];
                 if (setter != null) {
                     if (setter.getMethod().getParameterTypes()[0].isPrimitive()) {
-                        setter.set(result, tuple[i], null);
+                        setter.set(result, tuple[i]);
                     } else {
                         if (setter.getMethodName().equals("setCfValues")) {
                             cfValues.put(aliases[i], tuple[i]);
                             setterCustomField = setter;
                         } else {
                             Object setterValue = getSetterValueAsObject(aliases[i], tuple[i]);
-                            setter.set(result, setterValue, null);
+                            setter.set(result, setterValue);
                         }
                     }
                 }
@@ -96,29 +88,27 @@ public class AliasToAggregatedWalletOperationResultTransformer extends AliasedTu
             if (setterCustomField != null) {
                 populateCustomField(result, setterCustomField, cfValues);
             }
+
         } catch (InstantiationException e) {
             throw new RuntimeException("Could not instantiate resultclass: " + resultClass.getName(), e);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            throw new RuntimeException("Could not instantiate resultclass: " + resultClass.getName(), e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Could not instantiate resultclass: " + resultClass.getName(), e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException("Could not instantiate resultclass: " + resultClass.getName(), e);
+
+        } catch (IllegalAccessException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
+            throw new RuntimeException("Could not set field on resultclass: " + resultClass.getName(), e);
         }
 
         return result;
     }
 
     private void populateCustomField(Object result, Setter setterCustomField, Map<String, Object> cfValues) {
-        setterCustomField.set(result, cfValues, null);
+        setterCustomField.set(result, cfValues);
     }
 
-    private Object getSetterValueAsObject(String field, Object value)
-            throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Object getSetterValueAsObject(String field, Object value) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
         Class classField = resultClass.getDeclaredField(field).getType();
         if (value != null && BaseEntity.class.isAssignableFrom(classField)) {
-            BaseEntity valueObject = (BaseEntity) classField.getDeclaredConstructor(null).newInstance();
+            BaseEntity valueObject = (BaseEntity) classField.getDeclaredConstructor().newInstance();
             valueObject.setId((Long) value);
             return valueObject;
         } else {
@@ -130,8 +120,8 @@ public class AliasToAggregatedWalletOperationResultTransformer extends AliasedTu
     }
 
     private void initialize(String[] aliases) {
-        PropertyAccessStrategyChainedImpl propertyAccessStrategy = new PropertyAccessStrategyChainedImpl(PropertyAccessStrategyBasicImpl.INSTANCE,
-                PropertyAccessStrategyFieldImpl.INSTANCE, PropertyAccessStrategyMapImpl.INSTANCE);
+        PropertyAccessStrategyChainedImpl propertyAccessStrategy = new PropertyAccessStrategyChainedImpl(PropertyAccessStrategyBasicImpl.INSTANCE, PropertyAccessStrategyFieldImpl.INSTANCE,
+            PropertyAccessStrategyMapImpl.INSTANCE);
         this.aliases = new String[aliases.length];
         setters = new Setter[aliases.length];
         for (int i = 0; i < aliases.length; i++) {
@@ -139,9 +129,9 @@ public class AliasToAggregatedWalletOperationResultTransformer extends AliasedTu
             if (alias != null) {
                 this.aliases[i] = alias;
                 try {
-                    setters[i] = propertyAccessStrategy.buildPropertyAccess(resultClass, alias).getSetter();
+                    setters[i] = propertyAccessStrategy.buildPropertyAccess(resultClass, alias, true).getSetter();
                 } catch (Exception ignore) {
-                    setters[i] = propertyAccessStrategy.buildPropertyAccess(resultClass, "cfValues").getSetter();
+                    setters[i] = propertyAccessStrategy.buildPropertyAccess(resultClass, "cfValues", true).getSetter();
                 }
             }
         }
@@ -163,6 +153,7 @@ public class AliasToAggregatedWalletOperationResultTransformer extends AliasedTu
             return false;
         }
 
+        @SuppressWarnings("rawtypes")
         AliasToAggregatedWalletOperationResultTransformer that = (AliasToAggregatedWalletOperationResultTransformer) o;
 
         if (!resultClass.equals(that.resultClass)) {

@@ -1,10 +1,10 @@
 package org.meveo.service.billing.impl;
 
-import javax.ejb.Stateless;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.AttributeInstance;
 import org.meveo.service.cpq.AttributeValueService;
+
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class AttributeInstanceService extends AttributeValueService<AttributeInstance> {

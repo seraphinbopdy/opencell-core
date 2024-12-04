@@ -35,8 +35,28 @@ public class ClusterEventDto implements Serializable {
      * Cluster event action value.
      *
      */
-    public enum CrudActionEnum {
-        create, update, remove, enable, disable,
+    public enum ClusterEventActionEnum {
+        /**
+         * Create an entity
+         */
+        create,
+        /**
+         * Update an entity
+         */
+        update,
+        /**
+         * Remove an entity
+         */
+        remove,
+        /**
+         * Enable an entity
+         */
+        enable,
+
+        /**
+         * Disable an entity
+         */
+        disable,
 
         /**
          * Launch a job
@@ -60,7 +80,17 @@ public class ClusterEventDto implements Serializable {
         /**
          * Last message was received in job processing data queue. Will indicate that data processing threads should continue.
          */
-        lastJobDataMessageReceived;
+        lastJobDataMessageReceived,
+
+        /**
+         * Get a result of a script execution for endpoint
+         */
+        getEndpointExecutionResult,
+
+        /**
+         * Job execution has completed
+         */
+        jobExecutionCompleted
     };
 
     /**
@@ -81,7 +111,7 @@ public class ClusterEventDto implements Serializable {
     /**
      * Action that initiated synchronization.
      */
-    private CrudActionEnum action;
+    private ClusterEventActionEnum action;
 
     /**
      * Node that published the information
@@ -120,7 +150,7 @@ public class ClusterEventDto implements Serializable {
      * @param additionalInfo Additional information about the action
      * 
      */
-    public ClusterEventDto(String clazz, Long id, String code, CrudActionEnum action, String sourceNode, String providerCode, String userName, Map<String, Object> additionalInfo) {
+    public ClusterEventDto(String clazz, Long id, String code, ClusterEventActionEnum action, String sourceNode, String providerCode, String userName, Map<String, Object> additionalInfo) {
         super();
         this.clazz = clazz;
         this.id = id;
@@ -156,7 +186,7 @@ public class ClusterEventDto implements Serializable {
     /**
      * @return crud action.
      */
-    public CrudActionEnum getAction() {
+    public ClusterEventActionEnum getAction() {
         return action;
     }
 

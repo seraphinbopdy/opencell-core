@@ -18,33 +18,37 @@
 package org.meveo.model.rating;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.PartitionKey;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.HugeEntity;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedNativeQueries;
+import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Event data record - EDR - information
@@ -55,9 +59,9 @@ import org.meveo.model.billing.WalletOperation;
 @Entity
 @HugeEntity
 @Table(name = "rating_edr")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "rating_edr_seq"), @Parameter(name = "increment_size", value = "5000") })
-@NamedQueries({
-        @NamedQuery(name = "EDR.getEdrsForCache", query = "select case when e.originRecord is null then '' else e.originRecord end as cacheKey from EDR e where e.status='OPEN' ORDER BY e.eventDate DESC"),
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "rating_edr_seq"),
+        @Parameter(name = "increment_size", value = "5000") })
+@NamedQueries({ @NamedQuery(name = "EDR.getEdrsForCache", query = "select case when e.originRecord is null then '' else e.originRecord end as cacheKey from EDR e where e.status='OPEN' ORDER BY e.eventDate DESC"),
 
         @NamedQuery(name = "EDR.listToRateIds", query = "SELECT e.id from EDR e where e.status='OPEN' order by e.id"),
         @NamedQuery(name = "EDR.findByIdWithSubscription", query = "SELECT e from EDR e left join fetch e.subscription where e.status='OPEN' and e.id=:id "),
@@ -99,13 +103,10 @@ import org.meveo.model.billing.WalletOperation;
         @NamedQuery(name = "EDR.getDuplicatedEDRsItem", query = "SELECT COUNT(e.id) - 1, STRING_AGG(cast(e.id as text), ','), e.eventKey FROM EDR e  "
                 + "              WHERE e.status <> 'CANCELLED' AND e.created > :limitDate AND e.eventKey IS NOT NULL GROUP BY e.eventKey HAVING COUNT(e.id) > 1"),
         @NamedQuery(name = "EDR.cancelEDRsWithRejectReasonAndEventVersion", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('Received new version EDR[id=',id,']'), eventVersion=eventVersion+1 ,updated=:updatedDate where id in :ids"),
-        @NamedQuery(name = "EDR.cancelEDRsWithRejectReason", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('EDR[id=', id,', eventKey=', eventKey,'] has already been invoiced'), updated=:updatedDate where id in :ids")
-    })
-
+        @NamedQuery(name = "EDR.cancelEDRsWithRejectReason", query = "UPDATE EDR set status='CANCELLED', rejectReason=concat('EDR[id=', id,', eventKey=', eventKey,'] has already been invoiced'), updated=:updatedDate where id in :ids") })
 
 @NamedNativeQueries({
-        @NamedNativeQuery(name = "EDR.triggeredEDRSummaryForRerating", query = "select edr.id, edr.status from {h-schema}rating_edr edr where edr.status<>'CANCELLED' and edr.wallet_operation_id in :woIds")
-})
+        @NamedNativeQuery(name = "EDR.triggeredEDRSummaryForRerating", query = "select edr.id, edr.status from {h-schema}rating_edr edr where edr.status<>'CANCELLED' and edr.wallet_operation_id in :woIds") })
        
 public class EDR extends BaseEntity {
 
@@ -304,13 +305,14 @@ public class EDR extends BaseEntity {
     /**
      * Parameter
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "extra_parameter")
     private String extraParameter;
 
     /**
      * Processing status
      */
+    @PartitionKey
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private EDRStatusEnum status = EDRStatusEnum.OPEN;
@@ -318,7 +320,7 @@ public class EDR extends BaseEntity {
     /**
      * Rejection reason
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "reject_reason")
     private String rejectReason;
 
@@ -351,7 +353,7 @@ public class EDR extends BaseEntity {
     /**
      * If true, the WalletOperation will be deleted if rated to 0
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "zero_wo_dropped")
     private Boolean zeroWoDropped = false;
 
@@ -598,9 +600,9 @@ public class EDR extends BaseEntity {
         return "EDR [id=" + id + ", subscription=" + (subscription != null ? subscription.getId() : null) + ", originBatch=" + originBatch + ", originRecord=" + originRecord + ", eventDate=" + eventDate + ", quantity="
                 + quantity + ", access=" + accessCode + ", parameter1=" + parameter1 + ", parameter2=" + parameter2 + ", parameter3=" + parameter3 + ", parameter4=" + parameter4 + ", parameter5=" + parameter5
                 + ", parameter6=" + parameter6 + ", parameter7=" + parameter7 + ", parameter8=" + parameter8 + ", parameter9=" + parameter9 + ", dateParam1=" + dateParam1 + ", dateParam2=" + dateParam2 + ", dateParam3="
-                + dateParam3 + ", dateParam4=" + dateParam4 + ", dateParam5=" + dateParam5 + ", decimalParam1=" + decimalParam1 + ", decimalParam2=" + decimalParam2 + ", decimalParam3=" + decimalParam3 + ", decimalParam4="
-                + decimalParam4 + ", decimalParam5=" + decimalParam5 + ", extraParameter=" + extraParameter + ", headerEDR=" + ((headerEDR == null) ? "null" : headerEDR.getId()) + ", created=" + created + ", lastUpdate="
-                + updated + "]";
+                + dateParam3 + ", dateParam4=" + dateParam4 + ", dateParam5=" + dateParam5 + ", decimalParam1=" + decimalParam1 + ", decimalParam2=" + decimalParam2 + ", decimalParam3=" + decimalParam3
+                + ", decimalParam4=" + decimalParam4 + ", decimalParam5=" + decimalParam5 + ", extraParameter=" + extraParameter + ", headerEDR=" + ((headerEDR == null) ? "null" : headerEDR.getId()) + ", created="
+                + created + ", lastUpdate=" + updated + "]";
     }
 
     @Override

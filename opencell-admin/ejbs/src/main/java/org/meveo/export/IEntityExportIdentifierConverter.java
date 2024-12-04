@@ -26,13 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Inheritance;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Parameter;
-import javax.persistence.Query;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.hibernate.proxy.HibernateProxy;
@@ -47,6 +40,13 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Parameter;
+import jakarta.persistence.Query;
 
 /**
  * Xstream converter to serialise/deserialize an entity into/from a short version.

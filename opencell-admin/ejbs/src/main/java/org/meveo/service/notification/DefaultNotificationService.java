@@ -26,18 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.IEvent;
-import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.CustomTableEvent;
 import org.meveo.model.IEntity;
 import org.meveo.model.notification.EmailNotification;
@@ -60,6 +51,12 @@ import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
 
 /**
  * Basically an extension of {@link DefaultObserver} to call notification asychronously.
@@ -167,8 +164,8 @@ public class DefaultNotificationService {
 				context.put(entry.getKey(), ValueExpressionWrapper.evaluateExpression(entry.getValue(), elContext, Object.class));
 			}
 
-			if (scriptInstance.getReuse()) {
-				return scriptInstanceService.executeCached(entityOrEvent, scriptInstance.getCode(), context);
+			if (scriptInstance.isUsePool()) {
+				return scriptInstanceService.executeFromPool(entityOrEvent, scriptInstance.getCode(), context);
 
 			} else {
 				return scriptInstanceService.execute(entityOrEvent, scriptInstance.getCode(), context, isToInit, isToExecute, isToTerminate);

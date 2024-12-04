@@ -378,4 +378,47 @@ public class CustomApiGatewayPayment implements GatewayPaymentInterface {
 		
 	}
 
+	@Override
+	public String createCardCvvToken(CustomerAccount customerAccount, String alias, String cardNumber,
+			String cardHolderName, String expirayDate, String issueNumber, CreditCardTypeEnum cardType, String cvv)
+			throws BusinessException {
+			Map<String, Object> scriptContext = new HashMap<String, Object>();
+	        scriptContext.put(PaymentScript.CONTEXT_PG, paymentGateway);
+	        scriptContext.put(PaymentScript.CONTEXT_CA, customerAccount);
+	        scriptContext.put(PaymentScript.CONTEXT_ALIAS, alias);
+	        scriptContext.put(PaymentScript.CONTEXT_CARD_NUMBER, cardNumber);
+	        scriptContext.put(PaymentScript.CONTEXT_CARD_OWNER, cardHolderName);
+	        scriptContext.put(PaymentScript.CONTEXT_CARD_EXPIRATION, expirayDate);
+	        scriptContext.put(PaymentScript.CONTEXT_CARD_TYPE, cardType);
+	        scriptContext.put(PaymentScript.CONTEXT_ISSUE_NUMBER, issueNumber);
+	        scriptContext.put(PaymentScript.CONTEXT_CCVV, cvv);
+	        
+	        paymentScriptInterface.createCardCvvToken(scriptContext);
+
+	        return (String) scriptContext.get(PaymentScript.RESULT_TOKEN);
+	}
+
+	@Override
+
+	public PaymentResponseDto capturePayment(String preAuthorisationId, Long ctsAmount, String merchantParameters)throws BusinessException {
+		    Map<String, Object> scriptContext = new HashMap<String, Object>();
+	        scriptContext.put(PaymentScript.CONTEXT_PG, paymentGateway);
+	        scriptContext.put(PaymentScript.CONTEXT_PRE_AUTH_ID, preAuthorisationId);
+	        scriptContext.put(PaymentScript.CONTEXT_MERCHANT_PARAMS, merchantParameters);
+	        scriptContext.put(PaymentScript.CONTEXT_AMOUNT_CTS, ctsAmount);
+	       
+	        paymentScriptInterface.capturePayment(scriptContext);
+
+	        PaymentResponseDto doPaymentResponseDto = new PaymentResponseDto();
+	        doPaymentResponseDto.setPaymentID((String) scriptContext.get(PaymentScript.RESULT_PAYMENT_ID));
+	        doPaymentResponseDto.setTransactionId((String) scriptContext.get(PaymentScript.RESULT_TRANSACTION_ID));
+	        doPaymentResponseDto.setPaymentStatus((PaymentStatusEnum) scriptContext.get(PaymentScript.RESULT_PAYMENT_STATUS));
+	        doPaymentResponseDto.setErrorMessage((String) scriptContext.get(PaymentScript.RESULT_ERROR_MSG));
+	        doPaymentResponseDto.setCodeClientSide((String) scriptContext.get(PaymentScript.RESULT_CODE_CLIENT_SIDE));
+	        doPaymentResponseDto.setBankRefenrence((String) scriptContext.get(PaymentScript.RESULT_BANK_REFERENCE));
+	        doPaymentResponseDto.setPaymentBrand((String) scriptContext.get(PaymentScript.RESULT_PAYMENT_BRAND));
+	        doPaymentResponseDto.setTokenId((String) scriptContext.get(PaymentScript.RESULT_TOKEN_ID));
+
+	        return doPaymentResponseDto;
+	}
 }

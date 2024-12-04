@@ -16,6 +16,7 @@ import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.service.communication.impl.EmailSender;
 import org.meveo.service.communication.impl.EmailTemplateService;
 
+
 public class ImportJobNotificationScript extends Script {
     private static final String USER_CODE = "user";
     private static final String FROM_EMAIL = ParamBean.getInstance().getProperty("email.sender", "no_reply@opencellsoft.com");

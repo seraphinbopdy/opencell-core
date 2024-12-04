@@ -6,11 +6,9 @@
 		<ui:include src="/layout/navigation.xhtml" />
 	</ui:define>
 
-	<ui:define name="metadata">
 		<f:metadata>
 			<f:event type="preRenderView" listener="#{creationInvoiceBean.preRenderView}" />
 		</f:metadata>
-	</ui:define>
 
 	<ui:define name="body">
 		<h:form id="crumbmenuForm1">
@@ -81,9 +79,9 @@
 										<hftl:column label="#{messages['invoice.amountWithoutTax']}" field="linkedInvoiceValue.amountWithoutTax" rendered="#{appProvider.entreprise}" />
 										<hftl:column label="#{messages['invoice.amountWithTax']}" field="linkedInvoiceValue.amountWithTax" rendered="#{!appProvider.entreprise}" />
 										<p:column width="20px;">
-											<p:commandButton icon="ui-icon-trash" action="#{creationInvoiceBean.deleteLinkedInvoice}" update=":formId:tabView:linkedInvoices :formId:tabView:ImportRTs">
+											<p:commandButton icon="pi pi-trash" action="#{creationInvoiceBean.deleteLinkedInvoice}" update=":formId:tabView:linkedInvoices :formId:tabView:ImportRTs">
 												<f:setPropertyActionListener value="#{entity}" target="#{creationInvoiceBean.selectedInvoice}" />
-												<p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert" />
+												<p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle" />
 											</p:commandButton>
 										</p:column>
 									</p:dataTable>
@@ -141,7 +139,7 @@
 								<p:tab id="subCatAggregate">
 									<f:facet name="title">
 										<h:outputText value="#{aSubCatInvAgregate.description}" />
-										<p:commandButton icon="ui-icon-trash" process=":formId:tabView:detailedInvoicePanel" action="#{creationInvoiceBean.deleteLinkedInvoiceCategoryDetaild}"
+										<p:commandButton icon="pi pi-trash" process=":formId:tabView:detailedInvoicePanel" action="#{creationInvoiceBean.deleteLinkedInvoiceCategoryDetaild}"
 											update=":formId:tabView:detailedInvoicePanel :formId:tabView:invoiceSummary" styleClass="noBorderBackground" style="margin-left:20px">
 											<f:setPropertyActionListener value="#{aSubCatInvAgregate}" target="#{creationInvoiceBean.selectedSubCategoryInvoiceAgregateDetaild}" />
 										</p:commandButton>
@@ -249,7 +247,7 @@
 											</f:facet>
 											<p:inputText value="#{rated.quantity}" size="8" label="#{messages['ratedTransaction.quantity']}">
 												<p:keyFilter mask="num" />
-												<p:ajax event="change" listener="#{creationInvoiceBean.reComputeAmounts(rated)}" update="#{p:component('subCatAggregate')} :formId:tabView:invoiceSummary"></p:ajax>
+												<p:ajax event="change" listener="#{creationInvoiceBean.reComputeAmounts(rated)}" update="@([id$=subCatAggregate]) :formId:tabView:invoiceSummary"></p:ajax>
 											</p:inputText>
 										</p:column>
 										<p:column width="5%" rendered="#{!creationInvoiceBean.detailedWithServices}">
@@ -304,7 +302,7 @@
 											<f:facet name="header">
 												<h:outputText value="#{messages['commons.actions']}" />
 											</f:facet>
-											<p:commandButton icon="ui-icon-trash" process=":formId:tabView:detailedInvoicePanel" action="#{creationInvoiceBean.deleteRatedTransactionLine}"
+											<p:commandButton icon="pi pi-trash" process=":formId:tabView:detailedInvoicePanel" action="#{creationInvoiceBean.deleteRatedTransactionLine}"
 												update=":formId:tabView:detailedInvoicePanel :formId:tabView:invoiceSummary">
 												<f:setPropertyActionListener value="#{rated}" target="#{creationInvoiceBean.selectedRatedTransaction}" />
 											</p:commandButton>
@@ -323,7 +321,7 @@
 								<p:tab>
 									<f:facet name="title">
 										<h:outputText value="#{entity.invoiceCategory.description}" />
-										<p:commandButton icon="ui-icon-trash" immediate="true" action="#{creationInvoiceBean.deleteLinkedInvoiceCategory}"
+										<p:commandButton icon="pi pi-trash" immediate="true" action="#{creationInvoiceBean.deleteLinkedInvoiceCategory}"
 											update=":formId:tabView:aggregatedInvoicePanel :formId:tabView:invoiceSummary" styleClass="noBorderBackground" style="margin-left:20px">
 											<f:setPropertyActionListener value="#{entity}" target="#{creationInvoiceBean.selectedCategoryInvoiceAgregate}" />
 										</p:commandButton>
@@ -363,7 +361,7 @@
 											</p:inputText>
 										</p:column>
 										<p:column>
-											<p:commandButton icon="ui-icon-trash" process=":formId:tabView:aggregatedInvoicePanel" action="#{creationInvoiceBean.deleteLinkedInvoiceSubCategory}"
+											<p:commandButton icon="pi pi-trash" process=":formId:tabView:aggregatedInvoicePanel" action="#{creationInvoiceBean.deleteLinkedInvoiceSubCategory}"
 												update=":formId:tabView:aggregatedInvoicePanel :formId:tabView:invoiceSummary">
 												<f:setPropertyActionListener value="#{subCat}" target="#{creationInvoiceBean.selectedSubCategoryInvoiceAgregate}" />
 											</p:commandButton>
@@ -537,7 +535,7 @@
 
 					<p:fieldset legend="Generate Invoice" style="float: left; width: 95%; margin-top: 10px;">
 						<p:outputPanel column="2" id="buttonGenerate">
-							<p:commandButton value="#{messages['invoice.generateDraft']}" icon="ui-icon-refresh" action="#{creationInvoiceBean.generateDraftInvoice()}"
+							<p:commandButton value="#{messages['invoice.generateDraft']}" icon="pi pi-refresh" action="#{creationInvoiceBean.generateDraftInvoice()}"
 								update=":formId:messages :formId:tabView:attachments buttonGenerate" process="@this" />
 						</p:outputPanel>
 

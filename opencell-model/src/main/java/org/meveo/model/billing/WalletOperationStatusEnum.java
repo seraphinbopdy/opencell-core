@@ -57,11 +57,11 @@ public enum WalletOperationStatusEnum {
      * It is a scheduled operation
      */
     SCHEDULED,
-	
-	/**
-	 * Rating scripts, Price calculation process... can reject a WalletOperation
-	 */
-	REJECTED;
+
+    /**
+     * Rating scripts, Price calculation process... can reject a WalletOperation
+     */
+    REJECTED;
 
     public String getLabel() {
         return this.getClass().getSimpleName() + "." + this.name();

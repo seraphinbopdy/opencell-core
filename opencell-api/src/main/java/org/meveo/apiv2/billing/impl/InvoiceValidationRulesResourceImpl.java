@@ -20,10 +20,10 @@ import org.meveo.service.billing.impl.InvoiceTypeService;
 import org.meveo.service.billing.impl.InvoiceValidationRulesService;
 import org.meveo.service.script.ScriptInstanceService;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.Response;
 
 import java.util.Objects;
 

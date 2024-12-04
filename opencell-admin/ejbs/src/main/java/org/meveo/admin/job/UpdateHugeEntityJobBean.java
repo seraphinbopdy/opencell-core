@@ -17,6 +17,14 @@
  */
 package org.meveo.admin.job;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.IEntity;
@@ -30,15 +38,8 @@ import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * A job implementation to update huge entity
@@ -69,7 +70,7 @@ public class UpdateHugeEntityJobBean extends IteratorBasedScopedJobBean<Map.Entr
             super.execute(jobExecutionResult, jobInstance, this::initJobAndGetDataToProcess, this::updateWithCheck, null, null, this::finalizeProcess);
         } else {
             batchEntityService.checkAndUpdateHugeEntity(jobExecutionResult);
-        }
+    }
     }
 
     private void finalizeProcess(JobExecutionResultImpl jobExecutionResult) {

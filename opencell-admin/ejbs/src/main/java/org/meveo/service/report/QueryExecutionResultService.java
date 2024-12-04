@@ -3,13 +3,13 @@ package org.meveo.service.report;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-
 import org.meveo.model.report.query.QueryExecutionResult;
 import org.meveo.model.report.query.ReportQuery;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
 @Stateless
 public class QueryExecutionResultService extends PersistenceService<QueryExecutionResult> {

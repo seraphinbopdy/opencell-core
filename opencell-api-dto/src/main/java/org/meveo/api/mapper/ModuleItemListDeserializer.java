@@ -1,16 +1,32 @@
 package org.meveo.api.mapper;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.meveo.api.dto.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.meveo.api.dto.BaseEntityDto;
+import org.meveo.api.dto.CustomEntityTemplateDto;
+import org.meveo.api.dto.CustomFieldTemplateDto;
+import org.meveo.api.dto.EntityCustomActionDto;
+import org.meveo.api.dto.FilterDto;
+import org.meveo.api.dto.ScriptInstanceDto;
 import org.meveo.api.dto.account.BusinessAccountModelDto;
-import org.meveo.api.dto.catalog.*;
+import org.meveo.api.dto.catalog.BundleTemplateDto;
+import org.meveo.api.dto.catalog.BusinessOfferModelDto;
+import org.meveo.api.dto.catalog.BusinessProductModelDto;
+import org.meveo.api.dto.catalog.BusinessServiceModelDto;
+import org.meveo.api.dto.catalog.CounterTemplateDto;
+import org.meveo.api.dto.catalog.OfferTemplateCategoryDto;
+import org.meveo.api.dto.catalog.OfferTemplateDto;
+import org.meveo.api.dto.catalog.OneShotChargeTemplateDto;
+import org.meveo.api.dto.catalog.PricePlanMatrixDto;
+import org.meveo.api.dto.catalog.ProductChargeTemplateDto;
+import org.meveo.api.dto.catalog.ProductTemplateDto;
+import org.meveo.api.dto.catalog.RecurringChargeTemplateDto;
+import org.meveo.api.dto.catalog.ServiceTemplateDto;
+import org.meveo.api.dto.catalog.UsageChargeTemplateDto;
 import org.meveo.api.dto.dwh.BarChartDto;
 import org.meveo.api.dto.dwh.LineChartDto;
 import org.meveo.api.dto.dwh.MeasurableQuantityDto;
@@ -26,11 +42,14 @@ import org.meveo.api.dto.payment.DDRequestBuilderDto;
 import org.meveo.api.dto.payment.PaymentGatewayDto;
 import org.meveo.api.dto.payment.WorkflowDto;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * A custom deserializer for list of ModuleItems

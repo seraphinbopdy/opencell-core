@@ -17,31 +17,33 @@
  */
 package org.meveo.model.catalog;
 
+import java.math.BigDecimal;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.EnableBusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ModuleItem;
 import org.meveo.model.ObservableEntity;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.math.BigDecimal;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Counter template/definition
@@ -54,13 +56,12 @@ import java.math.BigDecimal;
 @ObservableEntity
 @ExportIdentifier({ "code" })
 @Table(name = "cat_counter_template", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "cat_counter_template_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cat_counter_template_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
-        @NamedQuery(name = "counterTemplate.getNbrCounterWithNotService", query = "select count(*) from CounterTemplate c where c.id not in (select serv.counterTemplate from ServiceChargeTemplateUsage serv)", hints = {
+        @NamedQuery(name = "counterTemplate.getNbrCounterWithNotService", query = "select count(*) from CounterTemplate c where c.id not in (select serv.counterTemplate.id from ServiceChargeTemplateUsage serv)", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
 
-        @NamedQuery(name = "counterTemplate.getCounterWithNotService", query = "from CounterTemplate c where c.id not in (select serv.counterTemplate from ServiceChargeTemplateUsage serv) ") })
+        @NamedQuery(name = "counterTemplate.getCounterWithNotService", query = "select c from CounterTemplate c where c.id not in (select serv.counterTemplate.id from ServiceChargeTemplateUsage serv) ") })
 public class CounterTemplate extends EnableBusinessEntity {
 
     private static final long serialVersionUID = -1246995971618884001L;
@@ -126,7 +127,7 @@ public class CounterTemplate extends EnableBusinessEntity {
     /**
      * Check if is it an accumulator account.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_accumulator")
     private Boolean accumulator = Boolean.FALSE;
 
@@ -156,12 +157,11 @@ public class CounterTemplate extends EnableBusinessEntity {
     @Column(name = "value_el", length = 2000)
     @Size(max = 2000)
     private String valueEl;
-    
-    
+
     /**
      * The field can be disable/enable accumulator counter automatic application
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "managed_byapp")
     private boolean managedByApp = true;
 
@@ -239,6 +239,7 @@ public class CounterTemplate extends EnableBusinessEntity {
 
     /**
      * Gets the accumulator type multiple or single
+     * 
      * @return an accumulator counter type enum.
      */
     public AccumulatorCounterTypeEnum getAccumulatorType() {
@@ -247,6 +248,7 @@ public class CounterTemplate extends EnableBusinessEntity {
 
     /**
      * Sets the accumulator counter type.
+     * 
      * @param accumulatorType AccumulatorCounterTypeEnum
      */
     public void setAccumulatorType(AccumulatorCounterTypeEnum accumulatorType) {
@@ -255,6 +257,7 @@ public class CounterTemplate extends EnableBusinessEntity {
 
     /**
      * Gets the EL filter
+     * 
      * @return the EL Filter
      */
     public String getFilterEl() {
@@ -263,6 +266,7 @@ public class CounterTemplate extends EnableBusinessEntity {
 
     /**
      * Sets the EL filter
+     * 
      * @param filterEl
      */
     public void setFilterEl(String filterEl) {
@@ -271,6 +275,7 @@ public class CounterTemplate extends EnableBusinessEntity {
 
     /**
      * Gets the EL key expression
+     * 
      * @return the EL key expression
      */
     public String getKeyEl() {
@@ -279,6 +284,7 @@ public class CounterTemplate extends EnableBusinessEntity {
 
     /**
      * Sets EL key expression
+     * 
      * @param keyEl El key expression
      */
     public void setKeyEl(String keyEl) {
@@ -287,6 +293,7 @@ public class CounterTemplate extends EnableBusinessEntity {
 
     /**
      * Gets the EL value expression
+     * 
      * @return EL value expression
      */
     public String getValueEl() {
@@ -295,19 +302,19 @@ public class CounterTemplate extends EnableBusinessEntity {
 
     /**
      * Sets EL value expression
+     * 
      * @param valueEl EL value expression
      */
     public void setValueEl(String valueEl) {
         this.valueEl = valueEl;
     }
 
-	public boolean isManagedByApp() {
-		return managedByApp;
-	}
+    public boolean isManagedByApp() {
+        return managedByApp;
+    }
 
-	public void setManagedByApp(boolean managedByApp) {
-		this.managedByApp = managedByApp;
-	}
-    
-    
+    public void setManagedByApp(boolean managedByApp) {
+        this.managedByApp = managedByApp;
+    }
+
 }

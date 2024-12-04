@@ -1,22 +1,34 @@
 package org.meveo.model.securityDeposit;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
-import javax.persistence.*;
-import javax.validation.constraints.Digits;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.settings.OpenOrderSetting;
 
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Digits;
+
 @Entity
+@Cacheable
 @Table(name = "finance_settings")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "finance_settings_seq") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "finance_settings_seq"), @Parameter(name = "increment_size", value = "1") })
 public class FinanceSettings extends BusinessEntity {
 
     /**
@@ -24,7 +36,7 @@ public class FinanceSettings extends BusinessEntity {
      */
     private static final long serialVersionUID = -7662503000202423539L;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "use_security_deposit")
     private boolean useSecurityDeposit = false;
 
@@ -36,7 +48,7 @@ public class FinanceSettings extends BusinessEntity {
     @Digits(integer = NB_PRECISION, fraction = NB_DECIMALS)
     private BigDecimal maxAmountPerCustomer;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "auto_refund")
     private boolean autoRefund = false;
 
@@ -44,35 +56,35 @@ public class FinanceSettings extends BusinessEntity {
     @JoinColumn(name = "open_order_settings_id")
     private OpenOrderSetting openOrderSetting;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "activate_dunning")
     private boolean activateDunning = false;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "enable_billing_redirection_rules")
     private boolean enableBillingRedirectionRules = false;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "discount_advanced_mode")
     private boolean discountAdvancedMode = false;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "enable_price_list")
     private boolean enablePriceList = false;
 
-	@Column(name = "article_selection_mode")
-	@Enumerated(EnumType.STRING)
-	private ArticleSelectionModeEnum articleSelectionMode = ArticleSelectionModeEnum.AFTER_PRICING;
+    @Column(name = "article_selection_mode")
+    @Enumerated(EnumType.STRING)
+    private ArticleSelectionModeEnum articleSelectionMode = ArticleSelectionModeEnum.AFTER_PRICING;
 
-	@Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "entities_with_huge_volume", columnDefinition = "jsonb")
     private Map<String, HugeEntity> entitiesWithHugeVolume;
 
     @Column(name = "nb_partitions_keep")
     private Integer nbPartitionsToKeep;
 
-   @Column(name = "wo_partition_range_months")
-   private Integer woPartitionPeriod;
+    @Column(name = "wo_partition_range_months")
+    private Integer woPartitionPeriod;
 
     @Column(name = "rt_partition_range_months")
     private Integer rtPartitionPeriod;
@@ -83,34 +95,34 @@ public class FinanceSettings extends BusinessEntity {
     @Embedded
     private AuxiliaryAccounting auxiliaryAccounting;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "billing_run_process_warning")
     private boolean billingRunProcessWarning;
-    
+
     @Column(name = "synchronous_mass_action_limit")
     private Integer synchronousMassActionLimit = 10000;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "handle_framework_agreement")
     private boolean handleFrameworkAgreement = false;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "handle_invoice_plan")
     private boolean handleInvoicingPlans = false;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "handle_accounting_periods")
     private boolean handleAccountingPeriods = false;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "enable_empty_subscription_activation")
     private boolean enableEmptySubscriptionActivation;
-    
-    @Type(type = "numeric_boolean")
+
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "enable_quotes_feature")
     private boolean enableQuotesFeature = false;
-    
-    @Type(type = "numeric_boolean")
+
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "display_counters")
     private boolean displayCounters = false;
 
@@ -186,41 +198,42 @@ public class FinanceSettings extends BusinessEntity {
     public boolean isEnableBillingRedirectionRules() {
         return enableBillingRedirectionRules;
     }
+
     public void setEnableBillingRedirectionRules(boolean enableBillingRedirectionRules) {
         this.enableBillingRedirectionRules = enableBillingRedirectionRules;
     }
 
-	public boolean isDiscountAdvancedMode() {
-		return discountAdvancedMode;
-	}
+    public boolean isDiscountAdvancedMode() {
+        return discountAdvancedMode;
+    }
 
-	public void setDiscountAdvancedMode(boolean discountAdvancedMode) {
-		this.discountAdvancedMode = discountAdvancedMode;
-	}
+    public void setDiscountAdvancedMode(boolean discountAdvancedMode) {
+        this.discountAdvancedMode = discountAdvancedMode;
+    }
 
-	public boolean isEnablePriceList() {
-		return enablePriceList;
-	}
+    public boolean isEnablePriceList() {
+        return enablePriceList;
+    }
 
-	public void setEnablePriceList(boolean enablePriceList) {
-		this.enablePriceList = enablePriceList;
-	}
+    public void setEnablePriceList(boolean enablePriceList) {
+        this.enablePriceList = enablePriceList;
+    }
 
-	public ArticleSelectionModeEnum getArticleSelectionMode() {
-		return articleSelectionMode;
-	}
+    public ArticleSelectionModeEnum getArticleSelectionMode() {
+        return articleSelectionMode;
+    }
 
-	public void setArticleSelectionMode(ArticleSelectionModeEnum articleSelectionMode) {
-		this.articleSelectionMode = articleSelectionMode;
-	}
+    public void setArticleSelectionMode(ArticleSelectionModeEnum articleSelectionMode) {
+        this.articleSelectionMode = articleSelectionMode;
+    }
 
-	public Map<String, HugeEntity> getEntitiesWithHugeVolume() {
-		return entitiesWithHugeVolume;
-	}
+    public Map<String, HugeEntity> getEntitiesWithHugeVolume() {
+        return entitiesWithHugeVolume;
+    }
 
-	public void setEntitiesWithHugeVolume(Map<String, HugeEntity> entitiesWithHugeVolume) {
-		this.entitiesWithHugeVolume = entitiesWithHugeVolume;
-	}
+    public void setEntitiesWithHugeVolume(Map<String, HugeEntity> entitiesWithHugeVolume) {
+        this.entitiesWithHugeVolume = entitiesWithHugeVolume;
+    }
 
     public boolean isBillingRunProcessWarning() {
         return billingRunProcessWarning;
@@ -238,13 +251,13 @@ public class FinanceSettings extends BusinessEntity {
         this.nbPartitionsToKeep = nbPartitionsToKeep;
     }
 
-	public Integer getSynchronousMassActionLimit() {
-		return synchronousMassActionLimit;
-	}
+    public Integer getSynchronousMassActionLimit() {
+        return synchronousMassActionLimit;
+    }
 
-	public void setSynchronousMassActionLimit(Integer synchronousMassActionLimit) {
-		this.synchronousMassActionLimit = synchronousMassActionLimit;
-	}
+    public void setSynchronousMassActionLimit(Integer synchronousMassActionLimit) {
+        this.synchronousMassActionLimit = synchronousMassActionLimit;
+    }
 
     public Integer getWoPartitionPeriod() {
         return woPartitionPeriod;
@@ -302,20 +315,20 @@ public class FinanceSettings extends BusinessEntity {
         this.enableEmptySubscriptionActivation = enableEmptySubscriptionActivation;
     }
 
-	public boolean isEnableQuotesFeature() {
-		return enableQuotesFeature;
-	}
+    public boolean isEnableQuotesFeature() {
+        return enableQuotesFeature;
+    }
 
-	public void setEnableQuotesFeature(boolean enableQuotesFeature) {
-		this.enableQuotesFeature = enableQuotesFeature;
-	}
+    public void setEnableQuotesFeature(boolean enableQuotesFeature) {
+        this.enableQuotesFeature = enableQuotesFeature;
+    }
 
-	public boolean isDisplayCounters() {
-		return displayCounters;
-	}
+    public boolean isDisplayCounters() {
+        return displayCounters;
+    }
 
-	public void setDisplayCounters(boolean displayCounters) {
-		this.displayCounters = displayCounters;
-	}
-    
+    public void setDisplayCounters(boolean displayCounters) {
+        this.displayCounters = displayCounters;
+    }
+
 }

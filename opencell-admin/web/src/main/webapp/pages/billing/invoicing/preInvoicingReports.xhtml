@@ -5,11 +5,9 @@
 	template="/layout/template.xhtml" xmlns:p="http://primefaces.org/ui"
 	xmlns:e="http://jboss.com/products/seam/excel">
 
-    <ui:define name="metadata">
         <f:metadata>
             <f:viewParam name="objectId" value="#{billingRunBean.objectId}" />
         </f:metadata>
-    </ui:define>
 
 	<ui:define name="body">
 		<h:form id="crumbmenuForm">
@@ -139,7 +137,7 @@
 				<p:button id="backButton" value="#{messages['action.back']}"
 					outcome="billingRuns" includeViewParams="true" immediate="true" process="@this">
 					<f:param name="cid"
-						value="#{javax.enterprise.context.conversation.id}" />
+						value="#{jakarta.enterprise.context.conversation.id}" />
 				</p:button>
 			</ui:define>
 			

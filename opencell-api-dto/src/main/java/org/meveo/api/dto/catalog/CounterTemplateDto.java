@@ -18,19 +18,20 @@
 
 package org.meveo.api.dto.catalog;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+
 import org.meveo.api.dto.EnableBusinessDto;
 import org.meveo.model.catalog.AccumulatorCounterTypeEnum;
 import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.catalog.CounterTemplateLevel;
 import org.meveo.model.catalog.CounterTypeEnum;
 
-import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
-import java.math.BigDecimal;
+import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class CounterTemplateDto.

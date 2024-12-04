@@ -18,6 +18,7 @@
 package org.meveo.model.billing;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -26,35 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.Size;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.CustomFieldEntity;
@@ -85,6 +63,31 @@ import org.meveo.model.payments.PaymentScheduleInstance;
 import org.meveo.model.quote.QuoteProduct;
 import org.meveo.model.shared.DateUtils;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
+
 /**
  * Service subscribed to.
  *
@@ -96,11 +99,10 @@ import org.meveo.model.shared.DateUtils;
 @Entity
 @WorkflowedEntity
 @ObservableEntity
-@CustomFieldEntity(cftCodePrefix = "ServiceInstance", inheritCFValuesFrom = {"productVersion.product", "serviceTemplate"})
+@CustomFieldEntity(cftCodePrefix = "ServiceInstance", inheritCFValuesFrom = { "productVersion.product", "serviceTemplate" })
 @Table(name = "billing_service_instance")
 @AttributeOverrides({ @AttributeOverride(name = "code", column = @Column(name = "code", unique = false)) })
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_service_instance_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_service_instance_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
         @NamedQuery(name = "ServiceInstance.getExpired", query = "select s.id from ServiceInstance s where s.subscription.status in (:subscriptionStatuses) AND s.subscribedTillDate is not null and s.subscribedTillDate<=:date and s.status in (:statuses)"),
         @NamedQuery(name = "ServiceInstance.findByServiceCodeAndSubscriptionCodeAndValidity", query = "select s from ServiceInstance s where lower(s.code) = :code and lower(s.subscription.code) = :subscriptionCode AND (s.subscription.validity is null or (s.subscription.validity.from <= :subscriptionValidityDate and  (s.subscription.validity.to is null or :subscriptionValidityDate < s.subscription.validity.to)))"),
@@ -115,7 +117,7 @@ import org.meveo.model.shared.DateUtils;
         @NamedQuery(name = "ServiceInstance.getPendingToActivate", query = "select s.id from ServiceInstance s where s.subscription.status in (:subscriptionStatuses) AND s.subscriptionDate is not null and s.subscriptionDate<:date and s.status in (:statuses)"),
         @NamedQuery(name = "ServiceInstance.listActiveRecurrentServiceInstances", query = "select s from ServiceInstance s where s.status = org.meveo.model.billing.InstanceStatusEnum.ACTIVE and s.serviceRenewal.initialTermType =  org.meveo.model.billing.SubscriptionRenewal$InitialTermTypeEnum.RECURRING"),
 })
-public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinimumApplicable,IWFEntity, ICounterEntity, IDiscountable  {
+public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinimumApplicable, IWFEntity, ICounterEntity, IDiscountable {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1L;
@@ -141,8 +143,7 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     private QuoteProduct quoteProduct;
 
     /**
-     * Calendar to use when creating Wallet operations. Service subscription start date is taken as calendar's initiation date. Invoicing calendar to calculate if operation should
-     * be invoiced on an future date.
+     * Calendar to use when creating Wallet operations. Service subscription start date is taken as calendar's initiation date. Invoicing calendar to calculate if operation should be invoiced on an future date.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoicing_calendar_id")
@@ -180,22 +181,22 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     private Date reactivationDate;
 
     /** If true, end of agreement date will be extended automatically till subscribedTillDate field. */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "auto_end_of_engagement")
     private Boolean autoEndOfEngagement = Boolean.FALSE;
 
-	/**
-	 * status of product type of {@link PriceVersionDateSettingEnum}
-	 */
-	@Column(name = "price_version_date_setting")
-	@Enumerated(EnumType.STRING)
-	private PriceVersionDateSettingEnum priceVersionDateSetting;
+    /**
+     * status of product type of {@link PriceVersionDateSettingEnum}
+     */
+    @Column(name = "price_version_date_setting")
+    @Enumerated(EnumType.STRING)
+    private PriceVersionDateSettingEnum priceVersionDateSetting;
 
     /** price Version Date timestamp. */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "price_version_date")
     private Date priceVersionDate;
-    
+
     /**
      * Charges instances associated with a service instance
      */
@@ -229,8 +230,7 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     private String orderNumber;
 
     /**
-     * Create Wallet operations and Rated transactions upon service subscription only to this date. Later RT jobs needs to be run to create the remaining Wallet operations and
-     * Rated transactions.
+     * Create Wallet operations and Rated transactions upon service subscription only to this date. Later RT jobs needs to be run to create the remaining Wallet operations and Rated transactions.
      */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "rate_until_date")
@@ -245,7 +245,7 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     @Column(name = "minimum_label_el", length = 2000)
     @Size(max = 2000)
     private String minimumLabelEl;
-    
+
     /** Corresponding to minimum invoice subcategory */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "minimum_invoice_sub_category_id")
@@ -297,7 +297,7 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
 
     /** Was service renewed. */
     @AuditTarget(type = AuditChangeTypeEnum.RENEWAL, history = true, notif = true)
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "renewed")
     private boolean renewed;
 
@@ -323,11 +323,11 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     /**
      * Initial service renewal configuration
      */
-    @Type(type = "longText")
+    @JdbcTypeCode(Types.LONGVARCHAR)
     @Column(name = "initial_renewal")
     private String initialServiceRenewal;
 
-    @OneToMany(mappedBy = "serviceInstance", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "serviceInstance", cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<AttributeInstance> attributeInstances = new ArrayList<>();
 
     /**
@@ -336,7 +336,7 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "minimum_article_id")
     private AccountingArticle minimumArticle;
-    
+
     /** Delivery timestamp. */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "delivery_date")
@@ -363,11 +363,10 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
 
     @Transient
     private List<UsageChargeInstance> usageChargeInstances;
-    
 
     @OneToMany(mappedBy = "serviceInstance", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiscountPlanInstance> discountPlanInstances = new ArrayList<>();
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_product_id")
     private OrderProduct orderProduct;
@@ -1013,36 +1012,36 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     public void setAutoEndOfEngagement(Boolean autoEndOfEngagement) {
         this.autoEndOfEngagement = autoEndOfEngagement;
     }
-    
+
     /**
      * @return the priceVersionDateSetting
      */
     public PriceVersionDateSettingEnum getPriceVersionDateSetting() {
-		return priceVersionDateSetting;
-	}
+        return priceVersionDateSetting;
+    }
 
-	/**
-	 * @param priceVersionDateSetting to set priceVersionDateSetting
-	 */
-	public void setPriceVersionDateSetting(PriceVersionDateSettingEnum priceVersionDateSetting) {
-		this.priceVersionDateSetting = priceVersionDateSetting;
-	}
+    /**
+     * @param priceVersionDateSetting to set priceVersionDateSetting
+     */
+    public void setPriceVersionDateSetting(PriceVersionDateSettingEnum priceVersionDateSetting) {
+        this.priceVersionDateSetting = priceVersionDateSetting;
+    }
 
-	/**
-	 * @return the priceVersionDate
-	 */
-	public Date getPriceVersionDate() {
-		return priceVersionDate;
-	}
+    /**
+     * @return the priceVersionDate
+     */
+    public Date getPriceVersionDate() {
+        return priceVersionDate;
+    }
 
-	/**
-	 * @param priceVersionDate to set priceVersionDate
-	 */
-	public void setPriceVersionDate(Date priceVersionDate) {
-		this.priceVersionDate = priceVersionDate;
-	}
+    /**
+     * @param priceVersionDate to set priceVersionDate
+     */
+    public void setPriceVersionDate(Date priceVersionDate) {
+        this.priceVersionDate = priceVersionDate;
+    }
 
-	/**
+    /**
      * Gets the amount PS.
      *
      * @return the amountPS
@@ -1151,8 +1150,6 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
         this.counters = counters;
     }
 
-    
-    
     /**
      * @return the minimumInvoiceSubCategory
      */
@@ -1169,6 +1166,7 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
 
     /**
      * Gets the charge template used in minimum amount.
+     * 
      * @return a one Shot Charge template
      */
     public OneShotChargeTemplate getMinimumChargeTemplate() {
@@ -1177,6 +1175,7 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
 
     /**
      * Sets the minimum amount charge template.
+     * 
      * @param minimumChargeTemplate a one Shot Charge template
      */
     public void setMinimumChargeTemplate(OneShotChargeTemplate minimumChargeTemplate) {
@@ -1197,65 +1196,60 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
         this.chargeInstances = chargeInstances;
     }
 
-
+    /**
+     * @return the attributeInstances
+     */
+    public List<AttributeInstance> getAttributeInstances() {
+        return attributeInstances;
+    }
 
     /**
-	 * @return the attributeInstances
-	 */
-	public List<AttributeInstance> getAttributeInstances() {
-		return attributeInstances;
-	}
+     * @param attributeInstances the attributeInstances to set
+     */
+    public void setAttributeInstances(List<AttributeInstance> attributeInstances) {
+        this.attributeInstances = attributeInstances;
+    }
 
-	/**
-	 * @param attributeInstances the attributeInstances to set
-	 */
-	public void setAttributeInstances(List<AttributeInstance> attributeInstances) {
-		this.attributeInstances = attributeInstances;
-	}
+    public void addAttributeInstance(AttributeInstance attributeInstance) {
+        attributeInstances = attributeInstances != null ? attributeInstances : new ArrayList<>();
+        if (attributeInstance != null) {
+            attributeInstances.add(attributeInstance);
+        }
 
-	public void addAttributeInstance(AttributeInstance attributeInstance) {
-		attributeInstances=attributeInstances!=null?attributeInstances:new ArrayList<>();
-		if(attributeInstance!=null) {
-			attributeInstances.add(attributeInstance);
-		}
-
-	}
-
-
-
-	/**
-	 * @return the product
-	 */
-	public ProductVersion getProductVersion() {
-		return productVersion;
-	}
-
-	/**
-	 * @param product the product to set
-	 */
-	public void setProductVersion(ProductVersion productVersion) {
-		this.productVersion = productVersion;
-	}
-
-
-
-	/**
-	 * @return the quoteProduct
-	 */
-	public QuoteProduct getQuoteProduct() {
-		return quoteProduct;
-	}
-
-	/**
-	 * @param quoteProduct the quoteProduct to set
-	 */
-	public void setQuoteProduct(QuoteProduct quoteProduct) {
-		this.quoteProduct = quoteProduct;
-	}
-
-	/**
+    }
 
     /**
+     * @return the product
+     */
+    public ProductVersion getProductVersion() {
+        return productVersion;
+    }
+
+    /**
+     * @param product the product to set
+     */
+    public void setProductVersion(ProductVersion productVersion) {
+        this.productVersion = productVersion;
+    }
+
+    /**
+     * @return the quoteProduct
+     */
+    public QuoteProduct getQuoteProduct() {
+        return quoteProduct;
+    }
+
+    /**
+     * @param quoteProduct the quoteProduct to set
+     */
+    public void setQuoteProduct(QuoteProduct quoteProduct) {
+        this.quoteProduct = quoteProduct;
+    }
+
+    /**
+     * 
+     * /**
+     * 
      * @return the ratedTransactions
      */
     public List<RatedTransaction> getRatedTransactions() {
@@ -1303,48 +1297,47 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     }
 
     public ServiceCharge getServiceCharge() {
-        return serviceTemplate != null ? serviceTemplate : productVersion.getProduct();
+        return serviceTemplate != null ? serviceTemplate :  productVersion.getProduct(); 
     }
 
     public void clearTransientSubscriptionChargeInstance() {
-        this.subscriptionChargeInstances = getSubscriptionChargeInstances().stream()
-                .filter(ch -> ch.getId() != null)
-                .collect(Collectors.toList());
+        this.subscriptionChargeInstances = getSubscriptionChargeInstances().stream().filter(ch -> ch.getId() != null).collect(Collectors.toList());
     }
 
-	public Date getDeliveryDate() {
-		return deliveryDate;
-	}
+    public Date getDeliveryDate() {
+        return deliveryDate;
+    }
 
-	public void setDeliveryDate(Date deliveryDate) {
-		this.deliveryDate = deliveryDate;
-	}
-	
-	public Date getActivationDate() {
-		if(InstanceStatusEnum.ACTIVE.equals(status)) {
-			return statusDate;
-		}
-		return null;
-	}
-	public List<DiscountPlanInstance> getDiscountPlanInstances() {
-		return discountPlanInstances;
-	}
+    public void setDeliveryDate(Date deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
 
-	public void setDiscountPlanInstances(List<DiscountPlanInstance> discountPlanInstance) {
-		this.discountPlanInstances = discountPlanInstance;
-	}
+    public Date getActivationDate() {
+        if (InstanceStatusEnum.ACTIVE.equals(status)) {
+            return statusDate;
+        }
+        return null;
+    }
+
+    public List<DiscountPlanInstance> getDiscountPlanInstances() {
+        return discountPlanInstances;
+    }
+
+    public void setDiscountPlanInstances(List<DiscountPlanInstance> discountPlanInstance) {
+        this.discountPlanInstances = discountPlanInstance;
+    }
 
     public OrderProduct getOrderProduct() {
-		return orderProduct;
-	}
+        return orderProduct;
+    }
 
-	public void setOrderProduct(OrderProduct orderProduct) {
-		this.orderProduct = orderProduct;
-	}
-    
+    public void setOrderProduct(OrderProduct orderProduct) {
+        this.orderProduct = orderProduct;
+    }
+
     
 
-	@Override
+    @Override
     public List<DiscountPlanInstance> getAllDiscountPlanInstances() {
         return this.getDiscountPlanInstances();
     }
@@ -1356,13 +1349,13 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
         }
         this.getDiscountPlanInstances().add(discountPlanInstance);
     }
-    
+
     @Override
     public Seller getSeller() {
-    	if(subscription==null) {
-    		return null;
-    	}
-    	return subscription.getSeller();
+        if (subscription == null) {
+            return null;
+        }
+        return subscription.getSeller();
     }
 
     public BigDecimal getMrr() {

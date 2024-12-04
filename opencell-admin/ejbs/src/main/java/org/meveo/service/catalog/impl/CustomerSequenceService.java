@@ -18,12 +18,12 @@
 
 package org.meveo.service.catalog.impl;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.model.crm.CustomerSequence;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.billing.impl.ServiceSingleton;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * Service for managing customer sequence entity.

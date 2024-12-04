@@ -5,32 +5,31 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.cpq.enums.OperatorEnum;
 import org.meveo.model.scripts.ScriptInstance;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "billing_invoice_validation_rule", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_invoice_validation_rule_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_invoice_validation_rule_seq"), @Parameter(name = "increment_size", value = "1") })
 public class InvoiceValidationRule extends BusinessEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -63,8 +62,8 @@ public class InvoiceValidationRule extends BusinessEntity {
 
     @Column(name = "validation_el")
     private String validationEL;
-    
-    @Type(type = "json")
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "rule_values", columnDefinition = "jsonb")
     private Map<String, String> ruleValues;
 
@@ -72,18 +71,18 @@ public class InvoiceValidationRule extends BusinessEntity {
     @Enumerated(EnumType.STRING)
     @NotNull
     private EvaluationModeEnum evaluationMode = EvaluationModeEnum.VALIDATION;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "operator")
     private OperatorEnum operator = OperatorEnum.OR;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private InvoiceValidationRule parentRule;
-    
+
     @OneToMany(mappedBy = "parentRule", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceValidationRule> subRules = new ArrayList<>();
-    
+
     @Transient
     private boolean toReorder;
 
@@ -151,21 +150,21 @@ public class InvoiceValidationRule extends BusinessEntity {
         this.failStatus = failStatus;
     }
 
-	public Map<String, String> getRuleValues() {
-		return ruleValues;
-	}
+    public Map<String, String> getRuleValues() {
+        return ruleValues;
+    }
 
-	public void setRuleValues(Map<String, String> ruleValues) {
-		this.ruleValues = ruleValues;
-	}
+    public void setRuleValues(Map<String, String> ruleValues) {
+        this.ruleValues = ruleValues;
+    }
 
-	public boolean isToReorder() {
-		return toReorder;
-	}
+    public boolean isToReorder() {
+        return toReorder;
+    }
 
-	public void setToReorder(boolean toReorder) {
-		this.toReorder = toReorder;
-	}
+    public void setToReorder(boolean toReorder) {
+        this.toReorder = toReorder;
+    }
 
     public EvaluationModeEnum getEvaluationMode() {
         return evaluationMode;
@@ -175,28 +174,28 @@ public class InvoiceValidationRule extends BusinessEntity {
         this.evaluationMode = evaluationMode;
     }
 
-	public OperatorEnum getOperator() {
-		return operator;
-	}
+    public OperatorEnum getOperator() {
+        return operator;
+    }
 
-	public void setOperator(OperatorEnum operator) {
-		this.operator = operator;
-	}
+    public void setOperator(OperatorEnum operator) {
+        this.operator = operator;
+    }
 
-	public InvoiceValidationRule getParentRule() {
-		return parentRule;
-	}
+    public InvoiceValidationRule getParentRule() {
+        return parentRule;
+    }
 
-	public void setParentRule(InvoiceValidationRule parentRule) {
-		this.parentRule = parentRule;
-	}
+    public void setParentRule(InvoiceValidationRule parentRule) {
+        this.parentRule = parentRule;
+    }
 
-	public List<InvoiceValidationRule> getSubRules() {
-		return subRules;
-	}
+    public List<InvoiceValidationRule> getSubRules() {
+        return subRules;
+    }
 
-	public void setSubRules(List<InvoiceValidationRule> subRules) {
-		this.subRules = subRules;
-	}
-    
+    public void setSubRules(List<InvoiceValidationRule> subRules) {
+        this.subRules = subRules;
+    }
+
 }

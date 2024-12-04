@@ -31,30 +31,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Embedded;
-import javax.persistence.Enumerated;
-import javax.persistence.Inheritance;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderColumn;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-
 import org.apache.commons.io.FileUtils;
 import org.hibernate.annotations.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -71,15 +53,34 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.resolution.TypeSolver;
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserClassDeclaration;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserFieldDeclaration;
-import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Produces data/DB model documentation by parsing source files
@@ -103,7 +104,7 @@ public class DbModelDocs {
         combinedSolver.add(reflectionTypeSolver);
         combinedSolver.add(javaParserTypeSolver);
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedSolver);
-        JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
+        StaticJavaParser.getParserConfiguration().setSymbolResolver(symbolSolver);
 
         new File(outputDir).mkdirs();
 
@@ -124,7 +125,7 @@ public class DbModelDocs {
             // Parse sources to determine DB tables and their fields
             for (File file : files) {
 
-                CompilationUnit cu = JavaParser.parse(file);
+                CompilationUnit cu = StaticJavaParser.parse(file);
 
                 // Parse class. If class is of no interest - does not have a table- do not set a classname value and it will be disregarded
                 DBTable dbTable = new DBTable();
@@ -207,14 +208,16 @@ public class DbModelDocs {
 
                 // Inspect parent classes and add fields if applicable
                 for (ClassOrInterfaceType extendsFromType : cd.getExtendedTypes()) {
-                    
-                    ResolvedReferenceType resolvedSuperClass = extendsFromType.resolve();
+
+                    ResolvedReferenceType resolvedSuperClass = (ResolvedReferenceType) extendsFromType.resolve();
+
+                    ResolvedReferenceTypeDeclaration superClassTypeDeclaration = resolvedSuperClass.getTypeDeclaration().get();
 
                     // Need to check if parent entity has fields in a separate or same table
                     // Covers Inheritance.JOINED inheritance strategy
-                    if (resolvedSuperClass.getTypeDeclaration() instanceof JavaParserClassDeclaration) {
+                    if (superClassTypeDeclaration instanceof JavaParserClassDeclaration) {
 
-                        JavaParserClassDeclaration parentClassDeclaration = (JavaParserClassDeclaration) resolvedSuperClass.getTypeDeclaration();
+                        JavaParserClassDeclaration parentClassDeclaration = (JavaParserClassDeclaration) superClassTypeDeclaration;
                         Optional<AnnotationExpr> inheritanceAnnotation = parentClassDeclaration.getWrappedNode().getAnnotationByClass(Inheritance.class);
 
                         if (inheritanceAnnotation.isPresent()) {
@@ -236,7 +239,7 @@ public class DbModelDocs {
                             }
                         } catch (Exception e) {
                             log.error("Failed to resolve parent class fields for " + extendsFromType);
-                            
+
                         }
 
                     } catch (Exception e) {
@@ -248,20 +251,19 @@ public class DbModelDocs {
                     dbTable.setComment(cd.getComment().get().toString());
                 }
 
-                
-
                 // Supplements a parent table with inheritance.SINGLE type of inheritance. Fields will be added to parent table in later iteration.
             } else if (cd.isAnnotationPresent("DiscriminatorValue")) {
 
                 // Inspect parent classes and add fields if applicable
                 for (ClassOrInterfaceType extendsFromType : cd.getExtendedTypes()) {
-                    
-                    ResolvedReferenceType resolvedSuperClass = extendsFromType.resolve();
+
+                    ResolvedReferenceType resolvedSuperClass = (ResolvedReferenceType) extendsFromType.resolve();
+                    ResolvedReferenceTypeDeclaration superClassTypeDeclaration = resolvedSuperClass.getTypeDeclaration().get();
 
                     // Find a parent class that has fields in the same table
-                    if (resolvedSuperClass.getTypeDeclaration() instanceof JavaParserClassDeclaration) {
+                    if (superClassTypeDeclaration instanceof JavaParserClassDeclaration) {
 
-                        JavaParserClassDeclaration parentClassDeclaration = (JavaParserClassDeclaration) resolvedSuperClass.getTypeDeclaration();
+                        JavaParserClassDeclaration parentClassDeclaration = (JavaParserClassDeclaration) superClassTypeDeclaration;
                         Optional<AnnotationExpr> inheritanceAnnotation = parentClassDeclaration.getWrappedNode().getAnnotationByClass(Inheritance.class);
 
                         if (inheritanceAnnotation.isPresent()) {
@@ -367,12 +369,12 @@ public class DbModelDocs {
                                 overridenFields.put(fieldname, new DBField(fieldname, dbFieldname, null, null, null, isNullable));
                             }
 
-                            ResolvedReferenceType resolvedReferencedClass = referencedType.resolve();
+                            ResolvedReferenceType resolvedReferencedClass = (ResolvedReferenceType) referencedType.resolve();
+                            ResolvedReferenceTypeDeclaration referencedClassTypeDeclaration = resolvedReferencedClass.getTypeDeclaration().get();
 
                             // Extract fields from referenced class and add comments, data types and default values to overriden column definitions
-                            if (resolvedReferencedClass.getTypeDeclaration() instanceof JavaParserClassDeclaration) {
-                                ClassOrInterfaceDeclaration referencedClassDeclaration = ((JavaParserClassDeclaration) resolvedReferencedClass.getTypeDeclaration())
-                                    .getWrappedNode();
+                            if (referencedClassTypeDeclaration instanceof JavaParserClassDeclaration) {
+                                ClassOrInterfaceDeclaration referencedClassDeclaration = ((JavaParserClassDeclaration) referencedClassTypeDeclaration).getWrappedNode();
 
                                 DBTable referencedTable = new DBTable();
                                 fieldVisitor.visit(referencedClassDeclaration, referencedTable);
@@ -454,8 +456,7 @@ public class DbModelDocs {
                     extraTable.fields.add(new DBField("", inverseJoinColumnName, "Long", null, relatedEntityClassname + " identifier", false));
 
                     if (fd.isAnnotationPresent(OrderColumn.class)) {
-                        extraTable.fields
-                            .add(new DBField("", getStringParameter(fd.getAnnotationByClass(OrderColumn.class).get(), "name"), "Integer", null, "Ordering number sequence", false));
+                        extraTable.fields.add(new DBField("", getStringParameter(fd.getAnnotationByClass(OrderColumn.class).get(), "name"), "Integer", null, "Ordering number sequence", false));
                     }
                     return;
 
@@ -538,7 +539,7 @@ public class DbModelDocs {
                         dbTable.addUniqueFields(embeddedTable.fields);
 
                     } catch (Exception e) {
-                        
+
                         if (dbTable.failedEmbeddedTypes == null) {
                             dbTable.failedEmbeddedTypes = new ArrayList<>();
                         }
@@ -568,8 +569,6 @@ public class DbModelDocs {
                     dbField.nullable = false;
                 }
 
-                
-
                 dbField.setFieldname(variableName);
                 if (dbField.dbFieldType == null) {
                     dbField.setDbFieldType(vd.getTypeAsString());
@@ -597,13 +596,11 @@ public class DbModelDocs {
 
                 dbTable.fields.add(dbField);
 
-                
-
             } catch (
 
             Exception e) {
                 log.error("Failed to process " + dbTable.classname + " field " + fd.toString());
-              
+
                 throw e;
             }
         }
@@ -701,8 +698,7 @@ public class DbModelDocs {
         public List<String> failedEmbeddedTypes = null;
 
         /**
-         * Is this an embedded entity definition. In this case tablename will be null. Fields will be appended to the entities where failedEmbeddedTypes match the classname value
-         * of embedded entity.
+         * Is this an embedded entity definition. In this case tablename will be null. Fields will be appended to the entities where failedEmbeddedTypes match the classname value of embedded entity.
          */
         public boolean isEmbedded = false;
 
@@ -745,7 +741,7 @@ public class DbModelDocs {
          * Add fields that are not present yet
          * 
          * @param fieldsToAdd Fields to add
-         * @throws Exception 
+         * @throws Exception
          */
         public void addUniqueFields(List<DBField> fieldsToAdd) throws Exception {
 
@@ -930,8 +926,8 @@ public class DbModelDocs {
          * @return HTML table row
          */
         public String toHtml() {
-            return "<tr><td>" + fieldname + "</td><td>" + dbFieldname + "</td><td>" + dbFieldType + "</td><td>" + (dbFieldDefaultValue != null ? dbFieldDefaultValue : "")
-                    + "</td><td>" + (!nullable ? "yes" : "") + "</td><td>" + (comment != null ? comment : "") + "</td></tr>";
+            return "<tr><td>" + fieldname + "</td><td>" + dbFieldname + "</td><td>" + dbFieldType + "</td><td>" + (dbFieldDefaultValue != null ? dbFieldDefaultValue : "") + "</td><td>" + (!nullable ? "yes" : "")
+                    + "</td><td>" + (comment != null ? comment : "") + "</td></tr>";
         }
     }
 

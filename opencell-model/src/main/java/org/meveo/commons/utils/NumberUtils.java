@@ -82,20 +82,20 @@ public class NumberUtils {
         return minuend.subtract(subtrahend);
     }
 
-    public static BigDecimal getInChargeUnit(BigDecimal unitValue,ChargeTemplate chargeTemplate) {
-    	
-        BigDecimal unitMultiplicator=chargeTemplate.getUnitMultiplicator();
-		if (unitMultiplicator == null) {
+    public static BigDecimal getInChargeUnit(BigDecimal unitValue, ChargeTemplate chargeTemplate) {
+
+        BigDecimal unitMultiplicator = chargeTemplate.getUnitMultiplicator();
+        if (unitMultiplicator == null) {
             unitMultiplicator = BigDecimal.ONE;
         }
-        int unitNbDecimal=chargeTemplate.getUnitNbDecimal();
-		if (unitNbDecimal == 0) {
+        int unitNbDecimal = chargeTemplate.getUnitNbDecimal();
+        if (unitNbDecimal == 0) {
             unitNbDecimal = 2;
         }
 
         BigDecimal result = unitValue.multiply(unitMultiplicator);
         RoundingModeEnum roundingMode = chargeTemplate.getRoundingMode();
-		result = result.setScale(unitNbDecimal, roundingMode.getRoundingMode());
+        result = result.setScale(unitNbDecimal, roundingMode.getRoundingMode());
         return result;
     }
 
@@ -192,14 +192,13 @@ public class NumberUtils {
 
         return new BigDecimal[] { amountWithoutTax, amountWithTax, amountTax };
     }
-    
-	public static BigDecimal computeTax(BigDecimal amountWithoutTax, BigDecimal taxPercent, int rounding,
-			RoundingMode roundingMode) {
-		taxPercent = taxPercent != null ? taxPercent : BigDecimal.ZERO;
-		amountWithoutTax.setScale(rounding, roundingMode);
-		BigDecimal tax = amountWithoutTax.multiply(taxPercent).divide(new BigDecimal(100), rounding, roundingMode);
-		return tax;
-	}
+
+    public static BigDecimal computeTax(BigDecimal amountWithoutTax, BigDecimal taxPercent, int rounding, RoundingMode roundingMode) {
+        taxPercent = taxPercent != null ? taxPercent : BigDecimal.ZERO;
+        amountWithoutTax.setScale(rounding, roundingMode);
+        BigDecimal tax = amountWithoutTax.multiply(taxPercent).divide(new BigDecimal(100), rounding, roundingMode);
+        return tax;
+    }
 
     public static long parseLongDefault(String value, long defaultValue) {
         try {

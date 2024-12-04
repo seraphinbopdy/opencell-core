@@ -29,8 +29,8 @@ import org.meveo.api.dto.response.catalog.GetDiscountPlanResponseDto;
 import org.meveo.api.dto.response.catalog.GetDiscountPlansResponseDto;
 import org.meveo.api.rest.IBaseRs;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("/catalog/discountPlan")
 @Tag(name = "DiscountPlan", description = "@%DiscountPlan")

@@ -18,21 +18,20 @@
 
 package org.meveo.model.communication;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.ExportIdentifier;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
+
 @Entity
 @ExportIdentifier({ "com_communication_entity" })
 @Table(name = "com_communication_entity")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "com_communication_entity_seq") })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "com_communication_entity_seq"), @Parameter(name = "increment_size", value = "1") })
 public class CommunicationEntity extends BaseEntity {
     @Column(name = "name", length = 50)
     @Size(max = 50)

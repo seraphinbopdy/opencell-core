@@ -41,10 +41,10 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ejb.EJB;
-import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
+import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -183,7 +183,7 @@ public abstract class BaseApi {
     private static final String SUPER_ADMIN_MANAGEMENT = "superAdminManagement";
 
     @Inject
-    private AuditableFieldService auditableFieldService;
+    protected AuditableFieldService auditableFieldService;
 
     @Inject
     protected CustomGenericEntityCodeService customGenericEntityCodeService;

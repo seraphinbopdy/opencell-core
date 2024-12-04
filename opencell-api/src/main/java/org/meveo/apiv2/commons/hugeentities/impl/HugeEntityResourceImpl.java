@@ -35,9 +35,9 @@ import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

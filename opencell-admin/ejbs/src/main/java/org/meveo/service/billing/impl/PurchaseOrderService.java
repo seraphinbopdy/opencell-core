@@ -3,7 +3,7 @@ package org.meveo.service.billing.impl;
 import org.meveo.model.billing.PurchaseOrder;
 import org.meveo.service.base.BusinessService;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class PurchaseOrderService extends BusinessService<PurchaseOrder> {

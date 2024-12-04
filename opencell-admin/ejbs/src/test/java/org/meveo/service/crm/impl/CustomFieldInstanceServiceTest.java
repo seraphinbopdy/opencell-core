@@ -18,10 +18,10 @@
 
 package org.meveo.service.crm.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 import org.meveo.model.customEntities.CustomEntityTemplate;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class CustomFieldInstanceServiceTest {
     private CustomFieldInstanceService sut = new CustomFieldInstanceService();

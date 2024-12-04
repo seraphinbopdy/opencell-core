@@ -22,17 +22,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * The Class UserDto.
@@ -52,6 +52,7 @@ public class UserDto extends AuditableEntityDto {
     @XmlElement(required = true)
     @Schema(description = "the username of the user")
     @NotNull
+    @Size(min = 3, max = 50)
     private String username;
 
     /**
@@ -69,7 +70,7 @@ public class UserDto extends AuditableEntityDto {
 
     /** The first name. */
     @Schema(description = "first name")
-	    private String firstName;
+    private String firstName;
 
     /** The last name. */
     @Schema(description = "last name")
@@ -128,7 +129,10 @@ public class UserDto extends AuditableEntityDto {
         lastName = user.getName() != null ? user.getName().getLastName() : null;
         email = user.getEmail();
         userLevel = user.getUserLevel();
-        roles = new ArrayList<String>(user.getRoles());
+        roles = user.getRealmLevelRoles();
+        attributes = user.getAttributes();
+        clientRoles = user.getClientLevelRoles();
+
         if (user.getAuditable() != null) {
             createdAt = user.getAuditable().getCreated();
         }

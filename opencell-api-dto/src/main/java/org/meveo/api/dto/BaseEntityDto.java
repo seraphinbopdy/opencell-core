@@ -22,8 +22,11 @@ import java.io.Serializable;
 
 import org.meveo.api.message.exception.InvalidDTOException;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A base class for all API DTO classes
@@ -35,6 +38,29 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public abstract class BaseEntityDto implements Serializable {
 
     private static final long serialVersionUID = 4456089256601996946L;
+
+    /** The id. */
+    @JsonIgnore
+    @Schema(description = "Entity id")
+    protected Long id;
+
+    /**
+     * Gets the id.
+     *
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * Sets the id.
+     *
+     * @param id the new id
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     /**
      * Validate DTO

@@ -17,27 +17,9 @@
  */
 package org.meveo.model;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.catalog.OneShotChargeTemplate;
@@ -49,8 +31,22 @@ import org.meveo.model.shared.ContactInformation;
 import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 
 /**
  * Parent class of all account entities
@@ -61,9 +57,8 @@ import java.util.List;
 @Entity
 @HugeEntity
 @ObservableEntity
-@Table(name = "account_entity", uniqueConstraints = @UniqueConstraint(columnNames = { "code"}))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "account_entity_seq"), })
+@Table(name = "account_entity", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "account_entity_seq"), @Parameter(name = "increment_size", value = "1") })
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @EntityListeners({ AccountCodeGenerationListener.class })
 public abstract class AccountEntity extends BusinessCFEntity {
@@ -100,7 +95,7 @@ public abstract class AccountEntity extends BusinessCFEntity {
      * Deprecated in 5.3 for not use
      */
     @Deprecated
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "default_level")
     protected Boolean defaultLevel = true;
 
@@ -175,24 +170,23 @@ public abstract class AccountEntity extends BusinessCFEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "minimum_charge_template_id")
     private OneShotChargeTemplate minimumChargeTemplate;
-    
+
     /**
      * Corresponding to minimum invoice AccountingArticle
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "minimum_article_id")
     private AccountingArticle minimumArticle;
-    
+
     @Column(name = "company")
-    @Type(type = "numeric_boolean")
-    protected Boolean isCompany=Boolean.FALSE;
+    @Convert(converter = NumericBooleanConverter.class)
+    protected Boolean isCompany = Boolean.FALSE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "legal_entity_type_id")
     protected Title legalEntityType;
-	
-	
-	public String getExternalRef1() {
+
+    public String getExternalRef1() {
         return externalRef1;
     }
 
@@ -268,10 +262,10 @@ public abstract class AccountEntity extends BusinessCFEntity {
         if (!StringUtils.isBlank(description)) {
             setDescription(code);
         }
-        if (name != null ) {
+        if (name != null) {
             name.anonymize(code);
         }
-        if (address != null ) {
+        if (address != null) {
             address.anonymize(code);
         }
         getContactInformationNullSafe().anonymize(code);
@@ -293,28 +287,25 @@ public abstract class AccountEntity extends BusinessCFEntity {
         this.vatStatus = vatStatus;
     }
 
-    /*public String getRegistrationNo() {
-        return registrationNo;
-    }
+    /*
+     * public String getRegistrationNo() { return registrationNo; }
+     * 
+     * public void setRegistrationNo(String registrationNo) { this.registrationNo = registrationNo; }
+     */
 
-    public void setRegistrationNo(String registrationNo) {
-        this.registrationNo = registrationNo;
-    }*/
-
-	/**
-     * Instantiate contactInformation field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record
-     * will be updated in DB
+    /**
+     * Instantiate contactInformation field if it is null. NOTE: do not use this method unless you have an intention to modify it's value, as entity will be marked dirty and record will be updated in DB
      * 
      * @return ContactInformation value or instantiated ContactInformation field value
      */
-	public ContactInformation getContactInformationNullSafe() {
+    public ContactInformation getContactInformationNullSafe() {
         if (contactInformation == null) {
             contactInformation = new ContactInformation();
         }
         return contactInformation;
     }
 
-	public ContactInformation getContactInformation() {
+    public ContactInformation getContactInformation() {
         return contactInformation;
     }
 
@@ -322,11 +313,9 @@ public abstract class AccountEntity extends BusinessCFEntity {
         this.contactInformation = contactInformation;
     }
 
-
-
-
     /**
      * Expression to determine minimum amount value.
+     * 
      * @return an El expression
      */
     public String getMinimumAmountEl() {
@@ -335,6 +324,7 @@ public abstract class AccountEntity extends BusinessCFEntity {
 
     /**
      * Sets the minimum amount El expression.
+     * 
      * @param minimumAmountEl an El expression
      */
     public void setMinimumAmountEl(String minimumAmountEl) {
@@ -343,6 +333,7 @@ public abstract class AccountEntity extends BusinessCFEntity {
 
     /**
      * An EL expression to get the label used for the minimum RT.
+     * 
      * @return an EL expression
      */
     public String getMinimumLabelEl() {
@@ -351,6 +342,7 @@ public abstract class AccountEntity extends BusinessCFEntity {
 
     /**
      * Sets the minimum amount label.
+     * 
      * @param minimumLabelEl the minimum amount label EL
      */
     public void setMinimumLabelEl(String minimumLabelEl) {
@@ -359,6 +351,7 @@ public abstract class AccountEntity extends BusinessCFEntity {
 
     /**
      * Gets the charge template used in minimum amount.
+     * 
      * @return a one Shot Charge template
      */
     public OneShotChargeTemplate getMinimumChargeTemplate() {
@@ -367,6 +360,7 @@ public abstract class AccountEntity extends BusinessCFEntity {
 
     /**
      * Sets the minimum amount charge template.
+     * 
      * @param minimumChargeTemplate a one Shot Charge template
      */
     public void setMinimumChargeTemplate(OneShotChargeTemplate minimumChargeTemplate) {
@@ -381,37 +375,37 @@ public abstract class AccountEntity extends BusinessCFEntity {
         this.minimumArticle = minimumArticle;
     }
 
-	/**
-	 * @return the isCompany
-	 */
-	public Boolean getIsCompany() {
-		return isCompany != null && isCompany;
-	}
+    /**
+     * @return the isCompany
+     */
+    public Boolean getIsCompany() {
+        return isCompany != null && isCompany;
+    }
 
-	/**
-	 * @param isCompany the isCompany to set
-	 */
-	public void setIsCompany(Boolean isCompany) {
-		this.isCompany = isCompany;
-	}
+    /**
+     * @param isCompany the isCompany to set
+     */
+    public void setIsCompany(Boolean isCompany) {
+        this.isCompany = isCompany;
+    }
 
-	/**
-	 * @return the legalEntityType
-	 */
-	public Title getLegalEntityType() {
-		return legalEntityType;
-	}
+    /**
+     * @return the legalEntityType
+     */
+    public Title getLegalEntityType() {
+        return legalEntityType;
+    }
 
-	/**
-	 * @param legalEntityType the legalEntityType to set
-	 */
-	public void setLegalEntityType(Title legalEntityType) {
-		this.legalEntityType = legalEntityType;
-	}
+    /**
+     * @param legalEntityType the legalEntityType to set
+     */
+    public void setLegalEntityType(Title legalEntityType) {
+        this.legalEntityType = legalEntityType;
+    }
 
     public String getAccountType() {
         return this.getClass().getSimpleName();
     }
-	
-	public abstract String getRegistrationNo();
+
+    public abstract String getRegistrationNo();
 }

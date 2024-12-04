@@ -22,4 +22,6 @@ import org.immutables.value.Value;
 import org.meveo.apiv2.models.PaginatedResource;
 
 @Value.Immutable
-public interface Products extends PaginatedResource<Product> { }
+@Value.Style(jdkOnly = true, jakarta = true)
+public interface Products extends PaginatedResource<Product> {
+}

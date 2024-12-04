@@ -3,8 +3,6 @@ package org.meveo.api.dto.cpq;
 import java.util.Date;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.EnableBusinessDto;
 import org.meveo.apiv2.cpq.contracts.BillingRuleDto;
@@ -12,6 +10,7 @@ import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.enums.ContractAccountLevel;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * @author Tarik FAKHOURI

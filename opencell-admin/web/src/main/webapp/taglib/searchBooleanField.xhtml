@@ -9,7 +9,7 @@
         style="#{style}" labelStyle="#{labelStyle}" labelStyleClass="#{labelStyleClass}" inputStyle="#{inputStyle}" inputStyleClass="#{inputStyleClass}" labelWidth="#{labelWidth}"
         inputWidth="#{inputWidth}">
 
-        <p:selectOneMenu id="#{id}" value="#{backingBean.filters[field]}" converter="javax.faces.Boolean" disabled="#{disabled}">
+        <p:selectOneMenu id="#{id}" value="#{backingBean.filters[field]}" converter="jakarta.faces.Boolean" disabled="#{disabled}">
             <f:selectItem itemValue="#{null}" itemLabel="" />
             <f:selectItem itemValue="#{false}" itemLabel="#{messages['commons.no']}" />
             <f:selectItem itemValue="#{true}" itemLabel="#{messages['commons.yes']}" />

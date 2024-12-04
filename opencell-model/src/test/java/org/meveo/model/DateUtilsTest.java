@@ -19,6 +19,7 @@
 package org.meveo.model;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -439,28 +440,30 @@ public class DateUtilsTest {
         Assert.assertEquals("a", normalized.get(1).getValue());
         Assert.assertEquals(1, normalized.get(1).getPriorityInt());
     }
-    
+
     @Test()
     public void splitDatePeriodByCalendars_ifParamsKO_ThenThrowException() {
-        DatePeriod datePeriod1 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JANUARY, 1, 10, 0, 0),null);
-        DatePeriod datePeriod2 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JANUARY, 1, 10, 0, 0),
-            DateUtils.newDate(2019, java.util.Calendar.JANUARY, 1, 10, 0, 0));
-        DatePeriod datePeriod3 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JANUARY, 1, 10, 0, 0),
-            DateUtils.newDate(2020, java.util.Calendar.JANUARY, 2, 10, 0, 0));
+        DatePeriod datePeriod1 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JANUARY, 1, 10, 0, 0), null);
+        DatePeriod datePeriod2 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JANUARY, 1, 10, 0, 0), DateUtils.newDate(2019, java.util.Calendar.JANUARY, 1, 10, 0, 0));
+        DatePeriod datePeriod3 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JANUARY, 1, 10, 0, 0), DateUtils.newDate(2020, java.util.Calendar.JANUARY, 2, 10, 0, 0));
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> { DateUtils.splitDatePeriodByCalendars(datePeriod1, null, new CalendarSplit[] {});});
-        
-        assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> { DateUtils.splitDatePeriodByCalendars(datePeriod2, null, new CalendarSplit[] {});});
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            DateUtils.splitDatePeriodByCalendars(datePeriod1, null, new CalendarSplit[] {});
+        });
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> { DateUtils.splitDatePeriodByCalendars(datePeriod3, null, new CalendarSplit[] {});});
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            DateUtils.splitDatePeriodByCalendars(datePeriod2, null, new CalendarSplit[] {});
+        });
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> { DateUtils.splitDatePeriodByCalendars(datePeriod3, new Date(), new CalendarSplit[] {}); });
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            DateUtils.splitDatePeriodByCalendars(datePeriod3, null, new CalendarSplit[] {});
+        });
+
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            DateUtils.splitDatePeriodByCalendars(datePeriod3, new Date(), new CalendarSplit[] {});
+        });
     }
-    
+
     @Test()
     public void splitDatePeriodByCalendars_if2Calendars_ThenSuccess() {
 
@@ -486,10 +489,10 @@ public class DateUtilsTest {
 //        Assert.assertEquals(1L, normalized.get(1).getValue());
 //        Assert.assertEquals(1, normalized.get(1).getPriorityInt());
     }
-        
+
     private List<Calendar> constructCalendars() {
         List<Calendar> calendars = new ArrayList<Calendar>();
-        
+
         // ******Peak calendar
         List<CalendarDateInterval> intervals = new ArrayList<CalendarDateInterval>();
         // Interval calendar (range time)
@@ -531,10 +534,8 @@ public class DateUtilsTest {
         calendars.add(calendarJoin2);
 
         // *******special days
-        DatePeriod datePeriod1 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JANUARY, 1, 0, 0, 0),
-                DateUtils.newDate(2020, java.util.Calendar.JANUARY, 05, 0, 0, 0));
-        DatePeriod datePeriod2 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JUNE, 5, 0, 0, 0),
-                DateUtils.newDate(2020, java.util.Calendar.JUNE, 6, 0, 0, 0));
+        DatePeriod datePeriod1 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JANUARY, 1, 0, 0, 0), DateUtils.newDate(2020, java.util.Calendar.JANUARY, 05, 0, 0, 0));
+        DatePeriod datePeriod2 = new DatePeriod(DateUtils.newDate(2020, java.util.Calendar.JUNE, 5, 0, 0, 0), DateUtils.newDate(2020, java.util.Calendar.JUNE, 6, 0, 0, 0));
         CalendarFixed calendarFixedDate = new CalendarFixed();
         calendarFixedDate.addFixedDate(datePeriod1);
         calendarFixedDate.addFixedDate(datePeriod2);
@@ -547,7 +548,7 @@ public class DateUtilsTest {
         weekend.setIntervals(intervalsWeekend);
         intervalsWeekend.add(new CalendarDateInterval(weekend, 6, 7)); // saturday & sunday
         calendars.add(weekend);
-        
+
         return calendars;
     }
 }

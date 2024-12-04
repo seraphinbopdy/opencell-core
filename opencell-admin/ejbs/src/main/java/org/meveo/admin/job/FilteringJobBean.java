@@ -24,14 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.InvalidScriptException;
 import org.meveo.model.IEntity;
@@ -44,6 +36,14 @@ import org.meveo.service.filter.FilterService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Job implementation to execute the given script for each entity returned from the given filter.

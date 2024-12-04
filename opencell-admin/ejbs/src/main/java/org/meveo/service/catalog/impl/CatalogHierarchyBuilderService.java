@@ -32,9 +32,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.Hibernate;
@@ -113,6 +110,9 @@ import org.meveo.service.quote.QuoteOfferService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * A service that duplicate a hierarchy such as {@link OfferTemplate} and {@link ServiceTemplate}.
@@ -395,8 +395,7 @@ public class CatalogHierarchyBuilderService {
 				duplicate.setDiscountValueEL(dp.getDiscountValueEL());
 				duplicate.setDiscountPlanItemType(dp.getDiscountPlanItemType());
 				duplicate.setUUIDIfNull();
-				duplicate.setCfValues(dp.getCfValues());
-				duplicate.setCfAccumulatedValues(dp.getCfAccumulatedValues());
+				duplicate.setCfValuesAsJson(dp.getCfValuesAsJson());
 				duplicate.setInvoiceCategory(dp.getInvoiceCategory());
 				
 				discountPlanItemService.create(duplicate);

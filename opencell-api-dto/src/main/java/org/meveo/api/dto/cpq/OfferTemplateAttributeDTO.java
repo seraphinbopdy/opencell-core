@@ -8,8 +8,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotNull;
-
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.catalog.ChargeTemplate;
@@ -20,6 +18,7 @@ import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.trade.CommercialRuleHeader;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * @author Tarik FAKHOURI

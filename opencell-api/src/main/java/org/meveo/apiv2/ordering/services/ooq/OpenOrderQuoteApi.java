@@ -1,5 +1,30 @@
 package org.meveo.apiv2.ordering.services.ooq;
 
+import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.ACCEPTED;
+import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.CANCELED;
+import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.DRAFT;
+import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.REJECTED;
+import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.SENT;
+import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.VALIDATED;
+import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.WAITING_VALIDATION;
+import static org.meveo.model.ordering.OpenOrderTypeEnum.ARTICLES;
+import static org.meveo.model.ordering.OpenOrderTypeEnum.PRODUCTS;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
@@ -31,33 +56,9 @@ import org.meveo.service.order.OpenOrderService;
 import org.meveo.service.order.OpenOrderTemplateService;
 import org.meveo.service.settings.impl.OpenOrderSettingService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.ACCEPTED;
-import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.CANCELED;
-import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.DRAFT;
-import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.REJECTED;
-import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.SENT;
-import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.VALIDATED;
-import static org.meveo.model.ordering.OpenOrderQuoteStatusEnum.WAITING_VALIDATION;
-import static org.meveo.model.ordering.OpenOrderTypeEnum.ARTICLES;
-import static org.meveo.model.ordering.OpenOrderTypeEnum.PRODUCTS;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @Stateless
 public class OpenOrderQuoteApi {

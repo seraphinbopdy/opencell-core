@@ -1,13 +1,15 @@
 package org.meveo.apiv2.AcountReceivable;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.immutables.value.Value;
-
-import javax.annotation.Nullable;
 import java.util.Date;
 
+import jakarta.annotation.Nullable;
+
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(builder = ImmutableDeferralPayments.Builder.class)
 public interface DeferralPayments {
     @Nullable

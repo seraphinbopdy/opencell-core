@@ -18,12 +18,11 @@
 
 package org.meveo.admin.job;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.crm.CustomFieldTemplate;
-import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.jobs.JobCategoryEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
@@ -31,8 +30,8 @@ import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.jobs.MeveoJobCategoryEnum;
 import org.meveo.service.job.Job;
 
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * A Job to update unpaid invoice status

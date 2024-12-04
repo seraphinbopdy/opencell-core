@@ -23,8 +23,9 @@ package org.meveo.model.module;
  *
  **/
 public enum ModuleLicenseEnum {
-    APACHE("license.apache"), BSD3_N("license.bsd3_n"), BSD3_R("license.bsd3_r"), BSD2_S("license.bsd2_s"), FREE_BSD("license.free_bsd"), GPL("license.gpl"), AGPL(
-            "license.agpl"), LGPL("license.lgpl"), MIT("license.mit"), MOZ("license.moz"), CDDL("license.cddl"), EPL("license.epl"), OPEN("license.open"), COM("license.com");
+    APACHE("license.apache"), BSD3_N("license.bsd3_n"), BSD3_R("license.bsd3_r"), BSD2_S("license.bsd2_s"), FREE_BSD("license.free_bsd"), GPL("license.gpl"), AGPL("license.agpl"), LGPL("license.lgpl"), MIT(
+            "license.mit"), MOZ("license.moz"), CDDL("license.cddl"), EPL("license.epl"), OPEN("license.open"), COM("license.com");
+
     private String label;
 
     private ModuleLicenseEnum(String label) {

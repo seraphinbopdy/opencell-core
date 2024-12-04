@@ -2,32 +2,39 @@ package org.meveo.model.dunning;
 
 import java.util.List;
 
-import javax.persistence.*;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessCFEntity;
-import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.payments.ActionChannelEnum;
 import org.meveo.model.payments.ActionModeEnum;
 import org.meveo.model.payments.ActionTypeEnum;
 import org.meveo.model.scripts.ScriptInstance;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+
 @Entity
 @Table(name = "ar_dunning_action")
-@CustomFieldEntity(cftCodePrefix = "DunningAction")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_dunning_action_seq"), })
-@NamedQueries({
-        @NamedQuery(name = "DunningAction.findByAgentId", query = "SELECT da FROM DunningAction da where da.assignedTo.id = :id")
-})
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_dunning_action_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({ @NamedQuery(name = "DunningAction.findByAgentId", query = "SELECT da FROM DunningAction da where da.assignedTo.id = :id") })
 public class DunningAction extends BusinessCFEntity {
 
     private static final long serialVersionUID = -3093051277357043210L;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "is_action_active")
     private boolean isActiveAction = true;
 
@@ -55,11 +62,11 @@ public class DunningAction extends BusinessCFEntity {
     @JoinColumn(name = "action_notification_template_id")
     private EmailTemplate actionNotificationTemplate;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "attach_overdue_invoices")
     private boolean attachOverdueInvoices = true;
 
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "attach_due_invoices")
     private boolean attachDueInvoices = false;
 

@@ -1,5 +1,8 @@
 package org.meveo.service.script;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +13,6 @@ import org.meveo.model.billing.Subscription;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanStatusEnum;
 import org.meveo.model.catalog.DiscountPlanTypeEnum;
-import org.meveo.model.catalog.OfferProductTemplate;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.offer.OfferComponent;
@@ -20,9 +22,6 @@ import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.catalog.impl.DiscountPlanService;
 import org.meveo.service.catalog.impl.OfferTemplateService;
 import org.meveo.service.cpq.ProductService;
-
-import java.util.List;
-import java.util.Map;
 
 public class MassInstantiateDiscountScript  extends Script{
 	

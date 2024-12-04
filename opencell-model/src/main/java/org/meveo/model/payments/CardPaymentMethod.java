@@ -21,18 +21,18 @@ package org.meveo.model.payments;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Transient;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-
 import org.meveo.model.shared.DateUtils;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 /**
  * Payment by card method
@@ -43,7 +43,7 @@ import org.meveo.model.shared.DateUtils;
 @Entity
 @DiscriminatorValue(value = "CARD")
 
-@NamedQueries({ 
+@NamedQueries({
         @NamedQuery(name = "PaymentMethod.getNumberOfCardCustomerAccount", query = "select count(*) from  CardPaymentMethod pm where pm.customerAccount.id = :customerAccountId and pm.hiddenCardNumber = :hiddenCardNumber and pm.cardType = :cardType and pm.disabled = false") })
 public class CardPaymentMethod extends PaymentMethod {
 
@@ -83,6 +83,12 @@ public class CardPaymentMethod extends PaymentMethod {
      */
     @Column(name = "card_number")
     private String hiddenCardNumber;
+    
+    /**
+     * Pre authorisation id
+     */
+    @Column(name = "pre_authorisation_id")
+    private String preAuthorisationId;
 
     /**
      * Full card number. Used at data entry time.
@@ -179,14 +185,24 @@ public class CardPaymentMethod extends PaymentMethod {
     public void setHiddenCardNumber(String hiddenCardNumber) {
         this.hiddenCardNumber = hiddenCardNumber;
     }
+    
+    
 
-    @Override
+    public String getPreAuthorisationId() {
+		return preAuthorisationId;
+	}
+
+	public void setPreAuthorisationId(String preAuthorisationId) {
+		this.preAuthorisationId = preAuthorisationId;
+	}
+
+	@Override
     public void anonymize(String code) {
         super.anonymize(code);
         setOwner(code);
         setMonthExpiration(1);
         setYearExpiration(0);
-        setCardNumber(code.substring(0,16));
+        setCardNumber(code.substring(0, 16));
         setCardType(null);
         setIssueNumber(code);
     }
@@ -260,7 +276,7 @@ public class CardPaymentMethod extends PaymentMethod {
             return "invalid";
         }
         cardNumber = cardNumber.replaceAll("\\s+", "");
-        if (cardNumber.length() > 4 ) {
+        if (cardNumber.length() > 4) {
             return cardNumber.substring(cardNumber.length() - 4);
         }
         return cardNumber;

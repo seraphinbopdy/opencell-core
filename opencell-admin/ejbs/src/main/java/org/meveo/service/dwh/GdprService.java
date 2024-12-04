@@ -24,13 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.BusinessCFEntity;
@@ -42,12 +39,16 @@ import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldValue;
+import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.BaseService;
 import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.crm.impl.CustomFieldTemplateService;
 import org.meveo.service.crm.impl.CustomerService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * General Data Protection Regulation (GDPR) service provides a feature that
@@ -124,8 +125,8 @@ public class GdprService extends BaseService {
 			} else if (previousCfValues != null && !previousCfValues.isEmpty()) {
 				newCfValues.put(cftCode, previousCfValues);
 			}
-		});
-		entity.getCfValuesNullSafe().setValues(newCfValues);
+        });
+        entity.setCfValues(new CustomFieldValues(newCfValues));
 	}
 
 	/**

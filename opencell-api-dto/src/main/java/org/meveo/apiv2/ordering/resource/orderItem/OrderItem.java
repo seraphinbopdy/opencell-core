@@ -18,18 +18,21 @@
 
 package org.meveo.apiv2.ordering.resource.orderItem;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+
+import jakarta.annotation.Nullable;
+
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.order.OrderItemActionEnum;
 import org.meveo.model.order.OrderStatusEnum;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Value.Immutable
-@Value.Style(jdkOnly=true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableOrderItem.class)
 public interface OrderItem extends Resource {
     @Nullable

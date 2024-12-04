@@ -24,19 +24,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.model.DataModel;
-
-//import org.ajax4jsf.model.DataVisitor;
-//import org.ajax4jsf.model.ExtendedDataModel;
-//import org.ajax4jsf.model.Range;
-//import org.ajax4jsf.model.SequenceRange;
-import org.meveo.model.IEntity;
 //import org.richfaces.component.SortOrder;
 //import org.richfaces.model.Arrangeable;
 //import org.richfaces.model.ArrangeableState;
 //import org.richfaces.model.FilterField;
 //import org.richfaces.model.SortField;
 import  org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
+//import org.ajax4jsf.model.DataVisitor;
+//import org.ajax4jsf.model.ExtendedDataModel;
+//import org.ajax4jsf.model.Range;
+//import org.ajax4jsf.model.SequenceRange;
+import org.meveo.model.IEntity;
+
+import jakarta.faces.model.DataModel;
 
 /**
  * Pagination model implementation. To make sorting work, initiate object with sorting options.

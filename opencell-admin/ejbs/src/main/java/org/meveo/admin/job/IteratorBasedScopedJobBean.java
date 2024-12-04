@@ -1,12 +1,13 @@
 package org.meveo.admin.job;
 
+import java.util.Iterator;
+import java.util.Optional;
+
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.job.JobInstanceService;
 
-import javax.inject.Inject;
-import java.util.Iterator;
-import java.util.Optional;
+import jakarta.inject.Inject;
 
 /**
  * Implements job logic to iterate over data and process one item at a time

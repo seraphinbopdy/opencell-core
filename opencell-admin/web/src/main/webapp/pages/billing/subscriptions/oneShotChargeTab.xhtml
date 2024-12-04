@@ -32,7 +32,7 @@
                             <h:outputText value="#{messages['commons.actions']}" />
                         </f:facet>
                         <p:commandButton id="editOneShotChgInsLink" action="#{subscriptionBean.editOneShotChargeIns(entity)}" rendered="#{subscriptionBean.canUserUpdateEntity()}"
-                            update=":subscriptionTab:oneShotChgDiv" icon="ui-icon-document">
+                            update=":subscriptionTab:oneShotChgDiv" icon="pi pi-file-edit">
                             <f:setPropertyActionListener value="true" target="#{subscriptionBean.showApplyOneShotForm}" />
                         </p:commandButton>
                     </p:column>
@@ -53,14 +53,14 @@
                 dataModel="#{oneShotChargeTemplateBean.otherTypeCharges}" searchField1Label="#{messages['chargeTemplate.code']}" searchField1="code"
                 searchField2Label="#{messages['chargeTemplate.description']}" searchField2="description" column1Label="#{messages['chargeTemplate.description']}" column1="code"
                 column2Label="#{messages['chargeTemplate.description']}" column2="description" selection="#{subscriptionBean.oneShotChargeInstance.chargeTemplate}"
-                updateField=":#{p:component('chargeTemplateSelectId_text')} :subscriptionTab:oneShotChgForm1 :#{p:component('chargeWalletSelectId_selectLink')}">
+                updateField="@([id$=chargeTemplateSelectId_text]) :subscriptionTab:oneShotChgForm1 @([id$=chargeWalletSelectId_selectLink])">
             </hftl:entityPopup>
 
             <hftl:entityPopup id="popupWalletTemplates" header="#{messages['oneShotChargeTmp.popup.header']}" backingBean="#{walletTemplateBean}" lazy="false"
                 dataModel="#{subscriptionBean.findWalletTemplatesForOneShot()}" searchField1Label="#{messages['BusinessEntity.code']}" searchField1="code"
                 searchField2Label="#{messages['BusinessEntity.description']}" searchField2="description" column1Label="#{messages['BusinessEntity.code']}" column1="code"
                 column2Label="#{messages['BusinessEntity.description']}" column2="description" selection="#{subscriptionBean.selectedWalletTemplate}"
-                updateField=":#{p:component('chargeWalletSelectId_text')}">
+                updateField="@([id$=chargeWalletSelectId_text])">
             </hftl:entityPopup>
 
             <hftl:formPanel edit="#{subscriptionBean.oneShotChargeInstance.isTransient()}" backingBean="#{subscriptionBean}" entity="#{subscriptionBean.oneShotChargeInstance}"
@@ -73,7 +73,7 @@
                     <hftl:decorateFormField fieldId="chargeTemplateSelectId_text" label="#{messages['businessEntity.code']}"
                         rendered="#{subscriptionBean.oneShotChargeInstance.transient}">
                         <p:inputText id="chargeTemplateSelectId_text" required="true" value="#{subscriptionBean.oneShotChargeInstance.chargeTemplate.code}" disabled="true" />
-                        <p:commandButton id="chargeTemplateSelectId_selectLink" onclick="PF('dlg_oneShotChargeTmpPopup').show()" icon="ui-icon-search" type="button" />
+                        <p:commandButton id="chargeTemplateSelectId_selectLink" onclick="PF('dlg_oneShotChargeTmpPopup').show()" icon="pi pi-search" type="button" />
                     </hftl:decorateFormField>
                 </h:panelGroup>
                 <hftl:formField label="#{messages['businessEntity.description']}" field="description" />
@@ -85,7 +85,7 @@
                         <p:outputLabel for="chargeWalletSelectId_text" value="#{messages['menu.wallet']}" />
                         <h:panelGroup layout="block" styleClass="formFieldItem2Lines" style="width: 100%;">
                             <p:inputText id="chargeWalletSelectId_text" required="false" value="#{subscriptionBean.selectedWalletTemplateCode}" />
-                            <p:commandButton id="chargeWalletSelectId_selectLink" onclick="PF('dlg_popupWalletTemplates').show()" icon="ui-icon-search" type="button" />
+                            <p:commandButton id="chargeWalletSelectId_selectLink" onclick="PF('dlg_popupWalletTemplates').show()" icon="pi pi-search" type="button" />
                         </h:panelGroup>
                     </h:panelGroup>
                 </h:panelGroup>

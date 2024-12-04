@@ -3,12 +3,12 @@ package org.meveo.admin.job;
 import static org.meveo.model.billing.BillingEntityTypeEnum.BILLINGACCOUNT;
 import static org.meveo.model.billing.DateAggregationOption.NO_DATE_AGGREGATION;
 
+import java.util.List;
+
 import org.meveo.model.billing.BillingEntityTypeEnum;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.DateAggregationOption;
 import org.meveo.model.billing.DiscountAggregationModeEnum;
-
-import java.util.List;
 
 public class AggregationConfiguration {
 

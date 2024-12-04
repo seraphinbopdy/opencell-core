@@ -1,19 +1,20 @@
 package org.meveo.apiv2.generic;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.immutables.value.Value;
-import org.meveo.api.dto.response.PagingAndFiltering;
-
-import javax.annotation.Nullable;
-import javax.persistence.criteria.JoinType;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.annotation.Nullable;
+
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import jakarta.persistence.criteria.JoinType;
+
 @Value.Immutable
-@Value.Style(jdkOnly=true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableGenericPagingAndFiltering.class)
 public interface GenericPagingAndFiltering {
     @Nullable

@@ -1,5 +1,6 @@
 package org.meveo.admin.job.invoicing;
 import java.util.Date;
+
 import org.meveo.model.shared.DateUtils;
 public class DiscountPlanSummary {
 	private Date startDate;

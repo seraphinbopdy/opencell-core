@@ -1,14 +1,14 @@
 package org.meveo.service.cpq;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-
 import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.cpq.contract.TradingContractItem;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
 
 /**
  * Persistence service for entity TradingContractItem

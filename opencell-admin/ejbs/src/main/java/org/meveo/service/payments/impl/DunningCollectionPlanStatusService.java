@@ -1,10 +1,6 @@
 package org.meveo.service.payments.impl;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-import javax.ws.rs.BadRequestException;
+import java.util.Arrays;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
@@ -12,7 +8,11 @@ import org.meveo.model.dunning.DunningCollectionPlanStatus;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.service.base.PersistenceService;
 
-import java.util.Arrays;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
+import jakarta.ws.rs.BadRequestException;
 
 /**
  * Service implementation to manage DunningCollectionPlanStatuses entity.

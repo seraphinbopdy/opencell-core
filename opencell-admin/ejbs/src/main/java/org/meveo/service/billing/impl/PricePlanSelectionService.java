@@ -10,12 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.annotations.QueryHints;
 import org.meveo.admin.exception.InvalidELException;
@@ -48,6 +42,12 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
 @Stateless
 public class PricePlanSelectionService implements Serializable {

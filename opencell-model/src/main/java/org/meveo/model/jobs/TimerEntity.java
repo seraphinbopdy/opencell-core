@@ -21,22 +21,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.EnableBusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ModuleItem;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Job execution schedule. Similar to Unix schedule format.
@@ -47,8 +47,7 @@ import org.meveo.model.ModuleItem;
 @ModuleItem
 @ExportIdentifier({ "code" })
 @Table(name = "meveo_timer", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "meveo_timer_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "meveo_timer_seq"), @Parameter(name = "increment_size", value = "1") })
 public class TimerEntity extends EnableBusinessEntity {
 
     private static final long serialVersionUID = -3764934334462355788L;
@@ -236,7 +235,7 @@ public class TimerEntity extends EnableBusinessEntity {
 
         TimerEntity other = (TimerEntity) obj;
 
-        if (id != null && id.equals(other.getId()) ) {
+        if (id != null && id.equals(other.getId())) {
             return true;
         }
 
@@ -254,8 +253,8 @@ public class TimerEntity extends EnableBusinessEntity {
      */
     @Override
     public String toString() {
-        return "TimerEntity [year=" + year + ", month=" + month + ", dayOfMonth=" + dayOfMonth + ", dayOfWeek=" + dayOfWeek + ", hour=" + hour + ", minute=" + minute + ", second="
-                + second + ", start=" + start + ", end=" + end + "]";
+        return "TimerEntity [year=" + year + ", month=" + month + ", dayOfMonth=" + dayOfMonth + ", dayOfWeek=" + dayOfWeek + ", hour=" + hour + ", minute=" + minute + ", second=" + second + ", start=" + start + ", end="
+                + end + "]";
     }
 
 }

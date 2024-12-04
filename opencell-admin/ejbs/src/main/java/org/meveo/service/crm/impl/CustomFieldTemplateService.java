@@ -33,14 +33,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -55,7 +47,7 @@ import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.model.BusinessCFEntity;
 import org.meveo.model.BusinessEntity;
@@ -73,7 +65,7 @@ import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.crm.custom.CustomFieldValue;
 import org.meveo.model.customEntities.CustomEntityInstance;
 import org.meveo.model.customEntities.CustomEntityTemplate;
-import org.meveo.model.persistence.CustomFieldJsonTypeDescriptor;
+import org.meveo.model.persistence.CustomFieldJsonDataType;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.custom.CfValueAccumulator;
 import org.meveo.service.custom.CustomEntityTemplateService;
@@ -89,6 +81,14 @@ import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+
 /**
  * @author Wassim Drira
  * @author Abdellatif BARI
@@ -99,7 +99,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
 
     public static final String UPDATE_EXISTING = "#updateExisting#";
 
-	@Inject
+    @Inject
     private CustomFieldsCacheContainerProvider customFieldsCache;
 
     @Inject
@@ -123,7 +123,6 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
     private void init() {
         useCFTCache = ParamBeanFactory.getAppScopeInstance().getPropertyAsBoolean("cache.cacheCFT", true);
     }
-
 
     public static void setCacheCFTAsTrue() {
         useCFTCache = true;
@@ -297,14 +296,14 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
 
         customFieldsCache.addUpdateCustomFieldTemplate(cft);
 
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.create);
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.create);
 
-        if (CfValueAccumulator.isAccumulateCf()) {
-            boolean reaccumulateCFValues = cfValueAccumulator.refreshCfAccumulationRules(cft);
-            if (reaccumulateCFValues) {
-                cfValueAccumulator.cftCreated(cft);
-            }
-        }
+//        if (CfValueAccumulator.isAccumulateCf()) {
+//            boolean reaccumulateCFValues = cfValueAccumulator.refreshCfAccumulationRules(cft);
+//            if (reaccumulateCFValues) {
+//                cfValueAccumulator.cftCreated(cft);
+//            }
+//        }
         if (updateUniqueConstraint) {
             updateConstraintByOldColumnsAndCet(oldConstraintColumns, cet, cetFields);
         }
@@ -358,7 +357,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         }
     }
 
-    //@Override
+    // @Override
     public CustomFieldTemplate update(CustomFieldTemplate oldCft, CustomFieldTemplate cft) throws BusinessException {
         return update(oldCft, cft, true);
     }
@@ -395,7 +394,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         CustomFieldTemplate cftUpdated = super.update(cft);
 
         customFieldsCache.addUpdateCustomFieldTemplate(cftUpdated);
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.update);
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.update);
 
         if (updateUniqueConstraint) {
             updateConstraintByOldColumnsAndCet(oldConstraintColumns, cet, cetFields);
@@ -437,10 +436,10 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
             }
         }
 
-        if (CfValueAccumulator.isAccumulateCf()) {
-            cfValueAccumulator.refreshCfAccumulationRules(cft);
-        }
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.remove);
+//        if (CfValueAccumulator.isAccumulateCf()) {
+//            cfValueAccumulator.refreshCfAccumulationRules(cft);
+//        }
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.remove);
     }
 
     @Override
@@ -448,7 +447,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         cft = refreshOrRetrieve(cft);
         cft = super.enable(cft);
         customFieldsCache.addUpdateCustomFieldTemplate(cft);
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.enable);
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.enable);
         return cft;
     }
 
@@ -456,7 +455,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
     public CustomFieldTemplate disable(CustomFieldTemplate cft) throws BusinessException {
         cft = super.disable(cft);
         customFieldsCache.removeCustomFieldTemplate(cft);
-        clusterEventPublisher.publishEvent(cft, CrudActionEnum.disable);
+        clusterEventPublisher.publishEvent(cft, ClusterEventActionEnum.disable);
         return cft;
     }
 
@@ -584,7 +583,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
         if (templates != null) {
             CustomFieldTemplate existingCustomField = null;
             for (CustomFieldTemplate cft : templates) {
-            	updateExisting=updateExisting || (cft.getTags()!=null && cft.getTags().contains(UPDATE_EXISTING));
+                updateExisting = updateExisting || (cft.getTags() != null && cft.getTags().contains(UPDATE_EXISTING));
                 if (!allTemplates.containsKey(cft.getCode())) {
                     log.debug("Create a missing CFT {} for {} entity", cft.getCode(), appliesTo);
                     create(cft);
@@ -822,16 +821,14 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
     public List getReferencedEntities(CustomFieldTemplate customField, String code, Class entityClass) {
 
         // Case of encrypted customfields in DB
-		if (CustomFieldJsonTypeDescriptor.TRUE_STR.equalsIgnoreCase(
-						ParamBean.getInstance().getProperty(CustomFieldJsonTypeDescriptor.ENCRYPT_CUSTOM_FIELDS_PROPERTY,
-								CustomFieldJsonTypeDescriptor.FALSE_STR)) && !StringUtils.isBlank(ParamBean.getInstance().getProperty(CustomFieldJsonTypeDescriptor.OPENCELL_SHA_KEY_PROPERTY, null))) {
+        if (CustomFieldJsonDataType.TRUE_STR.equalsIgnoreCase(ParamBean.getInstance().getProperty(CustomFieldJsonDataType.ENCRYPT_CUSTOM_FIELDS_PROPERTY, CustomFieldJsonDataType.FALSE_STR))
+                && !StringUtils.isBlank(ParamBean.getInstance().getProperty(CustomFieldJsonDataType.OPENCELL_SHA_KEY_PROPERTY, null))) {
             QueryBuilder queryBuilder = new QueryBuilder(entityClass, "a");
             Query query = queryBuilder.getQuery(getEntityManager());
             List<BusinessCFEntity> resultList = (List<BusinessCFEntity>) query.getResultList();
 
             for (BusinessCFEntity entity : resultList) {
-				if (entity.getCfValues() != null && entity.getCfValues().getValues() != null 
-						&& entity.getCfValues().getValues().get(customField.getCode()) != null
+                if (entity.getCfValues() != null && entity.getCfValues().getValues() != null && entity.getCfValues().getValues().get(customField.getCode()) != null
                         && code.equalsIgnoreCase(((EntityReferenceWrapper) entity.getCfValues().getValues().get(customField.getCode())).getCode())) {
 
                     return resultList;
@@ -841,7 +838,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
             return null;
         }
         QueryBuilder queryBuilder = new QueryBuilder(entityClass, "a");
-        queryBuilder.addCriterion("entityFromJson(cf_values," + customField.getCode() + ",entity)", "=", code, true);
+        queryBuilder.addCriterion("entityFromJson('cf_values','" + customField.getCode() + "')", "=", code, true);
         Query query = queryBuilder.getQuery(getEntityManager());
         List resultList = query.getResultList();
         return resultList;
@@ -899,7 +896,21 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
 
     @Override
     public CustomFieldTemplate update(CustomFieldTemplate cft) {
-        customFieldsCache.addUpdateCustomFieldTemplate(cft);
-        return super.update(cft);
+
+        CustomEntityTemplate cet = findCETbyCFT(cft);
+
+        boolean isCustomTable = cet != null && cet.isStoreAsTable();
+        if (isCustomTable) {
+
+            CustomFieldTemplate oldCft = customFieldTemplateService.findByCodeAndAppliesToNoCache(cft.getCode(), cft.getAppliesTo());
+            oldCft = SerializationUtils.clone(oldCft);
+            
+            return update(oldCft, cft);
+
+        } else {
+            customFieldsCache.addUpdateCustomFieldTemplate(cft);
+
+            return super.update(cft);
+        }
     }
 }

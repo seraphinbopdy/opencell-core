@@ -11,10 +11,10 @@
         <p:panel width="100" header="#{messages['customizedEntities.fieldsAndActions']}" rendered="#{customEntityTemplateBean.cetPrefix!=null}">
             <p:treeTable id="fields" value="#{customEntityTemplateBean.fields}" var="entity" nodeVar="node" resizableColumns="true">
                 <p:column headerText="#{messages['BusinessEntity.code']}">
-                    <h:panelGroup styleClass="ui-icon ui-icon-play inlineIcon" rendered="#{node.type == 'action'}" />
+                    <h:panelGroup styleClass="pi pi-play inlineIcon" rendered="#{node.type == 'action'}" />
                     <h:outputText value="#{entity.code}" rendered="#{node.type == 'field' or node.type == 'action'}" />
-                    <h:panelGroup styleClass="ui-icon ui-icon-folder-collapsed inlineIcon" rendered="#{node.type == 'tab'}" />
-                    <h:panelGroup styleClass="ui-icon ui-icon-contact inlineIcon" rendered="#{node.type == 'fieldGroup'}" />
+                    <h:panelGroup styleClass="pi pi-folder inlineIcon" rendered="#{node.type == 'tab'}" />
+                    <h:panelGroup styleClass="pi pi-file inlineIcon" rendered="#{node.type == 'fieldGroup'}" />
                     <h:outputText value="#{entity.label}" rendered="#{node.type == 'tab' or node.type == 'fieldGroup'}" />
                 </p:column>
                 <p:column headerText="#{messages['customFieldTemplate.fieldLabel']}">
@@ -48,96 +48,96 @@
                 </p:column>
                 <p:column headerText="#{messages['commons.actions']}" width="12%">
                     <h:panelGroup rendered="#{node.type == 'tab'}">
-                        <p:commandButton id="editTabBtn" icon="ui-icon-document" oncomplete="PF('groupDialog').show()" update=":groupForm" action="#{customEntityTemplateBean.editFieldGrouping(node)}"
+                        <p:commandButton id="editTabBtn" icon="pi pi-file-edit" oncomplete="PF('groupDialog').show()" update=":groupForm" action="#{customEntityTemplateBean.editFieldGrouping(node)}"
                             rendered="#{!customEntityTemplateBean.customTable}">
                             <!--                             <f:setPropertyActionListener target="#{customEntityTemplateBean.selectedFieldGrouping}" value="#{node}" /> -->
                         </p:commandButton>
 
-                        <p:commandButton id="addFieldGroupBtn" icon="ui-icon-contact" action="#{customEntityTemplateBean.newFieldGroup(node)}" oncomplete="PF('groupDialog').show()" update=":groupForm"
+                        <p:commandButton id="addFieldGroupBtn" icon="pi pi-folder-plus" action="#{customEntityTemplateBean.newFieldGroup(node)}" oncomplete="PF('groupDialog').show()" update=":groupForm"
                             rendered="#{!customEntityTemplateBean.customTable}" />
 
-                        <p:commandButton id="addFieldInTabBtn" icon="ui-icon-plus" oncomplete="PF('cftDialog').show()" actionListener="#{customFieldTemplateBean.newEntity()}" update=":cftForm">
+                        <p:commandButton id="addFieldInTabBtn" icon="pi pi-plus" oncomplete="PF('cftDialog').show()" actionListener="#{customFieldTemplateBean.newEntity()}" update=":cftForm">
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.backViewSave}" value="customizedEntity" />
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.entity.appliesTo}" value="#{customEntityTemplateBean.cetPrefix}" />
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.entity.guiPosition}" value="#{node.guiPositionForField}" />
                         </p:commandButton>
 
-                        <p:commandButton id="addActionInTabBtn" icon="ui-icon-play" oncomplete="PF('actionDialog').show()" actionListener="#{entityCustomActionBean.newEntity()}" update=":actionForm"
+                        <p:commandButton id="addActionInTabBtn" icon="pi pi-play" oncomplete="PF('actionDialog').show()" actionListener="#{entityCustomActionBean.newEntity()}" update=":actionForm"
                             rendered="#{!customEntityTemplateBean.customTable}">
                             <f:setPropertyActionListener target="#{entityCustomActionBean.backViewSave}" value="customizedEntity" />
                             <f:setPropertyActionListener target="#{entityCustomActionBean.entity.appliesTo}" value="#{customEntityTemplateBean.cetPrefix}" />
                             <f:setPropertyActionListener target="#{entityCustomActionBean.entity.guiPosition}" value="#{node.guiPositionForAction}" />
                         </p:commandButton>
 
-                        <p:commandButton id="deleteTablink" icon="ui-icon-trash" action="#{customEntityTemplateBean.removeFieldGrouping()}" update=":fieldsForm:fields"
+                        <p:commandButton id="deleteTablink" icon="pi pi-trash" action="#{customEntityTemplateBean.removeFieldGrouping()}" update=":fieldsForm:fields"
                             rendered="#{node.parent.childCount &gt; 1}">
                             <f:setPropertyActionListener target="#{customEntityTemplateBean.selectedFieldGrouping}" value="#{node}" />
-                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['customizedEntities.confirmDeleteTab']}" icon="ui-icon-alert" />
+                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['customizedEntities.confirmDeleteTab']}" icon="pi pi-exclamation-triangle" />
                         </p:commandButton>
 
-                        <p:commandButton id="moveUpTabBtn" icon="ui-icon-arrowthick-1-n" action="#{customEntityTemplateBean.moveUp(node)}" update=":fieldsForm:fields" rendered="#{node.canMoveUp()}" />
+                        <p:commandButton id="moveUpTabBtn" icon="pi pi-arrow-up" action="#{customEntityTemplateBean.moveUp(node)}" update=":fieldsForm:fields" rendered="#{node.canMoveUp()}" />
 
-                        <p:commandButton id="moveDownTabBtn" icon="ui-icon-arrowthick-1-s" action="#{customEntityTemplateBean.moveDown(node)}" update=":fieldsForm:fields"
+                        <p:commandButton id="moveDownTabBtn" icon="pi pi-arrow-down" action="#{customEntityTemplateBean.moveDown(node)}" update=":fieldsForm:fields"
                             rendered="#{node.canMoveDown()}" />
                     </h:panelGroup>
 
                     <h:panelGroup rendered="#{node.type == 'fieldGroup'}">
-                        <p:commandButton id="editFieldGroupBtn" icon="ui-icon-document" oncomplete="PF('groupDialog').show()" update=":groupForm"
+                        <p:commandButton id="editFieldGroupBtn" icon="pi pi-file-edit" oncomplete="PF('groupDialog').show()" update=":groupForm"
                             action="#{customEntityTemplateBean.editFieldGrouping(node)}">
                             <!--                             <f:setPropertyActionListener target="#{customEntityTemplateBean.selectedFieldGrouping}" value="#{node}" /> -->
                         </p:commandButton>
 
-                        <p:commandButton id="addFieldInFieldGroupBtn" icon="ui-icon-plus" oncomplete="PF('cftDialog').show()" actionListener="#{customFieldTemplateBean.newEntity()}" update=":cftForm">
+                        <p:commandButton id="addFieldInFieldGroupBtn" icon="pi pi-plus" oncomplete="PF('cftDialog').show()" actionListener="#{customFieldTemplateBean.newEntity()}" update=":cftForm">
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.backViewSave}" value="customizedEntity" />
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.entity.appliesTo}" value="#{customEntityTemplateBean.cetPrefix}" />
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.entity.guiPosition}" value="#{node.guiPositionForField}" />
                         </p:commandButton>
 
-                        <p:commandButton id="deleteFieldGrouplink" icon="ui-icon-trash" action="#{customEntityTemplateBean.removeFieldGrouping()}" update=":fieldsForm:fields">
+                        <p:commandButton id="deleteFieldGrouplink" icon="pi pi-trash" action="#{customEntityTemplateBean.removeFieldGrouping()}" update=":fieldsForm:fields">
                             <f:setPropertyActionListener target="#{customEntityTemplateBean.selectedFieldGrouping}" value="#{node}" />
-                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['customizedEntities.confirmDeleteFieldGroup']}" icon="ui-icon-alert" />
+                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['customizedEntities.confirmDeleteFieldGroup']}" icon="pi pi-exclamation-triangle" />
                         </p:commandButton>
 
-                        <p:commandButton id="moveUpFgBtn" icon="ui-icon-arrowthick-1-n" action="#{customEntityTemplateBean.moveUp(node)}" update=":fieldsForm:fields" rendered="#{node.canMoveUp()}" />
+                        <p:commandButton id="moveUpFgBtn" icon="pi pi-arrow-up" action="#{customEntityTemplateBean.moveUp(node)}" update=":fieldsForm:fields" rendered="#{node.canMoveUp()}" />
 
-                        <p:commandButton id="moveDownFgBtn" icon="ui-icon-arrowthick-1-s" action="#{customEntityTemplateBean.moveDown(node)}" update=":fieldsForm:fields"
+                        <p:commandButton id="moveDownFgBtn" icon="pi pi-arrow-down" action="#{customEntityTemplateBean.moveDown(node)}" update=":fieldsForm:fields"
                             rendered="#{node.canMoveDown()}" />
                     </h:panelGroup>
 
                     <h:panelGroup rendered="#{node.type == 'field'}">
 
-                        <p:commandButton id="editFieldBtn" icon="ui-icon-document" oncomplete="PF('cftDialog').show()" action="#{customFieldTemplateBean.initEntity(entity.id)}" update=":cftForm">
+                        <p:commandButton id="editFieldBtn" icon="pi pi-file-edit" oncomplete="PF('cftDialog').show()" action="#{customFieldTemplateBean.initEntity(entity.id)}" update=":cftForm">
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.backViewSave}" value="customizedEntity" />
                         </p:commandButton>
 
 
-                        <p:commandButton id="enablelink" icon="ui-icon-circle-check" rendered="#{entity.disabled}" actionListener="#{customEntityTemplateBean.refreshFields}"
+                        <p:commandButton id="enablelink" icon="pi pi-check-circle" rendered="#{entity.disabled}" actionListener="#{customEntityTemplateBean.refreshFields}"
                             action="#{customFieldTemplateBean.enable()}" update="@form">
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.entity}" value="#{entity}" />
                             <p:confirm header="#{messages['commons.enable']}" message="#{messages['commons.confirmEnable']}" />
                         </p:commandButton>
-                        <p:commandButton id="disablelink" icon="ui-icon-circle-close" rendered="#{not entity.disabled}" actionListener="#{customEntityTemplateBean.refreshFields}"
+                        <p:commandButton id="disablelink" icon="pi pi-stop-circle" rendered="#{not entity.disabled}" actionListener="#{customEntityTemplateBean.refreshFields}"
                             action="#{customFieldTemplateBean.disable()}" update="@form">
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.entity}" value="#{entity}" />
                             <p:confirm header="#{messages['commons.disable']}" message="#{messages['commons.confirmDisable']}" />
                         </p:commandButton>
 
 
-                        <p:commandButton id="copylink" icon="ui-icon-copy" update=":copyCFTForm" oncomplete="PF('copyCFTDialog').show()" rendered="#{!customEntityTemplateBean.customTable}">
+                        <p:commandButton id="copylink" icon="pi pi-copy" update=":copyCFTForm" oncomplete="PF('copyCFTDialog').show()" rendered="#{!customEntityTemplateBean.customTable}">
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.entity}" value="#{entity}" />
                         </p:commandButton>
 
                         <p:remoteCommand id="remoteDeleteButton" actionListener="#{customFieldTemplateBean.delete}" action="#{customEntityTemplateBean.removeField(node)}" name="fieldsDoDelete"
                             update="@form" />
-                        <p:commandButton id="deletelink" icon="ui-icon-trash" oncomplete="fieldsDoDelete()" disabled="#{entity.uniqueConstraint == true}">
+                        <p:commandButton id="deletelink" icon="pi pi-trash" oncomplete="fieldsDoDelete()" disabled="#{entity.uniqueConstraint == true}">
                             <f:setPropertyActionListener target="#{customFieldTemplateBean.entity}" value="#{entity}" />
-                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert" />
+                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle" />
                         </p:commandButton>
 
 
-                        <p:commandButton id="moveUpFBtn" icon="ui-icon-arrowthick-1-n" action="#{customEntityTemplateBean.moveUp(node)}" update=":fieldsForm:fields" rendered="#{node.canMoveUp()}" />
+                        <p:commandButton id="moveUpFBtn" icon="pi pi-arrow-up" action="#{customEntityTemplateBean.moveUp(node)}" update=":fieldsForm:fields" rendered="#{node.canMoveUp()}" />
 
-                        <p:commandButton id="moveDownFBtn" icon="ui-icon-arrowthick-1-s" action="#{customEntityTemplateBean.moveDown(node)}" update=":fieldsForm:fields"
+                        <p:commandButton id="moveDownFBtn" icon="pi pi-arrow-down" action="#{customEntityTemplateBean.moveDown(node)}" update=":fieldsForm:fields"
                             rendered="#{node.canMoveDown()}" />
 
                     </h:panelGroup>
@@ -145,16 +145,16 @@
 
                     <h:panelGroup rendered="#{node.type == 'action'}">
 
-                        <p:commandButton id="editActionBtn" icon="ui-icon-document" oncomplete="PF('actionDialog').show()" action="#{entityCustomActionBean.initEntity(entity.id)}" update=":actionForm">
+                        <p:commandButton id="editActionBtn" icon="pi pi-file-edit" oncomplete="PF('actionDialog').show()" action="#{entityCustomActionBean.initEntity(entity.id)}" update=":actionForm">
                             <f:setPropertyActionListener target="#{entityCustomActionBean.backViewSave}" value="customizedEntity" />
                         </p:commandButton>
 
-                        <p:commandButton id="enableActionlink" icon="ui-icon-circle-check" rendered="#{entity.disabled}" actionListener="#{customEntityTemplateBean.refreshActions}"
+                        <p:commandButton id="enableActionlink" icon="pi pi-check-circle" rendered="#{entity.disabled}" actionListener="#{customEntityTemplateBean.refreshActions}"
                             action="#{entityCustomActionBean.enable()}" update="@form">
                             <f:setPropertyActionListener target="#{entityCustomActionBean.entity}" value="#{entity}" />
                             <p:confirm header="#{messages['commons.enable']}" message="#{messages['commons.confirmEnable']}" />
                         </p:commandButton>
-                        <p:commandButton id="disableActionlink" icon="ui-icon-circle-close" rendered="#{not entity.disabled}" actionListener="#{customEntityTemplateBean.refreshActions}"
+                        <p:commandButton id="disableActionlink" icon="pi pi-stop-circle" rendered="#{not entity.disabled}" actionListener="#{customEntityTemplateBean.refreshActions}"
                             action="#{entityCustomActionBean.disable()}" update="@form">
                             <f:setPropertyActionListener target="#{entityCustomActionBean.entity}" value="#{entity}" />
                             <p:confirm header="#{messages['commons.disable']}" message="#{messages['commons.confirmDisable']}" />
@@ -162,14 +162,14 @@
 
                         <p:remoteCommand id="remoteDeleteActionButton" actionListener="#{entityCustomActionBean.deleteInlist}" action="#{customEntityTemplateBean.refreshFields}" name="actionsDoDelete"
                             oncomplete="handleDeleteComplete(xhr,status,args)" update="@form" />
-                        <p:commandButton id="deleteActionlink" icon="ui-icon-trash" oncomplete="actionsDoDelete()">
+                        <p:commandButton id="deleteActionlink" icon="pi pi-trash" oncomplete="actionsDoDelete()">
                             <f:setPropertyActionListener target="#{entityCustomActionBean.entity}" value="#{entity}" />
-                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert" />
+                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle" />
                         </p:commandButton>
 
-                        <p:commandButton id="moveUpABtn" icon="ui-icon-arrowthick-1-n" action="#{customEntityTemplateBean.moveUp(node)}" update=":fieldsForm:fields" rendered="#{node.canMoveUp()}" />
+                        <p:commandButton id="moveUpABtn" icon="pi pi-arrow-up" action="#{customEntityTemplateBean.moveUp(node)}" update=":fieldsForm:fields" rendered="#{node.canMoveUp()}" />
 
-                        <p:commandButton id="moveDownABtn" icon="ui-icon-arrowthick-1-s" action="#{customEntityTemplateBean.moveDown(node)}" update=":fieldsForm:fields"
+                        <p:commandButton id="moveDownABtn" icon="pi pi-arrow-down" action="#{customEntityTemplateBean.moveDown(node)}" update=":fieldsForm:fields"
                             rendered="#{node.canMoveDown()}" />
 
                     </h:panelGroup>
@@ -390,7 +390,7 @@
 
                             <c:if test="#{customFieldTemplateBean.edit}">
                                 <p:column width="50">
-                                    <p:commandButton id="deletelink" action="#{customFieldTemplateBean.entity.removeMatrixColumn(matrixColumn)}" partialSubmit="true" icon="ui-icon-trash"
+                                    <p:commandButton id="deletelink" action="#{customFieldTemplateBean.entity.removeMatrixColumn(matrixColumn)}" partialSubmit="true" icon="pi pi-trash"
                                         process="@this" update=":cftForm:matrixColumns">
                                     </p:commandButton>
                                 </p:column>
@@ -472,7 +472,7 @@
                         <p:remoteCommand action="#{customEntityTemplateBean.refreshFields}" name="refreshFields" update=":fieldsForm:fields" />
                         <p:commandButton value="#{messages['action.save']}" onclick="delayDisable(this);"
                             oncomplete="if (args &amp;&amp; !args.validationFailed){refreshFields();PF('cftDialog').hide();}" actionListener="#{customFieldTemplateBean.saveOrUpdateForPopup}"
-                            icon="ui-icon-check" process="@form" update="@form">
+                            icon="pi pi-check" process="@form" update="@form">
                             <f:param name="edit" value="true" />
                         </p:commandButton>
                         <p:commandButton value="#{messages['commons.disable']}" rendered="#{not empty customFieldTemplateBean.entity.id and customFieldTemplateBean.entity.active}"
@@ -484,13 +484,13 @@
                             oncomplete="refreshFields()" action="#{customFieldTemplateBean.enable}" update="@form">
                             <p:confirm header="#{messages['commons.enable']}" message="#{messages['commons.confirmEnable']}" />
                         </p:commandButton>
-                        <p:commandButton id="deleteButton" icon="ui-icon-trash" value="#{messages['commons.delete']}" action="#{customFieldTemplateBean.delete}"
+                        <p:commandButton id="deleteButton" icon="pi pi-trash" value="#{messages['commons.delete']}" action="#{customFieldTemplateBean.delete}"
                             rendered="#{customFieldTemplateBean.entity.id!=null and customFieldTemplateBean.canUserDeleteEntity()}"
                             oncomplete="if (args &amp;&amp; !args.validationFailed){refreshFields();PF('cftDialog').hide();}">
-                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert" />
+                            <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle" />
                         </p:commandButton>
 
-                        <p:commandButton id="copyButton" icon="ui-icon-copy" value="#{messages['customFieldTemplate.copyCFT.action']}"
+                        <p:commandButton id="copyButton" icon="pi pi-copy" value="#{messages['customFieldTemplate.copyCFT.action']}"
                             rendered="#{customFieldTemplateBean.entity.id!=null and customFieldTemplateBean.canUserUpdateEntity()}" oncomplete="PF('copyCFTDialog').show()" update=":copyCFTForm">
                         </p:commandButton>
 

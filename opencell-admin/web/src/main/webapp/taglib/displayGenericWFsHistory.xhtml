@@ -46,7 +46,7 @@
 	                  <hftl:column label="#{messages['BusinessEntity.description']}" field="currentStatus.description" entity="${wfInstance}" />
 	                  
 	                  <p:column headerText="#{messages['commons.actions']}">
-                             <p:commandButton icon="ui-icon-document" action="#{workflowInstanceHistoryBean.selectWFInstance(wfInstance)}"
+                             <p:commandButton icon="pi pi-file-edit" action="#{workflowInstanceHistoryBean.selectWFInstance(wfInstance)}"
                                  update=":#{component.namingContainer.parent.namingContainer.clientId}:wfHistoryDetails"
                      			 process="@this" />
 	                  </p:column>

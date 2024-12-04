@@ -28,11 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.billing.BatchEntity;
@@ -42,6 +37,11 @@ import org.meveo.model.billing.ThresholdOptionsEnum;
 import org.meveo.model.crm.Provider;
 import org.meveo.service.base.PersistenceService;
 import org.meveo.util.ApplicationProvider;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 /**
  * A class for invoicing threshold persistence services.
@@ -69,32 +69,32 @@ public class InvoicingThresholdService extends PersistenceService<BatchEntity> {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void applyThresholdByInvoice(BillingRun billingRun, Set<Long> billingAccountsIds,
 			BigDecimal invoicingThreshold, ThresholdOptionsEnum checkThreshold) {
-		List<Object[]> ids; // List of array of billingAccountsIds and invoiceLinesIds
+            List<Object[]> ids; // List of array of billingAccountsIds and invoiceLinesIds
 		ids = invoiceLineService.checkThreshold(billingRun.getId(), invoicingThreshold, checkThreshold, appProvider.isEntreprise());
 		String billingAccountReason = "Billing account did not reach invoicing threshold";
-		Set<Long> invoiceLinesIds = new HashSet<>();
-		ids.forEach(item -> {
-		    BigInteger billingAccountId = (BigInteger) item[0];
-		    String ilIds = (String) item[1];
-		    if (billingAccountId != null) {
-		        billingAccountsIds.add(billingAccountId.longValue());
-		    }
-		    if (!StringUtils.isBlank(ilIds)) {
-		        invoiceLinesIds.addAll(stream((ilIds).split(",")).map(Long::parseLong).collect(toSet()));
-		    }
-		});
-		if (!invoiceLinesIds.isEmpty()) {
-		    // reopen invoice lines RTs
-		    ratedTransactionService.detachRatedTransactions(invoiceLinesIds);
-		    // cancel invoice lines
-		    invoiceLineService.cancelInvoiceLines(invoiceLinesIds);
-		}
+            Set<Long> invoiceLinesIds = new HashSet<>();
+            ids.forEach(item -> {
+                BigInteger billingAccountId = (BigInteger) item[0];
+                String ilIds = (String) item[1];
+                if (billingAccountId != null) {
+                    billingAccountsIds.add(billingAccountId.longValue());
+                }
+                if (!StringUtils.isBlank(ilIds)) {
+                    invoiceLinesIds.addAll(stream((ilIds).split(",")).map(Long::parseLong).collect(toSet()));
+                }
+            });
+            if (!invoiceLinesIds.isEmpty()) {
+                // reopen invoice lines RTs
+                ratedTransactionService.detachRatedTransactions(invoiceLinesIds);
+                // cancel invoice lines
+                invoiceLineService.cancelInvoiceLines(invoiceLinesIds);
+            }
 		/* Create rejected billing accounts for invoice and each entity (BA, CA, C) */
-        billingAccountsIds.forEach(baIdToReject -> {
-            BillingAccount ba = getEntityManager().getReference(BillingAccount.class, baIdToReject);
-            rejectedBillingAccountService.create(ba, getEntityManager().getReference(BillingRun.class, billingRun.getId()), billingAccountReason);
-        });
-	}
+            billingAccountsIds.forEach(baIdToReject -> {
+                BillingAccount ba = getEntityManager().getReference(BillingAccount.class, baIdToReject);
+                rejectedBillingAccountService.create(ba, getEntityManager().getReference(BillingRun.class, billingRun.getId()), billingAccountReason);
+            });
+        }
 
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -118,7 +118,7 @@ public class InvoicingThresholdService extends PersistenceService<BatchEntity> {
                 rejectedBillingAccountService.create(ba, getEntityManager().getReference(BillingRun.class, billingRun.getId()), billingAccountReason);
             });
 		    billingAccountsIds.addAll(currentBillingAccountsIds);
-		}
+    }
 	}
 
 }

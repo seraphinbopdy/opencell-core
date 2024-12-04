@@ -7,10 +7,9 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.meveo.model.billing.InvoiceStatusEnum.DRAFT;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
-import static org.meveo.model.jobs.JobLauncherEnum.API;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -20,39 +19,38 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.job.UpdateHugeEntityJob;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.BaseApi;
 import org.meveo.api.dto.FilterDto;
 import org.meveo.api.dto.billing.QuarantineBillingRunDto;
 import org.meveo.api.dto.invoice.GenerateInvoiceRequestDto;
-import org.meveo.api.exception.AccessDeniedException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.invoice.InvoiceApi;
-import org.meveo.apiv2.billing.*;
+import org.meveo.apiv2.billing.BasicInvoice;
+import org.meveo.apiv2.billing.GenerateInvoiceResult;
+import org.meveo.apiv2.billing.ImmutableInvoiceLine;
+import org.meveo.apiv2.billing.ImmutableInvoiceLinesInput;
+import org.meveo.apiv2.billing.InvoiceLine;
+import org.meveo.apiv2.billing.InvoiceLineInput;
+import org.meveo.apiv2.billing.InvoiceLinesInput;
+import org.meveo.apiv2.billing.InvoiceLinesToReplicate;
+import org.meveo.apiv2.billing.InvoiceNotValidated;
+import org.meveo.apiv2.billing.InvoicePatchInput;
 import org.meveo.apiv2.billing.ProcessCdrListResult.Statistics;
+import org.meveo.apiv2.billing.ProcessingModeEnum;
+import org.meveo.apiv2.billing.RejectReasonInput;
+import org.meveo.apiv2.billing.ValidateInvoiceResult;
 import org.meveo.apiv2.billing.impl.InvoiceMapper;
+import org.meveo.apiv2.common.HugeEntity;
+import org.meveo.apiv2.common.ImmutableHugeEntity;
 import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.IBillableEntity;
@@ -60,21 +58,30 @@ import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceStatusEnum;
-import org.meveo.model.billing.LinkedInvoice;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.RatedTransactionAction;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.DiscountPlan;
-import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.filter.Filter;
-import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.payments.OperationCategoryEnum;
-import org.meveo.service.billing.impl.*;
+import org.meveo.service.billing.impl.BatchEntityService;
+import org.meveo.service.billing.impl.InvoiceLineService;
+import org.meveo.service.billing.impl.InvoiceService;
+import org.meveo.service.billing.impl.InvoiceTypeService;
+import org.meveo.service.billing.impl.LinkedInvoiceService;
+import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.filter.FilterService;
-import org.meveo.service.job.JobExecutionService;
-import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
+
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 
 public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	
@@ -114,12 +121,9 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 	@Inject
 	private AdvancedSettingsService advancedSettingsService;
-	
-	@Inject
-	private JobInstanceService jobInstanceService;
 
 	@Inject
-	private JobExecutionService jobExecutionService;
+	private BatchEntityService batchEntityService;
 
 	@Override
 	public List<Invoice> list(Long offset, Long limit, String sort, String orderBy, String filter) {
@@ -278,6 +282,13 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 			}
 			invoice.getInvoiceLines().add(invoiceLine);
 			result.addInvoiceLines(invoiceLineResource);
+		}
+		
+		if (InvoiceStatusEnum.NEW.equals(invoice.getStatus())) {
+			invoice.setStatus(DRAFT);
+			invoice.assignTemporaryInvoiceNumber();
+			invoiceService.update(invoice);
+			invoiceService.getEntityManager().flush();
 		}
 		invoiceService.calculateInvoice(invoice, false);
 		invoiceService.updateBillingRunStatistics(invoice);
@@ -508,7 +519,6 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 		return filter;
 	}
 	
-	@Transactional
 	public Invoice createAdjustment(Invoice invoice, InvoiceLinesToReplicate invoiceLinesToReplicate) {
 	    Invoice adjInvoice = null;
 
@@ -541,14 +551,11 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	    if (invoiceLinesToReplicate.getGlobalAdjustment() == null) {
             throw new MissingParameterException("globalAdjustment");
         }
-		
-		if(Boolean.TRUE.equals(invoiceLinesToReplicate.getRerate())) {
-			if(!Boolean.TRUE.equals(advancedSettingsService.getParameter("rating.allowBilledItemsRerating"))) {
+
+		if(Boolean.TRUE.equals(invoiceLinesToReplicate.getRerate())
+				&& !Boolean.TRUE.equals(advancedSettingsService.getParameter("rating.allowBilledItemsRerating"))) {
 				throw new ForbiddenException(resourceMessages.getString("error.adjustment.action.forbidden"));
-			} else if(!Boolean.TRUE.equals(invoiceLinesToReplicate.getGlobalAdjustment())) {
-				throw new ForbiddenException(resourceMessages.getString("error.adjustment.action.incompatible"));
 			}
-		}
 
 	    try {
 	        adjInvoice = invoiceService.createAdjustment(invoice, invoiceLinesToReplicate);
@@ -561,31 +568,28 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
     	    }
     	    invoiceService.update(invoice);
 
-			if(Boolean.TRUE.equals(invoiceLinesToReplicate.getRerate())) {
-				JobInstance markWOToRerateJob = jobInstanceService.findByCode("MarkWOToRerateJob");
-				if(markWOToRerateJob == null) {
-					throw new EntityDoesNotExistsException(JobInstance.class, "MarkWOToRerateJob");
-				}
+    	    if(Boolean.TRUE.equals(invoiceLinesToReplicate.getRerate())) {
+    	        Map<String, Object> filters = new HashMap<>();
 
-				if(markWOToRerateJob.getCfValues() == null) {
-					markWOToRerateJob.setCfValues(new CustomFieldValues());
-				}
+    	        if(Boolean.TRUE.equals(invoiceLinesToReplicate.getGlobalAdjustment())) {
+    	            filters.put("ratedTransaction.invoiceLine.invoice.id", invoice.getId());
+    	        } else {
+    	            // filters.put("$operator", "AND");
+    	            filters.put("inList ratedTransaction.invoiceLine.id", invoiceLinesToReplicate.getInvoiceLinesIds());
+    	            if(CollectionUtils.isNotEmpty(invoiceLinesToReplicate.getInvoiceLinesRTs())) {
+    	                filters.put("ratedTransaction.id", invoiceLinesToReplicate.getInvoiceLinesRTs());
+    	            }
+    	        }
 
-				markWOToRerateJob.setParamValue(UpdateHugeEntityJob.CF_ENTITY_ClASS_NAME, WalletOperation.class.getName());
+    	        HugeEntity batchEntity = ImmutableHugeEntity.builder()
+    	                .filters(filters)
+    	                .targetJob("MarkWOToRerateJob")
+    	                .build();
 
-				Map<String, Map<String, Object>> filters = new HashMap<>();
-				filters.put("filters", Map.of("ratedTransaction.invoiceLine.invoice.id", invoice.getId()));
-				try {
-					markWOToRerateJob.setParamValue(UpdateHugeEntityJob.CF_DEFAULT_FILTER, new ObjectMapper().writeValueAsString(filters));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-
-				jobExecutionService.executeJob(markWOToRerateJob, markWOToRerateJob.getRunTimeValues(), API);
-			}
-	    }
-	    catch (Exception e) {
-	        throw new BusinessApiException(e.getMessage());
+    	        batchEntityService.create(batchEntity, batchEntity.getFilters(), WalletOperation.class.getSimpleName());
+    	    }
+        } catch (Exception e) {
+            throw new BusinessApiException(e);
         }
 	    
 	    adjInvoice = invoiceService.findById(adjInvoice.getId(), asList("invoiceLines", "invoiceType", "invoiceType.occTemplate", "linkedInvoices"));

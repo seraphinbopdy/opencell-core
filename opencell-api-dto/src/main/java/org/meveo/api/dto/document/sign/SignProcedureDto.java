@@ -18,9 +18,8 @@
 
 package org.meveo.api.dto.document.sign;
 
+import java.io.Serializable;
 import java.util.List;
-
-import org.meveo.api.dto.BaseEntityDto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -30,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Said Ramli 
  */ 
 @JsonIgnoreProperties (ignoreUnknown = true)
-public class SignProcedureDto  extends BaseEntityDto { 
+public class SignProcedureDto implements Serializable { 
     
     /** The Constant serialVersionUID. */ 
     private static final long serialVersionUID = 1L; 

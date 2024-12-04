@@ -29,9 +29,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.api.dto.CategoryInvoiceAgregateDto;
@@ -69,6 +66,9 @@ import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
 import org.meveo.service.catalog.impl.TaxService;
 import org.meveo.service.tax.TaxClassService;
 import org.meveo.util.ApplicationProvider;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * The Class PaymentScheduleInstanceItemService.

@@ -22,9 +22,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.dto.account.CRMAccountHierarchyDto;
 import org.meveo.model.AccountEntity;
@@ -33,6 +30,9 @@ import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.account.AccountScript;
 import org.meveo.service.script.account.AccountScriptInterface;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class AccountModelScriptService implements Serializable {

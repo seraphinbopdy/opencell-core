@@ -7,13 +7,13 @@ import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
 import java.util.regex.Pattern;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.cpq.AttributeValidationType;
 import org.meveo.model.cpq.ProductVersionAttribute;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 /**
  * @author Rachid.AITYAAZZA

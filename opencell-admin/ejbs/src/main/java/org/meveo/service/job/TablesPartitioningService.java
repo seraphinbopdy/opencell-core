@@ -5,14 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-
 import org.hibernate.JDBCException;
 import org.hibernate.query.NativeQuery;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
@@ -23,6 +15,14 @@ import org.meveo.model.jobs.JobExecutionResultStatusEnum;
 import org.meveo.service.base.NativePersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.Query;
 
 @Stateless
 public class TablesPartitioningService extends NativePersistenceService {

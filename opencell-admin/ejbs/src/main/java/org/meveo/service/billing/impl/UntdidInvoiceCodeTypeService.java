@@ -6,8 +6,8 @@ import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.billing.UntdidInvoiceCodeType;
 import org.meveo.service.base.PersistenceService;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class UntdidInvoiceCodeTypeService extends PersistenceService<UntdidInvoiceCodeType> {

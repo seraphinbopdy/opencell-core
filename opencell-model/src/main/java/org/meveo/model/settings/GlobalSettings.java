@@ -1,18 +1,19 @@
 package org.meveo.model.settings;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "global_settings")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "global_settings_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = {
+        @Parameter(name = "sequence_name", value = "global_settings_seq"), @Parameter(name = "increment_size", value = "1") })
 public class GlobalSettings extends AuditableEntity {
 
     private static final long serialVersionUID = 7097186153182628716L;
@@ -24,7 +25,7 @@ public class GlobalSettings extends AuditableEntity {
      * @deprecated in 14.0.0 for not use
      */
     @Deprecated
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "activate_dunning")
     private Boolean activateDunning = Boolean.FALSE;
 

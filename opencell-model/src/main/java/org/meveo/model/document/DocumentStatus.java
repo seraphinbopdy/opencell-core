@@ -7,9 +7,7 @@ package org.meveo.model.document;
  */
 
 public enum DocumentStatus {
-    ACTIVE(1, "DocumentStatus.active"),
-    INACTIVE(2, "DocumentStatus.inactive"),
-    REJECTED(3, "DocumentStatus.rejected");
+    ACTIVE(1, "DocumentStatus.active"), INACTIVE(2, "DocumentStatus.inactive"), REJECTED(3, "DocumentStatus.rejected");
 
     private Integer id;
     private String label;

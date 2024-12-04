@@ -3,14 +3,13 @@ package org.meveo.service.cpq.order;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.TypedQuery;
-
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.TypedQuery;
 import org.meveo.model.cpq.commercial.OrderProduct;
-import org.meveo.model.quote.QuoteProduct;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
 
 /**
  * @author Tarik FAKHOURI

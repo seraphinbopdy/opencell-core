@@ -1,14 +1,15 @@
 package org.meveo.apiv2.AcountReceivable;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
-import org.immutables.value.Value;
-import org.meveo.api.dto.account.CustomerAccountDto;
-
 import java.math.BigDecimal;
 
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Value.Immutable
-@Value.Style(jdkOnly = true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableAmountToTransferDto.class)
 public interface AmountToTransferDto {
 	

@@ -4,9 +4,9 @@ import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.ordering.resource.oo.OpenOrderDto;
 import org.meveo.apiv2.ordering.services.OpenOrderApiService;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

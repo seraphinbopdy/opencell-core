@@ -23,10 +23,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.admin.exception.ValidationException;
@@ -58,6 +54,10 @@ import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
+
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
 
 @Stateless
 public class OneShotChargeInstanceService extends BusinessService<OneShotChargeInstance> {

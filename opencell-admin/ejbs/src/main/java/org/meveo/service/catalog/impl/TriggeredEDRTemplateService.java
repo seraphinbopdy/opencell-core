@@ -17,14 +17,14 @@
  */
 package org.meveo.service.catalog.impl;
 
-import javax.ejb.Stateless;
-
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.catalog.TriggeredEDRTemplate;
 import org.meveo.service.base.BusinessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Stateless;
 
 /**
  * Charge Template service implementation.

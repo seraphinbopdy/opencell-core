@@ -1,13 +1,14 @@
 package org.meveo.api.dto.cpq.xml;
 
+import java.util.Date;
+
 import org.meveo.api.dto.cpq.CurrencyDetailDto;
 import org.meveo.api.dto.cpq.TaxDetailDTO;
 import org.meveo.model.quote.QuoteVersion;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import java.util.Date;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class QuoteXMLHeader extends Header {
@@ -23,13 +24,11 @@ public class QuoteXMLHeader extends Header {
     public QuoteXMLHeader() {
     }
 
-    public QuoteXMLHeader(BillingAccount billingAccount, Contract contract, QuoteVersion quoteVersion, String quoteCode, Date startDate,
-                          Long duration, int opportunityDuration, String customerReference, String registrationNumber,
-                          Date validFromDate, Date validToDate, String comment, org.meveo.api.dto.cpq.xml.Customer customer, org.meveo.api.dto.cpq.xml.Seller seller,
-                          CurrencyDetailDto currency, TaxDetailDTO taxDetail) {
-        super(billingAccount, contract, quoteVersion.getQuoteVersion(), quoteCode, startDate,
-                duration, opportunityDuration, customerReference, registrationNumber,
-                validFromDate, validToDate, comment, quoteVersion.getStartDate(), quoteVersion.getEndDate());
+    public QuoteXMLHeader(BillingAccount billingAccount, Contract contract, QuoteVersion quoteVersion, String quoteCode, Date startDate, Long duration, Integer opportunityDuration, String customerReference,
+            String registrationNumber, Date validFromDate, Date validToDate, String comment, org.meveo.api.dto.cpq.xml.Customer customer, org.meveo.api.dto.cpq.xml.Seller seller, CurrencyDetailDto currency,
+            TaxDetailDTO taxDetail) {
+        super(billingAccount, contract, quoteVersion.getQuoteVersion(), quoteCode, startDate, duration, opportunityDuration, customerReference, registrationNumber, validFromDate, validToDate, comment,
+            quoteVersion.getStartDate(), quoteVersion.getEndDate());
         this.customer = customer;
         this.seller = seller;
         this.currency = currency;

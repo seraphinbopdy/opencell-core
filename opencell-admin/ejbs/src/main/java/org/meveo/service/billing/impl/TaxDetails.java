@@ -6,11 +6,11 @@ import static java.math.RoundingMode.FLOOR;
 import static java.math.RoundingMode.HALF_UP;
 import static java.util.stream.Collectors.toList;
 
-import org.meveo.model.billing.Tax;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.meveo.model.billing.Tax;
 
 public class TaxDetails {
 

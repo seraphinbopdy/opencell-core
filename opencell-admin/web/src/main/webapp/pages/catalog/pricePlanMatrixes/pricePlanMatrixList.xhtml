@@ -24,7 +24,7 @@
 
         <f:facet name="header">
             <p:commandButton id="toggler1" type="button" style="float:right" disabled="#{pricePlanMatrixListBean.lazyDataModel.size()==0?'true':'false'}"
-                             icon="ui-icon-calculator"/>
+                             icon="pi pi-calculator"/>
             <p:columnToggler datasource="datatable_pp_results_omitFromSubmit" trigger="toggler1">
                 <!-- 					<p:ajax event="toggle" listener="#{pricePlanMatrixColumnSelectorBean.onToggle}" /> -->
             </p:columnToggler>
@@ -36,7 +36,7 @@
             <h:link id="pp_detail" value="#{entity.code}" outcome="pricePlanMatrixDetail">
                 <f:param name="objectId" value="#{entity.id}"/>
                 <f:param name="edit" value="true"/>
-                <f:param name="cid" value="#{javax.enterprise.context.conversation.id}"/>
+                <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}"/>
                 <f:param name="chargeId" value="#{chargeTemplateBean.entity.id}"/>
             </h:link>
         </p:column>
@@ -363,25 +363,25 @@
             <f:facet name="header">
                 <h:outputText value="#{messages['commons.actions']}"/>
             </f:facet>
-            <p:button outcome="pricePlanMatrixDetail" icon="ui-icon-document">
+            <p:button outcome="pricePlanMatrixDetail" icon="pi pi-file-edit">
                 <f:param name="objectId" value="#{entity.id}"/>
                 <f:param name="edit" value="true"/>
                 <f:param name="chargeId" value="#{chargeTemplateBean.entity.id}"/>
                 <f:param name="cid"
-                         value="#{javax.enterprise.context.conversation.id}"/>
+                         value="#{jakarta.enterprise.context.conversation.id}"/>
             </p:button>
-            <p:commandButton update="@form" icon="ui-icon-trash"
+            <p:commandButton update="@form" icon="pi pi-trash"
                              action="#{pricePlanMatrixBean.delete(entity.id)}"
                              rendered="#{pricePlanMatrixBean.canUserDeleteEntity()}">
                 <p:confirm header="#{messages['commons.confirmationHeader']}"
-                           message="#{messages['commons.confirmDelete']}" icon="ui-icon-alert"/>
+                           message="#{messages['commons.confirmDelete']}" icon="pi pi-exclamation-triangle"/>
             </p:commandButton>
         </p:column>
     </p:dataTable>
     <p:button id="buttonNew" outcome="pricePlanMatrixDetail"
               value="#{messages['commons.new']}"
               rendered="#{pricePlanMatrixBean.canUserUpdateEntity()}">
-        <f:param name="cid" value="#{javax.enterprise.context.conversation.id}"/>
+        <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}"/>
         <f:param name="edit" value="true"/>
         <f:param name="chargeId" value="#{chargeTemplateBean.entity.id}"/>
     </p:button>

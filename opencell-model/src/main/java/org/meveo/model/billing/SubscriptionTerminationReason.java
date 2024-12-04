@@ -17,24 +17,28 @@
  */
 package org.meveo.model.billing;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.NumericBooleanConverter;
+import org.hibernate.type.SqlTypes;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ExportIdentifier;
 import org.meveo.model.ISearchable;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Subscription termination rule
@@ -47,8 +51,7 @@ import java.util.Map;
 @Cacheable
 @ExportIdentifier({ "code" })
 @Table(name = "billing_subscrip_termin_reason", uniqueConstraints = @UniqueConstraint(columnNames = { "code" }))
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "billing_sub_term_reason_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "billing_sub_term_reason_seq"), @Parameter(name = "increment_size", value = "1") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties({ "auditable", "previousCode", "appendGeneratedCode" })
 public class SubscriptionTerminationReason extends BusinessEntity implements ISearchable {
@@ -58,28 +61,28 @@ public class SubscriptionTerminationReason extends BusinessEntity implements ISe
     /**
      * Apply agreement
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "apply_agreement")
     private boolean applyAgreement;
 
     /**
      * invoice agreement immediately by setting WO's operation date to termination date
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "invoice_agreement_immediately")
     private boolean invoiceAgreementImmediately;
 
     /**
      * Reimburse
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "apply_reimbursment")
     private boolean applyReimbursment;
 
     /**
      * Apply termination charges
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "apply_termination_charges")
     private boolean applyTerminationCharges;
 
@@ -93,14 +96,14 @@ public class SubscriptionTerminationReason extends BusinessEntity implements ISe
     /**
      * reimburse Oneshots charges.
      */
-    @Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "reimburse_oneshots")
     private boolean reimburseOneshots;
 
     /**
      * Translated descriptions in JSON format with language code as a key and translated description as a value
      */
-    @Type(type = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description_i18n", columnDefinition = "jsonb")
     private Map<String, String> descriptionI18n;
 
@@ -174,7 +177,7 @@ public class SubscriptionTerminationReason extends BusinessEntity implements ISe
     }
 
     public String getLocalizedDescription(String lang) {
-        if(descriptionI18n != null) {
+        if (descriptionI18n != null) {
             return descriptionI18n.getOrDefault(lang, this.description);
         } else {
             return this.description;

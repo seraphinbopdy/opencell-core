@@ -11,12 +11,8 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.Map;
-
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import java.util.Optional;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
@@ -30,12 +26,16 @@ import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplate;
-import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.AttributeValue;
+import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.rating.EDR;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.catalog.impl.OneShotChargeTemplateService;
 import org.meveo.service.tax.TaxClassService;
+
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class OneShotRatingService extends RatingService implements Serializable {

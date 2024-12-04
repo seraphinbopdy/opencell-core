@@ -21,12 +21,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-
 import org.meveo.model.DatePeriod;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 
 @Entity
 @DiscriminatorValue("FIXED")
@@ -76,11 +76,7 @@ public class CalendarFixed extends Calendar {
      * @return Next calendar date.
      */
     public Date nextCalendarDate(Date date) {
-        return fixedDates.stream().map(FixedDate::getDatePeriod)
-            .filter(datePeriod -> datePeriod.isCorrespondsToPeriod(date))
-            .map(DatePeriod::getTo)
-            .findFirst()
-            .orElse(null);
+        return fixedDates.stream().map(FixedDate::getDatePeriod).filter(datePeriod -> datePeriod.isCorrespondsToPeriod(date)).map(DatePeriod::getTo).findFirst().orElse(null);
     }
 
     /**
@@ -90,11 +86,7 @@ public class CalendarFixed extends Calendar {
      * @return previous calendar date.
      */
     public Date previousCalendarDate(Date date) {
-        return fixedDates.stream().map(FixedDate::getDatePeriod)
-                .filter(datePeriod -> datePeriod.isCorrespondsToPeriod(date))
-                .map(DatePeriod::getFrom)
-                .findFirst()
-                .orElse(null);
+        return fixedDates.stream().map(FixedDate::getDatePeriod).filter(datePeriod -> datePeriod.isCorrespondsToPeriod(date)).map(DatePeriod::getFrom).findFirst().orElse(null);
     }
 
     /**
@@ -105,11 +97,8 @@ public class CalendarFixed extends Calendar {
      */
     @Override
     public Date previousPeriodEndDate(Date date) {
-        return fixedDates.stream().map(fixedDate -> fixedDate.getDatePeriod().getTo())
-                .filter(toDate -> toDate.before(date))
-                .max(Date::compareTo)
-                .orElse(null);    
-        }
+        return fixedDates.stream().map(fixedDate -> fixedDate.getDatePeriod().getTo()).filter(toDate -> toDate.before(date)).max(Date::compareTo).orElse(null);
+    }
 
     /**
      * Checks for next period start date.
@@ -119,9 +108,6 @@ public class CalendarFixed extends Calendar {
      */
     @Override
     public Date nextPeriodStartDate(Date date) {
-        return fixedDates.stream().map(fixedDate -> fixedDate.getDatePeriod().getFrom())
-                .filter(fromDate -> fromDate.after(date))
-                .min(Date::compareTo)
-                .orElse(null);    
+        return fixedDates.stream().map(fixedDate -> fixedDate.getDatePeriod().getFrom()).filter(fromDate -> fromDate.after(date)).min(Date::compareTo).orElse(null);
     }
 }

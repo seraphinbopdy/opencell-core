@@ -29,12 +29,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.Conversation;
-import javax.faces.model.DataModel;
-import javax.faces.view.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jboss.seam.international.status.Messages;
@@ -53,8 +47,13 @@ import org.meveo.util.ApplicationProvider;
 import org.meveo.util.view.LazyDataModelWSize;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.SortOrder;
 import org.slf4j.Logger;
+
+import jakarta.enterprise.context.Conversation;
+import jakarta.faces.model.DataModel;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 @ViewScoped
@@ -218,7 +217,7 @@ public class EntityExportImportBean implements Serializable {
 
                 @SuppressWarnings("unchecked")
                 @Override
-                public List load(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
+                public List load(int first, int pageSize, Map sortBy, Map filterBy) {
 
                     setRowCount(templates.size());
 
@@ -337,7 +336,7 @@ public class EntityExportImportBean implements Serializable {
 
                 File tempFile = File.createTempFile(FilenameUtils.getBaseName(event.getFile().getFileName()).replaceAll(" ", "_"),
                     "." + FilenameUtils.getExtension(event.getFile().getFileName()));
-                FileUtils.copyInputStreamToFile(event.getFile().getInputstream(), tempFile);
+                FileUtils.copyInputStreamToFile(event.getFile().getInputStream(), tempFile);
 
                 exportImportFuture = entityExportImportService.importEntities(tempFile, event.getFile().getFileName().replaceAll(" ", "_"), false, false, !requireFK, null, false);
                 messages.info(new BundleKey("messages", "export.import.inProgress"), event.getFile().getFileName());

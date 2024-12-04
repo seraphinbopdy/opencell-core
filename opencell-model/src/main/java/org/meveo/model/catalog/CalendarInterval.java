@@ -21,25 +21,25 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.meveo.model.shared.DateUtils;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+
 /**
  * Represents a time inverval(s) based calendar. Time interval specifies a begin and end times, which can be expressed in the following units: weekdays, month/day and hour/minute.
  * 
- * Example: given a month/day interval of 01/15 - 01/30 a previous calendar date for 2015/01/20 will be 2015/01/15 and next calendar date will be 2015/01/30&lt;br/&gt; given a
- * hour/minute interval of 15:30 - 16:45 a previous calendar date for 2015/01/20 16:00 will be 2015/01/20 15:30 and next calendar date will be 2015/01/20 16:45 &lt;br/&gt; given
- * weekday interval of 1-5 (monday - friday) a previous calendar date for 2015/01/20 will be 2015/01/19 and next calendar date will be 2015/01/23&lt;br/&gt;
+ * Example: given a month/day interval of 01/15 - 01/30 a previous calendar date for 2015/01/20 will be 2015/01/15 and next calendar date will be 2015/01/30&lt;br/&gt; given a hour/minute interval of 15:30 - 16:45 a
+ * previous calendar date for 2015/01/20 16:00 will be 2015/01/20 15:30 and next calendar date will be 2015/01/20 16:45 &lt;br/&gt; given weekday interval of 1-5 (monday - friday) a previous calendar date for 2015/01/20
+ * will be 2015/01/19 and next calendar date will be 2015/01/23&lt;br/&gt;
  * 
  * @author Andrius Karpavicius
  * 
@@ -76,8 +76,7 @@ public class CalendarInterval extends Calendar {
     }
 
     /**
-     * Determines a next calendar date matching any of calendar's time intervals. Example: given a month/day period of 01/15-01/30 a next calendar date for 2015/01/20 will be
-     * 2015/01/30
+     * Determines a next calendar date matching any of calendar's time intervals. Example: given a month/day period of 01/15-01/30 a next calendar date for 2015/01/20 will be 2015/01/30
      * 
      * 
      * @param date Date to check
@@ -121,8 +120,7 @@ public class CalendarInterval extends Calendar {
             // value is adjusted by 12 month.
         } else if (intervalType == CalendarIntervalTypeEnum.DAY) {
 
-            int monthDay = Integer.parseInt((calendar.get(java.util.Calendar.MONTH) + 1) + "" + (calendar.get(java.util.Calendar.DAY_OF_MONTH) < 10 ? "0" : "")
-                    + calendar.get(java.util.Calendar.DAY_OF_MONTH));
+            int monthDay = Integer.parseInt((calendar.get(java.util.Calendar.MONTH) + 1) + "" + (calendar.get(java.util.Calendar.DAY_OF_MONTH) < 10 ? "0" : "") + calendar.get(java.util.Calendar.DAY_OF_MONTH));
 
             for (CalendarDateInterval interval : intervals) {
 
@@ -152,8 +150,7 @@ public class CalendarInterval extends Calendar {
             // adjusted by 24 hours.
         } else if (intervalType == CalendarIntervalTypeEnum.HOUR) {
 
-            int hourMin = Integer
-                .parseInt(calendar.get(java.util.Calendar.HOUR_OF_DAY) + "" + (calendar.get(java.util.Calendar.MINUTE) < 10 ? "0" : "") + calendar.get(java.util.Calendar.MINUTE));
+            int hourMin = Integer.parseInt(calendar.get(java.util.Calendar.HOUR_OF_DAY) + "" + (calendar.get(java.util.Calendar.MINUTE) < 10 ? "0" : "") + calendar.get(java.util.Calendar.MINUTE));
 
             for (CalendarDateInterval interval : intervals) {
 
@@ -188,8 +185,7 @@ public class CalendarInterval extends Calendar {
     }
 
     /**
-     * Determines a previous calendar date matching any of calendar's time intervals. Example: given a month/day period of 01/15-01/30 a previous calendar date for 2015/01/20 will
-     * be 2015/01/15
+     * Determines a previous calendar date matching any of calendar's time intervals. Example: given a month/day period of 01/15-01/30 a previous calendar date for 2015/01/20 will be 2015/01/15
      * 
      * 
      * @param date Date to check
@@ -233,8 +229,7 @@ public class CalendarInterval extends Calendar {
             // value is adjusted by 12 month.
         } else if (intervalType == CalendarIntervalTypeEnum.DAY) {
 
-            int monthDay = Integer.parseInt((calendar.get(java.util.Calendar.MONTH) + 1) + "" + (calendar.get(java.util.Calendar.DAY_OF_MONTH) < 10 ? "0" : "")
-                    + calendar.get(java.util.Calendar.DAY_OF_MONTH));
+            int monthDay = Integer.parseInt((calendar.get(java.util.Calendar.MONTH) + 1) + "" + (calendar.get(java.util.Calendar.DAY_OF_MONTH) < 10 ? "0" : "") + calendar.get(java.util.Calendar.DAY_OF_MONTH));
 
             for (CalendarDateInterval interval : intervals) {
 
@@ -264,8 +259,7 @@ public class CalendarInterval extends Calendar {
             // adjusted by 24 hours.
         } else if (intervalType == CalendarIntervalTypeEnum.HOUR) {
 
-            int hourMin = Integer
-                .parseInt(calendar.get(java.util.Calendar.HOUR_OF_DAY) + "" + (calendar.get(java.util.Calendar.MINUTE) < 10 ? "0" : "") + calendar.get(java.util.Calendar.MINUTE));
+            int hourMin = Integer.parseInt(calendar.get(java.util.Calendar.HOUR_OF_DAY) + "" + (calendar.get(java.util.Calendar.MINUTE) < 10 ? "0" : "") + calendar.get(java.util.Calendar.MINUTE));
 
             for (CalendarDateInterval interval : intervals) {
 
@@ -345,8 +339,7 @@ public class CalendarInterval extends Calendar {
             // for 01/15 to 03/25 period), the interval begin value is adjusted by -12 month.
         } else if (intervalType == CalendarIntervalTypeEnum.DAY) {
 
-            int monthDay = Integer.parseInt((calendar.get(java.util.Calendar.MONTH) + 1) + "" + (calendar.get(java.util.Calendar.DAY_OF_MONTH) < 10 ? "0" : "")
-                    + calendar.get(java.util.Calendar.DAY_OF_MONTH));
+            int monthDay = Integer.parseInt((calendar.get(java.util.Calendar.MONTH) + 1) + "" + (calendar.get(java.util.Calendar.DAY_OF_MONTH) < 10 ? "0" : "") + calendar.get(java.util.Calendar.DAY_OF_MONTH));
 
             int earliestMonthDay = -10000000;
             for (CalendarDateInterval interval : intervals) {
@@ -384,8 +377,7 @@ public class CalendarInterval extends Calendar {
             // when checking for 01:00), the interval end value is adjusted by -24 hours.
         } else if (intervalType == CalendarIntervalTypeEnum.HOUR) {
 
-            int hourMin = Integer
-                .parseInt(calendar.get(java.util.Calendar.HOUR_OF_DAY) + "" + (calendar.get(java.util.Calendar.MINUTE) < 10 ? "0" : "") + calendar.get(java.util.Calendar.MINUTE));
+            int hourMin = Integer.parseInt(calendar.get(java.util.Calendar.HOUR_OF_DAY) + "" + (calendar.get(java.util.Calendar.MINUTE) < 10 ? "0" : "") + calendar.get(java.util.Calendar.MINUTE));
 
             int earliestHourMin = -10000000;
             for (CalendarDateInterval interval : intervals) {
@@ -471,8 +463,7 @@ public class CalendarInterval extends Calendar {
             // to 03/25 period), the interval begin value is adjusted by 12 month.
         } else if (intervalType == CalendarIntervalTypeEnum.DAY) {
 
-            int monthDay = Integer.parseInt((calendar.get(java.util.Calendar.MONTH) + 1) + "" + (calendar.get(java.util.Calendar.DAY_OF_MONTH) < 10 ? "0" : "")
-                    + calendar.get(java.util.Calendar.DAY_OF_MONTH));
+            int monthDay = Integer.parseInt((calendar.get(java.util.Calendar.MONTH) + 1) + "" + (calendar.get(java.util.Calendar.DAY_OF_MONTH) < 10 ? "0" : "") + calendar.get(java.util.Calendar.DAY_OF_MONTH));
 
             int earliestMonthDay = 10000000;
             for (CalendarDateInterval interval : intervals) {
@@ -510,8 +501,7 @@ public class CalendarInterval extends Calendar {
             // checking for 23:00), the interval begin value is adjusted by 24 hours.
         } else if (intervalType == CalendarIntervalTypeEnum.HOUR) {
 
-            int hourMin = Integer
-                .parseInt(calendar.get(java.util.Calendar.HOUR_OF_DAY) + "" + (calendar.get(java.util.Calendar.MINUTE) < 10 ? "0" : "") + calendar.get(java.util.Calendar.MINUTE));
+            int hourMin = Integer.parseInt(calendar.get(java.util.Calendar.HOUR_OF_DAY) + "" + (calendar.get(java.util.Calendar.MINUTE) < 10 ? "0" : "") + calendar.get(java.util.Calendar.MINUTE));
 
             int earliestHourMin = 10000000;
             for (CalendarDateInterval interval : intervals) {

@@ -23,17 +23,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.UsageRatingService;
+
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 
 @Stateless
 public class UsageRatingJobBean extends IteratorBasedScopedJobBean<Long> {
@@ -51,6 +51,7 @@ public class UsageRatingJobBean extends IteratorBasedScopedJobBean<Long> {
     private boolean hasMore = false;
     private String parameter1 = null;
     private String parameter2 = null;
+    boolean multiProcessOnlyMode = false;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.NEVER)
@@ -89,9 +90,10 @@ public class UsageRatingJobBean extends IteratorBasedScopedJobBean<Long> {
      * @param jobExecutionResult Job execution result
      */
     private void rateEDRBatch(List<Long> edrIds, JobExecutionResultImpl jobExecutionResult) {
+    	
 
         // In case of no need to rollback when rating fails, an error will be recorded directly in EDR, error will never be thrown and only batch mode will be used
-        usageRatingService.ratePostpaidUsage(edrIds);
+        usageRatingService.ratePostpaidUsage(edrIds, jobExecutionResult, multiProcessOnlyMode);
     }
 
     private boolean hasMore(JobInstance jobInstance) {
@@ -114,6 +116,7 @@ public class UsageRatingJobBean extends IteratorBasedScopedJobBean<Long> {
             ratingGroup = (String) this.getParamOrCFValue(jobInstance, "ratingGroup");
             parameter1 = (String) this.getParamOrCFValue(jobInstance, "parameter1");
             parameter2 = (String) this.getParamOrCFValue(jobInstance, "parameter2");
+            multiProcessOnlyMode = (boolean) this.getParamOrCFValue(jobInstance, "batchProcessingOnly", false);
         } catch (Exception e) {
             log.warn("Can't get customFields for {}. {}", jobInstance.getJobTemplate(), e.getMessage());
         }

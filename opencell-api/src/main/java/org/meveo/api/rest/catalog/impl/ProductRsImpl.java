@@ -2,11 +2,6 @@ package org.meveo.api.rest.catalog.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.transaction.Transactional;
-import javax.ws.rs.core.Response;
-
 import org.meveo.api.cpq.ProductApi;
 import org.meveo.api.cpq.ProductLineApi;
 import org.meveo.api.dto.ActionStatus;
@@ -31,6 +26,11 @@ import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.ProductVersion;
 import org.meveo.model.cpq.enums.ProductStatusEnum;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
+
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.Response;
 
 @Interceptors({ WsRestApiInterceptor.class })
 public class ProductRsImpl extends BaseRs implements ProductRs {

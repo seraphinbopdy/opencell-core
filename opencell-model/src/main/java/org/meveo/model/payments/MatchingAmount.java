@@ -19,15 +19,15 @@ package org.meveo.model.payments;
 
 import java.math.BigDecimal;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Matching amount among Account operations
@@ -36,8 +36,7 @@ import org.meveo.model.AuditableEntity;
  */
 @Entity
 @Table(name = "ar_matching_amount")
-@GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_matching_amount_seq"), })
+@GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_matching_amount_seq"), @Parameter(name = "increment_size", value = "1") })
 public class MatchingAmount extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;
@@ -67,7 +66,7 @@ public class MatchingAmount extends AuditableEntity {
      */
     @Column(name = "transactional_matching_amount", precision = 23, scale = 12)
     private BigDecimal transactionalMatchingAmount;
-    
+
     public MatchingAmount() {
     }
 

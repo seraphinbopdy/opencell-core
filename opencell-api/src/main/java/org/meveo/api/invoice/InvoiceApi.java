@@ -35,11 +35,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.BadRequestException;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.meveo.admin.exception.BusinessException;
@@ -581,7 +582,7 @@ public class InvoiceApi extends BaseApi {
      * @throws ImportInvoiceException Failed to import invoice exception
      * @throws IOException 
      */
-    @TransactionAttribute
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String validateInvoice(Long invoiceId, boolean generateAO, boolean refreshExchangeRate, boolean createSD) throws MissingParameterException,
             EntityDoesNotExistsException, BusinessException, ImportInvoiceException, InvoiceExistException, IOException {
         if (StringUtils.isBlank(invoiceId)) {

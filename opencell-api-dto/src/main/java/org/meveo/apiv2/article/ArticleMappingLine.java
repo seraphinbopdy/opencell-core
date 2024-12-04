@@ -1,20 +1,20 @@
 package org.meveo.apiv2.article;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.List;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.cpq.enums.OperatorEnum;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import java.util.List;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 @Value.Immutable
-@Value.Style(jdkOnly=true)
+@Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableArticleMappingLine.class)
 public interface ArticleMappingLine extends Resource {
 

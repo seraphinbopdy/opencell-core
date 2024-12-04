@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Utils class for working with strings.
@@ -59,7 +60,7 @@ public class StringUtils {
     }
 
     /**
-     * Value is null or empty
+     * Value is null or empty (including trimmed value)
      * 
      * @param value Value to check
      * @return True if value is null or is empty
@@ -68,6 +69,16 @@ public class StringUtils {
         return (value == null || value.trim().isEmpty());
     }
 
+    /**
+     * Value is null or empty (excluding trimmed value)
+     * 
+     * @param value Value to check
+     * @return True if value is null or is empty
+     */
+    public static boolean isEmpty(String value) {
+        return (value == null || value.isEmpty());
+    }
+    
     public static boolean isNotBlank(String value) {
         return !isBlank(value);
     }
@@ -376,13 +387,23 @@ public class StringUtils {
         }  
         return strOut;
     }
-    
-    
+
     public static boolean isBoolean(String value) {
-
     	return value != null && Arrays.stream(new String[]{"true", "false", "1", "0"})
-
     			.anyMatch(b -> b.equalsIgnoreCase(value));
+    }
+    
+    public static String readBuffer(BufferedReader reader){
+        return reader.lines().collect(Collectors.joining("\n"));
+    }
 
+    /**
+     * Replace spaces and special symbols with _ character
+     */
+    public static String cleanupSpecialCharactersAndSpaces(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replaceAll("[^A-Za-z0-9-]", "_");
     }
 }

@@ -4,13 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.persistence.TypedQuery;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.base.BusinessService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.TypedQuery;
 
 @Stateless
 public class AdvancedSettingsService extends BusinessService<AdvancedSettings> {

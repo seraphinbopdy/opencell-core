@@ -20,13 +20,6 @@ package org.meveo.service.notification;
 
 import java.util.List;
 
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.IteratorBasedJobBean;
 import org.meveo.audit.logging.annotations.MeveoAudit;
@@ -35,7 +28,7 @@ import org.meveo.event.CounterPeriodEvent;
 import org.meveo.event.communication.InboundCommunicationEvent;
 import org.meveo.event.logging.LoggedEvent;
 import org.meveo.event.monitoring.BusinessExceptionEvent;
-import org.meveo.event.monitoring.ClusterEventDto.CrudActionEnum;
+import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
 import org.meveo.event.qualifier.AdvancementRateIncreased;
 import org.meveo.event.qualifier.Created;
@@ -83,6 +76,13 @@ import org.meveo.service.generic.wf.GenericWorkflowService;
 import org.meveo.service.generic.wf.WorkflowInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ejb.Lock;
+import jakarta.ejb.LockType;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 /**
  * Handles events associated with CDRUD operations on entities
@@ -257,7 +257,7 @@ public class DefaultObserver {
         IteratorBasedJobBean.releaseJobDataProcessingThreads(jobInstanceId);
 
         // Publish event to other nodes
-        clusterEventPublisher.publishEvent(jobInstance, CrudActionEnum.lastJobDataMessageReceived);
+        clusterEventPublisher.publishEvent(jobInstance, ClusterEventActionEnum.lastJobDataMessageReceived);
     }
 
     public void businesException(@Observes BusinessExceptionEvent bee) {

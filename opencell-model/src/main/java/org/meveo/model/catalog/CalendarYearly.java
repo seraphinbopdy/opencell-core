@@ -17,18 +17,19 @@
  */
 package org.meveo.model.catalog;
 
+import java.util.Date;
+import java.util.List;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.meveo.model.shared.DateUtils;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import java.util.Date;
-import java.util.List;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 
 @Entity
 @DiscriminatorValue("YEARLY")
@@ -50,8 +51,8 @@ public class CalendarYearly extends Calendar {
     }
 
     /**
-     * Checks for next calendar date. If not found in this year checks next years dates. Calendar has list of days (month/day), so if calendar has at least one date it will be
-     * found in this or next year. For example today is 2010.12.06. Calendar has only one day - 12.05. So nextCalendarDate will be found for 2011.12.05.
+     * Checks for next calendar date. If not found in this year checks next years dates. Calendar has list of days (month/day), so if calendar has at least one date it will be found in this or next year. For example
+     * today is 2010.12.06. Calendar has only one day - 12.05. So nextCalendarDate will be found for 2011.12.05.
      * 
      * @param date Current date.
      * @return Next calendar date.
@@ -86,8 +87,8 @@ public class CalendarYearly extends Calendar {
     }
 
     /**
-     * Checks for previous calendar date. If not found in this year checks previous years dates. Calendar has list of days (month/day), so if calendar has at least one date it will
-     * be found in this or next year. For example today is 2010.12.06. Calendar has only one day - 12.07. So previousCalendarDate will be found for 2009.12.07.
+     * Checks for previous calendar date. If not found in this year checks previous years dates. Calendar has list of days (month/day), so if calendar has at least one date it will be found in this or next year. For
+     * example today is 2010.12.06. Calendar has only one day - 12.07. So previousCalendarDate will be found for 2009.12.07.
      * 
      * @param date Current date.
      * @return Next calendar date.

@@ -6,11 +6,9 @@ import org.meveo.api.dto.billing.PurchaseOrderDto;
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.model.AccountEntity;
-import org.meveo.model.BusinessEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.PurchaseOrder;
-import org.meveo.model.cpq.enums.ContractAccountLevel;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
@@ -21,8 +19,8 @@ import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class PurchaseOrderApi extends BaseApi {

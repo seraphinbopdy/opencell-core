@@ -106,17 +106,17 @@
 				<p:column headerText="#{messages['commons.actions']}"
 					rendered="#{edit and !disabled}" width="15%">
 					<c:if test="#{!empty(popupWidgetVar) and edit and !disabled}">
-						<p:commandButton icon="ui-icon-minus"
+						<p:commandButton icon="pi pi-minus"
 										 action="#{customFieldDataEntryBean.removeValue(field, cft.storageType, mapValues)}"
 										 partialSubmit="true" process="@this"
 										 update="#{updateOnAddEdit} #{idPrefix}_customFields_omitFromSubmit">
 							<p:confirm header="#{messages['commons.confirmationHeader']}"
 									   message="#{messages['commons.confirmDelete']}"
-									   icon="ui-icon-alert" />
+									   icon="pi pi-exclamation-triangle" />
 						</p:commandButton>
 					</c:if>
 					<c:if test="#{empty(popupWidgetVar) and edit and !disabled}">
-						<p:commandButton icon="ui-icon-minus" onclick="PF('confirmCanotDeleteWidget_#{idPrefix}_#{cft.id}').show()">
+						<p:commandButton icon="pi pi-minus" onclick="PF('confirmCanotDeleteWidget_#{idPrefix}_#{cft.id}').show()">
 							<f:setPropertyActionListener value="#{mapValues}" target="#{customFieldDataEntryBean.selectedItem}" />
 						</p:commandButton>
 					</c:if>
@@ -141,14 +141,14 @@
 
 									<p:inputText id="newRonKeyFrom"
 										value="#{cfValueHolder.newValues[cft.code.concat('_key_one_from')]}"
-										converter="javax.faces.Double"
+										converter="jakarta.faces.Double"
 										placeholder="#{messages['customFieldTemplate.mapKeyRonFrom']}"
 										label="#{messages['customFieldTemplate.mapKeyRonFrom']}"
 										size="9" maxlength="15" />
 									<h:outputText value=" - " />
 									<p:inputText id="newRonKeyTo"
 										value="#{cfValueHolder.newValues[cft.code.concat('_key_one_to')]}"
-										converter="javax.faces.Double"
+										converter="jakarta.faces.Double"
 										placeholder="#{messages['customFieldTemplate.mapKeyRonTo']}"
 										label="#{messages['customFieldTemplate.mapKeyRonTo']}"
 										size="9" maxlength="15" />
@@ -187,7 +187,7 @@
 							<p:commandButton
 								value="#{messages['customFieldTemplate.import']}"
 								onclick="PF('importDialog_#{idPrefix}_#{cft.id}').show()"
-								icon="fa fa-arrow-up" type="button">
+								icon="pi pi-arrow-up" type="button">
 							</p:commandButton>
 						</c:if>
 
@@ -239,11 +239,11 @@
 							<h:inputText value="#{mapValues[column.code]}" size="9"
 								maxlength="15"
 								rendered="#{column.keyType eq CustomFieldMapKeyEnum.LONG}"
-								converter="javax.faces.Long" />
+								converter="jakarta.faces.Long" />
 							<h:inputText value="#{mapValues[column.code]}" size="9"
 								maxlength="15"
 								rendered="#{column.keyType eq CustomFieldMapKeyEnum.DOUBLE}"
-								converter="javax.faces.Double" />
+								converter="jakarta.faces.Double" />
 							<p:inputText value="#{mapValues[column.code]}" size="20"
 								maxlength="30"
 								rendered="#{column.keyType eq CustomFieldMapKeyEnum.RON}">
@@ -274,17 +274,17 @@
 				<p:column headerText="#{messages['commons.actions']}" width="10%"
 					rendered="#{edit and !disabled}">
 					<c:if test="#{!empty(popupWidgetVar) and edit and !disabled}">
-						<p:commandButton icon="ui-icon-minus"
+						<p:commandButton icon="pi pi-minus"
 									 action="#{customFieldDataEntryBean.removeValue(field, cft.storageType, mapValues)}"
 									 partialSubmit="true" process="@this"
 									 update="#{updateOnAddEdit} #{idPrefix}_customFields_omitFromSubmit">
 							<p:confirm header="#{messages['commons.confirmationHeader']}"
 								   message="#{messages['commons.confirmDelete']}"
-								   icon="ui-icon-alert" />
+								   icon="pi pi-exclamation-triangle" />
 						</p:commandButton>
 					</c:if>
 					<c:if test="#{empty(popupWidgetVar) and edit and !disabled}">
-						<p:commandButton icon="ui-icon-minus" onclick="PF('confirmCanotDeleteWidget_#{idPrefix}_#{cft.id}').show()">
+						<p:commandButton icon="pi pi-minus" onclick="PF('confirmCanotDeleteWidget_#{idPrefix}_#{cft.id}').show()">
 							<f:setPropertyActionListener value="#{mapValues}" target="#{customFieldDataEntryBean.selectedItem}" />
 						</p:commandButton>
 					</c:if>
@@ -315,14 +315,14 @@
 								<c:if test="#{column.keyType eq CustomFieldMapKeyEnum.LONG}">
 									<p:inputText
 										value="#{cfValueHolder.newValues[cft.code.concat('_').concat(column.code)]}"
-										converter="javax.faces.Long" placeholder="#{column.label}"
+										converter="jakarta.faces.Long" placeholder="#{column.label}"
 										label="#{column.label}" size="9" maxlength="15" />
 								</c:if>
 
 								<c:if test="#{column.keyType eq CustomFieldMapKeyEnum.DOUBLE}">
 									<p:inputText
 										value="#{cfValueHolder.newValues[cft.code.concat('_').concat(column.code)]}"
-										converter="javax.faces.Double" placeholder="#{column.label}"
+										converter="jakarta.faces.Double" placeholder="#{column.label}"
 										label="#{column.label}" size="9" maxlength="15" />
 								</c:if>
 
@@ -330,12 +330,12 @@
 
 									<p:inputText
 										value="#{cfValueHolder.newValues[cft.code.concat('_').concat(column.code).concat('_from')]}"
-										converter="javax.faces.Double" placeholder="#{column.label}"
+										converter="jakarta.faces.Double" placeholder="#{column.label}"
 										label="#{column.label}" size="9" maxlength="15" />
 									<h:outputText value=" - " />
 									<p:inputText id="newRonKeyTo"
 										value="#{cfValueHolder.newValues[cft.code.concat('_').concat(column.code).concat('_to')]}"
-										converter="javax.faces.Double" placeholder="#{column.label}"
+										converter="jakarta.faces.Double" placeholder="#{column.label}"
 										label="#{column.label}" size="9" maxlength="15" />
 								</c:if>
 
@@ -375,7 +375,7 @@
 							<p:commandButton
 								value="#{messages['customFieldTemplate.import']}"
 								onclick="PF('importDialog_#{idPrefix}_#{cft.id}').show()"
-								icon="fa fa-arrow-up" type="button">
+								icon="pi pi-arrow-up" type="button">
 							</p:commandButton>
 						</c:if>
 

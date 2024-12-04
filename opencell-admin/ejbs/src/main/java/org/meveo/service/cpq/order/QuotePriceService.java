@@ -3,17 +3,17 @@ package org.meveo.service.cpq.order;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.model.cpq.commercial.PriceLevelEnum;
 import org.meveo.model.cpq.offer.QuoteOffer;
 import org.meveo.model.quote.QuotePrice;
 import org.meveo.model.quote.QuoteVersion;
 import org.meveo.service.base.PersistenceService;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.Query;
 
 /**
  * @author Tarik FAKHOURI

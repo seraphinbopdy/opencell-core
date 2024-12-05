@@ -8,6 +8,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.NamedNativeQueries;
+import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.SqlResultSetMapping;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableCFEntity;
@@ -50,6 +54,37 @@ import jakarta.validation.constraints.NotNull;
                 + " where qv.id=:quoteVersionId and qf.offerTemplate.code=:offerCode and pv.product.code=:productCode ")
 
 })
+
+@NamedNativeQueries({
+		@NamedNativeQuery(name = "QuoteProduct.calculateMrr", query = "SELECT " +
+				"                        SUM( " +
+				"                            CASE  " +
+				"                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN  " +
+				"                                    price.amount_with_tax / NULLIF(cal.period_length, 0) " +
+				"                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN  " +
+				"                                    (price.amount_with_tax * 365 / 12) / NULLIF(cal.period_length, 0) " +
+				"                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN  " +
+				"                                    price.amount_with_tax * (select count(*) from {h-schema}cat_calendar_days d where  d.calendar_id = cal.id) / 12 " +
+				"                                ELSE price.amount_with_tax " +
+				"                            END " +
+				"                        ) as amount" +
+				"                    FROM {h-schema}cpq_quote_product p " +
+				"                    JOIN {h-schema}cpq_quote_article_line art ON art.quote_product_id = p.id " +
+				"                    JOIN {h-schema}cpq_quote_price price ON price.quote_article_line_id = art.id " +
+				"                    JOIN {h-schema}cat_charge_template ch ON ch.id = price.charge_template_id " +
+				"                    JOIN {h-schema}cat_calendar cal ON cal.id = ch.calendar_id " +
+				"                    WHERE price.price_type = 'RECURRING' " +
+				"                    AND price.price_level = 'PRODUCT' " +
+				"                    AND (cal.period_unit IS NULL OR cal.period_unit IN (2, 5)) " +
+				"                    AND p.id = :quoteProductId group by p.id",
+				resultSetMapping = "BigDecimalMapping")
+})
+@SqlResultSetMapping(
+		name = "BigDecimalMapping",
+		columns = {
+				@ColumnResult(name = "amount", type = BigDecimal.class)
+		}
+)
 public class QuoteProduct extends AuditableCFEntity {
 
     /**

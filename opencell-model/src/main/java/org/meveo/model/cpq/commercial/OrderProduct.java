@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.NamedNativeQuery;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.AuditableCFEntity;
@@ -47,6 +48,31 @@ import jakarta.validation.constraints.NotNull;
 @CustomFieldEntity(cftCodePrefix = "OrderProduct", inheritCFValuesFrom = "quoteProduct")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_order_product_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "OrderProduct.findOrderProductByOrder", query = "select op FROM OrderProduct op WHERE op.order.id = :commercialOrderId") })
+
+@NamedNativeQuery(name = "OrderProduct.calculateMrr", query = "SELECT " +
+        "                        SUM(" +
+        "                            CASE " +
+        "                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN " +
+        "                                    price.amount_with_tax / NULLIF(cal.period_length, 0)" +
+        "                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN " +
+        "                                    (price.amount_with_tax * 365 / 12) / NULLIF(cal.period_length, 0)" +
+        "                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN " +
+        "                                    price.amount_with_tax * (select count(*) from {h-schema}cat_calendar_days d where  d.calendar_id = cal.id) / 12" +
+        "                                ELSE price.amount_with_tax" +
+        "                            END" +
+        "                        ) AS amount" +
+        "                    FROM {h-schema}cpq_order_product p" +
+        "                    JOIN {h-schema}order_article_line art ON art.order_product_id = p.id" +
+        "                    JOIN {h-schema}order_price price ON price.order_article_line_id = art.id" +
+        "                    JOIN {h-schema}cat_charge_template ch ON ch.id = price.charge_template_id" +
+        "                    JOIN {h-schema}cat_calendar cal ON cal.id = ch.calendar_id" +
+        "                    WHERE price.price_type = 'RECURRING'" +
+        "                    AND price.price_level = 'PRODUCT'" +
+        "                    AND (cal.period_unit IS NULL OR cal.period_unit IN (2, 5))" +
+        "                    AND p.id = :orderProductId" +
+        "                    GROUP BY p.id",
+        resultSetMapping = "BigDecimalMapping")
+
 public class OrderProduct extends AuditableCFEntity {
 
     /**

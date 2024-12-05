@@ -19,6 +19,7 @@ package org.meveo.service.catalog.impl;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,6 +40,8 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.Auditable;
 import org.meveo.model.DatePeriod;
 import org.meveo.model.admin.Seller;
+import org.meveo.model.billing.Subscription;
+import org.meveo.model.billing.SubscriptionStatusEnum;
 import org.meveo.model.catalog.Channel;
 import org.meveo.model.catalog.DigitalResource;
 import org.meveo.model.catalog.DiscountPlan;
@@ -576,5 +579,18 @@ public class OfferTemplateService extends GenericProductOfferingService<OfferTem
     public void massCalculateARR() {
         Query query = getEntityManager().createQuery("update OfferTemplate offer set offer.arr = (select sum(sub.mrr) * 12 from Subscription sub where sub.offer = offer and sub.mrr is not null)");
         query.executeUpdate();
+    }
+
+    public void calculateArr(OfferTemplate offerTemplate) {
+        List<Subscription> subscriptions = subscriptionService.listByOffer(offerTemplate.getCode(), "id", null);
+        BigDecimal mrr = subscriptions.stream()
+                                         .filter(subscription -> /*SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus()) && */subscription.getMrr() != null)
+                                         .map(Subscription::getMrr)
+                                         .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal arr = mrr.multiply(BigDecimal.valueOf(12));
+        if(!arr.equals(offerTemplate.getArr())) {
+            offerTemplate.setArr(arr);
+            update(offerTemplate);
+        }
     }
 }

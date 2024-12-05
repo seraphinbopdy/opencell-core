@@ -12,6 +12,8 @@ import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.ServiceInstanceService;
 import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.catalog.impl.OfferTemplateService;
+import org.meveo.service.cpq.CpqQuoteService;
+import org.meveo.service.cpq.order.CommercialOrderService;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;
@@ -38,6 +40,12 @@ public class MRRCalculationJobBean extends IteratorBasedJobBean<ServiceInstance>
     
     @Inject
     private OfferTemplateService offerTemplateService;
+
+    @Inject
+    private CpqQuoteService cpqQuoteService;
+
+    @Inject
+    private CommercialOrderService commercialOrderService;
     
     /**
      * Execute the job
@@ -60,6 +68,9 @@ public class MRRCalculationJobBean extends IteratorBasedJobBean<ServiceInstance>
         subscriptionService.massCalculateMRR();
         billingAccountService.massCalculateMRR();
         offerTemplateService.massCalculateARR();
+
+        cpqQuoteService.massCalculateMRR();
+        commercialOrderService.massCalculateMRR();
         
     }
 
@@ -84,7 +95,7 @@ public class MRRCalculationJobBean extends IteratorBasedJobBean<ServiceInstance>
         // Calculate MRR for a ServiceInstance
         log.info("Calculating MRR for serviceInstance {}", serviceInstance.getCode());
         try {
-            serviceInstanceService.calculateMRR(serviceInstance);
+            serviceInstanceService.calculateMRRNewTx(serviceInstance);
         } catch (Exception e) {
             log.error("Failed to calculate MRR for serviceInstance #{}", serviceInstance.getId(), e);
             jobExecutionResult.unRegisterSucces();

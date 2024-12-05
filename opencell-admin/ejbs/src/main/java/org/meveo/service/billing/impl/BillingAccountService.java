@@ -39,6 +39,7 @@ import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.DiscountPlanInstance;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.Subscription;
+import org.meveo.model.billing.SubscriptionStatusEnum;
 import org.meveo.model.billing.SubscriptionTerminationReason;
 import org.meveo.model.billing.UserAccount;
 import org.meveo.model.catalog.DiscountPlan;
@@ -75,6 +76,9 @@ public class BillingAccountService extends AccountService<BillingAccount> {
 
     @Inject
     private DiscountPlanInstanceService discountPlanInstanceService;
+
+    @Inject
+    private SubscriptionService subscriptionService;
 
     /**
      * Inits the billing account.
@@ -614,5 +618,18 @@ public class BillingAccountService extends AccountService<BillingAccount> {
     public void massCalculateMRR() {
         Query query = getEntityManager().createQuery("update BillingAccount ba set ba.mrr = (select sum(sub.mrr) from Subscription sub where sub.userAccount.billingAccount.id = ba.id and sub.mrr is not null)");
         query.executeUpdate();
+    }
+    
+    public void calculateMrr(BillingAccount billingAccount) {
+        List<Subscription> subscriptions = subscriptionService.findByBA(billingAccount);
+        BigDecimal mrr = subscriptions.stream()
+                                      .filter(subscription -> /*subscription.getStatus().equals(SubscriptionStatusEnum.ACTIVE) && */subscription.getMrr() != null)
+                                      .map(Subscription::getMrr)
+                                      .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        if(!mrr.equals(billingAccount.getMrr())) {
+            billingAccount.setMrr(mrr);
+            update(billingAccount);
+        }
     }
 }

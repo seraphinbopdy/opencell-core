@@ -1,14 +1,18 @@
 package org.meveo.service.cpq.order;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.logging.log4j.util.Strings;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.model.cpq.commercial.OfferLineTypeEnum;
 import org.meveo.model.cpq.commercial.OrderOffer;
+import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.service.admin.impl.CustomGenericEntityCodeService;
 import org.meveo.service.base.PersistenceService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -26,6 +30,12 @@ public class OrderOfferService extends PersistenceService<OrderOffer> {
 
 	@Inject
 	private CustomGenericEntityCodeService customGenericEntityCodeService;
+
+	@Inject
+	private OrderProductService orderProductService;
+
+	@Inject
+	private AdvancedSettingsService advancedSettingsService;
 	
 
 	public OrderOffer findByCodeAndQuoteVersion(String code, String orderCode) {
@@ -49,9 +59,24 @@ public class OrderOfferService extends PersistenceService<OrderOffer> {
 		var orderOfferExist = findByCodeAndQuoteVersion(entity.getCode(), entity.getOrder().getCode());
 		if(orderOfferExist != null)
 			throw new EntityAlreadyExistsException("Quote offer already exist with code : " + entity.getCode() + " and Order code : " + entity.getOrder().getCode());
+		updateMrr(entity);
 		super.create(entity);
 	}
-	
+
+	@Override
+	public OrderOffer update(OrderOffer entity) {
+		updateMrr(entity);
+		return super.update(entity);
+	}
+
+	private void updateMrr(OrderOffer entity) {
+		Boolean updateMrr = (Boolean) advancedSettingsService.getParameter(AdvancedSettingsService.DISABLE_SYNC_MRR_UPDATE);
+		if(updateMrr != null && updateMrr) {
+			entity.getProducts().forEach(product ->product.setMrr(orderProductService.calculateMRR(product)));
+			entity.getOrder().setMrr(entity.getProducts().stream().map(OrderProduct::getMrr).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
+		}
+	}
+
 	public List<OrderOffer> findBySubscriptionAndStatus(String subscriptionCode, OfferLineTypeEnum offerLineType) {
 		Query query=getEntityManager().createNamedQuery("OrderOffer.findByStatusAndSubscription");
 		query.setParameter("subscriptionCode", subscriptionCode)

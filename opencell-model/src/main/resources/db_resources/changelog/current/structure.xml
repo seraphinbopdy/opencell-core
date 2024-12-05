@@ -15628,6 +15628,24 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
        <addColumn tableName="ar_payment_token">
             <column name="pre_authorisation_id" type="varchar(255)"  />
         </addColumn>
-    </changeSet> 
+    </changeSet>
+
+    <changeSet id="#INTRD-25948_disableSynchronousMrrUpdate" author="a.rouaguebe">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="performance"/>
+            <column name="property_group" value="subscription"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="disableSynchronousMrrUpdate"/>
+            <column name="description" value="Disable synchronous MRR update"/>
+            <column name="description_i18n" value='{"FRA":"Désactiver la mise à jour synchrone du MRR","ENG":"Disable synchronous MRR update"}'/>
+        </insert>
+    </changeSet>
+
 
 </databaseChangeLog>

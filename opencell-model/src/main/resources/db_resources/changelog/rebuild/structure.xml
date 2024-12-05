@@ -20780,6 +20780,7 @@
     <changeSet id="#INTRD-25224_20240909" author="Mohammed_ElAzzouzi" />
     <changeSet id="INTRD-26817_20241126" author="AndriusKarpavicius"/>
     <changeSet id="#INTRD-25643-202401011" author="anasseh" />
+    <changeSet id="#INTRD-25948_disableSynchronousMrrUpdate" author="a.rouaguebe" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

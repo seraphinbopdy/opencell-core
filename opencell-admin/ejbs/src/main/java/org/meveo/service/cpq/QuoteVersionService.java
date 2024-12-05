@@ -46,6 +46,9 @@ public class QuoteVersionService extends PersistenceService<QuoteVersion>   {
 	
 	@Inject
 	private QuoteService quoteService;
+
+	@Inject
+	private QuoteProductService quoteProductService;
 	
 	public QuoteVersion createQuoteVersion(QuoteVersion quoteVersion) {
 		LOGGER.info("adding new quote version attached to quote:({}) ", quoteVersion.getQuote().getCode());
@@ -232,4 +235,11 @@ public class QuoteVersionService extends PersistenceService<QuoteVersion>   {
             update(quoteVersion);
         }
     }
+
+	public QuoteVersion update(QuoteVersion quoteVersion) {
+		/*getEntityManager().flush();
+		quoteVersion.getQuoteProducts()
+                    .forEach(quoteProduct -> quoteProduct.setMrr(quoteProductService.calculateMRR(quoteProduct)));*/
+		return super.update(quoteVersion);
+	}
 }

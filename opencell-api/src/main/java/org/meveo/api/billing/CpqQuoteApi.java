@@ -45,6 +45,7 @@ import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import javax.print.attribute.standard.Media;
 
+import jakarta.transaction.Transactional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.meveo.admin.exception.BusinessException;
@@ -175,6 +176,7 @@ import org.meveo.service.quote.QuoteOfferService;
 import org.meveo.service.script.Script;
 import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.ScriptInterface;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.meveo.service.settings.impl.GlobalSettingsService;
 import org.meveo.service.tax.TaxMappingService;
 import org.meveo.service.tax.TaxMappingService.TaxInfo;
@@ -297,6 +299,9 @@ public class CpqQuoteApi extends BaseApi {
 	
 	@Inject
 	private OfferTemplateAttributeService offerTemplateAttributeService;
+
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
 	
     private static final String ADMINISTRATION_VISUALIZATION = "administrationVisualization";
     
@@ -1627,6 +1632,7 @@ public class CpqQuoteApi extends BaseApi {
         }
     }
 
+    @Transactional
     public void updateQuoteVersionStatus(String quoteCode, int currentVersion, VersionStatusEnum status) {
         QuoteVersion quoteVersion = quoteVersionService.findByQuoteAndVersion(quoteCode, currentVersion);
         if (quoteVersion == null) {
@@ -1711,6 +1717,20 @@ public class CpqQuoteApi extends BaseApi {
         
         Map<BigDecimal, List<QuotePrice>> pricesPerTaux = accountingArticlePrices.stream()
                 .collect(Collectors.groupingBy(QuotePrice::getTaxRate));
+
+        Boolean updateMrr = (Boolean) advancedSettingsService.getParameter(AdvancedSettingsService.DISABLE_SYNC_MRR_UPDATE);
+        
+        // Calculate MRR
+        quoteVersionService.getEntityManager().flush();
+        if (Boolean.FALSE.equals(updateMrr)) {
+            quoteVersion.getQuoteProducts().forEach(qp -> qp.setMrr(quoteProductService.calculateMRR(qp)));
+            quoteVersion.getQuote()
+                        .setMrr(quoteVersion.getQuoteProducts()
+                                            .stream()
+                                            .map(QuoteProduct::getMrr)
+                                            .filter(Objects::nonNull)
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add));
+        }
         
         BigDecimal quoteTotalAmount = BigDecimal.ZERO;
 
@@ -1735,6 +1755,8 @@ public class CpqQuoteApi extends BaseApi {
 //        applyFixedDiscount(quoteVersion.getDiscountPlan(), quoteTotalAmount, quote.getSeller(),
 //        		quote.getBillableAccount(), null, null,null, quoteVersion,quote.getQuoteDate());
 
+        quoteVersionService.update(quoteVersion);
+        
         //Get the updated quote version and construct the DTO
         QuoteVersion updatedQuoteVersion=quoteVersionService.findById(quoteVersion.getId());
         GetQuoteVersionDtoResponse getQuoteVersionDtoResponse = new GetQuoteVersionDtoResponse(updatedQuoteVersion,true,true,true,true);

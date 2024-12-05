@@ -3,6 +3,8 @@ package org.meveo.service.cpq;
 import java.math.BigDecimal;
 import java.util.List;
 
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.TypedQuery;
 import org.meveo.model.quote.QuoteProduct;
 import org.meveo.service.base.PersistenceService;
 
@@ -54,5 +56,22 @@ public class QuoteProductService extends PersistenceService<QuoteProduct> {
 		Query query = this.getEntityManager().createNamedQuery("QuoteProduct.findByQuoteVersionId").setParameter("id", quoteVersionId);
 		return query.getResultList();
 	}
+
+	public QuoteProduct update(QuoteProduct quoteProduct) {
+		BigDecimal qpMRR = calculateMRR(quoteProduct);
+		log.info("QuoteProduct {} MRR: {}", quoteProduct.getId(), qpMRR);
+		quoteProduct.setMrr(qpMRR);
+		return super.update(quoteProduct);
+	}
+
+	public BigDecimal calculateMRR(QuoteProduct quoteProduct) {
+        try {
+			TypedQuery<Object> query = getEntityManager().createNamedQuery("QuoteProduct.calculateMrr", Object.class);
+			return (BigDecimal) query.setParameter("quoteProductId", quoteProduct.getId()).getSingleResult();
+        } catch (NoResultException | NonUniqueResultException e) {
+			log.debug("No MRR calculation found for quoteProduct id: #" + quoteProduct.getId(), e);
+            return null;
+        }
+    }
 
 }

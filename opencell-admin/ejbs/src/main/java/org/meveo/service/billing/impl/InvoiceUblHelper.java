@@ -1179,11 +1179,17 @@ public class InvoiceUblHelper {
 					allowanceChargeReason.setValue(allowanceCode.getDescription());
 					allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
 				}
+				final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null;
 				Amount amount = objectFactorycommonBasic.createAmount();
+				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
+
+				if(currency != null){
+					amount.setCurrencyID(currency);
+					baseAmount.setCurrencyID(currency);
+				}
 				amount.setValue(subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs());
 				allowanceCharge.setAmount(amount);
-				
-				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
+
 				baseAmount.setCurrencyID(invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null);
 				baseAmount.setValue(subCategoryInvoiceAgregate.getAmountWithoutTax().setScale(rounding, RoundingMode.HALF_UP).abs());
 				allowanceCharge.setBaseAmount(baseAmount);

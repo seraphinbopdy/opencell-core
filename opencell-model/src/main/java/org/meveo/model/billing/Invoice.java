@@ -863,7 +863,7 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
                 this.tradingLanguage = customerAccount.getTradingLanguage() != null ? customerAccount.getTradingLanguage() : this.getSeller().getTradingLanguage();
             }
         }
-        if (this.id == null) {
+        if (this.version == null) {
             if (this.lastAppliedRateDate == null) {
                 this.lastAppliedRateDate = invoiceDate;
             }

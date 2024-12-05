@@ -11012,6 +11012,7 @@ Your name and surname
     </changeSet>
 
     <changeSet id="INTRD-19464_20231204" author="TarikFA.">
+    	<validCheckSum>8:dc0e4ee87bd3b5ec3e8d2864f17fa0d8</validCheckSum>
         <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq" />
             <column name="version" valueNumeric="1" />

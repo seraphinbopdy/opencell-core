@@ -110,6 +110,8 @@ public class CurrentUserProvider {
     public void forceAuthentication(String userName, String providerCode) {
 
         OidcPrincipal oidcPrincipal = null;
+
+        // Get security principal from request
         try {
             HttpServletRequest request = null;
             request = requestInst.get();
@@ -118,6 +120,11 @@ public class CurrentUserProvider {
             }
         } catch (Exception e) {
             // Ignore. Its the only way to inject request outside the http code trace
+        }
+
+        // Or from EJB context
+        if (oidcPrincipal == null && ctx.getCallerPrincipal() instanceof OidcPrincipal) {
+            oidcPrincipal = (OidcPrincipal) ctx.getCallerPrincipal();
         }
 
         // Current user is already authenticated via OIDC, can't overwrite it
@@ -138,39 +145,15 @@ public class CurrentUserProvider {
     }
 
     /**
-     * Reestablish authentication of a user. Allowed only when no security context is present.In case of multitenancy, when user authentication is forced as result of a fired trigger (scheduled jobs, other timed event
+     * Reestablish authentication of a user. Allowed only when no security context is present. In case of multitenancy, when user authentication is forced as result of a fired trigger (scheduled jobs, other timed event
      * expirations), current user might be lost, thus there is a need to reestablish.
      * 
      * @param lastCurrentUser Last authenticated user. Note: Pass a unproxied version of MeveoUser (currentUser.unProxy()), as otherwise it will access CurrentUser producer method
      */
-    @SuppressWarnings("rawtypes")
     public void reestablishAuthentication(MeveoUser lastCurrentUser) {
 
-        OidcPrincipal oidcPrincipal = null;
-        try {
-            HttpServletRequest request = null;
-            request = requestInst.get();
-            if (request != null && request.getUserPrincipal() instanceof OidcPrincipal) {
-                oidcPrincipal = (OidcPrincipal) request.getUserPrincipal();
-            }
-        } catch (Exception e) {
-            // Ignore. Its the only way to inject request outside the http code trace
-        }
-
-        // Current user is already authenticated via OIDC, can't overwrite it
-        if (oidcPrincipal == null) {
-
-            if (lastCurrentUser.getProviderCode() == null) {
-                MDC.remove("providerCode");
-            } else {
-                MDC.put("providerCode", lastCurrentUser.getProviderCode());
-            }
-
-            forcedUserUsername.set(lastCurrentUser.getUserName());
-            setCurrentUsername(lastCurrentUser.getUserName());
-            setCurrentTenant(lastCurrentUser.getProviderCode());
-            log.debug("Reestablished authentication to {}/{}", lastCurrentUser.getUserName(), lastCurrentUser.getProviderCode());
-        }
+        log.debug("Will attempt to re-established/force authentication to {}/{}", lastCurrentUser.getUserName(), lastCurrentUser.getProviderCode());
+        forceAuthentication(lastCurrentUser.getUserName(), lastCurrentUser.getProviderCode());
     }
 
     /**
@@ -178,10 +161,12 @@ public class CurrentUserProvider {
      * 
      * @return Current user implementation
      */
-    @SuppressWarnings({ "rawtypes", "unused" })
+    @SuppressWarnings({ "rawtypes" })
     public MeveoUser getCurrentUser() {
 
         OidcPrincipal oidcPrincipal = null;
+
+        // Get security principal from request
         try {
             HttpServletRequest request = null;
             request = requestInst.get();
@@ -190,6 +175,11 @@ public class CurrentUserProvider {
             }
         } catch (Exception e) {
             // Ignore. Its the only way to inject request outside the http code trace
+        }
+
+        // Or from EJB context
+        if (oidcPrincipal == null && ctx.getCallerPrincipal() instanceof OidcPrincipal) {
+            oidcPrincipal = (OidcPrincipal) ctx.getCallerPrincipal();
         }
 
         String username = null;
@@ -325,7 +315,7 @@ public class CurrentUserProvider {
                     if (resourceIds != null) {
                         loop1: for (String resourceId : resourceIds) {
                             for (Permission permission : permissions) {
-                                if (resourceId.equals( permission.getResourceId())) {
+                                if (resourceId.equals(permission.getResourceId())) {
                                     result[i] = true;
                                     break loop1;
                                 }

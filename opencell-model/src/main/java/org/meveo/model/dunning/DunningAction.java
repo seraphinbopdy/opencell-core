@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.BusinessCFEntity;
+import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.payments.ActionChannelEnum;
 import org.meveo.model.payments.ActionModeEnum;
@@ -27,6 +28,7 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 
 @Entity
+@CustomFieldEntity(cftCodePrefix = "DunningAction")
 @Table(name = "ar_dunning_action")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "ar_dunning_action_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "DunningAction.findByAgentId", query = "SELECT da FROM DunningAction da where da.assignedTo.id = :id") })

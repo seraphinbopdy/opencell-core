@@ -217,4 +217,16 @@ public interface DunningCollectionPlanResource {
                     description = "Entity does not exist")
     })
     Response updateDunningActionInstance(@Parameter(required = true) DunningActionInstanceInput dunningActionInstanceInput, @PathParam("actionInstanceId") Long actionInstanceId);
+
+    @POST
+    @Path("/executeDunningActionInstance/{actionInstanceId}")
+    @Operation(
+            summary = "Execute DunningActionInstance",
+            tags = {"Collection Plan"},
+            description = "Execute DunningActionInstance",
+            responses = {
+                @ApiResponse(responseCode = "200", description = "Execute action success"),
+                @ApiResponse(responseCode = "404", description = "Action instance does not exist")
+            })
+    Response executeDunningActionInstance(@PathParam("actionInstanceId") Long actionInstanceId);
 }

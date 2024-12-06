@@ -1,30 +1,61 @@
 package org.meveo.service.payments.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
+import jakarta.inject.Inject;
+import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.QueryBuilder;
-import org.meveo.model.dunning.DunningAction;
-import org.meveo.model.dunning.DunningActionInstance;
-import org.meveo.model.dunning.DunningActionInstanceStatusEnum;
-import org.meveo.model.dunning.DunningCollectionPlan;
-import org.meveo.model.dunning.DunningLevelInstance;
-import org.meveo.model.dunning.DunningLevelInstanceStatusEnum;
-import org.meveo.model.dunning.DunningPolicyLevel;
+import org.meveo.model.admin.Seller;
+import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.Invoice;
+import org.meveo.model.communication.email.EmailTemplate;
+import org.meveo.model.dunning.*;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.shared.Name;
+import org.meveo.model.shared.Title;
 import org.meveo.service.base.PersistenceService;
 
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
+import org.meveo.service.billing.impl.BillingAccountService;
+import org.meveo.service.billing.impl.InvoiceService;
+import org.meveo.service.script.Script;
+import org.meveo.service.script.ScriptInstanceService;
+
+import static java.util.Optional.ofNullable;
+import static org.meveo.model.payments.ActionChannelEnum.EMAIL;
+import static org.meveo.model.payments.ActionTypeEnum.*;
 
 @Stateless
 public class DunningActionInstanceService extends PersistenceService<DunningActionInstance> {
+
+    @Inject
+    private DunningSettingsService dunningSettingsService;
+
+    @Inject
+    private ScriptInstanceService scriptInstanceService;
+
+    @Inject
+    private CustomerAccountService customerAccountService;
+
+    @Inject
+    private DunningCollectionPlanService collectionPlanService;
+
+    @Inject
+    private BillingAccountService billingAccountService;
+
+    @Inject
+    private InvoiceService invoiceService;
+
+    private final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	
     /**
      * Find a dunning action instance by code and dunning level instance
      *
-     * @param code                Code
+     * @param code Code
      * @param dunningLevelInstance Level instance
      * @return A dunning action instance
      */
@@ -43,7 +74,7 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
     /**
      * Update the status of a dunning action instance
      *
-     * @param actionStatus         Action status
+     * @param actionStatus Action status
      * @param dunningLevelInstance Level instance
      * @return The number of updated records
      */
@@ -87,7 +118,7 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
     /**
      * Create a dunning action instance
      *
-     * @param action               Dunning action
+     * @param action Dunning action
      * @param pDunningLevelInstance Level instance
      * @return A dunning action instance
      */
@@ -106,5 +137,180 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
         }
 
         return dunningActionInstance;
+    }
+
+    /**
+     * Trigger action
+     *
+     * @param actionInstance Action instance
+     * @param collectionPlan Collection plan
+     */
+    public void triggerAction(DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
+        // Execute script
+        if (actionInstance.getActionType().equals(SCRIPT) && actionInstance.getDunningAction() != null) {
+            executeScriptAction(dunningSettingsService.findLastOne(), actionInstance, collectionPlan);
+        }
+
+        // Send notification
+        if (actionInstance.getActionType().equals(SEND_NOTIFICATION) && actionInstance.getDunningAction().getActionChannel().equals(EMAIL)) {
+            executeNotificationAction(dunningSettingsService.findLastOne(), actionInstance, collectionPlan);
+        }
+
+        // Retry payment
+        if (actionInstance.getActionType().equals(RETRY_PAYMENT)) {
+            collectionPlanService.launchPaymentAction(collectionPlan);
+        }
+    }
+
+    /**
+     * Execute script action
+     *
+     * @param dunningSettings Dunning settings
+     * @param actionInstance Action instance
+     * @param collectionPlan Collection plan
+     */
+    private void executeScriptAction(DunningSettings dunningSettings, DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
+        HashMap<String, Object> context = new HashMap<>();
+        context.put(Script.CONTEXT_ENTITY, collectionPlan.getRelatedInvoice());
+        context.put("customerAccount", collectionPlan.getCustomerAccount());
+
+        if (dunningSettings != null) {
+            context.put("dunningMode", dunningSettings.getDunningMode());
+        }
+
+        scriptInstanceService.execute(actionInstance.getDunningAction().getScriptInstance().getCode(), context);
+    }
+
+    /**
+     * Execute notification action
+     *
+     * @param dunningSettings Dunning settings
+     * @param actionInstance Action instance
+     * @param collectionPlan Collection plan
+     */
+    private void executeNotificationAction(DunningSettings dunningSettings, DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
+        if(dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.INVOICE_LEVEL) {
+            sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), collectionPlan.getRelatedInvoice(), collectionPlan.getLastActionDate());
+        } else if (dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL) {
+            customerAccountService.sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), actionInstance.getCollectionPlan());
+        }
+    }
+
+    /**
+     * Send email
+     *
+     * @param emailTemplate Email template
+     * @param invoice Invoice
+     * @param lastActionDate Last action date
+     */
+    private void sendEmail(EmailTemplate emailTemplate, Invoice invoice, Date lastActionDate) {
+        if (invoice.getSeller() != null
+                && invoice.getSeller().getContactInformation() != null
+                && invoice.getSeller().getContactInformation().getEmail() != null
+                && !invoice.getSeller().getContactInformation().getEmail().isBlank()) {
+            // prepare params
+            Map<Object, Object> params = new HashMap<>();
+
+            // get billing account infos and set it into params
+            BillingAccount billingAccount = billingAccountService.findById(invoice.getBillingAccount().getId(), List.of("customerAccount"));
+            setBillingAccountInfo(params, billingAccount);
+
+            // get customer account infos and set it into params
+            CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
+            setCustomerAccountInfo(params, customerAccount);
+
+            // set invoice infos
+            params.put("invoiceInvoiceNumber", invoice.getInvoiceNumber());
+            params.put("invoiceTotal", invoice.getAmountWithTax());
+            params.put("invoiceDueDate", formatter.format(invoice.getDueDate()));
+            params.put("dayDate", formatter.format(new Date()));
+            params.put("dunningCollectionPlanLastActionDate", lastActionDate != null ? formatter.format(lastActionDate) : "");
+
+            // prepare attachments
+            List<File> attachments = setAttachment(invoice);
+
+            // send notification
+            sendNotification(billingAccount, invoice.getSeller(), emailTemplate, params, attachments);
+        } else {
+            throw new BusinessException("The email sending skipped because the from email is missing for the seller : " + invoice.getSeller().getCode());
+        }
+    }
+
+    /**
+     * Set billing account info
+     *
+     * @param params Params
+     * @param billingAccount Billing account
+     */
+    private void setBillingAccountInfo(Map<Object, Object> params, BillingAccount billingAccount) {
+        params.put("billingAccountDescription", billingAccount.getDescription());
+        params.put("billingAccountAddressAddress1", billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
+        params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
+        params.put("billingAccountAddressCity", billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
+        params.put("billingAccountContactInformationPhone", billingAccount.getContactInformation() != null ? billingAccount.getContactInformation().getPhone() : "");
+
+        if (Boolean.TRUE.equals(billingAccount.getIsCompany())) {
+            params.put("customerAccountLegalEntityTypeCode", ofNullable(billingAccount.getLegalEntityType()).map(Title::getCode).orElse(""));
+        } else {
+            Name name = billingAccount.getName();
+            Title title = ofNullable(name).map(Name::getTitle).orElse(null);
+            params.put("customerAccountLegalEntityTypeCode", ofNullable(title).map(Title::getDescription).orElse(""));
+        }
+    }
+
+    /**
+     * Set customer account info
+     *
+     * @param params Params
+     * @param customerAccount Customer account
+     */
+    private void setCustomerAccountInfo(Map<Object, Object> params, CustomerAccount customerAccount) {
+        params.put("customerAccountAddressAddress1", customerAccount.getAddress() != null ? customerAccount.getAddress().getAddress1() : "");
+        params.put("customerAccountAddressZipCode", customerAccount.getAddress() != null ? customerAccount.getAddress().getZipCode() : "");
+        params.put("customerAccountAddressCity", customerAccount.getAddress() != null ? customerAccount.getAddress().getCity() : "");
+        params.put("customerAccountDescription", customerAccount.getDescription());
+        params.put("customerAccountLastName", customerAccount.getName() != null ? customerAccount.getName().getLastName() : "");
+        params.put("customerAccountFirstName", customerAccount.getName() != null ? customerAccount.getName().getFirstName() : "");
+    }
+
+    /**
+     * Set attachment
+     *
+     * @param invoice Invoice
+     * @return A list of files
+     */
+    private List<File> setAttachment(Invoice invoice) {
+        List<File> attachments = new ArrayList<>();
+        String invoiceFileName = invoiceService.getFullPdfFilePath(invoice, false);
+        File attachment = new File(invoiceFileName);
+
+        if (attachment.exists()) {
+            attachments.add(attachment);
+        } else {
+            log.warn("No Pdf file exists for the invoice : {}", invoice.getInvoiceNumber() != null ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber());
+        }
+
+        return attachments;
+    }
+
+    /**
+     * Send notification
+     *
+     * @param billingAccount Billing account
+     * @param seller Seller
+     * @param emailTemplate Email template
+     * @param params Params
+     * @param attachments Attachments
+     */
+    private void sendNotification(BillingAccount billingAccount, Seller seller, EmailTemplate emailTemplate, Map<Object, Object> params, List<File> attachments) {
+        if (billingAccount.getContactInformation() != null && billingAccount.getContactInformation().getEmail() != null) {
+            try {
+                collectionPlanService.sendNotification(seller.getContactInformation().getEmail(), billingAccount, emailTemplate, params, attachments);
+            } catch (Exception exception) {
+                throw new BusinessException(exception.getMessage());
+            }
+        } else {
+            throw new BusinessException("The email is missing for the billing account : " + billingAccount.getCode());
+        }
     }
 }

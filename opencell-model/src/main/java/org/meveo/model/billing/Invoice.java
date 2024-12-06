@@ -69,7 +69,6 @@ import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostUpdate;
@@ -781,6 +780,10 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
 
     @Column(name = "certificate_uncollectibility_number", length = 50)
     private String certificateUncollectibilityNumber;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dunning_collection_plan_id")
+    private DunningCollectionPlan collectionPlan;
 
     public Invoice() {
     }
@@ -2048,5 +2051,13 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     public Invoice setCertificateUncollectibilityNumber(String certificateUncollectibilityNumber) {
         this.certificateUncollectibilityNumber = certificateUncollectibilityNumber;
         return this;
+    }
+
+    public DunningCollectionPlan getCollectionPlan() {
+        return collectionPlan;
+    }
+
+    public void setCollectionPlan(DunningCollectionPlan collectionPlan) {
+        this.collectionPlan = collectionPlan;
     }
 }

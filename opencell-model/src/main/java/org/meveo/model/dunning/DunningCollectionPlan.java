@@ -198,6 +198,12 @@ public class DunningCollectionPlan extends AuditableEntity {
 	@JoinColumn(name = "customer_account_id")
 	private CustomerAccount customerAccount;
 
+    /**
+     * The related invoices for CUSTOMER_LEVEL
+     */
+    @OneToMany(mappedBy = "collectionPlan", fetch = FetchType.LAZY)
+    private List<Invoice> relatedInvoices;
+
     public DunningCollectionPlan() {};
 
     public DunningCollectionPlan(Long id) {
@@ -393,4 +399,12 @@ public class DunningCollectionPlan extends AuditableEntity {
 	public void setCustomerAccount(CustomerAccount customerAccount) {
 		this.customerAccount = customerAccount;
 	}
+
+    public List<Invoice> getRelatedInvoices() {
+        return relatedInvoices;
+    }
+
+    public void setRelatedInvoices(List<Invoice> relatedInvoices) {
+        this.relatedInvoices = relatedInvoices;
+    }
 }

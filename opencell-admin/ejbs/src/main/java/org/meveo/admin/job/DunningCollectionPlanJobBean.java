@@ -149,7 +149,7 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
             customerAccountsBalance.put(customerAccount, balance);
         });
         Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy = getEligibleCustomerAccount(sortedPolicies, customerAccountsBalance);
-        return dunningPolicyService.processEligibleCustomerAccounts(eligibleCustomerAccountsByPolicy);
+        return dunningPolicyService.processEligibleCustomerAccounts(eligibleCustomerAccountsByPolicy, linkedOccTemplates);
     }
 
     /**

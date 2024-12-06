@@ -3283,6 +3283,7 @@
 			<column name="sips_batch_archive_name" type="varchar(255)" />
             <column name="pdp_status_id" type="bigint" />
             <column name="certificate_uncollectibility_number" type="varchar(50)" />
+            <column name="dunning_collection_plan_id" type="bigint" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-177">
@@ -6377,7 +6378,7 @@
             <column name="code" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="description" type="varchar(255)" />
+            <column name="description" type="varchar(500)" />
             <column name="script" type="${type.text}" />
             <column name="script_instance_cat_id" type="bigint" />
             <column name="creator" type="varchar(100)" />

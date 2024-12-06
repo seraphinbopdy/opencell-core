@@ -547,102 +547,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         });
     }
 
-    /**
-     * Trigger action
-     *
-     * @param actionInstance Action instance
-     * @param collectionPlan Collection plan
-     */
-    private void triggerAction(DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
-        DunningSettings dunningSettings = dunningSettingsService.findLastOne();
-
-        // Execute script
-        if (actionInstance.getActionType().equals(SCRIPT) && actionInstance.getDunningAction() != null) {
-            HashMap<String, Object> context = new HashMap<>();
-            context.put(Script.CONTEXT_ENTITY, collectionPlan.getRelatedInvoice());
-            context.put("customerAccount", collectionPlan.getCustomerAccount());
-            if (dunningSettings != null) {
-                context.put("dunningMode", dunningSettings.getDunningMode());
-            }
-            scriptInstanceService.execute(actionInstance.getDunningAction().getScriptInstance().getCode(), context);
-        }
-
-        // Send notification
-        if (actionInstance.getActionType().equals(SEND_NOTIFICATION) &&
-                (actionInstance.getDunningAction().getActionChannel().equals(EMAIL) || actionInstance.getDunningAction().getActionChannel().equals(LETTER))) {
-
-            if(dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.INVOICE_LEVEL) {
-                sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), collectionPlan.getRelatedInvoice(), collectionPlan.getLastActionDate());
-            }else if (dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL) {
-                customerAccountService.sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), actionInstance.getCollectionPlan());
-        }
-        }
-
-        // Retry payment
-        if (actionInstance.getActionType().equals(RETRY_PAYMENT)) {
-        	collectionPlanService.launchPaymentAction(collectionPlan);
-        }
-    }
-
-    /**
-     * Send email
-     *
-     * @param emailTemplate Email template
-     * @param invoice Invoice
-     * @param lastActionDate Last action date
-     */
-    private void sendEmail(EmailTemplate emailTemplate, Invoice invoice, Date lastActionDate) {
-        if (invoice.getSeller() != null && invoice.getSeller().getContactInformation() != null
-                && invoice.getSeller().getContactInformation().getEmail() != null
-                && !invoice.getSeller().getContactInformation().getEmail().isBlank()) {
-            Seller seller = invoice.getSeller();
-            Map<Object, Object> params = new HashMap<>();
-            BillingAccount billingAccount = billingAccountService.findById(invoice.getBillingAccount().getId(), asList("customerAccount"));
-            setBillingAccountInfo(params, billingAccount);
-            params.put("billingAccountContactInformationPhone", billingAccount.getContactInformation() != null ? billingAccount.getContactInformation().getPhone() : "");
-
-            CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
-            if (Boolean.TRUE.equals(billingAccount.getIsCompany())) {
-                params.put("customerAccountLegalEntityTypeCode", ofNullable(billingAccount.getLegalEntityType()).map(Title::getCode).orElse(""));
-            } else {
-                Name name = ofNullable(billingAccount.getName()).orElse(null);
-                Title title = ofNullable(name).map(Name::getTitle).orElse(null);
-                params.put("customerAccountLegalEntityTypeCode", ofNullable(title).map(Title::getDescription).orElse(""));
-            }
-
-            setCustomerAccountInfo(params, customerAccount);
-            params.put("customerAccountLastName", customerAccount.getName() != null ? customerAccount.getName().getLastName() : "");
-            params.put("customerAccountFirstName", customerAccount.getName() != null ? customerAccount.getName().getFirstName() : "");
-            params.put("invoiceInvoiceNumber", invoice.getInvoiceNumber());
-            params.put("invoiceTotal", invoice.getAmountWithTax());
-            params.put("invoiceDueDate", formatter.format(invoice.getDueDate()));
-            params.put("dayDate", formatter.format(new Date()));
-            params.put("dunningCollectionPlanLastActionDate", lastActionDate != null ? formatter.format(lastActionDate) : "");
-
-            List<File> attachments = new ArrayList<>();
-            String invoiceFileName = invoiceService.getFullPdfFilePath(invoice, false);
-            File attachment = new File(invoiceFileName);
-
-            if (attachment.exists()) {
-                attachments.add(attachment);
-            } else {
-                log.warn("No Pdf file exists for the invoice : {}", invoice.getInvoiceNumber() != null ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber());
-            }
-
-            if (billingAccount.getContactInformation() != null && billingAccount.getContactInformation().getEmail() != null) {
-                try {
-                    collectionPlanService.sendNotification(seller.getContactInformation().getEmail(), billingAccount, emailTemplate, params, attachments);
-                } catch (Exception exception) {
-                    throw new BusinessException(exception.getMessage());
-                }
-            } else {
-                throw new BusinessException("The email is missing for the billing account : " + billingAccount.getCode());
-            }
-        } else {
-            throw new BusinessException("The email sending skipped because the from email is missing for the seller : " + invoice.getSeller().getCode());
-        }
-    }
-
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void doPayment(PaymentMethod preferredPaymentMethod, CustomerAccount customerAccount,
@@ -769,7 +673,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
      * @param actionInstance Action instance
      */
     private void triggerActionAndRefreshLevelsAndActions(DunningCollectionPlan collectionPlan, DunningLevelInstance levelInstance, DunningActionInstance actionInstance) {
-        triggerAction(actionInstance, collectionPlan);
+        actionInstanceService.triggerAction(actionInstance, collectionPlan);
         collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
         actionInstance.setExecutionDate(new Date());
@@ -782,51 +686,51 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         collectionPlan.setLastAction(actionInstance.getDunningAction().getCode());
     }
 
-    /**
-     * Set customer account info
-     * @param params Params
-     * @param customerAccount Customer account
-     */
-    static void setCustomerAccountInfo(Map<Object, Object> params, CustomerAccount customerAccount) {
-        params.put("customerAccountAddressAddress1", customerAccount.getAddress() != null ? customerAccount.getAddress().getAddress1() : "");
-        params.put("customerAccountAddressZipCode", customerAccount.getAddress() != null ? customerAccount.getAddress().getZipCode() : "");
-        params.put("customerAccountAddressCity", customerAccount.getAddress() != null ? customerAccount.getAddress().getCity() : "");
-        params.put("customerAccountDescription", customerAccount.getDescription());
-    }
+//    /**
+//     * Set customer account info
+//     * @param params Params
+//     * @param customerAccount Customer account
+//     */
+//    static void setCustomerAccountInfo(Map<Object, Object> params, CustomerAccount customerAccount) {
+//        params.put("customerAccountAddressAddress1", customerAccount.getAddress() != null ? customerAccount.getAddress().getAddress1() : "");
+//        params.put("customerAccountAddressZipCode", customerAccount.getAddress() != null ? customerAccount.getAddress().getZipCode() : "");
+//        params.put("customerAccountAddressCity", customerAccount.getAddress() != null ? customerAccount.getAddress().getCity() : "");
+//        params.put("customerAccountDescription", customerAccount.getDescription());
+//    }
+//
+//    /**
+//     * Set billing account info
+//     * @param params Params
+//     * @param billingAccount Billing account
+//     */
+//    static void setBillingAccountInfo(Map<Object, Object> params, BillingAccount billingAccount) {
+//        params.put("billingAccountDescription", billingAccount.getDescription());
+//        params.put("billingAccountAddressAddress1", billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
+//        params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
+//        params.put("billingAccountAddressCity", billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
+//    }
 
-    /**
-     * Set billing account info
-     * @param params Params
-     * @param billingAccount Billing account
-     */
-    static void setBillingAccountInfo(Map<Object, Object> params, BillingAccount billingAccount) {
-        params.put("billingAccountDescription", billingAccount.getDescription());
-        params.put("billingAccountAddressAddress1", billingAccount.getAddress() != null ? billingAccount.getAddress().getAddress1() : "");
-        params.put("billingAccountAddressZipCode", billingAccount.getAddress() != null ? billingAccount.getAddress().getZipCode() : "");
-        params.put("billingAccountAddressCity", billingAccount.getAddress() != null ? billingAccount.getAddress().getCity() : "");
-    }
-
-    private List<Long> fillBalanceOperationAndReturnListOperationsIds(String customerAccountCode, Long customerAccountId, Long customerBalanceId, Long transactionalCurrencyId, Map<Object, Object> params){
-        var customerAccountDto = new CustomerAccountDto();
-        customerAccountDto.setCode(customerAccountCode);
-        customerAccountDto.setId(customerAccountId);
-
-        var customerBalance = ImmutableCustomerBalance.builder().id(customerBalanceId).build();
-        var transactionCurrency = new CurrencyDto();
-        transactionCurrency.setId(transactionalCurrencyId);
-
-        AccountOperationsDetails accountOperationsDetails = ImmutableAccountOperationsDetails.builder()
-                                                                                            .customerAccount(customerAccountDto)
-                                                                                            .customerBalance(customerBalance)
-                                                                                            .transactionalCurrency(transactionCurrency)
-                                                                                            .build();
-        var accountOperationResult = customerBalanceService.getAccountOperations(accountOperationsDetails);
-
-        params.put("dunningBalanceTotal", accountOperationResult.balance());
-        params.put("dunningBalanceDebit", accountOperationResult.totalDebit());
-        params.put("dunningBalanceCredit", accountOperationResult.totalCredit());
-
-        return accountOperationResult.accountOperationIds();
-    }
+//    private List<Long> fillBalanceOperationAndReturnListOperationsIds(String customerAccountCode, Long customerAccountId, Long customerBalanceId, Long transactionalCurrencyId, Map<Object, Object> params){
+//        var customerAccountDto = new CustomerAccountDto();
+//        customerAccountDto.setCode(customerAccountCode);
+//        customerAccountDto.setId(customerAccountId);
+//
+//        var customerBalance = ImmutableCustomerBalance.builder().id(customerBalanceId).build();
+//        var transactionCurrency = new CurrencyDto();
+//        transactionCurrency.setId(transactionalCurrencyId);
+//
+//        AccountOperationsDetails accountOperationsDetails = ImmutableAccountOperationsDetails.builder()
+//                                                                                            .customerAccount(customerAccountDto)
+//                                                                                            .customerBalance(customerBalance)
+//                                                                                            .transactionalCurrency(transactionCurrency)
+//                                                                                            .build();
+//        var accountOperationResult = customerBalanceService.getAccountOperations(accountOperationsDetails);
+//
+//        params.put("dunningBalanceTotal", accountOperationResult.balance());
+//        params.put("dunningBalanceDebit", accountOperationResult.totalDebit());
+//        params.put("dunningBalanceCredit", accountOperationResult.totalCredit());
+//
+//        return accountOperationResult.accountOperationIds();
+//    }
 
 }

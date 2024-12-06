@@ -514,7 +514,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
      * @param eligibleCustomerAccountsByPolicy Customer account by policy
      * @return Number of collection plans
      */
-    public int processEligibleCustomerAccounts(Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy) {
+    public int processEligibleCustomerAccounts(Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy, List<String> linkedOccTemplates) {
         DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
         AtomicInteger dunningCollectionPlanNumber = new AtomicInteger(0);
         for (Map.Entry<DunningPolicy, Map<CustomerAccount, BigDecimal>> entry : eligibleCustomerAccountsByPolicy.entrySet()) {
@@ -529,7 +529,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                 entry.getValue().forEach((customerAccount, minBalance) -> {
                     if(minBalance.compareTo(BigDecimal.valueOf(policy.getMinBalanceTrigger())) > 0) {
                         dunningCollectionPlanNumber.incrementAndGet();
-                        collectionPlanService.createCollectionPlanForCustomerLevel(customerAccount, minBalance, policy, collectionPlanStatus);
+                        collectionPlanService.createCollectionPlanForCustomerLevel(customerAccount, minBalance, policy, collectionPlanStatus, linkedOccTemplates);
                     }
                 });
             } else {

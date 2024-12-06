@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RatingException;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ChargeApplicationModeEnum;
@@ -83,6 +84,17 @@ public class OneShotRatingService extends RatingService implements Serializable 
         if (chargeMode == null) {
             chargeMode = ChargeApplicationModeEnum.SUBSCRIPTION;
         }
+        if(commercialOrder != null) {
+            chargeInstance.setOrderNumber(commercialOrder.getCode());
+        }
+
+        Subscription subscription = chargeInstance.getSubscription();
+
+        if(StringUtils.isBlank(chargeInstance.getOrderNumber()) ) {
+            if(subscription.getOrder() != null) {
+                chargeInstance.setOrderNumber(chargeInstance.getSubscription().getOrder().getCode());
+            }
+        }
 
         if (!RatingService.isORChargeMatch(chargeInstance)) {
             log.debug("Not rating oneshot chargeInstance {}/{}, filter expression or service attributes evaluated to FALSE", chargeInstance.getId(), chargeInstance.getCode());
@@ -97,7 +109,6 @@ public class OneShotRatingService extends RatingService implements Serializable 
             }
         }
 
-        Subscription subscription = chargeInstance.getSubscription();
 
         log.debug("Will rate a one shot charge subscription {}, quantity {}, applicationDate {}, chargeInstance {}/{}/{}", subscription.getId(), quantityInChargeUnits, applicationDate, chargeInstance.getId(),
             chargeInstance.getCode(), chargeInstance.getDescription());

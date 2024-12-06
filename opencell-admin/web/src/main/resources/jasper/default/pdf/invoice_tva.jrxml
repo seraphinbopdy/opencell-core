@@ -344,6 +344,7 @@
 						<property name="com.jaspersoft.studio.unit.x" value="px"/>
 						<property name="com.jaspersoft.studio.unit.y" value="px"/>
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<printWhenExpression><![CDATA[($F{customerPo}!=null && !String.valueOf($F{customerPo}).isEmpty() && !String.valueOf($F{customerPo}).equals("null")) || ($F{previousInvoices}!=null && !String.valueOf($F{previousInvoices}).isEmpty() && !String.valueOf($F{previousInvoices}).equals("null"))]]></printWhenExpression>
 					</reportElement>
 					<box topPadding="0" leftPadding="5" bottomPadding="0" rightPadding="0">
 						<pen lineWidth="5.0" lineColor="#FF8C00"/>
@@ -369,7 +370,7 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font fontName="SansSerif" size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountWithoutTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountWithoutTax})))]]></textFieldExpression>
+					<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountWithoutTax})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountWithoutTax})) + " " + $F{currencySymbol})]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="530" y="201" width="48" height="28" forecolor="#0D0101" uuid="302ed8a5-2d59-4d2d-97e6-a20a009b885d">
@@ -581,14 +582,14 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font fontName="SansSerif" size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountWithTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountWithTax})))]]></textFieldExpression>
+					<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountWithTax})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountWithTax})) + " " + $F{currencySymbol})]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="360" y="165" width="99" height="27" forecolor="#0D0101" uuid="89c8939a-e199-40dc-a708-52484264ee5b"/>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font fontName="SansSerif" size="10"/>
 					</textElement>
-					<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new java.math.BigDecimal(Double.valueOf($F{amountWithTax})).subtract(new java.math.BigDecimal(Double.valueOf($F{amountWithoutTax}))))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new java.math.BigDecimal(Double.valueOf($F{amountWithTax})).subtract(new java.math.BigDecimal(Double.valueOf($F{amountWithoutTax})))))]]></textFieldExpression>
+					<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new java.math.BigDecimal(Double.valueOf($F{amountWithTax})).subtract(new java.math.BigDecimal(Double.valueOf($F{amountWithoutTax})))) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new java.math.BigDecimal(Double.valueOf($F{amountWithTax})).subtract(new java.math.BigDecimal(Double.valueOf($F{amountWithoutTax})))) + " " + $F{currencySymbol})]]></textFieldExpression>
 				</textField>
 				<textField>
 					<reportElement x="248" y="88" width="346" height="59" forecolor="#878787" uuid="497ea258-6ffb-494f-be3b-4bc544034578">
@@ -612,7 +613,7 @@
 					<textElement textAlignment="Right" verticalAlignment="Bottom">
 						<font fontName="SansSerif" size="10" isBold="false"/>
 					</textElement>
-					<textFieldExpression><![CDATA[($F{language}=="FRA") ? "Montant prépayé : " + (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{totalAdvancesAmountWithTax}))) : "Prepaid amount : " + (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{totalAdvancesAmountWithTax})))]]></textFieldExpression>
+					<textFieldExpression><![CDATA[($F{language}=="FRA") ? "Montant prépayé : " + (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{totalAdvancesAmountWithTax})) + " " + $F{currencySymbol}) : "Prepaid amount : " + (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{totalAdvancesAmountWithTax})) + " " + $F{currencySymbol})]]></textFieldExpression>
 				</textField>
 				<componentElement>
 					<reportElement key="" positionType="Float" stretchType="ElementGroupHeight" isPrintRepeatedValues="false" x="241" y="30" width="343" height="30" isPrintWhenDetailOverflows="true" forecolor="#000000" uuid="efb6e3e2-cf48-479d-a73b-0fabcbe6decb"/>
@@ -723,7 +724,7 @@
 									<textElement textAlignment="Right" verticalAlignment="Middle">
 										<font fontName="SansSerif" size="11" isBold="false"/>
 									</textElement>
-									<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountWithoutTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountWithoutTax})))]]></textFieldExpression>
+									<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountWithoutTax})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountWithoutTax})) + " " + $F{currencySymbol})]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
@@ -760,7 +761,7 @@
 									<textElement textAlignment="Right" verticalAlignment="Middle">
 										<font fontName="SansSerif" size="11" isBold="false"/>
 									</textElement>
-									<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amount}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amount})))]]></textFieldExpression>
+									<textFieldExpression><![CDATA[($F{country} == "FR" || $F{country} == "UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amount})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amount})) + " " + $F{currencySymbol})]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>

@@ -240,6 +240,9 @@
 		<field name="language" class="java.lang.String">
 			<fieldDescription><![CDATA[/invoice/@language]]></fieldDescription>
 		</field>
+		<field name="currencySymbol" class="java.lang.String">
+			<fieldDescription><![CDATA[/invoice/amount/currencySymbol]]></fieldDescription>
+		</field>
 		<sortField name="categoryCode"/>
 	</subDataset>
 	<parameter name="logoPath" class="java.lang.String" isForPrompting="false">
@@ -328,7 +331,7 @@
 						<font fontName="SansSerif" size="11"/>
 						<paragraph rightIndent="0"/>
 					</textElement>
-					<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{discountAmountWithoutTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{discountAmountWithoutTax})))]]></textFieldExpression>
+					<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{discountAmountWithoutTax})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{discountAmountWithoutTax})) + " " + $F{currencySymbol})]]></textFieldExpression>
 				</textField>
 			</band>
 			<band height="21">
@@ -376,7 +379,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="SansSerif" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($F{language}=="FRA" ? "Prix HT" : "Price w/o tax") +"(" + $F{currencySymbol} + ")"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{language}=="FRA" ? "Prix HT" : "Price w/o tax")]]></textFieldExpression>
 			</textField>
 			<componentElement>
 				<reportElement key="" positionType="Float" stretchType="ElementGroupHeight" isPrintRepeatedValues="false" x="0" y="25" width="350" height="25" isPrintWhenDetailOverflows="true" forecolor="#000000" uuid="a38f6a7f-8f3c-44b7-9015-b82312e77752"/>
@@ -416,7 +419,7 @@
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="11" isBold="false"/>
 								</textElement>
-								<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{categoryAmountWithTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{categoryAmountWithTax})))]]></textFieldExpression>
+								<textFieldExpression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{categoryAmountWithTax})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{categoryAmountWithTax})) + " " + $F{currencySymbol})]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

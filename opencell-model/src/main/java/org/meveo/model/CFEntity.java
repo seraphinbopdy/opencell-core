@@ -23,6 +23,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.meveo.model.crm.custom.CustomFieldValues;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
@@ -70,6 +72,7 @@ public abstract class CFEntity extends BaseEntity implements ICustomFieldEntity 
     /**
      * Custom field values in JSON format
      */
+    @JsonProperty("cfValues")
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "cf_values", columnDefinition = "jsonb")
     protected String cfValuesAsJson;

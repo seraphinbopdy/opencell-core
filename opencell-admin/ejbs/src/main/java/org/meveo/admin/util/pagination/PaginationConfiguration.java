@@ -19,6 +19,9 @@ package org.meveo.admin.util.pagination;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -123,10 +126,10 @@ public class PaginationConfiguration implements Serializable {
     public PaginationConfiguration(Integer firstRow, Integer numberOfRows, Map<String, Object> filters, String fullTextFilter, boolean doFetch, List<String> fetchFields, Object... sortFieldsAndOrder) {
         this.firstRow = firstRow;
         this.numberOfRows = numberOfRows;
-        this.filters = filters;
+        this.filters = migrateOldFieldNames(filters);
         this.fullTextFilter = fullTextFilter;
         this.doFetch = doFetch;
-        this.fetchFields = fetchFields;
+        this.fetchFields = migrateOldFieldNames(fetchFields);
         this.limit = numberOfRows;
 
         List<Object> sortValues = new ArrayList<Object>();
@@ -134,7 +137,7 @@ public class PaginationConfiguration implements Serializable {
             if (sortFieldsAndOrder[i] == null) {
                 continue;
             }
-            sortValues.add(sortFieldsAndOrder[i]);
+            sortValues.add(migrateOldFieldName((String) sortFieldsAndOrder[i]));
             sortValues.add(sortFieldsAndOrder[i + 1] == null ? SortOrder.ASCENDING : sortFieldsAndOrder[i + 1]);
         }
 
@@ -169,8 +172,8 @@ public class PaginationConfiguration implements Serializable {
      */
     public PaginationConfiguration(Integer firstRow, Integer numberOfRows, Map<String, Object> filters, String fullTextFilter, List<String> fetchFields, Set<String> groupBy, Set<String> having, Object... sortFieldsAndOrder) {
         this(firstRow, numberOfRows, filters, fullTextFilter, fetchFields, sortFieldsAndOrder);
-        this.groupBy = groupBy;
-        this.having = having;
+        this.groupBy = migrateOldFieldNames(groupBy);
+        this.having = migrateOldFieldNames(having);
     }
 
     public PaginationConfiguration(Integer firstRow, Integer numberOfRows, Map<String, Object> filters, String fullTextFilter, List<String> fetchFields, Set<String> groupBy, Set<String> having, JoinType joinType, Object... sortFieldsAndOrder) {
@@ -184,7 +187,7 @@ public class PaginationConfiguration implements Serializable {
      * @param filters Search criteria
      */
     public PaginationConfiguration(Map<String, Object> filters) {
-        this.filters = filters;
+        this.filters = migrateOldFieldNames(filters);
     }
 
     /**
@@ -195,20 +198,20 @@ public class PaginationConfiguration implements Serializable {
      * @param sortOrder Sort order
      */
     public PaginationConfiguration(Map<String, Object> filters, String sortField, SortOrder sortOrder) {
-        this.filters = filters;
+        this.filters = migrateOldFieldNames(filters);
         if (sortField != null && sortOrder != null) {
-            ordering = new Object[] { sortField, sortOrder };
+            ordering = new Object[] { migrateOldFieldName(sortField), sortOrder };
         } else if (sortField != null) {
-            ordering = new Object[] { sortField, SortOrder.ASCENDING };
+            ordering = new Object[] { migrateOldFieldName(sortField), SortOrder.ASCENDING };
         }
     }
 
     public PaginationConfiguration(Map<String, Object> filters, String sortField, SortOrder sortOrder, int numberOfRows) {
-        this.filters = filters;
+        this.filters = migrateOldFieldNames(filters);
         if (sortField != null && sortOrder != null) {
-            ordering = new Object[] { sortField, sortOrder };
+            ordering = new Object[] { migrateOldFieldName(sortField), sortOrder };
         } else if (sortField != null) {
-            ordering = new Object[] { sortField, SortOrder.ASCENDING };
+            ordering = new Object[] { migrateOldFieldName(sortField), SortOrder.ASCENDING };
         }
         this.numberOfRows = numberOfRows;
     }
@@ -425,6 +428,90 @@ public class PaginationConfiguration implements Serializable {
             for (String key : pKeys) {
                 getFilters().remove(key);
             }
+        }
+    }
+
+    /**
+     * Migrate field names from old to new names.<br/>
+     * Field names migrated are: from "cfValues" to "cfValuesAsJson"
+     *
+     * @param fieldMap A map of fields or expressions
+     * @return A map of fields or expressions with renamed field names
+     */
+    private Map<String, Object> migrateOldFieldNames(Map<String, Object> fieldMap) {
+
+        if (fieldMap == null) {
+            return null;
+        }
+
+        Map<String, Object> newFieldMap = new HashMap<>();
+        fieldMap.forEach((k, v) -> {
+            if (k.contains("cfValues") && !k.contains("cfValuesAsJson")) {
+                String newKey = k.replaceAll("cfValues", "cfValuesAsJson");
+                newFieldMap.put(newKey, v);
+            } else {
+                newFieldMap.put(k, v);
+            }
+        });
+        return newFieldMap;
+    }
+
+    /**
+     * Migrate field names from old to new names.<br/>
+     * Field names migrated are: from "cfValues" to "cfValuesAsJson"
+     * 
+     * @param fields A set of fields or expressions
+     * @return A set of fields or expressions with renamed field names
+     */
+    private Set<String> migrateOldFieldNames(Set<String> fields) {
+
+        if (fields == null) {
+            return null;
+        }
+
+        return new HashSet<String>(migrateOldFieldNames(Arrays.asList(fields.toArray(new String[] {}))));
+    }
+
+    /**
+     * Migrate field names from old to new names.<br/>
+     * Field names migrated are: from "cfValues" to "cfValuesAsJson"
+     * 
+     * @param fields A list of fields or expressions
+     * @return A list of fields or expressions with renamed field names
+     */
+    private List<String> migrateOldFieldNames(List<String> fields) {
+        if (fields == null) {
+            return null;
+        }
+
+        List<String> newFields = new ArrayList<String>();
+        fields.forEach(name -> {
+            if (name.contains("cfValues") && !name.contains("cfValuesAsJson")) {
+                String newName = name.replaceAll("cfValues", "cfValuesAsJson");
+                newFields.add(newName);
+            } else {
+                newFields.add(name);
+            }
+        });
+
+        return newFields;
+    }
+
+    /**
+     * Migrate field names from old to new names.<br/>
+     * Field names migrated are: from "cfValues" to "cfValuesAsJson"
+     * 
+     * @param field A field name or expression
+     * @return A field or expression with renamed field names
+     */
+    private String migrateOldFieldName(String field) {
+        if (field == null) {
+            return null;
+        }
+        if (field.contains("cfValues") && !field.contains("cfValuesAsJson")) {
+            return field.replaceAll("cfValues", "cfValuesAsJson");
+        } else {
+            return field;
         }
     }
 }

@@ -36,19 +36,13 @@ public class CounterUpdateTracking {
         if (counterUpdates == null) {
             counterUpdates = new HashMap<String, List<CounterPeriod>>();
         }
-	    
-	    String key = counterPeriod.getCounterInstance().getId() + "-" + counterPeriod.getCode();
-		
-	    var counterTemplate = counterPeriod.getCounterInstance().getCounterTemplate();
-	    if(counterTemplate.isSharedCounter() && counterTemplate.getAccumulator() == Boolean.TRUE) {
-		    counterPeriod.setValue(counterPeriod.getValue() != null ? counterPeriod.getValue().add(counterValueChangeInfo.getDeltaValue()) : counterValueChangeInfo.getDeltaValue());
-		    counterUpdates.put(key, List.of(counterPeriod));
-		    if (counterPeriod.getAccumulatedValues() != null) {
-			    counterPeriod.setAccumulatedValues(new HashMap<String, BigDecimal>(counterPeriod.getAccumulatedValues()));
-		    }
-		    return;
-	    }
 
+        String key = counterPeriod.getCounterInstance().getId() + "-" + counterPeriod.getCode();
+        var counterTemplate = counterPeriod.getCounterInstance().getCounterTemplate();
+        if (counterTemplate.isSharedCounter() && counterTemplate.getAccumulator() == Boolean.TRUE) {
+            handleSharedCounterTemplate(counterPeriod, counterValueChangeInfo, key);
+            return;
+        }
         List<CounterPeriod> counterPeriods = counterUpdates.get(key);
 
         if (counterPeriods == null) {
@@ -95,5 +89,13 @@ public class CounterUpdateTracking {
      */
     public void setCounterUpdates(Map<String, List<CounterPeriod>> counterUpdates) {
         this.counterUpdates = counterUpdates;
+    }
+
+    private void handleSharedCounterTemplate(CounterPeriod counterPeriod, CounterValueChangeInfo counterValueChangeInfo, String key) {
+        counterPeriod.setValue(counterPeriod.getValue() != null ? counterPeriod.getValue().add(counterValueChangeInfo.getDeltaValue()) : counterValueChangeInfo.getDeltaValue());
+        counterUpdates.put(key, List.of(counterPeriod));
+        if (counterPeriod.getAccumulatedValues() != null) {
+            counterPeriod.setAccumulatedValues(new HashMap<String, BigDecimal>(counterPeriod.getAccumulatedValues()));
+        }
     }
 }

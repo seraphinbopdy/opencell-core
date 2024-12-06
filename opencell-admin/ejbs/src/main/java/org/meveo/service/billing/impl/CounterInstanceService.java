@@ -222,18 +222,11 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private CounterInstance instantiateCounter(BusinessService service, ICounterEntity entity, CounterTemplate counterTemplate, ChargeInstance chargeInstance, boolean isVirtual, CounterInstance counterInstanceShared) {
-		if(counterInstanceShared != null) {
-			if(counterTemplate.getAccumulator() != null && counterTemplate.getAccumulator()) {
-				chargeInstance.addAccumulatorCounterInstance(counterInstanceShared);
-				genericChargeInstanceService.update(chargeInstance);
-			}
-			entity.getCounters().put(counterTemplate.getCode(), counterInstanceShared);
-			if (!isVirtual) {
-				service.update((BusinessEntity) entity);
-			}
-			return counterInstanceShared;
-		}
-		CounterInstance counterInstance = new CounterInstance();
+        CounterInstance counterInstance = handleSharedCounterInstance(counterTemplate, chargeInstance, entity, counterInstanceShared, isVirtual, service);
+        if (counterInstance != null) {
+            return counterInstance;
+        }
+        counterInstance = new CounterInstance();
 		if (!entity.getCounters().containsKey(counterTemplate.getCode()) || chargeInstance.getAccumulatorCounterInstances().stream().noneMatch(c -> c.getCode().equals(counterTemplate.getCode()))) {
 			counterInstance.setCounterTemplate(counterTemplate);
 			
@@ -1250,7 +1243,22 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
 				return (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndServiceShared").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
 			case SU:
 				return (List<Long>) getEntityManager().createNamedQuery("CounterInstance.findByCounterAndSubscriptionShared").setParameter("counterTemplateCode", counterTemplateCode).getResultList();
+            default: return ids;
 		}
-		return ids;
 	}
+
+    private CounterInstance handleSharedCounterInstance(CounterTemplate counterTemplate, ChargeInstance chargeInstance, ICounterEntity entity, CounterInstance counterInstanceShared, boolean isVirtual, BusinessService service) {
+        if (counterInstanceShared != null) {
+            if (counterTemplate.getAccumulator() != null && counterTemplate.getAccumulator()) {
+                chargeInstance.addAccumulatorCounterInstance(counterInstanceShared);
+                genericChargeInstanceService.update(chargeInstance);
+            }
+            entity.getCounters().put(counterTemplate.getCode(), counterInstanceShared);
+            if (!isVirtual) {
+                service.update((BusinessEntity) entity);
+            }
+            return counterInstanceShared;
+        }
+        return null;
+    }
 }

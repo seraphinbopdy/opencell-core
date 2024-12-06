@@ -452,7 +452,7 @@ public abstract class BaseApi {
 
                 boolean cftValueRequired = cft.isValueRequired();
 
-                if (cft.isDisabled() || (!cftValueRequired && cft.getDefaultValue() == null && !cft.isUseInheritedAsDefaultValue())) {
+                if (cft.isDisabled() || (!cftValueRequired && StringUtils.isBlank(cft.getDefaultValue()) && !cft.isUseInheritedAsDefaultValue())) {
                     continue;
                 }
 
@@ -482,7 +482,7 @@ public abstract class BaseApi {
                             hasValue = value != null;
                         }
 
-                        if (!hasValue && cft.getDefaultValue() != null && (isNewEntity || cftValueRequired)) { // No need to check for !cft.isInheritedAsDefaultValue() as it was
+                        if (!hasValue && StringUtils.isNotBlank(cft.getDefaultValue()) && (isNewEntity || cftValueRequired)) { // No need to check for !cft.isInheritedAsDefaultValue() as it was
                             // checked above
                             Object value = customFieldInstanceService.instantiateCFWithDefaultValue(entity, cft.getCode());
                             hasValue = value != null;
@@ -502,7 +502,7 @@ public abstract class BaseApi {
                     if (emptyValue) {
                         Object value = customFieldInstanceService.getInheritedOnlyCFValue(entity, cft.getCode());
 
-                        if (isNewEntity && !emptyValue && ((value == null && cft.getDefaultValue() != null) || cft.isUseInheritedAsDefaultValue())) {
+                        if (isNewEntity && !emptyValue && ((value == null && StringUtils.isNotBlank(cft.getDefaultValue())) || cft.isUseInheritedAsDefaultValue())) {
                             value = customFieldInstanceService.instantiateCFWithInheritedOrDefaultValue(entity, cft);
                         }
                         if (value == null && cftValueRequired) {

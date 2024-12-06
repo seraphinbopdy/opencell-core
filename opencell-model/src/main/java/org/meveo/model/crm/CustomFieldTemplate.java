@@ -608,7 +608,7 @@ public class CustomFieldTemplate extends EnableBusinessEntity implements Compara
     }
 
     public Object getDefaultValueConverted() {
-        if (defaultValue == null) {
+        if (StringUtils.isBlank(defaultValue)) {
             return null;
         }
         try {

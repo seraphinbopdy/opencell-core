@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.DatePeriod;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -125,7 +126,7 @@ public class CustomFieldValueHolder implements Serializable {
             newValues.clear();
 
             for (CustomFieldTemplate cft : cfts) {
-                if (cft.isVersionable() && cft.getDefaultValue() != null && !newValues.containsKey(cft.getCode() + "_value")) {
+                if (cft.isVersionable() && StringUtils.isNotBlank(cft.getDefaultValue()) && !newValues.containsKey(cft.getCode() + "_value")) {
                     newValues.put(cft.getCode() + "_value", cft.getDefaultValueConverted());
                 }
             }
@@ -142,7 +143,7 @@ public class CustomFieldValueHolder implements Serializable {
             for (String keyToRemove : keysToRemove) {
                 newValues.remove(keyToRemove);
             }
-            if (cftToReset.getDefaultValue() != null) {
+            if (StringUtils.isNotBlank(cftToReset.getDefaultValue())) {
                 newValues.put(cftToReset.getCode() + "_value", cftToReset.getDefaultValueConverted());
             }
         }

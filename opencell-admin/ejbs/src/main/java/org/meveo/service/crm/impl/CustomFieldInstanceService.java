@@ -522,13 +522,13 @@ public class CustomFieldInstanceService extends BaseService {
 
         // No existing CF value. Create CF value with new value. Assign(persist) NULL value only if cft.defaultValue is present
         if (!hasCfValue) {
-            if (value == null && cft.getDefaultValue() == null) {
+            if (value == null && StringUtils.isBlank(cft.getDefaultValue())) {
                 return;
             }
             entity.setCfValue(cfCode, value);
 
             // Existing CFI found. Update with new value or NULL value only if cft.defaultValue is present
-        } else if (value != null || (value == null && cft.getDefaultValue() != null)) {
+        } else if (value != null || (value == null && StringUtils.isNotBlank(cft.getDefaultValue()))) {
             entity.setCfValue(cfCode, value);
 
             // Existing CF value found, but new value is null, so remove CF value all together
@@ -576,13 +576,13 @@ public class CustomFieldInstanceService extends BaseService {
 
         // No existing CF value. Create CF value with new value. Persist NULL value only if cft.defaultValue is present
         if (!hasCfValue) {
-            if (value == null && cft.getDefaultValue() == null) {
+            if (value == null && StringUtils.isBlank(cft.getDefaultValue())) {
                 return;
             }
             entity.setCfValue(cfCode, cft.getDatePeriod(valueDate), null, value);
 
             // Existing CFI found. Update with new value or NULL value only if cft.defaultValue is present
-        } else if (value != null || (value == null && cft.getDefaultValue() != null)) {
+        } else if (value != null || (value == null && StringUtils.isNotBlank(cft.getDefaultValue()))) {
             entity.setCfValue(cfCode, cft.getDatePeriod(valueDate), null, value);
 
             // Existing CFI found, but new value is null, so remove CFI
@@ -636,13 +636,13 @@ public class CustomFieldInstanceService extends BaseService {
 
         // No existing CF value. Create CF value with new value. Persist NULL value only if cft.defaultValue is present
         if (!hasCFValue) {
-            if (value == null && cft.getDefaultValue() == null) {
+            if (value == null && StringUtils.isBlank(cft.getDefaultValue())) {
                 return;
             }
             entity.setCfValue(cfCode, new DatePeriod(valueDateFrom, valueDateTo), valuePriority, value);
 
             // Existing CF value found. Update with new value or NULL value only if cft.defaultValue is present
-        } else if (value != null || (value == null && cft.getDefaultValue() != null)) {
+        } else if (value != null || (value == null && StringUtils.isNotBlank(cft.getDefaultValue()))) {
             entity.setCfValue(cfCode, new DatePeriod(valueDateFrom, valueDateTo), valuePriority, value);
 
             // Existing CF value found, but new value is null, so remove CF value

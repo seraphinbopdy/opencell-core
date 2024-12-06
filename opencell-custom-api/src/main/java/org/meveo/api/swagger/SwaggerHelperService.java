@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.customEntities.CustomEntityTemplate;
@@ -107,7 +108,7 @@ public class SwaggerHelperService {
 
         schema.setName(cft.getCode());
         schema.setTitle(cft.getDescription());
-        if (cft.getDefaultValue() != null) {
+        if (StringUtils.isNotBlank(cft.getDefaultValue())) {
             schema.setDefault(schema);
         }
 

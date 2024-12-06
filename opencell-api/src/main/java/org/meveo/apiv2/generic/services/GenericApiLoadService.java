@@ -71,7 +71,7 @@ public class GenericApiLoadService {
     public String findPaginatedRecords(Boolean extractList, Class entityClass, PaginationConfiguration searchConfig, Set<String> genericFields, Set<String> fetchFields, Long nestedDepth, Long id, Set<String> excludedFields) {
 
         if(genericFields != null && isAggregationQueries(genericFields)){
-            searchConfig.setFetchFields(new ArrayList<>(genericFields));
+            searchConfig.setFetchFields(PaginationConfiguration.migrateOldFieldNames(new ArrayList<>(genericFields)));
             List<List<Object>> list = (List<List<Object>>) nativePersistenceService.getAggregateQuery(entityClass.getCanonicalName(), searchConfig, id)
                     .find(nativePersistenceService.getEntityManager()).stream()
                     .map(Arrays::asList)
@@ -90,7 +90,7 @@ public class GenericApiLoadService {
         }else if(genericFields != null &&  isCustomFieldQuery(genericFields)){
         	// get specific custom fields with meta data
         	SearchResult searchResult = persistenceDelegate.list(entityClass, searchConfig);
-            searchConfig.setFetchFields(new ArrayList<>(genericFields));
+            searchConfig.setFetchFields(PaginationConfiguration.migrateOldFieldNames(new ArrayList<>(genericFields)));
             List<List<Object>> list = (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, id, Boolean.FALSE)
                     .find(nativePersistenceService.getEntityManager()).stream()
                     .map(ObjectArrays -> Arrays.asList(ObjectArrays))

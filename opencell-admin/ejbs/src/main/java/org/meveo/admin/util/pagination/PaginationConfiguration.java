@@ -438,7 +438,7 @@ public class PaginationConfiguration implements Serializable {
      * @param fieldMap A map of fields or expressions
      * @return A map of fields or expressions with renamed field names
      */
-    private Map<String, Object> migrateOldFieldNames(Map<String, Object> fieldMap) {
+    public static Map<String, Object> migrateOldFieldNames(Map<String, Object> fieldMap) {
 
         if (fieldMap == null) {
             return null;
@@ -463,7 +463,7 @@ public class PaginationConfiguration implements Serializable {
      * @param fields A set of fields or expressions
      * @return A set of fields or expressions with renamed field names
      */
-    private Set<String> migrateOldFieldNames(Set<String> fields) {
+    public static Set<String> migrateOldFieldNames(Set<String> fields) {
 
         if (fields == null) {
             return null;
@@ -479,7 +479,7 @@ public class PaginationConfiguration implements Serializable {
      * @param fields A list of fields or expressions
      * @return A list of fields or expressions with renamed field names
      */
-    private List<String> migrateOldFieldNames(List<String> fields) {
+    public static List<String> migrateOldFieldNames(List<String> fields) {
         if (fields == null) {
             return null;
         }
@@ -504,7 +504,7 @@ public class PaginationConfiguration implements Serializable {
      * @param field A field name or expression
      * @return A field or expression with renamed field names
      */
-    private String migrateOldFieldName(String field) {
+    public static String migrateOldFieldName(String field) {
         if (field == null) {
             return null;
         }

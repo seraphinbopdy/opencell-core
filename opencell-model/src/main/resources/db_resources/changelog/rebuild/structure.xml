@@ -20781,6 +20781,7 @@
     <changeSet id="INTRD-26817_20241126" author="AndriusKarpavicius"/>
     <changeSet id="#INTRD-25643-202401011" author="anasseh" />
     <changeSet id="#INTRD-25948_disableSynchronousMrrUpdate" author="a.rouaguebe" />
+    <changeSet id="#INTRD-27683_update_dunning_actions_levels" author="zelmeliani" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

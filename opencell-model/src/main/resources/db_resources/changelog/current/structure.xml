@@ -15647,5 +15647,15 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD-27683_update_dunning_actions_levels" author="zelmeliani">
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Manual level 2 call to enterprise customer"/>
+            <where>code = 'Call B2B LVL2'</where>
+        </update>
+        <update tableName="ar_dunning_action">
+            <column name="description" value="Appel manuel de niveau 2 vers client entreprise"/>
+            <where>code = 'Call B2B LVL2-FR'</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>

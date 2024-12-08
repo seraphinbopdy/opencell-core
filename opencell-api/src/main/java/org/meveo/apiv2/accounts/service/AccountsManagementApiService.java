@@ -702,7 +702,7 @@ public class AccountsManagementApiService {
 		result.setAmountWithoutTax(amountWithoutTax.get());
 		result.setAmountTax(amountTax.get());
 		result.setWalletOperationCount(walletOperationCount.get());
-
+        result.setAppliedCharges(Arrays.stream(result.getAppliedCharges()).filter(Objects::nonNull).toArray(AppliedChargeResponseDto[]::new));
 		return result;
 	}
 
@@ -734,9 +734,13 @@ public class AccountsManagementApiService {
 						return createAppliedChargeResponseDto(osho, returnWalletOperations, returnWalletOperationDetails);
 					});
 				}
-					
-				result.addAppliedCharge(chargePosition, oshoDto);
-				result.getStatistics().addSuccess();
+
+                if(oshoDto.getAmountWithoutTax().compareTo(BigDecimal.ZERO) == 0) {
+                    log.warn("applyOneShotChargeInstance #{}: charge amount is 0", chargePosition);
+                }else{
+                    result.addAppliedCharge(chargePosition, oshoDto);
+                    result.getStatistics().addSuccess();
+                }
 			} catch (Exception e) {
 				log.error("Error when applying OSO at position #["+chargePosition+"]" , e);
 				result.getStatistics().addFail();

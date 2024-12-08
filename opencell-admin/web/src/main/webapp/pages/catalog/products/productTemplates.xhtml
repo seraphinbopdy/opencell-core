@@ -36,7 +36,7 @@
 						<p:inputText placeholder="#{messages['action.search']}"
 							syle="float:right;"
 							value="#{businessProductModelListBean.filters['wildcardOr productTemplate.name productTemplate.description']}" />
-						<p:commandLink styleClass="Padding3 fa fa-search"
+						<p:commandLink styleClass="Padding3 pi pi-search"
 							update=":mainForm:dataGrid"></p:commandLink>
 					</h:panelGrid>
 				</h:form>
@@ -96,7 +96,7 @@
 							<div class="Container100">
 								<p:panel header="#{messages['action.startWithThisTemplate']}">
 									<p:link
-										styleClass="fa fa-2x fa-play no-text-decoration text-red"
+										styleClass="pi pi-2x pi-play no-text-decoration text-red"
 										outcome="mm_productTemplateDetail" value="">
 										<f:param name="bpmId" value="#{entity.id}"></f:param>
 										<f:param name="objectId" value="#{entity.productTemplate.id}"></f:param>

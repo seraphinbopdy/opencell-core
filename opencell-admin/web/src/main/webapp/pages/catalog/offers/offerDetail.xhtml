@@ -43,7 +43,7 @@
                             <ul class="list-inline">
                                 <li><p:link id="newVersionLink"
                                         title="#{messages['commons.newVersion']}"
-                                        styleClass="fa fa-plus no-text-decoration text-blue fa-2x"
+                                        styleClass="pi pi-plus no-text-decoration text-blue pi-2x"
                                         outcome="mm_offerTemplateDetail">
                                         <f:param name="cid"
                                             value="#{jakarta.enterprise.context.conversation.id}" />
@@ -56,7 +56,7 @@
                                     </p:link></li>
                                 <li class=""><p:link id="duplicate"
                                         title="#{messages['commons.duplicate']}"
-                                        styleClass="fa fa-copy fa-2x text-blue no-text-decoration"
+                                        styleClass="pi pi-copy pi-2x text-blue no-text-decoration"
                                         outcome="mm_offerTemplateDetail">
                                         <f:param name="cid"
                                             value="#{jakarta.enterprise.context.conversation.id}" />
@@ -68,7 +68,7 @@
                                         <f:param name="duplicateOffer" value="true" />
                                     </p:link></li>
                                 <li class=""><p:link
-                                        styleClass="fa fa-edit fa-2x text-blue no-text-decoration"
+                                        styleClass="pi pi-edit pi-2x text-blue no-text-decoration"
                                         outcome="mm_offerTemplateDetail"
                                         title="#{messages['action.edit']}">
                                         <f:param name="cid"
@@ -295,7 +295,7 @@
                         process="@this customFieldsWrappPanel"
                         oncomplete="PF('entityCustomizationDialog').show()"
                         update="entityCustomizationDialogPanel"
-                        styleClass="fa fa-edit no-text-decoration"
+                        styleClass="pi pi-edit no-text-decoration"
                         style="margin-left: 10px;" rendered="#{offerTemplateBean.edit}" />
                 </f:facet>
                 <!-- custom fields -->

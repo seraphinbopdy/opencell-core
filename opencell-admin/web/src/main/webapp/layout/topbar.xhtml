@@ -5,70 +5,67 @@
                 xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
 
 
-	<div id="topbar-wrapper" class="clearfix">
-		<div id="layout-topbar" class="pull-left">
-			<a href="#{request.contextPath}" id="logo-wrapper"> <h:graphicImage
-					name="logo.png" library="img" />
+	<div id="topbar-wrapper" class="" style="display: flex; justify-content: space-between">
+		<div id="layout-topbar" class="">
+			<a href="#{request.contextPath}" id="logo-wrapper"> 
+				<h:graphicImage name="logo.png" library="img" />
 			</a>
 		</div>
 
 		<div id="responsive-menu-button">
-			<a id="menu-button"><i class="fa fa-bars"></i> </a>
+			<a id="menu-button"><i class="pi pi-bars"/></a>
 		</div>
 
-		<h:form id="primary-nav-form">
-			<div  class="pull-right"> <!-- <div class="pull-right" id="primary_nav_wrap"> -->
-				<ul  id="top-right-menu">
-					<li><c:if test="#{currentUser.authenticated}">
-							<a href="#" id="menu1"><i class="fa fa-2x fa-cog"></i></a>
-							<ul > <!-- <ul style="display: none; z-index: 1"> -->
-								<li><h:commandLink id="logout" action="#{authenticationProvider.logout}" value="#{messages['menutop.logout']}" /></li>
-							</ul>
-						</c:if></li>
-					<li><a href="#" id="menu2"><i class="fa fa-2x fa-question"></i></a>
-						<ul style="display: none; z-index: 1">
-							<li><p:link outcome="about"
-									value="#{messages['menu.aboutUs']}"></p:link></li>
-							<li><h:outputLink target="_blank"
-									value="https://support.opencellsoft.com">
+		<h:form id="primary-nav-form" style="display: flex; margin-top: 10px;">
+			<ul id="user-info" class="ListNoStyle Padding10" style="margin: 0 40px 0 0;">
+				<li class="Fs14 FontBold">#{currentUser.fullNameOrUserName}</li>
+				<li class="Fs12 FontBold">#{appProvider.description}</li>
+				<li class="Fs12 FontBold">#{clusterInformation.clusterNodeName}</li>
+			</ul>
+			<ul id="top-right-menu" style="display: flex; list-style-type: none; row-gap: 100px;">
+					<li>
+						<c:if test="#{currentUser.authenticated}">
+							<a href="#" id="menu1">
+								<i class="pi pi-cog" style="font-size: 1.5rem"/>
+							</a>
+							<h:commandLink class="menu2cog" style="top:60px; padding:5px; display: none; background-color:#002050; position:absolute; right:0;" action="#{authenticationProvider.logout}" value="#{messages['menutop.logout']}"/>
+						</c:if>
+					</li>
+					<li>
+						<a href="#" id="menu2">
+							<i class="pi pi-question" style="font-size: 1.5rem"/>
+						</a>
+						<ul class="menu2Question" style="top:60px; padding:5px; background-color:#002050; position:absolute; right:0; display: none; z-index: 1; list-style-type: none">
+							<li>
+								<p:link outcome="about" value="#{messages['menu.aboutUs']}"/>
+							</li>
+							<li>
+								<h:outputLink target="_blank" value="https://support.opencellsoft.com">
 									<h:outputText value="#{messages['menu.documentation']}" />
-								</h:outputLink></li>
-						</ul></li>
+								</h:outputLink>
+							</li>
+						</ul>
+					</li>
 
 				</ul>
-				<!-- / top-right-menu -->
-			</div>
 			<script type="text/javascript">
 				$(document).ready(
 						function() {
-							$('#top-right-menu li a').click(
-									function(e) {
-										//e.preventDefault();
-										e.stopPropagation();
-										var id = $(this).attr("id");
-										if (id === "menu1") {
-											$("#menu2").parent().find('ul')
-													.hide();
-										} else {
-											$("#menu1").parent().find('ul')
-													.hide();
-										}
+							let cog = $('#menu1');
+							let question = $('#menu2');
+							let cogMenu = $('.menu2cog');
+							let questionMenu = $('.menu2Question');
+							question.on('click', function (e){
+								cogMenu.hide();
+								questionMenu.toggle();
+							});
+							cog.on('click', function (e){
+								questionMenu.hide();
+								cogMenu.toggle();
+							})
 
-										$(this).parent().find('ul')
-												.slideToggle();
-										$(this).parent().find('ul').delay(5000)
-												.fadeOut('slow');
-									});
 						})
 			</script>
-			<div class="FRight">
-				<ul id="user-info" class="ListNoStyle Padding10"
-					style="margin: 0 40px 0 0;">
-					<li class="Fs14 FontBold">#{currentUser.fullNameOrUserName}</li>
-					<li class="Fs12 FontBold">#{appProvider.description}</li>
-                    <li class="Fs12 FontBold">#{clusterInformation.clusterNodeName}</li>
-				</ul>
-			</div>
 			<c:if
 				test="#{currentUser.hasRoles('marketingCatalogVisualization','marketingCatalogManager') }">
 				<div class="search-wrapper">
@@ -76,7 +73,7 @@
 						value="#{fullTextSearchBean.filters['fullText']}"
 						placeholder="#{messages['commons.search']}" />
 					<p:commandLink id="doGlobalFullTextSearch"
-						styleClass="Padding5 fa fa-search" action="mm_fullTextSearch"
+						styleClass="Padding5 pi pi-search" action="mm_fullTextSearch"
 						process="globalFullTextSearch @this" />
 
 				</div>

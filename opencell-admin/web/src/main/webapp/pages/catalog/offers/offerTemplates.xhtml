@@ -34,7 +34,7 @@
 						<p:inputText placeholder="#{messages['action.search']}"
 							syle="float:right;"
 							value="#{businessOfferModelListBean.filters['wildcardOr offerTemplate.name offerTemplate.description']}" />
-						<p:commandLink styleClass="Padding3 fa fa-search"
+						<p:commandLink styleClass="Padding3 pi pi-search"
 							update=":mainForm:dataGrid"></p:commandLink>
 					</h:panelGrid>					
 				</h:form>
@@ -188,7 +188,7 @@
 							<div class="Container100">
 								<p:panel header="#{messages['action.startWithThisTemplate']}">
 									<p:link id="startWithThisTemplate"
-										styleClass="fa fa-2x fa-play no-text-decoration text-red"
+										styleClass="pi pi-2x pi-play no-text-decoration text-red"
 										outcome="mm_offerTemplateDetail" value="">
 										<f:param name="bomId" value="#{entity.id}"></f:param>
 										<f:param name="objectId" value="#{entity.offerTemplate.id}"></f:param>

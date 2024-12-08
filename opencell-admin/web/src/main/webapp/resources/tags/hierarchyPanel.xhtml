@@ -71,7 +71,7 @@
 	        });
 	        function showMenuPanel(icon, show){
 	        	if(show){
-	        		icon.removeClass("fa fa-fw fa-bars");
+	        		icon.removeClass("pi pi-fw fa-bars");
 	        		icon.removeClass("ui-icon-plusthick");
 	                icon.addClass("ui-icon-minusthick");
 	                $("#{cc.attrs.menuPanel} .ui-panel-title").show();
@@ -81,7 +81,7 @@
 	        	} else {
 	        		icon.removeClass("ui-icon-minusthick");
 	        		icon.removeClass("ui-icon-plusthick");
-	                icon.addClass("fa fa-fw fa-bars");
+	                icon.addClass("pi pi-fw fa-bars");
 	                $("#{cc.attrs.menuPanel} .ui-panel-title").hide();
 	                $("#{cc.attrs.menuPanel} .ui-panel-content").hide();
 	                $("#{cc.attrs.menuPanel}").css("width", "#{cc.attrs.menuWidthMin}");

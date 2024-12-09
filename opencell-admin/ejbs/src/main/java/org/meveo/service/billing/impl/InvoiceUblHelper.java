@@ -1170,6 +1170,8 @@ public class InvoiceUblHelper {
 	private void setAllowanceCharge(org.meveo.model.billing.Invoice invoice, Invoice target, CreditNote creditNote){
 		List<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates = invoiceAgregateService.listByInvoiceAndType(invoice, SubCategoryInvoiceAgregate.class);
 		if(CollectionUtils.isNotEmpty(subCategoryInvoiceAgregates)){
+			var isDiscountExist = subCategoryInvoiceAgregates.stream().anyMatch(subCategoryInvoiceAgregate -> subCategoryInvoiceAgregate.getDiscountPlanItem() !=null);
+			if(!isDiscountExist) return;
 			subCategoryInvoiceAgregates.forEach(subCategoryInvoiceAgregate -> {
 				AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
 				ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();

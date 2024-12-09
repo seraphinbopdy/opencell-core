@@ -437,6 +437,7 @@
 								<property name="com.jaspersoft.studio.unit.x" value="px"/>
 								<property name="com.jaspersoft.studio.unit.y" value="px"/>
 								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<printWhenExpression><![CDATA[$F{subCode}!=null || $F{openOrderNumber}!=null || $F{contracts}!=null || $F{orderNumber}!=null]]></printWhenExpression>
 							</reportElement>
 							<box topPadding="0" leftPadding="5" bottomPadding="0" rightPadding="0">
 								<pen lineWidth="5.0" lineColor="#FF8C00"/>
@@ -486,7 +487,9 @@
 + "\n"
 + (($F{caCountry}!=null && !String.valueOf($F{caCountry}).isEmpty() && !String.valueOf($F{caCountry}).equals("null")) ? $F{caCountry} : "")
 + "\n"
-+ (($F{baRegNo}!=null && !String.valueOf($F{baRegNo}).isEmpty() && !String.valueOf($F{baRegNo}).equals("null")) ? "<style isBold='true'>Reg.nr.: </style>" + $F{baRegNo}+ "\n" : "")
++ (($F{baSiren}!=null && !String.valueOf($F{baSiren}).isEmpty() && !String.valueOf($F{baSiren}).equals("null")) ? "Siren : " + $F{baSiren} + "\n" : "")
++ (($F{baSiret}!=null && !String.valueOf($F{baSiret}).isEmpty() && !String.valueOf($F{baSiret}).equals("null")) ? "Siret : " + $F{baSiret} + " " : "")
++ "\n"
 + (($F{baVatNo}!=null && !String.valueOf($F{baVatNo}).isEmpty() && !String.valueOf($F{baVatNo}).equals("null")) ? "<style isBold='true'>VAT: </style>" + $F{baVatNo}+ "\n" : "")]]></textFieldExpression>
 						</textField>
 						<textField>
@@ -672,9 +675,6 @@
 + (($F{baCity}!=null && !String.valueOf($F{baCity}).isEmpty() && !String.valueOf($F{baCity}).equals("null")) ? $F{baCity} : "")
 + "\n"
 + (($F{baCountry}!=null && !String.valueOf($F{baCountry}).isEmpty() && !String.valueOf($F{baCountry}).equals("null")) ? $F{baCountry} : "")
-+ "\n"
-+ (($F{baSiren}!=null && !String.valueOf($F{baSiren}).isEmpty() && !String.valueOf($F{baSiren}).equals("null")) ? "Siren : " + $F{baSiren} + "\n" : "")
-+ (($F{baSiret}!=null && !String.valueOf($F{baSiret}).isEmpty() && !String.valueOf($F{baSiret}).equals("null")) ? "Siret : " + $F{baSiret} + " " : "")
 + "\n"]]></textFieldExpression>
 			</textField>
 		</band>
@@ -701,8 +701,6 @@
 					</textElement>
 					<textFieldExpression><![CDATA[(($F{sellerDescription}!=null && !String.valueOf($F{sellerDescription}).isEmpty() && !String.valueOf($F{sellerDescription}).equals("null")) ? "<style isBold='true'>" + $F{sellerDescription} + "</style> " : "") +
 (($F{sellerLegalForm}!=null && !String.valueOf($F{sellerLegalForm}).isEmpty() && !String.valueOf($F{sellerLegalForm}).equals("null")) ? " - " + $F{sellerLegalForm} : "") + 
-(($F{sellerRegNo}!=null && !String.valueOf($F{sellerRegNo}).isEmpty() && !String.valueOf($F{sellerRegNo}).equals("null")) ? "<style isBold='true'>" + ($F{language}=="FRA" ? " - N° enrg.: " : " - Reg.nr.: ") + "</style>" + $F{sellerRegNo} : "")
-+
 (($F{sellerVatNo}!=null && !String.valueOf($F{sellerVatNo}).isEmpty() && !String.valueOf($F{sellerVatNo}).equals("null")) ? "<style isBold='true'>" + ($F{language}=="FRA" ? " - N° TVA " : " - VAT Number ")+ "</style>" + $F{sellerVatNo} : "")
 + (($F{sellerSiren}!=null && !String.valueOf($F{sellerSiren}).isEmpty() && !String.valueOf($F{sellerSiren}).equals("null")) ? "<style isBold='true'> - Siren </style>" + $F{sellerSiren} : "")
 + (($F{sellerSiret}!=null && !String.valueOf($F{sellerSiret}).isEmpty() && !String.valueOf($F{sellerSiret}).equals("null")) ? "<style isBold='true'> - Siret </style>" + $F{sellerSiret} : "")

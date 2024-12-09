@@ -353,7 +353,7 @@ public class InvoiceResourceImpl implements InvoiceResource {
 	public Response cancelInvoice(Long id, RatedTransactionAction rtAction) {
 		Invoice invoice = findInvoiceEligibleToUpdate(id);
 		invoiceApiService.cancelInvoice(invoice, rtAction);
-		return Response.created(LinkGenerator.getUriBuilderFromResource(InvoiceResource.class, id).build())
+		return Response.ok(LinkGenerator.getUriBuilderFromResource(InvoiceResource.class, id).build())
                 .build();
 	}
 

@@ -1948,6 +1948,9 @@ public class AccountHierarchyApi extends BaseApi {
         }
 
         if (accountDto.getName() != null) {
+        	if (accountEntity.getName() == null) {
+        		accountEntity.setName(new NameDto());
+        	}
             if (!StringUtils.isBlank(accountDto.getName().getFirstName())) {
                 accountEntity.getName().setFirstName(accountDto.getName().getFirstName());
             }

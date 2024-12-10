@@ -197,38 +197,6 @@
           "attributes": {}
         },
         {
-          "id": "ecb2093a-7c13-4557-8442-3ea0587c9368",
-          "name": "genApiPkg_mediation.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "23624de1-0098-4b76-8a1f-bf433c3cbff9",
-          "name": "genApiPkg_scripts.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "b7524f6c-6506-48b5-9094-a54181d155a6",
-          "name": "genApiPkg_tax.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "d8628110-0171-41c6-afb5-a677a07e3247",
-          "name": "genApiPkg_order.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "44ae2d99-2e99-485e-a94e-f3bd06ad5b2e",
           "name": "billingVisualization",
           "composite": false,
@@ -253,64 +221,8 @@
           "attributes": {}
         },
         {
-          "id": "a5ae6de2-4b0c-401a-a42c-225e6b38f23c",
-          "name": "genApiPkg_dwh.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "766b1868-fb2b-42a0-a6f7-4105ff1cbf1d",
-          "name": "genApiPkg_accountingScheme.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f6ae30c2-5b62-4c49-bc55-8679c19e64f7",
-          "name": "genApiPkg_payments.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "9027bba7-deab-454b-9349-7326da25aec9",
           "name": "genApiPkg_accounting.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f2a46e86-cf9f-4953-8071-da4c786eee8a",
-          "name": "genApiPkg_dunning.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "884b242f-8fa3-4a97-a75c-8518b71c2b69",
-          "name": "genApiPkg_scripts.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "61215e70-c375-4035-a16d-152c6fa75f0a",
-          "name": "genApiPkg_bi.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "3bc2e6bc-be08-4772-8146-0022d65fc512",
-          "name": "genApiPkg_dwh.create",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -336,24 +248,8 @@
           "attributes": {}
         },
         {
-          "id": "b87d426f-39f5-4da7-81c2-52186ff40a42",
-          "name": "genApiPkg_accountingScheme.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "3c36c820-aebd-4e45-b63f-5e54fa6bf85c",
           "name": "genApiPkg_article.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "47ac3861-6273-4495-a249-7173b67988db",
-          "name": "genApiPkg_jobs.delete",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -384,30 +280,6 @@
           "attributes": {}
         },
         {
-          "id": "b01ada36-e09f-46e0-9517-bbfca08fc825",
-          "name": "genApiPkg_mediation.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "69dcffd5-b9a9-496b-ade1-a372a0871765",
-          "name": "genApiPkg_accountingScheme.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f2a9d598-c28d-4c8c-b77b-307c2f1f0077",
-          "name": "genApiPkg_metrics.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "0db7bfbd-00c9-401f-9415-9556e1a6667b",
           "name": "apiOrderManagement",
           "composite": false,
@@ -424,30 +296,6 @@
           "attributes": {}
         },
         {
-          "id": "8d3a6dd2-b482-4746-b40e-988482dcf00b",
-          "name": "genApiPkg_billing.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "e6ffec86-d7dd-4583-8f8d-79965cdcc1ea",
-          "name": "genApiPkg_security.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "9621aac3-62ed-496f-8b08-3998723d6f84",
-          "name": "genApiPkg_module.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "9711dd41-80b3-4c9b-8390-8c77f7e0ce1e",
           "name": "apiWorkflowVisualizer",
           "composite": false,
@@ -456,32 +304,8 @@
           "attributes": {}
         },
         {
-          "id": "ee4f1a27-3cf4-4614-be1b-e46ff843fc35",
-          "name": "genApiPkg_document.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "834b9c21-0204-4dd0-a042-517eaa9e3c64",
-          "name": "genApiPkg_mediation.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "0794cbb7-7089-48ba-93df-4dafee6d4e19",
           "name": "genApiPkg_rating.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "11e63c64-6d4a-48bf-bb04-b8e0d9b9a6d4",
-          "name": "genApiPkg_generic.update",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -520,22 +344,6 @@
           "attributes": {}
         },
         {
-          "id": "8d10cbf9-ed9a-4c01-8d67-4a975965042a",
-          "name": "genApiPkg_generic.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "aa00b98b-fea9-44fc-94ab-eca8c1435707",
-          "name": "genApiPkg_settings.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "f28e2d09-6db1-4c18-b5b3-e7ed6502f0f2",
           "name": "genApiPkg_datawarehouse.list",
           "composite": false,
@@ -546,14 +354,6 @@
         {
           "id": "cf90a737-d1d4-4917-b199-5a869e484c5b",
           "name": "administrationManagement",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "d92b86f3-acd5-42c4-959a-465902974698",
-          "name": "genApiPkg_catalog.update",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -600,32 +400,8 @@
           "attributes": {}
         },
         {
-          "id": "8132d0d4-2003-457a-a1cc-f690ded997e6",
-          "name": "genApiPkg_security.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "64061a1a-af6e-4b0e-8bcf-195d9a58866f",
-          "name": "genApiPkg_sequence.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "34d1f5b2-42ca-4ebc-b356-4572abb039cd",
           "name": "genApiPkg_hierarchy.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "d28056ea-920d-4d44-ad34-a3a4fbfd6872",
-          "name": "genApiPkg_admin.create",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -665,48 +441,8 @@
           "attributes": {}
         },
         {
-          "id": "e76abb2d-3153-4108-8e94-29f0f31734c4",
-          "name": "genApiPkg_crm.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "ae3ac511-2f44-47d6-9d47-fb7856aacbde",
-          "name": "genApiPkg_customEntities.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "463025cb-e920-45c7-b384-012fb09bc4d0",
-          "name": "genApiPkg_rating.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "5ef51d82-3c96-484c-ac12-5ff4f975b9f4",
-          "name": "genApiPkg_audit.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "fdfc4c14-34bd-4dd3-9393-063133c64d4b",
           "name": "apiPaymentVisualization",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "4ad356f8-2a67-49aa-bf64-375542e0c48b",
-          "name": "genApiPkg_crm.create",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -729,38 +465,6 @@
           "attributes": {}
         },
         {
-          "id": "35e338e7-26bd-4a86-92b4-781281cde407",
-          "name": "genApiPkg_audit.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "5e162f0b-89ac-47d9-b23b-ae4d770318aa",
-          "name": "genApiPkg_shared.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "77e87807-6f68-4acd-825d-c96936ae5517",
-          "name": "genApiPkg_settings.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "e75f6646-b0fd-4e17-a1c0-cf654e9d084e",
-          "name": "genApiPkg_bi.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "ac0c8b83-6177-47c2-9185-5335a3c4de95",
           "name": "genApiPkg_document.list",
           "composite": false,
@@ -771,14 +475,6 @@
         {
           "id": "0db16881-b25e-4759-99b9-7df0f07e4bd0",
           "name": "countryManagement",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "c543fca4-c4eb-4958-9720-a067b8f6e4bd",
-          "name": "genApiPkg_settings.delete",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -808,14 +504,6 @@
           "attributes": {}
         },
         {
-          "id": "13e20114-e7cc-42db-92a3-86c05d2f99e1",
-          "name": "genApiPkg_notification.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "10c5bab9-7e4b-41d9-91c2-04b5cbf0338b",
           "name": "apiWorkflowManager",
           "composite": false,
@@ -832,56 +520,8 @@
           "attributes": {}
         },
         {
-          "id": "b9874fb7-a117-4174-b21a-7183a2c0eae8",
-          "name": "genApiPkg_wf.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f7fe6f04-e2e3-48e5-bdae-114808bc95af",
-          "name": "genApiPkg_report.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "9fc5fe96-ae57-4c43-bfd6-9fcea66e1513",
-          "name": "genApiPkg_security.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "e763463e-5bcd-49e9-b10d-ae388c7cb884",
           "name": "genApiPkg_cpq.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "c25e8468-baff-40d8-8964-4a2c4f540e7a",
-          "name": "genApiPkg_document.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "9229fb3d-182f-4b26-ae48-b2c27d4083cf",
-          "name": "genApiPkg_finance.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "e2254407-9c9d-4c16-85e7-f2ef4ab41b8e",
-          "name": "genApiPkg_hierarchy.delete",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -936,93 +576,6 @@
           "attributes": {}
         },
         {
-          "id": "77e4391e-8636-421b-90cb-c1f4a5c95386",
-          "name": "genApiPkg_cpq.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f2877f59-1361-48da-a87d-e06d78f47839",
-          "name": "genApiPkg_COMMON.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "19d55957-f8c7-4e8a-9bef-52c575507438",
-          "name": "genApiPkg_payments.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "d7ed736b-96a2-4bdb-97e6-9220e130c0f0",
-          "name": "genApiFull.create",
-          "composite": true,
-          "composites": {
-            "client": {
-              "opencell-web": [
-                "genApiPkg_crm.create",
-                "genApiPkg_payments.create",
-                "genApiPkg_COMMON.create",
-                "genApiPkg_rating.create",
-                "genApiPkg_dunning.create",
-                "genApiPkg_scripts.create",
-                "genApiPkg_customEntities.create",
-                "genApiPkg_billing.create",
-                "genApiPkg_quote.create",
-                "genApiPkg_intcrm.create",
-                "genApiPkg_sequence.create",
-                "genApiPkg_datawarehouse.create",
-                "genApiPkg_jobs.create",
-                "genApiPkg_wf.create",
-                "genApiPkg_hierarchy.create",
-                "genApiPkg_catalog.create",
-                "genApiPkg_generic.create",
-                "genApiPkg_metrics.create",
-                "genApiPkg_shared.create",
-                "genApiPkg_accountingScheme.create",
-                "genApiPkg_bi.create",
-                "genApiPkg_settings.create",
-                "genApiPkg_report.create",
-                "genApiPkg_notification.create",
-                "genApiPkg_accounting.create",
-                "genApiPkg_finance.create",
-                "genApiPkg_communication.create",
-                "genApiPkg_tax.create",
-                "genApiPkg_dwh.create",
-                "genApiPkg_security.create",
-                "genApiPkg_filter.create",
-                "genApiPkg_order.create",
-                "genApiPkg_admin.create",
-                "genApiPkg_securityDeposit.create",
-                "genApiPkg_document.create",
-                "genApiPkg_module.create",
-                "genApiPkg_article.create",
-                "genApiPkg_mediation.create",
-                "genApiPkg_cpq.create",
-                "genApiPkg_audit.create",
-                "genApiPkg_ordering.create"
-              ]
-            }
-          },
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "91c1df39-c1c2-4876-b0ce-5195538cae21",
-          "name": "genApiPkg_rating.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "5be1a633-1e48-4023-ad88-c6c1d1b9c485",
           "name": "languageVisualization",
           "composite": false,
@@ -1033,22 +586,6 @@
         {
           "id": "3aeb708b-c98d-4857-92ee-d7113ac050a3",
           "name": "genApiPkg_customEntities.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "e9f3b656-b419-4c31-a7ca-aa60411ccf7e",
-          "name": "genApiPkg_intcrm.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "3f878a9d-98d8-4f34-ba98-1e2a30df17af",
-          "name": "genApiPkg_dwh.update",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1140,14 +677,6 @@
           "attributes": {}
         },
         {
-          "id": "9e88f35f-d5d2-49b9-a105-879923c31199",
-          "name": "genApiPkg_datawarehouse.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "20d9cc3d-6dcb-4886-8408-bd3dbbc74e2d",
           "name": "genApiPkg_finance.list",
           "composite": false,
@@ -1164,24 +693,8 @@
           "attributes": {}
         },
         {
-          "id": "dcc9431c-b582-43be-866d-254affb3c74e",
-          "name": "genApiPkg_datawarehouse.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "58f52c7f-71ca-4944-a4e0-5f69242c418c",
           "name": "catalogManagement",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f79ae066-c18c-4152-b1d2-340df7ac7fc6",
-          "name": "genApiPkg_finance.create",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1229,14 +742,6 @@
           "attributes": {}
         },
         {
-          "id": "aa6fe6b4-c2e9-48bc-a317-6f36c46bbc0c",
-          "name": "genApiPkg_customEntities.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "72dbe853-414a-4fb9-b383-8ea250ccc499",
           "name": "orderManagement",
           "composite": false,
@@ -1261,32 +766,8 @@
           "attributes": {}
         },
         {
-          "id": "5ad2a973-4a2a-436f-89b6-1265c1ebc2fa",
-          "name": "genApiPkg_article.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "cb035328-c614-45fc-8f85-bad0a0ba4be7",
           "name": "apiPaymentManagement",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "252083ad-ebce-4144-a501-a24ed390d7b6",
-          "name": "genApiPkg_accounting.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "614da726-ed25-4827-aba6-ed46b2a7e9ec",
-          "name": "genApiPkg_payments.delete",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1317,14 +798,6 @@
           "attributes": {}
         },
         {
-          "id": "a289285b-2ffb-4f98-935c-e9cb6e3025c0",
-          "name": "genApiPkg_customEntities.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "4d25f64a-6a0f-45d5-91a0-e6eb65a065e1",
           "name": "genApiPkg_quote.list",
           "composite": false,
@@ -1341,32 +814,8 @@
           "attributes": {}
         },
         {
-          "id": "ff508c86-10ec-4f5b-9212-d62a1d75680a",
-          "name": "genApiPkg_sequence.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "8efeb0e3-7f04-4d39-bf20-94f61ed1ba42",
           "name": "userSelfManagement",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f64b49b2-f957-4b11-a5df-05e4e6697057",
-          "name": "genApiPkg_datawarehouse.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f5b0745b-5392-474d-a91d-742a2b6a1ca0",
-          "name": "genApiPkg_quote.update",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1381,32 +830,8 @@
           "attributes": {}
         },
         {
-          "id": "1937efe1-c3aa-42e4-8fba-2bf7957c4315",
-          "name": "genApiPkg_metrics.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "5c071799-5519-46b6-aa13-fb743f3635bf",
-          "name": "genApiPkg_shared.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "f0d2b186-62f6-41ac-9a22-de062f66e029",
           "name": "marketingCatalogVisualization",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "2c57fa72-6b97-4caf-8cf2-a4d997e5aa49",
-          "name": "genApiPkg_report.create",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1430,30 +855,6 @@
         {
           "id": "fcce98bd-fd94-4dff-aba6-f928956a259a",
           "name": "genApiPkg_accountingScheme.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "43b2fe58-92dd-410c-b7f4-fba77ad23033",
-          "name": "genApiPkg_accounting.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "8032aa4c-0134-437b-98c9-619008cde0cd",
-          "name": "genApiPkg_securityDeposit.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "a7651bfa-1dd2-4907-b025-40748bfb99f8",
-          "name": "genApiPkg_intcrm.update",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1531,22 +932,6 @@
           "attributes": {}
         },
         {
-          "id": "2f501bf0-e237-450d-9969-aafb7d20b4a9",
-          "name": "genApiPkg_rating.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "c75367ee-af5d-4c91-ba23-a7d51a853652",
-          "name": "genApiPkg_admin.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "bd78210b-95a2-4246-8a51-2fc0f07fa449",
           "name": "apiCustomEntityVisualization",
           "description": "Allows to view custom entity data",
@@ -1556,32 +941,8 @@
           "attributes": {}
         },
         {
-          "id": "3795d175-e109-456c-85fa-fcd286989bc8",
-          "name": "genApiPkg_jobs.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f847867b-5654-4d23-8349-2531cf2e6382",
-          "name": "genApiPkg_quote.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "92405ff4-c027-4ed6-9ee9-a5a5f598590c",
           "name": "genApiPkg_jobs.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "f56f6e9b-a7ce-47ac-b542-0dc36a9a2b1e",
-          "name": "genApiPkg_ordering.create",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1598,22 +959,6 @@
         {
           "id": "2e66cf13-7581-4177-ba08-c272e84b468c",
           "name": "accountVisualization",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "a15105da-b108-4450-9767-4849278b33e3",
-          "name": "genApiPkg_notification.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "33bcd985-94a0-4d68-86c6-34b3fb451044",
-          "name": "genApiPkg_securityDeposit.update",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1646,33 +991,9 @@
           "attributes": {}
         },
         {
-          "id": "c1169e1e-2408-41d0-984c-6c43cc5e5358",
-          "name": "genApiPkg_report.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "b4450493-3026-477e-bf3c-2bdeea7adb5c",
           "name": "apiUseReport",
           "description": "Run a report and see report execution history",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "6a033aa2-c764-496c-916a-c56f72382f83",
-          "name": "genApiPkg_metrics.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "01f734e7-65dc-4bef-be88-73d0230cfbd5",
-          "name": "genApiPkg_notification.update",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1696,61 +1017,6 @@
           "attributes": {}
         },
         {
-          "id": "c200a7b0-70c4-4e06-86f3-6559d67e0d61",
-          "name": "genApiFull.delete",
-          "composite": true,
-          "composites": {
-            "client": {
-              "opencell-web": [
-                "genApiPkg_cpq.delete",
-                "genApiPkg_notification.delete",
-                "genApiPkg_billing.delete",
-                "genApiPkg_security.delete",
-                "genApiPkg_intcrm.delete",
-                "genApiPkg_module.delete",
-                "genApiPkg_document.delete",
-                "genApiPkg_mediation.delete",
-                "genApiPkg_report.delete",
-                "genApiPkg_tax.delete",
-                "genApiPkg_communication.delete",
-                "genApiPkg_dwh.delete",
-                "genApiPkg_settings.delete",
-                "genApiPkg_scripts.delete",
-                "genApiPkg_bi.delete",
-                "genApiPkg_dunning.delete",
-                "genApiPkg_ordering.delete",
-                "genApiPkg_securityDeposit.delete",
-                "genApiPkg_order.delete",
-                "genApiPkg_catalog.delete",
-                "genApiPkg_datawarehouse.delete",
-                "genApiPkg_sequence.delete",
-                "genApiPkg_wf.delete",
-                "genApiPkg_crm.delete",
-                "genApiPkg_admin.delete",
-                "genApiPkg_accountingScheme.delete",
-                "genApiPkg_generic.delete",
-                "genApiPkg_customEntities.delete",
-                "genApiPkg_jobs.delete",
-                "genApiPkg_finance.delete",
-                "genApiPkg_COMMON.delete",
-                "genApiPkg_hierarchy.delete",
-                "genApiPkg_audit.delete",
-                "genApiPkg_filter.delete",
-                "genApiPkg_accounting.delete",
-                "genApiPkg_quote.delete",
-                "genApiPkg_article.delete",
-                "genApiPkg_shared.delete",
-                "genApiPkg_rating.delete",
-                "genApiPkg_metrics.delete",
-                "genApiPkg_payments.delete"
-              ]
-            }
-          },
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "0f676804-fbde-47b3-9aa1-336e4a8df9bf",
           "name": "marketingManager",
           "composite": true,
@@ -1767,40 +1033,8 @@
           "attributes": {}
         },
         {
-          "id": "7f0afe4d-589b-4a12-953c-12c1d55f5e75",
-          "name": "genApiPkg_communication.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "55c71d59-790d-489a-a64c-b831846b703b",
           "name": "genApiPkg_dunning.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "06832884-8543-4b3f-a8bb-d75aa974b016",
-          "name": "genApiPkg_tax.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "c1aff53c-5bed-4c27-8cbd-00cc532cc162",
-          "name": "genApiPkg_ordering.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "3f88170f-8066-448b-9d6a-6de6ffc0f4e1",
-          "name": "genApiPkg_filter.create",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1822,40 +1056,8 @@
           "attributes": {}
         },
         {
-          "id": "90d385c2-31d6-4225-8918-168c0dc55a8d",
-          "name": "genApiPkg_crm.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "e35c7760-56dc-4aaf-a4df-4108e44fcbc8",
           "name": "cdrVisualizer",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "fad3ddce-f7f4-4333-b2eb-7f506eefde03",
-          "name": "genApiPkg_filter.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "75b405a2-f4eb-4a02-8fdc-ddc96ac29dee",
-          "name": "genApiPkg_generic.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "3dd95752-1b9a-4b8f-a4da-69d722e153c8",
-          "name": "genApiPkg_module.create",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -1893,14 +1095,6 @@
           "attributes": {}
         },
         {
-          "id": "76f40e6a-ee54-44e1-b615-3f5378e92463",
-          "name": "genApiPkg_cpq.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "14c2ecd6-b21d-44ef-8695-015e34a43947",
           "name": "currencyVisualization",
           "composite": false,
@@ -1926,38 +1120,6 @@
           "attributes": {}
         },
         {
-          "id": "ddae071b-d906-4e4c-8a1e-5c1fd99f76ea",
-          "name": "genApiPkg_communication.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "b811db8f-f706-4b6c-a7ad-8cdfc75581bd",
-          "name": "genApiPkg_intcrm.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "644f1331-a8c2-4245-84c2-b266ee736ac0",
-          "name": "genApiPkg_scripts.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "56483dc1-da60-414d-861b-04d5519c48fa",
-          "name": "genApiPkg_bi.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "35b1385e-c064-4a55-bec8-2131af9f8428",
           "name": "apiQuoteVisualization",
           "composite": false,
@@ -1974,14 +1136,6 @@
           "attributes": {}
         },
         {
-          "id": "d8e3206b-142e-481e-b25c-352554972ee6",
-          "name": "genApiPkg_jobs.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "7ce394ba-5190-44d4-854e-8688628775fc",
           "name": "genApiPkg_communication.list",
           "composite": false,
@@ -1992,22 +1146,6 @@
         {
           "id": "bcc142e6-5ce8-4b43-85be-cc0d2b20a79c",
           "name": "apiCatalogVisualization",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "bdcdfcf4-073f-4187-bd55-33cb9ec53277",
-          "name": "genApiPkg_communication.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "a6cf3351-5fbf-430b-bf0e-5353d39f94e3",
-          "name": "genApiPkg_wf.update",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -2031,56 +1169,8 @@
           "attributes": {}
         },
         {
-          "id": "a6334055-004a-49f2-957b-8bfd47a707b4",
-          "name": "genApiPkg_cpq.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "dadbb318-006e-47c0-86ca-f68032c85fac",
-          "name": "genApiPkg_finance.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "b065f2b4-5883-4d0e-9c8a-27d7c79eb880",
           "name": "genApiPkg_sequence.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "352080d2-4a8e-48af-97fe-6416cdaa1c32",
-          "name": "genApiPkg_accounting.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "1543206e-0e66-4812-83f8-1d95c4ba3965",
-          "name": "genApiPkg_dunning.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "516d7a84-15d3-475c-959c-a9f6513c401e",
-          "name": "genApiPkg_ordering.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "3dcc7422-34ff-4bb4-94fd-ea7807a6ad9f",
-          "name": "genApiPkg_order.delete",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -2151,40 +1241,8 @@
           "attributes": {}
         },
         {
-          "id": "ef35dd37-5a87-4392-99e7-72d330f6728d",
-          "name": "genApiPkg_COMMON.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "28dbbdff-3d73-4a09-b5fc-9c2e30446209",
-          "name": "genApiPkg_audit.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "fc8edbeb-3aa1-4931-8dc0-b6d8869f9edc",
-          "name": "genApiPkg_article.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "ebaac134-c830-48f0-9ecd-2557237817ae",
           "name": "genApiPkg_COMMON.list",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "abcf2518-fab0-4f21-85db-5651aa6dfb63",
-          "name": "genApiPkg_shared.delete",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -2225,37 +1283,10 @@
             "client": {
               "opencell-web": [
                 "apiAdministrateur",
-                "apiSuperAdminManagement",
-                "genApiFull.create",
-                "genApiFull.delete",
-                "genApiFull.update"
+                "apiSuperAdminManagement"
               ]
             }
           },
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "193ee197-4688-417b-adb9-d30b8e84089b",
-          "name": "genApiPkg_sequence.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "3937a17e-9d28-486c-a25b-4c3ef7d799fd",
-          "name": "genApiPkg_COMMON.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "b83af99c-7a62-4840-91a8-e856d26f1396",
-          "name": "genApiPkg_dunning.create",
-          "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
           "attributes": {}
@@ -2285,72 +1316,8 @@
           "attributes": {}
         },
         {
-          "id": "adac9f4b-7995-4bbd-92b4-f73798345630",
-          "name": "genApiPkg_billing.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "6155c4d4-0058-49e7-8163-468568d4606d",
-          "name": "genApiPkg_quote.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "299d798f-7b9a-4a75-9280-9b224c554e39",
           "name": "billingManagement",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "849db44c-be82-4cd0-9bb9-4a691ec533ff",
-          "name": "genApiPkg_wf.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "c7443b3f-51d4-469c-9a7a-80880b8e3056",
-          "name": "genApiPkg_hierarchy.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "b36dd067-9f4c-4119-a9ef-0e936ba21fea",
-          "name": "genApiPkg_article.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "1104f94c-e863-478e-9bc6-c5b6a6aa2062",
-          "name": "genApiPkg_tax.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "7a10412a-302f-4fa6-b16a-ff70348439fd",
-          "name": "genApiPkg_catalog.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "8f571e85-7d65-4ab3-8378-cf3b69aca5fb",
-          "name": "genApiPkg_hierarchy.update",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -2373,32 +1340,8 @@
           "attributes": {}
         },
         {
-          "id": "1c433049-ea39-47c9-876c-dc5dd07fd176",
-          "name": "genApiPkg_catalog.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "ccf7de51-907c-4ec6-afda-b7c9f0cbef96",
           "name": "orderVisualization",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "a7b5fe3d-75c6-4c64-ae3f-8ff2117eb433",
-          "name": "genApiPkg_billing.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "5628499b-c20b-4f94-b217-9d70a7be0961",
-          "name": "genApiPkg_order.create",
           "composite": false,
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
@@ -2447,38 +1390,6 @@
           "attributes": {}
         },
         {
-          "id": "257b1997-ca59-4707-9c9c-cbbd14c378d7",
-          "name": "genApiPkg_securityDeposit.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "5fd075ea-4ff2-4596-9ce6-b67ce7bc4170",
-          "name": "genApiPkg_admin.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "ab05125d-4dc3-41bc-a1b7-8406b1bb7232",
-          "name": "genApiPkg_document.create",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "0211b705-e69e-4735-ac28-811f6dd97ad8",
-          "name": "genApiPkg_module.update",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "cc68b5b0-6ba8-4969-888d-6a43e4c0391a",
           "name": "genApiPkg_bi.list",
           "composite": false,
@@ -2506,72 +1417,9 @@
           "attributes": {}
         },
         {
-          "id": "142a739f-e9f1-4fb5-ac92-bd1fc776b0b8",
-          "name": "genApiPkg_filter.delete",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
           "id": "874b0ad1-4b20-4c2a-81bb-ce03e62b1576",
           "name": "apiCpqVisualization",
           "composite": false,
-          "clientRole": true,
-          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
-          "attributes": {}
-        },
-        {
-          "id": "b69c948d-f78d-4181-b865-6e8ad268d558",
-          "name": "genApiFull.update",
-          "composite": true,
-          "composites": {
-            "client": {
-              "opencell-web": [
-                "genApiPkg_securityDeposit.update",
-                "genApiPkg_scripts.update",
-                "genApiPkg_sequence.update",
-                "genApiPkg_COMMON.update",
-                "genApiPkg_bi.update",
-                "genApiPkg_mediation.update",
-                "genApiPkg_generic.update",
-                "genApiPkg_audit.update",
-                "genApiPkg_order.update",
-                "genApiPkg_shared.update",
-                "genApiPkg_metrics.update",
-                "genApiPkg_dwh.update",
-                "genApiPkg_settings.update",
-                "genApiPkg_article.update",
-                "genApiPkg_tax.update",
-                "genApiPkg_quote.update",
-                "genApiPkg_wf.update",
-                "genApiPkg_payments.update",
-                "genApiPkg_notification.update",
-                "genApiPkg_cpq.update",
-                "genApiPkg_hierarchy.update",
-                "genApiPkg_finance.update",
-                "genApiPkg_datawarehouse.update",
-                "genApiPkg_dunning.update",
-                "genApiPkg_accounting.update",
-                "genApiPkg_catalog.update",
-                "genApiPkg_intcrm.update",
-                "genApiPkg_ordering.update",
-                "genApiPkg_billing.update",
-                "genApiPkg_rating.update",
-                "genApiPkg_filter.update",
-                "genApiPkg_report.update",
-                "genApiPkg_admin.update",
-                "genApiPkg_security.update",
-                "genApiPkg_document.update",
-                "genApiPkg_module.update",
-                "genApiPkg_jobs.update",
-                "genApiPkg_crm.update",
-                "genApiPkg_customEntities.update",
-                "genApiPkg_accountingScheme.update",
-                "genApiPkg_communication.update"
-              ]
-            }
-          },
           "clientRole": true,
           "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
           "attributes": {}
@@ -10675,36 +9523,6 @@
             }
           },
           {
-            "id": "80c81134-81e5-4d66-b3ab-8d9a561e07b5",
-            "name": "Role genApiPkg_shared.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_shared.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "f2a5b963-2c66-4c21-b1bb-7484527b16b6",
-            "name": "Role genApiPkg_shared.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_shared.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "702a7f1a-82a0-447f-a46b-e0267a0cbe0b",
-            "name": "Role genApiPkg_shared.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_shared.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "b73c7be9-423f-4a3c-925c-8ccefdfba62e",
             "name": "Role genApiPkg_ordering.list",
             "type": "role",
@@ -10712,36 +9530,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_ordering.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "00c39105-f3d7-40c9-ad78-ae6e16252ca5",
-            "name": "Role genApiPkg_ordering.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_ordering.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "d7b0f840-368a-45e3-9e50-0becfd360148",
-            "name": "Role genApiPkg_ordering.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_ordering.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "d02542ab-0043-464a-ba49-225b9df9e5af",
-            "name": "Role genApiPkg_ordering.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_ordering.delete\",\"required\":false}]"
             }
           },
           {
@@ -10755,36 +9543,6 @@
             }
           },
           {
-            "id": "469535c7-9de4-4752-8fe0-2ed759a98ec9",
-            "name": "Role genApiPkg_catalog.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_catalog.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "0f0f1540-7cfe-48a2-ad81-3e9072791f44",
-            "name": "Role genApiPkg_catalog.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_catalog.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "83669228-53d6-4a71-b09a-5c467790c5c9",
-            "name": "Role genApiPkg_catalog.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_catalog.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "9bdc0ad5-4655-4de4-9bf6-c2bb67c196b6",
             "name": "Role genApiPkg_document.list",
             "type": "role",
@@ -10792,36 +9550,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_document.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "7720fb26-93be-4d3b-9262-94881cd5a413",
-            "name": "Role genApiPkg_document.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_document.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "29df1bb1-7418-410c-914f-30724e4808d1",
-            "name": "Role genApiPkg_document.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_document.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "08172f07-0119-461d-988e-f99630940837",
-            "name": "Role genApiPkg_document.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_document.delete\",\"required\":false}]"
             }
           },
           {
@@ -10835,36 +9563,6 @@
             }
           },
           {
-            "id": "1a6848a3-4416-4d3c-a00d-2e7b9a7042e2",
-            "name": "Role genApiPkg_bi.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_bi.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "235159f7-4557-46a6-9b9f-6baf90846e04",
-            "name": "Role genApiPkg_bi.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_bi.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "a52d014d-0644-4a46-8a21-4064e5ed0ecb",
-            "name": "Role genApiPkg_bi.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_bi.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "e05a79d9-adc7-4c67-ac65-b116f0b934fd",
             "name": "Role genApiPkg_payments.list",
             "type": "role",
@@ -10872,36 +9570,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_payments.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "3fd19164-fbb4-404d-bf82-282ee0f62af7",
-            "name": "Role genApiPkg_payments.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_payments.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "b43424f9-8eee-4468-9510-64b656765d88",
-            "name": "Role genApiPkg_payments.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_payments.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "4eda8e39-96c7-4bfb-abab-caa75f2f446c",
-            "name": "Role genApiPkg_payments.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_payments.delete\",\"required\":false}]"
             }
           },
           {
@@ -10915,36 +9583,6 @@
             }
           },
           {
-            "id": "ac746d74-c096-4543-bd9a-ecde37d84ee2",
-            "name": "Role genApiPkg_rating.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_rating.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "d44e364d-c4b9-4c58-b94f-6d13287d2c0b",
-            "name": "Role genApiPkg_rating.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_rating.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "498e9cdc-92b1-451e-bbcd-a7c7956d58b8",
-            "name": "Role genApiPkg_rating.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_rating.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "59eac37b-2d3d-4463-b85b-de631d122794",
             "name": "Role genApiPkg_admin.list",
             "type": "role",
@@ -10952,36 +9590,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_admin.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "3d95e325-95fc-4a46-a693-6410de528baa",
-            "name": "Role genApiPkg_admin.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_admin.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "f49413fd-0127-4e5b-aab3-96f6dbcbe60a",
-            "name": "Role genApiPkg_admin.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_admin.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "6b03e7f5-f76c-42bb-a692-0b8b883f54ad",
-            "name": "Role genApiPkg_admin.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_admin.delete\",\"required\":false}]"
             }
           },
           {
@@ -10995,36 +9603,6 @@
             }
           },
           {
-            "id": "239cf5da-aff8-4d27-8905-0852bc6506be",
-            "name": "Role genApiPkg_securityDeposit.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_securityDeposit.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "af645aba-fc6f-42ce-92e8-5236d42c8ecc",
-            "name": "Role genApiPkg_securityDeposit.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_securityDeposit.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "e197115a-db2c-4d1b-bbac-f4057b9de449",
-            "name": "Role genApiPkg_securityDeposit.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_securityDeposit.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "454b7243-7fe9-4c22-be22-e6039ac20265",
             "name": "Role genApiPkg_accounting.list",
             "type": "role",
@@ -11032,36 +9610,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_accounting.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "90f42d6a-78bb-4edb-9189-e2e72ed9afdf",
-            "name": "Role genApiPkg_accounting.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_accounting.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "10d8e4b7-8fb8-449c-be29-5d14904deac0",
-            "name": "Role genApiPkg_accounting.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_accounting.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "e5b6f38f-3778-4c21-a202-9971645b7f10",
-            "name": "Role genApiPkg_accounting.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_accounting.delete\",\"required\":false}]"
             }
           },
           {
@@ -11075,36 +9623,6 @@
             }
           },
           {
-            "id": "7df289c7-8cd9-4a80-9af7-62df00cda176",
-            "name": "Role genApiPkg_customEntities.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_customEntities.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "ae25042f-5924-4060-b48a-23e1417c8aa2",
-            "name": "Role genApiPkg_customEntities.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_customEntities.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "07f85386-657a-4501-8b22-e21741b9c32e",
-            "name": "Role genApiPkg_customEntities.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_customEntities.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "651fae96-dee4-42ff-91d9-62d72fc86bbd",
             "name": "Role genApiPkg_wf.list",
             "type": "role",
@@ -11112,36 +9630,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_wf.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "f08b3295-be2c-4683-b47c-974dfb7ec47e",
-            "name": "Role genApiPkg_wf.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_wf.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "94d5c834-8e64-4e12-8abd-da6eecc89d9c",
-            "name": "Role genApiPkg_wf.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_wf.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "d4ccf904-5667-42eb-81ec-8f9b71bbb473",
-            "name": "Role genApiPkg_wf.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_wf.delete\",\"required\":false}]"
             }
           },
           {
@@ -11155,36 +9643,6 @@
             }
           },
           {
-            "id": "c3b72e89-8bbb-4b2c-8851-dc27e7d0f5e5",
-            "name": "Role genApiPkg_billing.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_billing.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "5c5c79f9-161a-43c8-808e-8830bd0bcd0d",
-            "name": "Role genApiPkg_billing.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_billing.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "226529c7-8397-48e2-92ae-bcdcd11adc87",
-            "name": "Role genApiPkg_billing.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_billing.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "102ff344-bf4a-4107-84e7-029e13e6ef2a",
             "name": "Role genApiPkg_notification.list",
             "type": "role",
@@ -11192,36 +9650,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_notification.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "29a60118-c568-4314-be86-fb360d08d1e8",
-            "name": "Role genApiPkg_notification.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_notification.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "78cb9fe5-37b9-45f4-8896-06c110de537e",
-            "name": "Role genApiPkg_notification.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_notification.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "22f58aa3-d733-48b7-89a9-28caa86f6281",
-            "name": "Role genApiPkg_notification.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_notification.delete\",\"required\":false}]"
             }
           },
           {
@@ -11235,36 +9663,6 @@
             }
           },
           {
-            "id": "1346f929-6b6e-4325-9930-b097843b1a13",
-            "name": "Role genApiPkg_security.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_security.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "a79bb9a4-c9ab-4f98-838a-d49f0fcdc0b6",
-            "name": "Role genApiPkg_security.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_security.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "d9d7324a-64c0-4130-b6c6-858212889aee",
-            "name": "Role genApiPkg_security.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_security.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "b742a16c-1342-475f-bd12-9591db2b1e29",
             "name": "Role genApiPkg_quote.list",
             "type": "role",
@@ -11272,36 +9670,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_quote.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "43fb8c7b-a093-4b5e-994a-500ea8b9608b",
-            "name": "Role genApiPkg_quote.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_quote.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "7bdbe768-ef89-486c-ba37-a839893eb7ed",
-            "name": "Role genApiPkg_quote.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_quote.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "23a83f1c-6c15-472e-9881-34d415111356",
-            "name": "Role genApiPkg_quote.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_quote.delete\",\"required\":false}]"
             }
           },
           {
@@ -11315,36 +9683,6 @@
             }
           },
           {
-            "id": "8e44fd0f-be41-481d-b34a-a972d62cbd45",
-            "name": "Role genApiPkg_audit.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_audit.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "7522af59-0cd9-4fd2-8c90-e4c6f17f1ea0",
-            "name": "Role genApiPkg_audit.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_audit.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "997ab285-9aa0-4455-8711-cf4359c4a3d0",
-            "name": "Role genApiPkg_audit.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_audit.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "44bd3776-0178-428b-9023-dbdf30ecf3f2",
             "name": "Role genApiPkg_mediation.list",
             "type": "role",
@@ -11352,36 +9690,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_mediation.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "83385eae-b2d1-4c59-87c2-bb7b0b4626ec",
-            "name": "Role genApiPkg_mediation.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_mediation.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "cd4dd23f-9f13-4319-9839-a7f291eaab64",
-            "name": "Role genApiPkg_mediation.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_mediation.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "0ca31a39-1590-46ea-a3fa-5e11b6957f7c",
-            "name": "Role genApiPkg_mediation.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_mediation.delete\",\"required\":false}]"
             }
           },
           {
@@ -11395,36 +9703,6 @@
             }
           },
           {
-            "id": "a8d7f4a6-07b1-4380-a212-c957656975bb",
-            "name": "Role genApiPkg_scripts.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_scripts.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "324f1a73-51a4-4f3b-b9db-5649876fc278",
-            "name": "Role genApiPkg_scripts.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_scripts.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "22936f82-181c-4df3-9024-d6a6c837fd57",
-            "name": "Role genApiPkg_scripts.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_scripts.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "34d17511-422b-4ae0-8217-fce92e34c52b",
             "name": "Role genApiPkg_communication.list",
             "type": "role",
@@ -11432,36 +9710,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_communication.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "da51c40e-a1fa-4e50-8cbd-7ceaef12cff6",
-            "name": "Role genApiPkg_communication.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_communication.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "b5d89db3-6a41-447e-842a-210d411e2092",
-            "name": "Role genApiPkg_communication.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_communication.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "f522d3d2-734e-4bc7-b52c-428d4c166007",
-            "name": "Role genApiPkg_communication.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_communication.delete\",\"required\":false}]"
             }
           },
           {
@@ -11475,36 +9723,6 @@
             }
           },
           {
-            "id": "47c3e8ed-cd14-4407-a44c-176e4990c8b3",
-            "name": "Role genApiPkg_crm.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_crm.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "b1e88ccb-2724-4f41-ac69-1356911be438",
-            "name": "Role genApiPkg_crm.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_crm.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "9383cc78-86d0-4189-8270-1c2f66cade92",
-            "name": "Role genApiPkg_crm.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_crm.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "9f9a82ac-5e1a-42a7-a0c2-e42de6fe1573",
             "name": "Role genApiPkg_order.list",
             "type": "role",
@@ -11512,36 +9730,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_order.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "eb76a210-a3e9-4a42-87cd-c758d6f6308d",
-            "name": "Role genApiPkg_order.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_order.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "9976881d-9980-44d7-999e-5a46d41127b6",
-            "name": "Role genApiPkg_order.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_order.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "46048fe2-c5d0-4cca-b5fe-a55728bf4a1e",
-            "name": "Role genApiPkg_order.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_order.delete\",\"required\":false}]"
             }
           },
           {
@@ -11555,36 +9743,6 @@
             }
           },
           {
-            "id": "c0e55ae6-2de2-48ff-ad67-7b9d9f7314b7",
-            "name": "Role genApiPkg_settings.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_settings.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "3715f504-d713-4d6f-b989-8b4f5c469503",
-            "name": "Role genApiPkg_settings.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_settings.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "53739317-f25a-4019-b062-dbf07f6cb6a4",
-            "name": "Role genApiPkg_settings.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_settings.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "83ae39dd-2536-42be-9ebf-e16a76ffe8d4",
             "name": "Role genApiPkg_cpq.list",
             "type": "role",
@@ -11592,36 +9750,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_cpq.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "aba51bc0-7dcd-4565-9a17-883933a89789",
-            "name": "Role genApiPkg_cpq.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_cpq.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "f1f14c6b-7c94-443b-8eb9-e3997e2413bc",
-            "name": "Role genApiPkg_cpq.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_cpq.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "0d6c9076-2840-4b7d-b76b-2123c4985bc3",
-            "name": "Role genApiPkg_cpq.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_cpq.delete\",\"required\":false}]"
             }
           },
           {
@@ -11635,36 +9763,6 @@
             }
           },
           {
-            "id": "864b7310-a8f2-4c4a-8e17-7874d93d320b",
-            "name": "Role genApiPkg_dunning.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_dunning.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "863c5fc2-fa28-4d09-bc19-b6ae43719124",
-            "name": "Role genApiPkg_dunning.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_dunning.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "895592fe-f33f-49bd-9f32-a93c38ea3ce2",
-            "name": "Role genApiPkg_dunning.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_dunning.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "5c013453-cb58-46fb-b53f-72400e9d4413",
             "name": "Role genApiPkg_hierarchy.list",
             "type": "role",
@@ -11672,36 +9770,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_hierarchy.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "f2365ea4-58d5-443f-af2d-a803f1bc763e",
-            "name": "Role genApiPkg_hierarchy.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_hierarchy.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "c9912766-fc87-462f-939c-94bd79886d7a",
-            "name": "Role genApiPkg_hierarchy.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_hierarchy.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "5f1c235a-5341-4142-9337-7b3d4b78df53",
-            "name": "Role genApiPkg_hierarchy.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_hierarchy.delete\",\"required\":false}]"
             }
           },
           {
@@ -11715,36 +9783,6 @@
             }
           },
           {
-            "id": "5cf02a0e-a960-4268-8f3e-5563c3faba98",
-            "name": "Role genApiPkg_jobs.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_jobs.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "3b475dec-708c-4b5b-97b8-1074ca4553e4",
-            "name": "Role genApiPkg_jobs.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_jobs.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "6dab9c67-6101-4f79-851a-759dba1695bd",
-            "name": "Role genApiPkg_jobs.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_jobs.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "5a627671-3e5e-4559-97e6-af11242c4555",
             "name": "Role genApiPkg_module.list",
             "type": "role",
@@ -11752,36 +9790,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_module.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "ddf39e5e-7a5c-4fb4-847e-317c6f53e5cd",
-            "name": "Role genApiPkg_module.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_module.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "dc42e3f1-3f70-4f8c-a1be-6799ecf9eec7",
-            "name": "Role genApiPkg_module.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_module.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "07d599ac-3936-45b8-bdd2-b10bca0b55a0",
-            "name": "Role genApiPkg_module.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_module.delete\",\"required\":false}]"
             }
           },
           {
@@ -11795,36 +9803,6 @@
             }
           },
           {
-            "id": "db7da7c5-8b59-48b8-bd80-beac21fad4bf",
-            "name": "Role genApiPkg_tax.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_tax.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "5d80eab9-6a10-42c2-a621-8b9363629bfe",
-            "name": "Role genApiPkg_tax.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_tax.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "9296295d-329c-454a-97c5-51fb3b381b41",
-            "name": "Role genApiPkg_tax.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_tax.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "f2673f90-f1ff-4aee-a65d-cddf096cc5a3",
             "name": "Role genApiPkg_article.list",
             "type": "role",
@@ -11832,36 +9810,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_article.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "de530c7f-9464-4d20-9b03-8f028c3d556c",
-            "name": "Role genApiPkg_article.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_article.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "85e8bf62-aa3c-4528-b42c-6f9b44e40cbd",
-            "name": "Role genApiPkg_article.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_article.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "f3fa952c-9d8d-4bb0-a748-f92a5d023c84",
-            "name": "Role genApiPkg_article.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_article.delete\",\"required\":false}]"
             }
           },
           {
@@ -11875,36 +9823,6 @@
             }
           },
           {
-            "id": "40107a07-c671-41fa-8a4e-34839f67dcde",
-            "name": "Role genApiPkg_generic.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_generic.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "4d9315f6-6f07-4e17-83e5-4896cf3bfce0",
-            "name": "Role genApiPkg_generic.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_generic.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "1abf0281-0219-4eeb-8d4e-3765b4edb829",
-            "name": "Role genApiPkg_generic.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_generic.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "a9f6b355-94e2-4848-b20c-7cf2c2c15ea5",
             "name": "Role genApiPkg_filter.list",
             "type": "role",
@@ -11912,36 +9830,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_filter.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "acd625a1-7570-4b7f-87ed-98afeafa19e6",
-            "name": "Role genApiPkg_filter.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_filter.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "6dc3e7b4-fcfe-4539-8309-3536eabdc239",
-            "name": "Role genApiPkg_filter.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_filter.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "7b92bd5d-f376-4f5c-875a-2dc5dea940e1",
-            "name": "Role genApiPkg_filter.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_filter.delete\",\"required\":false}]"
             }
           },
           {
@@ -11955,36 +9843,6 @@
             }
           },
           {
-            "id": "c7ffebc7-5d71-455f-abfc-0f0b40c469f8",
-            "name": "Role genApiPkg_sequence.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_sequence.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "e85fd6bb-8266-4e87-a75e-52a570dd8a57",
-            "name": "Role genApiPkg_sequence.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_sequence.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "f5efe6af-cca4-4b7c-a9d6-1843a15a45c8",
-            "name": "Role genApiPkg_sequence.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_sequence.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "e4c2654d-0e26-4d64-a6a8-ce8e228467fd",
             "name": "Role genApiPkg_accountingScheme.list",
             "type": "role",
@@ -11992,36 +9850,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_accountingScheme.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "6cec433f-690d-425f-94a2-25852fdc225b",
-            "name": "Role genApiPkg_accountingScheme.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_accountingScheme.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "cda3a785-5b56-4ff0-8dd1-3af850344179",
-            "name": "Role genApiPkg_accountingScheme.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_accountingScheme.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "304fa5e0-cb04-41e8-8c89-44bc23020213",
-            "name": "Role genApiPkg_accountingScheme.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_accountingScheme.delete\",\"required\":false}]"
             }
           },
           {
@@ -12035,36 +9863,6 @@
             }
           },
           {
-            "id": "aa13fe08-254b-4479-815a-9015f74b11f5",
-            "name": "Role genApiPkg_dwh.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_dwh.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "12ede9b1-8976-4dc7-8632-f9b431e0ae32",
-            "name": "Role genApiPkg_dwh.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_dwh.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "009a87b9-3528-4ac9-8588-029a1f054022",
-            "name": "Role genApiPkg_dwh.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_dwh.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "c8fa47a2-a002-4eec-8373-aea53c9020a5",
             "name": "Role genApiPkg_report.list",
             "type": "role",
@@ -12072,36 +9870,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_report.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "c30a0316-462c-4918-b086-b1515e0b2a6e",
-            "name": "Role genApiPkg_report.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_report.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "259035bf-3f2a-4975-8676-fec530514557",
-            "name": "Role genApiPkg_report.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_report.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "35b5e02e-da3b-4dea-97cb-d84b0de46244",
-            "name": "Role genApiPkg_report.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_report.delete\",\"required\":false}]"
             }
           },
           {
@@ -12115,16 +9883,6 @@
             }
           },
           {
-            "id": "5aea814d-e4e6-4a17-95ee-1ab40d9fbb8a",
-            "name": "Role genApiPkg_COMMON.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_COMMON.create\",\"required\":false}]"
-            }
-          },
-          {
             "id": "0d247324-c486-4b62-8822-459ec3729dba",
             "name": "Role inboundAccess",
             "type": "role",
@@ -12132,26 +9890,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/inboundAccess\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "82ce0d57-a759-44f0-bd58-6c3251f28721",
-            "name": "Role genApiPkg_COMMON.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_COMMON.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "a8fd3e74-5165-4c56-9d06-55b5e285d4bd",
-            "name": "Role genApiPkg_COMMON.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_COMMON.delete\",\"required\":false}]"
             }
           },
           {
@@ -12165,36 +9903,6 @@
             }
           },
           {
-            "id": "bebc8351-2cc4-454f-bd28-2462c3e71d7e",
-            "name": "Role genApiPkg_metrics.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_metrics.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "b426fff1-c7ff-4020-8810-deeb4721cd72",
-            "name": "Role genApiPkg_metrics.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_metrics.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "4011044f-6d13-4285-a01d-a458534ae03f",
-            "name": "Role genApiPkg_metrics.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_metrics.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "521b9583-c823-4ca6-bafe-3c9215f75120",
             "name": "Role genApiPkg_datawarehouse.list",
             "type": "role",
@@ -12202,36 +9910,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_datawarehouse.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "138bc7c8-a58c-4cb3-a1aa-a0d240b79390",
-            "name": "Role genApiPkg_datawarehouse.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_datawarehouse.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "bb8cc2e9-e52d-4fc8-a867-2a59ccb0c93e",
-            "name": "Role genApiPkg_datawarehouse.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_datawarehouse.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "bc44736a-2316-4635-a63d-d8d6f3c846a8",
-            "name": "Role genApiPkg_datawarehouse.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_datawarehouse.delete\",\"required\":false}]"
             }
           },
           {
@@ -12245,36 +9923,6 @@
             }
           },
           {
-            "id": "9934b2b6-7b83-4867-907a-4414774e45c2",
-            "name": "Role genApiPkg_intcrm.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_intcrm.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "47c0b65e-7b5e-4323-9257-27775fff147f",
-            "name": "Role genApiPkg_intcrm.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_intcrm.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "8611d300-ae80-4127-8cee-bb79aa205365",
-            "name": "Role genApiPkg_intcrm.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_intcrm.delete\",\"required\":false}]"
-            }
-          },
-          {
             "id": "efc2cbb8-fd19-48b1-aca6-ada44f650b25",
             "name": "Role genApiPkg_finance.list",
             "type": "role",
@@ -12282,36 +9930,6 @@
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "roles": "[{\"id\":\"opencell-web/genApiPkg_finance.list\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "5efc43cc-90da-4f61-b931-f07a61fb1aaa",
-            "name": "Role genApiPkg_finance.create",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_finance.create\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "adf12348-19e3-4923-87e2-092fc81d17a1",
-            "name": "Role genApiPkg_finance.update",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_finance.update\",\"required\":false}]"
-            }
-          },
-          {
-            "id": "207dd9ce-6903-4293-bb3b-37c7f7cb69ab",
-            "name": "Role genApiPkg_finance.delete",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "roles": "[{\"id\":\"opencell-web/genApiPkg_finance.delete\",\"required\":false}]"
             }
           },
           {
@@ -12879,18 +10497,6 @@
             }
           },
           {
-            "id": "02549919-ea7a-4e73-9c5c-100301f4b1a0",
-            "name": "GenApi Pkg shared - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg shared - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_shared.create\"]"
-            }
-          },
-          {
             "id": "3ae323ab-bf1b-4980-9a00-f931eac802b8",
             "name": "GenApi Pkg shared - fud - find",
             "type": "scope",
@@ -12900,30 +10506,6 @@
               "resources": "[\"GenApi Pkg shared - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_shared.list\"]"
-            }
-          },
-          {
-            "id": "65d2298c-6c5e-47ed-bfbb-3496676a3bf9",
-            "name": "GenApi Pkg shared - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg shared - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_shared.update\"]"
-            }
-          },
-          {
-            "id": "ea8b7e04-0f48-42c1-9860-876a09ef4d8a",
-            "name": "GenApi Pkg shared - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg shared - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_shared.delete\"]"
             }
           },
           {
@@ -12939,18 +10521,6 @@
             }
           },
           {
-            "id": "f457dbf5-fe4f-426d-a958-cf69994db6c7",
-            "name": "GenApi Pkg ordering - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg ordering - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_ordering.create\"]"
-            }
-          },
-          {
             "id": "c5104fa5-67bb-443e-8b36-cec3421d8c91",
             "name": "GenApi Pkg ordering - fud - find",
             "type": "scope",
@@ -12960,30 +10530,6 @@
               "resources": "[\"GenApi Pkg ordering - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_ordering.list\"]"
-            }
-          },
-          {
-            "id": "5d6620ee-2284-40c5-984f-b56d89bb164a",
-            "name": "GenApi Pkg ordering - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg ordering - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_ordering.update\"]"
-            }
-          },
-          {
-            "id": "3293ec5d-8c21-4836-8f96-61f21aa24d04",
-            "name": "GenApi Pkg ordering - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg ordering - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_ordering.delete\"]"
             }
           },
           {
@@ -12999,18 +10545,6 @@
             }
           },
           {
-            "id": "8a622225-99c1-40e8-9a33-827f5529d076",
-            "name": "GenApi Pkg catalog - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg catalog - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_catalog.create\"]"
-            }
-          },
-          {
             "id": "5bb089a3-e76c-464a-82c8-3cff1386d008",
             "name": "GenApi Pkg catalog - fud - find",
             "type": "scope",
@@ -13020,30 +10554,6 @@
               "resources": "[\"GenApi Pkg catalog - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_catalog.list\"]"
-            }
-          },
-          {
-            "id": "aacd887f-f6b3-485a-b546-cda3ca6b287b",
-            "name": "GenApi Pkg catalog - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg catalog - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_catalog.update\"]"
-            }
-          },
-          {
-            "id": "24cbc802-d5c7-4a96-a70b-4a669521189d",
-            "name": "GenApi Pkg catalog - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg catalog - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_catalog.delete\"]"
             }
           },
           {
@@ -13081,18 +10591,6 @@
             }
           },
           {
-            "id": "37a6570f-281c-4d67-92fa-ce8b887d560b",
-            "name": "GenApi Pkg document - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg document - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_document.create\"]"
-            }
-          },
-          {
             "id": "daffbe4c-f322-4378-9d68-30f4fd766978",
             "name": "GenApi Pkg document - fud - find",
             "type": "scope",
@@ -13102,30 +10600,6 @@
               "resources": "[\"GenApi Pkg document - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_document.list\"]"
-            }
-          },
-          {
-            "id": "08530133-f6db-4ba9-b0d9-5b07074ef831",
-            "name": "GenApi Pkg document - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg document - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_document.update\"]"
-            }
-          },
-          {
-            "id": "1f307987-739d-4352-812d-198e09050e80",
-            "name": "GenApi Pkg document - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg document - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_document.delete\"]"
             }
           },
           {
@@ -13141,18 +10615,6 @@
             }
           },
           {
-            "id": "770d171b-8189-4bd8-a755-457540033963",
-            "name": "GenApi Pkg bi - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg bi - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_bi.create\"]"
-            }
-          },
-          {
             "id": "cb770382-9950-4aae-96cc-64bdd68ad8b0",
             "name": "GenApi Pkg bi - fud - find",
             "type": "scope",
@@ -13162,30 +10624,6 @@
               "resources": "[\"GenApi Pkg bi - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_bi.list\"]"
-            }
-          },
-          {
-            "id": "7b776b6a-dd14-49ed-b29e-18f9c1f9b392",
-            "name": "GenApi Pkg bi - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg bi - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_bi.update\"]"
-            }
-          },
-          {
-            "id": "c89e2f25-1c29-49ea-af00-544db3947b9b",
-            "name": "GenApi Pkg bi - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg bi - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_bi.delete\"]"
             }
           },
           {
@@ -13201,18 +10639,6 @@
             }
           },
           {
-            "id": "3dc729ed-d6ea-440c-9ea2-4d36228d06ab",
-            "name": "GenApi Pkg payments - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg payments - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_payments.create\"]"
-            }
-          },
-          {
             "id": "caa6a32d-f80b-404e-9a61-6b4292f2d971",
             "name": "GenApi Pkg payments - fud - find",
             "type": "scope",
@@ -13222,30 +10648,6 @@
               "resources": "[\"GenApi Pkg payments - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_payments.list\"]"
-            }
-          },
-          {
-            "id": "eafb5644-8c45-411c-8866-f6651a8736f6",
-            "name": "GenApi Pkg payments - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg payments - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_payments.update\"]"
-            }
-          },
-          {
-            "id": "3bebd7eb-9d16-41de-a862-f4dc4d925e80",
-            "name": "GenApi Pkg payments - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg payments - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_payments.delete\"]"
             }
           },
           {
@@ -13261,18 +10663,6 @@
             }
           },
           {
-            "id": "a8e6f96d-00d5-48fc-846d-9f01f96b1b13",
-            "name": "GenApi Pkg rating - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg rating - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_rating.create\"]"
-            }
-          },
-          {
             "id": "2e5cfd12-3a29-44e2-b83e-d09d5f21382c",
             "name": "GenApi Pkg rating - fud - find",
             "type": "scope",
@@ -13282,30 +10672,6 @@
               "resources": "[\"GenApi Pkg rating - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_rating.list\"]"
-            }
-          },
-          {
-            "id": "63426432-fcd3-403d-aef9-b5a28aa82ec6",
-            "name": "GenApi Pkg rating - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg rating - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_rating.update\"]"
-            }
-          },
-          {
-            "id": "7418606c-9b89-4780-afb1-e973b46e7986",
-            "name": "GenApi Pkg rating - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg rating - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_rating.delete\"]"
             }
           },
           {
@@ -13321,18 +10687,6 @@
             }
           },
           {
-            "id": "0d991100-0af2-4897-8bf2-01a28cb9492d",
-            "name": "GenApi Pkg admin - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg admin - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_admin.create\"]"
-            }
-          },
-          {
             "id": "1fdbda4d-fd69-4ed0-b99f-36850048845d",
             "name": "GenApi Pkg admin - fud - find",
             "type": "scope",
@@ -13342,30 +10696,6 @@
               "resources": "[\"GenApi Pkg admin - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_admin.list\"]"
-            }
-          },
-          {
-            "id": "e6fa6724-e979-4562-be46-3677a7db9c4e",
-            "name": "GenApi Pkg admin - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg admin - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_admin.update\"]"
-            }
-          },
-          {
-            "id": "98b44c35-97b5-4668-80cb-215656bd6db0",
-            "name": "GenApi Pkg admin - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg admin - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_admin.delete\"]"
             }
           },
           {
@@ -13381,18 +10711,6 @@
             }
           },
           {
-            "id": "2d5cef0d-6978-4ff5-b3b9-49149b026733",
-            "name": "GenApi Pkg securityDeposit - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg securityDeposit - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_securityDeposit.create\"]"
-            }
-          },
-          {
             "id": "e48c7b60-f85d-4572-bc44-339b113e06de",
             "name": "GenApi Pkg securityDeposit - fud - find",
             "type": "scope",
@@ -13402,30 +10720,6 @@
               "resources": "[\"GenApi Pkg securityDeposit - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_securityDeposit.list\"]"
-            }
-          },
-          {
-            "id": "c82fb6d3-8b01-4ee0-99af-2e0e3faad883",
-            "name": "GenApi Pkg securityDeposit - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg securityDeposit - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_securityDeposit.update\"]"
-            }
-          },
-          {
-            "id": "0eafe03b-8f24-4c48-8ff5-f48cfccb0a17",
-            "name": "GenApi Pkg securityDeposit - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg securityDeposit - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_securityDeposit.delete\"]"
             }
           },
           {
@@ -13441,18 +10735,6 @@
             }
           },
           {
-            "id": "3cd01705-ef01-4245-bc44-12941ae08e8a",
-            "name": "GenApi Pkg accounting - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg accounting - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_accounting.create\"]"
-            }
-          },
-          {
             "id": "346377ba-9768-4ef6-9d7b-489510b65148",
             "name": "GenApi Pkg accounting - fud - find",
             "type": "scope",
@@ -13462,30 +10744,6 @@
               "resources": "[\"GenApi Pkg accounting - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_accounting.list\"]"
-            }
-          },
-          {
-            "id": "43d73722-64f4-4f54-8d3f-54a2b98ba1b4",
-            "name": "GenApi Pkg accounting - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg accounting - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_accounting.update\"]"
-            }
-          },
-          {
-            "id": "09e04def-ba84-4cfc-b652-ebd740150804",
-            "name": "GenApi Pkg accounting - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg accounting - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_accounting.delete\"]"
             }
           },
           {
@@ -13501,18 +10759,6 @@
             }
           },
           {
-            "id": "e6b29e57-6e55-40f8-a958-efbe1c2afb35",
-            "name": "GenApi Pkg customEntities - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg customEntities - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_customEntities.create\"]"
-            }
-          },
-          {
             "id": "2d50da39-bb72-4c22-85b8-6ab72ce0ff97",
             "name": "GenApi Pkg customEntities - fud - find",
             "type": "scope",
@@ -13522,30 +10768,6 @@
               "resources": "[\"GenApi Pkg customEntities - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_customEntities.list\"]"
-            }
-          },
-          {
-            "id": "006ad081-e998-4ed8-b4bc-ca26ba80d4ed",
-            "name": "GenApi Pkg customEntities - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg customEntities - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_customEntities.update\"]"
-            }
-          },
-          {
-            "id": "aa278a45-995a-47e5-af6e-95cf6d405ffe",
-            "name": "GenApi Pkg customEntities - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg customEntities - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_customEntities.delete\"]"
             }
           },
           {
@@ -13561,18 +10783,6 @@
             }
           },
           {
-            "id": "1807f7fe-07d7-46e7-99e7-ed052a5cd329",
-            "name": "GenApi Pkg wf - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg wf - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_wf.create\"]"
-            }
-          },
-          {
             "id": "df71ef4d-bafa-4b4d-b073-9360b11a0f77",
             "name": "GenApi Pkg wf - fud - find",
             "type": "scope",
@@ -13582,30 +10792,6 @@
               "resources": "[\"GenApi Pkg wf - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_wf.list\"]"
-            }
-          },
-          {
-            "id": "f455b75f-e8b9-4234-a112-972a40bd78ed",
-            "name": "GenApi Pkg wf - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg wf - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_wf.update\"]"
-            }
-          },
-          {
-            "id": "d04f542c-3f8f-4d70-b5ca-d56352d01ed7",
-            "name": "GenApi Pkg wf - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg wf - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_wf.delete\"]"
             }
           },
           {
@@ -13621,18 +10807,6 @@
             }
           },
           {
-            "id": "02b1b406-dc48-4e59-9910-59336085c073",
-            "name": "GenApi Pkg billing - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg billing - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_billing.create\"]"
-            }
-          },
-          {
             "id": "0f56ac35-31f9-4ef6-a400-b9ef6fa53926",
             "name": "GenApi Pkg billing - fud - find",
             "type": "scope",
@@ -13642,30 +10816,6 @@
               "resources": "[\"GenApi Pkg billing - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_billing.list\"]"
-            }
-          },
-          {
-            "id": "d87dca23-a93e-4b4f-8f90-1656a4966b35",
-            "name": "GenApi Pkg billing - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg billing - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_billing.update\"]"
-            }
-          },
-          {
-            "id": "22ff991d-a077-4cfb-af3a-412546362996",
-            "name": "GenApi Pkg billing - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg billing - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_billing.delete\"]"
             }
           },
           {
@@ -13681,18 +10831,6 @@
             }
           },
           {
-            "id": "beea5271-2db9-41e5-8d98-de67361e2528",
-            "name": "GenApi Pkg notification - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg notification - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_notification.create\"]"
-            }
-          },
-          {
             "id": "1827f1cd-5555-4619-b41b-5cb3c899811b",
             "name": "GenApi Pkg notification - fud - find",
             "type": "scope",
@@ -13702,30 +10840,6 @@
               "resources": "[\"GenApi Pkg notification - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_notification.list\"]"
-            }
-          },
-          {
-            "id": "2141bcc4-4e3b-48f9-af5f-fdd5275f881e",
-            "name": "GenApi Pkg notification - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg notification - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_notification.update\"]"
-            }
-          },
-          {
-            "id": "db351c1f-bdfd-4fac-968d-c91ddb1bd00a",
-            "name": "GenApi Pkg notification - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg notification - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_notification.delete\"]"
             }
           },
           {
@@ -13741,18 +10855,6 @@
             }
           },
           {
-            "id": "229ed989-1fd8-4789-aa58-895ed0c56881",
-            "name": "GenApi Pkg security - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg security - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_security.create\"]"
-            }
-          },
-          {
             "id": "47522470-c056-4d8e-a990-a94118691be0",
             "name": "GenApi Pkg security - fud - find",
             "type": "scope",
@@ -13762,30 +10864,6 @@
               "resources": "[\"GenApi Pkg security - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_security.list\"]"
-            }
-          },
-          {
-            "id": "67fbe1ff-77e4-443c-81ac-231a437c23ed",
-            "name": "GenApi Pkg security - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg security - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_security.update\"]"
-            }
-          },
-          {
-            "id": "8ee4edeb-8795-4c49-aeb9-f02b7ba5aab5",
-            "name": "GenApi Pkg security - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg security - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_security.delete\"]"
             }
           },
           {
@@ -13801,18 +10879,6 @@
             }
           },
           {
-            "id": "e6cd5052-847b-4029-8146-f6b168bfc9c8",
-            "name": "GenApi Pkg quote - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg quote - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_quote.create\"]"
-            }
-          },
-          {
             "id": "c889c75a-5611-4602-be1d-daaf849ae604",
             "name": "GenApi Pkg quote - fud - find",
             "type": "scope",
@@ -13822,30 +10888,6 @@
               "resources": "[\"GenApi Pkg quote - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_quote.list\"]"
-            }
-          },
-          {
-            "id": "c5021c9a-12a1-4bcf-9795-c275c7495911",
-            "name": "GenApi Pkg quote - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg quote - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_quote.update\"]"
-            }
-          },
-          {
-            "id": "f31b6111-0ced-4778-b11c-1a0f88f0391b",
-            "name": "GenApi Pkg quote - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg quote - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_quote.delete\"]"
             }
           },
           {
@@ -13861,18 +10903,6 @@
             }
           },
           {
-            "id": "aa4dbfc8-709d-4713-b492-880180ad9fd4",
-            "name": "GenApi Pkg audit - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg audit - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_audit.create\"]"
-            }
-          },
-          {
             "id": "a9bfc72e-68cd-4e87-9d2b-05c2b6cc71c3",
             "name": "GenApi Pkg audit - fud - find",
             "type": "scope",
@@ -13882,18 +10912,6 @@
               "resources": "[\"GenApi Pkg audit - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_audit.list\"]"
-            }
-          },
-          {
-            "id": "7959a6e1-1a00-4369-bcfc-ee458486e53b",
-            "name": "GenApi Pkg audit - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg audit - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_audit.update\"]"
             }
           },
           {
@@ -14161,18 +11179,6 @@
             }
           },
           {
-            "id": "4c9c699c-4691-4b4f-84d0-a256c07a12d1",
-            "name": "GenApi Pkg audit - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg audit - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_audit.delete\"]"
-            }
-          },
-          {
             "id": "9f994007-94a7-4977-a25d-0effd4cd4ec8",
             "name": "GenApi Pkg mediation - list - list",
             "type": "scope",
@@ -14182,18 +11188,6 @@
               "resources": "[\"GenApi Pkg mediation - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_mediation.list\"]"
-            }
-          },
-          {
-            "id": "741f1605-59ce-4e4d-9858-0ff5c749b682",
-            "name": "GenApi Pkg mediation - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg mediation - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_mediation.create\"]"
             }
           },
           {
@@ -14209,30 +11203,6 @@
             }
           },
           {
-            "id": "0f636545-3819-4ce4-ba7a-7be6e8c17055",
-            "name": "GenApi Pkg mediation - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg mediation - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_mediation.update\"]"
-            }
-          },
-          {
-            "id": "eab28fea-e069-44de-8461-ac329f02d2a3",
-            "name": "GenApi Pkg mediation - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg mediation - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_mediation.delete\"]"
-            }
-          },
-          {
             "id": "5c501d0d-7aca-4e7a-aeeb-2bad4e3110e6",
             "name": "GenApi Pkg scripts - list - list",
             "type": "scope",
@@ -14242,18 +11212,6 @@
               "resources": "[\"GenApi Pkg scripts - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_scripts.list\"]"
-            }
-          },
-          {
-            "id": "764aa7b0-dbaf-464f-b850-04bf34dc20bc",
-            "name": "GenApi Pkg scripts - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg scripts - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_scripts.create\"]"
             }
           },
           {
@@ -14689,30 +11647,6 @@
             }
           },
           {
-            "id": "995c3e06-7827-46f5-9806-1da08304fda2",
-            "name": "GenApi Pkg scripts - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg scripts - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_scripts.update\"]"
-            }
-          },
-          {
-            "id": "cd485811-3da4-479c-a757-250624dface4",
-            "name": "GenApi Pkg scripts - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg scripts - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_scripts.delete\"]"
-            }
-          },
-          {
             "id": "9dc424ff-3d8a-4e47-a339-1b86440dcdaf",
             "name": "GenApi Pkg communication - list - list",
             "type": "scope",
@@ -14722,18 +11656,6 @@
               "resources": "[\"GenApi Pkg communication - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_communication.list\"]"
-            }
-          },
-          {
-            "id": "0a3cdda2-f1a8-4374-b305-cf7e1b7a6219",
-            "name": "GenApi Pkg communication - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg communication - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_communication.create\"]"
             }
           },
           {
@@ -14749,30 +11671,6 @@
             }
           },
           {
-            "id": "ddab1b3f-a682-4f78-b055-63cd21a50262",
-            "name": "GenApi Pkg communication - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg communication - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_communication.update\"]"
-            }
-          },
-          {
-            "id": "ba504199-9e88-42fe-88ee-ac0deb2ea31d",
-            "name": "GenApi Pkg communication - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg communication - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_communication.delete\"]"
-            }
-          },
-          {
             "id": "32e30f55-2df6-46b0-a982-0cbee7c0ac95",
             "name": "GenApi Pkg crm - list - list",
             "type": "scope",
@@ -14782,18 +11680,6 @@
               "resources": "[\"GenApi Pkg crm - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_crm.list\"]"
-            }
-          },
-          {
-            "id": "7a7cc99e-20a7-4147-8506-ae7c98465f90",
-            "name": "GenApi Pkg crm - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg crm - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_crm.create\"]"
             }
           },
           {
@@ -15289,30 +12175,6 @@
             }
           },
           {
-            "id": "854e392e-ea99-4e3b-a26a-4668d3e5cae5",
-            "name": "GenApi Pkg crm - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg crm - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_crm.update\"]"
-            }
-          },
-          {
-            "id": "b522e8bc-50e3-4124-b262-61ad3569364d",
-            "name": "GenApi Pkg crm - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg crm - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_crm.delete\"]"
-            }
-          },
-          {
             "id": "fda75c16-05d3-422e-bf5b-d770de2c0526",
             "name": "GenApi Pkg order - list - list",
             "type": "scope",
@@ -15322,18 +12184,6 @@
               "resources": "[\"GenApi Pkg order - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_order.list\"]"
-            }
-          },
-          {
-            "id": "38765897-4d13-4e18-aff0-d2ae162f7f1c",
-            "name": "GenApi Pkg order - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg order - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_order.create\"]"
             }
           },
           {
@@ -15349,18 +12199,6 @@
             }
           },
           {
-            "id": "0f86b34f-d979-49d0-a5a7-324b51a1eb0f",
-            "name": "GenApi Pkg order - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg order - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_order.update\"]"
-            }
-          },
-          {
             "id": "21199e64-d694-4acb-8adc-f7c7e424b792",
             "name": "Api V1 Configuration - Billing - read",
             "type": "scope",
@@ -15370,18 +12208,6 @@
               "resources": "[\"Api V1 Configuration - Billing\"]",
               "scopes": "[\"GET\"]",
               "applyPolicies": "[\"Role apiAdministrationVisualization\"]"
-            }
-          },
-          {
-            "id": "9728fce1-71dc-45c1-9892-fe37a83c8973",
-            "name": "GenApi Pkg order - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg order - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_order.delete\"]"
             }
           },
           {
@@ -16008,18 +12834,6 @@
             }
           },
           {
-            "id": "b3c83d05-c7de-4546-866e-b16b0e599c4c",
-            "name": "GenApi Pkg settings - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg settings - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_settings.create\"]"
-            }
-          },
-          {
             "id": "59794e89-7164-4017-b9fe-d3090ad52820",
             "name": "Api V1 Configuration - read via post - read",
             "type": "resource",
@@ -16400,30 +13214,6 @@
             }
           },
           {
-            "id": "25cabe79-bbda-4f85-a834-b048926472fb",
-            "name": "GenApi Pkg settings - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg settings - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_settings.update\"]"
-            }
-          },
-          {
-            "id": "95119e2c-dc81-4d00-8cfa-1b6334ef9881",
-            "name": "GenApi Pkg settings - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg settings - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_settings.delete\"]"
-            }
-          },
-          {
             "id": "cabe6d04-9f66-4908-b992-caf959c0df02",
             "name": "GenApi Pkg cpq - list - list",
             "type": "scope",
@@ -16433,18 +13223,6 @@
               "resources": "[\"GenApi Pkg cpq - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_cpq.list\"]"
-            }
-          },
-          {
-            "id": "292bd93e-70fc-480a-8ed2-d3f37879170b",
-            "name": "GenApi Pkg cpq - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg cpq - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_cpq.create\"]"
             }
           },
           {
@@ -16460,30 +13238,6 @@
             }
           },
           {
-            "id": "5d154a7a-2039-4410-847d-e1cf91adba03",
-            "name": "GenApi Pkg cpq - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg cpq - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_cpq.update\"]"
-            }
-          },
-          {
-            "id": "c51d8403-97cc-4c96-9d5d-22af11586b65",
-            "name": "GenApi Pkg cpq - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg cpq - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_cpq.delete\"]"
-            }
-          },
-          {
             "id": "08e31ffa-855a-44e0-8476-11026dbdd66a",
             "name": "GenApi Pkg dunning - list - list",
             "type": "scope",
@@ -16493,18 +13247,6 @@
               "resources": "[\"GenApi Pkg dunning - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_dunning.list\"]"
-            }
-          },
-          {
-            "id": "ffec27d3-9ec0-439c-9748-ffd60b2c3301",
-            "name": "GenApi Pkg dunning - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg dunning - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_dunning.create\"]"
             }
           },
           {
@@ -16520,30 +13262,6 @@
             }
           },
           {
-            "id": "ef59a63f-03cb-47a3-8b87-1237488c323b",
-            "name": "GenApi Pkg dunning - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg dunning - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_dunning.update\"]"
-            }
-          },
-          {
-            "id": "a6a5889e-fb74-4aa1-aa54-0c0a664b04bd",
-            "name": "GenApi Pkg dunning - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg dunning - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_dunning.delete\"]"
-            }
-          },
-          {
             "id": "7cf3778e-9acf-4ad1-83c2-8561cbd72032",
             "name": "GenApi Pkg hierarchy - list - list",
             "type": "scope",
@@ -16553,18 +13271,6 @@
               "resources": "[\"GenApi Pkg hierarchy - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_hierarchy.list\"]"
-            }
-          },
-          {
-            "id": "69805524-38d9-45c9-9064-d8ce060aaac4",
-            "name": "GenApi Pkg hierarchy - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg hierarchy - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_hierarchy.create\"]"
             }
           },
           {
@@ -16580,30 +13286,6 @@
             }
           },
           {
-            "id": "9217e47c-3ff2-4bef-ac67-ff78fea14dd5",
-            "name": "GenApi Pkg hierarchy - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg hierarchy - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_hierarchy.update\"]"
-            }
-          },
-          {
-            "id": "df37ec15-155d-4912-9902-407edc416223",
-            "name": "GenApi Pkg hierarchy - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg hierarchy - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_hierarchy.delete\"]"
-            }
-          },
-          {
             "id": "b4b3aa21-1852-422f-b3fe-b5782b9da48d",
             "name": "GenApi Pkg jobs - list - list",
             "type": "scope",
@@ -16613,18 +13295,6 @@
               "resources": "[\"GenApi Pkg jobs - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_jobs.list\"]"
-            }
-          },
-          {
-            "id": "4314668a-b1ef-45a2-a5c3-b79068d09810",
-            "name": "GenApi Pkg jobs - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg jobs - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_jobs.create\"]"
             }
           },
           {
@@ -16640,30 +13310,6 @@
             }
           },
           {
-            "id": "ec911842-d00a-4490-bcbf-a5f2bdadc8c9",
-            "name": "GenApi Pkg jobs - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg jobs - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_jobs.update\"]"
-            }
-          },
-          {
-            "id": "2118db92-4af9-4cd6-a1a4-ea9d8a3fde0f",
-            "name": "GenApi Pkg jobs - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg jobs - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_jobs.delete\"]"
-            }
-          },
-          {
             "id": "f26dba9b-d681-4b2f-8616-72bb98bf8d48",
             "name": "GenApi Pkg module - list - list",
             "type": "scope",
@@ -16673,18 +13319,6 @@
               "resources": "[\"GenApi Pkg module - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_module.list\"]"
-            }
-          },
-          {
-            "id": "ea7690c8-1c4e-4e6b-8886-736a3f6ec464",
-            "name": "GenApi Pkg module - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg module - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_module.create\"]"
             }
           },
           {
@@ -16700,30 +13334,6 @@
             }
           },
           {
-            "id": "9a2c7bca-59d4-4c38-b504-e5be30094a06",
-            "name": "GenApi Pkg module - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg module - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_module.update\"]"
-            }
-          },
-          {
-            "id": "24736653-2aee-4e83-98d9-b08e0963b72b",
-            "name": "GenApi Pkg module - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg module - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_module.delete\"]"
-            }
-          },
-          {
             "id": "d712d3cc-6885-4c2d-bc23-38de1be43387",
             "name": "GenApi Pkg tax - list - list",
             "type": "scope",
@@ -16733,18 +13343,6 @@
               "resources": "[\"GenApi Pkg tax - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_tax.list\"]"
-            }
-          },
-          {
-            "id": "b8189a16-44a9-4644-baaa-d3abae1d07a5",
-            "name": "GenApi Pkg tax - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg tax - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_tax.create\"]"
             }
           },
           {
@@ -16760,30 +13358,6 @@
             }
           },
           {
-            "id": "d56654ba-5dc2-48f0-a1b9-238dcacfaef0",
-            "name": "GenApi Pkg tax - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg tax - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_tax.update\"]"
-            }
-          },
-          {
-            "id": "9b7e192d-0eea-4358-adf6-7fdaee473160",
-            "name": "GenApi Pkg tax - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg tax - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_tax.delete\"]"
-            }
-          },
-          {
             "id": "625a5705-5f12-4cee-8a46-030762e210f6",
             "name": "GenApi Pkg article - list - list",
             "type": "scope",
@@ -16793,18 +13367,6 @@
               "resources": "[\"GenApi Pkg article - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_article.list\"]"
-            }
-          },
-          {
-            "id": "f3ec5343-da0e-4397-b455-0bdbf985cfed",
-            "name": "GenApi Pkg article - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg article - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_article.create\"]"
             }
           },
           {
@@ -16820,30 +13382,6 @@
             }
           },
           {
-            "id": "94e6605a-afb1-4de6-96d2-048a686b6255",
-            "name": "GenApi Pkg article - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg article - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_article.update\"]"
-            }
-          },
-          {
-            "id": "ad75b31d-a574-4baf-9fdc-f1ba5f3f867e",
-            "name": "GenApi Pkg article - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg article - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_article.delete\"]"
-            }
-          },
-          {
             "id": "86c2ba8e-6d9a-4f0b-810f-2222f57008e4",
             "name": "GenApi Pkg generic - list - list",
             "type": "scope",
@@ -16853,18 +13391,6 @@
               "resources": "[\"GenApi Pkg generic - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_generic.list\"]"
-            }
-          },
-          {
-            "id": "527b83ec-4a22-4c3c-9f17-6f1372d79bfe",
-            "name": "GenApi Pkg generic - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg generic - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_generic.create\"]"
             }
           },
           {
@@ -16880,30 +13406,6 @@
             }
           },
           {
-            "id": "07ad177a-7f15-4f2c-8472-fb823d95a5ce",
-            "name": "GenApi Pkg generic - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg generic - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_generic.update\"]"
-            }
-          },
-          {
-            "id": "613bc089-7dd3-4781-bcd8-445129a63aaa",
-            "name": "GenApi Pkg generic - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg generic - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_generic.delete\"]"
-            }
-          },
-          {
             "id": "df356bd4-ba51-4d10-a934-ab789c7f9a37",
             "name": "GenApi Pkg filter - list - list",
             "type": "scope",
@@ -16913,18 +13415,6 @@
               "resources": "[\"GenApi Pkg filter - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_filter.list\"]"
-            }
-          },
-          {
-            "id": "c9f20333-10c7-4bbf-a958-2e4b1d24ba35",
-            "name": "GenApi Pkg filter - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg filter - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_filter.create\"]"
             }
           },
           {
@@ -16940,30 +13430,6 @@
             }
           },
           {
-            "id": "d006bc40-aedb-47da-8d58-64856695c364",
-            "name": "GenApi Pkg filter - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg filter - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_filter.update\"]"
-            }
-          },
-          {
-            "id": "6bfc88f5-9d59-4806-aff8-17be47111dbc",
-            "name": "GenApi Pkg filter - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg filter - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_filter.delete\"]"
-            }
-          },
-          {
             "id": "b5a064b7-59f7-4fa4-9ed7-7caa8cb61166",
             "name": "GenApi Pkg sequence - list - list",
             "type": "scope",
@@ -16973,18 +13439,6 @@
               "resources": "[\"GenApi Pkg sequence - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_sequence.list\"]"
-            }
-          },
-          {
-            "id": "8bad82a0-76a8-4daa-9ba9-3b91b7a33235",
-            "name": "GenApi Pkg sequence - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg sequence - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_sequence.create\"]"
             }
           },
           {
@@ -17000,30 +13454,6 @@
             }
           },
           {
-            "id": "29b1b10a-9b81-4147-b8e2-c6b13e96a4e9",
-            "name": "GenApi Pkg sequence - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg sequence - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_sequence.update\"]"
-            }
-          },
-          {
-            "id": "00e0cfb1-96a2-4527-a12d-6b13470dc3cf",
-            "name": "GenApi Pkg sequence - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg sequence - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_sequence.delete\"]"
-            }
-          },
-          {
             "id": "3a42a81d-299c-458f-a29a-a8288b6cc84b",
             "name": "GenApi Pkg accountingScheme - list - list",
             "type": "scope",
@@ -17033,18 +13463,6 @@
               "resources": "[\"GenApi Pkg accountingScheme - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_accountingScheme.list\"]"
-            }
-          },
-          {
-            "id": "adeb67a8-4ba1-466e-ba86-beeb2dfb4460",
-            "name": "GenApi Pkg accountingScheme - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg accountingScheme - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_accountingScheme.create\"]"
             }
           },
           {
@@ -17060,30 +13478,6 @@
             }
           },
           {
-            "id": "738a7ead-848c-4a06-8b75-1c0af4f68f9d",
-            "name": "GenApi Pkg accountingScheme - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg accountingScheme - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_accountingScheme.update\"]"
-            }
-          },
-          {
-            "id": "4408a2ce-245e-473b-b952-55f0dd0ef991",
-            "name": "GenApi Pkg accountingScheme - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg accountingScheme - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_accountingScheme.delete\"]"
-            }
-          },
-          {
             "id": "37a74200-2717-41e2-ba09-378a67b437a7",
             "name": "GenApi Pkg dwh - list - list",
             "type": "scope",
@@ -17093,18 +13487,6 @@
               "resources": "[\"GenApi Pkg dwh - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_dwh.list\"]"
-            }
-          },
-          {
-            "id": "c0f961a3-5448-419f-bb54-bfd3d3455864",
-            "name": "GenApi Pkg dwh - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg dwh - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_dwh.create\"]"
             }
           },
           {
@@ -17120,30 +13502,6 @@
             }
           },
           {
-            "id": "3faf8f83-bbf9-410c-9b94-bcc5cc742c65",
-            "name": "GenApi Pkg dwh - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg dwh - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_dwh.update\"]"
-            }
-          },
-          {
-            "id": "f328be73-bff9-46b9-b3b5-794badaa2a1e",
-            "name": "GenApi Pkg dwh - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg dwh - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_dwh.delete\"]"
-            }
-          },
-          {
             "id": "52379f84-83b2-478f-b15e-541d42a354f3",
             "name": "GenApi Pkg report - list - list",
             "type": "scope",
@@ -17153,18 +13511,6 @@
               "resources": "[\"GenApi Pkg report - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_report.list\"]"
-            }
-          },
-          {
-            "id": "cb15395a-bcf8-4272-a745-43d359c48319",
-            "name": "GenApi Pkg report - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg report - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_report.create\"]"
             }
           },
           {
@@ -17180,30 +13526,6 @@
             }
           },
           {
-            "id": "41ece768-02c1-49a1-a2e9-1d3d00fcb2c4",
-            "name": "GenApi Pkg report - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg report - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_report.update\"]"
-            }
-          },
-          {
-            "id": "4111940c-baf1-4f55-90e7-3635294c51e7",
-            "name": "GenApi Pkg report - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg report - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_report.delete\"]"
-            }
-          },
-          {
             "id": "ae99761b-31a3-498d-a882-fd7217af88a3",
             "name": "GenApi Pkg COMMON - list - list",
             "type": "scope",
@@ -17213,18 +13535,6 @@
               "resources": "[\"GenApi Pkg COMMON - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_COMMON.list\"]"
-            }
-          },
-          {
-            "id": "f4962985-bdc2-489b-b12c-7fa3eed90e2a",
-            "name": "GenApi Pkg COMMON - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg COMMON - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_COMMON.create\"]"
             }
           },
           {
@@ -17240,30 +13550,6 @@
             }
           },
           {
-            "id": "844d10a1-9ca4-447a-9bf6-b1a502b5c8c1",
-            "name": "GenApi Pkg COMMON - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg COMMON - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_COMMON.update\"]"
-            }
-          },
-          {
-            "id": "12403905-267f-4e29-93ac-9edd2a8fe6ae",
-            "name": "GenApi Pkg COMMON - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg COMMON - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_COMMON.delete\"]"
-            }
-          },
-          {
             "id": "d4de89cf-ecdb-4806-81fd-a4f1a12c88c7",
             "name": "GenApi Pkg metrics - list - list",
             "type": "scope",
@@ -17273,18 +13559,6 @@
               "resources": "[\"GenApi Pkg metrics - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_metrics.list\"]"
-            }
-          },
-          {
-            "id": "56f37cce-a969-4745-9881-61532d75f308",
-            "name": "GenApi Pkg metrics - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg metrics - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_metrics.create\"]"
             }
           },
           {
@@ -17300,30 +13574,6 @@
             }
           },
           {
-            "id": "0399eadf-18d3-4c53-95ce-d5b5b70b07f2",
-            "name": "GenApi Pkg metrics - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg metrics - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_metrics.update\"]"
-            }
-          },
-          {
-            "id": "43971bd9-4906-4e60-b9e3-a4b4021d562e",
-            "name": "GenApi Pkg metrics - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg metrics - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_metrics.delete\"]"
-            }
-          },
-          {
             "id": "f5d2d751-6c32-4e71-8138-e05e67511676",
             "name": "GenApi Pkg datawarehouse - list - list",
             "type": "scope",
@@ -17333,18 +13583,6 @@
               "resources": "[\"GenApi Pkg datawarehouse - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_datawarehouse.list\"]"
-            }
-          },
-          {
-            "id": "5f5bf9d2-01a6-4b7e-b20e-2e4bebc8377f",
-            "name": "GenApi Pkg datawarehouse - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg datawarehouse - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_datawarehouse.create\"]"
             }
           },
           {
@@ -17360,30 +13598,6 @@
             }
           },
           {
-            "id": "95affd33-db87-4780-9992-55e08fb9f9a8",
-            "name": "GenApi Pkg datawarehouse - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg datawarehouse - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_datawarehouse.update\"]"
-            }
-          },
-          {
-            "id": "ebfc05b3-e47e-4b71-8bec-4840b6da579e",
-            "name": "GenApi Pkg datawarehouse - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg datawarehouse - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_datawarehouse.delete\"]"
-            }
-          },
-          {
             "id": "d67433ea-bb2a-4a9a-932c-1e1bb39f6f1b",
             "name": "GenApi Pkg intcrm - list - list",
             "type": "scope",
@@ -17393,18 +13607,6 @@
               "resources": "[\"GenApi Pkg intcrm - list\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_intcrm.list\"]"
-            }
-          },
-          {
-            "id": "b0583019-35c7-46d3-ac81-46b5f849da36",
-            "name": "GenApi Pkg intcrm - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg intcrm - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_intcrm.create\"]"
             }
           },
           {
@@ -17420,30 +13622,6 @@
             }
           },
           {
-            "id": "81f4af80-045c-43ac-8248-962eddb4a2f4",
-            "name": "GenApi Pkg intcrm - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg intcrm - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_intcrm.update\"]"
-            }
-          },
-          {
-            "id": "fdc9b218-188c-4eea-a450-2fd2f1feb986",
-            "name": "GenApi Pkg intcrm - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg intcrm - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_intcrm.delete\"]"
-            }
-          },
-          {
             "id": "7fb7f0bb-ccb3-4f6d-adf8-024e15699710",
             "name": "GenApi Pkg finance - list - list",
             "type": "scope",
@@ -17456,18 +13634,6 @@
             }
           },
           {
-            "id": "f54c53b1-5aa2-4f47-86a6-c75aa246869e",
-            "name": "GenApi Pkg finance - create - create",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg finance - create\"]",
-              "scopes": "[\"POST\"]",
-              "applyPolicies": "[\"Role genApiPkg_finance.create\"]"
-            }
-          },
-          {
             "id": "6a60dea1-6017-4f7e-ab71-6a0fce400190",
             "name": "GenApi Pkg finance - fud - find",
             "type": "scope",
@@ -17477,30 +13643,6 @@
               "resources": "[\"GenApi Pkg finance - fud\"]",
               "scopes": "[\"POST\"]",
               "applyPolicies": "[\"Role genApiPkg_finance.list\"]"
-            }
-          },
-          {
-            "id": "dc52de82-4e2a-4c73-ac55-53bdfe2ebde0",
-            "name": "GenApi Pkg finance - fud - update",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg finance - fud\"]",
-              "scopes": "[\"PUT\"]",
-              "applyPolicies": "[\"Role genApiPkg_finance.update\"]"
-            }
-          },
-          {
-            "id": "93295d2e-4dcd-4c9f-aa4d-dbda0ba3842f",
-            "name": "GenApi Pkg finance - fud - delete",
-            "type": "scope",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "resources": "[\"GenApi Pkg finance - fud\"]",
-              "scopes": "[\"DELETE\"]",
-              "applyPolicies": "[\"Role genApiPkg_finance.delete\"]"
             }
           }
         ],

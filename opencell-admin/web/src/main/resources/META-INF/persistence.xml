@@ -16,6 +16,7 @@
             <!-- hibernate.hbm2ddl.auto=validate will only validate DB schema. DB migration must be done manually.
                  hibernate.hbm2ddl.auto=update will migrate DB schema at application startup and will validate DB chema. Use environment variable "DB_MIGRATION_MANUAL=true" to turn off automatic database update at application startup. Db schema validation would still occur. -->
             <property name="hibernate.hbm2ddl.auto" value="update" />
+            <property name="hibernate.show_sql" value="true" />
             <!-- <property name="hibernate.default_schema" value="public" /> Disable for Mysql/mariaDB instalation -->
             
             <property name="hibernate.cache.use_second_level_cache" value="true" />

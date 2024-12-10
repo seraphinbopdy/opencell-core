@@ -1,18 +1,18 @@
 package org.meveo.commons.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.HashSet;
+import java.util.Set;
 
 public class InnerJoin {
 
     private final String alias;
     private String name;
-    private List<InnerJoin> nextInnerJoins = new ArrayList();
+    private Set<InnerJoin> nextInnerJoins = new HashSet<>();
 
-    public InnerJoin(String name, int index) {
+    public InnerJoin(String name) {
         this.name = name;
-        this.alias = name + "_" + index;
+        int i = GeneratorUtils.COUNTER.get().incrementAndGet();
+        this.alias = name + "_" + i;
     }
 
     public String getName() {
@@ -27,7 +27,7 @@ public class InnerJoin {
         nextInnerJoins.add(nextInnerJoin);
     }
 
-    public List<InnerJoin> getNextInnerJoins() {
+    public Set<InnerJoin> getNextInnerJoins() {
         return nextInnerJoins;
     }
 }

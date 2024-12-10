@@ -776,6 +776,8 @@ public class InvoiceUblHelper {
             if (address.getCountry() != null) {
                 CountryType countryType = objectFactoryCommonAggrement.createCountryType();
                 IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
+				identificationCode.setListID("ISO3166-1");
+				identificationCode.setListAgencyID("6");
                 identificationCode.setValue(address.getCountry().getCode());
                 countryType.setIdentificationCode(identificationCode);
                 postalAddress.setCountry(countryType);
@@ -946,6 +948,8 @@ public class InvoiceUblHelper {
 		if (address.getCountry() != null) {
 			CountryType countryType = objectFactoryCommonAggrement.createCountryType();
 			IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
+			identificationCode.setListID("ISO3166-1");
+			identificationCode.setListAgencyID("6");
 			identificationCode.setValue(address.getCountry().getCode());
 			countryType.setIdentificationCode(identificationCode);
 			addressType.setCountry(countryType);
@@ -996,6 +1000,8 @@ public class InvoiceUblHelper {
 			if (address.getCountry() != null) {
 				CountryType countryType = objectFactoryCommonAggrement.createCountryType();
 				IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
+				identificationCode.setListID("ISO3166-1");
+				identificationCode.setListAgencyID("6");
 				identificationCode.setValue(address.getCountry().getCode());
 				countryType.setIdentificationCode(identificationCode);
 				addressType.setCountry(countryType);
@@ -1295,6 +1301,8 @@ public class InvoiceUblHelper {
 			taxCurrencyCode.setValue(source.getBillingAccount().getTradingCurrency().getCurrencyCode());
 			documentCurrencyCode.setValue(source.getBillingAccount().getTradingCurrency().getCurrencyCode());
 		}
+		documentCurrencyCode.setListID("ISO 4217");
+		documentCurrencyCode.setListAgencyID("6");
 	}
 	private static XMLGregorianCalendar toXmlDate(Date date){
 		if(date == null) return null;
@@ -1330,7 +1338,7 @@ public class InvoiceUblHelper {
 				taxCategoryType.getTaxExemptionReasons().add(taxExemptionReason);
 			if(tax.getUntdidVatex() != null) {
 				TaxExemptionReasonCode taxExemptionReasonCode = objectFactorycommonBasic.createTaxExemptionReasonCode();
-				taxExemptionReasonCode.setListID("CEF VATEX");
+				taxExemptionReasonCode.setListID("CWA 15577");
 				taxExemptionReasonCode.setListAgencyID("ZZZ");
 				taxExemptionReasonCode.setValue(tax.getUntdidVatex().getCode());
 				taxCategoryType.setTaxExemptionReasonCode(taxExemptionReasonCode);
@@ -1521,6 +1529,8 @@ public class InvoiceUblHelper {
 		// AccountingCustomerParty/Party/PostalAddress/Country
 		CountryType countryType = objectFactoryCommonAggrement.createCountryType();
 		IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
+		identificationCode.setListID("ISO3166-1");
+		identificationCode.setListAgencyID("6");
 		if(pCustomerAccount.getAddress() != null && pCustomerAccount.getAddress().getCountry() != null){
 		identificationCode.setValue(pCustomerAccount.getAddress().getCountry().getCode());
 		}
@@ -1586,12 +1596,16 @@ public class InvoiceUblHelper {
 		CountrySubentity countrySubentity = objectFactorycommonBasic.createCountrySubentity();
 		countrySubentity.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getState());
 		addressType.setCountrySubentity(countrySubentity);
-		
-		CountryType countryType = objectFactoryCommonAggrement.createCountryType();
-		IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
-		//identificationCode.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry().getCountryCode());
-		countryType.setIdentificationCode(identificationCode);
-		addressType.setCountry(countryType);
+
+		if(CollectionUtils.isNotEmpty(pInvoice.getBillingAccount().getUsersAccounts()) && pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress() != null && pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry() != null){
+			CountryType countryType = objectFactoryCommonAggrement.createCountryType();
+			IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
+			identificationCode.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCountry().getCountryCode());
+			identificationCode.setListID("ISO3166-1");
+			identificationCode.setListAgencyID("6");
+			countryType.setIdentificationCode(identificationCode);
+			addressType.setCountry(countryType);
+		}
 		
 
 

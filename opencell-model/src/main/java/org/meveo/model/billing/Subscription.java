@@ -30,9 +30,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import jakarta.persistence.JoinTable;
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -510,7 +513,20 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     /** MRR. */
     @Column(name = "mrr", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal mrr;
-    
+
+    /**
+     * Purchase orders on subscription
+     */
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "billing_subscriptions_purchaseOrders", joinColumns = @JoinColumn(name = "subscription_id"), inverseJoinColumns = @JoinColumn(name = "purchaseOrder_id"))
+    private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
+
+    /**
+     * invoice lines on subscription
+     */
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "subscriptions", cascade = CascadeType.ALL)
+    private Set<InvoiceLine> invoiceLines = new HashSet<>();
+
     /**
      * This method is called implicitly by hibernate, used to enable encryption for custom fields of this entity
      */
@@ -1378,5 +1394,30 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
 
     public void setMrr(BigDecimal mrr) {
         this.mrr = mrr;
+    }
+
+    public Set<PurchaseOrder> getPurchaseOrders() {
+        return purchaseOrders;
+    }
+
+    public void setPurchaseOrders(Set<PurchaseOrder> purchaseOrders) {
+        this.purchaseOrders = purchaseOrders;
+    }
+
+    public void addPurchaseOrder(PurchaseOrder purchaseOrder) {
+        if (purchaseOrders == null) {
+            purchaseOrders = new HashSet<>();
+        }
+        if (purchaseOrder != null) {
+            purchaseOrders.add(purchaseOrder);
+        }
+    }
+
+    public Set<InvoiceLine> getInvoiceLines() {
+        return invoiceLines;
+    }
+
+    public void setInvoiceLines(Set<InvoiceLine> invoiceLines) {
+        this.invoiceLines = invoiceLines;
     }
 }

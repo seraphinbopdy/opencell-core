@@ -15664,4 +15664,58 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </addColumn>
     </changeSet>
 
+    <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI">
+        <createTable tableName="billing_subscriptions_purchaseOrders">
+            <column name="subscription_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="purchaseOrder_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>CREATE UNIQUE INDEX billing_subscriptions_purchaseOrders_id_index ON billing_subscriptions_purchaseOrders (subscription_id, purchaseOrder_id)</sql>
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_subscriptions_purchaseOrders"
+                                 constraintName="fk_subscription_id_billing_subscriptions_purchaseOrders"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_subscription"/>
+        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_subscriptions_purchaseOrders"
+                                 constraintName="fk_purchaseOrder_id_billing_subscriptions_purchaseOrders"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
+        <createTable tableName="billing_invoiceLines_subscriptions">
+            <column name="invoiceLine_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subscription_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>CREATE UNIQUE INDEX billing_invoiceLines_subscriptions_id_index ON billing_invoiceLines_subscriptions (invoiceLine_id, subscription_id)</sql>
+        <addForeignKeyConstraint baseColumnNames="invoiceLine_id" baseTableName="billing_invoiceLines_subscriptions"
+                                 constraintName="fk_purchaseOrder_id_billing_invoiceLines_subscriptions"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_invoice_line"/>
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_invoiceLines_subscriptions"
+                                 constraintName="fk_subscription_id_billing_invoiceLines_subscriptions"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_subscription"/>
+        <createTable tableName="billing_invoices_purchaseOrders">
+            <column name="invoice_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="purchaseOrder_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>CREATE UNIQUE INDEX billing_invoices_purchaseOrders_id_index ON billing_invoices_purchaseOrders (invoice_id, purchaseOrder_id)</sql>
+        <addForeignKeyConstraint baseColumnNames="invoice_id" baseTableName="billing_invoices_purchaseOrders"
+                                 constraintName="fk_invoice_id_billing_invoices_purchaseOrders" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_invoice"/>
+        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_invoices_purchaseOrders"
+                                 constraintName="fk_purchaseOrder_id_billing_invoices_purchaseOrders" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
+    </changeSet>
+
 </databaseChangeLog>

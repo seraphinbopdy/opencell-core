@@ -57,8 +57,10 @@ import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
+import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.RejectedBillingAccountService;
 import org.meveo.service.billing.impl.ServiceSingleton;
+import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.catalog.impl.DiscountPlanItemService;
 import org.meveo.service.catalog.impl.DiscountPlanService;
 import org.meveo.service.catalog.impl.InvoiceSubCategoryService;
@@ -106,7 +108,11 @@ public class InvoicingService extends PersistenceService<Invoice> {
 	private DiscountPlanService discountPlanService;
 	@Inject
 	private DiscountPlanItemService discountPlanItemService;
-    
+    @Inject
+    private SubscriptionService subscriptionService;
+    @Inject
+    private PurchaseOrderService PurchaseOrderService;
+
 	/** Creates the aggregates and invoice async. group of BAs at a time in a separate transaction.
 	 * 
 	 * @param billingRun
@@ -437,6 +443,14 @@ public class InvoicingService extends PersistenceService<Invoice> {
         if(invoiceAggregate instanceof SubCategoryInvoiceAgregate) {
             ((SubCategoryInvoiceAgregate)invoiceAggregate).addILs(summuryItem.getilIDs());
         }
+        /*
+        for (Long subscriptionId : summuryItem.getSubscriptionIds()) {
+            (invoiceAggregate.getInvoice().getInvoiceLines()).stream().forEach(invoiceLine -> invoiceLine.addSubscription(subscriptionService.findById(subscriptionId)));
+        }
+        for (Long purchaseOrderId : summuryItem.getPurchaseOrderIds()) {
+            invoiceAggregate.getInvoice().addPurchaseOrder(PurchaseOrderService.findById(purchaseOrderId));
+        }
+        */
     }
     
     private void addAggregationAmounts(InvoiceAgregate subTaxAggregate, InvoiceAgregate invoiceAggregate) {

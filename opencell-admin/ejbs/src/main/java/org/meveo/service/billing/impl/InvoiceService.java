@@ -3795,6 +3795,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if(invoice.getBillingRun() == null
                 && (invoice.getSubscriptions() == null || invoice.getSubscriptions().isEmpty())) {
         	linkInvoiceSubscriptions(invoice);
+            linkInvoicePurchaseOrderss(invoice);
         }
 
         entityCreatedEventProducer.fire((BaseEntity) invoice);
@@ -4379,6 +4380,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
     private void linkInvoiceSubscriptions(Invoice invoice) {
     	getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
 	}
+
+    private void linkInvoicePurchaseOrderss(Invoice invoice) {
+        getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
+    }
     
     public void linkInvoicesToSubscriptionsByBR(BillingRun billingRun) {
     	getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByBR").setParameter("billingRunId", billingRun.getId()).executeUpdate();

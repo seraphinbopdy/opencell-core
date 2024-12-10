@@ -19,6 +19,7 @@
 package org.meveo.api.billing;
 
 import static java.util.EnumSet.of;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.meveo.commons.utils.StringUtils.isNotBlank;
 import static org.meveo.model.billing.SubscriptionStatusEnum.ACTIVE;
@@ -28,13 +29,16 @@ import static org.meveo.model.billing.SubscriptionStatusEnum.PENDING;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -66,6 +70,7 @@ import org.meveo.api.dto.billing.OneShotChargeInstanceDto;
 import org.meveo.api.dto.billing.OperationServicesRequestDto;
 import org.meveo.api.dto.billing.ProductDto;
 import org.meveo.api.dto.billing.ProductInstanceDto;
+import org.meveo.api.dto.billing.PurchaseOrderDto;
 import org.meveo.api.dto.billing.RateSubscriptionRequestDto;
 import org.meveo.api.dto.billing.ServiceInstanceDto;
 import org.meveo.api.dto.billing.ServiceToActivateDto;
@@ -126,6 +131,7 @@ import org.meveo.model.billing.InvoiceSubCategory;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.OneShotChargeInstance;
 import org.meveo.model.billing.ProductInstance;
+import org.meveo.model.billing.PurchaseOrder;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.RecurringChargeInstance;
 import org.meveo.model.billing.ServiceInstance;
@@ -175,6 +181,7 @@ import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoiceTypeService;
 import org.meveo.service.billing.impl.OneShotChargeInstanceService;
 import org.meveo.service.billing.impl.ProductInstanceService;
+import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.RecurringChargeInstanceService;
 import org.meveo.service.billing.impl.ServiceInstanceService;
@@ -331,6 +338,9 @@ public class SubscriptionApi extends BaseApi {
 
     @Inject
     private PriceListService priceListService;
+
+    @Inject
+    private PurchaseOrderService purchaseOrderService;
 
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 
@@ -623,6 +633,25 @@ public class SubscriptionApi extends BaseApi {
 
         }
         updateSubscriptionVersions(postData.getNextVersion(), postData.getPreviousVersion(), subscription);
+
+        if (CollectionUtils.isNotEmpty(postData.getPurchaseOrders())) {
+            if (subscription.getPurchaseOrders() != null) {
+                subscription.getPurchaseOrders().clear();
+            }
+            for (Long purchaseOrderId : postData.getPurchaseOrders()) {
+                PurchaseOrder purchaseOrder = ofNullable(purchaseOrderService.findById(purchaseOrderId)).orElseThrow(() -> new EntityDoesNotExistsException(PurchaseOrder.class, purchaseOrderId));
+
+                //Check if the purchase order is linked to the subscription
+                if ((purchaseOrder.getBillingAccount() != null && !purchaseOrder.getBillingAccount().equals(subscription.getUserAccount().getBillingAccount()))
+                        || (purchaseOrder.getCustomerAccount() != null && !purchaseOrder.getCustomerAccount().equals(subscription.getUserAccount().getBillingAccount().getCustomerAccount()))
+                        || (purchaseOrder.getCustomer() != null && !purchaseOrder.getCustomer().equals(subscription.getUserAccount().getBillingAccount().getCustomerAccount().getCustomer()))
+                        || (purchaseOrder.getSeller() != null && !purchaseOrder.getSeller().equals(subscription.getUserAccount().getBillingAccount().getCustomerAccount().getCustomer().getSeller()))) {
+                    throw new BusinessException("the purchase order with id " + purchaseOrderId + " cannot be linked to the subscription " + subscription.getId());
+                }
+                subscription.addPurchaseOrder(purchaseOrder);
+            }
+        }
+
         subscription = subscriptionService.update(subscription);
         // ignoring postData.getEndAgreementDate() if subscription.getAutoEndOfEngagement is true
         if (subscription.getAutoEndOfEngagement() == null || !subscription.getAutoEndOfEngagement()) {

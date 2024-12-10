@@ -5,10 +5,14 @@ import static java.util.Optional.ofNullable;
 import static org.meveo.commons.utils.EjbUtils.getServiceInterface;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.NumberUtils;
@@ -180,11 +184,23 @@ public class InvoiceLinesFactory {
         DatePeriod validity = new DatePeriod();
         validity.setFrom(ofNullable((Date) data.get("start_date")).orElse(usageDate));
         validity.setTo(ofNullable((Date) data.get("end_date")).orElse(null));
-        if(data.get("subscription_id") != null) {
+        if (data.get("subscription_id") != null) {
             Subscription subscription = subscriptionService.getEntityManager().getReference(Subscription.class, ((Number) data.get("subscription_id")).longValue());
             invoiceLine.setSubscription(subscription);
-            if(data.get("commercial_order_id") != null) {
+            if (data.get("commercial_order_id") != null) {
                 invoiceLine.setCommercialOrder(commercialOrderService.getEntityManager().getReference(CommercialOrder.class, ((Number) data.get("commercial_order_id")).longValue()));
+            }
+            invoiceLine.setSubscriptions(Set.of(subscription));
+        } else {
+            String subscriptionIds = (String) data.get("subscription_ids");
+            if (!StringUtils.isBlank(subscriptionIds)) {
+                String[] ids = subscriptionIds.split(",");
+                for (String id : ids) {
+                    Subscription subscription = subscriptionService.findById(Long.valueOf(id));
+                    if (subscription != null) {
+                        invoiceLine.addSubscription(subscription);
+                    }
+                }
             }
         }
         invoiceLine.setValidity(validity);

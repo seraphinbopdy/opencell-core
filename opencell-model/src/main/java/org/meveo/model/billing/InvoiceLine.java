@@ -8,10 +8,16 @@ import static org.meveo.model.billing.AdjustmentStatusEnum.NOT_ADJUSTED;
 import static org.meveo.model.billing.InvoiceLineStatusEnum.OPEN;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -138,8 +144,11 @@ import jakarta.validation.constraints.Size;
 		@NamedQuery(name = "InvoiceLine.linkToInvoice", query = "UPDATE InvoiceLine il set il.status=org.meveo.model.billing.InvoiceLineStatusEnum.BILLED, il.invoice=:invoice, il.invoiceAggregateF=:invoiceAgregateF where il.id in :ids"),
         @NamedQuery(name = "InvoiceLine.getInvoicingItems", query = 
     	"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')),"
-    	+ " il.invoiceKey, (CASE WHEN COUNT(CASE WHEN il.useSpecificPriceConversion is TRUE THEN 1 END) > 0 THEN TRUE ELSE FALSE END), sum(il.transactionalAmountWithoutTax), sum(il.transactionalAmountWithTax), sum(il.transactionalAmountTax) "
+    	+ " il.invoiceKey, string_agg_distinct(subs.id) as subscriptionIds, string_agg_distinct(pos.id) as purchaseOrderIds," +
+				" (CASE WHEN COUNT(CASE WHEN il.useSpecificPriceConversion is TRUE THEN 1 END) > 0 THEN TRUE ELSE FALSE END), sum(il.transactionalAmountWithoutTax), sum(il.transactionalAmountWithTax), sum(il.transactionalAmountTax) "
     		+ " FROM InvoiceLine il "
+			+ " INNER JOIN il.subscriptions subs"
+			+ " INNER JOIN subs.purchaseOrders pos"
     		+ " WHERE il.billingRun.id=:billingRunId AND il.billingAccount.id IN (:ids) AND il.status='OPEN' "
     		+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.invoiceKey "
     		+ " order by il.billingAccount.id"),
@@ -529,6 +538,13 @@ public class InvoiceLine extends AuditableCFEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
+
+	/**
+	 * invoice lines which are related to the subscription.
+	 */
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "billing_invoiceLines_subscriptions", joinColumns = @JoinColumn(name = "invoiceLine_id"), inverseJoinColumns = @JoinColumn(name = "subscription_id"))
+	private Set<Subscription> subscriptions = new HashSet<>();
 
 	@Transient
 	private Long invoiceTypeId;
@@ -1177,5 +1193,22 @@ public class InvoiceLine extends AuditableCFEntity {
 	public static void setRoundingConfig(int invoiceRounding, RoundingModeEnum roundingModeEnum) {
 		INVOICING_ROUNDING = invoiceRounding;
 		ROUNDING_MODE = roundingModeEnum;
+	}
+
+	public Set<Subscription> getSubscriptions() {
+		return subscriptions;
+	}
+
+	public void setSubscriptions(Set<Subscription> subscriptions) {
+		this.subscriptions = subscriptions;
+	}
+
+	public void addSubscription(Subscription subscription) {
+		if (subscriptions == null) {
+			subscriptions = new HashSet<>();
+		}
+		if (subscription != null) {
+			subscriptions.add(subscription);
+		}
 	}
 }

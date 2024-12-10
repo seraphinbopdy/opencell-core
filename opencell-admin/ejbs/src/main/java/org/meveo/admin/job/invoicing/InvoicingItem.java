@@ -18,6 +18,8 @@ public class InvoicingItem {
 	private List<Long> ilIDs = new ArrayList<>();
 	private String invoiceCategoryId;
 	private String invoiceKey;
+	private List<Long> subscriptionIds = new ArrayList<>();
+	private List<Long> purchaseOrderIds = new ArrayList<>();
 	private boolean useSpecificTransactionalAmount;
 	private BigDecimal transactionalAmountWithoutTax = BigDecimal.ZERO;
 	private BigDecimal transactionalAmountTax = BigDecimal.ZERO;
@@ -35,6 +37,8 @@ public class InvoicingItem {
 		this.count = (Long) fields[i++];
 		this.ilIDs = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
 		this.invoiceKey = (String) fields[i++];
+		this.subscriptionIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+		this.purchaseOrderIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
 		this.useSpecificTransactionalAmount = (boolean) fields[i++];
 		this.transactionalAmountWithoutTax = (BigDecimal) fields[i++];
 		this.transactionalAmountTax = (BigDecimal) fields[i++];
@@ -47,6 +51,8 @@ public class InvoicingItem {
 	public InvoicingItem(List<InvoicingItem> items) {
 		for (InvoicingItem item : items) {
 			this.ilIDs.addAll(item.getilIDs());
+			this.subscriptionIds.addAll(item.getSubscriptionIds());
+			this.purchaseOrderIds.addAll(item.getPurchaseOrderIds());
 			this.count = this.count + item.count;
 			this.amountTax = this.amountTax.add(item.getAmountTax());
 			this.amountWithTax = this.amountWithTax.add(item.getAmountWithTax());
@@ -193,7 +199,15 @@ public class InvoicingItem {
 	public void setInvoiceKey(String invoiceKey) {
 		this.invoiceKey = invoiceKey;
 	}
-	
+
+	public List<Long> getSubscriptionIds() {
+		return subscriptionIds;
+	}
+
+	public List<Long> getPurchaseOrderIds() {
+		return purchaseOrderIds;
+	}
+
 	@Override
 	public String toString() {
 		return "InvoicingItem [billingAccountId : " + billingAccountId + ", invoiceSubCategoryId : " + invoiceSubCategoryId

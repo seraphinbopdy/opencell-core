@@ -15658,4 +15658,10 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </update>
     </changeSet>
 
+    <changeSet id="#INTRD-26795-20241210" author="zelmeliani">
+       <addColumn tableName="billing_invoice">
+            <column name="dunning_collection_plan_id" type="bigint"  />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

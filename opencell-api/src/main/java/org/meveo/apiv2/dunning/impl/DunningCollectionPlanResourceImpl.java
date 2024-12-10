@@ -211,7 +211,16 @@ public class DunningCollectionPlanResourceImpl implements DunningCollectionPlanR
             .build()).build();
     }
 
-	private Object toResourceOrderWithLink(org.meveo.apiv2.dunning.DunningCollectionPlan dunningCollectionPlan) {
+    @Override
+    public Response executeDunningActionInstance(Long actionInstanceId) {
+        DunningActionInstance executedDunningActionInstance = dunningCollectionPlanApiService.executeDunningActionInstance(actionInstanceId).get();
+        return Response.ok(ImmutableDunningActionInstanceSuccessResponse.builder()
+            .status("SUCCESS")
+            .newDunningActionInstance(actionInstanceMapper.toResource(executedDunningActionInstance))
+            .build()).build();
+    }
+
+    private Object toResourceOrderWithLink(org.meveo.apiv2.dunning.DunningCollectionPlan dunningCollectionPlan) {
         return ImmutableDunningCollectionPlan.copyOf(dunningCollectionPlan)
                 .withLinks(
                         new LinkGenerator.SelfLinkGenerator(DunningCollectionPlanResource.class)

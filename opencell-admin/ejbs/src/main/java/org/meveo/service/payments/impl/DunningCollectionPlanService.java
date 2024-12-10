@@ -37,13 +37,7 @@ import org.meveo.model.dunning.DunningPauseReason;
 import org.meveo.model.dunning.DunningPolicy;
 import org.meveo.model.dunning.DunningPolicyLevel;
 import org.meveo.model.dunning.DunningStopReason;
-import org.meveo.model.payments.ActionModeEnum;
-import org.meveo.model.payments.CardPaymentMethod;
-import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
-import org.meveo.model.payments.PaymentGateway;
-import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.*;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.audit.logging.AuditLogService;
 import org.meveo.service.base.PersistenceService;
@@ -105,6 +99,9 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
     @Inject
     private AuditLogService auditLogService;
+
+    @Inject
+    private AccountOperationService accountOperationService;
 
     private static final String STOP_REASON = "Changement de politique de recouvrement";
 
@@ -661,7 +658,8 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
      * @param policy Policy
      * @param collectionPlanStatus Collection plan status
      */
-    public void createCollectionPlanForCustomerLevel(CustomerAccount customerAccount, BigDecimal balance, DunningPolicy policy, DunningCollectionPlanStatus collectionPlanStatus) {
+    public void createCollectionPlanForCustomerLevel(CustomerAccount customerAccount, BigDecimal balance, DunningPolicy policy, DunningCollectionPlanStatus collectionPlanStatus,
+                                                     List<String> linkedOccTemplates) {
         customerAccount = customerAccountService.refreshOrRetrieve(customerAccount);
         DunningCollectionPlan collectionPlan = new DunningCollectionPlan();
         collectionPlan.setRelatedPolicy(policy);
@@ -675,6 +673,9 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         create(collectionPlan);
 
         collectionPlan.setCollectionPlanNumber("C" + collectionPlan.getId());
+
+        // Get the related invoices
+        getRelatedInvoices(customerAccount, linkedOccTemplates, collectionPlan);
 
         // Check if there's already a dunning level instances already created => In the case of launching the reminder without creating a collection plan
         List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByCustomerAccountAndEmptyCollectionPlan(customerAccount);
@@ -712,5 +713,31 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
         auditLogService.trackOperation("CREATE DunningCollectionPlan", new Date(), collectionPlan, collectionPlan.getCollectionPlanNumber());
         update(collectionPlan);
+    }
+
+    /**
+     * getRelatedInvoices
+     * @param customerAccount Customer account
+     * @param linkedOccTemplates Linked occ templates
+     * @param collectionPlan Collection plan
+     */
+    private void getRelatedInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, DunningCollectionPlan collectionPlan) {
+        List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount.getId(),
+                null,
+                linkedOccTemplates,
+                null);
+        if (accountOperations != null && !accountOperations.isEmpty()) {
+            accountOperations.forEach(accountOperation -> {
+                if (collectionPlan.getRelatedInvoices() == null) {
+                    collectionPlan.setRelatedInvoices(new ArrayList<>());
+                }
+                collectionPlan.getRelatedInvoices().addAll(accountOperation.getInvoices());
+                accountOperation.getInvoices().forEach(invoice -> {
+                    invoice.setCollectionPlan(collectionPlan);
+                    invoice.setDunningCollectionPlanTriggered(true);
+                    invoiceService.update(invoice);
+                });
+            });
+        }
     }
 }

@@ -1025,7 +1025,7 @@ public class InvoiceUblHelper {
 			String countryCode = seller.getAddress() != null && seller.getAddress().getCountry() != null ? seller.getAddress().getCountry().getCountryCode() : "";
 			companyID.setSchemeID(countryCode);
 			companyID.setSchemeAgencyID("ZZZ");
-			companyID.setValue(countryCode + seller.getVatNo());
+			companyID.setValue(seller.getVatNo());
 			taxScheme.setCompanyID(companyID);
 			taxScheme.setTaxScheme(getTaxSheme());
 			partyType.getPartyTaxSchemes().add(taxScheme);

@@ -1245,7 +1245,15 @@ public class InvoiceUblHelper {
 		target.setOrderReference(getOrderReference(source.getCommercialOrder(), source.getInvoiceDate()));
 	}
 	private void setOrderReference(org.meveo.model.billing.Invoice source, CreditNote target){
-		target.setOrderReference(getOrderReference(source.getCommercialOrder(), source.getInvoiceDate()));
+		OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
+		SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
+		Optional<LinkedInvoice> documentReference = source.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equalsIgnoreCase("COM")).findFirst();
+		if(documentReference.isPresent()){
+			salesOrderID.setValue(documentReference.get().getLinkedInvoiceValue().getInvoiceNumber());
+			orderReference.setSalesOrderID(salesOrderID);
+			orderReference.setIssueDate(getIssueDate(documentReference.get().getLinkedInvoiceValue().getDueDate()));
+			target.setOrderReference(orderReference);
+		}
 	}
 	private void setBillingReference(org.meveo.model.billing.Invoice source, Invoice target){
 		source.getLinkedInvoices().forEach(linInv -> {
@@ -1270,6 +1278,11 @@ public class InvoiceUblHelper {
 		ID id = objectFactorycommonBasic.createID();
 		id.setValue(source.getInvoiceNumber());
 		documentReferenceType.setID(id);
+
+		IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
+		dueDate.setValue(toXmlDate(source.getDueDate()));
+		documentReferenceType.setIssueDate(dueDate);
+
 		billingReference.setInvoiceDocumentReference(documentReferenceType);
 		return billingReference;
 	}

@@ -189,7 +189,7 @@ public class DunningCollectionPlan extends AuditableEntity {
     /**
      * The related invoices for CUSTOMER_LEVEL
      */
-    @OneToMany(mappedBy = "collectionPlan", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "collectionPlan", fetch = FetchType.LAZY)
     private List<Invoice> relatedInvoices;
 
     public DunningCollectionPlan() {};

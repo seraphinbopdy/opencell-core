@@ -1367,12 +1367,12 @@ public class InvoiceUblHelper {
 		
 		LineExtensionAmount lineExtensionAmountType = objectFactorycommonBasic.createLineExtensionAmount();
 		lineExtensionAmountType.setCurrencyID(currency);
-		lineExtensionAmountType.setValue(lineExtensionAmount);
+		lineExtensionAmountType.setValue(lineExtensionAmount.setScale(rounding, RoundingMode.HALF_UP));
 		moneyTotalType.setLineExtensionAmount(lineExtensionAmountType);
 		
 		PayableAmount payableAmountType = objectFactorycommonBasic.createPayableAmount();
 		payableAmountType.setCurrencyID(currency);
-		payableAmountType.setValue(payableAmount);
+		payableAmountType.setValue(payableAmount.setScale(rounding, RoundingMode.HALF_UP));
 		moneyTotalType.setPayableAmount(payableAmountType);
 
 		if(totalPrepaidAmount.compareTo(BigDecimal.ZERO) != 0){

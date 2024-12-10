@@ -9,6 +9,7 @@ import static org.meveo.model.payments.PaymentMethodEnum.CARD;
 import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -518,13 +519,14 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public Optional<DunningLevelInstance> addDunningLevelInstance(DunningLevelInstanceInput dunningLevelInstanceInput) {
         globalSettingsVerifier.checkActivateDunning();
         try {
             DunningLevelInstance newDunningLevelInstance = new DunningLevelInstance();
 
             Long collectionPlanId = dunningLevelInstanceInput.getCollectionPlan().getId();
-            var collectionPlan = findById(collectionPlanId).orElseThrow(() -> new EntityDoesNotExistsException(NO_DUNNING_FOUND + collectionPlanId));
+            DunningCollectionPlan collectionPlan = findById(collectionPlanId).orElseThrow(() -> new EntityDoesNotExistsException(NO_DUNNING_FOUND + collectionPlanId));
             newDunningLevelInstance.setCollectionPlan(collectionPlan);
 
             // 1- Can not create a new dunning level instance if :
@@ -534,8 +536,12 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             // Check if we can add a new dunning level instance to the collection plan
             validateAddDunningLevelToCollectionPlan(dunningLevel);
 
-            // Validate the execution date
-            validateExecutionDate(collectionPlan, dunningLevelInstanceInput.getExecutionDate());
+            if (dunningLevelInstanceInput.getExecutionDate() != null) {
+                // Validate the execution date
+                validateExecutionDate(collectionPlan, dunningLevelInstanceInput.getExecutionDate());
+                newDunningLevelInstance.setExecutionDate(dunningLevelInstanceInput.getExecutionDate());
+            }
+
             newDunningLevelInstance.setDunningLevel(dunningLevel);
 
             // check daysOverdue
@@ -595,24 +601,58 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         }
     }
 
+    /**
+     * Validate the execution date.
+     * @param collectionPlan the collection plan
+     * @param executionDate the execution date
+     */
     private void validateExecutionDate(DunningCollectionPlan collectionPlan, Date executionDate) {
+        DunningLevelInstance firstDunningLevel = getFirstDunningLevelInstance(collectionPlan);
         DunningLevelInstance inProgressDunningLevel = findFirstInProgressDunningLevel(collectionPlan);
         DunningLevelInstance lastDoneInstance = findLastDoneDunningLevel(collectionPlan);
         DunningLevelInstance endDunningLevel = findEndDunningLevel(collectionPlan);
 
-        if (inProgressDunningLevel != null && executionDate.before(inProgressDunningLevel.getExecutionDate())) {
+        if (executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(collectionPlan.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+            throw new BusinessApiException("The execution date must be after the collection plan start date");
+        }
+
+        if (firstDunningLevel != null && firstDunningLevel.getExecutionDate() != null &&
+                executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(firstDunningLevel.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+            throw new BusinessApiException("The execution date must be after the first dunning level instance execution date");
+        }
+
+        if (inProgressDunningLevel != null && inProgressDunningLevel.getExecutionDate() != null
+                && executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(inProgressDunningLevel.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
             throw new BusinessApiException("The execution date must be after the current dunning level instance execution date");
         }
 
-        if (lastDoneInstance != null && executionDate.before(lastDoneInstance.getExecutionDate())) {
+        if (lastDoneInstance != null && lastDoneInstance.getExecutionDate() != null
+                && executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(lastDoneInstance.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
             throw new BusinessApiException("The execution date must be after the last done dunning level instance execution date");
         }
 
-        if (endDunningLevel != null && executionDate.after(endDunningLevel.getExecutionDate())) {
+        if (endDunningLevel != null && endDunningLevel.getExecutionDate() != null
+                && executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isAfter(endDunningLevel.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
             throw new BusinessApiException("The execution date must be before the end dunning level instance execution date");
         }
     }
 
+    /**
+     * Get the first dunning level instance.
+     * @param collectionPlan the collection plan
+     * @return the first dunning level instance
+     */
+    private DunningLevelInstance getFirstDunningLevelInstance(DunningCollectionPlan collectionPlan) {
+        return collectionPlan.getDunningLevelInstances().stream()
+                .min(Comparator.comparing(DunningLevelInstance::getDaysOverdue))
+                .orElse(null);
+    }
+
+    /**
+     * Get the first in progress dunning level instance.
+     * @param collectionPlan the collection plan
+     * @return the first in progress dunning level instance
+     */
     private DunningLevelInstance findFirstInProgressDunningLevel(DunningCollectionPlan collectionPlan) {
         return collectionPlan.getDunningLevelInstances().stream()
                 .filter(dunningLevelInstance -> dunningLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IN_PROGRESS)
@@ -620,6 +660,11 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 .orElse(null);
     }
 
+    /**
+     * Get the last done dunning level instance.
+     * @param collectionPlan the collection plan
+     * @return the last done dunning level instance
+     */
     private DunningLevelInstance findLastDoneDunningLevel(DunningCollectionPlan collectionPlan) {
         return collectionPlan.getDunningLevelInstances().stream()
                 .filter(dunningLevelInstance -> dunningLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE)
@@ -627,6 +672,11 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 .orElse(null);
     }
 
+    /**
+     * Get the end dunning level instance.
+     * @param collectionPlan the collection plan
+     * @return the end dunning level instance
+     */
     private DunningLevelInstance findEndDunningLevel(DunningCollectionPlan collectionPlan) {
         return collectionPlan.getDunningLevelInstances().stream()
                 .filter(dunningLevelInstance -> dunningLevelInstance.getDunningLevel().isEndOfDunningLevel())
@@ -997,6 +1047,11 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         }
     }
 
+    /**
+     * Create actions
+     * @param dunningLevelInstance Dunning level instance {@link DunningLevelInstance}
+     * @param actionInstanceInputs List of dunning action instance input {@link DunningActionInstanceInput}
+     */
     private void createActions(DunningLevelInstance dunningLevelInstance, List<DunningActionInstanceInput> actionInstanceInputs) {
         List<DunningActionInstance> actions = new ArrayList<>();
 
@@ -1246,6 +1301,14 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         dunningActionInstance.setActionMode(ActionModeEnum.MANUAL);
         dunningActionInstance.setExecutionDate(new Date());
         dunningActionInstance.setActionRestult("Action executed manually");
+
+        // update dunning level instance status if all actions are done
+        DunningLevelInstance dunningLevelInstance = dunningActionInstance.getDunningLevelInstance();
+        if (dunningLevelInstance.getActions().stream().allMatch(action -> action.getActionStatus() == DunningActionInstanceStatusEnum.DONE)) {
+            dunningLevelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
+            dunningLevelInstance.setExecutionDate(new Date());
+            dunningLevelInstanceService.update(dunningLevelInstance);
+        }
 
         // update the dunningActionInstance
         dunningActionInstanceService.update(dunningActionInstance);

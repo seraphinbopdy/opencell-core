@@ -732,6 +732,11 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                     collectionPlan.setRelatedInvoices(new ArrayList<>());
                 }
                 collectionPlan.getRelatedInvoices().addAll(accountOperation.getInvoices());
+                accountOperation.getInvoices().forEach(invoice -> {
+                    invoice.setCollectionPlan(collectionPlan);
+                    invoice.setDunningCollectionPlanTriggered(true);
+                    invoiceService.update(invoice);
+                });
             });
         }
     }

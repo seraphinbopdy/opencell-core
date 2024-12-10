@@ -197,8 +197,8 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
             });
 
             if (!eligibleCustomerAccounts.isEmpty()) {
-            eligibleCustomerAccountsByPolicy.put(policy, eligibleCustomerAccounts);
-        }
+                eligibleCustomerAccountsByPolicy.put(policy, eligibleCustomerAccounts);
+            }
         }
 
         return eligibleCustomerAccountsByPolicy;
@@ -214,6 +214,10 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
         String creditCategoryCode = (customerAccount.getCreditCategory() != null) ? customerAccount.getCreditCategory().getCode() : null;
         String customerCategoryCode = (customerAccount.getCustomer().getCustomerCategory().getCode() != null) ? customerAccount.getCustomer().getCustomerCategory().getCode() : null;
         HashMap<Object, Object> objectObjectHashMap = getMapToCheck(customerAccount, creditCategoryCode, customerCategoryCode);
+
+        if (conditions == null || conditions.isEmpty()) {
+            return true;
+        }
 
         boolean result = ValueExpressionWrapper.evaluateToBoolean("#{ ".concat(conditions).concat(" }"), objectObjectHashMap);
         log.info("Result of the condition: {} for customer account: {} is: {}", result, customerAccount.getCode(), result);

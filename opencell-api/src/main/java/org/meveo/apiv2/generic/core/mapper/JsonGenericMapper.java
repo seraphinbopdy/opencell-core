@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.meveo.apiv2.generic.GenericPaginatedResource;
 import org.meveo.apiv2.generic.core.mapper.module.GenericModule;
+import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.IEntity;
 import org.meveo.model.crm.custom.CustomFieldValue;
 import org.meveo.model.crm.custom.CustomFieldValues;
@@ -70,6 +71,16 @@ public class JsonGenericMapper extends ObjectMapper {
         }
         setFilterProvider(this.simpleFilterProvider);
         try {
+
+            // Handle CF value conversion from String to JSON
+            if (dtoToSerialize instanceof GenericPaginatedResource) {
+                for (Object dataItem : ((GenericPaginatedResource) dtoToSerialize).getData()) {
+                    if (dataItem instanceof ICustomFieldEntity) {
+                        ((ICustomFieldEntity) dataItem).getCfValues();
+                    }
+                }
+            }
+
             return writeValueAsString(dtoToSerialize);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("json formatting exception", e);

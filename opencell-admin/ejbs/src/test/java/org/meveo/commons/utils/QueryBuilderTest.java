@@ -144,25 +144,25 @@ public class QueryBuilderTest {
 
     @Test
     public void join_has_name_and_alias() {
-        InnerJoin innerJoin = new InnerJoin("ab", 0);
+        InnerJoin innerJoin = new InnerJoin("ab");
         assertThat(innerJoin.getName()).isEqualTo("ab");
         assertThat(innerJoin.getAlias()).startsWith("ab_");
     }
 
     @Test
     public void join_may_point_to_list_of_joins() {
-        InnerJoin innerJoin = new InnerJoin("ab", 0);
-        InnerJoin acInnerJoin = new InnerJoin("ac", 1);
+        InnerJoin innerJoin = new InnerJoin("ab");
+        InnerJoin acInnerJoin = new InnerJoin("ac");
         innerJoin.next(acInnerJoin);
-        InnerJoin aeInnerJoin = new InnerJoin("ae", 2);
+        InnerJoin aeInnerJoin = new InnerJoin("ae");
         innerJoin.next(aeInnerJoin);
 
-        assertThat(innerJoin.getNextInnerJoins()).containsExactly(acInnerJoin, aeInnerJoin);
+        assertThat(innerJoin.getNextInnerJoins()).containsExactlyInAnyOrder(acInnerJoin, aeInnerJoin);
     }
 
     @Test
     public void can_format_one_join() {
-        InnerJoin innerJoin = new InnerJoin("ab", 1);
+        InnerJoin innerJoin = new InnerJoin("ab");
         QueryBuilder queryBuilder = new QueryBuilder(Invoice.class, "I", List.of());
         String joinString = queryBuilder.format("", innerJoin, false);
 
@@ -172,8 +172,8 @@ public class QueryBuilderTest {
     @Test
     public void query_builder_can_format_joins() {
 
-        InnerJoin abInnerJoin = new InnerJoin("ab", 0);
-        InnerJoin bcInnerJoin = new InnerJoin("bc", 1);
+        InnerJoin abInnerJoin = new InnerJoin("ab");
+        InnerJoin bcInnerJoin = new InnerJoin("bc");
         abInnerJoin.next(bcInnerJoin);
 
         QueryBuilder queryBuilder = new QueryBuilder(Invoice.class, "I", List.of());
@@ -184,9 +184,9 @@ public class QueryBuilderTest {
 
     @Test
     public void joins_may_have_n_deep() {
-        InnerJoin abInnerJoin = new InnerJoin("ab", 0);
-        InnerJoin acInnerJoin = new InnerJoin("ac", 1);
-        InnerJoin adInnerJoin = new InnerJoin("ad", 2);
+        InnerJoin abInnerJoin = new InnerJoin("ab");
+        InnerJoin acInnerJoin = new InnerJoin("ac");
+        InnerJoin adInnerJoin = new InnerJoin("ad");
         abInnerJoin.next(acInnerJoin);
         acInnerJoin.next(adInnerJoin);
 
@@ -234,10 +234,12 @@ public class QueryBuilderTest {
 
         assertThat(rootJoin.getName()).isEqualTo("a");
         assertThat(rootJoin.getNextInnerJoins()).hasSize(1);
-        assertThat(rootJoin.getNextInnerJoins().get(0).getName()).isEqualTo("b");
-        assertThat(rootJoin.getNextInnerJoins().get(0).getNextInnerJoins()).isEmpty();
-
-        assertThat(joinWrapper.getJoinAlias()).isEqualTo(rootJoin.getNextInnerJoins().get(0).getAlias() + ".c");
+        InnerJoin next = rootJoin.getNextInnerJoins()
+                                 .iterator()
+                                 .next();
+        assertThat(next.getName()).isEqualTo("b");
+        assertThat(next.getNextInnerJoins()).isEmpty();
+        assertThat(joinWrapper.getJoinAlias()).isEqualTo(next.getAlias() + ".c");
 
     }
 

@@ -64,8 +64,7 @@ public final class PersistenceServiceHelper {
 	 * @return
 	 */
 	private static String sanityzeEntityName(String entityName) {
-		Map<String, String> entityNameMap = Map.of("EDRService", EdrService.class.getSimpleName(),
-				"MediationSettingService", "MediationsettingService");
+		Map<String, String> entityNameMap = Map.of("EDRService", EdrService.class.getSimpleName());
 		return entityNameMap.getOrDefault(entityName, entityName).replace("Impl", "");
 	}
     

@@ -1294,7 +1294,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                             appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
                 }
 	            invoiceLine = this.findById(invoiceLineId);
-	            invoiceLine.setSellerId(ofNullable(groupedRT.get("seller_id")).map(id -> ((Number) id).longValue()).orElse(null));
+	            invoiceLine.setSeller(ofNullable(groupedRT.get("seller_id")).map(id -> sellerService.getEntityManager().getReference(Seller.class, ((Number)id).longValue())).orElse(null));
 	            invoiceLine.setAmountWithoutTax(invoiceLine.getAmountWithoutTax().add(deltaAmountWithoutTax));
 	            invoiceLine.setAmountWithTax(invoiceLine.getAmountWithTax().add(deltaAmountWithTax));
 	            invoiceLine.setAmountTax(invoiceLine.getAmountTax().add(deltaAmountTax));

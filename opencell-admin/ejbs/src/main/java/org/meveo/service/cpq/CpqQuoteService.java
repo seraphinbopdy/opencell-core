@@ -336,7 +336,7 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	            }
 
 	            DefaultJasperReportsContext context = DefaultJasperReportsContext.getInstance();
-	            JRPropertiesUtil.getInstance(context).setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.engine.util.xml.JaxenXPathExecuterFactory");
+	            JRPropertiesUtil.getInstance(context).setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.jaxen.util.xml.JaxenXPathExecuterFactory");
 
 	            Map<String, Object> parameters = new HashMap<>();
 	            String templateDir = new StringBuilder(resDir).toString();

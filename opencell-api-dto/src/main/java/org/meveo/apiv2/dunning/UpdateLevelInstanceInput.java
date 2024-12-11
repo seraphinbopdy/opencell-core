@@ -1,5 +1,6 @@
 package org.meveo.apiv2.dunning;
 
+import java.util.Date;
 import java.util.List;
 
 import jakarta.annotation.Nullable;
@@ -22,4 +23,7 @@ public interface UpdateLevelInstanceInput {
     
     @Nullable
     List<DunningActionInstanceInput> getActions();
+
+    @Nullable
+    Date getExecutionDate();
 }

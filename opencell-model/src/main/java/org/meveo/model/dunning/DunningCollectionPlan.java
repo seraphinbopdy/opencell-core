@@ -4,14 +4,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.type.NumericBooleanConverter;
-import org.meveo.model.AuditableEntity;
-import org.meveo.model.billing.BillingAccount;
-import org.meveo.model.billing.Invoice;
-import org.meveo.model.payments.CustomerAccount;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -25,6 +17,15 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.type.NumericBooleanConverter;
+import org.meveo.model.AuditableEntity;
+import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.Invoice;
+import org.meveo.model.payments.CustomerAccount;
+
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -197,6 +198,12 @@ public class DunningCollectionPlan extends AuditableEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "customer_account_id")
 	private CustomerAccount customerAccount;
+
+    /**
+     * The related invoices for CUSTOMER_LEVEL
+     */
+    @OneToMany(mappedBy = "collectionPlan", fetch = FetchType.LAZY)
+    private List<Invoice> relatedInvoices;
 
     public DunningCollectionPlan() {};
 
@@ -393,4 +400,12 @@ public class DunningCollectionPlan extends AuditableEntity {
 	public void setCustomerAccount(CustomerAccount customerAccount) {
 		this.customerAccount = customerAccount;
 	}
+
+    public List<Invoice> getRelatedInvoices() {
+        return relatedInvoices;
+    }
+
+    public void setRelatedInvoices(List<Invoice> relatedInvoices) {
+        this.relatedInvoices = relatedInvoices;
+    }
 }

@@ -1843,7 +1843,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
             context.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
             context.setProperty("net.sf.jasperreports.export.pdfa.conformance", PdfaConformanceEnum.PDFA_1A.getName());
             context.setProperty("net.sf.jasperreports.export.pdfa.icc.profile.path", resDir + File.separator + billingTemplateName + File.separator + "srgb.icc");
-
+            context.setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.jaxen.util.xml.JaxenXPathExecuterFactory");
+            
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 
             JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFullFilename);
@@ -7767,8 +7768,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			Predicate<LinkedInvoice> advFilter = i -> InvoiceTypeEnum.ADVANCEMENT_PAYMENT.equals(i.getType());
 			if (delete) {
 				invoice.getLinkedInvoices().stream().filter(advFilter).forEach(li -> li.getLinkedInvoiceValue().setInvoiceBalance(li.getLinkedInvoiceValue().getInvoiceBalance().add(li.getAmount())));
-				linkedInvoiceService.deleteByInvoiceIdAndType(invoice.getId(), InvoiceTypeEnum.ADVANCEMENT_PAYMENT);
-				//invoice.getLinkedInvoices().removeIf(advFilter);
+				invoice.getLinkedInvoices().removeIf(advFilter);
 			} else {
 				for (Invoice advInvoice : advInvoices) {
 					invoice.getLinkedInvoices().stream().filter(advFilter).filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getId() == advInvoice.getId()).findAny().ifPresent(li -> {

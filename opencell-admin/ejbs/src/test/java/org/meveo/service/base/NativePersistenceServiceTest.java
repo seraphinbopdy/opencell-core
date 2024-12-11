@@ -323,6 +323,27 @@ public class NativePersistenceServiceTest {
         // assertThat(queryWithAggFields(configuration)).isEqualTo("select a.field, a.field2, max(field3) from tableName a GROUP BY a.field, a.field2");
     }
 
+    @Test
+    public void testSharedNestedJoinsMultipleFilters() {
+        filters.put("customerAccount.customer.name.firstName", "John");
+        filters.put("customerAccount.customer.name.lastName", "Doe");
+        filters.put("customerAccount.name.firstName", "John");
+        filters.put("customerAccount.name.lastName", "Doe");
+
+        assertThat(getQuery()).isEqualTo("select a.selectField " +
+                "from tableName a  " +
+                "left join a.customerAccount customerAccount_1 " +
+                "left join customerAccount_1.customer customer_2 " +
+                "left join customer_2.name name_3 " +
+                "left join customerAccount_1.name name_4  " +
+                "where lower(name_3.firstName) = :name_3_firstName " +
+                "and lower(name_3.lastName) = :name_3_lastName " +
+                "and lower(name_4.lastName) = :name_4_lastName " +
+                "and lower(name_4.firstName) = :name_4_firstName " +
+                "Param name:name_4_firstName value:john Param name:name_3_firstName value:john " +
+                "Param name:name_3_lastName value:doe Param name:name_4_lastName value:doe");
+    }
+
     private String getQuery() {
         return nativePersistenceService.getQuery("tableName", new PaginationConfiguration(10, 40, filters, "text", List.of("selectField"), "selectField", "desc"), null, Boolean.FALSE).toString();
     }

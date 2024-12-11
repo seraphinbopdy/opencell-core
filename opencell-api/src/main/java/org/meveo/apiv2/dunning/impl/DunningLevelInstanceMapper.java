@@ -29,6 +29,7 @@ public class DunningLevelInstanceMapper extends ResourceMapper<DunningLevelInsta
                 .dunningLevel(createResource(entity.getDunningLevel()))
                 .collectionPlanStatus(createResource(entity.getCollectionPlanStatus()))
                 .actions(toActions(entity.getActions()))
+                .executionDate(entity.getExecutionDate())
                 .build();
     }
 

@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.type.NumericBooleanConverter;
@@ -53,33 +54,6 @@ import org.meveo.model.payments.plan.PaymentPlan;
 import org.meveo.model.quote.Quote;
 import org.meveo.model.shared.DateUtils;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedNativeQueries;
-import jakarta.persistence.NamedNativeQuery;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.PostPersist;
-import jakarta.persistence.PostUpdate;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -781,6 +755,10 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
 
     @Column(name = "certificate_uncollectibility_number", length = 50)
     private String certificateUncollectibilityNumber;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dunning_collection_plan_id")
+    private DunningCollectionPlan collectionPlan;
 
     public Invoice() {
     }
@@ -2048,5 +2026,13 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     public Invoice setCertificateUncollectibilityNumber(String certificateUncollectibilityNumber) {
         this.certificateUncollectibilityNumber = certificateUncollectibilityNumber;
         return this;
+    }
+
+    public DunningCollectionPlan getCollectionPlan() {
+        return collectionPlan;
+    }
+
+    public void setCollectionPlan(DunningCollectionPlan collectionPlan) {
+        this.collectionPlan = collectionPlan;
     }
 }

@@ -448,8 +448,8 @@ public class JournalEntryService extends PersistenceService<JournalEntry> {
     private void buildRevenuesJournalEntries(RecordedInvoice recordedInvoice, OCCTemplate occT, List<JournalEntry> saved) {
         Query query = getEntityManager().createQuery(
                         "SELECT ivl" + // amountWithoutTax
-                                " FROM InvoiceLine ivL LEFT JOIN AccountingCode ac ON ivL.accountingArticle.accountingCode = ac" +
-                                " WHERE ivL.invoice.id = :" + PARAM_ID_INV)
+                                " FROM InvoiceLine ivl LEFT JOIN AccountingCode ac ON ivl.accountingArticle.accountingCode = ac" +
+                                " WHERE ivl.invoice.id = :" + PARAM_ID_INV)
                 .setParameter(PARAM_ID_INV, recordedInvoice.getInvoice().getId());
 
         List<InvoiceLine> ivlResults = query.getResultList();

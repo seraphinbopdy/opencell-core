@@ -487,13 +487,13 @@ public class InvoiceUblHelper {
 	private void setPaymentMeans(PaymentMethod paymentMethod, Invoice target, CreditNote creditNote){
 		PaymentMeans paymentMeans = objectFactoryCommonAggrement.createPaymentMeans();
 
-		if(paymentMethod != null && paymentMethod.getPaymentMeans() != null) {
+		if(paymentMethod != null) {
 			PaymentMeansCode paymentMeansCode = objectFactorycommonBasic.createPaymentMeansCode();
 			paymentMeansCode.setListID("UN/ECE 4461");
 			paymentMeansCode.setListAgencyID("NES");
 			paymentMeansCode.setListAgencyName("Northern European Subset");
 			paymentMeansCode.setListName("Payment Means");
-			paymentMeansCode.setValue(paymentMethod.getPaymentMeans().getCode());
+			paymentMeansCode.setValue(paymentMethod.getPaymentMeans() != null ? paymentMethod.getPaymentMeans().getCode() : "59");
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
 		}
 

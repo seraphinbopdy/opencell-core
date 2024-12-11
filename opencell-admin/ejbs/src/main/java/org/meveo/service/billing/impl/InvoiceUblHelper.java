@@ -1168,8 +1168,7 @@ public class InvoiceUblHelper {
 		}
 	}
 	private void setAllowanceCharge(org.meveo.model.billing.Invoice invoice, Invoice target, CreditNote creditNote){
-		List<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates = (List<SubCategoryInvoiceAgregate>) invoiceAgregateService.listByInvoiceAndType(invoice, "F");
-		final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null;
+        final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null;
 		if(CollectionUtils.isNotEmpty(invoice.getInvoiceLines())){
 			invoice.getInvoiceLines().forEach(invoiceLine -> {
 				if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Discount".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
@@ -1198,7 +1197,6 @@ public class InvoiceUblHelper {
 					allowanceChargeReason.setValue(allowanceCode.getDescription());
 					allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
 				}
-				final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null;
 				Amount amount = objectFactorycommonBasic.createAmount();
 				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
 

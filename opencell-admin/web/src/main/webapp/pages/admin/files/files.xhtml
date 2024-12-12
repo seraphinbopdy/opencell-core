@@ -55,7 +55,7 @@
                 </p:dataTable>
                 <p:panel rendered="#{filesBean.selectedFileName!=null}" id="fileManageForm">
          			#{filesBean.selectedFileName}
-					<p:commandButton value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down" ajax="false">
+					<p:commandButton value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down">
                         <p:fileDownload value="#{filesBean.selectedFile}" />
                         <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                     </p:commandButton>

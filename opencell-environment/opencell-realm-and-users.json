@@ -1800,7 +1800,7 @@
         },
         {
           "id": "08d11ed6-0734-4211-b236-da1320c3c081",
-          "name": "PRODUCT/ADV",
+          "name": "CATALOG_MANAGER",
           "description": "accès Catalog Manager (Offer+product+tag+tag typ+product type)",
           "composite": false,
           "clientRole": true,
@@ -1904,7 +1904,7 @@
                 "CFO",
                 "C_CARE",
                 "SALES",
-                "PRODUCT/ADV",
+                "CATALOG_MANAGER",
                 "MARKETING_MANAGER"
               ]
             }

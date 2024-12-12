@@ -15663,5 +15663,57 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="dunning_collection_plan_id" type="bigint"  />
         </addColumn>
     </changeSet>
+    
+    <changeSet id="#INTRD-25643_20241206" author="anasseh">
+	     <createSequence sequenceName="ar_pre_authorization_seq" startValue="1"/>
+        <createTable tableName="ar_pre_authorization">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pre_authorization_pkey" />
+            </column>
+            <column name="version" type="int4" />
+            <column name="created" type="datetime"/>
+            <column name="updated" type="datetime" />
+            <column name="creator" type="varchar(100)" />
+            <column name="updater" type="varchar(100)" />
+            <column name="status" type="varchar(20)"><constraints nullable="false"/></column>
+            <column name="transaction_date" type="datetime"><constraints nullable="false" /></column>
+            <column name="capture_date" type="datetime"><constraints nullable="true" /></column>
+            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>           
+            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>  
+            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>  
+            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>  
+            <column name="error_detail" type="varchar(2000)"/>
+            <column name="customer_account_id" type="bigint" />
+            <column name="card_payment_method_id" type="bigint" ><constraints nullable="false" /></column>
+            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>           
+        </createTable>
+   
+        <addForeignKeyConstraint
+                baseTableName="ar_pre_authorization"
+                baseColumnNames="customer_account_id"
+                constraintName="customer_account_id_fk"
+                referencedTableName="ar_customer_account" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+                baseTableName="ar_pre_authorization"
+                baseColumnNames="card_payment_method_id"
+                constraintName="card_payment_method_id_fk"
+                referencedTableName="ar_payment_token" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />  
+		<addForeignKeyConstraint
+                baseTableName="ar_pre_authorization"
+                baseColumnNames="payment_gateway_id"
+                constraintName="payment_gateway_id_fk"
+                referencedTableName="ar_payment_gateway" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />   
+                
+         <dropColumn tableName="ar_payment_token">
+            <column name="pre_authorisation_id"></column>
+        </dropColumn>                                  
+    </changeSet>      
+    
 
 </databaseChangeLog>

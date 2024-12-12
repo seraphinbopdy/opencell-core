@@ -83,12 +83,6 @@ public class CardPaymentMethod extends PaymentMethod {
      */
     @Column(name = "card_number")
     private String hiddenCardNumber;
-    
-    /**
-     * Pre authorisation id
-     */
-    @Column(name = "pre_authorisation_id")
-    private String preAuthorisationId;
 
     /**
      * Full card number. Used at data entry time.
@@ -185,16 +179,6 @@ public class CardPaymentMethod extends PaymentMethod {
     public void setHiddenCardNumber(String hiddenCardNumber) {
         this.hiddenCardNumber = hiddenCardNumber;
     }
-    
-    
-
-    public String getPreAuthorisationId() {
-		return preAuthorisationId;
-	}
-
-	public void setPreAuthorisationId(String preAuthorisationId) {
-		this.preAuthorisationId = preAuthorisationId;
-	}
 
 	@Override
     public void anonymize(String code) {

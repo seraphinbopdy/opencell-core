@@ -944,7 +944,7 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 		}
 						
 		} catch (ApiException e) {
-			log.error("Error on doPayment :", e);
+			log.error("Error on capturePayment :", e);
 			doPaymentResponseDto.setPaymentStatus(PaymentStatusEnum.ERROR);
 			doPaymentResponseDto.setErrorMessage(e.getResponseBody());
 			if (CollectionUtils.isNotEmpty(e.getErrors())) {

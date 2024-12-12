@@ -74,6 +74,7 @@ import org.meveo.model.payments.PaymentRejectionAction;
 import org.meveo.model.payments.PaymentRejectionActionReport;
 import org.meveo.model.payments.PaymentRejectionActionStatus;
 import org.meveo.model.payments.PaymentStatusEnum;
+import org.meveo.model.payments.PreAuthorization;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.model.payments.Refund;
 import org.meveo.model.payments.RejectedPayment;
@@ -151,6 +152,9 @@ public class PaymentService extends PersistenceService<Payment> {
 
     @Inject
     private RecordedInvoiceService recordedInvoiceService;
+    
+    @Inject
+    private PreAuthorizationService preAuthorizationService;
 
     @MeveoAudit
     @Override
@@ -227,6 +231,19 @@ public class PaymentService extends PersistenceService<Payment> {
         return doPayment(customerAccount, ctsAmount, aoIdsToPay, createAO, matchingAO, paymentGateway, null, null, null, null, null, true, PaymentMethodEnum.DIRECTDEBIT, false, null);
     }
 
+    
+    public void cancelPayment(PreAuthorization preAuthorization)throws Exception {
+    	try {
+    		 GatewayPaymentInterface gatewayPaymentInterface = null;
+    		 gatewayPaymentInterface = gatewayPaymentFactory.getInstance(preAuthorization.getPaymentGateway());
+    		 gatewayPaymentInterface.cancelPayment(preAuthorization.getReference());
+    		 preAuthorizationService.cancel(preAuthorization);
+    		
+    	}catch (Exception e) {
+    		log.error("Error on cancelPayment",e);
+			throw e;
+		}
+    }
     /**
      * Refund by sepa.
      *
@@ -402,7 +419,7 @@ public class PaymentService extends PersistenceService<Payment> {
 			preferredMethod.setUserId(doPaymentResponseDto.getCodeClientSide());
 	        preferredMethod = paymentMethodService.update(preferredMethod);
 	        
-	        String preAuthId = null;
+	        PreAuthorization preAuthorization =  null;
 	        
             if (PaymentMethodEnum.CARD == paymentMethodType) {
             	if(!isNewCard) {
@@ -424,11 +441,11 @@ public class PaymentService extends PersistenceService<Payment> {
                     if (isNewCard) {
                         doPaymentResponseDto = gatewayPaymentInterface.doPaymentCard(customerAccount, ctsAmount, cardNumber, ownerName, cvv, expiryDate, cardType, null, null);
                     } else {
-                    	preAuthId =  ((CardPaymentMethod) preferredMethod).getPreAuthorisationId();                        	
-                    	if(preAuthId == null) {                    		
+                    	preAuthorization =  preAuthorizationService.getPreAuthorizationToCapture((CardPaymentMethod) preferredMethod);                 	
+                    	if(preAuthorization == null) {                    		
                     		doPaymentResponseDto = gatewayPaymentInterface.doPaymentToken(((CardPaymentMethod) preferredMethod), ctsAmount, null);
                     	}else {                    		
-                    		doPaymentResponseDto = gatewayPaymentInterface.capturePayment(preAuthId, ctsAmount, preAuthId);
+                    		doPaymentResponseDto = gatewayPaymentInterface.capturePayment(preAuthorization.getReference(), ctsAmount, preAuthorization.getReference());                    		
                     	}
                     }
                 } else {
@@ -478,9 +495,8 @@ public class PaymentService extends PersistenceService<Payment> {
 
 			if(payment != null) {
 				payment.setReference(doPaymentResponseDto.getPaymentID());
-				if( preAuthId != null) {
-					((CardPaymentMethod) preferredMethod).setPreAuthorisationId(null); 
-					paymentMethodService.updateNoCheck(preferredMethod);				
+				if( preAuthorization != null) {
+					preAuthorizationService.capture(preAuthorization, payment.getAmount());
 				}
 			}
 			if(refund != null) {

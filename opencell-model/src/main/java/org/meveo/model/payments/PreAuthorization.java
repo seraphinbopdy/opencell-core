@@ -47,7 +47,8 @@ import org.meveo.model.ObservableEntity;
 @ObservableEntity
 @Table(name = "ar_pre_authorization")
 @GenericGenerator(name = "ID_GENERATOR", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-        @Parameter(name = "sequence_name", value = "ar_pre_authorization_seq") })
+        @Parameter(name = "sequence_name", value = "ar_pre_authorization_seq"),
+        @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({
 		@NamedQuery(name = "PreAuthorization.listToCancel", query = "Select pa  from PreAuthorization as pa  where pa.transactionDate<:dateToCancelIN and pa.status = 'AUTORISED' "),
 		@NamedQuery(name = "PreAuthorization.PaToCapture", query = "Select pa  from PreAuthorization as pa  where pa.cardPaymentMethod.id=:cardPmIdIN and pa.status = 'AUTORISED' ")

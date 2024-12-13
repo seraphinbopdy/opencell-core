@@ -148,7 +148,7 @@ public abstract class SynchronizedMultiItemIterator<T> implements Iterator<List<
                         }
 
                     } else {
-                        return (T) ((Object[]) scrollableResults.get())[0];
+                        return (T) scrollableResults.get();
                     }
 
                 } else {

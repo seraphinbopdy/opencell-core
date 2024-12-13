@@ -24,9 +24,9 @@
     <changeSet author="AndriusKarpavicius"  id="rebuild_oracle_functions" dbms="oracle">
         <createProcedure>
             CREATE OR REPLACE FUNCTION now RETURN TIMESTAMP
-                IS
+            IS
             BEGIN
-                RETURN (sysdate);
+            RETURN (sysdate);
             END;
 
         </createProcedure>
@@ -35,139 +35,139 @@
         <createProcedure>
             create or replace type listagg_clob_t as object
             (
-                t_varchar2 VARCHAR2 (32767),
-                t_clob CLOB,
-                STATIC FUNCTION odciaggregateinitialize (sctx IN OUT listagg_clob_t)
-                    RETURN NUMBER,
-                MEMBER FUNCTION odciaggregateiterate (self    IN OUT listagg_clob_t,
-                                                      a_val          VARCHAR2)
-                    RETURN NUMBER,
-                MEMBER FUNCTION odciaggregateterminate (self          IN OUT listagg_clob_t,
-                                                        returnvalue      OUT CLOB,
-                                                        flags         IN     NUMBER)
-                    RETURN NUMBER,
-                MEMBER FUNCTION odciaggregatemerge (self   IN OUT listagg_clob_t,
-                                                    ctx2   IN OUT listagg_clob_t)
-                    RETURN NUMBER
+            t_varchar2 VARCHAR2 (32767),
+            t_clob CLOB,
+            STATIC FUNCTION odciaggregateinitialize (sctx IN OUT listagg_clob_t)
+            RETURN NUMBER,
+            MEMBER FUNCTION odciaggregateiterate (self    IN OUT listagg_clob_t,
+            a_val          VARCHAR2)
+            RETURN NUMBER,
+            MEMBER FUNCTION odciaggregateterminate (self          IN OUT listagg_clob_t,
+            returnvalue      OUT CLOB,
+            flags         IN     NUMBER)
+            RETURN NUMBER,
+            MEMBER FUNCTION odciaggregatemerge (self   IN OUT listagg_clob_t,
+            ctx2   IN OUT listagg_clob_t)
+            RETURN NUMBER
             );
         </createProcedure>
         <createProcedure>
             create or replace type body listagg_clob_t
             IS
-                STATIC FUNCTION odciaggregateinitialize (sctx IN OUT listagg_clob_t)
-                    RETURN NUMBER
-                    IS
-                BEGIN
-                    sctx := listagg_clob_t (NULL, NULL);
-                    RETURN odciconst.success;
-                END;
-                member function odciaggregateiterate
-                ( self in out listagg_clob_t
-                , a_val varchar2
-                )
-                    return number
-                    is
-                    procedure add_val( p_val varchar2 )
-                        is
-                    begin
-                        if nvl( lengthb( self.t_varchar2 ), 0 ) + lengthb( p_val ) &lt;= 4000
-                        THEN
-                            IF self.t_varchar2 IS NULL
-                            THEN
-                                self.t_varchar2 := self.t_varchar2 || p_val;
-                            ELSE
-                                self.t_varchar2 := self.t_varchar2 || ',' || p_val;
-                            END IF;
-                        ELSE
-                            IF self.t_clob IS NULL
-                            THEN
-                                DBMS_LOB.createtemporary (self.t_clob, TRUE, DBMS_LOB.call);
-                                DBMS_LOB.writeappend (self.t_clob,
-                                                      LENGTH (self.t_varchar2),
-                                                      self.t_varchar2);
-                            ELSE
-                                DBMS_LOB.writeappend (self.t_clob,
-                                                      LENGTH (self.t_varchar2) + 1,
-                                                      ',' || self.t_varchar2);
-                            END IF;
+            STATIC FUNCTION odciaggregateinitialize (sctx IN OUT listagg_clob_t)
+            RETURN NUMBER
+            IS
+            BEGIN
+            sctx := listagg_clob_t (NULL, NULL);
+            RETURN odciconst.success;
+            END;
+            member function odciaggregateiterate
+            ( self in out listagg_clob_t
+            , a_val varchar2
+            )
+            return number
+            is
+            procedure add_val( p_val varchar2 )
+            is
+            begin
+            if nvl( lengthb( self.t_varchar2 ), 0 ) + lengthb( p_val ) &lt;= 4000
+            THEN
+            IF self.t_varchar2 IS NULL
+            THEN
+            self.t_varchar2 := self.t_varchar2 || p_val;
+            ELSE
+            self.t_varchar2 := self.t_varchar2 || ',' || p_val;
+            END IF;
+            ELSE
+            IF self.t_clob IS NULL
+            THEN
+            DBMS_LOB.createtemporary (self.t_clob, TRUE, DBMS_LOB.call);
+            DBMS_LOB.writeappend (self.t_clob,
+            LENGTH (self.t_varchar2),
+            self.t_varchar2);
+            ELSE
+            DBMS_LOB.writeappend (self.t_clob,
+            LENGTH (self.t_varchar2) + 1,
+            ',' || self.t_varchar2);
+            END IF;
 
-                            self.t_varchar2 := p_val;
-                        END IF;
-                    END;
-                BEGIN
-                    add_val (a_val);
-                    RETURN odciconst.success;
-                END;
+            self.t_varchar2 := p_val;
+            END IF;
+            END;
+            BEGIN
+            add_val (a_val);
+            RETURN odciconst.success;
+            END;
 
-                MEMBER FUNCTION odciaggregateterminate (self          IN OUT listagg_clob_t,
-                                                        returnvalue      OUT CLOB,
-                                                        flags         IN     NUMBER)
-                    RETURN NUMBER
-                    IS
-                BEGIN
-                    IF self.t_clob IS NULL
-                    THEN
-                        DBMS_LOB.createtemporary (self.t_clob, TRUE, DBMS_LOB.call);
+            MEMBER FUNCTION odciaggregateterminate (self          IN OUT listagg_clob_t,
+            returnvalue      OUT CLOB,
+            flags         IN     NUMBER)
+            RETURN NUMBER
+            IS
+            BEGIN
+            IF self.t_clob IS NULL
+            THEN
+            DBMS_LOB.createtemporary (self.t_clob, TRUE, DBMS_LOB.call);
 
-                        IF self.t_varchar2 IS NOT NULL
-                        THEN
-                            DBMS_LOB.writeappend (self.t_clob,
-                                                  LENGTH (self.t_varchar2) ,
-                                                  self.t_varchar2);
-                        END IF;
-                    ELSE
-                        IF self.t_varchar2 IS NOT NULL
-                        THEN
-                            DBMS_LOB.writeappend (self.t_clob,
-                                                  LENGTH (self.t_varchar2) + 1,
-                                                  ',' || self.t_varchar2);
-                        END IF;
-                    END IF;
+            IF self.t_varchar2 IS NOT NULL
+            THEN
+            DBMS_LOB.writeappend (self.t_clob,
+            LENGTH (self.t_varchar2) ,
+            self.t_varchar2);
+            END IF;
+            ELSE
+            IF self.t_varchar2 IS NOT NULL
+            THEN
+            DBMS_LOB.writeappend (self.t_clob,
+            LENGTH (self.t_varchar2) + 1,
+            ',' || self.t_varchar2);
+            END IF;
+            END IF;
 
-                    returnvalue := self.t_clob;
-                    RETURN odciconst.success;
-                END;
+            returnvalue := self.t_clob;
+            RETURN odciconst.success;
+            END;
 
-                MEMBER FUNCTION odciaggregatemerge (self   IN OUT listagg_clob_t,
-                                                    ctx2   IN OUT listagg_clob_t)
-                    RETURN NUMBER
-                    IS
-                BEGIN
-                    IF self.t_clob IS NULL
-                    THEN
-                        DBMS_LOB.createtemporary (self.t_clob, TRUE, DBMS_LOB.call);
-                    END IF;
+            MEMBER FUNCTION odciaggregatemerge (self   IN OUT listagg_clob_t,
+            ctx2   IN OUT listagg_clob_t)
+            RETURN NUMBER
+            IS
+            BEGIN
+            IF self.t_clob IS NULL
+            THEN
+            DBMS_LOB.createtemporary (self.t_clob, TRUE, DBMS_LOB.call);
+            END IF;
 
-                    IF self.t_varchar2 IS NOT NULL
-                    THEN
-                        DBMS_LOB.writeappend (self.t_clob,
-                                              LENGTH (self.t_varchar2),
-                                              self.t_varchar2);
-                    END IF;
+            IF self.t_varchar2 IS NOT NULL
+            THEN
+            DBMS_LOB.writeappend (self.t_clob,
+            LENGTH (self.t_varchar2),
+            self.t_varchar2);
+            END IF;
 
-                    IF ctx2.t_clob IS NOT NULL
-                    THEN
-                        DBMS_LOB.append (self.t_clob, ctx2.t_clob);
-                        DBMS_LOB.freetemporary (ctx2.t_clob);
-                    END IF;
+            IF ctx2.t_clob IS NOT NULL
+            THEN
+            DBMS_LOB.append (self.t_clob, ctx2.t_clob);
+            DBMS_LOB.freetemporary (ctx2.t_clob);
+            END IF;
 
-                    IF ctx2.t_varchar2 IS NOT NULL
-                    THEN
-                        DBMS_LOB.writeappend (self.t_clob,
-                                              LENGTH (ctx2.t_varchar2),
-                                              ctx2.t_varchar2);
-                        ctx2.t_varchar2 := NULL;
-                    END IF;
+            IF ctx2.t_varchar2 IS NOT NULL
+            THEN
+            DBMS_LOB.writeappend (self.t_clob,
+            LENGTH (ctx2.t_varchar2),
+            ctx2.t_varchar2);
+            ctx2.t_varchar2 := NULL;
+            END IF;
 
-                    RETURN odciconst.success;
-                END;
+            RETURN odciconst.success;
+            END;
             END;
         </createProcedure>
         <createProcedure>
             create or replace function listagg_clob( agg varchar2 )
-                RETURN CLOB
-                PARALLEL_ENABLE
-                AGGREGATE USING listagg_clob_t;
+            RETURN CLOB
+            PARALLEL_ENABLE
+            AGGREGATE USING listagg_clob_t;
         </createProcedure>
     </changeSet>
 
@@ -14291,8 +14291,8 @@
         <addPrimaryKey constraintName="pk_adm_endpoint_path_parameter" tableName="adm_endpoint_path_parameter" columnNames="endpoint_id,script_parameter"/>
         <sql>
             ALTER TABLE adm_endpoint_path_parameter
-                ADD CONSTRAINT adm_endpoint_path_parameter_pos_gt_zero
-                    CHECK (position >= 0);
+            ADD CONSTRAINT adm_endpoint_path_parameter_pos_gt_zero
+            CHECK (position >= 0);
         </sql>
 
         <createTable tableName="adm_endpoint_parameters">
@@ -20049,14 +20049,14 @@
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-func-999" dbms="postgresql">
         <sql splitStatements="false" stripComments="false"><![CDATA[
-            CREATE OR REPLACE FUNCTION ${db.schema.adapted}fn_unaccent(str TEXT) RETURNS TEXT AS $$
-            BEGIN
+       CREATE OR REPLACE FUNCTION ${db.schema.adapted}fn_unaccent(str TEXT) RETURNS TEXT AS $$
+             BEGIN
                 RETURN  translate($1,
-                                  'çÇâàÂÀéèêÉÈÊîÎûÛôÔ',
-                                  'cCaaAAeeeEEEiIuUoO');
+                                 'çÇâàÂÀéèêÉÈÊîÎûÛôÔ',
+                                 'cCaaAAeeeEEEiIuUoO');
             END;
             $$ LANGUAGE plpgsql;
-            ]]></sql>
+        ]]></sql>
     </changeSet>
 
     <changeSet author="AndriusKarpavicius"  id="rebuild_pg_audit_functions" dbms="postgresql">
@@ -20065,12 +20065,12 @@
             AS $$
 
             SELECT
-                COALESCE(json_object_agg(key, value), '{}')::jsonb
+            COALESCE(json_object_agg(key, value), '{}')::jsonb
             FROM
-                jsonb_each(arg1)
+            jsonb_each(arg1)
             WHERE
-                ((arg1 -> key &lt;&gt; arg2 -> key OR arg2 -> key IS NULL)
-                    and key NOT IN ('version','created', 'updated', 'creator', 'updater') AND (retainOnlyFields ='' or position(','||key||',' IN ','||retainOnlyFields ||',') >0)) OR (preserveField &lt;&gt; '' and key = preserveField)
+            ((arg1 -> key &lt;&gt; arg2 -> key OR arg2 -> key IS NULL)
+            and key NOT IN ('version','created', 'updated', 'creator', 'updater') AND (retainOnlyFields ='' or position(','||key||',' IN ','||retainOnlyFields ||',') >0)) OR (preserveField &lt;&gt; '' and key = preserveField)
 
             $$ LANGUAGE SQL;
         </createProcedure>
@@ -20079,143 +20079,143 @@
             AS $$
 
             SELECT
-                COALESCE(json_object_agg(key, value), '{}')::jsonb
+            COALESCE(json_object_agg(key, value), '{}')::jsonb
             FROM
-                jsonb_each(arg1)
+            jsonb_each(arg1)
             WHERE
-                value &lt;&gt; 'null' and value &lt;&gt; '{}' and key NOT IN ('version','created', 'updated', 'creator', 'updater') AND ((retainOnlyFields ='' or position(','||key||',' IN ','||retainOnlyFields ||',') >0)  OR (preserveField &lt;&gt; '' and key = preserveField))
+            value &lt;&gt; 'null' and value &lt;&gt; '{}' and key NOT IN ('version','created', 'updated', 'creator', 'updater') AND ((retainOnlyFields ='' or position(','||key||',' IN ','||retainOnlyFields ||',') >0)  OR (preserveField &lt;&gt; '' and key = preserveField))
 
             $$ LANGUAGE SQL;
         </createProcedure>
         <createProcedure>
             CREATE OR REPLACE FUNCTION audit_data_log_trigger_func()
-                RETURNS trigger AS $body$
+            RETURNS trigger AS $body$
 
             DECLARE
-                audit_info varchar(400);
-                audit_info_array text[];
-                db_user varchar(100);
-                origin varchar(15);
-                origin_name varchar(250);
-                data_old jsonb;
-                data_new jsonb;
-                data_tmp jsonb;
-                ref_id bigint;
-                ref_table varchar(60);
-                save boolean;
+            audit_info varchar(400);
+            audit_info_array text[];
+            db_user varchar(100);
+            origin varchar(15);
+            origin_name varchar(250);
+            data_old jsonb;
+            data_new jsonb;
+            data_tmp jsonb;
+            ref_id bigint;
+            ref_table varchar(60);
+            save boolean;
             BEGIN
 
-                save := true;
+            save := true;
 
-                audit_info := current_setting('var.opencell_audit_info', true);
-                if (audit_info IS NOT NULL) then
-                    if (audit_info &lt;&gt; '') then
-                        audit_info_array := string_to_array(audit_info, '~~');
-                        db_user := audit_info_array[1];
-                        origin := audit_info_array[2];
-                        origin_name := audit_info_array[3];
-                    else
-                        origin :='GUI';
-                    end if;
-                else
-                    select current_user into db_user;
-                    origin :='DB';
-                end if;
+            audit_info := current_setting('var.opencell_audit_info', true);
+            if (audit_info IS NOT NULL) then
+            if (audit_info &lt;&gt; '') then
+            audit_info_array := string_to_array(audit_info, '~~');
+            db_user := audit_info_array[1];
+            origin := audit_info_array[2];
+            origin_name := audit_info_array[3];
+            else
+            origin :='GUI';
+            end if;
+            else
+            select current_user into db_user;
+            origin :='DB';
+            end if;
 
-                if (TG_OP = 'INSERT') then
-                    data_new := to_jsonb(NEW);
-                    if (data_new ? 'id') then
-                        ref_id :=NEW.id;
-                    end if;
-                    data_new := jsonb_removeNull(data_new, TG_ARGV[0], TG_ARGV[1]);
+            if (TG_OP = 'INSERT') then
+            data_new := to_jsonb(NEW);
+            if (data_new ? 'id') then
+            ref_id :=NEW.id;
+            end if;
+            data_new := jsonb_removeNull(data_new, TG_ARGV[0], TG_ARGV[1]);
 
-                    save := TG_ARGV[2]::bool or data_new &lt;&gt; '{}';
+            save := TG_ARGV[2]::bool or data_new &lt;&gt; '{}';
 
-                elseif (TG_OP = 'UPDATE') then
-                    data_old := to_jsonb(OLD);
-                    data_new := to_jsonb(NEW);
-                    if (data_new ? 'id') then
-                        ref_id :=NEW.id;
-                    end if;
-                    data_tmp := jsonb_minus(data_new, data_old, TG_ARGV[0], TG_ARGV[1]);
-                    data_old := jsonb_minus(data_old, data_new, TG_ARGV[0], TG_ARGV[1]);
-                    data_new := data_tmp;
+            elseif (TG_OP = 'UPDATE') then
+            data_old := to_jsonb(OLD);
+            data_new := to_jsonb(NEW);
+            if (data_new ? 'id') then
+            ref_id :=NEW.id;
+            end if;
+            data_tmp := jsonb_minus(data_new, data_old, TG_ARGV[0], TG_ARGV[1]);
+            data_old := jsonb_minus(data_old, data_new, TG_ARGV[0], TG_ARGV[1]);
+            data_new := data_tmp;
 
-                    save := TG_ARGV[2]::bool or data_new &lt;&gt; '{}';
+            save := TG_ARGV[2]::bool or data_new &lt;&gt; '{}';
 
-                else
-                    data_old := to_jsonb(OLD);
-                    if (data_old ? 'id') then
-                        ref_id :=OLD.id;
-                    end if;
-                    data_old := jsonb_removeNull(data_old, TG_ARGV[0], TG_ARGV[1]);
+            else
+            data_old := to_jsonb(OLD);
+            if (data_old ? 'id') then
+            ref_id :=OLD.id;
+            end if;
+            data_old := jsonb_removeNull(data_old, TG_ARGV[0], TG_ARGV[1]);
 
-                    save := TG_ARGV[2]::bool or data_old &lt;&gt; '{}';
+            save := TG_ARGV[2]::bool or data_old &lt;&gt; '{}';
 
-                end if;
+            end if;
 
-                if (save) then
-                    INSERT INTO audit_data_log_rec (
-                        id, created, tx_id, ref_table, ref_id, action, origin, origin_name, user_name, data_old, data_new )
-                    VALUES(
-                              nextval('audit_data_log_rec_seq'), statement_timestamp(), txid_current(), TG_TABLE_NAME, ref_id, TG_OP, origin, origin_name, db_user, data_old, data_new );
-                end if;
+            if (save) then
+            INSERT INTO audit_data_log_rec (
+            id, created, tx_id, ref_table, ref_id, action, origin, origin_name, user_name, data_old, data_new )
+            VALUES(
+            nextval('audit_data_log_rec_seq'), statement_timestamp(), txid_current(), TG_TABLE_NAME, ref_id, TG_OP, origin, origin_name, db_user, data_old, data_new );
+            end if;
 
-                if (TG_OP = 'DELETE') then
-                    RETURN OLD;
-                else
-                    RETURN NEW;
-                end if;
+            if (TG_OP = 'DELETE') then
+            RETURN OLD;
+            else
+            RETURN NEW;
+            end if;
             END;
             $body$
-                LANGUAGE plpgsql;
+            LANGUAGE plpgsql;
         </createProcedure>
         <createProcedure>
             CREATE OR REPLACE procedure proc_recreate_audit_data_trigger(table_name varchar, fields varchar, actions varchar, preserveField varchar, saveEvenDiffIsEmpty boolean)
-                language plpgsql
+            language plpgsql
             as $$
 
             DECLARE
-                trigger_name varchar(100);
-                trigger_actions varchar(1000);
+            trigger_name varchar(100);
+            trigger_actions varchar(1000);
             BEGIN
 
-                trigger_name :=table_name || '_audit_trigger';
+            trigger_name :=table_name || '_audit_trigger';
 
 
-                IF (actions IS NULL OR LOWER(actions) LIKE '%insert%') THEN
-                    trigger_actions := 'INSERT';
-                END IF;
+            IF (actions IS NULL OR LOWER(actions) LIKE '%insert%') THEN
+            trigger_actions := 'INSERT';
+            END IF;
 
-                IF (actions IS NULL OR LOWER(actions) LIKE '%update%') THEN
-                    trigger_actions := CASE WHEN trigger_actions IS NULL THEN '' ELSE trigger_actions || ' OR' END || ' UPDATE';
-                    if (fields IS NOT NULL) THEN
-                        trigger_actions := trigger_actions || ' of ' || fields;
-                    END IF;
-                END IF;
+            IF (actions IS NULL OR LOWER(actions) LIKE '%update%') THEN
+            trigger_actions := CASE WHEN trigger_actions IS NULL THEN '' ELSE trigger_actions || ' OR' END || ' UPDATE';
+            if (fields IS NOT NULL) THEN
+            trigger_actions := trigger_actions || ' of ' || fields;
+            END IF;
+            END IF;
 
 
-                IF (actions IS NULL OR LOWER(actions) LIKE '%delete%') THEN
-                    trigger_actions := CASE WHEN trigger_actions IS NULL THEN '' ELSE trigger_actions || ' OR' END || ' DELETE';
-                END IF;
+            IF (actions IS NULL OR LOWER(actions) LIKE '%delete%') THEN
+            trigger_actions := CASE WHEN trigger_actions IS NULL THEN '' ELSE trigger_actions || ' OR' END || ' DELETE';
+            END IF;
 
-                EXECUTE format ('DROP TRIGGER IF EXISTS %s ON %s', trigger_name, table_name );
-                EXECUTE format ('CREATE TRIGGER %I AFTER %s ON %s FOR EACH ROW EXECUTE FUNCTION audit_data_log_trigger_func(''%s'',''%s'',%I)', trigger_name, trigger_actions, table_name, preserveField, fields, saveEvenDiffIsEmpty::bool );
+            EXECUTE format ('DROP TRIGGER IF EXISTS %s ON %s', trigger_name, table_name );
+            EXECUTE format ('CREATE TRIGGER %I AFTER %s ON %s FOR EACH ROW EXECUTE FUNCTION audit_data_log_trigger_func(''%s'',''%s'',%I)', trigger_name, trigger_actions, table_name, preserveField, fields, saveEvenDiffIsEmpty::bool );
 
             END$$;
         </createProcedure>
         <createProcedure>
             CREATE OR REPLACE procedure proc_delete_audit_data_trigger(table_name varchar)
-                language plpgsql
+            language plpgsql
             as $$
 
             DECLARE
-                trigger_name varchar(100);
+            trigger_name varchar(100);
             BEGIN
 
-                trigger_name :=table_name || '_audit_trigger';
+            trigger_name :=table_name || '_audit_trigger';
 
-                EXECUTE format ('DROP TRIGGER IF EXISTS %s ON %s', trigger_name, table_name );
+            EXECUTE format ('DROP TRIGGER IF EXISTS %s ON %s', trigger_name, table_name );
 
             END$$;
         </createProcedure>
@@ -20230,40 +20230,40 @@
                 p_range_from      date
             ) RETURNS void LANGUAGE plpgsql AS $$
             DECLARE
-            l_partition_interval  integer;
+                l_partition_interval  integer;
                 l_range_to            date;
             BEGIN
 
-            SELECT wo_partition_range_months
-            INTO l_partition_interval
-            FROM finance_settings limit 1;
+                SELECT wo_partition_range_months
+                INTO l_partition_interval
+                FROM finance_settings limit 1;
 
-            IF l_partition_interval IS NULL THEN
+                IF l_partition_interval IS NULL THEN
                     RAISE EXCEPTION 'Partition interval setting not found for table: %', p_source_table;
-            END IF;
+                END IF;
 
                 l_range_to = p_range_from + l_partition_interval * interval '1 month';
 
                 IF EXISTS (SELECT 1 FROM tech_wo_partition_log t WHERE t.partition_name = p_partition_name) THEN
                     RAISE EXCEPTION 'The partition name [%] already exists', p_partition_name;
-            end if;
+                end if;
 
                 IF EXISTS (SELECT 1 FROM tech_wo_partition_log t WHERE (t.range_from, t.range_to) OVERLAPS (p_range_from, l_range_to)) THEN
                     RAISE EXCEPTION 'The period range [%, %[ already coverd by an existing partition', p_range_from, l_range_to;
-            end if;
+                end if;
 
-            execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
-                           p_partition_name,
-                           p_source_table,
-                           p_range_from,
-                           p_range_from,
-                           l_partition_interval);
+                execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
+                               p_partition_name,
+                               p_source_table,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
 
-            execute format('insert into tech_wo_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
-                           p_partition_name,
-                           p_range_from,
-                           p_range_from,
-                           l_partition_interval);
+                execute format('insert into tech_wo_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
+                               p_partition_name,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
             END;
             $$;
             ]]></sql>
@@ -20274,40 +20274,40 @@
                 p_range_from      date
             ) RETURNS void LANGUAGE plpgsql AS $$
             DECLARE
-            l_partition_interval  integer;
+                l_partition_interval  integer;
                 l_range_to            date;
             BEGIN
 
-            SELECT rt_partition_range_months
-            INTO l_partition_interval
-            FROM finance_settings limit 1;
+                SELECT rt_partition_range_months
+                INTO l_partition_interval
+                FROM finance_settings limit 1;
 
-            IF l_partition_interval IS NULL THEN
+                IF l_partition_interval IS NULL THEN
                     RAISE EXCEPTION 'Partition interval setting not found for table: %', p_source_table;
-            END IF;
+                END IF;
 
                 l_range_to = p_range_from + l_partition_interval * interval '1 month';
 
                 IF EXISTS (SELECT 1 FROM tech_rt_partition_log t WHERE t.partition_name = p_partition_name) THEN
                     RAISE EXCEPTION 'The partition name [%] already exists', p_partition_name;
-            end if;
+                end if;
 
                 IF EXISTS (SELECT 1 FROM tech_rt_partition_log t WHERE (t.range_from, t.range_to) OVERLAPS (p_range_from, l_range_to)) THEN
                     RAISE EXCEPTION 'The period range [%, %[ already coverd by an existing partition', p_range_from, l_range_to;
-            end if;
+                end if;
 
-            execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
-                           p_partition_name,
-                           p_source_table,
-                           p_range_from,
-                           p_range_from,
-                           l_partition_interval);
+                execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
+                               p_partition_name,
+                               p_source_table,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
 
-            execute format('insert into tech_rt_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
-                           p_partition_name,
-                           p_range_from,
-                           p_range_from,
-                           l_partition_interval);
+                execute format('insert into tech_rt_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
+                               p_partition_name,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
             END;
             $$;
             ]]></sql>
@@ -20318,40 +20318,40 @@
                 p_range_from      date
             ) RETURNS void LANGUAGE plpgsql AS $$
             DECLARE
-            l_partition_interval  integer;
+                l_partition_interval  integer;
                 l_range_to            date;
             BEGIN
 
-            SELECT edr_partition_range_months
-            INTO l_partition_interval
-            FROM finance_settings limit 1;
+                SELECT edr_partition_range_months
+                INTO l_partition_interval
+                FROM finance_settings limit 1;
 
-            IF l_partition_interval IS NULL THEN
+                IF l_partition_interval IS NULL THEN
                     RAISE EXCEPTION 'Partition interval setting not found for table: %', p_source_table;
-            END IF;
+                END IF;
 
                 l_range_to = p_range_from + l_partition_interval * interval '1 month';
 
                 IF EXISTS (SELECT 1 FROM tech_edr_partition_log t WHERE t.partition_name = p_partition_name) THEN
                     RAISE EXCEPTION 'The partition name [%] already exists', p_partition_name;
-            end if;
+                end if;
 
                 IF EXISTS (SELECT 1 FROM tech_edr_partition_log t WHERE (t.range_from, t.range_to) OVERLAPS (p_range_from, l_range_to)) THEN
                     RAISE EXCEPTION 'The period range [%, %[ already coverd by an existing partition', p_range_from, l_range_to;
-            end if;
+                end if;
 
-            execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
-                           p_partition_name,
-                           p_source_table,
-                           p_range_from,
-                           p_range_from,
-                           l_partition_interval);
+                execute format('create table %I partition of %I for values  FROM (%L) TO (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month'')',
+                               p_partition_name,
+                               p_source_table,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
 
-            execute format('insert into tech_edr_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
-                           p_partition_name,
-                           p_range_from,
-                           p_range_from,
-                           l_partition_interval);
+                execute format('insert into tech_edr_partition_log (partition_name, range_from, range_to) values (%L, %L, (to_date(%L, ''YYYY-MM-DD'') + %s * interval ''1 month''))',
+                               p_partition_name,
+                               p_range_from,
+                               p_range_from,
+                               l_partition_interval);
             END;
             $$;
             ]]></sql>
@@ -20365,21 +20365,21 @@
     <changeSet id="#INTRD-5777_2022-03-17_PG-rebuild" author="MohammedSTITANE" dbms="postgresql">
         <createView viewName="all_sequences_view" replaceIfExists="true">
             <![CDATA[
-            select nextVal(quote_ident(sequencename))::text as seq_val, sequencename as seq_code
-            FROM pg_catalog.pg_sequences
+                select nextVal(quote_ident(sequencename))::text as seq_val, sequencename as seq_code
+                FROM pg_catalog.pg_sequences
             ]]>
         </createView>
     </changeSet>
     <changeSet id="#INTRD-5777_2022-03-17_ORACLE-rebuild" author="MohammedSTITANE" dbms="oracle">
         <sql endDelimiter="/">
             CREATE OR REPLACE FUNCTION get_next_val (seq_name IN VARCHAR2) RETURN VARCHAR AS
-                v_seq_id number(38);
-                sql_stmt VARCHAR(2000);
+            v_seq_id number(38);
+            sql_stmt VARCHAR(2000);
             BEGIN
-                sql_stmt := 'select ' || seq_name || '.nextval from dual';
-                execute immediate sql_stmt into v_seq_id ;
-                DBMS_OUTPUT.PUT_LINE(seq_name || ' => ' || v_seq_id);
-                RETURN to_char(v_seq_id);
+            sql_stmt := 'select ' || seq_name || '.nextval from dual';
+            execute immediate sql_stmt into v_seq_id ;
+            DBMS_OUTPUT.PUT_LINE(seq_name || ' => ' || v_seq_id);
+            RETURN to_char(v_seq_id);
             END;
             /
         </sql>
@@ -20392,15 +20392,15 @@
         <createView viewName="billing_wallet_operation_period">
             select o.*, SUM(o.flag) over (partition by o.seller_id order by o.charge_instance_id ) as period
             from (select o.*, (case when (DATE(lag(o.end_Date) over (partition by o.seller_id order by o.charge_instance_id )) = DATE(o.start_date)) then 0 else 1 end) as flag
-                  FROM ${db.schema.adapted}billing_wallet_operation o WHERE o.status='OPEN' ) o
+            FROM ${db.schema.adapted}billing_wallet_operation o WHERE o.status='OPEN' ) o
         </createView>
     </changeSet>
     <changeSet author="MohamedSTITANE" id="rebuild-str-view-1-oracle" dbms="oracle">
         <createView viewName="billing_wallet_operation_period">
             select o.*, SUM(o.flag) over (partition by o.seller_id order by o.charge_instance_id ) as period
             from (select o.*, (case when (trunc(lag(o.end_Date) over (partition by o.seller_id order by o.charge_instance_id)) = trunc(o.start_date)) then 0 else 1 end) as flag
-                  FROM billing_wallet_operation o
-                  WHERE o.status = 'OPEN') o
+            FROM billing_wallet_operation o
+            WHERE o.status = 'OPEN') o
         </createView>
     </changeSet>
 
@@ -20890,7 +20890,7 @@
     <changeSet id="#INTRD-27683_update_dunning_actions_levels" author="zelmeliani" />
     <changeSet id="#INTRD-26795-20241210" author="zelmeliani" />
     <changeSet id="#INTRD-25643_20241206" author="anasseh" />
-    <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI">
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

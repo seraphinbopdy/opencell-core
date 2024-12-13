@@ -15665,7 +15665,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
     </changeSet>
 
     <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI">
-        <createTable tableName="billing_subscriptions_purchaseOrders">
+        <createTable tableName="billing_subscriptions_purchase_orders">
             <column name="subscription_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
@@ -15673,16 +15673,16 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <sql>CREATE UNIQUE INDEX billing_subscriptions_purchaseOrders_id_index ON billing_subscriptions_purchaseOrders (subscription_id, purchaseOrder_id)</sql>
-        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_subscriptions_purchaseOrders"
-                                 constraintName="fk_subscription_id_billing_subscriptions_purchaseOrders"
+        <sql>CREATE UNIQUE INDEX billing_subscriptions_purchase_orders_id_index ON billing_subscriptions_purchase_orders (subscription_id, purchaseOrder_id)</sql>
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_subscriptions_purchase_orders"
+                                 constraintName="fk_subscription_id_billing_subscriptions_purchase_orders"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_subscription"/>
-        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_subscriptions_purchaseOrders"
-                                 constraintName="fk_purchaseOrder_id_billing_subscriptions_purchaseOrders"
+        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_subscriptions_purchase_orders"
+                                 constraintName="fk_purchaseOrder_id_billing_subscriptions_purchase_orders"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
-        <createTable tableName="billing_invoiceLines_subscriptions">
+        <createTable tableName="billing_invoice_lines_subscriptions">
             <column name="invoiceLine_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
@@ -15690,16 +15690,16 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <sql>CREATE UNIQUE INDEX billing_invoiceLines_subscriptions_id_index ON billing_invoiceLines_subscriptions (invoiceLine_id, subscription_id)</sql>
-        <addForeignKeyConstraint baseColumnNames="invoiceLine_id" baseTableName="billing_invoiceLines_subscriptions"
-                                 constraintName="fk_purchaseOrder_id_billing_invoiceLines_subscriptions"
+        <sql>CREATE UNIQUE INDEX billing_invoice_lines_subscriptions_id_index ON billing_invoice_lines_subscriptions (invoiceLine_id, subscription_id)</sql>
+        <addForeignKeyConstraint baseColumnNames="invoiceLine_id" baseTableName="billing_invoice_lines_subscriptions"
+                                 constraintName="fk_purchaseOrder_id_billing_invoice_lines_subscriptions"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_invoice_line"/>
-        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_invoiceLines_subscriptions"
-                                 constraintName="fk_subscription_id_billing_invoiceLines_subscriptions"
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_invoice_lines_subscriptions"
+                                 constraintName="fk_subscription_id_billing_invoice_lines_subscriptions"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_subscription"/>
-        <createTable tableName="billing_invoices_purchaseOrders">
+        <createTable tableName="billing_invoices_purchase_orders">
             <column name="invoice_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
@@ -15707,13 +15707,13 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <sql>CREATE UNIQUE INDEX billing_invoices_purchaseOrders_id_index ON billing_invoices_purchaseOrders (invoice_id, purchaseOrder_id)</sql>
-        <addForeignKeyConstraint baseColumnNames="invoice_id" baseTableName="billing_invoices_purchaseOrders"
-                                 constraintName="fk_invoice_id_billing_invoices_purchaseOrders" deferrable="false"
+        <sql>CREATE UNIQUE INDEX billing_invoices_purchase_orders_id_index ON billing_invoices_purchase_orders (invoice_id, purchaseOrder_id)</sql>
+        <addForeignKeyConstraint baseColumnNames="invoice_id" baseTableName="billing_invoices_purchase_orders"
+                                 constraintName="fk_invoice_id_billing_invoices_purchase_orders" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_invoice"/>
-        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_invoices_purchaseOrders"
-                                 constraintName="fk_purchaseOrder_id_billing_invoices_purchaseOrders" deferrable="false"
+        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_invoices_purchase_orders"
+                                 constraintName="fk_purchaseOrder_id_billing_invoices_purchase_orders" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
     </changeSet>

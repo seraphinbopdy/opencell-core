@@ -542,7 +542,7 @@ public class InvoiceLine extends AuditableCFEntity {
 	/**
 	 * invoice lines which are related to the subscription.
 	 */
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "billing_invoiceLines_subscriptions", joinColumns = @JoinColumn(name = "invoiceLine_id"), inverseJoinColumns = @JoinColumn(name = "subscription_id"))
 	private Set<Subscription> subscriptions = new HashSet<>();
 

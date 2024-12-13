@@ -769,7 +769,7 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     /**
      * Purchase orders on invoice
      */
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "billing_invoices_purchaseOrders", joinColumns = @JoinColumn(name = "invoice_id"), inverseJoinColumns = @JoinColumn(name = "purchaseOrder_id"))
     private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
 

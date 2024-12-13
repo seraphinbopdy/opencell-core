@@ -79,13 +79,13 @@ public class PurchaseOrder extends BusinessEntity {
     /**
      * subscriptions which are related to the purchase order.
      */
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "purchaseOrders", cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "purchaseOrders")
     private Set<Subscription> subscriptions = new HashSet<>();
 
     /**
      * invoices which are related to the purchase order.
      */
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "purchaseOrders", cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "purchaseOrders")
     private Set<Invoice> invoices = new HashSet<>();
 
     public String getNumber() {

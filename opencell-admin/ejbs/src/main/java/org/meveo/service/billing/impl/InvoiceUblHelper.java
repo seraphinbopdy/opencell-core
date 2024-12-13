@@ -825,34 +825,7 @@ public class InvoiceUblHelper {
             partyLegalEntity.setRegistrationAddress(addressType);
         }
 
-        if (CollectionUtils.isNotEmpty(billingAccount.getRegistrationNumbers())) {
-            Optional<RegistrationNumber> registrationNumbers = billingAccount.getRegistrationNumbers().stream().filter(rgn -> rgn.getIsoIcd() != null && rgn.getIsoIcd().getCode().equals(SIREN)).findFirst();
-            if (registrationNumbers.isPresent()) {
-                CompanyID companyID = objectFactorycommonBasic.createCompanyID();
-                companyID.setSchemeID(SIREN);
-                companyID.setSchemeAgencyID(ISO_IEC_6523);
-                companyID.setValue(registrationNumbers.get().getRegistrationNo());
-                partyLegalEntity.setCompanyID(companyID);
-            }
-            registrationNumbers = billingAccount.getRegistrationNumbers().stream().filter(rgn -> rgn.getIsoIcd() != null && rgn.getIsoIcd().getCode().equals("0230")).findFirst();
-            if (registrationNumbers.isPresent()) {
-                EndpointID endpointID = objectFactorycommonBasic.createEndpointID();
-                endpointID.setSchemeID("0230");
-                endpointID.setSchemeAgencyID(ISO_IEC_6523);
-                endpointID.setValue(registrationNumbers.get().getRegistrationNo());
-                partyType.setEndpointID(endpointID);
-            }
-            registrationNumbers = billingAccount.getRegistrationNumbers().stream().filter(rgn -> rgn.getIsoIcd() != null && rgn.getIsoIcd().getCode().equals(SIRET)).findFirst();
-            if (registrationNumbers.isPresent()) {
-                PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
-                ID id = objectFactorycommonBasic.createID();
-                id.setSchemeID(SIRET);
-                id.setSchemeAgencyID(ISO_IEC_6523);
-                id.setValue(registrationNumbers.get().getRegistrationNo());
-                partyIdentification.setID(id);
-                partyType.getPartyIdentifications().add(partyIdentification);
-            }
-        }
+		addPartyIdentifications(billingAccount.getRegistrationNumbers(), partyType);
         partyType.getPartyLegalEntities().add(partyLegalEntity);
 
         // AccountingCustomerParty/Party/PartyLegalEntity/Contact
@@ -1065,36 +1038,7 @@ public class InvoiceUblHelper {
 			}
 			partyType.getPersons().add(personType);
 		}
-		if(CollectionUtils.isNotEmpty(seller.getRegistrationNumbers())){
-			for(RegistrationNumber registerNumber: seller.getRegistrationNumbers()) {
-				if(registerNumber.getIsoIcd() == null) continue;
-				if(SIRET.equalsIgnoreCase(registerNumber.getIsoIcd().getCode())){
-					PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
-					ID id = objectFactorycommonBasic.createID();
-					id.setSchemeID(SIRET);
-					id.setSchemeAgencyID(ISO_IEC_6523);
-					id.setValue(registerNumber.getRegistrationNo());
-					partyIdentification.setID(id);
-					partyType.getPartyIdentifications().add(partyIdentification);
-					continue;
-				}
-				if(registerNumber.getIsoIcd().getCode().equalsIgnoreCase("0230")){
-					EndpointID endpointID = objectFactorycommonBasic.createEndpointID();
-					endpointID.setSchemeID("0230");
-					endpointID.setSchemeAgencyID(ISO_IEC_6523);
-					endpointID.setValue(registerNumber.getRegistrationNo());
-					partyType.setEndpointID(endpointID);
-					continue;
-				}
-				if(SIREN.equalsIgnoreCase(registerNumber.getIsoIcd().getCode())){
-					CompanyID companyID = objectFactorycommonBasic.createCompanyID();
-					companyID.setSchemeID(SIREN);
-					companyID.setSchemeAgencyID(ISO_IEC_6523);
-					companyID.setValue(registerNumber.getRegistrationNo());
-					partyLegalEntity.setCompanyID(companyID);
-				}
-			}
-		}
+		addPartyIdentifications(seller.getRegistrationNumbers(), partyType);
 		if(seller.getLegalEntityType() != null) {
 			// AccountingSupplierParty/Party/PartyLegalEntity/CompanyLegalForm
 			CompanyLegalForm companyLegalForm = objectFactorycommonBasic.createCompanyLegalForm();
@@ -1668,5 +1612,22 @@ public class InvoiceUblHelper {
 
 }
 		return profileID;
+	}
+
+	private void addPartyIdentifications( List<RegistrationNumber> registrationNumbers, PartyType partyType) {
+		if (CollectionUtils.isNotEmpty(registrationNumbers)) {
+			for (RegistrationNumber registerNumber : registrationNumbers) {
+				if (registerNumber.getIsoIcd() == null) continue;
+				if (registerNumber.getIsoIcd().getCode() != null) {
+					PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
+					ID id = objectFactorycommonBasic.createID();
+					id.setSchemeID(registerNumber.getIsoIcd().getCode());
+					id.setSchemeAgencyID(ISO_IEC_6523);
+					id.setValue(registerNumber.getRegistrationNo());
+					partyIdentification.setID(id);
+					partyType.getPartyIdentifications().add(partyIdentification);
+				}
+			}
+		}
 	}
 }

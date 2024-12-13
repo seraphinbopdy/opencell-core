@@ -13,6 +13,7 @@ import static org.meveo.model.shared.DateUtils.addDaysToDate;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -67,6 +68,8 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
     private static final Logger log = LoggerFactory.getLogger(TriggerReminderDunningLevelJobBean.class);
 
     private static final String MESSAGE_LOGE = "dunning level instance with status ignored has been created for invoice {} - Dunning Level Instance id: {}";
+
+    private static final String MESSAGE_NOTHING_TO_BE_DONE = "Nothing to be done for invoice {} - due date: {} - today: {}";
 
     private static final String CUSTOMER_ACCOUNT = "customerAccount";
 
@@ -184,15 +187,20 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
             BillingAccount billingAccount = billingAccountService.findById(invoice.getBillingAccount().getId(), List.of(CUSTOMER_ACCOUNT));
             CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
 
-            if (simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today)) && !invoice.isReminderLevelTriggered()) {
-                DunningLevelInstance dunningLevelInstance = launchActions(customerAccount, invoice, policyLevel, dunningCollectionPlan);
-                markInvoiceAsReminderAlreadySent(invoice);
-                updateDunningLevelInstance(dunningLevelInstance);
-                processed = true;
-            } else {
-                // Create a new level instance with status ignored
-                createIgnoredDunningLevelInstance(customerAccount, invoice, policyLevel);
+            if(!invoice.isReminderLevelTriggered()) {
+                if (simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today))) {
+                    DunningLevelInstance dunningLevelInstance = launchActions(customerAccount, invoice, policyLevel, dunningCollectionPlan);
+                    markInvoiceAsReminderAlreadySent(invoice);
+                    updateDunningLevelInstance(dunningLevelInstance);
+                    processed = true;
+                } else if (!dateToCompare.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isAfter(today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+                    // Create a new level instance with status ignored
+                    createIgnoredDunningLevelInstance(customerAccount, invoice, policyLevel);
+                } else {
+                    log.info(MESSAGE_NOTHING_TO_BE_DONE, invoice.getId(), dateToCompare, today);
+                }
             }
+
         }
 
         return processed;
@@ -218,15 +226,21 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
             BillingAccount billingAccount = billingAccountService.findById(invoice.getBillingAccount().getId(), List.of(CUSTOMER_ACCOUNT));
             CustomerAccount customerAccount = customerAccountService.findById(billingAccount.getCustomerAccount().getId());
 
-            if ((simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today)) && !invoice.isReminderLevelTriggered()) && invoice.getNetToPay().compareTo(reminderLevel.getMinBalance()) > 0) {
-                DunningLevelInstance dunningLevelInstance = launchActions(customerAccount, invoice, policyLevel, dunningCollectionPlan);
-                markInvoiceAsReminderAlreadySent(invoice);
-                updateDunningLevelInstance(dunningLevelInstance);
-                processed = true;
-            } else {
-                // Create a new level instance with status ignored
-                createIgnoredDunningLevelInstance(customerAccount, invoice, policyLevel);
+            if(!invoice.isReminderLevelTriggered() && invoice.getNetToPay().compareTo(reminderLevel.getMinBalance()) > 0) {
+                if (simpleDateFormat.format(dateToCompare).equals(simpleDateFormat.format(today))) {
+                    DunningLevelInstance dunningLevelInstance = launchActions(customerAccount, invoice, policyLevel, dunningCollectionPlan);
+                    markInvoiceAsReminderAlreadySent(invoice);
+                    updateDunningLevelInstance(dunningLevelInstance);
+                    processed = true;
+                } if (!dateToCompare.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isAfter(today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+                    // Create a new level instance with status ignored
+                    createIgnoredDunningLevelInstance(customerAccount, invoice, policyLevel);
+                } else {
+                    log.info(MESSAGE_NOTHING_TO_BE_DONE, invoice.getId(), dateToCompare, today);
+                }
             }
+
+
         }
 
         return processed;

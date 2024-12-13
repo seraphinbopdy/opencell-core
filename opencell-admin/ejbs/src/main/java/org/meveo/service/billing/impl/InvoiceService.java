@@ -1809,9 +1809,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
         invoice.setPdfFilename(pdfFilename);
         String pdfFullFilename = getFullPdfFilePath(invoice, true);
         InputStream reportTemplate = null;
-        try {
-            generateInvoiceFile(billingTemplateName, resDir);
-            generateInvoiceAdjustmentFile(isInvoiceAdjustment, billingTemplateName, resDir);
+		try {
+			if (!isInvoiceAdjustment) {
+				generateInvoiceFile(billingTemplateName, resDir);
+			} else {
+				generateInvoiceAdjustmentFile(billingTemplateName, resDir);
+			}
 
             CustomerAccount customerAccount = billingAccount.getCustomerAccount();
             PaymentMethod preferedPaymentMethod = customerAccount.getPreferredPaymentMethod();

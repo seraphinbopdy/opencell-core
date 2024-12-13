@@ -598,7 +598,7 @@ public abstract class BaseApi {
                             throw new InvalidParameterException("Custom field " + cft.getCode() + " value " + stringValue + " length is longer then " + cft.getMaxValue() + " symbols");
 
                             // Validate String regExp
-                        } else if (cft.getRegExp() != null) {
+                        } else if (StringUtils.isNotBlank(cft.getRegExp())) {
                             try {
                                 Pattern pattern = Pattern.compile(cft.getRegExp());
                                 Matcher matcher = pattern.matcher(stringValue);
@@ -670,8 +670,8 @@ public abstract class BaseApi {
                         }
 
 
-                        if (StringUtils.isNotBlank(urlValue.getUrl()) && ((cft.getRegExp()!= null && !cft.getRegExp().isEmpty() && !urlValue.getUrl().matches(cft.getRegExp()))
-                                || (cft.getRegExp()== null && !urlValue.containsValidURL()))) {
+                        if (StringUtils.isNotBlank(urlValue.getUrl()) && ((StringUtils.isNotBlank(cft.getRegExp()) && !urlValue.getUrl().matches(cft.getRegExp()))
+                                || (StringUtils.isBlank(cft.getRegExp()) && !urlValue.containsValidURL()))) {
 
                             throw new InvalidParameterException("Wrong URL format. URL should match regular expression " + (cft.getRegExp() == null ? "": cft.getRegExp()) );
                         }

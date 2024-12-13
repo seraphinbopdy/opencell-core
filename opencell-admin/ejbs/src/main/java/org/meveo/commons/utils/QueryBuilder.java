@@ -170,10 +170,10 @@ public class QueryBuilder {
         String joinAlias = "";
         InnerJoin rootInnerJoin = null;
         InnerJoin subInnerJoin = null;
-        List<InnerJoin> lookForInnerJoin = new ArrayList<>(rootInnerJoins);
+        Set<InnerJoin> lookForInnerJoin = new HashSet<>(rootInnerJoins);
         for (AtomicInteger index = new AtomicInteger(); index.get() <= fields.length - 2; index.incrementAndGet()) {
             int i = index.get();
-            InnerJoin innerJoin = lookForInnerJoin.stream().filter(rij -> rij.getName().equals(fields[index.get()])).findFirst().orElse(new InnerJoin(fields[index.get()], i));
+            InnerJoin innerJoin = lookForInnerJoin.stream().filter(rij -> rij.getName().equals(fields[index.get()])).findFirst().orElseGet(() ->new InnerJoin(fields[index.get()]));
             if (i == 0) {
                 rootInnerJoin = innerJoin;
             } else {
@@ -209,7 +209,7 @@ public class QueryBuilder {
     }
 
     public QueryBuilder() {
-
+        GeneratorUtils.resetCounter();
     }
 
     /**
@@ -242,6 +242,7 @@ public class QueryBuilder {
     }
 
     private void initQueryBuilder(String sql, String alias) {
+        GeneratorUtils.resetCounter();
         q = new StringBuilder(sql);
         this.alias = alias;
         params = new HashMap<String, Object>();
@@ -260,6 +261,7 @@ public class QueryBuilder {
      * @param qb Query builder.
      */
     public QueryBuilder(QueryBuilder qb) {
+        GeneratorUtils.resetCounter();
         this.q = new StringBuilder(qb.q);
         this.alias = qb.alias;
         this.params = new HashMap<String, Object>(qb.params);

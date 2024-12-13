@@ -38,7 +38,7 @@
                                 <ul class="list-unstyled">
                                     <li class="button-item">
                                         <div class="btn-wrapper">
-                                            <i class="fa fa-plus text-blue"/>
+                                            <i class="pi pi-plus text-blue"/>
                                             <p:link styleClass="no-text-decoration"
                                                     outcome="mm_offerTemplates"
                                                     value=" #{messages['action.offer.create']}">
@@ -52,13 +52,13 @@
 
                         <p:panel id="top-details-container">
                             <ul class="list-unstyled">
-                                <li><i class="fa fa-check-square-o text-blue"/>
+                                <li><i class="pi pi-check-square-o text-blue"/>
                                     #{offerTemplateListBean.activeCount}
                                     #{messages['page.catalog.offersAreActive']}</li>
-                                <li><i class="fa fa-close text-blue"/>
+                                <li><i class="pi pi-close text-blue"/>
                                     #{offerTemplateListBean.inactiveCount}
                                     #{messages['page.catalog.offersAreDeactivated']}</li>
-                                <li><i class="fa fa-exclamation-circle text-blue"/>
+                                <li><i class="pi pi-exclamation-circle text-blue"/>
                                     #{offerTemplateListBean.almostExpiredCount}
                                     #{messages['page.catalog.offersWillExpireSoon']}</li>
                             </ul>
@@ -76,7 +76,7 @@
                                         columnClasses="Wid95, Wid5" columns="2">
                                     <p:inputText placeholder="#{messages['action.search']}"
                                                  value="#{offerTemplateListBean.filters['fullText']}"/>
-                                    <p:commandLink styleClass="Padding3 fa fa-search" update=":tabView"/>
+                                    <p:commandLink styleClass="Padding3 pi pi-search" update=":tabView"/>
                                 </h:panelGrid>
                                 <!-- / search-wrapper -->
                             </h:form>
@@ -86,7 +86,7 @@
                                      id="offerForExportPanel">
                                 <ul class="list-unstyled">
                                     <li class="text-left"><p:commandLink onclick="PF('exportableOffers').show();">
-                                        <i class="fa fa-share-square-o"/>
+                                        <i class="pi pi-share-square-o"/>
                                         <h:outputText
                                                 value=" #{offerTemplateListBean.selectedOfferTemplates.size()} #{messages['page.catalog.offersForExport']}"/>
                                     </p:commandLink></li>
@@ -95,7 +95,7 @@
                                             <p:commandLink
                                                     update="@([id$=exportParametersDialog])"
                                                     oncomplete="PF('exportParametersDialog').show()">
-                                                <i class="fa fa-play"/>
+                                                <i class="pi pi-play"/>
                                                 <h:outputText value=" #{messages['page.catalog.exportTo']}"/>
                                                 <f:setPropertyActionListener
                                                         target="#{entityExportImportBean.selectedExportTemplate}"
@@ -186,7 +186,7 @@
                                                 <ul class="list-inline">
                                                     <li><p:link id="viewLink"
                                                                 outcome="mm_offerTemplateDetail"
-                                                                styleClass="fa fa-search-plus no-text-decoration text-blue fa-2x" title="#{messages['action.view']}">
+                                                                styleClass="pi pi-search-plus no-text-decoration text-blue pi-2x" title="#{messages['action.view']}">
                                                         <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}"/>
                                                         <f:param name="objectId" value="#{entity.id}"/>
                                                         <f:param name="edit" value="false"/>
@@ -194,7 +194,7 @@
                                                         <f:param name="tab" value="0"/>
                                                     </p:link></li>
                                                     <li><p:link id="editLink"
-                                                                styleClass="fa fa-edit no-text-decoration text-blue fa-2x"
+                                                                styleClass="pi pi-edit no-text-decoration text-blue pi-2x"
                                                                 outcome="mm_offerTemplateDetail" title="#{messages['action.edit']}">
                                                         <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}"/>
                                                         <f:param name="objectId" value="#{entity.id}"/>
@@ -205,14 +205,14 @@
 <!--                                                     <li><p:commandLink id="duplicateLink" -->
 <!--                                                                        action="#{offerTemplateListBean.duplicateCatalogHierarchy()}" -->
 <!--                                                                        update=":tabView" -->
-<!--                                                                        styleClass="fa fa-copy fa-2x no-text-decoration text-blue"> -->
+<!--                                                                        styleClass="fa fa-copy pi-2x no-text-decoration text-blue"> -->
 <!--                                                         <f:setPropertyActionListener value="#{entity}" target="#{offerTemplateListBean.entity}"/> -->
 <!--                                                         <f:param name="tab" value="0"/> -->
 <!--                                                         <p:confirm header="#{messages['commons.duplicate']}" -->
 <!--                                                                    message="#{messages['commons.confirmDuplicate']}"/> -->
 <!--                                                     </p:commandLink></li> -->
                                                     <li><p:link id="newVersionLink" title="#{messages['commons.newVersion']}"
-                                                                styleClass="fa fa-plus no-text-decoration text-blue fa-2x"
+                                                                styleClass="pi pi-plus no-text-decoration text-blue pi-2x"
                                                                 outcome="mm_offerTemplateDetail">
                                                         <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}"/>
                                                         <f:param name="objectId" value="#{entity.id}"/>
@@ -223,7 +223,7 @@
 														</p:link></li>
                                                      <li><p:link id="duplicate"
                                                             title="#{messages['commons.duplicate']}"
-                                                            styleClass="fa fa-copy no-text-decoration text-blue fa-2x"
+                                                            styleClass="pi pi-copy no-text-decoration text-blue pi-2x"
                                                             outcome="mm_offerTemplateDetail">
                                                             <f:param name="cid"
                                                                 value="#{jakarta.enterprise.context.conversation.id}" />
@@ -234,13 +234,13 @@
                                                             <f:param name="duplicateOffer" value="true" />
                                                         </p:link></li>
                                                     <li><p:commandLink id="addToExportLink"
-                                                                       styleClass="fa fa-share-square-o text-blue fa-2x"
+                                                                       styleClass="pi pi-share-square-o text-blue pi-2x"
                                                                        update=":offerForExportPanel :dlgOfferExport"
                                                                        action="#{offerTemplateListBean.addForExport(entity)}" title="#{messages['action.addToExport']}">
                                                     </p:commandLink></li>
                                                     
                                                      <li><p:commandLink id="deleteLink"
-                                                                       styleClass="fa fa-trash-o text-blue fa-2x"
+                                                                       styleClass="pi pi-trash-o text-blue pi-2x"
                                                                        update=":tabView"
                                                                        action="#{offerTemplateListBean.deleteCatalogHierarchy(entity)}" title="#{messages['action.delete']}" rendered="#{!offerTemplateListBean.isUsedInSubscription(entity)}">
                                                         <f:param name="tab" value="0"/>
@@ -393,7 +393,7 @@
                             
                             <p:column headerText="#{messages['commons.actions']}">
                                 <p:link outcome="mm_offerTemplateDetail"
-                                        styleClass="Padding5 fa fa-search-plus no-text-decoration fa-2x text-blue" title="#{messages['action.view']}">
+                                        styleClass="Padding5 pi pi-search-plus no-text-decoration pi-2x text-blue" title="#{messages['action.view']}">
                                     <f:param name="cid"
                                              value="#{jakarta.enterprise.context.conversation.id}"/>
                                     <f:param name="objectId" value="#{entity.id}"></f:param>
@@ -402,7 +402,7 @@
                                     <f:param name="tab" value="1"></f:param>
                                 </p:link>
                                 <p:link
-                                        styleClass="Padding5 fa fa-edit no-text-decoration fa-2x text-blue"
+                                        styleClass="Padding5 pi pi-edit no-text-decoration pi-2x text-blue"
                                         outcome="mm_offerTemplateDetail" title="#{messages['action.edit']}">
                                     <f:param name="cid"
                                              value="#{jakarta.enterprise.context.conversation.id}"/>
@@ -414,7 +414,7 @@
 <!--                                 <p:commandLink action="#{offerTemplateListBean.duplicateCatalogHierarchy()}" -->
 <!--                                                update=":tabView" -->
 <!--                                                styleClass="Padding5" title="#{messages['commons.duplicate']}"> -->
-<!-- 									<i class="fa fa-copy no-text-decoration text-blue fa-2x" /> -->
+<!-- 									<i class="fa fa-copy no-text-decoration text-blue pi-2x" /> -->
 <!-- 									<f:setPropertyActionListener -->
 <!--                                             target="#{offerTemplateListBean.entity}" value="#{entity}"/> -->
 <!--                                     <f:param name="tab" value="1"></f:param> -->
@@ -422,7 +422,7 @@
 <!--                                                message="#{messages['commons.confirmDuplicate']}"/> -->
 <!--                                 </p:commandLink> -->
 								<p:link id="duplicate" title="#{messages['commons.duplicate']}"
-                                     styleClass="fa fa-copy no-text-decoration text-blue fa-2x" outcome="mm_offerTemplateDetail">
+                                     styleClass="pi pi-copy no-text-decoration text-blue pi-2x" outcome="mm_offerTemplateDetail">
                                      <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                                      <f:param name="objectId" value="#{entity.id}" />
                                      <f:param name="edit" value="true" />
@@ -434,7 +434,7 @@
                                         styleClass="Padding5"
                                         update=":offerForExportPanel :dlgOfferExport"
                                         action="#{offerTemplateListBean.addForExport(entity)}" title="#{messages['action.addToExport']}">
-                                        <i class="fa fa-share-square-o no-text-decoration fa-2x text-blue" />
+                                        <i class="pi pi-share-square-o no-text-decoration pi-2x text-blue" />
                                 </p:commandLink>
                             </p:column>
                         </hftl:dataList>

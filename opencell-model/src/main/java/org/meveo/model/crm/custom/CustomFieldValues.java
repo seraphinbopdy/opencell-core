@@ -44,6 +44,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -425,6 +426,7 @@ public class CustomFieldValues implements Cloneable, Serializable {
      * 
      * @return A map of values with key being custom field code.
      */
+    @JsonIgnore
     public Map<String, Object> getValues() {
 
         Map<String, Object> values = new HashMap<>();

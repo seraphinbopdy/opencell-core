@@ -36,12 +36,12 @@
                     </f:facet>
                     <p:column headerText="#{messages['fileExplorer.fileName']}" sortBy="#{file.name}">
                         <p:commandLink action="#{filesBean.setSelectedFolder(file.name)}" rendered="#{file.isDirectory()}" update=":fileExplorer" process="@this">
-                            <i class="fa fa-folder-o fa-2x"></i>
+                            <i class="pi pi-folder-o pi-2x"></i>
                             <p:spacer width="8" />
                             <h:outputText value='#{file.name}' />
                         </p:commandLink>
                         <p:commandLink action="#{filesBean.setSelectedFileName(file.name)}" rendered="#{!file.isDirectory()}" update=":fileExplorer" process="@this">
-                            <i class="fa fa-file-#{filesBean.getFileType(file.name)}-o fa-2x"></i>
+                            <i class="pi pi-file-#{filesBean.getFileType(file.name)}-o pi-2x"/>
                             <p:spacer width="8" />
                             <h:outputText value='#{file.name}' />
                         </p:commandLink>
@@ -55,7 +55,7 @@
                 </p:dataTable>
                 <p:panel rendered="#{filesBean.selectedFileName!=null}" id="fileManageForm">
          			#{filesBean.selectedFileName}
-					<p:commandButton value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down" ajax="false">
+					<p:commandButton value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down">
                         <p:fileDownload value="#{filesBean.selectedFile}" />
                         <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                     </p:commandButton>

@@ -28,7 +28,9 @@ import org.meveo.model.customEntities.CustomEntityInstance;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -36,6 +38,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -86,6 +89,11 @@ public class JacksonUtil {
     public static String toString(Object value) {
         try {
             ObjectMapper om = OBJECT_MAPPER.get();
+
+            om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            om.setVisibility(PropertyAccessor.FIELD, Visibility.ANY); // AK added, so that in case of immutable classes, private fields, that do not have setters, are also serialized
+            om.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
+            om.configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true); // AK Do not change to false, as it will serialize all getXXX() methods, which might not be related to actual fields
             return om.writeValueAsString(value);
 
         } catch (JsonProcessingException e) {

@@ -53,6 +53,7 @@ import org.xml.sax.SAXException;
 
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -952,7 +953,7 @@ public class StorageFactory {
                 JasperExportManager.exportReportToPdfFile(jasperPrint, fileName);
             }
             catch (JRException e) {
-                log.error("failed to generate PDF file : {}", e.getMessage());
+                log.error("failed to generate PDF file : {}", e);
             }
         }
         else if (storageType.equalsIgnoreCase(S3)) {
@@ -964,7 +965,7 @@ public class StorageFactory {
                 JasperExportManager.exportReportToPdfStream(jasperPrint, outStream);
             }
             catch (IOException | JRException e) {
-                log.error("error message : {}", e.getMessage());
+                log.error("error message : {}", e);
             }
         }
     }
@@ -977,18 +978,22 @@ public class StorageFactory {
      * @return JRXmlDataSource JRXmlDataSource object
      */
     public static JRXmlDataSource getJRXmlDataSource(File file) {
+        
+        DefaultJasperReportsContext context = DefaultJasperReportsContext.getInstance();
+        context.setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.jaxen.util.xml.JaxenXPathExecuterFactory");
+        
         if (storageType.equals(NFS)) {
             try {
                 return new JRXmlDataSource(file);
             } catch (JRException e) {
-                log.error("JRException : {}", e.getMessage());
+                log.error("JRException : {}", e);
             }
         }
         else if (storageType.equalsIgnoreCase(S3)) {
             try {
                 return new JRXmlDataSource(getInputStream(file));
             } catch (JRException e) {
-                log.error("JRException in getJRXmlDataSource : {}", e.getMessage());
+                log.error("JRException in getJRXmlDataSource : {}", e);
             }
         }
 

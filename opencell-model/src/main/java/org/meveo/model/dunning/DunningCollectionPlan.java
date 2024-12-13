@@ -4,7 +4,20 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.type.NumericBooleanConverter;
@@ -189,7 +202,7 @@ public class DunningCollectionPlan extends AuditableEntity {
     /**
      * The related invoices for CUSTOMER_LEVEL
      */
-    @OneToMany(mappedBy = "collectionPlan", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "collectionPlan", fetch = FetchType.LAZY)
     private List<Invoice> relatedInvoices;
 
     public DunningCollectionPlan() {};

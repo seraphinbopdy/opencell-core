@@ -23,6 +23,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.meveo.model.crm.custom.CustomFieldValues;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
@@ -72,7 +73,7 @@ public abstract class CFEntity extends BaseEntity implements ICustomFieldEntity 
     /**
      * Custom field values in JSON format
      */
-    @JsonProperty("cfValues")
+    @JsonIgnore
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "cf_values", columnDefinition = "jsonb")
     protected String cfValuesAsJson;
@@ -80,6 +81,7 @@ public abstract class CFEntity extends BaseEntity implements ICustomFieldEntity 
     /**
      * Custom field values holder for easier manipulation
      */
+    @JsonProperty("cfValues")
     @Transient
     private CustomFieldValues cfValues;
 
@@ -119,6 +121,7 @@ public abstract class CFEntity extends BaseEntity implements ICustomFieldEntity 
         this.cfValuesAsJson = cfValuesAsJson;
     }
 
+    @JsonIgnore
     @Override
     public CustomFieldValues getCFValuesTransient() {
         return cfValues;

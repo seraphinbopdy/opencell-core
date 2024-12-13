@@ -126,7 +126,7 @@ public class JsonGenericMapperTest {
         fields.addAll(Arrays.asList("code", "id", "defaultLevel", "addressbook", "addressbook.id"));
         String expected = jsonGenericMapper.toJson(fields, Customer.class, ImmutableGenericPaginatedResource.builder().addData(param).total(1L).limit(100L).offset(0L).build(), null);
         // Then
-        assertThat(expected).isEqualTo("{\"data\":[{\"id\":55,\"defaultLevel\":true,\"addressbook\":{\"id\":55}}],\"limit\":100,\"offset\":0,\"total\":1}");
+        assertThat(expected).isEqualTo("{\"total\":1,\"limit\":100,\"offset\":0,\"data\":[{\"id\":55,\"defaultLevel\":true,\"addressbook\":{\"id\":55}}]}");
     }
 
     @Test
@@ -141,7 +141,7 @@ public class JsonGenericMapperTest {
         ImmutableGenericPaginatedResource immutableGenericPaginatedResource = ImmutableGenericPaginatedResource.builder().total(1l).limit(0l).offset(0l).addData(user).build();
         String userJson = jsonGenericMapper.toJson(fields, User.class, immutableGenericPaginatedResource, null);
         // Then
-        assertThat(userJson).isEqualTo("{\"data\":[{\"id\":55,\"userName\":\"flirtikit\"}],\"limit\":0,\"offset\":0,\"total\":1}");
+        assertThat(userJson).isEqualTo("{\"total\":1,\"limit\":0,\"offset\":0,\"data\":[{\"id\":55,\"userName\":\"flirtikit\"}]}");
 
     }
 
@@ -257,7 +257,7 @@ public class JsonGenericMapperTest {
         fields.addAll(Arrays.asList("channels"));
         String transform = jsonGenericMapper1.toJson(fields, offerTemplate.getClass(), immutableGenericPaginatedResource, null);
         assertThat(transform).isEqualTo(
-            "{\"data\":[{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]},{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]},{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]}],\"limit\":0,\"offset\":0,\"total\":3}");
+            "{\"total\":3,\"limit\":0,\"offset\":0,\"data\":[{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]},{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]},{\"channels\":[{\"id\":1},{\"id\":2},{\"id\":3}]}]}");
     }
 
     @Test

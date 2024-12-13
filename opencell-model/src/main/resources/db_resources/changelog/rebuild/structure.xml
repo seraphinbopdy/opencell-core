@@ -1640,8 +1640,7 @@
             </column>
         </createTable>
         <sql>insert into ${db.schema.adapted}adm_endpoint_seq values(1)</sql>
-
-        <createTable tableName="ar_pre_authorization_seq">
+		<createTable tableName="ar_pre_authorization_seq">
             <column name="next_val" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ar_pre_authorization_seq_pk" />
             </column>
@@ -14314,9 +14313,8 @@
             <column name="example" type="varchar(500)"/>
         </createTable>
         <addPrimaryKey constraintName="pk_adm_endpoint_parameters" tableName="adm_endpoint_parameters" columnNames="endpoint_id,script_parameter"/>
-
-    </changeSet>
-    <changeSet id="#INTRD-25643_20241206-rebuild" author="anasseh">
+	</changeSet>  
+	<changeSet id="#INTRD-25643_20241206-rebuild" author="anasseh">
         <createTable tableName="ar_pre_authorization">
             <column name="id" type="bigint" autoIncrement="${id.auto}">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pre_authorization_pkey" />
@@ -14329,17 +14327,16 @@
             <column name="status" type="varchar(20)"><constraints nullable="false"/></column>
             <column name="transaction_date" type="datetime"><constraints nullable="false" /></column>
             <column name="capture_date" type="datetime"><constraints nullable="true" /></column>
-            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>
-            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>
-            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>
-            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>
+            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>           
+            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>  
+            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>  
+            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>  
             <column name="error_detail" type="varchar(2000)"/>
             <column name="customer_account_id" type="bigint" />
             <column name="card_payment_method_id" type="bigint" ><constraints nullable="false" /></column>
-            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>
+            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>           
         </createTable>
-    </changeSet>
-
+    </changeSet>  
     <!-- end tables -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-def-val-1">
@@ -19662,14 +19659,14 @@
                 referencedTableName="ar_customer_account" referencedColumnNames="id"
                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
                 onUpdate="NO ACTION" />
-        <addForeignKeyConstraint
+		<addForeignKeyConstraint
                 baseTableName="ar_pre_authorization"
                 baseColumnNames="card_payment_method_id"
                 constraintName="card_payment_method_id_fk"
                 referencedTableName="ar_payment_token" referencedColumnNames="id"
                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
                 onUpdate="NO ACTION" />
-        <addForeignKeyConstraint
+		<addForeignKeyConstraint
                 baseTableName="ar_pre_authorization"
                 baseColumnNames="payment_gateway_id"
                 constraintName="payment_gateway_id_fk"

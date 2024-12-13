@@ -174,7 +174,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, DRAFT_INVOICES, null);
 			prevalidatedAutomaticPrevBRStatus = true;
 			invoiceService.applyligibleInvoiceForAdvancement(billingRun.getId());
-			invoiceService.linkInvoicesToSubscriptionsByBR(billingRun);
+			//invoiceService.linkInvoicesToSubscriptionsByBR(billingRun);
 		}
         if(billingRun.getStatus() == DRAFT_INVOICES && billingRun.getProcessType() == FULL_AUTOMATIC) {
 		    billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, POSTVALIDATED, null);

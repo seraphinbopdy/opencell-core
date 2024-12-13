@@ -239,6 +239,8 @@ public class InvoiceLineAggregationService implements Serializable {
             if (BILLINGACCOUNT != aggregationConfiguration.getType() || !aggregationConfiguration.isIgnoreSubscriptions()) {
                 fieldToFetch.add("subscription.id as subscription_id");
                 fieldToFetch.add("serviceInstance.id as service_instance_id");
+            } else {
+                fieldToFetch.add("string_agg_long(subscription.id) as subscription_ids");
             }
             if (aggregationConfiguration.getAdditionalAggregation() != null
                     && !aggregationConfiguration.getAdditionalAggregation().isEmpty()) {

@@ -141,6 +141,12 @@ import jakarta.validation.constraints.Size;
         @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
                 + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
                 + "	WHERE il.status = 'BILLED' and il.invoice_id=:invoiceId"),
+        @NamedNativeQuery(name = "Invoice.linkWithPurchaseOrdersByID", query = "INSERT INTO billing_invoices_purchase_orders (invoice_id, purchaseOrder_id) "
+                + "	SELECT DISTINCT il.invoice_id, po_sub.purchaseOrder_id FROM billing_rated_transaction rt "
+                + " INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
+                + " INNER JOIN billing_subscription sub ON sub.id = rt.subscription_id "
+                + " INNER JOIN billing_subscriptions_purchase_orders po_sub ON po_sub.subscription_id = sub.id "
+                + "	WHERE il.status = 'BILLED' and il.invoice_id=:invoiceId"),
         @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
                 + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
                 + "	WHERE il.status = 'BILLED' and il.billing_run_id=:billingRunId")
@@ -759,6 +765,13 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dunning_collection_plan_id")
     private DunningCollectionPlan collectionPlan;
+
+    /**
+     * Purchase orders on invoice
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "billing_invoices_purchase_orders", joinColumns = @JoinColumn(name = "invoice_id"), inverseJoinColumns = @JoinColumn(name = "purchaseOrder_id"))
+    private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
 
     public Invoice() {
     }
@@ -2034,5 +2047,22 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
 
     public void setCollectionPlan(DunningCollectionPlan collectionPlan) {
         this.collectionPlan = collectionPlan;
+    }
+
+    public Set<PurchaseOrder> getPurchaseOrders() {
+        return purchaseOrders;
+    }
+
+    public void setPurchaseOrders(Set<PurchaseOrder> purchaseOrders) {
+        this.purchaseOrders = purchaseOrders;
+    }
+
+    public void addPurchaseOrder(PurchaseOrder purchaseOrder) {
+        if (purchaseOrders == null) {
+            purchaseOrders = new HashSet<>();
+        }
+        if (purchaseOrder != null) {
+            purchaseOrders.add(purchaseOrder);
+        }
     }
 }

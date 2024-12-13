@@ -1,8 +1,13 @@
 package org.meveo.model.billing;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
@@ -69,6 +74,19 @@ public class PurchaseOrder extends BusinessEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "billing_account_id")
     private BillingAccount billingAccount;
+
+
+    /**
+     * subscriptions which are related to the purchase order.
+     */
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "purchaseOrders")
+    private Set<Subscription> subscriptions = new HashSet<>();
+
+    /**
+     * invoices which are related to the purchase order.
+     */
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "purchaseOrders")
+    private Set<Invoice> invoices = new HashSet<>();
 
     public String getNumber() {
         return number;
@@ -140,6 +158,22 @@ public class PurchaseOrder extends BusinessEntity {
 
     public void setDeliveryDate(Date deliveryDate) {
         this.deliveryDate = deliveryDate;
+    }
+
+    public Set<Subscription> getSubscriptions() {
+        return subscriptions;
+    }
+
+    public void setSubscriptions(Set<Subscription> subscriptions) {
+        this.subscriptions = subscriptions;
+    }
+
+    public Set<Invoice> getInvoices() {
+        return invoices;
+    }
+
+    public void setInvoices(Set<Invoice> invoices) {
+        this.invoices = invoices;
     }
 
     @Override

@@ -518,7 +518,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
      * Purchase orders on subscription
      */
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "billing_subscriptions_purchase_orders", joinColumns = @JoinColumn(name = "subscription_id"), inverseJoinColumns = @JoinColumn(name = "\"purchaseOrder_id\""))
+    @JoinTable(name = "billing_subscriptions_purchase_orders", joinColumns = @JoinColumn(name = "subscription_id"), inverseJoinColumns = @JoinColumn(name = "purchase_order_id"))
     private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
 
     /**

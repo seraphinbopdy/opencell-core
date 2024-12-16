@@ -14343,12 +14343,12 @@
             <column name="subscription_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="purchaseOrder_id" type="BIGINT">
+            <column name="purchase_order_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
         <createTable tableName="billing_invoice_lines_subscriptions">
-            <column name="invoiceLine_id" type="BIGINT">
+            <column name="invoice_line_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="subscription_id" type="BIGINT">
@@ -14359,7 +14359,7 @@
             <column name="invoice_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="purchaseOrder_id" type="BIGINT">
+            <column name="purchase_order_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -19706,12 +19706,12 @@
                                  constraintName="fk_subscription_id_billing_subscriptions_purchase_orders"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_subscription"/>
-        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_subscriptions_purchase_orders"
-                                 constraintName="fk_purchaseOrder_id_billing_subscriptions_purchase_orders"
+        <addForeignKeyConstraint baseColumnNames="purchase_order_id" baseTableName="billing_subscriptions_purchase_orders"
+                                 constraintName="fk_purchase_order_id_billing_subscriptions_purchase_orders"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
-    	<addForeignKeyConstraint baseColumnNames="invoiceLine_id" baseTableName="billing_invoice_lines_subscriptions"
-                                 constraintName="fk_purchaseOrder_id_billing_invoice_lines_subscriptions"
+    	<addForeignKeyConstraint baseColumnNames="invoice_line_id" baseTableName="billing_invoice_lines_subscriptions"
+                                 constraintName="fk_invoice_line_id_billing_invoice_lines_subscriptions"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_invoice_line"/>
         <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_invoice_lines_subscriptions"
@@ -19722,8 +19722,8 @@
                                  constraintName="fk_invoice_id_billing_invoices_purchase_orders" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_invoice"/>
-        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_invoices_purchase_orders"
-                                 constraintName="fk_purchaseOrder_id_billing_invoices_purchase_orders" deferrable="false"
+        <addForeignKeyConstraint baseColumnNames="purchase_order_id" baseTableName="billing_invoices_purchase_orders"
+                                 constraintName="fk_purchase_order_id_billing_invoices_purchase_orders" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
     </changeSet>
@@ -20092,9 +20092,9 @@
         <sql>CREATE INDEX CREATE INDEX cpq_ppl_ppVersion_index ON cpq_price_plan_matrix_line(ppm_version_id, priority, accuracy)</sql>
     </changeSet>
 	<changeSet id="#INTRD-5220_20241205-idx-rebuild" author="AbdellatifBARI">
-    	<sql>CREATE UNIQUE INDEX billing_subscriptions_purchase_orders_id_index ON billing_subscriptions_purchase_orders ("subscription_id", "purchaseOrder_id")</sql>
-        <sql>CREATE UNIQUE INDEX billing_invoice_lines_subscriptions_id_index ON billing_invoice_lines_subscriptions ("invoiceLine_id", "subscription_id")</sql>
-	    <sql>CREATE UNIQUE INDEX billing_invoices_purchase_orders_id_index ON billing_invoices_purchase_orders ("invoice_id", "purchaseOrder_id")</sql>
+    	<sql>CREATE UNIQUE INDEX billing_subscriptions_purchase_orders_id_index ON billing_subscriptions_purchase_orders ("subscription_id", "purchase_order_id")</sql>
+        <sql>CREATE UNIQUE INDEX billing_invoice_lines_subscriptions_id_index ON billing_invoice_lines_subscriptions ("invoice_line_id", "subscription_id")</sql>
+	    <sql>CREATE UNIQUE INDEX billing_invoices_purchase_orders_id_index ON billing_invoices_purchase_orders ("invoice_id", "purchase_order_id")</sql>
 	</changeSet>
 
     <!-- end index -->
@@ -20892,6 +20892,7 @@
     <changeSet id="#INTRD-26795-20241210" author="zelmeliani" />
     <changeSet id="#INTRD-25643_20241206" author="anasseh" />
     <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-5220_20241216" author="AbdellatifBARI" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

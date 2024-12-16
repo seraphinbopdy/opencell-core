@@ -192,6 +192,8 @@ public class FilesApi extends BaseApi {
         path = path.normalize();
         String prefix = getProviderRootDir().replace("./", "");
         if (!path.toString().contains(prefix)) {
+
+            log.error("AKK 1 path is {} prefix is {}", path, prefix);
             throw new EntityDoesNotExistsException(FILE_DOES_NOT_EXISTS + dir);
         }
         return dir;
@@ -414,20 +416,25 @@ public class FilesApi extends BaseApi {
      */
     public File checkAndGetExistingFile(String filePath) {
 
-        File javaXMlFormatFile = (filePath.contains(getProviderRootDir().replace("\\", "/"))) ?
-                new File(filePath) : new File(getProviderRootDir() + File.separator + normalizePath(filePath));
+        File javaXMlFormatFile = (filePath.contains(getProviderRootDir().replace("\\", "/"))) ? new File(filePath) : new File(getProviderRootDir() + File.separator + normalizePath(filePath));
+        log.debug("AKK javaXMlFormatFile is {}, filePath is {}", javaXMlFormatFile, filePath);
         if (StorageFactory.exists(javaXMlFormatFile)) {
             return javaXMlFormatFile;
         } else {
             String[] fileNameParts = filePath.split("\\.");
+
+            log.debug("AKK javaXMlFormatFile does not exist, filePath split length is {}", fileNameParts.length);
             if (fileNameParts.length > 2) {
                 File sqlXMlFormatFile = new File((".").concat(filePath.split("\\.")[1] + "_" + format("%04d", 0) + "." + filePath.split("\\.")[2]));
                 if (sqlXMlFormatFile.exists()) {
                     return sqlXMlFormatFile;
                 } else {
+
+                    log.error("AKK 2");
                     throw new BusinessApiException(FILE_DOES_NOT_EXISTS + javaXMlFormatFile.getPath());
                 }
             } else {
+                log.error("AKK 3");
                 throw new BusinessApiException(FILE_DOES_NOT_EXISTS + javaXMlFormatFile.getPath());
             }
         }

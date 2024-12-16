@@ -141,8 +141,8 @@ import jakarta.validation.constraints.Size;
         @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
                 + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
                 + "	WHERE il.status = 'BILLED' and il.invoice_id=:invoiceId"),
-        @NamedNativeQuery(name = "Invoice.linkWithPurchaseOrdersByID", query = "INSERT INTO billing_invoices_purchase_orders (invoice_id, purchaseOrder_id) "
-                + "	SELECT DISTINCT il.invoice_id, po_sub.purchaseOrder_id FROM billing_rated_transaction rt "
+        @NamedNativeQuery(name = "Invoice.linkWithPurchaseOrdersByID", query = "INSERT INTO billing_invoices_purchase_orders (invoice_id, \"purchaseOrder_id\") "
+                + "	SELECT DISTINCT il.invoice_id, po_sub.\"purchaseOrder_id\" FROM billing_rated_transaction rt "
                 + " INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
                 + " INNER JOIN billing_subscription sub ON sub.id = rt.subscription_id "
                 + " INNER JOIN billing_subscriptions_purchase_orders po_sub ON po_sub.subscription_id = sub.id "
@@ -770,7 +770,7 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
      * Purchase orders on invoice
      */
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "billing_invoices_purchase_orders", joinColumns = @JoinColumn(name = "invoice_id"), inverseJoinColumns = @JoinColumn(name = "purchaseOrder_id"))
+    @JoinTable(name = "billing_invoices_purchase_orders", joinColumns = @JoinColumn(name = "invoice_id"), inverseJoinColumns = @JoinColumn(name =  "\"purchaseOrder_id\""))
     private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
 
     public Invoice() {

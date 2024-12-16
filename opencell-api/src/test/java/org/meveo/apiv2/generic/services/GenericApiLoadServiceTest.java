@@ -135,5 +135,20 @@ public class GenericApiLoadServiceTest {
         String paginatedRecords = loadService.findPaginatedRecords(false, Seller.class, searchConfig, fetchFieldsSet, null, null, null, null);
         Assert.assertEquals("{\"total\":1,\"limit\":0,\"offset\":0,\"data\":[{\"AVG(id)\":5.0}]}", paginatedRecords);
     }
+    
+
+    @Test
+    public void return_cfValues_test(){
+        QueryBuilder queryBuilder = Mockito.mock(QueryBuilder.class);
+        PaginationConfiguration searchConfig = Mockito.mock(PaginationConfiguration.class);
+        Object[] objects= new Object[1];
+        objects[0]=new String[] {"5","dd","11","{\"CF1\": [{\"string\": \"wweeee\"}], \"CFlist\": [{\"listString\": [\"house\"]}], \"CF_OF_STRING\": [{\"string\": \"from CFT on OfferTemplate\"}]}"};
+        Mockito.when(nativePersistenceService.getAggregateQuery(Seller.class.getCanonicalName(), searchConfig, null)).thenReturn(queryBuilder);
+        Mockito.when(queryBuilder.find(entityManager)).thenReturn(Arrays.asList(objects));
+        fetchFieldsSet = new LinkedHashSet<>();
+        fetchFieldsSet.addAll(Arrays.asList("MAX(id)", "code", "field2", "cfValues"));
+        String paginatedRecords = loadService.findPaginatedRecords(false, Seller.class, searchConfig, fetchFieldsSet, null, null, null, null);
+        Assert.assertEquals("{\"total\":1,\"limit\":0,\"offset\":0,\"data\":[{\"MAX(id)\":\"5\",\"code\":\"dd\",\"field2\":\"11\",\"cfValues\":{\"valuesByCode\":{\"CF1\":[{\"priority\":0,\"value\":\"wweeee\",\"string\":\"wweeee\"}],\"CFlist\":[{\"priority\":0,\"value\":[\"house\"],\"listValue\":[\"house\"],\"listString\":[\"house\"]}],\"CF_OF_STRING\":[{\"priority\":0,\"value\":\"from CFT on OfferTemplate\",\"string\":\"from CFT on OfferTemplate\"}]}}}]}", paginatedRecords);
+    }
 }
 

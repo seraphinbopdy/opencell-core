@@ -728,7 +728,7 @@ public class CustomerTreeBean extends BaseBean<AccountEntity> {
         }
 
         public String getCurrencyIconClass() {
-            String iconClass = "fa fa-";
+            String iconClass = "pi pi-";
             if (CustomerTreeBean.CURRENCIES.contains(currency)) {
                 return iconClass + currency.toLowerCase();
             }

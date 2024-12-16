@@ -31,7 +31,7 @@
             <p:panel style="width: 16%">
                 <p:panel>
                     <div class="btn-wrapper">
-                        <i class="fa fa-plus text-blue"></i>
+                        <i class="pi pi-plus text-blue"/>
                         <p:link styleClass="no-text-decoration" outcome="mm_workflowDetail" value=" #{messages['mmTransition.addNew']}" disabled="#{wfTransitionBean.workflowOrder == null}">
                             <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
                             <f:param name="edit" value="true" />
@@ -72,7 +72,7 @@
                             <p:commandButton id="moveDownBtn" icon="pi pi-arrow-down" styleClass="no-text-decoration text-blue"
                                 action="#{wfTransitionBean.moveDownOperation(transition)}" update="transitions" ajax="true" />
                             <p:panel styleClass="clearLeft">
-                                <i class="fa fa-arrow-circle-right text-blue" style="font-size: 16px; padding: 10px 15px; font-weight: 300"></i>
+                                <i class="pi pi-arrow-circle-right text-blue" style="font-size: 16px; padding: 10px 15px; font-weight: 300"></i>
                             </p:panel>
                         </h:panelGroup>
                         <h:panelGroup layout="block" styleClass="col2">
@@ -109,7 +109,7 @@
 
             <p:panel styleClass="clearLeft" style="border-top: solid">
                 <p:panel styleClass="clearLeft">
-                    <i class="fa fa-compass fa-2x text-blue" style="font-size: 16px; padding: 10px 15px; font-weight: 300"></i>
+                    <i class="pi pi-compass pi-2x text-blue" style="font-size: 16px; padding: 10px 15px; font-weight: 300"></i>
                     <h:outputText value="#{wfTransitionBean.catchAll.description}" />
                 </p:panel>
                 <p:panel styleClass="clearLeft">

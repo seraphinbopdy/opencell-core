@@ -258,6 +258,10 @@ public class SubscriptionDto extends BusinessEntityDto {
      */
 	@Schema(description = "code of existing contract")
 	private String contractCode;
+
+    /** The purchase orders. */
+    @XmlElement()
+    private List<Long> purchaseOrders;
     
     /**
      * Instantiates a new subscription dto.
@@ -962,5 +966,13 @@ public class SubscriptionDto extends BusinessEntityDto {
      */
     public void setPriceListCode(String priceListCode) {
         this.priceListCode = priceListCode;
+    }
+
+    public List<Long> getPurchaseOrders() {
+        return purchaseOrders;
+    }
+
+    public void setPurchaseOrders(List<Long> purchaseOrders) {
+        this.purchaseOrders = purchaseOrders;
     }
 }

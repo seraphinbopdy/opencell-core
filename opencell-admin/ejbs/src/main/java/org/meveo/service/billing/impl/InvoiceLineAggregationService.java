@@ -207,7 +207,7 @@ public class InvoiceLineAggregationService implements Serializable {
             fieldToFetch = new ArrayList<>(
                 asList("id as rated_transaction_ids", "billingAccount.id as billing_account__id", "description as label", "quantity as quantity", unitAmount + " as unit_amount_without_tax",
                     "amountWithoutTax as sum_without_tax", "amountWithTax as sum_with_tax", "offerTemplate.id as offer_id", "serviceInstance.id as service_instance_id", "usageDate as usage_date",
-                    "startDate as start_date", "endDate as end_date", "orderNumber as order_number", "orderInfo.order.id as commercial_order_id", "orderInfo.order.id as order_id", "taxPercent as tax_percent",
+                    "startDate as start_date", "endDate as end_date", "orderNumber as order_number", "orderInfo.order.id as commercial_order_id", "taxPercent as tax_percent",
                     "tax.id as tax_id", "orderInfo.productVersion.id as product_version_id", "orderInfo.orderLot.id as order_lot_id", "chargeInstance.id as charge_instance_id", "accountingArticle.id as article_id",
                     "discountedRatedTransaction as discounted_ratedtransaction_id", "discountPlanType as discount_plan_type", "discountValue as discount_value", "subscription.id as subscription_id", "userAccount.id as user_account_id", "seller.id as seller_id"));
 
@@ -224,7 +224,6 @@ public class InvoiceLineAggregationService implements Serializable {
             if (ORDER == aggregationConfiguration.getType() || !aggregationConfiguration.isIgnoreOrders()) {
                 fieldToFetch.add("orderInfo.order.id as commercial_order_id");
                 fieldToFetch.add("orderNumber as order_number");
-                fieldToFetch.add("orderInfo.order.id as order_id");
             }
             
             if(!aggregationConfiguration.isIgnoreUserAccounts()) {
@@ -240,6 +239,8 @@ public class InvoiceLineAggregationService implements Serializable {
             if (BILLINGACCOUNT != aggregationConfiguration.getType() || !aggregationConfiguration.isIgnoreSubscriptions()) {
                 fieldToFetch.add("subscription.id as subscription_id");
                 fieldToFetch.add("serviceInstance.id as service_instance_id");
+            } else {
+                fieldToFetch.add("string_agg_long(subscription.id) as subscription_ids");
             }
             if (aggregationConfiguration.getAdditionalAggregation() != null
                     && !aggregationConfiguration.getAdditionalAggregation().isEmpty()) {

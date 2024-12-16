@@ -339,6 +339,7 @@ public class CustomFieldValue implements Serializable, Cloneable {
     /**
      * @return boolean value of isNewPeriod
      */
+    @JsonIgnore
     public boolean isNewPeriod() {
         return isNewPeriod;
     }

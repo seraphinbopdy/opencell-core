@@ -145,7 +145,7 @@ public class PriceListService extends BusinessService<PriceList> {
 	}
 
 	private void setQueryParams(PriceListCriteria pPriceListCriteria, TypedQuery<?> query) {
-		query.setParameter("activeStatus", List.of(ACTIVE)).setParameter("currentDate", new Date());
+		query.setParameter("activeStatus", ACTIVE).setParameter("currentDate", new Date());
 
 		if(pPriceListCriteria.getBrandId() != null) {
 			query.setParameter("brandId", pPriceListCriteria.getBrandId());

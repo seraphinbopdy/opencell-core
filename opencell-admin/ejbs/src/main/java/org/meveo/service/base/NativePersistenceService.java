@@ -1592,7 +1592,7 @@ public class NativePersistenceService extends BaseService {
 
     private Object extractString(Object value, Class targetClass, CustomFieldTemplate cft) {
         if (targetClass == String.class) {
-            if (!StringUtils.isBlank(cft.getRegExp())) {
+            if (StringUtils.isNotBlank(cft.getRegExp())) {
                 final Pattern pattern = Pattern.compile(cft.getRegExp());
                 if (!pattern.matcher((String) value).matches()) {
                     throw new ValidationException("Value of String " + value + " does not match for regexp " + pattern.toString());

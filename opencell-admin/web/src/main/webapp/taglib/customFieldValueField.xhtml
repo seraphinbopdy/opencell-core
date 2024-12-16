@@ -42,7 +42,7 @@
 				required="#{cft.valueRequired and !hasInheritedValue}"
 				rendered="#{edit and !disabled}" label="#{cft.description}"
 				size="30" maxlength="#{cft.maxValue}">
-				<c:if test="#{cft.regExp!=null}">
+				<c:if test="#{cft.regExp!=null and cft.regExp.length()>0}">
 					<f:validateRegex pattern="#{cft.regExp}" />
 				</c:if>
 			</p:password>
@@ -52,7 +52,7 @@
 				required="#{cft.valueRequired and !hasInheritedValue}"
 				rendered="#{edit and !disabled}" label="#{cft.description}"
 				size="30" maxlength="#{cft.maxValue}">
-				<c:if test="#{cft.regExp!=null}">
+				<c:if test="#{cft.regExp!=null and cft.regExp.length()>0}">
 					<f:validateRegex pattern="#{cft.regExp}" />
 				</c:if>
 			</p:inputText>

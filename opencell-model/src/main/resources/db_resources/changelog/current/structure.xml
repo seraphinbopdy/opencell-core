@@ -11012,6 +11012,7 @@ Your name and surname
     </changeSet>
 
     <changeSet id="INTRD-19464_20231204" author="TarikFA.">
+    	<validCheckSum>8:dc0e4ee87bd3b5ec3e8d2864f17fa0d8</validCheckSum>
         <insert tableName="meveo_job_instance">
             <column name="id" valueSequenceNext="meveo_job_instance_seq" />
             <column name="version" valueNumeric="1" />
@@ -15662,6 +15663,112 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
        <addColumn tableName="billing_invoice">
             <column name="dunning_collection_plan_id" type="bigint"  />
         </addColumn>
+    </changeSet>
+    
+    <changeSet id="#INTRD-25643_20241206" author="anasseh">
+	     <createSequence sequenceName="ar_pre_authorization_seq" startValue="1"/>
+        <createTable tableName="ar_pre_authorization">
+            <column name="id" type="bigint" autoIncrement="${id.auto}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pre_authorization_pkey" />
+            </column>
+            <column name="version" type="int4" />
+            <column name="created" type="datetime"/>
+            <column name="updated" type="datetime" />
+            <column name="creator" type="varchar(100)" />
+            <column name="updater" type="varchar(100)" />
+            <column name="status" type="varchar(20)"><constraints nullable="false"/></column>
+            <column name="transaction_date" type="datetime"><constraints nullable="false" /></column>
+            <column name="capture_date" type="datetime"><constraints nullable="true" /></column>
+            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>           
+            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>  
+            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>  
+            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>  
+            <column name="error_detail" type="varchar(2000)"/>
+            <column name="customer_account_id" type="bigint" />
+            <column name="card_payment_method_id" type="bigint" ><constraints nullable="false" /></column>
+            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>           
+        </createTable>
+   
+        <addForeignKeyConstraint
+                baseTableName="ar_pre_authorization"
+                baseColumnNames="customer_account_id"
+                constraintName="customer_account_id_fk"
+                referencedTableName="ar_customer_account" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+                baseTableName="ar_pre_authorization"
+                baseColumnNames="card_payment_method_id"
+                constraintName="card_payment_method_id_fk"
+                referencedTableName="ar_payment_token" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />  
+		<addForeignKeyConstraint
+                baseTableName="ar_pre_authorization"
+                baseColumnNames="payment_gateway_id"
+                constraintName="payment_gateway_id_fk"
+                referencedTableName="ar_payment_gateway" referencedColumnNames="id"
+                deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                onUpdate="NO ACTION" />   
+                
+         <dropColumn tableName="ar_payment_token">
+            <column name="pre_authorisation_id"></column>
+        </dropColumn>                                  
+    </changeSet>      
+    
+
+    <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI">
+        <createTable tableName="billing_subscriptions_purchase_orders">
+            <column name="subscription_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="purchaseOrder_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>CREATE UNIQUE INDEX billing_subscriptions_purchase_orders_id_index ON billing_subscriptions_purchase_orders ("subscription_id", "purchaseOrder_id")</sql>
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_subscriptions_purchase_orders"
+                                 constraintName="fk_subscription_id_billing_subscriptions_purchase_orders"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_subscription"/>
+        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_subscriptions_purchase_orders"
+                                 constraintName="fk_purchaseOrder_id_billing_subscriptions_purchase_orders"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
+        <createTable tableName="billing_invoice_lines_subscriptions">
+            <column name="invoiceLine_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subscription_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>CREATE UNIQUE INDEX billing_invoice_lines_subscriptions_id_index ON billing_invoice_lines_subscriptions ("invoiceLine_id", "subscription_id")</sql>
+        <addForeignKeyConstraint baseColumnNames="invoiceLine_id" baseTableName="billing_invoice_lines_subscriptions"
+                                 constraintName="fk_purchaseOrder_id_billing_invoice_lines_subscriptions"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_invoice_line"/>
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_invoice_lines_subscriptions"
+                                 constraintName="fk_subscription_id_billing_invoice_lines_subscriptions"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_subscription"/>
+        <createTable tableName="billing_invoices_purchase_orders">
+            <column name="invoice_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="purchaseOrder_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>CREATE UNIQUE INDEX billing_invoices_purchase_orders_id_index ON billing_invoices_purchase_orders ("invoice_id", "purchaseOrder_id")</sql>
+        <addForeignKeyConstraint baseColumnNames="invoice_id" baseTableName="billing_invoices_purchase_orders"
+                                 constraintName="fk_invoice_id_billing_invoices_purchase_orders" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_invoice"/>
+        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_invoices_purchase_orders"
+                                 constraintName="fk_purchaseOrder_id_billing_invoices_purchase_orders" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
     </changeSet>
 
 </databaseChangeLog>

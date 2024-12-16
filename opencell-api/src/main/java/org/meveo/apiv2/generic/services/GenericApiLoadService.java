@@ -31,10 +31,15 @@ import org.meveo.apiv2.generic.common.ExcelExportConfiguration;
 import org.meveo.apiv2.generic.core.mapper.JsonGenericMapper;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.IEntity;
+import org.meveo.model.persistence.CustomFieldJsonDataType;
 import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ejb.Stateless;
@@ -139,11 +144,27 @@ public class GenericApiLoadService {
 				.find(nativePersistenceService.getEntityManager()).size();
 	}
 	private Map<String, Object> addResultLine(List<Object> line, Iterator<String> iterator) {
-	    return line.stream()
-	            .flatMap(array -> array instanceof Object[] ? flatten((Object[])array) : Stream.of(array))
+	    
+	    List<Object> valueList = line.stream()
+                .flatMap(array -> array instanceof Object[] ? flatten((Object[])array) : Stream.of(array))
                 .map(l -> Objects.isNull(l) ? "" : l)
-	            .collect(toMap(x -> iterator.next(), Function.identity(), (existing, replacement) -> existing, LinkedHashMap::new));
-	}
+                .collect(Collectors.toList());
+
+        Map<String, Object> valueMap = new LinkedHashMap<>();
+
+        for (Object value : valueList) {
+            String fieldName = iterator.next();
+
+            if (fieldName.endsWith("cfValues")) {
+                value = CustomFieldJsonDataType.INSTANCE.fromString((String) value);
+            }
+
+            valueMap.put(fieldName, value);
+        }
+
+        return valueMap;
+    }
+	
     private static Stream<Object> flatten(Object[] array) {
         return Arrays.stream(array)
                 .flatMap(o -> o instanceof Object[]? flatten((Object[])o): Stream.of(o));
@@ -158,7 +179,12 @@ public class GenericApiLoadService {
     }
     
     private String serializeResults(Map<String, Object> results) {
+               
         ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY); // AK added, so that in case of immutable classes, private fields, that do not have setters, are also serialized
+        mapper.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
+        mapper.configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true); // AK Do not change to false, as it will serialize all getXXX() methods, which might not be related to actual fields
         try {
             return mapper.writeValueAsString(results);
         } catch (JsonProcessingException e) {

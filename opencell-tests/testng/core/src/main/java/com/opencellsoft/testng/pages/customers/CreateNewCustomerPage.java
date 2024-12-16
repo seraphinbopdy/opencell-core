@@ -27,7 +27,7 @@ public class CreateNewCustomerPage extends BasePage {
     /**
      * customer menu.
      */
-    @FindBy(css = ".nav .fa-users")
+    @FindBy(css = ".nav .pi-users")
     private WebElement customerMenu;
     
     /**

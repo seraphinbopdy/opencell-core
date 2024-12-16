@@ -53,6 +53,7 @@ import org.xml.sax.SAXException;
 
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -977,6 +978,10 @@ public class StorageFactory {
      * @return JRXmlDataSource JRXmlDataSource object
      */
     public static JRXmlDataSource getJRXmlDataSource(File file) {
+        
+        DefaultJasperReportsContext context = DefaultJasperReportsContext.getInstance();
+        context.setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.jaxen.util.xml.JaxenXPathExecuterFactory");
+        
         if (storageType.equals(NFS)) {
             try {
                 return new JRXmlDataSource(file);

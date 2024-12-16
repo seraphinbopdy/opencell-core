@@ -1106,8 +1106,8 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                     .collect(toList());
             ratedTransactionService.reopenRatedTransaction(ids);
         }
-        remove(invoiceLine);
-	}
+        delete(lineId);
+    }
 
     private void reduceDiscountAmounts(Invoice invoice, InvoiceLine invoiceLine) {
         if (invoiceLine.getDiscountPlan() != null
@@ -1986,4 +1986,10 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 		jobExecutionResult.addNbItemsCorrectlyProcessed(-errorsToCompute);
 	}
 
+    public void delete(Long lineId) {
+        getEntityManager()
+                .createNamedQuery("InvoiceLine.deleteInvoiceLine")
+                .setParameter("ilId", lineId)
+                .executeUpdate();
+    }
 }

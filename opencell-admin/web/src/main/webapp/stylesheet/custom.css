@@ -250,7 +250,12 @@ body {
 .ui-widget-header .ui-state-default:hover {
   box-shadow: none !important;
 }
-
+.ui-datatable .ui-datatable-data tr td {
+  padding: 0.4rem 1rem 0.4rem 1rem !important;
+}
+body .ui-widget, ui-button-text, ui-column-title {
+  font-size: 0.85rem;
+}
 input[type="submit"],
 .ui-button,
 .ui-datatable table .ui-button {
@@ -1285,7 +1290,11 @@ footer .footer-copyright {
 
 body .ui-inputfield { padding : 5px !important; }
 body .ui-button.ui-button-text-only .ui-button-text {
-  padding: .2rem 1rem;
+  padding: .5rem 1rem .5rem 1rem;
+}
+
+.ui-datatable-tablewrapper {
+  border-bottom: 1px #ddd solid;
 }
 #top-menu-cover div{
   color: #264676;

@@ -49,6 +49,7 @@ import org.meveo.model.billing.VatDateCodeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.CardPaymentMethod;
+import org.meveo.model.payments.CheckPaymentMethod;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.DDPaymentMethod;
 import org.meveo.model.payments.PaymentMethod;

@@ -15,6 +15,8 @@ import jakarta.annotation.Nullable;
 @Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableSimpleOneshotProductDto.class)
 public interface SimpleOneshotProductDto extends SimpleChargeProductDto {
+	
+	OneShotChargeTemplateTypeEnum getOneShotChargeTemplateType();
 
 	@Nullable
     @Schema(description = "Code of the price plan to be associated")

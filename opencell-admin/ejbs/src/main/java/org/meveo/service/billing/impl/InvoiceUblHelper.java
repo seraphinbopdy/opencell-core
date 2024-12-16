@@ -1121,32 +1121,22 @@ public class InvoiceUblHelper {
         final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null;
 		if(CollectionUtils.isNotEmpty(invoice.getInvoiceLines())){
 			invoice.getInvoiceLines().forEach(invoiceLine -> {
-				if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Discount".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
+				if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
 					return;
 				}
 				AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
 				ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
 				chargeIndicator.setValue(false);
 				allowanceCharge.setChargeIndicator(chargeIndicator);
+				
 				AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
+				allowanceChargeReasonCode.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getCode());
+				allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
+				
 				AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
-				if(invoiceLine.getDiscountPlanItem() != null) {
-					allowanceChargeReasonCode.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getCode());
-					allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
-					
-					allowanceChargeReason.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription());
-					allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
-				}else{
-					UntdidAllowanceCode allowanceCode = untdidAllowanceCodeService.getByCode("104");
-					if(allowanceCode == null) {
-						throw new EntityDoesNotExistsException(UntdidAllowanceCode.class, "104");
-					}
-					allowanceChargeReasonCode.setValue(allowanceCode.getCode());
-					allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
-					
-					allowanceChargeReason.setValue(allowanceCode.getDescription());
-					allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
-				}
+				allowanceChargeReason.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription());
+				allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
+			
 				Amount amount = objectFactorycommonBasic.createAmount();
 				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
 

@@ -15770,5 +15770,10 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
     </changeSet>
+    <changeSet id="#INTRD-5220_20241205" author="AndriusKarpavicius" failOnError="false">
+        <renameColumn tableName="billing_invoices_purchase_orders" oldColumnName="purchaseOrder_id" newColumnName="purchase_order_id"/>
+        <renameColumn tableName="billing_subscriptions_purchase_orders" oldColumnName="purchaseOrder_id" newColumnName="purchase_order_id"/>
+        <renameColumn tableName="billing_invoice_lines_subscriptions" oldColumnName="invoiceLine_id" newColumnName="invoice_line_id"/>
+    </changeSet>
 
 </databaseChangeLog>

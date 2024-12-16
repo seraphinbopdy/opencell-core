@@ -495,6 +495,17 @@ public class InvoiceUblHelper {
 			paymentMeansCode.setListName("Payment Means");
 			paymentMeansCode.setValue(paymentMethod.getPaymentMeans() != null ? paymentMethod.getPaymentMeans().getCode() : "59");
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
+			
+			
+		}
+		
+		//check
+		if(Hibernate.unproxy(paymentMethod) instanceof CheckPaymentMethod) {
+			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
+			payerFinancialAccountId.setValue("no IBAN");
+			FinancialAccountType payerFinancialAccount = objectFactoryCommonAggrement.createFinancialAccountType();
+			payerFinancialAccount.setID(payerFinancialAccountId);
+			paymentMeans.setPayerFinancialAccount(payerFinancialAccount);
 		}
 
 		// DirectDebit

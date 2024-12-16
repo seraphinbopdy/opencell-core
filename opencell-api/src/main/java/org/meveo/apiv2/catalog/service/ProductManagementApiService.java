@@ -8,6 +8,7 @@ import org.meveo.api.catalog.PricePlanMatrixApi;
 import org.meveo.api.catalog.PricePlanMatrixVersionApi;
 import org.meveo.api.catalog.RecurringChargeTemplateApi;
 import org.meveo.api.catalog.UsageChargeTemplateApi;
+import org.meveo.api.cpq.AttributeApi;
 import org.meveo.api.cpq.ProductApi;
 import org.meveo.api.dto.catalog.ChargeTemplateDto;
 import org.meveo.api.dto.catalog.OneShotChargeTemplateDto;
@@ -17,7 +18,12 @@ import org.meveo.api.dto.catalog.RecurringChargeTemplateDto;
 import org.meveo.api.dto.catalog.UsageChargeTemplateDto;
 import org.meveo.api.dto.cpq.ProductChargeTemplateMappingDto;
 import org.meveo.api.dto.cpq.ProductDto;
+import org.meveo.api.dto.cpq.ProductVersionAttributeDTO;
 import org.meveo.api.dto.cpq.ProductVersionDto;
+import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.api.exception.InvalidParameterException;
+import org.meveo.api.exception.MeveoApiException;
+import org.meveo.api.exception.MissingParameterException;
 import org.meveo.apiv2.catalog.SimpleChargeProductDto;
 import org.meveo.apiv2.catalog.SimpleOneshotProductDto;
 import org.meveo.apiv2.catalog.SimpleRecurrentProductDto;
@@ -37,7 +43,10 @@ import org.meveo.model.cpq.enums.VersionStatusEnum;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.ws.rs.NotFoundException;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Stateless
@@ -64,11 +73,14 @@ public class ProductManagementApiService extends BaseApi {
     @Inject
     private ProductApi productApi;
     
+    @Inject
+    private AttributeApi attributeApi;
+    
     @MeveoJpa
     @Inject
     private EntityManagerWrapper emWrapper; 
     
-    public ProductDto createProductSimpleOneShot(SimpleOneshotProductDto postData) {
+    public ProductDto createProductSimpleOneShot(SimpleOneshotProductDto postData) throws MissingParameterException, InvalidParameterException, MeveoApiException {
 
         if(StringUtils.isBlank(postData.getChargeCode()) && StringUtils.isBlank(postData.getProductCode())) {
             throw new BusinessException("Either chargeCode or productCode must be provided");
@@ -79,20 +91,43 @@ public class ProductManagementApiService extends BaseApi {
         EntityManager entityManager = emWrapper.getEntityManager();
         entityManager.flush();
 
-        PricePlanMatrixDto pricePlanMatrixDto = new PricePlanMatrixDto();
-        pricePlanMatrixDto.setCode("PPM_"+oneShotChargeTemplate.getCode());
-        pricePlanMatrixDto.setEventCode(oneShotChargeTemplate.getCode());
-        PricePlanMatrix createdPP = pricePlanMatrixApi.create(pricePlanMatrixDto);
-        entityManager.flush();
+        String pricePlanCode;
+        if (postData.getPricePlanCode() != null) {
+            // Duplicate existing price plan with new code as per spec
+            String newPricePlanCode = postData.getPricePlanCode() + "_" + oneShotChargeTemplate.getCode();
+            try {
+                pricePlanMatrixApi.duplicatePricePlan(postData.getPricePlanCode(), newPricePlanCode, 1, null);
+                pricePlanCode = newPricePlanCode;           
+                entityManager.flush();
+                
+                PricePlanMatrixDto pricePlanMatrixDto = pricePlanMatrixApi.find(pricePlanCode);
+                pricePlanMatrixDto.setEventCode(oneShotChargeTemplate.getCode());
+                pricePlanMatrixApi.update(pricePlanMatrixDto);
+            } catch (EntityDoesNotExistsException e) {
+                throw new NotFoundException("Price plan with code " + postData.getPricePlanCode() + " not found");
+            }
+        } else {
+            // Create new price plan as before
+            PricePlanMatrixDto pricePlanMatrixDto = new PricePlanMatrixDto();
+            pricePlanMatrixDto.setCode("PPM_" + oneShotChargeTemplate.getCode());
+            pricePlanMatrixDto.setEventCode(oneShotChargeTemplate.getCode());
+            PricePlanMatrix createdPP = pricePlanMatrixApi.create(pricePlanMatrixDto);
+            entityManager.flush();
 
-        PricePlanMatrixVersionDto pricePlanMatrixVersionDto = createPricePlanVersionDto(postData, pricePlanMatrixDto);
-        pricePlanMatrixVersionApi.create(pricePlanMatrixVersionDto);
-        entityManager.flush();
-        
-        
-        pricePlanMatrixVersionApi.updateProductVersionStatus(pricePlanMatrixDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
-        genericChargeTemplateApi.updateStatus(oneShotChargeTemplate.getCode(), ChargeTemplateStatusEnum.ACTIVE.name());
-        entityManager.flush();
+            PricePlanMatrixVersionDto pricePlanMatrixVersionDto = createPricePlanVersionDto(postData, pricePlanMatrixDto);
+            pricePlanMatrixVersionApi.create(pricePlanMatrixVersionDto);
+            entityManager.flush();
+            
+            pricePlanCode = pricePlanMatrixDto.getCode();
+        }
+
+        // Handle price publication based on publishPrice flag
+        if (postData.getPublishPrice() == null || (postData.getPublishPrice() !=null && postData.getPublishPrice())) {
+            pricePlanMatrixVersionApi.updateProductVersionStatus(pricePlanCode, 1, VersionStatusEnum.PUBLISHED);
+            entityManager.flush();
+            genericChargeTemplateApi.updateStatus(oneShotChargeTemplate.getCode(), ChargeTemplateStatusEnum.ACTIVE.name());
+            entityManager.flush();
+        }
 
         ProductDto productDto = new ProductDto();
         productDto.setCode(postData.getProductCode());
@@ -102,6 +137,20 @@ public class ProductManagementApiService extends BaseApi {
         productDto.getCurrentProductVersion().setProductCode(postData.getProductCode());
         productDto.getCurrentProductVersion().setStatus(VersionStatusEnum.DRAFT);
         productDto.getCurrentProductVersion().setShortDescription("Product " + postData.getProductCode());
+        
+        // Handle attributes if provided
+        if (postData.getAttributes() != null && !postData.getAttributes().isEmpty()) {
+            // Validate that all attributes exist
+            for (ProductVersionAttributeDTO attr : postData.getAttributes()) {
+                try {
+                    attributeApi.findByCode(attr.getAttributeCode());
+                } catch (EntityDoesNotExistsException e) {
+                    throw new NotFoundException("Attribute with code " + attr.getAttributeCode() + " not found");
+                }
+            }
+            productDto.getCurrentProductVersion().setProductAttributes(new HashSet<>(postData.getAttributes()));
+        }
+        
         productDto.setProductChargeTemplateMappingDto(new ArrayList<>());
         ProductChargeTemplateMappingDto mapping = new ProductChargeTemplateMappingDto();
         mapping.setChargeCode(oneShotChargeTemplate.getCode());
@@ -110,14 +159,20 @@ public class ProductManagementApiService extends BaseApi {
         ProductDto createdProduct = productApi.create(productDto);
         entityManager.flush();
         
-        productApi.UpdateProductVersionStatus(productDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
-        entityManager.flush();
-        productApi.updateStatus(productDto.getCode(), ProductStatusEnum.ACTIVE);
-        entityManager.flush();
+        if (postData.getPublishPrice() == null || postData.getPublishPrice()) {
+	        productApi.UpdateProductVersionStatus(productDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
+	        entityManager.flush();
+	        productApi.updateStatus(productDto.getCode(), ProductStatusEnum.ACTIVE);
+	        entityManager.flush();
+        }else {
+        	productApi.UpdateProductVersionStatus(productDto.getCode(), 1, VersionStatusEnum.DRAFT);
+            entityManager.flush();
+        }
 
         createdProduct = productApi.findByCode(createdProduct.getCode());
         return createdProduct;
     }
+
 
     public ProductDto createProductSimpleRecurrent(SimpleRecurrentProductDto postData) {
 
@@ -342,3 +397,4 @@ public class ProductManagementApiService extends BaseApi {
         
     }
 }
+

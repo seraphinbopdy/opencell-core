@@ -1813,7 +1813,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			if (!isInvoiceAdjustment) {
 				generateInvoiceFile(billingTemplateName, resDir);
 			} else {
-				generateInvoiceAdjustmentFile(billingTemplateName, resDir);
+				generateInvoiceAdjustmentFile(true, billingTemplateName, resDir);
 			}
 
             CustomerAccount customerAccount = billingAccount.getCustomerAccount();

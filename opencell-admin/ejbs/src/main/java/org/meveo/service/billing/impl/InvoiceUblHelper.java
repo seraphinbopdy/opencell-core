@@ -230,7 +230,7 @@ public class InvoiceUblHelper {
 		setPaymentTerms(invoice, invoiceXml, creditNote, invoice.getInvoiceType(), invoiceLanguageCode);
 		setAccountingSupplierParty(invoice.getSeller(), invoiceXml, creditNote, invoiceLanguageCode);
 		setAccountingCustomerParty(invoice.getBillingAccount(), invoiceXml, creditNote);
-		setPaymentMeans(invoice.getPaymentMethod(), invoiceXml, creditNote);
+		setPaymentMeans(invoice.getBillingAccount().getCustomerAccount().getPreferredPaymentMethod(), invoiceXml, creditNote);
 		String curreny = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode():null;
 		BigDecimal amountWithoutTax = invoice.getAmountWithoutTax();
 		BigDecimal amountWithTax = invoice.getAmountWithTax();
@@ -640,10 +640,10 @@ public class InvoiceUblHelper {
 		}
 
 		// PaymentMeans/PayeeFinancialAccount
-		if (StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())) {
+		if (bank.getBankCoordinates() != null) {
 			FinancialAccountType payerFinancialAccount = objectFactoryCommonAggrement.createFinancialAccountType();
 			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
-			payerFinancialAccountId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
+			payerFinancialAccountId.setValue(bank.getBankCoordinates().getIban());
 			payerFinancialAccount.setID(payerFinancialAccountId);
 			paymentMeans.setPayerFinancialAccount(payerFinancialAccount);
 		}

@@ -45,7 +45,7 @@ public class ArticleMappingLineService extends BusinessService<ArticleMappingLin
 	public List<ArticleMappingLine> findByProductAndChargeByIds(Long productId, Long chargeTemplateId,
 				   Long  offerId, String parameter1,
 				   String parameter2, String parameter3) {
-		QueryBuilder queryBuilder = new QueryBuilder(ArticleMappingLine.class, "am", Arrays.asList("attributesMapping"));
+		QueryBuilder queryBuilder = new QueryBuilder(ArticleMappingLine.class, "am");
 		if(productId != null)
 			queryBuilder.addCriterionEntity("am.product.id", productId);
 		if(chargeTemplateId != null)

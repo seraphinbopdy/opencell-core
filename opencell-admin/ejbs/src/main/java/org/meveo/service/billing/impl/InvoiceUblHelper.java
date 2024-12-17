@@ -647,6 +647,15 @@ public class InvoiceUblHelper {
 			payerFinancialAccount.setID(payerFinancialAccountId);
 			paymentMeans.setPayerFinancialAccount(payerFinancialAccount);
 		}
+
+		// PaymentMeans/PayeeFinancialInstitution
+		if (provider.getBankCoordinates() != null) {
+			FinancialAccountType payeeFinancialInstitution = objectFactoryCommonAggrement.createFinancialAccountType();
+			ID payeeFinancialInstitutionId = objectFactorycommonBasic.createID();
+			payeeFinancialInstitutionId.setValue(provider.getBankCoordinates().getIban());
+			payeeFinancialInstitution.setID(payeeFinancialInstitutionId);
+			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
+		}
 	}
 
 	private void setInvoiceLine(List<InvoiceLine> invoiceLines, Invoice target, String invoiceLanguageCode){
@@ -1140,13 +1149,13 @@ public class InvoiceUblHelper {
 				ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
 				chargeIndicator.setValue(false);
 				allowanceCharge.setChargeIndicator(chargeIndicator);
-				
+				var allowanceCode = invoiceLine.getAccountingArticle().getAllowanceCode();
 				AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
-				allowanceChargeReasonCode.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getCode());
+				allowanceChargeReasonCode.setValue( allowanceCode != null ? allowanceCode.getCode() : null);
 				allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
 				
 				AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
-				allowanceChargeReason.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription());
+				allowanceChargeReason.setValue(allowanceCode != null ? allowanceCode.getDescription() : null);
 				allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
 			
 				Amount amount = objectFactorycommonBasic.createAmount();

@@ -1290,11 +1290,13 @@ public class InvoiceUblHelper {
 		percent.setValue(taxInvoiceAgregate.getTaxPercent().setScale(rounding, RoundingMode.HALF_UP));
 		taxCategoryType.setPercent(percent);
 		
-		if(tax.getUntdidTaxationCategory() != null) {
+		if(tax != null && tax.getUntdidTaxationCategory() != null) {
 			UntdidTaxationCategory untdidTaxationCategory = tax.getUntdidTaxationCategory();
-			TaxExemptionReason taxExemptionReason = objectFactorycommonBasic.createTaxExemptionReason();
-			taxExemptionReason.setValue(untdidTaxationCategory.getSemanticModel());
+			if(!untdidTaxationCategory.getSemanticModel().equalsIgnoreCase("Standard rate")){
+				TaxExemptionReason taxExemptionReason = objectFactorycommonBasic.createTaxExemptionReason();
+				taxExemptionReason.setValue(untdidTaxationCategory.getSemanticModel());
 				taxCategoryType.getTaxExemptionReasons().add(taxExemptionReason);
+			}
 			if(tax.getUntdidVatex() != null) {
 				TaxExemptionReasonCode taxExemptionReasonCode = objectFactorycommonBasic.createTaxExemptionReasonCode();
 				taxExemptionReasonCode.setListID("CWA 15577");

@@ -15781,5 +15781,8 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                  referencedColumnNames="id" referencedTableName="billing_invoice_line"/>
         
     </changeSet>
+    <changeSet id="#INTRD-27818_20241217" author="AndriusKarpavicius">
+        <sql>update ${db.schema.adapted}billing_accounting_code set chart_of_account_type='ASSETS' where chart_of_account_type='ASSET'</sql>
+    </changeSet>
 
 </databaseChangeLog>

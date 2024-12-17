@@ -670,6 +670,7 @@ public class ReratingService extends RatingService implements Serializable {
             newWO.setReratedWalletOperation(operationToRerate);
             if(update) {
             	operationToRerate.changeStatus(WalletOperationStatusEnum.RERATED);
+                operationToRerate.setUpdater(currentUser.getUserName());
                 walletOperationService.update(operationToRerate);
             }
 

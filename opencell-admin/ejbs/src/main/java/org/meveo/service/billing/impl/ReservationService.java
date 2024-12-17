@@ -274,7 +274,8 @@ public class ReservationService extends PersistenceService<Reservation> {
             .getResultList();
 
         for (WalletReservation wo : ops) {
-            wo.changeStatus(WalletOperationStatusEnum.CANCELED);            
+            wo.changeStatus(WalletOperationStatusEnum.CANCELED);
+            wo.setUpdater(currentUser.getUserName());
             walletCacheContainerProvider.updateBalance(wo);
         }
 

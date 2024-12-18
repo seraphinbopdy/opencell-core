@@ -1684,21 +1684,21 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
 
     public List<InvoiceLine> findByIdsAndAdjustmentStatus(List<Long> invoiceLinesIds, AdjustmentStatusEnum adjustmentStatusEnum) {
         return getEntityManager().createNamedQuery("InvoiceLine.findByIdsAndAdjustmentStatus", entityClass)
-                .setParameter("status", adjustmentStatusEnum.toString())
+                .setParameter("status", adjustmentStatusEnum)
                 .setParameter("invoiceLinesIds", invoiceLinesIds)
                 .getResultList();
     }
     
     public List<InvoiceLine> findByIdsAndOtherAdjustmentStatus(List<Long> invoiceLinesIds) {
         return getEntityManager().createNamedQuery("InvoiceLine.findByIdsAndOtherAdjustmentStatus", entityClass)
-                .setParameter("status", AdjustmentStatusEnum.NOT_ADJUSTED.toString())
+                .setParameter("status", AdjustmentStatusEnum.NOT_ADJUSTED)
                 .setParameter("invoiceLinesIds", invoiceLinesIds)
                 .getResultList();
     }
     
     public List<InvoiceLine> findInvoiceLinesToAdjust() {
         return getEntityManager().createNamedQuery("InvoiceLine.findByAdjustmentStatus", entityClass)
-                .setParameter("status", AdjustmentStatusEnum.TO_ADJUST.toString())
+                .setParameter("status", AdjustmentStatusEnum.TO_ADJUST)
                 .getResultList();
     }
     
@@ -1711,7 +1711,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
     
     public void updateForAdjustment(Collection<Long> invoicesIds, AdjustmentStatusEnum status) {
         getEntityManager().createNamedQuery("InvoiceLine.updateForAdjustment")
-                .setParameter("status", status.toString())
+                .setParameter("status", status)
                 .setParameter("now", new Date())
                 .setParameter("ids", invoicesIds)
                 .executeUpdate();

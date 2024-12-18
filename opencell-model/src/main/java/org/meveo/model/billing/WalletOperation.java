@@ -676,6 +676,18 @@ public class WalletOperation extends CFEntity {
     @JoinColumn(name = "price_list_line_id")
     private PriceListLine priceListLine;
 
+    /**
+     * Username of a user that created the record/entity
+     */
+    @Column(name = "creator", updatable = false, length = 100)
+    private String creator;
+
+    /**
+     * Username of a user that last updated the record/entity
+     */
+    @Column(name = "updater", length = 100)
+    private String updater;
+    
     @Column(name = "business_key")
     private String businessKey;
 
@@ -1861,5 +1873,21 @@ public class WalletOperation extends CFEntity {
      */
     public void setReratingBatch(BatchEntity reratingBatch) {
         this.reratingBatch = reratingBatch;
+	}
+    
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
+    public String getUpdater() {
+        return updater;
+    }
+
+    public void setUpdater(String updater) {
+        this.updater = updater;
     }
 }

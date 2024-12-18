@@ -28,7 +28,7 @@ class ExceptionSerializer {
         final List<Cause>  cause = getCause(exception);
         return ImmutableApiException.builder()
                 .status(null)
-                .details(exception.getMessage() != null ? exception.getMessage() : getStackTrace(exception.getStackTrace()))
+                .details(exception.getMessage() != null ? getUserFriendlyMessage(exception) : getStackTrace(exception.getStackTrace()))
                 .addAllCauses(cause)
                 .build();
     }
@@ -37,7 +37,7 @@ class ExceptionSerializer {
         final List<Cause>  cause = getCause(exception);
         return ImmutableApiException.builder()
                 .status(status)
-                .details(exception.getMessage() != null ? exception.getMessage() : getStackTrace(exception.getStackTrace()))
+                .details(exception.getMessage() != null ? getUserFriendlyMessage(exception) : getStackTrace(exception.getStackTrace()))
                 .addAllCauses(cause)
                 .build();
     }
@@ -60,5 +60,20 @@ class ExceptionSerializer {
                 .filter(cause -> cause != null && cause.getMessage() != null)
                 .map(cause -> ImmutableCause.builder().causeMessage(cause.getMessage()).build())
                 .collect(Collectors.toList());
+    }
+    
+    /**
+     * Convert error message to user friendly message.
+     * 
+     * @param exception Exception
+     * @return User friendly message
+     */
+    private String getUserFriendlyMessage(Throwable exception) {
+
+        String message = exception.getMessage();
+        if (message != null && message.contains("ERROR: numeric field overflow")) {
+            return "One of the numbers passed or caclulated is too large - exceeds 11 digits. Please check the input values.";
+        }
+        return message;
     }
 }

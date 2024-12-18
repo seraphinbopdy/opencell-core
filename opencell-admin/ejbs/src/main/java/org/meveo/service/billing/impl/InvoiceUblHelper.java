@@ -1142,21 +1142,22 @@ public class InvoiceUblHelper {
         final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null;
 		if(CollectionUtils.isNotEmpty(invoice.getInvoiceLines())){
 			invoice.getInvoiceLines().forEach(invoiceLine -> {
-				if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
+				if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && "Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
 					return;
 				}
 				AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
 				ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
 				chargeIndicator.setValue(false);
 				allowanceCharge.setChargeIndicator(chargeIndicator);
-				var allowanceCode = invoiceLine.getAccountingArticle().getAllowanceCode();
-				AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
-				allowanceChargeReasonCode.setValue( allowanceCode != null ? allowanceCode.getCode() : null);
-				allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
-				
-				AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
-				allowanceChargeReason.setValue(allowanceCode != null ? allowanceCode.getDescription() : null);
-				allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
+				if(invoiceLine.getAccountingArticle().getAllowanceCode() != null) {
+					AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
+					allowanceChargeReasonCode.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getCode());
+					allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
+					
+					AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
+					allowanceChargeReason.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription());
+					allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
+				}
 			
 				Amount amount = objectFactorycommonBasic.createAmount();
 				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();

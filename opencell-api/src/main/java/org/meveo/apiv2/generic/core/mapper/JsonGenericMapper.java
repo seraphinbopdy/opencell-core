@@ -8,6 +8,12 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
+import com.fasterxml.jackson.databind.ser.PropertyWriter;
+import jakarta.persistence.Persistence;
+import org.hibernate.collection.spi.PersistentBag;
 import org.meveo.apiv2.generic.GenericPaginatedResource;
 import org.meveo.apiv2.generic.core.mapper.module.GenericModule;
 import org.meveo.model.ICustomFieldEntity;
@@ -67,7 +73,33 @@ public class JsonGenericMapper extends ObjectMapper {
         }
         if ((fields == null || fields.isEmpty()) && excludedFields != null && !excludedFields.isEmpty()) {
             addMixIn(entityClass, EntityFieldsFilterMixIn.class);
-            simpleFilterProvider.addFilter("EntityFieldsFilter", SimpleBeanPropertyFilter.serializeAllExcept(excludedFields));
+            simpleFilterProvider.addFilter("EntityFieldsFilter", new SimpleBeanPropertyFilter.SerializeExceptFilter(excludedFields) {
+                @Override
+                protected boolean include(BeanPropertyWriter writer) {
+                    return super.include(writer);
+                }
+
+                @Override
+                protected boolean include(PropertyWriter writer) {
+                    return super.include(writer);
+                }
+
+                @Override
+                public void serializeAsField(Object pojo, JsonGenerator jgen, SerializerProvider provider, PropertyWriter writer) throws Exception {
+
+                    if (include(writer)) {
+                        Object prop = ((BeanPropertyWriter)writer).get(pojo);
+                        GenericSimpleFilterProvider genericSimpleFilterProvider = (GenericSimpleFilterProvider) simpleFilterProvider;
+                        if(!genericSimpleFilterProvider.isNestedEntityCandidate(writer.getName(), jgen) && prop instanceof PersistentBag && !Persistence.getPersistenceUtil().isLoaded(prop)) {
+                            return;
+                        }
+                        writer.serializeAsField(pojo, jgen, provider);
+                    } else if (!jgen.canOmitFields()) { // since 2.3
+                        writer.serializeAsOmittedField(pojo, jgen, provider);
+                        
+                    }
+                }
+            });
         }
         setFilterProvider(this.simpleFilterProvider);
         try {

@@ -6492,7 +6492,7 @@
             <column name="creator" value="applicationInitializer"/>
             <column name="code" value="4181" />
             <column name="description" value="Customers - Invoices to be issued (FAE)" />
-            <column name="chart_of_account_type" value="ASSET" />
+            <column name="chart_of_account_type" value="ASSETS" />
             <column name="chart_of_account_view_type" value="REGULAR" />
         </insert>
 

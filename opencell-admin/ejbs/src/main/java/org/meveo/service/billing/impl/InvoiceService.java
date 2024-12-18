@@ -1813,7 +1813,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			if (!isInvoiceAdjustment) {
 				generateInvoiceFile(billingTemplateName, resDir);
 			} else {
-				generateInvoiceAdjustmentFile(billingTemplateName, resDir);
+				generateInvoiceAdjustmentFile(true, billingTemplateName, resDir);
 			}
 
             CustomerAccount customerAccount = billingAccount.getCustomerAccount();
@@ -7151,12 +7151,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param invoice
      * @return
      */
-    public Object calculateInvoice(Invoice invoice, boolean excuteSplitScript) {
+    public Object calculateInvoice(Invoice invoice, boolean executeSplitScript) {
         invoice = invoiceService.retrieveIfNotManaged(invoice);
         final BillingAccount billingAccount = billingAccountService.retrieveIfNotManaged(invoice.getBillingAccount());
         invoiceService.updateBillingRunStatistics(invoice);
         return createAggregatesAndInvoiceFromIls(billingAccount, billingAccount.getBillingRun(), null,null, invoice.getInvoiceDate(), null, null, invoice.isDraft(), billingAccount.getBillingCycle(), billingAccount,
-            billingAccount.getPaymentMethod(), invoice.getInvoiceType(), null, false, false, invoice, InvoiceProcessTypeEnum.MANUAL,null, null, excuteSplitScript);
+            billingAccount.getPaymentMethod(), invoice.getInvoiceType(), null, false, false, invoice, InvoiceProcessTypeEnum.MANUAL,null, null, executeSplitScript);
     }
 
     private final String TAX_INVOICE_AGREGATE = "T";

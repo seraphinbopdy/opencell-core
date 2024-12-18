@@ -1427,7 +1427,6 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         q.setTupleTransformer(TupleToMapResultTransformer.INSTANCE);
         q.setFetchSize(10000);
         q.setReadOnly(true);
-        q.setLockMode("a", LockMode.NONE);
         if (params != null) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 q.setParameter(entry.getKey(), entry.getValue());

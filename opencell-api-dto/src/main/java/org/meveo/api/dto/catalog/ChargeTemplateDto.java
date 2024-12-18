@@ -163,6 +163,9 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
 
     private Set<String> pricePlanCodes = new HashSet<>();
     
+    @Schema(description = "price plan matrixes")
+    private List<PricePlanMatrixDto> pricePlanMatrixes;
+    
  // Parameter 1
     @Schema(description = "Description of Parameter 1")
     private String parameter1Description;
@@ -363,6 +366,12 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
         businessKeyIsHidden = chargeTemplate.isBusinessKeyIsHidden();
         quantityAttribute =
                 chargeTemplate.getQuantityAttribute() != null ? chargeTemplate.getQuantityAttribute().getCode() : null;
+        if (chargeTemplate.getPricePlans() != null && !chargeTemplate.getPricePlans().isEmpty()) {
+            this.pricePlanMatrixes = chargeTemplate.getPricePlans()
+                    .stream()
+                    .map(pricePlan -> new PricePlanMatrixDto(pricePlan, null, false))
+                    .collect(Collectors.toList());
+        }
     }
      
 
@@ -1018,4 +1027,10 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
     public void setQuantityAttribute(String quantityAttribute) {
         this.quantityAttribute = quantityAttribute;
     }
+    public List<PricePlanMatrixDto> getPricePlanMatrixes() {
+		return pricePlanMatrixes;
+	}
+	public void setPricePlanMatrixes(List<PricePlanMatrixDto> pricePlanMatrixes) {
+		this.pricePlanMatrixes = pricePlanMatrixes;
+	}
 }

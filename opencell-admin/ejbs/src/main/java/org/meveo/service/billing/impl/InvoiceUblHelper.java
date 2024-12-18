@@ -49,6 +49,7 @@ import org.meveo.model.billing.VatDateCodeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.CardPaymentMethod;
+import org.meveo.model.payments.CheckPaymentMethod;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.DDPaymentMethod;
 import org.meveo.model.payments.PaymentMethod;
@@ -229,7 +230,7 @@ public class InvoiceUblHelper {
 		setPaymentTerms(invoice, invoiceXml, creditNote, invoice.getInvoiceType(), invoiceLanguageCode);
 		setAccountingSupplierParty(invoice.getSeller(), invoiceXml, creditNote, invoiceLanguageCode);
 		setAccountingCustomerParty(invoice.getBillingAccount(), invoiceXml, creditNote);
-		setPaymentMeans(invoice.getPaymentMethod(), invoiceXml, creditNote);
+		setPaymentMeans(invoice.getBillingAccount().getCustomerAccount().getPreferredPaymentMethod(), invoiceXml, creditNote);
 		String curreny = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode():null;
 		BigDecimal amountWithoutTax = invoice.getAmountWithoutTax();
 		BigDecimal amountWithTax = invoice.getAmountWithTax();
@@ -495,6 +496,17 @@ public class InvoiceUblHelper {
 			paymentMeansCode.setListName("Payment Means");
 			paymentMeansCode.setValue(paymentMethod.getPaymentMeans() != null ? paymentMethod.getPaymentMeans().getCode() : "59");
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
+			
+			
+		}
+		
+		//check
+		if(Hibernate.unproxy(paymentMethod) instanceof CheckPaymentMethod) {
+			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
+			payerFinancialAccountId.setValue("no IBAN");
+			FinancialAccountType payerFinancialAccount = objectFactoryCommonAggrement.createFinancialAccountType();
+			payerFinancialAccount.setID(payerFinancialAccountId);
+			paymentMeans.setPayerFinancialAccount(payerFinancialAccount);
 		}
 
 		// DirectDebit
@@ -628,12 +640,21 @@ public class InvoiceUblHelper {
 		}
 
 		// PaymentMeans/PayeeFinancialAccount
-		if (StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) || StringUtils.isNotBlank(bank.getBankCoordinates().getBankId())) {
+		if (bank.getBankCoordinates() != null) {
 			FinancialAccountType payerFinancialAccount = objectFactoryCommonAggrement.createFinancialAccountType();
 			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
-			payerFinancialAccountId.setValue(StringUtils.isNotBlank(bank.getBankCoordinates().getIban()) ? bank.getBankCoordinates().getIban() : bank.getBankCoordinates().getBankId());
+			payerFinancialAccountId.setValue(bank.getBankCoordinates().getIban());
 			payerFinancialAccount.setID(payerFinancialAccountId);
 			paymentMeans.setPayerFinancialAccount(payerFinancialAccount);
+		}
+
+		// PaymentMeans/PayeeFinancialInstitution
+		if (provider.getBankCoordinates() != null) {
+			FinancialAccountType payeeFinancialInstitution = objectFactoryCommonAggrement.createFinancialAccountType();
+			ID payeeFinancialInstitutionId = objectFactorycommonBasic.createID();
+			payeeFinancialInstitutionId.setValue(provider.getBankCoordinates().getIban());
+			payeeFinancialInstitution.setID(payeeFinancialInstitutionId);
+			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
 		}
 	}
 
@@ -1279,11 +1300,13 @@ public class InvoiceUblHelper {
 		percent.setValue(taxInvoiceAgregate.getTaxPercent().setScale(rounding, RoundingMode.HALF_UP));
 		taxCategoryType.setPercent(percent);
 		
-		if(tax.getUntdidTaxationCategory() != null) {
+		if(tax != null && tax.getUntdidTaxationCategory() != null) {
 			UntdidTaxationCategory untdidTaxationCategory = tax.getUntdidTaxationCategory();
-			TaxExemptionReason taxExemptionReason = objectFactorycommonBasic.createTaxExemptionReason();
-			taxExemptionReason.setValue(untdidTaxationCategory.getSemanticModel());
+			if(!untdidTaxationCategory.getSemanticModel().equalsIgnoreCase("Standard rate")){
+				TaxExemptionReason taxExemptionReason = objectFactorycommonBasic.createTaxExemptionReason();
+				taxExemptionReason.setValue(untdidTaxationCategory.getSemanticModel());
 				taxCategoryType.getTaxExemptionReasons().add(taxExemptionReason);
+			}
 			if(tax.getUntdidVatex() != null) {
 				TaxExemptionReasonCode taxExemptionReasonCode = objectFactorycommonBasic.createTaxExemptionReasonCode();
 				taxExemptionReasonCode.setListID("CWA 15577");

@@ -24,6 +24,7 @@ import org.meveo.api.catalog.OfferTemplateApi;
 import org.meveo.api.dto.catalog.ChargeTemplateDto;
 import org.meveo.api.dto.catalog.CpqOfferDto;
 import org.meveo.api.dto.catalog.DiscountPlanDto;
+import org.meveo.api.dto.catalog.PricePlanMatrixDto;
 import org.meveo.api.dto.cpq.AttributeDTO;
 import org.meveo.api.dto.cpq.CommercialRuleHeaderDTO;
 import org.meveo.api.dto.cpq.GroupedAttributeDto;
@@ -56,6 +57,7 @@ import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.OfferTemplate;
+import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.ProductChargeTemplateMapping;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.GroupedAttributes;
@@ -77,6 +79,7 @@ import org.meveo.service.catalog.impl.ChargeTemplateService;
 import org.meveo.service.catalog.impl.CounterTemplateService;
 import org.meveo.service.catalog.impl.DiscountPlanService;
 import org.meveo.service.catalog.impl.OfferTemplateService;
+import org.meveo.service.catalog.impl.PricePlanMatrixService;
 import org.meveo.service.catalog.impl.ProductChargeTemplateMappingService;
 import org.meveo.service.cpq.AttributeService;
 import org.meveo.service.cpq.CommercialRuleHeaderService;
@@ -160,6 +163,9 @@ public class ProductApi extends BaseApi {
 	
 	@Inject
 	private CommercialRulesContainerProvider commercialRulesContainerProvider;
+	
+	@Inject
+	private PricePlanMatrixService pricePlanMatrixService;
 
 	private static final String DEFAULT_SORT_ORDER_ID = "id";
 
@@ -383,23 +389,44 @@ public class ProductApi extends BaseApi {
 
 	public GetProductDtoResponse findByCode(String code) throws MeveoApiException {
 		if (StringUtils.isBlank(code)) {
-			missingParameters.add("code");
-			handleMissingParameters();
-		}
-		Product product = productService.findByCode(code);
-		if (product == null) {
-			throw new EntityDoesNotExistsException(Product.class,code);
-		}
-		ChargeTemplateDto chargeTemplateDto=null;
-		Set<ChargeTemplateDto> chargeTemplateDtos=new HashSet<ChargeTemplateDto>();
-		for(ProductChargeTemplateMapping prodcutCharge : product.getProductCharges()) {
-			chargeTemplateDto=new ChargeTemplateDto(prodcutCharge.getChargeTemplate(),entityToDtoConverter.getCustomFieldsDTO(prodcutCharge.getChargeTemplate()));
-			chargeTemplateDtos.add(chargeTemplateDto);
-		}
-			GetProductDtoResponse  result = new GetProductDtoResponse(product,chargeTemplateDtos,true);
-			result.setCustomFields(entityToDtoConverter.getCustomFieldsDTO(product));
-			return result;
-		}
+	        missingParameters.add("code");
+	        handleMissingParameters();
+	    }
+	    Product product = productService.findByCode(code);
+	    if (product == null) {
+	        throw new EntityDoesNotExistsException(Product.class, code);
+	    }
+	    Set<ChargeTemplateDto> chargeTemplateDtos = new HashSet<>();
+	    for (ProductChargeTemplateMapping productCharge : product.getProductCharges()) {
+	        ChargeTemplateDto chargeTemplateDto = new ChargeTemplateDto(
+	            productCharge.getChargeTemplate(),
+	            entityToDtoConverter.getCustomFieldsDTO(productCharge.getChargeTemplate())
+	        );
+	        chargeTemplateDtos.add(chargeTemplateDto);
+	    }
+	    // Populate price plans
+	    chargeTemplateDtos = populatePricePlans(chargeTemplateDtos);
+	    GetProductDtoResponse result = new GetProductDtoResponse(product, chargeTemplateDtos, true);
+	    result.setCustomFields(entityToDtoConverter.getCustomFieldsDTO(product));
+	    return result;
+	}
+	
+	private Set<ChargeTemplateDto> populatePricePlans(Set<ChargeTemplateDto> chargeTemplateDtos) {
+	    if (chargeTemplateDtos == null || chargeTemplateDtos.isEmpty()) {
+	        return chargeTemplateDtos; // Nothing to process
+	    }
+	    chargeTemplateDtos.forEach(chargeTemplate -> {
+	        List<PricePlanMatrix> activePricePlansByChargeCode = 
+	            pricePlanMatrixService.getActivePricePlansByChargeCode(chargeTemplate.getCode());
+	        
+	        List<PricePlanMatrixDto> pricePlanDtos = activePricePlansByChargeCode.stream()
+	            .map(pricePlan -> new PricePlanMatrixDto(pricePlan, null, false)) // Assuming null for CustomFieldsDto
+	            .collect(Collectors.toList());
+	        
+	        chargeTemplate.setPricePlanMatrixes(pricePlanDtos); // Populate price plans
+	    });
+	    return chargeTemplateDtos;
+	}
 
 	public ProductVersion createProductVersion(Product product, ProductVersionDto postData) throws MeveoApiException, BusinessException {
 		checkMandatoryFields(postData);

@@ -15726,7 +15726,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <sql>CREATE UNIQUE INDEX billing_subscriptions_purchase_orders_id_index ON billing_subscriptions_purchase_orders (subscription_id, purchaseOrder_id)</sql>
+        <sql>CREATE UNIQUE INDEX billing_subscriptions_purchase_orders_id_index ON billing_subscriptions_purchase_orders ("subscription_id", "purchaseOrder_id")</sql>
         <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_subscriptions_purchase_orders"
                                  constraintName="fk_subscription_id_billing_subscriptions_purchase_orders"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -15743,7 +15743,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <sql>CREATE UNIQUE INDEX billing_invoice_lines_subscriptions_id_index ON billing_invoice_lines_subscriptions (invoiceLine_id, subscription_id)</sql>
+        <sql>CREATE UNIQUE INDEX billing_invoice_lines_subscriptions_id_index ON billing_invoice_lines_subscriptions ("invoiceLine_id", "subscription_id")</sql>
         <addForeignKeyConstraint baseColumnNames="invoiceLine_id" baseTableName="billing_invoice_lines_subscriptions"
                                  constraintName="fk_purchaseOrder_id_billing_invoice_lines_subscriptions"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -15760,7 +15760,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <sql>CREATE UNIQUE INDEX billing_invoices_purchase_orders_id_index ON billing_invoices_purchase_orders (invoice_id, purchaseOrder_id)</sql>
+        <sql>CREATE UNIQUE INDEX billing_invoices_purchase_orders_id_index ON billing_invoices_purchase_orders ("invoice_id", "purchaseOrder_id")</sql>
         <addForeignKeyConstraint baseColumnNames="invoice_id" baseTableName="billing_invoices_purchase_orders"
                                  constraintName="fk_invoice_id_billing_invoices_purchase_orders" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -15769,6 +15769,20 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                                  constraintName="fk_purchaseOrder_id_billing_invoices_purchase_orders" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
+    </changeSet>
+    <changeSet id="#INTRD-5220_20241216" author="AndriusKarpavicius" failOnError="false">
+        <renameColumn tableName="billing_invoices_purchase_orders" oldColumnName="purchaseOrder_id" newColumnName="purchase_order_id"/>
+        <renameColumn tableName="billing_subscriptions_purchase_orders" oldColumnName="purchaseOrder_id" newColumnName="purchase_order_id"/>
+        <renameColumn tableName="billing_invoice_lines_subscriptions" oldColumnName="invoiceLine_id" newColumnName="invoice_line_id"/>
+        <dropForeignKeyConstraint baseTableName="billing_invoice_lines_subscriptions" constraintName="fk_purchaseOrder_id_billing_invoice_lines_subscriptions"/>
+        <addForeignKeyConstraint baseColumnNames="invoice_line_id" baseTableName="billing_invoice_lines_subscriptions"
+                 constraintName="fk_invoice_line_id_billing_invoice_lines_subscriptions"
+                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                 referencedColumnNames="id" referencedTableName="billing_invoice_line"/>
+        
+    </changeSet>
+    <changeSet id="#INTRD-27818_20241217" author="AndriusKarpavicius">
+        <sql>update ${db.schema.adapted}billing_accounting_code set chart_of_account_type='ASSETS' where chart_of_account_type='ASSET'</sql>
     </changeSet>
 
 </databaseChangeLog>

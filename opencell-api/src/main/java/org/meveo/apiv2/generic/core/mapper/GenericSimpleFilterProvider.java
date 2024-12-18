@@ -17,12 +17,16 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import jakarta.persistence.Persistence;
 
 class GenericSimpleFilterProvider extends SimpleFilterProvider {
+    
+    private Set<String> nestedEntities;
+    
     private static final String[] forbiddenFieldNames = {
             "NB_DECIMALS", "historized", "notified", "NB_PRECISION", "appendGeneratedCode", "serialVersionUID", "transient", "codeChanged",
             "version", "uuid", "cfValuesNullSafe", "cfAccumulatedValuesNullSafe", "descriptionOrCode", "descriptionAndCode", "referenceCode",
             "referenceDescription", "cfAccumulatedValues"
     };
     public GenericSimpleFilterProvider(boolean shouldExtractList, Set<String> nestedEntities) {
+        this.nestedEntities = nestedEntities;
         addFilter("GenericPaginatedResourceFilter", filterOutAllExcept("data","total","offset","limit"));
         addFilter("EntityCustomFieldValuesFilter", filterOutAllExcept("valuesByCode"));
         addFilter("EntityCustomFieldValueFilter", filterOutAllExcept("value", "priority", "period"));
@@ -37,7 +41,7 @@ class GenericSimpleFilterProvider extends SimpleFilterProvider {
             {
                 if (include(writer)) {
                 	Object prop = ((BeanPropertyWriter)writer).get(pojo);
-                	if(!isNestedEntityCandidate(nestedEntities, writer.getName(), jgen) && prop instanceof PersistentBag && !Persistence.getPersistenceUtil().isLoaded(prop)) {
+                	if(!isNestedEntityCandidate(writer.getName(), jgen) && prop instanceof PersistentBag && !Persistence.getPersistenceUtil().isLoaded(prop)) {
                 		return;
                 	}
                     writer.serializeAsField(pojo, jgen, provider);
@@ -53,7 +57,7 @@ class GenericSimpleFilterProvider extends SimpleFilterProvider {
         });
     }
     
-    boolean isNestedEntityCandidate(Set<String> nestedEntities, String current, JsonGenerator jgen) {
+    boolean isNestedEntityCandidate(String current, JsonGenerator jgen) {
         String currentPath = jgen.getOutputContext()
                 .getParent()
                 .pathAsPointer(false)

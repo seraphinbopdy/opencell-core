@@ -68,6 +68,8 @@ import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 public class FilesApi extends BaseApi {
 
     public static final String FILE_DOES_NOT_EXISTS = "File does not exists: ";
+    
+    public static final String FILE_INVALID_PATH = "Invalid path: ";
 
     public static final String SOURCE_FILE_OR_FOLDER_DOES_NOT_EXISTS = "Source file or folder does not exist: ";
 
@@ -187,12 +189,17 @@ public class FilesApi extends BaseApi {
         if (dir == null) {
             throw new BusinessApiException("Invalid parameter, file or directory is null");
         }
-        File dirFile = new File(getProviderRootDir() + File.separator + dir);
+
+        String providerRootDir = getProviderRootDir();
+
+        File dirFile = new File(providerRootDir + File.separator + dir);
         Path path = dirFile.toPath();
         path = path.normalize();
-        String prefix = getProviderRootDir().replace("./", "");
+        String prefix = new File(providerRootDir.replace("./", "")).toPath().normalize().toString();
         if (!path.toString().contains(prefix)) {
-            throw new EntityDoesNotExistsException(FILE_DOES_NOT_EXISTS + dir);
+
+            log.error("File requested {} and resolved to {} is not within provider's root directory {}", dir, path, prefix);
+            throw new EntityDoesNotExistsException(FILE_INVALID_PATH + dir);
         }
         return dir;
     }
@@ -414,20 +421,26 @@ public class FilesApi extends BaseApi {
      */
     public File checkAndGetExistingFile(String filePath) {
 
-        File javaXMlFormatFile = (filePath.contains(getProviderRootDir().replace("\\", "/"))) ?
-                new File(filePath) : new File(getProviderRootDir() + File.separator + normalizePath(filePath));
+        String providerRootDir = getProviderRootDir();
+
+        File javaXMlFormatFile = (filePath.contains(providerRootDir.replace("\\", "/"))) ? new File(filePath) : new File(providerRootDir + File.separator + normalizePath(filePath));
+
         if (StorageFactory.exists(javaXMlFormatFile)) {
             return javaXMlFormatFile;
         } else {
             String[] fileNameParts = filePath.split("\\.");
+
             if (fileNameParts.length > 2) {
                 File sqlXMlFormatFile = new File((".").concat(filePath.split("\\.")[1] + "_" + format("%04d", 0) + "." + filePath.split("\\.")[2]));
                 if (sqlXMlFormatFile.exists()) {
                     return sqlXMlFormatFile;
+
                 } else {
+                    log.error("File requested {} and resolved to sql xml format file {} does not exist", filePath, sqlXMlFormatFile.getPath());
                     throw new BusinessApiException(FILE_DOES_NOT_EXISTS + javaXMlFormatFile.getPath());
                 }
             } else {
+                log.error("File requested {} and resolved to {} does not exist", filePath, javaXMlFormatFile.getPath());
                 throw new BusinessApiException(FILE_DOES_NOT_EXISTS + javaXMlFormatFile.getPath());
             }
         }

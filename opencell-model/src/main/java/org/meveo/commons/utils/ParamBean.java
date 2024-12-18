@@ -224,13 +224,16 @@ public class ParamBean {
             return null;
 
         }
-        if (!isMultitenancyEnabled() || "".equals(provider) || provider == null) {
-            return currentInstance.getProperty("providers.rootDir", "./opencelldata") + File.separator + instance.getProperty("provider.rootDir", "default");
+
+        String dir = currentInstance.getProperty("providers.rootDir", "./opencelldata");
+        if (!(dir.endsWith("/") || dir.endsWith("\\"))) {
+            dir += File.separator;
         }
 
-        String dir;
-        dir = currentInstance.getProperty("providers.rootDir", "./opencelldata");
-        dir += File.separator;
+        if (!isMultitenancyEnabled() || "".equals(provider) || provider == null) {
+            return dir + instance.getProperty("provider.rootDir", "default");
+        }
+
         ParamBean instanceByProvider = getInstanceByProvider(provider);
         if (instanceByProvider != null) {
             dir += instanceByProvider.getProperty("provider.rootDir", provider);

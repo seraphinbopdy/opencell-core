@@ -124,7 +124,7 @@ public class DunningSettingsApiService implements ApiService<DunningSettings> {
 		
 		//Check if active and paused dunning collection are not empty
 		if((activeDunningCollectionPlans != null && !activeDunningCollectionPlans.isEmpty()) || (pausedDunningCollectionPlans != null && !pausedDunningCollectionPlans.isEmpty())) {
-			throw new ForbiddenException(ACTIVE_OR_PAUSED_DUNNING_COLLECTION_PLAN_FOUND);
+			throw new BadRequestException(ACTIVE_OR_PAUSED_DUNNING_COLLECTION_PLAN_FOUND);
 		}
 
 		//Check customer balance if not filled then get the default one, in update case pass the dunning settings to update

@@ -32,7 +32,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1189,9 +1188,9 @@ public class CustomTableService extends NativePersistenceService {
     }
 
     private void validateExistance(String dbTablename, List<Long> inputIds) {
-        List<BigInteger> existingRecords = filterExistingRecordsOnTable(dbTablename, inputIds);
+        List<Long> existingRecords = filterExistingRecordsOnTable(dbTablename, inputIds);
 
-        Map<Boolean, List<Long>> partitioned = inputIds.stream().collect(Collectors.partitioningBy(x -> existingRecords.stream().anyMatch(y -> x.equals(y.longValue()))));
+        Map<Boolean, List<Long>> partitioned = inputIds.stream().collect(Collectors.partitioningBy(x -> existingRecords.stream().anyMatch(y -> x.equals(y))));
 
         List<Long> invalidList = partitioned.get(false);
         if (!invalidList.isEmpty()) {

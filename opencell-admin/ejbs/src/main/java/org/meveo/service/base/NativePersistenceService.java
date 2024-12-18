@@ -1683,13 +1683,13 @@ public class NativePersistenceService extends BaseService {
     }
 
     @SuppressWarnings("unchecked")
-    public List<BigInteger> filterExistingRecordsOnTable(String tableName, List<Long> ids) {
+    public List<Long> filterExistingRecordsOnTable(String tableName, List<Long> ids) {
         tableName = addCurrentSchema(tableName);
         Session session = getEntityManager().unwrap(Session.class);
         StringBuilder selectQuery = new StringBuilder("select ").append(FIELD_ID).append(" from ").append(tableName).append(" e where ").append(FIELD_ID).append(" in (:ids)");
         NativeQuery query = session.createNativeQuery(selectQuery.toString());
         query.setParameterList("ids", ids);
-        return (List<BigInteger>) query.setFlushMode(FlushModeType.COMMIT).list();
+        return (List<Long>) query.setFlushMode(FlushModeType.COMMIT).list();
     }
 
     /**

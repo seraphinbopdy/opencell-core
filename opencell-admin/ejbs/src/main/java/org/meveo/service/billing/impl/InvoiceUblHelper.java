@@ -629,14 +629,14 @@ public class InvoiceUblHelper {
 		paymentMeans.getPaymentMeansCode().setValue("59");
 
 		Provider provider = providerService.getProvider();
-
+		
+		PaymentMandate paymentMandate = objectFactoryCommonAggrement.createPaymentMandate();
 		// PaymentMeans/PaymentMandate
 		if (StringUtils.isNotBlank(bank.getMandateIdentification())) {
-			PaymentMandate paymentMandate = objectFactoryCommonAggrement.createPaymentMandate();
 			ID mandateID = objectFactorycommonBasic.createID();
 			mandateID.setValue(bank.getMandateIdentification());
 			paymentMandate.setID(mandateID);
-			paymentMeans.setPaymentMandate(paymentMandate);
+			
 		}
 
 		// PaymentMeans/PayeeFinancialAccount
@@ -645,8 +645,9 @@ public class InvoiceUblHelper {
 			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
 			payerFinancialAccountId.setValue(bank.getBankCoordinates().getIban());
 			payerFinancialAccount.setID(payerFinancialAccountId);
-			paymentMeans.setPayerFinancialAccount(payerFinancialAccount);
+			paymentMandate.setPayerFinancialAccount(payerFinancialAccount);
 		}
+		paymentMeans.setPaymentMandate(paymentMandate);
 
 		// PaymentMeans/PayeeFinancialInstitution
 		if (provider.getBankCoordinates() != null) {

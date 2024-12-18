@@ -1478,12 +1478,14 @@ public class InvoiceUblHelper {
 		AdditionalStreetName additionalStreetName = objectFactorycommonBasic.createAdditionalStreetName();
 		additionalStreetName.setValue(pCustomerAccount.getAddress().getAddress2());
 		addressType.setAdditionalStreetName(additionalStreetName);
-
-		// AccountingCustomerParty/Party/PostalAddress/BuildingNumber
-		BuildingNumber buildingNumber = objectFactorycommonBasic.createBuildingNumber();
-		buildingNumber.setValue(pCustomerAccount.getAddress().getAddress3());
-		addressType.setBuildingNumber(buildingNumber);
-
+		
+		if(StringUtils.isNotBlank(pCustomerAccount.getAddress().getAddress3())){
+			AddressLine addressLine = objectFactoryCommonAggrement.createAddressLine();
+			Line line = objectFactorycommonBasic.createLine();
+			line.setValue(pCustomerAccount.getAddress().getAddress3());
+			addressLine.setLine(line);
+			addressType.getAddressLines().add(addressLine);
+		}
 		// AccountingCustomerParty/Party/PostalAddress/Department
 		Department department = objectFactorycommonBasic.createDepartment();
 		department.setValue(pCustomerAccount.getAddress().getAddress4());

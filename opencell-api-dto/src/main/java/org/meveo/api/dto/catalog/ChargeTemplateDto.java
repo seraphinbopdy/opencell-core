@@ -165,7 +165,7 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
     
     @Schema(description = "price plan matrixes")
     private List<PricePlanMatrixDto> pricePlanMatrixes;
-    
+
  // Parameter 1
     @Schema(description = "Description of Parameter 1")
     private String parameter1Description;
@@ -266,6 +266,9 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
 
     @Schema(description = "Code of quantity attribute")
     private String quantityAttribute;
+
+    @Schema(description = "indicate if rating script uses price versions")
+    private Boolean ratingScriptUsesPriceVersions;
 
     /**
      * Instantiates a new charge template dto.
@@ -1026,6 +1029,14 @@ public class ChargeTemplateDto extends EnableBusinessDto implements Serializable
 
     public void setQuantityAttribute(String quantityAttribute) {
         this.quantityAttribute = quantityAttribute;
+    }
+
+    public Boolean getRatingScriptUsesPriceVersions() {
+        return ratingScriptUsesPriceVersions;
+    }
+
+    public void setRatingScriptUsesPriceVersions(Boolean ratingScriptUsesPriceVersions) {
+        this.ratingScriptUsesPriceVersions = ratingScriptUsesPriceVersions;
     }
     public List<PricePlanMatrixDto> getPricePlanMatrixes() {
 		return pricePlanMatrixes;

@@ -4435,6 +4435,7 @@
             </column>
             <column name="business_key_is_mandatory" type="${type.boolean}" defaultValueNumeric="0" />
             <column name="business_key_is_hidden" type="${type.boolean}" defaultValueNumeric="0" />
+            <column name="rating_script_uses_price_versions" type="${type.boolean}" defaultValueNumeric="0"/>
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-208">
@@ -14313,7 +14314,7 @@
             <column name="example" type="varchar(500)"/>
         </createTable>
         <addPrimaryKey constraintName="pk_adm_endpoint_parameters" tableName="adm_endpoint_parameters" columnNames="endpoint_id,script_parameter"/>
-	</changeSet>  
+	</changeSet>
 	<changeSet id="#INTRD-25643_20241206-rebuild" author="anasseh">
         <createTable tableName="ar_pre_authorization">
             <column name="id" type="bigint" autoIncrement="${id.auto}">
@@ -14337,7 +14338,7 @@
             <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>           
         </createTable>
     </changeSet>
-    
+
     <changeSet id="#INTRD-5220_20241205-tbl-rebuild" author="AbdellatifBARI">
         <createTable tableName="billing_subscriptions_purchase_orders">
             <column name="subscription_id" type="BIGINT">
@@ -14363,7 +14364,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-    </changeSet> 
+    </changeSet>
     <!-- end tables -->
 
     <changeSet author="AndriusKarpavicius" id="rebuild-str-def-val-1">
@@ -20894,6 +20895,8 @@
     <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI" />
     <changeSet id="#INTRD-5220_20241216" author="AndriusKarpavicius" />
     <changeSet id="#INTRD-27818_20241217" author="AndriusKarpavicius" />
+    <changeSet id="#INTRD-26786_20241218" author="TarikFA." />
+
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

@@ -75,6 +75,11 @@ public class UsageChargeTemplateApi extends ChargeTemplateApi<UsageChargeTemplat
     }
 
     @Override
+    public UsageChargeTemplate createOrUpdate(UsageChargeTemplateDto dataDto) throws MeveoApiException, BusinessException {
+        return super.createOrUpdate(dataDto);
+    }
+
+    @Override
     public UsageChargeTemplate update(UsageChargeTemplateDto postData) throws MeveoApiException, BusinessException {
 
         if (StringUtils.isBlank(postData.getCode())) {
@@ -146,6 +151,10 @@ public class UsageChargeTemplateApi extends ChargeTemplateApi<UsageChargeTemplat
             } catch (ValidationException exception) {
                 throw new MeveoApiException(exception);
             }
+        }
+
+        if(postData.getRatingScriptUsesPriceVersions() != null) {
+            chargeTemplate.setRatingScriptUsesPriceVersions(postData.getRatingScriptUsesPriceVersions());
         }
 
         return chargeTemplate;

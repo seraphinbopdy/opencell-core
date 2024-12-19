@@ -124,6 +124,10 @@ public class OneShotChargeTemplateApi extends ChargeTemplateApi<OneShotChargeTem
 
         chargeTemplate.setImmediateInvoicing(postData.getImmediateInvoicing());
 
+        if(postData.getRatingScriptUsesPriceVersions() != null) {
+        	chargeTemplate.setRatingScriptUsesPriceVersions(postData.getRatingScriptUsesPriceVersions());
+        }
+
         return chargeTemplate;
     }
 

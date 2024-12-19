@@ -193,6 +193,10 @@ public class RecurringChargeTemplateApi extends ChargeTemplateApi<RecurringCharg
                     .orElseThrow(() -> new EntityDoesNotExistsException(Attribute.class, postData.getQuantityAttribute()));
             chargeTemplate.setQuantityAttribute(quantityAttribute);
         }
+        if(postData.getRatingScriptUsesPriceVersions() != null) {
+            chargeTemplate.setRatingScriptUsesPriceVersions(postData.getRatingScriptUsesPriceVersions());
+        }
+
         return chargeTemplate;
     }
 

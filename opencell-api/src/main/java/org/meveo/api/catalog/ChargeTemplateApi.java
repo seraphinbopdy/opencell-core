@@ -386,4 +386,14 @@ public abstract class ChargeTemplateApi<E extends ChargeTemplate, T extends Char
         }
         return ratingUOM;
     }
+
+    @Override
+    public E create(T dtoData) throws MeveoApiException, BusinessException {
+        return null;
+    }
+
+    @Override
+    public E createOrUpdate(T dataDto) throws MeveoApiException, BusinessException {
+        return super.createOrUpdate(dataDto);
+    }
 }

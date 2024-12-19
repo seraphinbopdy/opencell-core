@@ -854,11 +854,13 @@ public class InvoiceUblHelper {
         // todo : Check this contact namespace is correct
         if (billingAccount.getContactInformation() != null) {
             ContactType contactType = getContactInformation(billingAccount.getContactInformation());
-            if (billingAccount.getName() != null && billingAccount.getName().getFullName() != null) {
-                name = objectFactorycommonBasic.createName();
-                name.setValue(billingAccount.getName().getFullName());
-                contactType.setName(name);
-            }
+			if(billingAccount.getName() != null ) {
+				name = objectFactorycommonBasic.createName();
+				if(StringUtils.isNotBlank(billingAccount.getName().getFirstName())) {
+					name.setValue(billingAccount.getName().getFirstName() + " " + billingAccount.getName().getLastName() != null ? billingAccount.getName().getLastName() : "");
+				}
+				contactType.setName(name);
+			}
             partyType.setContact(contactType);
         }
         // AccountingCustomerParty/Party/PartyLegalEntity/Person

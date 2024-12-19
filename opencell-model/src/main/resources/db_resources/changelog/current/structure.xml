@@ -6070,7 +6070,7 @@ Your name and surname
         </insert>
         <!-- END Dunning Policy B2B -->
     </changeSet>
-    
+
     <changeSet id="#INTRD-22810_20240514" author="TarikFA.">
     	<preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -9220,7 +9220,7 @@ Your name and surname
         <sql>SELECT setval('untdid_vatex_seq', 57, true)</sql> 
         <sql>SELECT setval('untdid_2475_vat_payment_option_seq', 3, true)</sql> 
     </changeSet>
-    
+
 
     <changeSet id="#INTRD-14750_20230331" author="TarikFA.">
         <insert tableName="meveo_job_instance">
@@ -13707,7 +13707,7 @@ public class DummyPaymentGatewayScript extends Script {
             <where>code='RatingCancellationJob'</where>
         </update>
     </changeSet>
-        
+
     <changeSet id="INTRD-23881_20240702" author="TarikFA." failOnError="false">
         <addColumn tableName="advanced_settings">
             <column name="description_i18n" type="${type.json}" />
@@ -14697,7 +14697,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="is_manual_payment" type="${type.boolean}" valueNumeric="0" />
         </addColumn>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25474_new_cg_20241003" author="a.rouaguebe">
     	<preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">
@@ -14738,7 +14738,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="vat_status" type="varchar(25)" defaultValue="UNKNOWN"  />
         </addColumn>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25744_add_desci18n" author="a.rouaguebe">
         <update tableName="billing_subscrip_termin_reason">
             <column name="description" value="Charge agreement period, Reimburse advance charges, Apply termination fees" />
@@ -14780,7 +14780,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="ignore_service_instances" type="${type.boolean}" defaultValueNumeric="1" />
         </addColumn>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25340_update_dunning_actions_levels" author="zelmeliani">
         <update tableName="ar_dunning_action">
             <column name="description" value="Automatic level 1 email to individual customer"/>
@@ -14921,13 +14921,13 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <column name="cf_values" type="${type.json}" />
         </addColumn>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25018_20241021" author="AbdelmounaimAkadid">
         <addColumn tableName="ar_dunning_action">
             <column name="cf_values" type="${type.json}"></column>
         </addColumn>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25018_2_20241021" author="AbdelmounaimAkadid">
         <addColumn tableName="ar_dunning_action">
             <column name="uuid" type="varchar(60)">
@@ -14937,7 +14937,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <sql>update ${db.schema.adapted}ar_dunning_action set uuid = 'arda'||id</sql>
         <addNotNullConstraint tableName="ar_dunning_action" columnName="uuid" columnDataType="varchar(60)"/>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25018_3_20241021" author="AbdelmounaimAkadid">
         <addColumn tableName="dunning_action_instance">
             <column name="uuid" type="varchar(60)">
@@ -14947,7 +14947,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <sql>update ${db.schema.adapted}dunning_action_instance set uuid = 'dain'||id</sql>
         <addNotNullConstraint tableName="dunning_action_instance" columnName="uuid" columnDataType="varchar(60)"/>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25018_4_20241021" author="AbdelmounaimAkadid">
      	<addColumn tableName="dunning_level">
             <column name="cf_values" type="${type.json}"></column>
@@ -14960,7 +14960,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
         <sql>update ${db.schema.adapted}dunning_level set uuid = 'dunlvl'||id</sql>
         <addNotNullConstraint tableName="dunning_level" columnName="uuid" columnDataType="varchar(60)"/>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25018_5_20241021" author="AbdelmounaimAkadid">
         <addColumn tableName="dunning_level_instance">
             <column name="uuid" type="varchar(60)">
@@ -14992,7 +14992,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>code = 'reopenEDRZeroJob'</where>
         </update>
     </changeSet>
-    
+
     <changeSet id="#INTRD-26057_20241023" author="TarikFA.">
         <addColumn tableName="electronic_invoice_settings">
             <column name="customization_id" type="varchar(200)" defaultValue="urn:cen.eu:en16931:2017" />
@@ -15031,15 +15031,15 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             UPDATE cpq_quote_product product
             SET mrr = subquery.total_calculated_amount
                 FROM (
-                    SELECT 
+                    SELECT
                         p.id as product_id,
                         SUM(
-                            CASE 
-                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN 
+                            CASE
+                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN
                                     price.amount_with_tax / NULLIF(cal.period_length, 0)
-                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN 
+                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN
                                     (price.amount_with_tax * 365 / 12) / NULLIF(cal.period_length, 0)
-                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN 
+                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN
                                     price.amount_with_tax * (select count(*) from cat_calendar_days d where  d.calendar_id = cal.id) / 12
                                 ELSE price.amount_with_tax
                             END
@@ -15060,7 +15060,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             UPDATE cpq_quote q
             SET mrr = subquery.total_mrr
                 FROM (
-                   SELECT 
+                   SELECT
                        cq.id as quote_id,
                        SUM(cqp.mrr) as total_mrr
                    FROM cpq_quote cq
@@ -15081,15 +15081,15 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             UPDATE cpq_order_product product
             SET mrr = subquery.total_calculated_amount
                 FROM (
-                    SELECT 
+                    SELECT
                         p.id as product_id,
                         SUM(
-                            CASE 
-                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN 
+                            CASE
+                                WHEN cal.period_unit = 2 and cal.cal_type = 'PERIOD' THEN
                                     price.amount_with_tax / NULLIF(cal.period_length, 0)
-                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN 
+                                WHEN cal.period_unit = 5 and cal.cal_type = 'PERIOD' THEN
                                     (price.amount_with_tax * 365 / 12) / NULLIF(cal.period_length, 0)
-                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN 
+                                WHEN cal.period_unit IS NULL and cal.cal_type = 'YEARLY' THEN
                                     price.amount_with_tax * (select count(*) from cat_calendar_days d where  d.calendar_id = cal.id) / 12
                                 ELSE price.amount_with_tax
                             END
@@ -15110,7 +15110,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             UPDATE cpq_commercial_order ord
             SET mrr = subquery.total_mrr
                 FROM (
-                   SELECT 
+                   SELECT
                        o.id as order_id,
                        SUM(cop.mrr) as total_mrr
                    FROM cpq_commercial_order o
@@ -15138,7 +15138,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             <where>code = 'default_customer_balance'</where>
         </update>
     </changeSet>
-    
+
     <changeSet id="INTRD-26317_20241031" author="Mohammed_ElAzzouzi">
         <addColumn tableName="meveo_job_instance">
             <column name="process_next_job_on_error" type="${type.boolean}" defaultValueNumeric="0"/>
@@ -15179,7 +15179,7 @@ Usually, you’ll want that only if you don’t manage customer balance in Openc
             </column>
         </insert>
     </changeSet>
-        
+
     <changeSet id="#INTRD-26054_20241101" author="TarikFA.">
         <createSequence sequenceName="billing_purchase_order_seq" startValue="1" />
         <createTable tableName="billing_purchase_order">
@@ -15501,9 +15501,9 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
         </insert>
     </changeSet>
-        
+
     <changeSet id="#INTRD-22676" author="AndriusKarpavicius">
-     	<createSequence sequenceName="adm_endpoint_seq" startValue="1"/>                              
+     	<createSequence sequenceName="adm_endpoint_seq" startValue="1"/>
 
         <createTable tableName="adm_endpoint">
             <column name="id" type="bigint" autoIncrement="${id.auto}">
@@ -15582,7 +15582,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="parameter_name" type="varchar(50)" />
             <column name="multivalued" type="int4" defaultValueNumeric="0">
                 <constraints nullable="false"/>
-            </column>              
+            </column>
             <column name="default_value" type="varchar(255)"/>
             <column name="value_required" type="int4" defaultValueNumeric="0">
                 <constraints nullable="false"/>
@@ -15594,7 +15594,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         <addForeignKeyConstraint baseTableName="adm_endpoint_parameters" baseColumnNames="endpoint_id"
                                  constraintName="fk_adm_endpoint_parameters_endpoint_id" referencedTableName="adm_endpoint"
                                  referencedColumnNames="id" />
-                                 
+
         <addColumn tableName="meveo_script_instance">
             <column name="use_pool" type="${type.boolean}" defaultValueNumeric="0">
                 <constraints nullable="false"/>
@@ -15602,10 +15602,10 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="min_pool" type="int4"/>
             <column name="max_pool" type="int4"/>
             <column name="max_idle_time_pool" type="int4"/>
-        </addColumn>                         
-                              
+        </addColumn>
+
 	</changeSet>
-	
+
 	<changeSet id="INTRD-24987" author="AndriusKarpavicius">
 		<addColumn tableName="adm_notif_im">
 			<column name="im_provider_name" type="varchar(20)"/>
@@ -15617,14 +15617,14 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
 		<dropColumn tableName="adm_notif_im" columnName="im_provider" />
 		<addNotNullConstraint tableName="adm_notif_im" columnName="im_provider_name" />
 	</changeSet>
-    
+
     <changeSet id="INTRD-26817_20241126" author="AndriusKarpavicius">
         <sql>update ${db.schema.adapted}meveo_script_instance set description = substring(description, 1,255)</sql>
         <sql>update ${db.schema.adapted}batch_entity set description = substring(description, 1,255)</sql>
         <modifyDataType tableName="meveo_script_instance" columnName="description" newDataType="varchar(255)"/>
         <modifyDataType tableName="batch_entity" columnName="description" newDataType="varchar(255)"/>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25643-202401011" author="anasseh">
        <addColumn tableName="ar_payment_token">
             <column name="pre_authorisation_id" type="varchar(255)"  />
@@ -15664,7 +15664,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="dunning_collection_plan_id" type="bigint"  />
         </addColumn>
     </changeSet>
-    
+
     <changeSet id="#INTRD-25643_20241206" author="anasseh">
 	     <createSequence sequenceName="ar_pre_authorization_seq" startValue="1"/>
         <createTable tableName="ar_pre_authorization">
@@ -15679,16 +15679,16 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="status" type="varchar(20)"><constraints nullable="false"/></column>
             <column name="transaction_date" type="datetime"><constraints nullable="false" /></column>
             <column name="capture_date" type="datetime"><constraints nullable="true" /></column>
-            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>           
-            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>  
-            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>  
-            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>  
+            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>
+            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>
+            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>
+            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>
             <column name="error_detail" type="varchar(2000)"/>
             <column name="customer_account_id" type="bigint" />
             <column name="card_payment_method_id" type="bigint" ><constraints nullable="false" /></column>
-            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>           
+            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>
         </createTable>
-   
+
         <addForeignKeyConstraint
                 baseTableName="ar_pre_authorization"
                 baseColumnNames="customer_account_id"
@@ -15702,20 +15702,20 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 constraintName="card_payment_method_id_fk"
                 referencedTableName="ar_payment_token" referencedColumnNames="id"
                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-                onUpdate="NO ACTION" />  
+                onUpdate="NO ACTION" />
 		<addForeignKeyConstraint
                 baseTableName="ar_pre_authorization"
                 baseColumnNames="payment_gateway_id"
                 constraintName="payment_gateway_id_fk"
                 referencedTableName="ar_payment_gateway" referencedColumnNames="id"
                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-                onUpdate="NO ACTION" />   
-                
+                onUpdate="NO ACTION" />
+
          <dropColumn tableName="ar_payment_token">
             <column name="pre_authorisation_id"></column>
-        </dropColumn>                                  
-    </changeSet>      
-    
+        </dropColumn>
+    </changeSet>
+
 
     <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI">
         <createTable tableName="billing_subscriptions_purchase_orders">
@@ -15779,10 +15779,16 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                  constraintName="fk_invoice_line_id_billing_invoice_lines_subscriptions"
                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                  referencedColumnNames="id" referencedTableName="billing_invoice_line"/>
-        
+
     </changeSet>
     <changeSet id="#INTRD-27818_20241217" author="AndriusKarpavicius">
         <sql>update ${db.schema.adapted}billing_accounting_code set chart_of_account_type='ASSETS' where chart_of_account_type='ASSET'</sql>
+    </changeSet>
+
+    <changeSet id="#INTRD-26786_20241218" author="TarikFA.">
+        <addColumn tableName="cat_charge_template">
+            <column name="rating_script_uses_price_versions" type="${type.boolean}" defaultValueNumeric="0"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

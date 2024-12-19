@@ -435,7 +435,12 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quantity_attribute_id")
     private Attribute quantityAttribute;
-    
+
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "rating_script_uses_price_versions")
+    private boolean ratingScriptUsesPriceVersions = false;
+
     public String getInputUnitEL() {
         return inputUnitEL;
     }
@@ -1073,5 +1078,13 @@ public abstract class ChargeTemplate extends EnableBusinessCFEntity {
         tradingLanguageMap.put("ENG", "Business key is computed at rating using a custom expression set on the charge");
         tradingLanguageMap.put("FRA", "La clé métier est calculé à la valorisation en utilisant une formule personnalisé enregistrée sur la charge");
         return tradingLanguageMap;
+	}
+
+    public boolean isRatingScriptUsesPriceVersions() {
+        return ratingScriptUsesPriceVersions;
+    }
+
+    public void setRatingScriptUsesPriceVersions(boolean ratingScriptUsesPriceVersions) {
+        this.ratingScriptUsesPriceVersions = ratingScriptUsesPriceVersions;
     }
 }

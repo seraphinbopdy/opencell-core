@@ -208,6 +208,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
 
     public static final String FROM_JSON_FUNCTION = "FromJson(a.";
     public static final String CF_VALUES_FIELD = "cfValues";
+    public static final String CF_JSON_VALUES_FIELD = "cfValuesAsJson";
 
     public static final int SHORT_MAX_VALUE = 32767;
     /**
@@ -1220,7 +1221,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         Class currentEntity = entityClass;
         final String[] elements = orderElement.split("\\.");
         for (String element : elements) {
-            if (CF_VALUES_FIELD.equals(element)) {
+            if (CF_VALUES_FIELD.equals(element) || CF_JSON_VALUES_FIELD.equals(element)) {
                 break;
             }
             try {

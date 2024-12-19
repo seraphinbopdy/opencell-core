@@ -1680,7 +1680,7 @@ public class QueryBuilder {
         if (param instanceof Collection) {
             StringBuilder params = new StringBuilder();
             ((Collection<?>) param).forEach(v -> {
-                params.append("'").append(v).append("',");
+                params.append(paramToString(v)).append(",");
             });
             params.setLength(params.length() - 1);
             return params.toString();

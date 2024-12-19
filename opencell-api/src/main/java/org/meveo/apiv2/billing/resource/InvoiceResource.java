@@ -383,7 +383,7 @@ public interface InvoiceResource {
     Response deleteSubTotals(
             @Parameter(description = "the add SubTotals", required = true) InvoiceSubTotalsDto invoiceSubTotals);
 	
-	@PATCH
+	@PUT
     @Path("/validated/{id}")
     @Operation(summary = "Update a validated invoice", tags = { "Invoices" }, description = "Update a validated invoice with a set of changes to apply and return the updated invoice",
                     responses = {

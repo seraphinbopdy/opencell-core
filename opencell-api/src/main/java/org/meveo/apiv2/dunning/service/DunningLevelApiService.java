@@ -89,6 +89,10 @@ public class DunningLevelApiService extends BaseApi implements ApiService<Dunnin
 
         DunningSettings dunningSettings = dunningSettingsService.findLastOne();
 
+        if (dunningSettings != null && dunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL) && newDunningLevel.isReminder()) {
+            throw new InvalidParameterException("Reminder dunning level is not allowed for customer level dunning mode");
+        }
+
         if(dunningSettings != null) {
             newDunningLevel.setType(dunningSettings.getDunningMode());
         }

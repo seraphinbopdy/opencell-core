@@ -491,11 +491,10 @@ public class MediationJobBean extends BaseJobBean {
 	}
 
 
-    private void failedCDR(JobExecutionResultImpl jobExecutionResult,String fileName, CDR cdr, CDRStatusEnum status, PrintWriter rejectFileWriter, Map<String, List<String>> errorsMap) {
+    private void failedCDR(JobExecutionResultImpl jobExecutionResult, String fileName, CDR cdr, CDRStatusEnum status, PrintWriter rejectFileWriter, Map<String, List<String>> errorsMap) {
         log.error("Failed to process a CDR line: {} from file {}. Reason: {}", cdr.getLine(), fileName, cdr.getRejectReason());
         rejectFileWriter.println(cdr.getLine() + "\t" + cdr.getRejectReason());
         errorsMap.computeIfAbsent("file=" + fileName +" -> " + cdr.getRejectReason(), k -> new ArrayList<>()).add(cdr.getAccessCode());
-        jobExecutionResult.unRegisterSucces();
         cdr.setStatus(status);
         rejectededCdrEventProducer.fire(cdr);
         cdrService.createOrUpdateCdr(cdr);

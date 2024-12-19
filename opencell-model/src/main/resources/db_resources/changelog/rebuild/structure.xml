@@ -20892,6 +20892,10 @@
     <changeSet id="#INTRD-27683_update_dunning_actions_levels" author="zelmeliani" />
     <changeSet id="#INTRD-26795-20241210" author="zelmeliani" />
     <changeSet id="#INTRD-25643_20241206" author="anasseh" />
+    <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI" />
+    <changeSet id="#INTRD-5220_20241216" author="AndriusKarpavicius" />
+    <changeSet id="#INTRD-27818_20241217" author="AndriusKarpavicius" />
+    <changeSet id="#INTRD-26786_20241218" author="TarikFA." />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

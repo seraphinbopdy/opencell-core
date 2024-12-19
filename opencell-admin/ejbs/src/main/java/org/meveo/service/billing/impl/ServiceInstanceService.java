@@ -1047,7 +1047,10 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         entity.updateSubscribedTillAndRenewalNotifyDates();
         
         if(recalculateMrr) {
-            entity.setMrr(calculateMRR(entity));
+            ServiceInstance finalEntity = entity;
+            methodCallingUtils.callMethodInNewTx(() -> {
+                finalEntity.setMrr(calculateMRR(finalEntity));
+            });
             subscriptionService.calculateMrr(entity.getSubscription());
         }
 

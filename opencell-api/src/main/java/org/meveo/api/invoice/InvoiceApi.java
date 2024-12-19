@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.ejb.Stateless;
@@ -593,22 +592,6 @@ public class InvoiceApi extends BaseApi {
                 .orElseThrow(() -> new EntityDoesNotExistsException("Invoice does not exists"));
         if(VALIDATED.equals(invoice.getStatus())) {
             throw new BadRequestException("Invoice already validated");
-        }
-        if(invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode())) {
-            Set<LinkedInvoice> linkedInvoices = invoice.getLinkedInvoices();
-            if(linkedInvoices != null && !linkedInvoices.isEmpty()) {
-               Invoice originalInvoice = linkedInvoices.stream().map(LinkedInvoice::getLinkedInvoiceValue).findFirst().get();
-               if(originalInvoice.getLinkedInvoices() != null && !originalInvoice.getLinkedInvoices().isEmpty()) {
-                   long validatedAdj = originalInvoice.getLinkedInvoices().stream()
-                           .filter(linkedInvoice -> (linkedInvoice.getLinkedInvoiceValue().getInvoiceType() != null
-                                   && !"ADV".equals(linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode())
-                                   && linkedInvoice.getLinkedInvoiceValue().getStatus().equals(VALIDATED)))
-                           .count();
-                   if(validatedAdj == 1) {
-                       throw new BusinessApiException("Can not validate multiple adjustment on the same Invoice");
-                   }
-               }
-            }
         }
 		List<Invoice> advList = invoice.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV")).map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
 	    invoiceService.checkIfAllAdvArePaid(invoice, advList);

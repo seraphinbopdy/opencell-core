@@ -1205,6 +1205,10 @@ public class InvoiceUblHelper {
 		OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
 		SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
 		Optional<LinkedInvoice> documentReference = source.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equalsIgnoreCase("COM")).findFirst();
+		ID id = objectFactorycommonBasic.createID();
+		id.setValue(source.getExternalPurchaseOrderNumber());
+		orderReference.setID(id);
+
 		if(documentReference.isPresent()){
 			salesOrderID.setValue(documentReference.get().getLinkedInvoiceValue().getInvoiceNumber());
 			orderReference.setSalesOrderID(salesOrderID);

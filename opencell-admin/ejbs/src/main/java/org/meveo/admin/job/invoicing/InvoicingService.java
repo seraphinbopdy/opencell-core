@@ -58,6 +58,7 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.PurchaseOrderService;
+import org.meveo.service.billing.impl.InvoiceTypeService;
 import org.meveo.service.billing.impl.RejectedBillingAccountService;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.billing.impl.SubscriptionService;
@@ -92,6 +93,8 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private ServiceSingleton serviceSingleton;
     @Inject
     private InvoiceService invoiceService;
+    @Inject
+    private InvoiceTypeService invoiceTypeService;
     @Inject
     private TaxScriptService taxScriptService;
     @Inject
@@ -280,7 +283,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         itemsBySubCategory.put(scAggregate,items);
     }
     private Invoice initInvoice(BillingAccountDetailsItem billingAccountDetailsItem, BillingRun billingRun, BillingAccount billingAccount, BillingCycle billingCycle, boolean isFullAutomatic) {
-        InvoiceType invoiceType = invoiceService.determineInvoiceType(false, false, false, billingCycle, billingRun, billingAccount);
+        InvoiceType invoiceType = invoiceTypeService.retrieveIfNotManaged(invoiceService.determineInvoiceType(false, false, false, billingCycle, billingRun, billingAccount));
         Invoice invoice = new Invoice();
         invoice.setBillingAccount(billingAccount);
         invoice.setSeller(billingAccountDetailsItem.getSellerId() != null ? getEntityManager().getReference(Seller.class, billingAccountDetailsItem.getSellerId()) : null);

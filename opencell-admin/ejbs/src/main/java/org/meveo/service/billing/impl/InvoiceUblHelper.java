@@ -661,6 +661,9 @@ public class InvoiceUblHelper {
 
 	private void setInvoiceLine(List<InvoiceLine> invoiceLines, Invoice target, String invoiceLanguageCode){
 		invoiceLines.forEach(invoiceLine -> {
+			if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))) {
+				return;
+			}
 			// InvoiceLine/ Item/ ClassifiedTaxCategory/ Percent
 			InvoiceLineType invoiceLineType = objectFactoryCommonAggrement.createInvoiceLineType();
 			ItemType itemType = getItemTyp(invoiceLine, invoiceLanguageCode);
@@ -676,6 +679,9 @@ public class InvoiceUblHelper {
 	}
 	private void setInvoiceLine(List<InvoiceLine> invoiceLines, CreditNote target, String invoiceLanguageCode){
 		invoiceLines.forEach(invoiceLine -> {
+			if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))) {
+				return;
+			}
 			// InvoiceLine/ Item/ ClassifiedTaxCategory/ Percent
 			CreditNoteLineType invoiceLineType = objectFactoryCommonAggrement.createCreditNoteLineType();
 			ItemType itemType = getItemTyp(invoiceLine, invoiceLanguageCode);
@@ -1142,25 +1148,26 @@ public class InvoiceUblHelper {
 		}
 	}
 	private void setAllowanceCharge(org.meveo.model.billing.Invoice invoice, Invoice target, CreditNote creditNote){
-        final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null;
-		if(CollectionUtils.isNotEmpty(invoice.getInvoiceLines())){
-			invoice.getInvoiceLines().forEach(invoiceLine -> {
-				if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && "Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
+		final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null;
+		List<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates = (List<SubCategoryInvoiceAgregate>) invoiceAgregateService.listByInvoiceAndType(invoice, "F");
+		if(CollectionUtils.isNotEmpty(subCategoryInvoiceAgregates)){
+			subCategoryInvoiceAgregates.forEach(subCategoryInvoiceAgregate -> {
+				//if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && "Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
+				if(subCategoryInvoiceAgregate.getDiscountPlanItem() == null){
 					return;
 				}
 				AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
 				ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
 				chargeIndicator.setValue(false);
 				allowanceCharge.setChargeIndicator(chargeIndicator);
-				if(invoiceLine.getAccountingArticle().getAllowanceCode() != null) {
 					AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
-					allowanceChargeReasonCode.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getCode());
+					allowanceChargeReasonCode.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getCode());
 					allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
 					
 					AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
-					allowanceChargeReason.setValue(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription());
+					allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDescription());
 					allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
-				}
+
 			
 				Amount amount = objectFactorycommonBasic.createAmount();
 				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
@@ -1169,11 +1176,11 @@ public class InvoiceUblHelper {
 					amount.setCurrencyID(currency);
 					baseAmount.setCurrencyID(currency);
 				}
-				amount.setValue(invoiceLine.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs());
+				amount.setValue(subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs());
 				allowanceCharge.setAmount(amount);
 
 				baseAmount.setCurrencyID(invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null);
-				baseAmount.setValue(invoiceLine.getAmountWithoutTax().setScale(rounding, RoundingMode.HALF_UP).abs());
+				baseAmount.setValue(subCategoryInvoiceAgregate.getAmountWithoutTax().setScale(rounding, RoundingMode.HALF_UP).abs());
 				allowanceCharge.setBaseAmount(baseAmount);
 				if(creditNote != null)
 					creditNote.getAllowanceCharges().add(allowanceCharge);

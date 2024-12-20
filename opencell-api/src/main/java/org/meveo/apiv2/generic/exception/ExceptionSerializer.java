@@ -5,12 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.ws.rs.core.Response;
-
 import org.meveo.apiv2.models.ApiException;
 import org.meveo.apiv2.models.Cause;
 import org.meveo.apiv2.models.ImmutableApiException;
 import org.meveo.apiv2.models.ImmutableCause;
+
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+
+import jakarta.ws.rs.core.Response;
 
 class ExceptionSerializer {
 
@@ -71,8 +73,14 @@ class ExceptionSerializer {
     private String getUserFriendlyMessage(Throwable exception) {
 
         String message = exception.getMessage();
-        if (message != null && message.contains("ERROR: numeric field overflow")) {
+        if (message == null) {
+            return null;
+            
+        } else if (message.contains("ERROR: numeric field overflow")) {
             return "One of the numbers passed or caclulated is too large - exceeds 11 digits. Please check the input values.";
+
+        } else if (exception instanceof UnrecognizedPropertyException) {
+            return message.substring(0, message.indexOf(" (class"));
         }
         return message;
     }

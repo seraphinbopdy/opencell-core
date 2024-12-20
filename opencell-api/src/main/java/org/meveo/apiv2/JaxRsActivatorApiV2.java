@@ -9,12 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.ApplicationPath;
-import jakarta.ws.rs.core.Application;
-
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -70,9 +64,8 @@ import org.meveo.apiv2.customaction.CustomActionResourceImpl;
 import org.meveo.apiv2.customtable.CustomTableResourceImpl;
 import org.meveo.apiv2.document.DocumentResourceImpl;
 import org.meveo.apiv2.documentCategory.impl.DocumentCategoryResourceImpl;
-import org.meveo.apiv2.dunning.impl.DunningActionImpl;
 import org.meveo.apiv2.dunning.impl.CollectionPlanStatusResourceImpl;
-import org.meveo.apiv2.payments.resource.CustomerBalanceResourceImpl;
+import org.meveo.apiv2.dunning.impl.DunningActionImpl;
 import org.meveo.apiv2.dunning.impl.DunningAgentResourceImpl;
 import org.meveo.apiv2.dunning.impl.DunningCollectionPlanResourceImpl;
 import org.meveo.apiv2.dunning.impl.DunningLevelResourceImpl;
@@ -101,6 +94,7 @@ import org.meveo.apiv2.generic.exception.IllegalArgumentExceptionMapper;
 import org.meveo.apiv2.generic.exception.MeveoExceptionMapper;
 import org.meveo.apiv2.generic.exception.NotFoundExceptionMapper;
 import org.meveo.apiv2.generic.exception.UnprocessableEntityExceptionMapper;
+import org.meveo.apiv2.generic.exception.UnrecognizedPropertyExceptionMapper;
 import org.meveo.apiv2.generic.exception.ValidationExceptionMapper;
 import org.meveo.apiv2.generic.services.GenericApiLoggingFilter;
 import org.meveo.apiv2.media.file.upload.FileUploadResourceImpl;
@@ -111,6 +105,7 @@ import org.meveo.apiv2.ordering.resource.openorder.OpenOrderResourceImpl;
 import org.meveo.apiv2.ordering.resource.order.OrderResourceImpl;
 import org.meveo.apiv2.ordering.resource.orderitem.OrderItemResourceImpl;
 import org.meveo.apiv2.ordering.resource.product.ProductResourceImpl;
+import org.meveo.apiv2.payments.resource.CustomerBalanceResourceImpl;
 import org.meveo.apiv2.payments.resource.PaymentPlanResourceImpl;
 import org.meveo.apiv2.payments.resource.PaymentResourceImpl;
 import org.meveo.apiv2.quote.impl.QuoteOfferResourceImpl;
@@ -126,6 +121,12 @@ import org.meveo.apiv2.standardReport.impl.StandardReportResourceImpl;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
+
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 @ApplicationPath("/api/rest")
 public class JaxRsActivatorApiV2 extends Application {
@@ -171,7 +172,7 @@ public class JaxRsActivatorApiV2 extends Application {
         
         resources.addAll(Set.of(
                 VersionImpl.class, GenericResourceImpl.class, NotYetImplementedResource.class, NotFoundExceptionMapper.class,
-                BadRequestExceptionMapper.class,
+                BadRequestExceptionMapper.class, UnrecognizedPropertyExceptionMapper.class,
                 MeveoExceptionMapper.class, IllegalArgumentExceptionMapper.class,
                 EJBTransactionRolledbackExceptionMapper.class, ForbiddenExceptionMapper.class,
                 EntityDoesNotExistsExceptionMapper.class,

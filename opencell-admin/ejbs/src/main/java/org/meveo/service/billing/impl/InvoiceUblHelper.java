@@ -245,7 +245,6 @@ public class InvoiceUblHelper {
 			setGeneralInfo(invoice, creditNote);
 			setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
-			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
 			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
 			creditNote.setProfileID(profileID);
@@ -253,7 +252,6 @@ public class InvoiceUblHelper {
 			setGeneralInfo(invoice, invoiceXml);
 			//setBillingReference(invoice, invoiceXml);
 			setOrderReference(invoice, invoiceXml);
-			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
 			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
 			var commercialorderIds = invoice.getInvoiceLines().stream().map(InvoiceLine::getCommercialOrder).filter(Objects::nonNull)
@@ -863,7 +861,7 @@ public class InvoiceUblHelper {
 			if(billingAccount.getName() != null ) {
 				name = objectFactorycommonBasic.createName();
 				if(StringUtils.isNotBlank(billingAccount.getName().getFirstName())) {
-					name.setValue(billingAccount.getName().getFirstName() + " " + billingAccount.getName().getLastName() != null ? billingAccount.getName().getLastName() : "");
+					name.setValue(billingAccount.getName().getFirstName() + " " + (billingAccount.getName().getLastName() != null ? billingAccount.getName().getLastName() : ""));
 				}
 				contactType.setName(name);
 			}
@@ -1198,31 +1196,38 @@ public class InvoiceUblHelper {
 		return issueDate;
 	}
 	
-	private OrderReference getOrderReference(CommercialOrder commercialOrder, Date invoiceDate) {
+	private OrderReference getOrderReference(CommercialOrder commercialOrder, Date invoiceDate, String purchaseOrderNumber) {
 		if(commercialOrder == null) return null;
+		if(StringUtils.isBlank(purchaseOrderNumber)) return null;
+
 		OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
 		SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
-		salesOrderID.setValue(commercialOrder != null ? commercialOrder.getOrderNumber() : StringUtils.EMPTY);
+		salesOrderID.setValue(commercialOrder.getOrderNumber());
 		orderReference.setSalesOrderID(salesOrderID);
 		orderReference.setIssueDate(getIssueDate(invoiceDate));
+		ID id = objectFactorycommonBasic.createID();
+		id.setValue(purchaseOrderNumber);
+		orderReference.setID(id);
 		return orderReference;
 	}
 	private void setOrderReference(org.meveo.model.billing.Invoice source, Invoice target){
-		target.setOrderReference(getOrderReference(source.getCommercialOrder(), source.getInvoiceDate()));
+		target.setOrderReference(getOrderReference(source.getCommercialOrder(), source.getInvoiceDate(), source.getExternalPurchaseOrderNumber()));
 	}
 	private void setOrderReference(org.meveo.model.billing.Invoice source, CreditNote target){
-		OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
-		SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
-		Optional<LinkedInvoice> documentReference = source.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equalsIgnoreCase("COM")).findFirst();
-		ID id = objectFactorycommonBasic.createID();
-		id.setValue(source.getExternalPurchaseOrderNumber());
-		orderReference.setID(id);
+		if(StringUtils.isNotBlank(source.getExternalPurchaseOrderNumber())){
+			OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
+			SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
+			Optional<LinkedInvoice> documentReference = source.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equalsIgnoreCase("COM")).findFirst();
+			ID id = objectFactorycommonBasic.createID();
+			id.setValue(source.getExternalPurchaseOrderNumber());
+			orderReference.setID(id);
 
-		if(documentReference.isPresent()){
-			salesOrderID.setValue(documentReference.get().getLinkedInvoiceValue().getInvoiceNumber());
-			orderReference.setSalesOrderID(salesOrderID);
-			orderReference.setIssueDate(getIssueDate(documentReference.get().getLinkedInvoiceValue().getDueDate()));
-			target.setOrderReference(orderReference);
+			if(documentReference.isPresent()){
+				salesOrderID.setValue(documentReference.get().getLinkedInvoiceValue().getInvoiceNumber());
+				orderReference.setSalesOrderID(salesOrderID);
+				orderReference.setIssueDate(getIssueDate(documentReference.get().getLinkedInvoiceValue().getDueDate()));
+				target.setOrderReference(orderReference);
+			}
 		}
 	}
 	private void setBillingReference(org.meveo.model.billing.Invoice source, Invoice target){

@@ -973,7 +973,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
             // Get the dunning collection plan status by status to remove
             DunningCollectionPlanStatus collectionPlanStatusToRemove = dunningCollectionPlanStatusService.findByStatus(pStatusToRemove);
 
-            if (dunningCollectionPlan.getStatus().equals(collectionPlanStatusToRemove)) {
+            if (dunningCollectionPlan.getStatus().getStatus().equals(collectionPlanStatusToRemove.getStatus())) {
                 // Set the dunning collection plan status to the status to set
                 DunningCollectionPlanStatus collectionPlanStatusToSet = dunningCollectionPlanStatusService.findByStatus(pStatusToSet);
                 dunningCollectionPlan.setStatus(collectionPlanStatusToSet);

@@ -5756,6 +5756,18 @@
 		    <column name="template_id"          valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'INV_ADV')" />
 		    <column name="customer_balance_id"  valueComputed="(SELECT id FROM ar_customer_balance WHERE code = 'default_customer_balance')" />
 		</insert>
+        <insert tableName="ar_customer_balance_templates">
+            <column name="template_id"          valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'REF_CASH')" />
+            <column name="customer_balance_id"  valueComputed="(SELECT id FROM ar_customer_balance WHERE code = 'default_customer_balance')" />
+        </insert>
+        <insert tableName="ar_customer_balance_templates">
+            <column name="template_id"          valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'PPL_INSTALLMENT')" />
+            <column name="customer_balance_id"  valueComputed="(SELECT id FROM ar_customer_balance WHERE code = 'default_customer_balance')" />
+        </insert>
+        <insert tableName="ar_customer_balance_templates">
+            <column name="template_id"          valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'PPL_CREATION')" />
+            <column name="customer_balance_id"  valueComputed="(SELECT id FROM ar_customer_balance WHERE code = 'default_customer_balance')" />
+        </insert>
 		<insert tableName="ar_customer_balance_templates">
 		    <column name="template_id"          valueComputed="(SELECT id FROM ar_occ_template WHERE code = 'PAY_WIRE')" />
 		    <column name="customer_balance_id"  valueComputed="(SELECT id FROM ar_customer_balance WHERE code = 'default_customer_balance')" />

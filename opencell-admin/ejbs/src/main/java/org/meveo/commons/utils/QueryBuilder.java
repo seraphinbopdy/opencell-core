@@ -1687,7 +1687,7 @@ public class QueryBuilder {
         } else if (param instanceof String || param instanceof Enum) {
             return "'" + param + "'";
         } else if (param instanceof Date) {
-            return "'" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(param) + "'";
+            return "{ts '" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(param) + "'}";
         } else {
             return param.toString();
         }

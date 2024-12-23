@@ -38,6 +38,7 @@ import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.payments.impl.PaymentService;
+import org.meveo.service.payments.impl.RecordedInvoiceService;
 import org.meveo.service.securityDeposit.impl.SecurityDepositService;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -73,6 +74,9 @@ public class SecurityDepositServiceTest {
     
     @Mock
     private CustomFieldInstanceService customFieldInstanceService;
+    
+    @Mock
+    private RecordedInvoiceService recordedInvoiceService;
     
     private Long sdId = 10000L;
     private BigDecimal amount = new BigDecimal(90);
@@ -365,7 +369,7 @@ public class SecurityDepositServiceTest {
         securityDepositService.createSecurityDepositPaymentAccountOperation(securityDeposit, invoicePaymentAmount);
 
         ArgumentCaptor<AccountOperation> accountOperationCaptor = ArgumentCaptor.forClass(AccountOperation.class);
-        verify(accountOperationService).createAndReturnId(accountOperationCaptor.capture());
+        verify(accountOperationService).createAndReturnReference(accountOperationCaptor.capture());
         AccountOperation expecTedAccountOperation = accountOperationCaptor.getValue();
 
         //Then

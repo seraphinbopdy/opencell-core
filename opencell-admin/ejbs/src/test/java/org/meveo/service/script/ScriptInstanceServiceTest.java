@@ -1,6 +1,7 @@
 package org.meveo.service.script;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +62,7 @@ public class ScriptInstanceServiceTest {
         // Mock the method getScriptInstance and return the instance of ScriptInterfaceImplForTest
         // Use the form "doAnswer().when().method" instead of "when().thenAnswer()" because on spied object the later will call a real method at the setup time, which will fail because of null values being passed.
         Mockito.doReturn(scriptInterfaceImplForTest).when(scriptInstanceService).getScriptInstance(any());
-        Mockito.doReturn(scriptInstance).when(scriptInstanceService).findByCode(any());
+        Mockito.doReturn(scriptInstance).when(scriptInstanceService).findByCode(any(), anyBoolean());
 
         // When
         scriptInstanceService.execute("ScriptInterfaceImplForTest", parameters, false, false, false);

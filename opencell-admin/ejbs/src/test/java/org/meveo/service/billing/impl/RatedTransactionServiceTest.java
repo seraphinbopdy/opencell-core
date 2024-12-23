@@ -45,7 +45,7 @@ public class RatedTransactionServiceTest {
     @Spy
     @InjectMocks
     private RatedTransactionService ratedTransactionService;
-    
+
     public List<RatedTransaction> initData() {
         Seller seller = new Seller();
 
@@ -105,131 +105,131 @@ public class RatedTransactionServiceTest {
         cat1.setCode("cat1");
         cat1.setId(1011L);
         AccountingCode accountingCode = new AccountingCode();
-        accountingCode.setId(19L);        
-        
+        accountingCode.setId(19L);
+
         InvoiceSubCategory subCat11 = new InvoiceSubCategory();
         subCat11.setInvoiceCategory(cat1);
         subCat11.setCode("subCat11");
         subCat11.setAccountingCode(accountingCode);
         subCat11.setId(1013L);
-        
+
         Tax tax = new Tax();
         tax.setId(1017L);
         tax.setCode("tax1");
         tax.setPercent(new BigDecimal(15));
-        
+
         TaxClass taxClass = new TaxClass();
         taxClass.setId(1018L);
-        
+
         InvoiceType invoiceType = new InvoiceType();
         invoiceType.setId(1004L);
-        
+
         RatedTransaction rt = new RatedTransaction(new Date(), new BigDecimal(15), new BigDecimal(16), new BigDecimal(1), new BigDecimal(2), new BigDecimal(15), new BigDecimal(16), new BigDecimal(1),
             RatedTransactionStatusEnum.OPEN, ua1.getWallet(), ba, ua1, subCat11, null, null, null, null, null, subscription1, null, null, null, null, null, "rt111", "RT111", new Date(), new Date(), seller, tax,
             tax.getPercent(), null, taxClass, accountingCode, null, null, null);
         rt.setId(1020L);
-        
+
         rts.add(rt);
-        
+
         return rts;
     }
-    
+
     @Test
-    void testOk() {
+    public void testOk() {
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);
         Contract c1 = new Contract();
         c1.setBillingAccount(rt.getBillingAccount());
         c1.setId(1028L);
-        
+
         BillingRule br1 = new BillingRule();
         br1.setContract(c1);
         br1.setPriority(1);
         br1.setInvoicedBACodeEL("#{rt.getUserAccount().getBillingAccount().getCode()}");
         br1.setCriteriaEL("#{rt.getUserAccount() != null}");
         BillingAccount billingAccountAvant = rt.getBillingAccount();
-        ratedTransactionService.applyInvoicingRules(rts);        
+        ratedTransactionService.applyInvoicingRules(rts);
         BillingAccount originBillingAccountTest = rt.getOriginBillingAccount();
         BillingAccount billingAccountApres = rt.getBillingAccount();
         assertEquals(originBillingAccountTest, billingAccountAvant);
         assertNotEquals(billingAccountApres, billingAccountAvant);
     }
-    
+
     @Test
-    void testOnlyOneRuleRedirect() {
+    public void testOnlyOneRuleRedirect() {
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);
         Contract c1 = new Contract();
         c1.setBillingAccount(rt.getBillingAccount());
         c1.setId(1028L);
-        
+
         BillingRule br1 = new BillingRule();
         br1.setContract(c1);
         br1.setPriority(1);
         br1.setInvoicedBACodeEL("#{rt.getUserAccount().getBillingAccount().getCode()}");
         br1.setCriteriaEL("#{rt.getUserAccount() != null}");
-        
+
         BillingRule br2 = new BillingRule();
         br2.setContract(c1);
         br2.setPriority(1);
         br2.setInvoicedBACodeEL("");
         br2.setCriteriaEL("");
-        
+
         BillingAccount billingAccountAvant = rt.getBillingAccount();
-        ratedTransactionService.applyInvoicingRules(rts);        
+        ratedTransactionService.applyInvoicingRules(rts);
         BillingAccount originBillingAccountTest = rt.getOriginBillingAccount();
         BillingAccount billingAccountApres = rt.getBillingAccount();
         assertEquals(originBillingAccountTest, billingAccountAvant);
         assertNotEquals(billingAccountApres, billingAccountAvant);
     }
-    
+
     @Test
-    void testNotEvaluateInvoicedBACodeEL() {
+    public void testNotEvaluateInvoicedBACodeEL() {
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);
         Contract c1 = new Contract();
         c1.setBillingAccount(rt.getBillingAccount());
         c1.setId(1028L);
-        
+
         BillingRule br1 = new BillingRule();
         br1.setContract(c1);
         br1.setPriority(1);
         br1.setInvoicedBACodeEL("");
         br1.setCriteriaEL("#{rt.getUserAccount() != null}");
-        
+
         BillingRule br2 = new BillingRule();
         br2.setContract(c1);
         br2.setPriority(1);
         br2.setInvoicedBACodeEL("");
         br2.setCriteriaEL("");
-        
-        ratedTransactionService.applyInvoicingRules(rts);        
+
+        ratedTransactionService.applyInvoicingRules(rts);
         RatedTransactionStatusEnum statusTest = rt.getStatus();
         String rejectReasonTest = rt.getRejectReason();
         assertTrue(statusTest.equals(RatedTransactionStatusEnum.REJECTED));
         assertTrue(rejectReasonTest.contains("Error evaluating invoicedBillingAccountCodeEL"));
     }
-    
+
     @Test
-    void testNotEvaluateCriteriaEL() {
+    public void testNotEvaluateCriteriaEL() {
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);
         Contract c1 = new Contract();
         c1.setBillingAccount(rt.getBillingAccount());
         c1.setId(1028L);
-        
+
         BillingRule br1 = new BillingRule();
         br1.setContract(c1);
         br1.setPriority(1);
         br1.setInvoicedBACodeEL("#{rt.getUserAccount().getBillingAccount().getCode()}");
         br1.setCriteriaEL("");
-        
+
         BillingRule br2 = new BillingRule();
         br2.setContract(c1);
         br2.setPriority(1);
         br2.setInvoicedBACodeEL("");
         br2.setCriteriaEL("");
-        
+
         ratedTransactionService.applyInvoicingRules(rts);
         RatedTransactionStatusEnum statusTest = rt.getStatus();
         String rejectReasonTest = rt.getRejectReason();

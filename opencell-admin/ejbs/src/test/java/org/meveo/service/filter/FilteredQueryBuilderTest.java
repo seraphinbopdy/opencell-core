@@ -25,13 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.model.billing.BillingAccount;
@@ -43,133 +37,117 @@ import org.meveo.model.filter.NativeFilterCondition;
 import org.meveo.model.filter.OrCompositeFilterCondition;
 import org.meveo.model.filter.OrderCondition;
 import org.meveo.model.filter.PrimitiveFilterCondition;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.inject.Inject;
 import jakarta.persistence.DiscriminatorValue;
 
 /**
  * @author Edward P. Legaspi
  **/
+@RunWith(MockitoJUnitRunner.class)
+public class FilteredQueryBuilderTest {
 
-@Ignore
-public class FilteredQueryBuilderTest extends BaseFilterTest {
+    @Spy
+    @InjectMocks
+    private FilterService filterService;
 
-	@Inject
-	private FilterService filterService;
-	
-	private static final Logger log = LoggerFactory.getLogger(FilteredQueryBuilderTest.class);
+    private static final Logger log = LoggerFactory.getLogger(FilteredQueryBuilderTest.class);
 
-	@Deployment
-	public static Archive<?> createTestArchive() {
-		WebArchive result = ShrinkWrap.create(WebArchive.class, "filter.war");
+    @Test
+    public void elMatchTest() {
+        NativeFilterCondition nativeFilterCondition = new NativeFilterCondition();
+        nativeFilterCondition.setFilterConditionType(NativeFilterCondition.class.getAnnotation(DiscriminatorValue.class).value());
+        nativeFilterCondition.setEl("#{ba.code eq 'BA1'}");
 
-		result = initArchive(result);
+        BillingAccount ba = new BillingAccount();
+        ba.setCode("BA1");
 
-		return result;
-	}
+        Map<Object, Object> params = new HashMap<>();
+        params.put("ba", ba);
 
-	@Test
-	public void elMatchTest() {
-		NativeFilterCondition nativeFilterCondition = new NativeFilterCondition();
-		nativeFilterCondition.setFilterConditionType(NativeFilterCondition.class
-				.getAnnotation(DiscriminatorValue.class).value());
-		nativeFilterCondition.setEl("#{ba.code eq 'BA1'}");
+        Assert.assertEquals(true, filterService.isMatch(nativeFilterCondition, params));
+    }
 
-		BillingAccount ba = new BillingAccount();
-		ba.setCode("BA1");
+    @Test
+    public void elNotMatchTest() {
+        NativeFilterCondition nativeFilterCondition = new NativeFilterCondition();
+        nativeFilterCondition.setFilterConditionType(NativeFilterCondition.class.getAnnotation(DiscriminatorValue.class).value());
+        nativeFilterCondition.setEl("#{ba.code eq 'BA2'}");
 
-		Map<Object, Object> params = new HashMap<>();
-		params.put("ba", ba);
+        BillingAccount ba = new BillingAccount();
+        ba.setCode("BA1");
 
-		Assert.assertEquals(true, filterService.isMatch(nativeFilterCondition, params));
-	}
+        Map<Object, Object> params = new HashMap<>();
+        params.put("ba", ba);
 
-	@Test
-	public void elNotMatchTest() {
-		NativeFilterCondition nativeFilterCondition = new NativeFilterCondition();
-		nativeFilterCondition.setFilterConditionType(NativeFilterCondition.class
-				.getAnnotation(DiscriminatorValue.class).value());
-		nativeFilterCondition.setEl("#{ba.code eq 'BA2'}");
+        Assert.assertNotEquals(true, filterService.isMatch(nativeFilterCondition, params));
+    }
 
-		BillingAccount ba = new BillingAccount();
-		ba.setCode("BA1");
+    @Test
+    public void filterTest() {
+        AndCompositeFilterCondition andCompositeFilterCondition = new AndCompositeFilterCondition();
+        andCompositeFilterCondition.setFilterConditionType(AndCompositeFilterCondition.class.getAnnotation(DiscriminatorValue.class).value());
+        Set<FilterCondition> andFilterConditions = new HashSet<>();
 
-		Map<Object, Object> params = new HashMap<>();
-		params.put("ba", ba);
+        NativeFilterCondition nativeFilterCondition = new NativeFilterCondition();
+        nativeFilterCondition.setFilterConditionType(NativeFilterCondition.class.getAnnotation(DiscriminatorValue.class).value());
+        nativeFilterCondition.setJpql("c.countryCode like '%A%'");
+        andFilterConditions.add(nativeFilterCondition);
 
-		Assert.assertNotEquals(true, filterService.isMatch(nativeFilterCondition, params));
-	}
+        /* OR */
+        OrCompositeFilterCondition orCompositeFilterCondition = new OrCompositeFilterCondition();
+        orCompositeFilterCondition.setFilterConditionType(OrCompositeFilterCondition.class.getAnnotation(DiscriminatorValue.class).value());
+        Set<FilterCondition> orFilterConditions = new HashSet<>();
 
-	@Test
-	public void filterTest() {
-		AndCompositeFilterCondition andCompositeFilterCondition = new AndCompositeFilterCondition();
-		andCompositeFilterCondition.setFilterConditionType(AndCompositeFilterCondition.class.getAnnotation(
-				DiscriminatorValue.class).value());
-		Set<FilterCondition> andFilterConditions = new HashSet<>();
+        NativeFilterCondition nativeFilterCondition2 = new NativeFilterCondition();
+        nativeFilterCondition2.setFilterConditionType(NativeFilterCondition.class.getAnnotation(DiscriminatorValue.class).value());
+        nativeFilterCondition2.setJpql("c.countryCode like 'B%'");
+        orFilterConditions.add(nativeFilterCondition2);
 
-		NativeFilterCondition nativeFilterCondition = new NativeFilterCondition();
-		nativeFilterCondition.setFilterConditionType(NativeFilterCondition.class
-				.getAnnotation(DiscriminatorValue.class).value());
-		nativeFilterCondition.setJpql("c.countryCode like '%A%'");
-		andFilterConditions.add(nativeFilterCondition);
+        PrimitiveFilterCondition primitiveFilterCondition = new PrimitiveFilterCondition();
+        primitiveFilterCondition.setFilterConditionType(PrimitiveFilterCondition.class.getAnnotation(DiscriminatorValue.class).value());
+        primitiveFilterCondition.setFieldName("c.countryCode");
+        primitiveFilterCondition.setOperator("like");
+        primitiveFilterCondition.setOperand("C%");
+        orFilterConditions.add(primitiveFilterCondition);
 
-		/* OR */
-		OrCompositeFilterCondition orCompositeFilterCondition = new OrCompositeFilterCondition();
-		orCompositeFilterCondition.setFilterConditionType(OrCompositeFilterCondition.class.getAnnotation(
-				DiscriminatorValue.class).value());
-		Set<FilterCondition> orFilterConditions = new HashSet<>();
+        PrimitiveFilterCondition primitiveFilterCondition2 = new PrimitiveFilterCondition();
+        primitiveFilterCondition2.setFilterConditionType(PrimitiveFilterCondition.class.getAnnotation(DiscriminatorValue.class).value());
+        primitiveFilterCondition2.setFieldName("c.id");
+        primitiveFilterCondition2.setOperator(">");
+        primitiveFilterCondition2.setOperand("100");
+        orFilterConditions.add(primitiveFilterCondition2);
+        orCompositeFilterCondition.setFilterConditions(orFilterConditions);
+        /* OR */
 
-		NativeFilterCondition nativeFilterCondition2 = new NativeFilterCondition();
-		nativeFilterCondition2.setFilterConditionType(NativeFilterCondition.class.getAnnotation(
-				DiscriminatorValue.class).value());
-		nativeFilterCondition2.setJpql("c.countryCode like 'B%'");
-		orFilterConditions.add(nativeFilterCondition2);
+        andFilterConditions.add(orCompositeFilterCondition);
+        andCompositeFilterCondition.setFilterConditions(andFilterConditions);
 
-		PrimitiveFilterCondition primitiveFilterCondition = new PrimitiveFilterCondition();
-		primitiveFilterCondition.setFilterConditionType(PrimitiveFilterCondition.class.getAnnotation(
-				DiscriminatorValue.class).value());
-		primitiveFilterCondition.setFieldName("c.countryCode");
-		primitiveFilterCondition.setOperator("like");
-		primitiveFilterCondition.setOperand("C%");
-		orFilterConditions.add(primitiveFilterCondition);
+        OrderCondition orderCondition = new OrderCondition();
+        orderCondition.setAscending(false);
+        orderCondition.setFieldNames(new ArrayList<>(Arrays.asList("countryCode")));
 
-		PrimitiveFilterCondition primitiveFilterCondition2 = new PrimitiveFilterCondition();
-		primitiveFilterCondition2.setFilterConditionType(PrimitiveFilterCondition.class.getAnnotation(
-				DiscriminatorValue.class).value());
-		primitiveFilterCondition2.setFieldName("c.id");
-		primitiveFilterCondition2.setOperator(">");
-		primitiveFilterCondition2.setOperand("100");
-		orFilterConditions.add(primitiveFilterCondition2);
-		orCompositeFilterCondition.setFilterConditions(orFilterConditions);
-		/* OR */
+        FilterSelector filterSelector1 = new FilterSelector();
+        filterSelector1.setTargetEntity("org.meveo.model.billing.Country");
+        filterSelector1.setAlias("c");
+        filterSelector1.setDisplayFields(new ArrayList<>(Arrays.asList("id", "countryCode", "description", "currency", "language")));
 
-		andFilterConditions.add(orCompositeFilterCondition);
-		andCompositeFilterCondition.setFilterConditions(andFilterConditions);
+        Filter filter = new Filter();
+        filter.setFilterCondition(andCompositeFilterCondition);
+        filter.setPrimarySelector(filterSelector1);
+        // filter.setSecondarySelectors(filterSelectors);
+        filter.setOrderCondition(orderCondition);
 
-		OrderCondition orderCondition = new OrderCondition();
-		orderCondition.setAscending(false);
-		orderCondition.setFieldNames(new ArrayList<>(Arrays.asList("countryCode")));
+        try {
+            String result = filterService.filteredList(filter, 1, 2);
 
-		FilterSelector filterSelector1 = new FilterSelector();
-		filterSelector1.setTargetEntity("org.meveo.model.billing.Country");
-		filterSelector1.setAlias("c");
-		filterSelector1.setDisplayFields(new ArrayList<>(Arrays.asList("id", "countryCode", "description",
-				"currency", "language")));
-
-		Filter filter = new Filter();
-		filter.setFilterCondition(andCompositeFilterCondition);
-		filter.setPrimarySelector(filterSelector1);
-		// filter.setSecondarySelectors(filterSelectors);
-		filter.setOrderCondition(orderCondition);
-
-		try {
-			String result = filterService.filteredList(filter, 1, 2);
-
-			Assert.assertNotNull(result);
-		} catch (Exception e) {
-			log.error("error = {}", e);
-		}
-	}
+            Assert.assertNotNull(result);
+        } catch (Exception e) {
+            log.error("error = {}", e);
+        }
+    }
 }

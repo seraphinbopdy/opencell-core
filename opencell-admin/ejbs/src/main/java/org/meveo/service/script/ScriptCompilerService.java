@@ -364,7 +364,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
 
         String fullClassName = ScriptUtils.getFullClassname(javaSrc);
 
-        log.trace("Compile JAVA script {} with classpath {}", fullClassName, classpath);
+        log.debug("Compile JAVA script {} with classpath {}", fullClassName, classpath);
 
         compiler = new CharSequenceCompiler<ScriptInterface>(this.getClass().getClassLoader(), Arrays.asList(new String[] { "-cp", classpath }));
         final DiagnosticCollector<JavaFileObject> errs = new DiagnosticCollector<JavaFileObject>();

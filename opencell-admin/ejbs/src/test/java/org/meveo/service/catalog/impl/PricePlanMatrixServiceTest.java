@@ -18,7 +18,6 @@
 
 package org.meveo.service.catalog.impl;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -28,14 +27,13 @@ import static org.mockito.Mockito.spy;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.RecurringChargeTemplate;
-import org.meveo.service.base.PersistenceService;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
@@ -47,7 +45,7 @@ public class PricePlanMatrixServiceTest {
 
     @Spy
     @InjectMocks
-    private PricePlanMatrixService spyPricePlanMatrixService;
+    private PricePlanMatrixService pricePlanMatrixService;
 
     @Test
     public void create_test() throws ParseException {
@@ -71,17 +69,17 @@ public class PricePlanMatrixServiceTest {
         pricePlanMatrix3.setValidityFrom(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
         pricePlanMatrix3.setValidityDate(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
 
-        doNothing().when(spyPricePlanMatrixService).create(pricePlanMatrix3);
-        doReturn(Arrays.asList(pricePlanMatrix1, pricePlanMatrix2)).when(spyPricePlanMatrixService).listByChargeCode("REC_CODE");
+        doNothing().when(pricePlanMatrixService).create(pricePlanMatrix3);
+        doReturn(Arrays.asList(pricePlanMatrix1, pricePlanMatrix2)).when(pricePlanMatrixService).listByChargeCode("REC_CODE");
 
         // Use the form "doAnswer().when().method" instead of "when().thenAnswer()" because on spied object the later will call a real method at the setup time, which will fail because of null values being passed.
         doAnswer(new Answer<PricePlanMatrix>() {
             public PricePlanMatrix answer(InvocationOnMock invocation) throws Throwable {
                 return pricePlanMatrix3;
             }
-        }).when(spyPricePlanMatrixService).findById(eq(3L));
+        }).when(pricePlanMatrixService).findById(eq(3L));
 
-        spyPricePlanMatrixService.createPP(pricePlanMatrix3);
+        pricePlanMatrixService.createPP(pricePlanMatrix3);
     }
 
     @Test(expected = BusinessException.class)
@@ -102,19 +100,20 @@ public class PricePlanMatrixServiceTest {
         pricePlanMatrix2.setValidityDate(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
 
         PricePlanMatrix pricePlanMatrix3 = new PricePlanMatrix();
-        pricePlanMatrix3.setId(1L);
+        pricePlanMatrix3.setId(3L);
         pricePlanMatrix3.setValidityFrom(new SimpleDateFormat("yyyy-MM-dd").parse("2018-07-01"));
         pricePlanMatrix3.setValidityDate(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
+        pricePlanMatrix3.setChargeTemplates(Set.of(recurringChargeTemplate));
 
-        doReturn(Arrays.asList(pricePlanMatrix1, pricePlanMatrix2)).when(spyPricePlanMatrixService).listByChargeCode("REC_CODE");
+        doReturn(Arrays.asList(pricePlanMatrix1, pricePlanMatrix2)).when(pricePlanMatrixService).listByChargeCode("REC_CODE");
 
         // Use the form "doAnswer().when().method" instead of "when().thenAnswer()" because on spied object the later will call a real method at the setup time, which will fail because of null values being passed.
         doAnswer(new Answer<PricePlanMatrix>() {
             public PricePlanMatrix answer(InvocationOnMock invocation) throws Throwable {
-                return pricePlanMatrix1;
+                return pricePlanMatrix3;
             }
-        }).when(spyPricePlanMatrixService).findById(eq(1L));
+        }).when(pricePlanMatrixService).findById(eq(3L));
 
-        spyPricePlanMatrixService.createPP(pricePlanMatrix3);
+        pricePlanMatrixService.createPP(pricePlanMatrix3);
     }
 }

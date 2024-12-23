@@ -1,6 +1,7 @@
 package org.meveo.service.billing;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -81,13 +82,14 @@ public class ServiceInstanceServiceTest {
                 chargeInstance.setRecurringChargeTemplate(recurringChargeTemplate);
                 chargeInstance.setChargedToDate(suspensionDate);
                 chargeInstance.setStatus(suspendedStatus);
+                chargeInstance.setAnticipateEndOfSubscription(false);
                 return Arrays.asList(chargeInstance);
             }
         });
 
         serviceInstance = serviceInstanceService.terminateService(serviceInstance, terminationDate, terminationReason, null);
         // Do not apply a rating during the suspend period
-        verify(recurringChargeInstanceService, never()).applyRecuringChargeToEndAgreementDate(any(), any(), eq(terminationReason.isInvoiceAgreementImmediately()), eq(terminationDate));
+        verify(recurringChargeInstanceService, never()).applyRecuringChargeToEndAgreementDate(any(), any(), anyBoolean(), any()); // eq(false), eq(terminationDate));
     }
 
     @Test
@@ -120,6 +122,6 @@ public class ServiceInstanceServiceTest {
 
         serviceInstance = serviceInstanceService.terminateService(serviceInstance, terminationDate, terminationReason, null);
         // Do not apply a rating during the suspend period even with charge never been applied before (chargedToDate = null)
-        verify(recurringChargeInstanceService, never()).applyRecuringChargeToEndAgreementDate(any(), any(), eq(terminationReason.isInvoiceAgreementImmediately()), eq(terminationDate));
+        verify(recurringChargeInstanceService, never()).applyRecuringChargeToEndAgreementDate(any(), any(), anyBoolean(), any());// eq(false), eq(terminationDate));
     }
 }

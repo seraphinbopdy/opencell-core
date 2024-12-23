@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.meveo.model.audit.AuditDataConfiguration;
 import org.meveo.model.billing.AttributeInstance;
 import org.meveo.model.billing.DiscountPlanInstance;
+import org.meveo.model.billing.PurchaseOrder;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.shared.Title;
@@ -380,7 +381,7 @@ public class AuditDataConfigurationServiceTest {
 
         assertThat(queries.get(9).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
         assertThat(queries.get(9).getTableName()).isEqualTo("cat_offer_allowed_offer_change");
-        
+
         assertThat(queries.get(10).getQueryName()).isEqualTo("AuditDataConfiguration.deleteDataAuditTrigger");
         assertThat(queries.get(10).getTableName()).isEqualTo("offer_template_attribute");
 
@@ -450,7 +451,7 @@ public class AuditDataConfigurationServiceTest {
         assertThat(dataHierarchy.getDbColumByFieldname("auditable.created")).isEqualTo("created");
         assertThat(dataHierarchy.getDbColumByFieldname("validity.from")).isEqualTo("start_date");
 
-        assertThat(dataHierarchy.getRelatedEntities().size()).isEqualTo(2);
+        assertThat(dataHierarchy.getRelatedEntities().size()).isEqualTo(3);
 
         AuditDataHierarchy discountPlanDH = dataHierarchy.getRelatedEntities().get(0);
         assertThat(discountPlanDH.getEntityClass()).isEqualTo(DiscountPlanInstance.class);
@@ -470,6 +471,16 @@ public class AuditDataConfigurationServiceTest {
         assertThat(attributeInstanceDH.getDbColumByFieldname("auditable.creator")).isEqualTo("creator");
         assertThat(attributeInstanceDH.getDbColumByFieldname("booleanValue")).isEqualTo("boolean_value");
         assertThat(attributeInstanceDH.getDbColumByFieldname("parentAttributeValue")).isEqualTo("parent_id");
+        
+        AuditDataHierarchy purchaseOrderDH = dataHierarchy.getRelatedEntities().get(2);
+        assertThat(purchaseOrderDH.getEntityClass()).isNull();
+        assertThat(purchaseOrderDH.getTableName()).isEqualTo("billing_subscriptions_purchase_orders");
+        assertThat(purchaseOrderDH.getFieldName()).isEqualTo("purchaseOrders");
+        assertThat(purchaseOrderDH.getParentIdDbColumn()).isEqualTo("subscription_id");
+        assertThat(purchaseOrderDH.getParentIdField()).isEqualTo("parentId");
+        assertThat(purchaseOrderDH.getSaveEvenDiffIsEmpty()).isEqualTo(false);
+        assertThat(purchaseOrderDH.getDbColumByFieldname("parentId")).isEqualTo("subscription_id");
+        assertThat(purchaseOrderDH.getDbColumByFieldname("id")).isEqualTo("purchase_order_id");
     }
 
     @Test
@@ -490,7 +501,7 @@ public class AuditDataConfigurationServiceTest {
 
         auditDataConfigurationService.create(auditDataConfiguration);
 
-        assertThat(queries.size()).isEqualTo(3);
+        assertThat(queries.size()).isEqualTo(4);
         assertThat(queries.get(0).getQueryName()).isEqualTo("AuditDataConfiguration.recreateDataAuditTrigger");
         assertThat(queries.get(0).getTableName()).isEqualTo("billing_subscription");
         assertThat(queries.get(0).getFields()).isNull();
@@ -511,6 +522,13 @@ public class AuditDataConfigurationServiceTest {
         assertThat(queries.get(2).getActions()).isEqualTo("INSERT,UPDATE,DELETE");
         assertThat(queries.get(2).getPreserveField()).isEqualTo("subscription_id");
         assertThat(queries.get(2).getSaveEvenDiffIsEmpty()).isEqualTo(false);
+
+        assertThat(queries.get(3).getQueryName()).isEqualTo("AuditDataConfiguration.recreateDataAuditTrigger");
+        assertThat(queries.get(3).getTableName()).isEqualTo("billing_subscriptions_purchase_orders");
+        assertThat(queries.get(3).getFields()).isNull();
+        assertThat(queries.get(3).getActions()).isEqualTo("INSERT,UPDATE,DELETE");
+        assertThat(queries.get(3).getPreserveField()).isEqualTo("subscription_id");
+        assertThat(queries.get(3).getSaveEvenDiffIsEmpty()).isEqualTo(false);
     }
 
     private class ProcedureSimulation implements StoredProcedureQuery {

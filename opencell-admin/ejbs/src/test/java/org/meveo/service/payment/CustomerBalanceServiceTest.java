@@ -16,7 +16,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -257,8 +256,8 @@ public class CustomerBalanceServiceTest {
 
         ArgumentCaptor<Long> customerAccountCaptor = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<Long> currencyCaptor = ArgumentCaptor.forClass(Long.class);
-        ArgumentCaptor<ArrayList<String>> linkedOccTemplates = ArgumentCaptor.forClass(ArrayList.class);
-        ArgumentCaptor<ArrayList<String>> occTemplatesToExclude = ArgumentCaptor.forClass(ArrayList.class);
+        ArgumentCaptor<List<String>> linkedOccTemplates = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List<String>> occTemplatesToExclude = ArgumentCaptor.forClass(List.class);
 
         customerBalanceService.getAccountOperations(accountOperationsDetails);
 

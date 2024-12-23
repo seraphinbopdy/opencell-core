@@ -112,8 +112,6 @@ public class PricePlanMatrixService extends BusinessService<PricePlanMatrix> {
 	}
 
     private boolean areValidityPeriodsOverlap(Date start1, Date end1, Date start2, Date end2){
-        System.out.println("Akk checking "+start1 +" "+ end1 +" "+ start2 +" "+ end2);
-        
         return  (start1 != null && isDateBetween(start1, start2, end2)) || (end1 != null && isDateBetween(end1, start2, end2));
     }
 

@@ -1474,7 +1474,10 @@ public class InvoiceUblHelper {
 				partyType.getPartyNames().add(getPartyName(billingAccount.getCustomerAccount()));
 			}
 		}
-		addPartyIdentifications(billingAccount.getCustomerAccount().getRegistrationNumbers(), partyType);
+		billingAccount.getUsersAccounts().forEach(userAccount -> {
+			addPartyIdentifications(userAccount.getRegistrationNumbers(), partyType);
+		});
+
 		partyType.setIndustryClassificationCode(getIndustryClassificationCode());
 		serviceProviderParty.setParty(partyType);
 		return serviceProviderParty;

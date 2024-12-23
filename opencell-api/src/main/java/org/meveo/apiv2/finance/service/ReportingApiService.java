@@ -86,10 +86,11 @@ public class ReportingApiService implements ApiService<AccountOperation> {
 		Set<String> fetchFieldsSet = new LinkedHashSet<>();
 		Map<String, Object> filters = new HashMap<>();
 		filters.put("toRange accountingDate", reportEndDateInclusive);
+		StringBuilder sqlFilter = new StringBuilder("(a.code not like '%_FAE%')");
 		if(codeOrLabel != null && !codeOrLabel.isEmpty()){
-			filters.put("SQL", "(a.accountingCode.code like '" + codeOrLabel + "%' OR a.accountingCode.description like '" + codeOrLabel + "%')");
+			sqlFilter.append(" and (a.accountingCode.code like '" + codeOrLabel + "%' OR a.accountingCode.description like '" + codeOrLabel + "%')");
 		}
-		filters.put("SQL", "(a.code not like '%_FAE%')");
+		filters.put("SQL", sqlFilter.toString());
 		String initalBalanceDebit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDate, "DEBIT");
 		String initalBalanceCredit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDate, "CREDIT");
 		String currentBalanceDebit = String.format(BALANCE_CRITERIA, reportStartDate, reportEndDateInclusive, "DEBIT");

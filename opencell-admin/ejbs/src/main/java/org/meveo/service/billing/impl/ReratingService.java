@@ -406,6 +406,7 @@ public class ReratingService extends RatingService implements Serializable {
 
             if (rejectReason != null) {
                 operationToRerate.changeStatus(WalletOperationStatusEnum.F_TO_RERATE);
+                operationToRerate.setUpdater(currentUser.getUserName());
                 operationToRerate.setRejectReason(rejectReason);
                 walletOperationService.update(operationToRerate);
                 return;

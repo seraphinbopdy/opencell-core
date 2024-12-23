@@ -241,21 +241,20 @@ public class InvoiceUblHelper {
 												.reduce(BigDecimal.ZERO, BigDecimal::add);
 		var profileID = getProfileID(invoice.getInvoiceLines());
 		BigDecimal payableAmount = invoice.getNetToPay();
+		BigDecimal discountAmount = invoice.getDiscountAmount();
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
 			setBillingReference(invoice, creditNote);
 			setOrderReference(invoice, creditNote);
-			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
-			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
+			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount, discountAmount));
 			creditNote.setProfileID(profileID);
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
 			//setBillingReference(invoice, invoiceXml);
 			setOrderReference(invoice, invoiceXml);
-			setOrderReferenceId(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
-			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount));
+			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount, discountAmount));
 			var commercialorderIds = invoice.getInvoiceLines().stream().map(InvoiceLine::getCommercialOrder).filter(Objects::nonNull)
 					.collect(Collectors.toSet());
 			setBillingReferenceForInvoice(commercialorderIds, invoiceXml);
@@ -853,6 +852,8 @@ public class InvoiceUblHelper {
             partyLegalEntity.setRegistrationAddress(addressType);
         }
 
+
+
 		addPartyIdentifications(billingAccount.getRegistrationNumbers(), partyType);
         partyType.getPartyLegalEntities().add(partyLegalEntity);
 
@@ -863,7 +864,7 @@ public class InvoiceUblHelper {
 			if(billingAccount.getName() != null ) {
 				name = objectFactorycommonBasic.createName();
 				if(StringUtils.isNotBlank(billingAccount.getName().getFirstName())) {
-					name.setValue(billingAccount.getName().getFirstName() + " " + billingAccount.getName().getLastName() != null ? billingAccount.getName().getLastName() : "");
+					name.setValue(billingAccount.getName().getFirstName() + " " + (billingAccount.getName().getLastName() != null ? billingAccount.getName().getLastName() : ""));
 				}
 				contactType.setName(name);
 			}
@@ -1083,6 +1084,14 @@ public class InvoiceUblHelper {
 		partyName.setName(name);
 		partyType.getPartyNames().add(partyName);
 
+		var siren = seller.getRegistrationNumbers().stream().filter(registrationNumber -> registrationNumber.getIsoIcd() != null && SIREN.equalsIgnoreCase(registrationNumber.getIsoIcd().getCode())).findFirst();
+		if(siren.isPresent()){
+			CompanyID companyID = objectFactorycommonBasic.createCompanyID();
+			companyID.setValue(siren.get().getRegistrationNo());
+			companyID.setSchemeID(siren.get().getIsoIcd().getCode());
+			partyLegalEntity.setCompanyID(companyID);
+			partyLegalEntity.setCompanyID(companyID);
+		}
 		partyType.getPartyLegalEntities().add(partyLegalEntity);
 		supplierPartyType.setParty(partyType);
 		if(creditNote == null)
@@ -1198,30 +1207,38 @@ public class InvoiceUblHelper {
 		return issueDate;
 	}
 	
-	private OrderReference getOrderReference(CommercialOrder commercialOrder, Date invoiceDate) {
+	private OrderReference getOrderReference(CommercialOrder commercialOrder, Date invoiceDate, String purchaseOrderNumber) {
 		if(commercialOrder == null) return null;
+		if(StringUtils.isBlank(purchaseOrderNumber)) return null;
+
 		OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
 		SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
-		salesOrderID.setValue(commercialOrder != null ? commercialOrder.getOrderNumber() : StringUtils.EMPTY);
+		salesOrderID.setValue(commercialOrder.getOrderNumber());
 		orderReference.setSalesOrderID(salesOrderID);
 		orderReference.setIssueDate(getIssueDate(invoiceDate));
+		ID id = objectFactorycommonBasic.createID();
+		id.setValue(purchaseOrderNumber);
+		orderReference.setID(id);
 		return orderReference;
 	}
 	private void setOrderReference(org.meveo.model.billing.Invoice source, Invoice target){
-		target.setOrderReference(getOrderReference(source.getCommercialOrder(), source.getInvoiceDate()));
+		target.setOrderReference(getOrderReference(source.getCommercialOrder(), source.getInvoiceDate(), source.getExternalPurchaseOrderNumber()));
 	}
 	private void setOrderReference(org.meveo.model.billing.Invoice source, CreditNote target){
-		OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
-		SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
-		Optional<LinkedInvoice> documentReference = source.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equalsIgnoreCase("COM")).findFirst();
-		ID id = objectFactorycommonBasic.createID();
-		id.setValue(source.getExternalPurchaseOrderNumber());
-		orderReference.setID(id);
+		if(StringUtils.isNotBlank(source.getExternalPurchaseOrderNumber())){
+			OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
+			SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
+			Optional<LinkedInvoice> documentReference = source.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equalsIgnoreCase("COM")).findFirst();
+			ID id = objectFactorycommonBasic.createID();
+			id.setValue(source.getExternalPurchaseOrderNumber());
+			orderReference.setID(id);
 
-		if(documentReference.isPresent()){
-			salesOrderID.setValue(documentReference.get().getLinkedInvoiceValue().getInvoiceNumber());
-			orderReference.setSalesOrderID(salesOrderID);
-			orderReference.setIssueDate(getIssueDate(documentReference.get().getLinkedInvoiceValue().getDueDate()));
+			if(documentReference.isPresent()){
+				salesOrderID.setValue(documentReference.get().getLinkedInvoiceValue().getInvoiceNumber());
+				orderReference.setSalesOrderID(salesOrderID);
+				orderReference.setIssueDate(getIssueDate(documentReference.get().getLinkedInvoiceValue().getDueDate()));
+			}
+
 			target.setOrderReference(orderReference);
 		}
 	}
@@ -1338,7 +1355,7 @@ public class InvoiceUblHelper {
 		return taxCategoryType;
 	}
 	
-	private static MonetaryTotalType setTaxExclusiveAmount(BigDecimal totalPrepaidAmount, String currency, BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal lineExtensionAmount, BigDecimal payableAmount) {
+	private static MonetaryTotalType setTaxExclusiveAmount(BigDecimal totalPrepaidAmount, String currency, BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal lineExtensionAmount, BigDecimal payableAmount, BigDecimal discountAmount) {
 		MonetaryTotalType moneyTotalType = objectFactoryCommonAggrement.createMonetaryTotalType();
 		TaxInclusiveAmount taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
 		taxInclusiveAmount.setCurrencyID(currency);
@@ -1360,11 +1377,18 @@ public class InvoiceUblHelper {
 		payableAmountType.setValue(payableAmount.setScale(rounding, RoundingMode.HALF_UP));
 		moneyTotalType.setPayableAmount(payableAmountType);
 
-		if(totalPrepaidAmount.compareTo(BigDecimal.ZERO) != 0){
+		if(totalPrepaidAmount != null && totalPrepaidAmount.compareTo(BigDecimal.ZERO) != 0){
 			PrepaidAmount prepaidAmount = objectFactorycommonBasic.createPrepaidAmount();
 			prepaidAmount.setCurrencyID(currency);
 			prepaidAmount.setValue(totalPrepaidAmount);
 			moneyTotalType.setPrepaidAmount(prepaidAmount);
+		}
+
+		if(discountAmount != null && discountAmount.compareTo(BigDecimal.ZERO) != 0){
+			var allowanceTotalAmount = objectFactorycommonBasic.createAllowanceTotalAmount();
+			allowanceTotalAmount.setCurrencyID(currency);
+			allowanceTotalAmount.setValue(discountAmount);
+			moneyTotalType.setAllowanceTotalAmount(allowanceTotalAmount);
 		}
 
 
@@ -1450,6 +1474,10 @@ public class InvoiceUblHelper {
 				partyType.getPartyNames().add(getPartyName(billingAccount.getCustomerAccount()));
 			}
 		}
+		billingAccount.getUsersAccounts().forEach(userAccount -> {
+			addPartyIdentifications(userAccount.getRegistrationNumbers(), partyType);
+		});
+
 		partyType.setIndustryClassificationCode(getIndustryClassificationCode());
 		serviceProviderParty.setParty(partyType);
 		return serviceProviderParty;

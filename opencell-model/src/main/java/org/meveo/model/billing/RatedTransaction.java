@@ -669,6 +669,12 @@ public class RatedTransaction extends CFEntity implements ISearchable, IInvoicea
     @Column(name = "business_key")
     private String businessKey;
 
+    /**
+     * Username of a user that last updated the record/entity
+     */
+    @Column(name = "updater", length = 100)
+    private String updater;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_id")
     private Contract contract;
@@ -1815,5 +1821,12 @@ public class RatedTransaction extends CFEntity implements ISearchable, IInvoicea
     public void setContractLine(ContractItem contractLine) {
         this.contractLine = contractLine;
     }
+    
+    public String getUpdater() {
+        return updater;
+    }
 
+    public void setUpdater(String updater) {
+        this.updater = updater;
+    }
 }

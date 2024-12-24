@@ -13921,8 +13921,8 @@ Meaning that advances won’t be available for further invoices."/>
 		    <column name="version" value="0" />
 		    <column name="created" valueDate="${db.current.time}" />
 		    <column name="creator" value="applicationInitializer" />
-		    <column name="code" value="ARREARS_BALANCE" />
-		    <column name="description" value="arrears balance" />
+		    <column name="code" value="DUNNING_BALANCE" />
+		    <column name="description" value="Dunning balance" />
 		    <column name="default_balance" value="0" />
 			<column name="balance_el" value="#{ accountOperation.type == 'I' &amp;&amp; accountOperation.dueDate &lt; currentDate &amp;&amp; (accountOperation.matchingStatus == 'O' || accountOperation.matchingStatus == 'P') }" />
 		</insert>

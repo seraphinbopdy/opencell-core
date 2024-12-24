@@ -27,7 +27,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.storage.StorageFactory;
-import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
@@ -43,7 +42,6 @@ import org.meveo.model.billing.LinkedInvoice;
 import org.meveo.model.billing.SubCategoryInvoiceAgregate;
 import org.meveo.model.billing.Tax;
 import org.meveo.model.billing.TaxInvoiceAgregate;
-import org.meveo.model.billing.UntdidAllowanceCode;
 import org.meveo.model.billing.UntdidTaxationCategory;
 import org.meveo.model.billing.VatDateCodeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
@@ -106,7 +104,6 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Allowanc
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Amount;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseAmount;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseQuantity;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BuildingNumber;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ChargeIndicator;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CityName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyID;
@@ -123,7 +120,6 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Document
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndDate;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndpointID;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FamilyName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FirstName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.HolderName;
@@ -1157,46 +1153,44 @@ public class InvoiceUblHelper {
 		}
 	}
 	private void setAllowanceCharge(org.meveo.model.billing.Invoice invoice, Invoice target, CreditNote creditNote){
-		final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null;
+		final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : invoice.getBillingAccount().getTradingCurrency() != null ? invoice.getBillingAccount().getTradingCurrency().getCurrencyCode() : null;
 		List<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates = (List<SubCategoryInvoiceAgregate>) invoiceAgregateService.listByInvoiceAndType(invoice, SubCategoryInvoiceAgregate.class);
 		if(CollectionUtils.isNotEmpty(subCategoryInvoiceAgregates)){
+			AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
 			subCategoryInvoiceAgregates.forEach(subCategoryInvoiceAgregate -> {
 				//if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && "Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
 				if(subCategoryInvoiceAgregate.getDiscountPlanItem() == null){
 					return;
 				}
-				AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
 				ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
 				chargeIndicator.setValue(false);
 				allowanceCharge.setChargeIndicator(chargeIndicator);
-					AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
-					allowanceChargeReasonCode.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getCode());
-					allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
-					
-					AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
-					allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDescription());
-					allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
+				AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
+				allowanceChargeReasonCode.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getCode());
+				allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
+
+				AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
+				allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDescription());
+				allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
 
 			
 				Amount amount = objectFactorycommonBasic.createAmount();
 				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
 
-				if(currency != null){
-					amount.setCurrencyID(currency);
-					baseAmount.setCurrencyID(currency);
-				}
-				amount.setValue(subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs());
+				amount.setCurrencyID(currency);
+				baseAmount.setCurrencyID(currency);
+
+				amount.setValue(amount.getValue() != null ? subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs().add(amount.getValue()) : subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs() );
 				allowanceCharge.setAmount(amount);
 
-				baseAmount.setCurrencyID(invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null);
 				baseAmount.setValue(subCategoryInvoiceAgregate.getAmountWithoutTax().setScale(rounding, RoundingMode.HALF_UP).abs());
 				allowanceCharge.setBaseAmount(baseAmount);
-				if(creditNote != null)
-					creditNote.getAllowanceCharges().add(allowanceCharge);
-				else
-					target.getAllowanceCharges().add(allowanceCharge);
-				
+
 			});
+			if(creditNote != null)
+				creditNote.getAllowanceCharges().add(allowanceCharge);
+			else
+				target.getAllowanceCharges().add(allowanceCharge);
 		}
 		
 	}
@@ -1380,14 +1374,14 @@ public class InvoiceUblHelper {
 		if(totalPrepaidAmount != null && totalPrepaidAmount.compareTo(BigDecimal.ZERO) != 0){
 			PrepaidAmount prepaidAmount = objectFactorycommonBasic.createPrepaidAmount();
 			prepaidAmount.setCurrencyID(currency);
-			prepaidAmount.setValue(totalPrepaidAmount);
+			prepaidAmount.setValue(totalPrepaidAmount.setScale(rounding, RoundingMode.HALF_UP));
 			moneyTotalType.setPrepaidAmount(prepaidAmount);
 		}
 
 		if(discountAmount != null && discountAmount.compareTo(BigDecimal.ZERO) != 0){
 			var allowanceTotalAmount = objectFactorycommonBasic.createAllowanceTotalAmount();
 			allowanceTotalAmount.setCurrencyID(currency);
-			allowanceTotalAmount.setValue(discountAmount);
+			allowanceTotalAmount.setValue(discountAmount.setScale(rounding, RoundingMode.HALF_UP));
 			moneyTotalType.setAllowanceTotalAmount(allowanceTotalAmount);
 		}
 

@@ -124,7 +124,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 			return Optional.empty();
 		}
 		
-		final long nrPerTx = (nrOfInitialWOs / nbThreads) < configuredNrPerTx ? nrOfInitialWOs / nbThreads : configuredNrPerTx;
+		final long nrPerTx = (nrOfInitialWOs / nbThreads) < configuredNrPerTx ? ((nrOfInitialWOs / nbThreads) <= 0 ? 1 : nrOfInitialWOs / nbThreads) : configuredNrPerTx;
 		int fetchSize = ((Long) nrPerTx).intValue() * nbThreads.intValue();
 		org.hibernate.query.Query nativeQuery = statelessSession.createNativeQuery("select id, count_wo from " + MAIN_VIEW_NAME + " order by id");
 		scrollableResults = nativeQuery.setReadOnly(true).setCacheable(false).setMaxResults(processNrInJobRun).setFetchSize(fetchSize).scroll(ScrollMode.FORWARD_ONLY);

@@ -1047,10 +1047,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         entity.updateSubscribedTillAndRenewalNotifyDates();
         
         if(recalculateMrr) {
-            ServiceInstance finalEntity = entity;
-            methodCallingUtils.callMethodInNewTx(() -> {
-                finalEntity.setMrr(calculateMRR(finalEntity));
-            });
+            entity.setMrr(calculateMRR(entity));
             subscriptionService.calculateMrr(entity.getSubscription());
         }
 
@@ -1439,7 +1436,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
                     try {
 
-                        methodCallingUtils.callMethodInNewTx(() -> {
+                        //methodCallingUtils.callMethodInNewTx(() -> {
                             RecurringChargeInstance rci = recurringChargeInstanceService.findById(chargeInstance.getId());
                             if (rci != null) {
                                 rci.setChargeDate(new Date());
@@ -1447,7 +1444,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
                             }
                             ratingResult.set(recurringChargeInstanceService.applyRecurringCharge(Optional.ofNullable(rci)
                                                                                                          .orElse(chargeInstance), new Date(), true, true, null));
-                        });
+                        //});
                         
                     } catch (Exception e) {
                         log.error("Failed to apply recurring charge {}: {}", chargeInstance, e.getMessage(), e);

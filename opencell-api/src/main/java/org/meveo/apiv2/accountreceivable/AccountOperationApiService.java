@@ -245,7 +245,7 @@ public class AccountOperationApiService implements ApiService<AccountOperation> 
 					BigDecimal amountToMatch = accountOperationAndSequenceOptional.get().getAmountToMatch();
 					Integer sequence = accountOperationAndSequenceOptional.get().getSequence();
 					if (amountToMatch != null) {
-						if (amountToMatch.compareTo(BigDecimal.ZERO) <= 0) {
+						if (amountToMatch.compareTo(BigDecimal.ZERO) < 0) {
 							throw new BusinessApiException("The amount to match must be greater than 0");
 						} else if (amountToMatch.compareTo(accountOperation.getUnMatchingAmount()) > 0) {
 							throw new BusinessApiException("The amount to match must be less than : " + accountOperation.getUnMatchingAmount().doubleValue() + " for sequence : " + sequence);

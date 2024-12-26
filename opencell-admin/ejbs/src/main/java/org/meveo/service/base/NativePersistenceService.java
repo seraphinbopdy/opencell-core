@@ -18,6 +18,7 @@
 package org.meveo.service.base;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.meveo.commons.utils.ParamBean.getInstance;
 
@@ -70,6 +71,7 @@ import org.meveo.jpa.EntityManagerProvider;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.CustomTableEvent;
+import org.meveo.model.IEntity;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
@@ -862,6 +864,16 @@ public class NativePersistenceService extends BaseService {
             config.setFetchFields(rework);
         }
 
+        Class<?> entity = null;
+        if (Boolean.TRUE.equals(isExport) && !tableName.toUpperCase().startsWith("CT_")) {
+            try {
+                entity = Class.forName(tableName);
+            } catch (ClassNotFoundException e) {
+                throw new BusinessException(String.format("Unknown entity %s", tableName));
+            }
+        }
+        Class<?> finalEntity = entity;
+
         String fieldsToRetrieve;
         if (fetchFields.isEmpty()) {
             fieldsToRetrieve = "*";
@@ -871,8 +883,23 @@ public class NativePersistenceService extends BaseService {
                 fieldsToRetrieve = fieldsToRetrieve + ", {aggregationFields}";
             }
         }
-        StringBuilder sql = new StringBuilder("select " + fieldsToRetrieve + " from " + tableName + " a ");
+        StringBuilder sql = new StringBuilder("select {fieldsPlaceHolder} from " + tableName + " a ");
         QueryBuilder queryBuilder = new QueryBuilder(sql.toString(), "a");
+
+        String fieldsPlaceHolder = mappedFields(fetchFields, predicate.negate()).stream()
+                                                                                .map(f -> {
+                                                                                    Field field = ReflectionUtils.getField(finalEntity, f.replace("a.", ""));
+                                                                                    var sField = f;
+                                                                                    if(IEntity.class.isAssignableFrom(field.getType())) {
+                                                                                        sField += ".dummy";
+                                                                                    }
+                                                                                    String explicitInnerJoinsForAggregation = queryBuilder.createExplicitInnerJoinsForAggregation(sField);
+                                                                                    return explicitInnerJoinsForAggregation.replace(".dummy", "");
+                                                                                })
+                                                                                .collect(joining(","));
+        
+        queryBuilder.setQ(new StringBuilder(queryBuilder.getSqlStringBuffer().toString().replace("{fieldsPlaceHolder}", fieldsPlaceHolder)));
+
         AdvancedSettings fieldSeparator = advancedSettingsService.findByCode("standardExports.fieldsSeparator");
         String listAggregationSeparator;
         if (fieldSeparator != null) {
@@ -880,22 +907,6 @@ public class NativePersistenceService extends BaseService {
         } else {
             listAggregationSeparator = "|";
         }
-
-        Class<?> entity = null;
-
-        if (Boolean.TRUE.equals(isExport) && !tableName.toUpperCase().startsWith("CT_")) {
-            try {
-                entity = Class.forName(tableName);
-            } catch (ClassNotFoundException e) {
-                throw new BusinessException(String.format("Unknown entity %s", tableName));
-            }
-        }
-
-        Class<?> finalEntity = entity;
-        fetchFields.stream().filter(predicate).forEach(s -> {
-
-        });
-
         List<String> aggregationFields = fetchFields.stream().filter(predicate).map(s -> {
             String fieldName = extractAggregatedField(s);
             if (fieldName == null) {
@@ -1186,8 +1197,8 @@ public class NativePersistenceService extends BaseService {
             return aggFields;
         }
     }
-
-    private String retrieveFields(List<String> fields, Predicate<String> predicate) {
+    
+    private List<String> mappedFields(List<String> fields, Predicate<String> predicate) {
         if (predicate == null) {
             return fields.stream().map(x -> {
                 if (x.toLowerCase().trim().contains("->>string"))
@@ -1206,7 +1217,7 @@ public class NativePersistenceService extends BaseService {
                     return x;
                 else
                     return "a." + x;
-            }).collect(joining(","));
+            }).collect(Collectors.toList());
         } else {
             return fields.stream().filter(predicate).map(x -> {
                 if (x.toLowerCase().trim().contains("->>string"))
@@ -1223,8 +1234,12 @@ public class NativePersistenceService extends BaseService {
                     return "entityFromJson(a.cfValuesAsJson,'" + x.split("->>")[0] + "','" + x.split("->>")[1] + "')";
                 else
                     return "a." + x;
-            }).collect(joining(","));
+            }).collect(Collectors.toList());
         }
+    }
+
+    private String retrieveFields(List<String> fields, Predicate<String> predicate) {
+        return String.join(",", mappedFields(fields, predicate));
     }
 
     private String aggregationFields(List<String> fields, Predicate<String> predicate) {

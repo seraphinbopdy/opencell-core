@@ -119,6 +119,9 @@ public class RatedTransactionsJobBean extends IteratorBasedScopedJobBean<WalletO
         if (aggregationSettings != null) {
             return Optional.empty();
         }
+        
+        log.info("Remove wallet operations rated to 0");
+        walletOperationService.removeZeroWalletOperation();
 
         return getIterator(jobExecutionResult);
     }

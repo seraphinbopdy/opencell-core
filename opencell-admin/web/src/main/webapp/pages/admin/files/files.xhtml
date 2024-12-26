@@ -24,7 +24,7 @@
 
         <p:panel id="fileExplorer">
 
-            <h:form>
+            <h:form id="fileDownloadForm">
                 <p:growl id="messages" showDetail="true" />
                 <p:dataTable var="file" value="#{filesBean.fileList}" sortBy="#{file.name}" resizableColumns="true">
                     <f:facet name="header">
@@ -54,11 +54,12 @@
                     </p:column>
                 </p:dataTable>
                 <p:panel rendered="#{filesBean.selectedFileName!=null}" id="fileManageForm">
-         			#{filesBean.selectedFileName}
-					<p:commandButton value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down">
-                        <p:fileDownload value="#{filesBean.selectedFile}" />
-                        <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
-                    </p:commandButton>
+                    #{filesBean.selectedFileName}
+                    <h:outputLink id="hiddenDownloadLink" style="display:none;" value="#{request.contextPath}/download">
+                        <f:param name="fileName" value="#{filesBean.selectedFileName}" />
+                        <f:param name="folder" value="#{filesBean.selectedFolder}" />
+                    </h:outputLink>
+                    <p:commandButton  value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down" onclick="document.getElementById('fileDownloadForm:hiddenDownloadLink').click(); return false;" />
                     <p:commandButton value="#{messages['fileExplorer.delete']}" icon="pi pi-trash" action="#{filesBean.deleteSelectedFile()}" update=":fileExplorer" process="@this"
                         rendered="#{filesBean.canUserDeleteEntity()}">
                         <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['fileExplorer.deleteConfirm']}" icon="pi pi-exclamation-triangle" />

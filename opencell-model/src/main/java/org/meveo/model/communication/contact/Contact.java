@@ -268,7 +268,7 @@ public class Contact extends BusinessCFEntity implements ISearchable {
     @Size(max = 2000)
     private String comment;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "contact", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AddressBookContact> addressBookContacts;
 
     @ManyToMany(fetch = FetchType.LAZY)

@@ -359,7 +359,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     public String getUpdateQuery(JobExecutionResultImpl jobExecutionResult, BatchEntity batchEntity, String entityClassName) {
         StringBuilder updateQuery = new StringBuilder("UPDATE ").append(entityClassName)
                                                                 .append(" SET ")
-                                                                .append("updated={ts %s}".formatted(QueryBuilder.paramToString(new Date())));
+                                                                .append("updated=%s".formatted(QueryBuilder.paramToString(new Date())));
 
         if (batchEntity != null) {
             updateQuery.append(", reratingBatch.id=").append(batchEntity.getId());

@@ -438,7 +438,7 @@ public class MediationApiService {
                             // For ROLLBACK_ON_ERROR mode, processing is called within TX, so when error is thrown up, everything will rollback
                             if (cdrProcessingResult.getMode() == ROLLBACK_ON_ERROR) {
 
-                                mediationsettingService.applyEdrVersioningRule(Arrays.asList(edr), cdr, false);
+                                mediationsettingService.applyEdrVersioningRule(new ArrayList<>(Arrays.asList(edr)), cdr, false);
                                 cdrParsingService.createEdr(edr, i == 0 ? cdr : null); // CDR is persisted and related to the first EDR only
 
                                 reservation = usageRatingService.reserveUsageWithinTransaction(edr);
@@ -447,7 +447,7 @@ public class MediationApiService {
                             } else {
                                 reservation = methodCallingUtils.callCallableInNewTx(() -> {
 
-                                    mediationsettingService.applyEdrVersioningRule(Arrays.asList(edr), cdr, false);
+                                    mediationsettingService.applyEdrVersioningRule(new ArrayList<>(Arrays.asList(edr)), cdr, false);
                                     cdrParsingService.createEdr(edr, finalI == 0 ? cdr : null); // CDR is persisted and related to the first EDR only
                                     return usageRatingService.reserveUsageWithinTransaction(edr);
                                 });
@@ -516,7 +516,7 @@ public class MediationApiService {
                             } else {
                                 ratingResult = methodCallingUtils.callCallableInNewTx(() -> {
 
-                                    mediationsettingService.applyEdrVersioningRule(Arrays.asList(edr), cdr, false);
+                                mediationsettingService.applyEdrVersioningRule(new ArrayList<>(Arrays.asList(edr)), cdr, false);
                                     cdrParsingService.createEdr(edr, finalI == 0 ? cdr : null); // CDR is persisted and related to the first EDR only
 
                                     try {

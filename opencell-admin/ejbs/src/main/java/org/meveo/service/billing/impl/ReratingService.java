@@ -508,7 +508,7 @@ public class ReratingService extends RatingService implements Serializable {
             List<Object[]> discountWOInfos = em.createNamedQuery("WalletOperation.discountWoSummaryForRerating").setParameter("woIds", woIdsToCheck).getResultList();
             for (Object[] discounWOInfo : discountWOInfos) {
                 // Supplement WoIdsToCheck list with discount WO id for further processing to determine any triggered EDRs/WOs/RTs
-                Long woId = ((BigInteger) discounWOInfo[0]).longValue();
+                Long woId = ((Long) discounWOInfo[0]);
 //                WalletOperationStatusEnum woStatus = WalletOperationStatusEnum.valueOf((String) discounWOInfo[1]);
                 woIdsToCheck.add(woId);
 
@@ -517,7 +517,7 @@ public class ReratingService extends RatingService implements Serializable {
 
                 // If WO has RT
                 if (discounWOInfo[2] != null) {
-                    Long rtId = ((BigInteger) discounWOInfo[2]).longValue();
+                    Long rtId = ((Long) discounWOInfo[2]);
                     rtIdsToCheck.add(rtId);
                 }
             }
@@ -528,7 +528,7 @@ public class ReratingService extends RatingService implements Serializable {
             List<Long> edrIdsToCheck = new ArrayList<Long>();
 
             for (Object[] edrInfo : edrInfos) {
-                Long edrId = ((BigInteger) edrInfo[0]).longValue();
+                Long edrId = ((Long) edrInfo[0]);
                 edrIdsToUpdate.add(edrId);
                 EDRStatusEnum edrStatus = EDRStatusEnum.valueOf((String) edrInfo[1]);
                 if (edrStatus != EDRStatusEnum.OPEN) { // EDR with CANCELED status was already omitted in SQL
@@ -539,14 +539,14 @@ public class ReratingService extends RatingService implements Serializable {
             if (!edrIdsToCheck.isEmpty()) {
                 List<Object[]> woInfos = em.createNamedQuery("WalletOperation.woSummaryForRerating").setParameter("edrIds", edrIdsToCheck).getResultList();
                 for (Object[] woInfo : woInfos) {
-                    Long woId = ((BigInteger) woInfo[0]).longValue();
+                    Long woId = ((Long) woInfo[0]);
                     // WalletOperationStatusEnum woStatus = WalletOperationStatusEnum.valueOf((String) woInfo[1]);
                     // Check further for triggered EDRs/WOs/RTs for WOs in other than Canceled status // WO with status CANCELED was already omitted in SQL
                     woIdsToCheck.add(woId);
                     // Non-Canceled WOs will be marked as canceled
                     woIdsToUpdate.add(woId);
                     if (woInfo[2] != null) {
-                        Long rtId = ((BigInteger) woInfo[2]).longValue();
+                        Long rtId = ((Long) woInfo[2]);
                         rtIdsToCheck.add(rtId);
                     }
                 }
@@ -560,11 +560,11 @@ public class ReratingService extends RatingService implements Serializable {
         if (!rtIdsToCheck.isEmpty()) {
             List<Object[]> rtIlInfos = em.createNamedQuery("RatedTransaction.rtSummaryForRerating").setParameter("rtIds", rtIdsToCheck).getResultList();
             for (Object[] rtIlInfo : rtIlInfos) {
-                Long rtId = ((BigInteger) rtIlInfo[0]).longValue();
+                Long rtId = ((Long) rtIlInfo[0]);
                 // RatedTransactionStatusEnum rtStatus = RatedTransactionStatusEnum.valueOf((String) rtIlInfo[1]);
                 rtIdsToUpdate.add(rtId);
                 if (rtIlInfo[6] != null) {
-                    Long ilId = ((BigInteger) rtIlInfo[6]).longValue();
+                    Long ilId = ((Long) rtIlInfo[6]);
                     InvoiceLineStatusEnum ilStatus = InvoiceLineStatusEnum.valueOf((String) rtIlInfo[7]);
                     // RT was already invoiced - WO can not be rerated
                     if (ilStatus == InvoiceLineStatusEnum.BILLED) {
@@ -575,7 +575,7 @@ public class ReratingService extends RatingService implements Serializable {
                         // IL was not billed yet, so IL amounts have to be deducted
                     } else if (ilStatus == InvoiceLineStatusEnum.OPEN) {
 
-                        Long brId = ((BigInteger) rtIlInfo[8]).longValue();
+                        Long brId = ((Long) rtIlInfo[8]).longValue();
 
                         BillingRun billingRun = em.find(BillingRun.class, brId);
                         boolean averageUnitAmounts = billingRun.getBillingCycle() != null && !billingRun.getBillingCycle().isDisableAggregation() && billingRun.getBillingCycle().isAggregateUnitAmounts();

@@ -20896,6 +20896,7 @@
     <changeSet id="#INTRD-5220_20241216" author="AndriusKarpavicius" />
     <changeSet id="#INTRD-27818_20241217" author="AndriusKarpavicius" />
     <changeSet id="#INTRD-26786_20241218" author="TarikFA." />
+    <changeSet id="#INTRD-28025_20241224" author="zelmeliani" />
 
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />

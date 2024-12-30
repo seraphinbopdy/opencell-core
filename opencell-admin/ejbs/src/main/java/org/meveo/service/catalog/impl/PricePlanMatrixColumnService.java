@@ -31,6 +31,7 @@ import org.meveo.model.catalog.PricePlanMatrixVersion;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.cpq.AttributeService;
@@ -39,6 +40,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.NoResultException;
 import jakarta.ws.rs.NotFoundException;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 @Stateless
 public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatrixColumn> {
@@ -50,6 +52,9 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
     
     @Inject
     private AttributeService attributeService;
+	
+	@Inject
+	private AdvancedSettingsService advancedSettingsService;
 
     public List<PricePlanMatrixColumn> findByAttributes(List<Attribute> attributes) {
         try {
@@ -126,7 +131,11 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
 	
 	private void createColumns(PricePlanMatrixVersion pricePlanMatrixVersion, Scanner scanner, List<Map.Entry<String, Optional<Attribute>>> columns) {
         String line = scanner.nextLine();
-        String[] firstLine = line.split(";");
+		String fieldSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator"))
+				.map(AdvancedSettings::getValue)
+				.filter(StringUtils::isNotBlank)
+				.orElse(",");
+        String[] firstLine = line.split(fieldSeparator);
         for (int i = 0; i < firstLine.length; i++) {
             String column = firstLine[i].split("\\[")[0];
             boolean isRange = firstLine[i].split("\\[").length > 1 && firstLine[i].split("\\[")[1].toLowerCase().contains("range");
@@ -229,7 +238,10 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
 	        PricePlanMatrixVersion pricePlanMatrixVersion, Scanner scanner, List<Map.Entry<String, Optional<Attribute>>> columns) {
 		String line;
 		List<PricePlanMatrixLineDto> pricePlanMatrixLines = new ArrayList<>();
-		
+		String fieldSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator"))
+				.map(AdvancedSettings::getValue)
+				.filter(StringUtils::isNotBlank)
+				.orElse(",");
 		
 		while (scanner.hasNextLine()) {
 			
@@ -248,7 +260,7 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
 			}else {
 				startValue = 1;
 			}
-			String[] nextLine = line.substring(startValue, endValue).split(";\"");
+			String[] nextLine = line.substring(startValue, endValue).split(fieldSeparator + "\"");
 			
 			for(var columnIndex=0; columnIndex < columns.size() ; columnIndex++ ) {
 				PricePlanMatrixValueDto pricePlanMatrixValueDto = new PricePlanMatrixValueDto();

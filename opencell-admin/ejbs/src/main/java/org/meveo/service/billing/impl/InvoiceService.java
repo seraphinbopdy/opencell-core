@@ -30,7 +30,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.meveo.commons.utils.NumberUtils.round;
 import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.model.billing.BillingProcessTypesEnum.FULL_AUTOMATIC;
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING;
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
 import static org.meveo.model.billing.InvoiceStatusEnum.DRAFT;
+import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_BILLING_ACCOUNT;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_CUSTOMER_ACCOUNT;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_DISCOUNT_PLAN_INSTANCE;
@@ -3420,7 +3423,18 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public Invoice updateStatus(Long invoiceId, InvoiceStatusEnum status) {
         Invoice invoice = findById(invoiceId);
         invoice.setStatus(status);
+        updatePaymentStatus(invoice, new Date());
         return update(invoice);
+    }
+
+    public void updatePaymentStatus(Invoice invoice, Date today) {
+        if (invoice.getDueDate().after(today) && invoice.getStatus() == VALIDATED) {
+            invoice.setPaymentStatusDate(today);
+            invoice.setPaymentStatus(PENDING);
+        } else if (invoice.getDueDate().before(today) && invoice.getStatus() == VALIDATED) {
+            invoice.setPaymentStatusDate(today);
+            invoice.setPaymentStatus(UNPAID);
+        }
     }
 
     /**
@@ -3490,6 +3504,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         billingAccount = incrementBAInvoiceDate(invoice.getBillingRun(), billingAccount);
         assignInvoiceNumberFromReserve(invoice, invoicesToNumberInfo);
         invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+        updatePaymentStatus(invoice, new Date());
         // /!\ DO NOT REMOVE THIS LINE, A LasyInitializationException is throw and the invoice is not generated.
         billingAccount = billingAccountService.refreshOrRetrieve(billingAccount);
         invoice = update(invoice);

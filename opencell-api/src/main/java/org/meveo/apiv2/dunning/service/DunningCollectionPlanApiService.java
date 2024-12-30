@@ -705,6 +705,8 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 levelInstanceToUpdate.setDaysOverdue(newDaysOverdue);
             }
 
+            // Validate previous level instance
+            validatePreviousLevelStatus(collectionPlan, levelInstanceToUpdate);
             // Validate the execution date
             validateExecutionDate(collectionPlan, updateLevelInstanceInput.getExecutionDate());
 
@@ -763,6 +765,20 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             throw e;
         } catch (Exception e) {
             throw new MeveoApiException(e);
+        }
+    }
+
+    /**
+     * Validate the previous level status before updating the level instance.
+     *
+     * @param collectionPlan the collection plan
+     * @param levelInstanceToUpdate the level instance to update
+     */
+    private void validatePreviousLevelStatus(DunningCollectionPlan collectionPlan, DunningLevelInstance levelInstanceToUpdate) {
+        DunningLevelInstance previousLevelInstance = dunningLevelInstanceService.findBySequence(collectionPlan, levelInstanceToUpdate.getSequence() - 1);
+
+        if (previousLevelInstance != null && previousLevelInstance.getLevelStatus() != DunningLevelInstanceStatusEnum.IGNORED && previousLevelInstance.getLevelStatus() != DunningLevelInstanceStatusEnum.DONE) {
+            throw new BusinessApiException("Can not update a dunningLevelInstance if the previous dunningLevelInstance is not DONE or IGNORED");
         }
     }
 
@@ -912,6 +928,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             if (dunningLevelInstance == null) {
                 throw new EntityDoesNotExistsException("No Dunning Level Instance found with id : " + dunningLevelInstanceIdInput);
             }
+
+            // Validate previous level instance
+            validatePreviousLevelStatus(dunningLevelInstance.getCollectionPlan(), dunningLevelInstance);
 
             if (!Objects.equals(dunningLevelInstanceIdInput, dunningLevelInstanceIdToUpdate)) {
                 fields.add("dunningLevelInstance");

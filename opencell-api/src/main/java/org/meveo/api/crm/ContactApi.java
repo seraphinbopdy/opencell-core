@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 import jakarta.inject.Inject;
 import jakarta.interceptor.Interceptors;
 
@@ -208,6 +209,7 @@ public class ContactApi extends BaseApi {
                 .anyMatch(x -> x.getContact().getId() == contact.getId());
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Contact update(ContactDto postData) throws MeveoApiException, BusinessException {
 
         if ((postData.getContactInformation() == null || StringUtils.isBlank(postData.getContactInformation().getEmail())) && StringUtils.isBlank(postData.getCode())) {

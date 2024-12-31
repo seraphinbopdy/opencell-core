@@ -260,7 +260,7 @@ public class InvoiceUblHelper {
 		
 		// check directory if exist
 		ParamBean paramBean = ParamBean.getInstance();
-		File ublDirectory = new File(paramBean.getChrootDir("") + File.separator + paramBean.getProperty("meveo.ubl.directory", "/ubl"));
+		File ublDirectory = new File(paramBean.getChrootDir("") + File.separator + paramBean.getProperty("meveo.ubl.directory", "/invoice/ubl"));
 		if (!StorageFactory.existsDirectory(ublDirectory)) {
 			StorageFactory.createDirectory(ublDirectory);
 		}

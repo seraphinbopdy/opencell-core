@@ -21,11 +21,18 @@ package org.meveo.admin.job;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 import org.meveo.admin.async.SynchronizedIterator;
+import org.meveo.admin.util.DirectoriesConstants;
+import org.meveo.commons.utils.ParamBean;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceStatusEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
@@ -68,7 +75,8 @@ public class XMLEInvoiceGenerationJobBean extends IteratorBasedJobBean<Long> {
 
         List<String> statusNamesList = (List<String>) this.getParamOrCFValue(jobInstance, "invoicesToProcess", asList("VALIDATED"));
         List<InvoiceStatusEnum> statusList = statusNamesList.stream().map(status -> InvoiceStatusEnum.valueOf(status)).collect(toList());
-
+		
+	    moveUBLFiles();
         List<Long> invoiceIds = this.fetchInvoiceIdsToProcess(statusList);
         return Optional.of(new SynchronizedIterator<>(invoiceIds));
     }
@@ -99,4 +107,27 @@ public class XMLEInvoiceGenerationJobBean extends IteratorBasedJobBean<Long> {
         log.debug(" fetchInvoiceIdsToProcess for InvoiceStatusEnums = {} and ublReference = false ", statusList);
         return invoiceService.listInvoicesWithoutXml(statusList);
     }
+	public void moveUBLFiles() {
+		// check if the directory ubl is present or not
+		ParamBean paramBean = ParamBean.getInstance();
+		final String ROOT_DIR = paramBean.getChrootDir("") + File.separator;
+		final String NEW_UBL_DIRECTORY = DirectoriesConstants.INVOICES_ROOT_FOLDER + File.separator + "ubl";
+		File oldUblDirectory = new File(ROOT_DIR  + "ubl");
+		File ublDirectory = new File(ROOT_DIR + paramBean.getProperty("meveo.ubl.directory", NEW_UBL_DIRECTORY));
+		if(!ublDirectory.exists()){
+			ublDirectory.mkdirs();
+		}
+		if(!oldUblDirectory.exists() || !oldUblDirectory.isDirectory()){
+			return;
+		}
+		File[] files = oldUblDirectory.listFiles();
+		for (File file : files) {
+			try{
+				Path targetPath = Paths.get(ublDirectory.getAbsolutePath() + File.separator + file.getName());
+				Files.move(file.toPath(), targetPath);
+			}catch (IOException e) {
+				log.error("Error while moving file : " + file.getName() + " to ubl directory", e);
+			}
+		}
+	}
 }

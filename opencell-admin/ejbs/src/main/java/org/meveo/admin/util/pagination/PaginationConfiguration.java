@@ -231,6 +231,14 @@ public class PaginationConfiguration implements Serializable {
     }
 
     /**
+     * 
+     * @param numberOfRows Number of rows to retrieve
+     */
+    public void setNumberOfRows(Integer numberOfRows) {
+        this.numberOfRows = numberOfRows;
+    }
+
+    /**
      * @return Sort field and sort order repeated multiple times
      */
     public Object[] getOrderings() {
@@ -369,7 +377,7 @@ public class PaginationConfiguration implements Serializable {
         this.limit = limit;
     }
 
-	/**
+    /**
 	 * @param cacheable Shall query results be cached - see Hibernate query cache behavior
 	 */
     public void setCacheable(boolean cacheable) {

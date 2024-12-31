@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.apiv2.JaxRsActivatorApiV2;
@@ -283,6 +284,18 @@ public class GenericApiLoadService {
                                                    .flatMap(List::stream)
                                                    .map(String::trim)
                                                    .collect(Collectors.toList()));
+        }
+        Integer exportLimitForEntity = genericPagingAndFilteringUtils.getExportLimitForEntity(entityClass);
+        
+        if (exportLimitForEntity != null) {
+            if(searchConfig.getLimit() == null) {
+                searchConfig.setNumberOfRows(exportLimitForEntity);
+            } else if (searchConfig.getLimit() > exportLimitForEntity) {
+                long count = persistenceDelegate.count(entityClass, searchConfig);
+                if (count > searchConfig.getLimit()) {
+                    throw new BusinessException("Export limit exceeded. Please reduce the number of records to export.");
+                }
+            }
         }
         
         return (List<List<Object>>) nativePersistenceService.getQuery(entityClass.getCanonicalName(), searchConfig, null, Boolean.TRUE)

@@ -29,6 +29,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import com.ingenico.connect.gateway.sdk.java.ReferenceException;
 import com.onlinepayments.ApiException;
 import com.onlinepayments.Client;
 import com.onlinepayments.CommunicatorConfiguration;
@@ -94,6 +95,8 @@ import org.meveo.api.dto.payment.HostedCheckoutStatusResponseDto;
 import org.meveo.api.dto.payment.MandatInfoDto;
 import org.meveo.api.dto.payment.PaymentHostedCheckoutResponseDto;
 import org.meveo.api.dto.payment.PaymentResponseDto;
+import org.meveo.api.exception.EntityAlreadyExistsException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.ParamBean;
@@ -341,23 +344,32 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 	}
 
 	@Override
-	public MandatInfoDto checkMandat(String mandatReference, String mandateId) throws BusinessException {
-		MandatInfoDto mandatInfoDto = new MandatInfoDto();
-		GetMandateResponse response = getClient().merchant(paymentGateway.getMarchandId()).mandates()
-				.getMandate(mandatReference);
-		MandateResponse mandatResponse = response.getMandate();
-		if (mandatResponse != null) {
-			if ("WAITING_FOR_REFERENCE".equals(mandatResponse.getStatus())) {
-				mandatInfoDto.setState(MandatStateEnum.waitingForReference);
-			} else {
-				mandatInfoDto.setState(MandatStateEnum.valueOf(mandatResponse.getStatus().toLowerCase()));
-			}
-			mandatInfoDto.setReference(mandatResponse.getUniqueMandateReference());
-		}
+	 public MandatInfoDto checkMandat(String mandatReference, String mandateId) throws BusinessException {
+		 MandatInfoDto mandatInfoDto=new MandatInfoDto();
+		 try {
+			 GetMandateResponse response = getClient().merchant(paymentGateway.getMarchandId()).mandates().getMandate(mandatReference); 
+			 MandateResponse mandatResponse=response.getMandate();
+			 if(mandatResponse!=null) { 
+				 if("WAITING_FOR_REFERENCE".equals(mandatResponse.getStatus())) {
+					 mandatInfoDto.setState(MandatStateEnum.waitingForReference); 
+				 }else {
+					 mandatInfoDto.setState(MandatStateEnum.valueOf(mandatResponse.getStatus().toLowerCase()));
+				 }
+				 mandatInfoDto.setReference(mandatResponse.getUniqueMandateReference());
+				 mandatInfoDto.setCustomer(mandatResponse.getCustomerReference());
+			 }  
+		 }catch(ReferenceException  e) {
+			 JsonReader reader = Json.createReader(new StringReader(e.getResponseBody()));
+			 JsonObject jsonObject = reader.readObject();
+			 JsonArray errorsArray = jsonObject.getJsonArray("errors");
+			 JsonObject firstError = errorsArray.getJsonObject(0);
+			 String message = firstError.getString("message");
+			 throw new EntityDoesNotExistsException(message);
+		 }
+		 return mandatInfoDto;
 
-		return mandatInfoDto;
-
-	}
+	 }
+	
 
 	@Override
 	public PaymentHostedCheckoutResponseDto getHostedCheckoutUrl(HostedCheckoutInput hostedCheckoutInput)
@@ -552,7 +564,19 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 	@Override
 	public void createMandate(CustomerAccount customerAccount, String iban, String mandateReference)
 			throws BusinessException {	
-        try {
+		
+		try {
+			String customerCode=customerAccount.getExternalRef1();
+			MandatInfoDto mandateDto=checkMandat(mandateReference, null);
+			if(customerCode!=null&& mandateDto.getReference()!=null && mandateDto.getCustomer()!=null) {
+				if(!customerCode.equals(mandateDto.getCustomer())) {
+					throw new EntityAlreadyExistsException("The mandate: " + mandateReference+ " already exist and is attached to another customer"); 
+				}else {
+					log.info("The mandate: {} already exist for this customer: {}",mandateReference,customerCode);
+					return;
+				}		
+			}		
+		
             BankAccountIban bankAccountIban = new BankAccountIban();
             bankAccountIban.setIban(iban);
 
@@ -607,16 +631,20 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
             CreateMandateResponse response = getClient().merchant(paymentGateway.getMarchandId()).mandates().createMandate(body);
             log.info("createMandate RESPONSE:" + marshaller.marshal(response));
            
-        } catch (ApiException ev) { 
-    		JsonReader reader = Json.createReader(new StringReader(ev.getResponseBody()));
-    		JsonObject jsonObject = reader.readObject();
-    		JsonArray errorsArray = jsonObject.getJsonArray("errors");
-    		JsonObject firstError = errorsArray.getJsonObject(0);
-    		String message = firstError.getString("message");
-    		throw new MeveoApiException(message);
-    	} catch (Exception e) { 
-    		throw new MeveoApiException(e.getMessage());
-    	}
+		}catch(EntityDoesNotExistsException ex) {
+			throw new EntityDoesNotExistsException(ex.getMessage());
+		}catch (ApiException ev) { 
+		JsonReader reader = Json.createReader(new StringReader(ev.getResponseBody()));
+		JsonObject jsonObject = reader.readObject();
+		JsonArray errorsArray = jsonObject.getJsonArray("errors");
+		JsonObject firstError = errorsArray.getJsonObject(0);
+		String message = firstError.getString("message");
+		throw new MeveoApiException(message);
+	   }catch (Exception e) { 
+		throw new MeveoApiException(e.getMessage());
+		
+		
+	}
 
     }
 
@@ -665,7 +693,8 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 
 		AmountOfMoney amountOfMoney = new AmountOfMoney();
 		amountOfMoney.setAmount(ctsAmount);
-		amountOfMoney.setCurrencyCode(customerAccount.getTradingCurrency().getCurrencyCode());
+		String currencyCode=customerAccount.getTradingCurrency().getCurrencyCode()!=null?customerAccount.getTradingCurrency().getCurrencyCode():getProviderService().getProvider().getCurrency().getCurrencyCode();
+		amountOfMoney.setCurrencyCode(currencyCode);
 
 		Customer customer = new Customer();
 		customer.setBillingAddress(getBillingAddress(customerAccount));
@@ -698,16 +727,25 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 	 * @param ddPaymentMethod the dd payment method
 	 * @return the sepa input
 	 */
-	private SepaDirectDebitPaymentMethodSpecificInput getSepaInput(DDPaymentMethod ddPaymentMethod) {
-		SepaDirectDebitPaymentMethodSpecificInput sepaPmInput = new SepaDirectDebitPaymentMethodSpecificInput();
-		sepaPmInput.setPaymentProductId(771);
-		SepaDirectDebitPaymentProduct771SpecificInput sepaDirectDebitPaymentProduct771SpecificInput = new SepaDirectDebitPaymentProduct771SpecificInput();
-		sepaDirectDebitPaymentProduct771SpecificInput
-				.setExistingUniqueMandateReference(ddPaymentMethod.getMandateIdentification());
-		sepaPmInput.setPaymentProduct771SpecificInput(sepaDirectDebitPaymentProduct771SpecificInput);
-
-		return sepaPmInput;
-	}
+	 private SepaDirectDebitPaymentMethodSpecificInput getSepaInput(DDPaymentMethod ddPaymentMethod) {
+	        SepaDirectDebitPaymentMethodSpecificInput sepaPmInput = new SepaDirectDebitPaymentMethodSpecificInput();
+	        sepaPmInput.setPaymentProductId(771);
+	        String mandateRef=ddPaymentMethod.getMandateIdentification();
+	        if(mandateRef!=null) {
+	        SepaDirectDebitPaymentProduct771SpecificInput sepaDirectDebitPaymentProduct771SpecificInput = new SepaDirectDebitPaymentProduct771SpecificInput();
+	        MandatInfoDto mandateDto=checkMandat(mandateRef,null);
+	        if(MandatStateEnum.blocked.equals(mandateDto.getState())) {
+	        	GetMandateResponse response= getClient().merchant(paymentGateway.getMarchandId()).mandates().unblockMandate(mandateRef);
+	        	log.info("Reactivate mandate={}, status={}",mandateRef,response.getMandate().getStatus());
+	        }
+	        sepaDirectDebitPaymentProduct771SpecificInput.setExistingUniqueMandateReference(mandateRef);
+	        sepaPmInput.setPaymentProduct771SpecificInput(sepaDirectDebitPaymentProduct771SpecificInput);
+	        }
+	        return sepaPmInput;
+	    }
+	
+	 
+	
 
 	/**
 	 * Gets the card input.
@@ -754,11 +792,16 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 
 				doPaymentResponseDto.setPaymentID(response.getPayment().getId());
 				doPaymentResponseDto.setPaymentStatus(mappingStaus(response.getPayment().getStatus()));
-				if (response.getCreationOutput() != null) {
-					doPaymentResponseDto.setTransactionId(response.getCreationOutput().getExternalReference());
-					doPaymentResponseDto.setTokenId(response.getCreationOutput().getToken());
-					doPaymentResponseDto.setNewToken(response.getCreationOutput().getIsNewToken());
-				}
+				  if (response.getCreationOutput() != null) {
+	                    doPaymentResponseDto.setTransactionId(response.getCreationOutput().getExternalReference());
+	                    doPaymentResponseDto.setTokenId(response.getCreationOutput().getToken());
+	                    if(response.getCreationOutput().getIsNewToken() != null) {
+	                    	doPaymentResponseDto.setNewToken(response.getCreationOutput().getIsNewToken());
+	                    }else {
+	                    	doPaymentResponseDto.setNewToken(false);
+	                    }
+	                    
+	                }
 				PaymentResponse payment = response.getPayment();
 				if (payment != null && response.getPayment().getStatusOutput().getErrors() != null) {
 					PaymentStatusOutput statusOutput = payment.getStatusOutput();

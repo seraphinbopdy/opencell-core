@@ -27,6 +27,7 @@ import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.catalog.UsageChargeTemplateDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.dto.response.UsageChargeTemplateResponseDto;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
@@ -76,6 +77,9 @@ public class UsageChargeTemplateApi extends ChargeTemplateApi<UsageChargeTemplat
 
     @Override
     public UsageChargeTemplate createOrUpdate(UsageChargeTemplateDto dataDto) throws MeveoApiException, BusinessException {
+        if(dataDto.getUnitNbDecimal() != null && (dataDto.getUnitNbDecimal() < 0 || dataDto.getUnitNbDecimal() > 12)) {
+            throw new BusinessApiException("UnitNbDecimal should be between 0 and 12 included");
+        }
         return super.createOrUpdate(dataDto);
     }
 

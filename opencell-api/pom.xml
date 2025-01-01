@@ -24,17 +24,14 @@
 		<dependency>
 			<groupId>com.opencellsoft</groupId>
 			<artifactId>opencell-admin-ejbs</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opencellsoft</groupId>
 			<artifactId>opencell-model</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opencellsoft</groupId>
 			<artifactId>opencell-api-dto</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opencellsoft</groupId>
@@ -321,6 +318,19 @@
 					<version>${project.version}</version>
 					<classifier>sources</classifier>
 				</dependency>
+				<!--
+				<dependency>
+					<groupId>com.opencellsoft</groupId>
+					<artifactId>opencell-admin-ejbs</artifactId>
+					<version>${project.version}</version>
+					<classifier>sources</classifier>
+				</dependency>-->
+				<dependency>
+					<groupId>com.opencellsoft</groupId>
+					<artifactId>opencell-api-dto</artifactId>
+					<version>${project.version}</version>
+					<classifier>sources</classifier>
+				</dependency>
 				<dependency>
 					<groupId>org.primefaces</groupId>
 					<artifactId>primefaces</artifactId>
@@ -461,19 +471,21 @@
 							<dependency>
 								<groupId>com.opencellsoft</groupId>
 								<artifactId>opencell-model</artifactId>
-								<version>${project.version}</version>
 								<classifier>sources</classifier>
 							</dependency>
 							<dependency>
 								<groupId>com.opencellsoft</groupId>
 								<artifactId>opencell-api-dto</artifactId>
-								<version>${project.version}</version>
 								<classifier>sources</classifier>
 							</dependency>
 							<dependency>
 								<groupId>com.opencellsoft</groupId>
 								<artifactId>opencell-api</artifactId>
-								<version>${project.version}</version>
+								<classifier>sources</classifier>
+							</dependency>
+							<dependency>
+								<groupId>com.opencellsoft</groupId>
+								<artifactId>opencell-admin-ejbs</artifactId>
 								<classifier>sources</classifier>
 							</dependency>
 						<!--	
@@ -499,7 +511,7 @@
 						</dependencies>
 						<executions>
 							<execution>
-								<phase>compile</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>generate</goal>
 								</goals>

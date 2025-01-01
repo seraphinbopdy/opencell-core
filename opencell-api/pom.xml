@@ -322,7 +322,6 @@
 					<groupId>com.opencellsoft</groupId>
 					<artifactId>opencell-admin-ejbs</artifactId>
 					<version>${project.version}</version>
-					<classifier>sources</classifier>
 				</dependency>
 				<dependency>
 					<groupId>com.opencellsoft</groupId>

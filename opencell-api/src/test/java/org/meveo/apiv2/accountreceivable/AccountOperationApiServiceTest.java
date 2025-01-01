@@ -19,8 +19,6 @@ import org.junit.runner.RunWith;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
-import org.meveo.admin.util.ResourceBundle;
-import org.meveo.api.dto.account.CustomerAccountDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.apiv2.AcountReceivable.*;
@@ -39,9 +37,6 @@ import jakarta.ws.rs.NotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountOperationApiServiceTest {
-
-    @Mock
-    private ResourceBundle resourceMessages;
     
     @InjectMocks
     private AccountOperationApiService accountOperationApiService;
@@ -57,12 +52,6 @@ public class AccountOperationApiServiceTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private MatchingCodeService matchingCodeService;
-    
-    @Mock
-    private PaymentPlanService paymentPlanService;
-    
-    @Mock
-    List<PartialMatchingOccToSelect> partialMatchingOcc;
 
     @Before
     public void setUp() {
@@ -176,7 +165,7 @@ public class AccountOperationApiServiceTest {
     @Test
     public void shouldReturnBusinessExceptionForZeroAmountMatchOperationAndUseAmountFromDto() throws BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException, Exception {
         List<AccountOperationAndSequence> operationAndSequence = List.of(ImmutableAccountOperationAndSequence.builder().id(1L).sequence(0).amountToMatch(new BigDecimal(0)).build(),
-            ImmutableAccountOperationAndSequence.builder().id(2L).sequence(1).amountToMatch(BigDecimal.ZERO).build());
+            ImmutableAccountOperationAndSequence.builder().id(2L).sequence(1).amountToMatch(new BigDecimal(-1)).build());
 
         AccountOperation aoInvoice = init("I", 2L, new BigDecimal(9000), BigDecimal.ZERO, MatchingStatusEnum.O, new BigDecimal(9000), AccountOperationStatus.POSTED);
         AccountOperation aoP1 = init("P", 3L, new BigDecimal(2000), BigDecimal.ZERO, MatchingStatusEnum.O, new BigDecimal(2000), AccountOperationStatus.POSTED);

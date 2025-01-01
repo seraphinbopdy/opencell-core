@@ -345,6 +345,31 @@
 					<artifactId>reflections</artifactId>
 				</dependency>
 				<dependency>
+				    <groupId>org.apache.logging.log4j</groupId>
+				    <artifactId>log4j-core</artifactId>
+				    <version>2.20.0</version>
+				</dependency>
+				<dependency>
+				    <groupId>org.apache.logging.log4j</groupId>
+				    <artifactId>log4j-api</artifactId>
+				    <version>2.20.0</version>
+				</dependency>
+				<dependency>
+				    <groupId>commons-collections</groupId>
+				    <artifactId>commons-collections</artifactId>
+				    <version>3.2.2</version>
+				</dependency>
+				<dependency>
+				    <groupId>com.google.code.gson</groupId>
+				    <artifactId>gson</artifactId>
+				    <version>2.10.1</version>
+				</dependency>
+				<dependency>
+				    <groupId>org.apache.poi</groupId>
+				    <artifactId>poi</artifactId>
+				    <version>5.2.3</version>
+				</dependency>
+				<dependency>
 					<groupId>org.jboss.spec.javax.ws.rs</groupId>
 					<artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
 					<version>1.0.2.Final</version>

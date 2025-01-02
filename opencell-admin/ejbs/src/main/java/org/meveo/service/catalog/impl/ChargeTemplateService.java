@@ -302,7 +302,7 @@ public class ChargeTemplateService<P extends ChargeTemplate> extends BusinessSer
         RoundingModeEnum roundingMode = chargeTemplate.getRoundingMode();
         int unitNbDecimal = chargeTemplate.getUnitNbDecimal();
         if (unitNbDecimal == 0) {
-            unitNbDecimal = 2;
+            unitNbDecimal = 12;
         }
 
         inputUnitFromEL = inputUnitFromEL != null ? inputUnitFromEL : chargeTemplate.getInputUnitOfMeasure();
@@ -314,6 +314,9 @@ public class ChargeTemplateService<P extends ChargeTemplate> extends BusinessSer
                     BigDecimal outputMultiplicator = BigDecimal.valueOf(outputUnitFromEL.getMultiplicator());
                     BigDecimal inputMultiplicator = BigDecimal.valueOf(inputUnitFromEL.getMultiplicator());
                     Integer scale = calculateNeededScale(inputMultiplicator, outputMultiplicator);
+                    if(chargeTemplate.getUnitNbDecimal() != 0) {
+                        scale = chargeTemplate.getUnitNbDecimal();
+                    }
                     return quantity.multiply(inputMultiplicator).divide(outputMultiplicator, scale, RoundingMode.HALF_UP);
                 } else {
                     throw new ValidationException("incompatible input/rating UnitOfMeasures: " + inputUnitFromEL + "/" + outputUnitFromEL + " for chargeTemplate " + chargeTemplate.getCode());

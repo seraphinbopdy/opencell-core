@@ -312,6 +312,74 @@
 			<id>api</id>
 			<!-- Dependencies for api documention generation -->
 			<dependencies>
+				<!-- Jakarta Persistence API (Replacement for javax.persistence) -->
+			    <dependency>
+			        <groupId>jakarta.persistence</groupId>
+			        <artifactId>jakarta.persistence-api</artifactId>
+			        <version>3.1.0</version>
+			    </dependency>
+			
+			    <!-- Hibernate Core (Ensure compatibility with Jakarta Persistence API) -->
+			    <dependency>
+			        <groupId>org.hibernate</groupId>
+			        <artifactId>hibernate-core</artifactId>
+			        <version>6.3.0.Final</version>
+			    </dependency>
+			
+			    <!-- Jakarta XML Binding (Replacement for javax.xml.bind) -->
+			    <dependency>
+			        <groupId>jakarta.xml.bind</groupId>
+			        <artifactId>jakarta.xml.bind-api</artifactId>
+			        <version>3.0.1</version>
+			    </dependency>
+			    <dependency>
+			        <groupId>org.glassfish.jaxb</groupId>
+			        <artifactId>jaxb-runtime</artifactId>
+			        <version>3.0.1</version>
+			    </dependency>
+			
+			    <!-- Jakarta Servlet API -->
+			    <dependency>
+			        <groupId>jakarta.servlet</groupId>
+			        <artifactId>jakarta.servlet-api</artifactId>
+			        <version>6.0.0</version>
+			    </dependency>
+			
+			    <!-- Jakarta Faces API -->
+			    <dependency>
+			        <groupId>jakarta.faces</groupId>
+			        <artifactId>jakarta.faces-api</artifactId>
+			        <version>4.0.1</version>
+			    </dependency>
+			
+			    <!-- Jakarta JMS API -->
+			    <dependency>
+			        <groupId>jakarta.jms</groupId>
+			        <artifactId>jakarta.jms-api</artifactId>
+			        <version>3.1.0</version>
+			    </dependency>
+			
+			    <!-- Jakarta Concurrency API -->
+			    <dependency>
+			        <groupId>jakarta.enterprise.concurrent</groupId>
+			        <artifactId>jakarta.enterprise.concurrent-api</artifactId>
+			        <version>3.0.0</version>
+			    </dependency>
+			
+			    <!-- Swagger Annotations -->
+			    <dependency>
+			        <groupId>io.swagger.core.v3</groupId>
+			        <artifactId>swagger-annotations</artifactId>
+			        <version>2.2.15</version>
+			    </dependency>
+			
+			    <!-- Infinispan -->
+			    <dependency>
+			        <groupId>org.infinispan</groupId>
+			        <artifactId>infinispan-core</artifactId>
+			        <version>14.0.3.Final</version>
+			    </dependency>
+
 				<dependency>
 					<groupId>com.opencellsoft</groupId>
 					<artifactId>opencell-model</artifactId>
@@ -373,11 +441,7 @@
 				    <artifactId>poi</artifactId>
 				    <version>5.2.3</version>
 				</dependency>
-				<dependency>
-					<groupId>org.jboss.spec.javax.ws.rs</groupId>
-					<artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-					<version>1.0.2.Final</version>
-				</dependency>
+				
 				<dependency>
 				    <groupId>com.googlecode.json-simple</groupId>
 				    <artifactId>json-simple</artifactId>

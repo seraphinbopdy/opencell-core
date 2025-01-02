@@ -123,9 +123,11 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                 for (DunningPolicyLevel policyLevel : policy.getDunningLevels()) {
                     if (policyLevel.getDunningLevel() != null && policyLevel.getDunningLevel().isReminder()) {
                         List<Invoice> invoices = policyService.findEligibleInvoicesForPolicy(policy);
-                        cpProcessed = processInvoices(invoices, policyLevel, dunningCollectionPlan, dunningSettings, policy);
-                        jobExecutionResult.setNbItemsToProcess(jobExecutionResult.getNbItemsToProcess() + invoices.size());
-                        numberOFAllInvoicesProcessed += invoices.size();
+                        // Filter invoices by searching if there's a dunning level instance for the invoice
+                        List<Invoice> filteredInvoices = getInvoices(invoices);
+                        cpProcessed = processInvoices(filteredInvoices, policyLevel, dunningCollectionPlan, dunningSettings, policy);
+                        jobExecutionResult.setNbItemsToProcess(jobExecutionResult.getNbItemsToProcess() + filteredInvoices.size());
+                        numberOFAllInvoicesProcessed += filteredInvoices.size();
                     }
                 }
 
@@ -138,6 +140,25 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
         } catch (Exception exception) {
             jobExecutionResult.addErrorReport(exception.getMessage());
         }
+    }
+
+    /**
+     * Get only invoices that have no dunning level instance
+     *
+     * @param invoices Invoices
+     * @return Filtered invoices
+     */
+    private List<Invoice> getInvoices(List<Invoice> invoices) {
+        List<Invoice> filteredInvoices = new ArrayList<>();
+
+        for (Invoice invoice : invoices) {
+            List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByInvoice(invoice);
+            if (dunningLevelInstances == null || dunningLevelInstances.isEmpty()) {
+                filteredInvoices.add(invoice);
+            }
+        }
+
+        return filteredInvoices;
     }
 
     /**
@@ -200,7 +221,6 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                     log.info(MESSAGE_NOTHING_TO_BE_DONE, invoice.getId(), dateToCompare, today);
                 }
             }
-
         }
 
         return processed;

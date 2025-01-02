@@ -55,11 +55,12 @@
                 </p:dataTable>
                 <p:panel rendered="#{filesBean.selectedFileName!=null}" id="fileManageForm">
                     #{filesBean.selectedFileName}
-                    <h:outputLink id="hiddenDownloadLink" style="display:none;" value="#{request.contextPath}/download">
-                        <f:param name="fileName" value="#{filesBean.selectedFileName}" />
-                        <f:param name="folder" value="#{filesBean.selectedFolder}" />
-                    </h:outputLink>
-                    <p:commandButton  value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down" onclick="document.getElementById('fileDownloadForm:hiddenDownloadLink').click(); return false;" />
+					<p:commandButton value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down" ajax="false">
+                        <p:fileDownload value="#{fileForDownloadBean.selectedFile}" />
+                        <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
+                        <f:param name="selectedFileName" value="#{filesBean.selectedFileName}" />
+                        <f:param name="selectedFolder" value="#{filesBean.selectedFolder}" />
+                    </p:commandButton>
                     <p:commandButton value="#{messages['fileExplorer.delete']}" icon="pi pi-trash" action="#{filesBean.deleteSelectedFile()}" update=":fileExplorer" process="@this"
                         rendered="#{filesBean.canUserDeleteEntity()}">
                         <p:confirm header="#{messages['commons.confirmationHeader']}" message="#{messages['fileExplorer.deleteConfirm']}" icon="pi pi-exclamation-triangle" />
@@ -68,8 +69,9 @@
                 </p:panel>
                 <p:panel id="downloadZipfile" rendered="#{filesBean.selectedFileName==null}">
                     <p:commandButton value="#{messages['fileExplore.downloadZipfile']}" icon="pi pi-arrow-down" ajax="false">
-                        <p:fileDownload value="#{filesBean.downloadZipFile}" />
+                        <p:fileDownload value="#{fileForDownloadBean.downloadZipFile}" />
                         <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
+                        <f:param name="selectedFolder" value="#{filesBean.selectedFolder}" />
                     </p:commandButton>
                 </p:panel>
             </h:form>

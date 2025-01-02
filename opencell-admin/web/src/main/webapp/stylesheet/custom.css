@@ -366,7 +366,7 @@ body .ui-messages>div {
 .custom-grid table thead tr th {
   background: #eee !important;
   color: #333;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: normal !important;
   padding: 7px 0;
 }
@@ -1290,7 +1290,11 @@ footer .footer-copyright {
 
 body .ui-inputfield { padding : 5px !important; }
 body .ui-button.ui-button-text-only .ui-button-text {
-  padding: .5rem 1rem .5rem 1rem;
+  padding: .2rem 0.5rem .2rem 0.5rem;
+}
+
+body .ui-button.ui-button-text-icon-left .ui-button-text {
+  padding: .2rem 0.5rem .2rem 2rem;
 }
 
 .ui-datatable-tablewrapper {
@@ -1310,6 +1314,25 @@ body .ui-menu.ui-menubar {
   padding: 0;
   background: #ffffff;
 }
+
+body .ui-button.ui-button-icon-only .ui-button-text{
+	padding:0.2rem;
+}
+
+body .ui-inputfield {
+	font-size: 0.8rem;
+}
+
+body .ui-chkbox .ui-chkbox-box {
+	height: 1.3rem;
+	min-width: 1.2rem;
+}
+
+body .pi {
+    font-size: 0.8rem;
+    padding: 0.1rem;
+}
+
 /* .ui-dialog { */
 /*   z-index: 99999999 !important; */
 /* } */

@@ -961,7 +961,9 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
 
         int cptOccDebit = 0, cptOccCredit = 0, cptPartialAllowed = 0;
         AccountOperation accountOperationForPartialMatching = null;
-		operationIds.add(aoToMatchLast);
+		if (aoToMatchLast != null) {
+			operationIds.add(aoToMatchLast);
+		}
         for (Long id : operationIds) {
             AccountOperation accountOperation = accountOperationService.findById(id);
             if (accountOperation == null) {

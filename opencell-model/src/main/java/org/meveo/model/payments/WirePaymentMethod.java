@@ -106,7 +106,7 @@ public class WirePaymentMethod extends PaymentMethod {
     }
 
     public BankCoordinates getBankCoordinates() {
-        return bankCoordinates;
+        return bankCoordinates != null ? bankCoordinates : new BankCoordinates();
     }
 
     public void setBankCoordinates(BankCoordinates bankCoordinates) {

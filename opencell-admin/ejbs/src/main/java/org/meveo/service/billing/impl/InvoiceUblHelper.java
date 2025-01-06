@@ -260,7 +260,7 @@ public class InvoiceUblHelper {
 		
 		// check directory if exist
 		ParamBean paramBean = ParamBean.getInstance();
-		File ublDirectory = new File(paramBean.getChrootDir("") + File.separator + paramBean.getProperty("meveo.ubl.directory", "/ubl"));
+		File ublDirectory = new File(paramBean.getChrootDir("") + File.separator + paramBean.getProperty("meveo.ubl.directory", "/invoices/ubl"));
 		if (!StorageFactory.existsDirectory(ublDirectory)) {
 			StorageFactory.createDirectory(ublDirectory);
 		}
@@ -1157,36 +1157,41 @@ public class InvoiceUblHelper {
 		List<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates = (List<SubCategoryInvoiceAgregate>) invoiceAgregateService.listByInvoiceAndType(invoice, SubCategoryInvoiceAgregate.class);
 		if(CollectionUtils.isNotEmpty(subCategoryInvoiceAgregates)){
 			AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
-			subCategoryInvoiceAgregates.forEach(subCategoryInvoiceAgregate -> {
-				//if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && "Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
-				if(subCategoryInvoiceAgregate.getDiscountPlanItem() == null){
-					return;
-				}
-				ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
-				chargeIndicator.setValue(false);
-				allowanceCharge.setChargeIndicator(chargeIndicator);
-				AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
-				allowanceChargeReasonCode.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getCode());
-				allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
-
-				AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
-				allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDescription());
-				allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
-
+			var discountAgregates = subCategoryInvoiceAgregates.stream().filter(subCategoryInvoiceAgregate -> subCategoryInvoiceAgregate.getDiscountPlanItem() != null).collect(Collectors.toList());
+			if(discountAgregates.isEmpty()) return;
+			BigDecimal totalWithTax = discountAgregates.stream()
+					.map(subCategoryInvoiceAgregate -> subCategoryInvoiceAgregate.getAmountWithTax().abs())
+					.reduce(BigDecimal.ZERO, BigDecimal::add);
 			
-				Amount amount = objectFactorycommonBasic.createAmount();
-				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
+			BigDecimal totalWithoutTax = discountAgregates.stream()
+					.map(subCategoryInvoiceAgregate -> subCategoryInvoiceAgregate.getAmountWithoutTax().abs())
+					.reduce(BigDecimal.ZERO, BigDecimal::add);
+			var subCategoryInvoiceAgregate = discountAgregates.get(0);
+			ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
+			chargeIndicator.setValue(false);
+			allowanceCharge.setChargeIndicator(chargeIndicator);
+			AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
+			allowanceChargeReasonCode.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getCode());
+			allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
 
-				amount.setCurrencyID(currency);
-				baseAmount.setCurrencyID(currency);
+			AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
+			allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDescription());
+			allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
 
-				amount.setValue(amount.getValue() != null ? subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs().add(amount.getValue()) : subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs() );
-				allowanceCharge.setAmount(amount);
+		
+			Amount amount = objectFactorycommonBasic.createAmount();
+			BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
 
-				baseAmount.setValue(subCategoryInvoiceAgregate.getAmountWithoutTax().setScale(rounding, RoundingMode.HALF_UP).abs());
-				allowanceCharge.setBaseAmount(baseAmount);
+			amount.setCurrencyID(currency);
+			baseAmount.setCurrencyID(currency);
 
-			});
+			amount.setValue(totalWithTax.setScale(rounding, RoundingMode.HALF_UP));
+			allowanceCharge.setAmount(amount);
+
+			baseAmount.setValue(totalWithoutTax.setScale(rounding, RoundingMode.HALF_UP));
+			allowanceCharge.setBaseAmount(baseAmount);
+			
+			
 			if(creditNote != null)
 				creditNote.getAllowanceCharges().add(allowanceCharge);
 			else

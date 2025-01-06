@@ -23,6 +23,11 @@ import jakarta.inject.Inject;
 import jakarta.interceptor.Interceptors;
 import jakarta.ws.rs.core.Response;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.meveo.api.catalog.PricePlanMatrixApi;
 import org.meveo.api.catalog.PricePlanMatrixColumnApi;
 import org.meveo.api.catalog.PricePlanMatrixLineApi;
@@ -40,11 +45,15 @@ import org.meveo.api.dto.response.PagingAndFiltering;
 import org.meveo.api.dto.response.catalog.GetListPricePlanMatrixVersionResponseDto;
 import org.meveo.api.dto.response.catalog.GetPricePlanMatrixColumnResponseDto;
 import org.meveo.api.dto.response.catalog.GetPricePlanMatrixLineResponseDto;
+import org.meveo.api.dto.response.catalog.GetPricePlanMatrixResponseDto;
+import org.meveo.api.dto.response.catalog.GetPricePlanMatrixResponseDto.PricePlanData;
 import org.meveo.api.dto.response.catalog.GetPricePlanResponseDto;
 import org.meveo.api.dto.response.catalog.GetPricePlanVersionResponseDto;
 import org.meveo.api.dto.response.catalog.PricePlanMatrixLinesDto;
 import org.meveo.api.dto.response.catalog.PricePlanMatrixesResponseDto;
+import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.rest.catalog.PricePlanRs;
@@ -53,8 +62,13 @@ import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
 import org.meveo.apiv2.ordering.common.LinkGenerator;
 import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.PricePlanMatrixColumn;
+import org.meveo.model.catalog.PricePlanMatrixLine;
+import org.meveo.model.catalog.PricePlanMatrixValue;
 import org.meveo.model.catalog.PricePlanMatrixVersion;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
+import org.meveo.model.shared.DateUtils;
+import org.meveo.service.catalog.impl.PricePlanMatrixService;
+import org.meveo.service.catalog.impl.PricePlanMatrixVersionService;
 
 /**
  * @author Edward P. Legaspi
@@ -71,6 +85,10 @@ public class PricePlanRsImpl extends BaseRs implements PricePlanRs {
     private PricePlanMatrixColumnApi pricePlanMatrixColumnApi;
     @Inject
     private PricePlanMatrixLineApi pricePlanMatrixLineApi;
+    @Inject
+    private PricePlanMatrixVersionService pricePlanMatrixVersionService;    
+    @Inject
+    private PricePlanMatrixService pricePlanMatrixService;
 
     @Override
     public ActionStatus create(PricePlanMatrixDto postData) {
@@ -530,5 +548,120 @@ public class PricePlanRsImpl extends BaseRs implements PricePlanRs {
             processException(e, result);
         }
         return Response.ok(result).build();
+    }
+    
+    @Override
+    public Response getPricePlanMatrixByCharge(String chargeCode, String pricePlanCode) {
+        GetPricePlanMatrixResponseDto result = new GetPricePlanMatrixResponseDto();
+        
+        try {
+            // Get price plans for charge code
+            List<PricePlanMatrix> pricePlans = pricePlanMatrixService.listByChargeCode(chargeCode);
+            
+            if (pricePlans == null || pricePlans.isEmpty()) {
+                throw new EntityDoesNotExistsException(PricePlanMatrix.class, 
+                    String.format("No price plan found for charge code '%s'", chargeCode));
+            }
+            result.setChargeCode(chargeCode);
+            // Filter by price plan code or get latest published version
+            PricePlanMatrix pricePlan;
+            if (pricePlanCode != null) {
+                pricePlan = pricePlans.stream()
+                    .filter(pp -> pp.getCode().equals(pricePlanCode))
+                    .findFirst()
+                    .orElseThrow(() -> new EntityDoesNotExistsException(PricePlanMatrix.class, 
+                        String.format("Price plan with code '%s' not found", pricePlanCode)));
+            } else {
+                // Get the price plan with latest published version
+                pricePlan = pricePlans.get(0); 
+                PricePlanMatrixVersion publishedVersion = pricePlanMatrixVersionService.getLastPublishedVersion(pricePlan.getCode());
+                if (publishedVersion != null) {
+                    pricePlan = publishedVersion.getPricePlanMatrix();
+                }
+            }
+            // Build response
+            PricePlanData pricePlanData = new PricePlanData();
+            pricePlanData.setCode(pricePlan.getCode());
+            
+            try {
+                PricePlanMatrixVersion version = pricePlanMatrixVersionService.getLastPricePlanMatrixtVersionWithCollections(pricePlan.getCode());
+                if (version != null) {
+                    pricePlanData.setVersion(version.getCurrentVersion());
+                    pricePlanData.setPrice(version.getPrice());
+                    pricePlanData.setPriceEl(version.getPriceEL());
+                    pricePlanData.setStartDate(version.getValidity() != null ? version.getValidity().getFrom() : null);
+                    pricePlanData.setEndDate(version.getValidity() != null ? version.getValidity().getTo() : null);
+                    pricePlanData.setStatus(version.getStatus());
+                    
+                    // Get columns
+                    pricePlanData.setColumns(version.getColumns().stream()
+                        .map(PricePlanMatrixColumn::getCode)
+                        .collect(Collectors.toList()));
+                    // Build matrix data
+                    Map<String, Map<String, String>> matrix = new HashMap<>();
+                    for (PricePlanMatrixLine line : version.getLines()) {
+                        Map<String, String> lineValues = new HashMap<>();
+                        
+                        for (PricePlanMatrixValue value : line.getPricePlanMatrixValues()) {
+                            String columnCode = value.getPricePlanMatrixColumn().getCode();
+                            String cellValue = resolvePricePlanValue(value);
+                            lineValues.put(columnCode, cellValue);
+                        }
+                        lineValues.put("description", line.getDescription());
+                        lineValues.put("price", line.getValue() != null ? line.getValue().toString() : null);
+                        lineValues.put("priceEl", line.getValueEL());
+                        
+                        matrix.put(line.getId().toString(), lineValues);
+                    }
+                    pricePlanData.setMatrix(matrix);
+                }
+            } catch (Exception e) {
+                log.error("Error loading price plan version for {}: {}", pricePlan.getCode(), e.getMessage());
+                throw new BusinessApiException("Error loading price plan data: " + e.getMessage());
+            }
+            
+            result.setPricePlan(pricePlanData);
+            return Response.ok(result).build();
+        } catch (EntityDoesNotExistsException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(new ActionStatus(ActionStatusEnum.FAIL, e.getMessage()))
+                .build();
+        } catch (Exception e) {
+            if (e instanceof BusinessApiException) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ActionStatus(ActionStatusEnum.FAIL, e.getMessage()))
+                    .build();
+            }
+            return errorResponse(new BusinessApiException(e.getMessage()), result.getActionStatus());
+        }
+    }
+    private String resolvePricePlanValue(PricePlanMatrixValue value) {
+        // Handle range values first
+        if (value.getFromDateValue() != null || value.getToDateValue() != null) {
+            // Date range format: "fromDate|toDate"
+            return (DateUtils.formatDateWithPattern(value.getFromDateValue(), "yyyy-MM-dd") + "|" + 
+                    DateUtils.formatDateWithPattern(value.getToDateValue(), "yyyy-MM-dd"))
+                    .replaceAll("null", "");
+        }
+        
+        if (value.getFromDoubleValue() != null || value.getToDoubleValue() != null) {
+            // Numeric range format: "fromValue|toValue" 
+            return (value.getFromDoubleValue() + "|" + value.getToDoubleValue())
+                    .replaceAll("null", ""); 
+        }
+        // Handle single values
+        if (value.getStringValue() != null) {
+            return value.getStringValue();
+        } else if (value.getDoubleValue() != null) {
+            return value.getDoubleValue().toString();
+        } else if (value.getLongValue() != null) {
+            return value.getLongValue().toString();
+        } else if (value.getDateValue() != null) {
+            return DateUtils.formatDateWithPattern(value.getDateValue(), "yyyy-MM-dd");
+        } else if (value.getBooleanValue() != null) {
+            return value.getBooleanValue().toString();
+        }
+        
+        return null;
     }
 }

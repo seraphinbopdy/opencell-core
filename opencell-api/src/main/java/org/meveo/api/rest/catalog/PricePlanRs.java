@@ -39,6 +39,7 @@ import org.meveo.api.dto.catalog.PricePlanMatrixColumnDto;
 import org.meveo.api.dto.catalog.PricePlanMatrixDto;
 import org.meveo.api.dto.catalog.PricePlanMatrixVersionDto;
 import org.meveo.api.dto.response.PagingAndFiltering;
+import org.meveo.api.dto.response.catalog.GetPricePlanMatrixResponseDto;
 import org.meveo.api.dto.response.catalog.GetPricePlanResponseDto;
 import org.meveo.api.dto.response.catalog.GetPricePlanVersionResponseDto;
 import org.meveo.api.dto.response.catalog.PricePlanMatrixLinesDto;
@@ -586,5 +587,25 @@ public interface PricePlanRs extends IBaseRs {
     @POST
     @Path("/tradingPricePlanMatrixLines/calculate")
     Response calculateTradingPricePlanMatrixLine(TradingPricePlanVersionDto postData);
+    
+    @GET
+    @Path("/charges/{chargeCode}")
+    @Operation(summary = "Get price plan matrix by charge code", 
+            tags = { "Price Plan" },
+            description = "Retrieve price plan matrix data for a given charge code. Matrix lines include additional fields: description, price, and priceEl",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Price plan matrix data successfully retrieved", 
+                               content = @Content(schema = @Schema(implementation = GetPricePlanMatrixResponseDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Price plan not found", 
+                               content = @Content(schema = @Schema(implementation = ActionStatus.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid parameters",
+                               content = @Content(schema = @Schema(implementation = ActionStatus.class)))
+            })
+    Response getPricePlanMatrixByCharge(
+            @Parameter(description = "Code of the charge", required = true) 
+            @PathParam("chargeCode") String chargeCode,
+            
+            @Parameter(description = "Optional price plan code filter") 
+            @QueryParam("pricePlanCode") String pricePlanCode);
 
 }

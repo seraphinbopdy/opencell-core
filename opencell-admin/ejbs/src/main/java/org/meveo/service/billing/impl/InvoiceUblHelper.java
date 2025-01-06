@@ -261,7 +261,7 @@ public class InvoiceUblHelper {
 		
 		// check directory if exist
 		ParamBean paramBean = ParamBean.getInstance();
-		File ublDirectory = new File(paramBean.getChrootDir("") + File.separator + paramBean.getProperty("meveo.ubl.directory", "/invoice/ubl"));
+		File ublDirectory = new File(paramBean.getChrootDir("") + File.separator + paramBean.getProperty("meveo.ubl.directory", "/invoices/ubl"));
 		if (!StorageFactory.existsDirectory(ublDirectory)) {
 			StorageFactory.createDirectory(ublDirectory);
 		}
@@ -762,6 +762,13 @@ public class InvoiceUblHelper {
 		TaxTypeCode taxTypeCode = objectFactorycommonBasic.createTaxTypeCode();
 		taxTypeCode.setValue(invoiceLine.getTax().getCode());
 		taxScheme.setTaxTypeCode(taxTypeCode);
+
+		ID id = objectFactorycommonBasic.createID();
+		id.setSchemeID("UN/ECE 5153");
+		id.setSchemeAgencyID("6");
+		id.setValue("VAT");
+		taxScheme.setID(id);
+
 		taxCategoryType.setTaxScheme(taxScheme);
 		itemType.getClassifiedTaxCategories().add(taxCategoryType);
 		//InvoiceLine/ Item/ Description
@@ -1173,36 +1180,41 @@ public class InvoiceUblHelper {
 		List<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates = (List<SubCategoryInvoiceAgregate>) invoiceAgregateService.listByInvoiceAndType(invoice, SubCategoryInvoiceAgregate.class);
 		if(CollectionUtils.isNotEmpty(subCategoryInvoiceAgregates)){
 			AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
-			subCategoryInvoiceAgregates.forEach(subCategoryInvoiceAgregate -> {
-				//if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && "Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))){
-				if(subCategoryInvoiceAgregate.getDiscountPlanItem() == null){
-					return;
-				}
-				ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
-				chargeIndicator.setValue(false);
-				allowanceCharge.setChargeIndicator(chargeIndicator);
-				AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
-				allowanceChargeReasonCode.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getCode());
-				allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
+			var discountAgregates = subCategoryInvoiceAgregates.stream().filter(subCategoryInvoiceAgregate -> subCategoryInvoiceAgregate.getDiscountPlanItem() != null).collect(Collectors.toList());
+			if(discountAgregates.isEmpty()) return;
+			BigDecimal totalWithTax = discountAgregates.stream()
+					.map(subCategoryInvoiceAgregate -> subCategoryInvoiceAgregate.getAmountWithTax().abs())
+					.reduce(BigDecimal.ZERO, BigDecimal::add);
 
-				AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
-				allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDescription());
-				allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
+			BigDecimal totalWithoutTax = discountAgregates.stream()
+					.map(subCategoryInvoiceAgregate -> subCategoryInvoiceAgregate.getAmountWithoutTax().abs())
+					.reduce(BigDecimal.ZERO, BigDecimal::add);
+			var subCategoryInvoiceAgregate = discountAgregates.get(0);
+			ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
+			chargeIndicator.setValue(false);
+			allowanceCharge.setChargeIndicator(chargeIndicator);
+			AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
+			allowanceChargeReasonCode.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getCode());
+			allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
 
-			
-				Amount amount = objectFactorycommonBasic.createAmount();
-				BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
+			AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
+			allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDescription());
+			allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
 
-				amount.setCurrencyID(currency);
-				baseAmount.setCurrencyID(currency);
 
-				amount.setValue(amount.getValue() != null ? subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs().add(amount.getValue()) : subCategoryInvoiceAgregate.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP).abs() );
-				allowanceCharge.setAmount(amount);
+			Amount amount = objectFactorycommonBasic.createAmount();
+			BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
 
-				baseAmount.setValue(subCategoryInvoiceAgregate.getAmountWithoutTax().setScale(rounding, RoundingMode.HALF_UP).abs());
-				allowanceCharge.setBaseAmount(baseAmount);
+			amount.setCurrencyID(currency);
+			baseAmount.setCurrencyID(currency);
 
-			});
+			amount.setValue(totalWithTax.setScale(rounding, RoundingMode.HALF_UP));
+			allowanceCharge.setAmount(amount);
+
+			baseAmount.setValue(totalWithoutTax.setScale(rounding, RoundingMode.HALF_UP));
+			allowanceCharge.setBaseAmount(baseAmount);
+
+
 			if(creditNote != null)
 				creditNote.getAllowanceCharges().add(allowanceCharge);
 			else

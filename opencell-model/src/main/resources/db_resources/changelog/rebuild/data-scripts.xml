@@ -475,4 +475,252 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </insert>
     </changeSet>
         
+    <changeSet id="#INTRD-13886_20250106" author="anasseh">
+		<insert tableName="meveo_script_instance">
+			<column name="id" valueSequenceNext="meveo_script_instance_seq"/>
+			<column name="code" value="org.opencell.payment.stripe.SaveStripePMScript"/>
+			<column name="script">
+				<![CDATA[package org.opencell.payment.stripe;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.billing.BankCoordinates;
+import org.meveo.model.notification.InboundRequest;
+import org.meveo.model.payments.CardPaymentMethod;
+import org.meveo.model.payments.CreditCardTypeEnum;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.DDPaymentMethod;
+import org.meveo.model.payments.PaymentGateway;
+import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.service.payments.impl.CustomerAccountService;
+import org.meveo.service.payments.impl.PaymentGatewayService;
+import org.meveo.service.payments.impl.PaymentMethodService;
+import org.meveo.service.script.Script;
+
+import com.google.gson.JsonSyntaxException;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.PaymentMethod;
+import com.stripe.model.StripeObject;
+import com.stripe.net.ApiResource;
+import com.stripe.net.Webhook;
+
+/**
+ * Handle Stripe webhook (async callBack).
+ * 
+ * @author anasseh
+ *
+ */
+public class SaveStripePMScript extends Script {
+	private PaymentMethodService paymentMethodService = (PaymentMethodService) getServiceInterface(
+			"PaymentMethodService");
+	private CustomerAccountService customerAccountService = (CustomerAccountService) getServiceInterface(
+			"CustomerAccountService");
+	private PaymentGatewayService paymentGatewayService = (PaymentGatewayService) getServiceInterface(
+			"PaymentGatewayService");
+
+	@Override
+	public void execute(Map<String, Object> methodContext) throws BusinessException {
+		log.info("execute methodContext:{}", methodContext);
+
+		InboundRequest inReq = (InboundRequest) methodContext.get("event");
+		log.info("execute inReq.getBody():{}", inReq.getBody());
+
+		if ("POST".equalsIgnoreCase(inReq.getMethod())) {
+
+			final String payload = inReq.getBody();
+			Event event = null;
+
+			try {
+				event = ApiResource.GSON.fromJson(payload, Event.class);
+			} catch (JsonSyntaxException e) {
+				throw new BusinessException(e.getMessage());
+			}
+
+			// Deserialize the nested object inside the event
+			EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
+			StripeObject stripeObject = null;
+			if (dataObjectDeserializer.getObject().isPresent()) {
+				stripeObject = dataObjectDeserializer.getObject().get();
+			} else {
+				throw new BusinessException("EventDataObjectDeserializer deserialization failed ");
+			}
+
+			switch (event.getType()) {
+			case "payment_method.attached":
+				PaymentMethod paymentMethodStripe = (PaymentMethod) stripeObject;
+				CustomerAccount ca = customerAccountService.findByExternalRef2(paymentMethodStripe.getCustomer());
+				if (ca == null) {
+					throw new BusinessException("Cant find customerAccount for Stripe customer:"
+							+ paymentMethodStripe.getCustomerObject().getId());
+				}
+
+				if (!paymentMethodService.isTokenExist(paymentMethodStripe.getId())) {
+
+					if (paymentMethodStripe.getCard() != null) {
+						//PaymentGateway getGateway = getGateway(ca, PaymentMethodEnum.CARD);
+						//validateSignature(inReq, getGateway);
+						createCardPaymentMethod(paymentMethodStripe, ca);
+					}
+					if (paymentMethodStripe.getSepaDebit() != null) {
+						//PaymentGateway getGateway = getGateway(ca, PaymentMethodEnum.DIRECTDEBIT);
+						//validateSignature(inReq, getGateway);
+						createDDPaymentMethod(paymentMethodStripe, ca);
+					}
+				} else {
+					log.warn("This PaymentMethod is already exist ");
+				}
+				break;
+
+			default:
+				log.warn("Unhandled event type: " + event.getType());
+			}
+		}
+	}
+
+	private void createDDPaymentMethod(PaymentMethod paymentMethodStripe, CustomerAccount ca) {
+		DDPaymentMethod ddPaymentMethod = new DDPaymentMethod();
+		ddPaymentMethod.setPaymentType(PaymentMethodEnum.DIRECTDEBIT);
+		BankCoordinates bankCoordinates = new BankCoordinates();
+		bankCoordinates.setIban(paymentMethodStripe.getSepaDebit().getLast4());
+		bankCoordinates.setBankCode(StringUtils.truncate(paymentMethodStripe.getSepaDebit().getBankCode(), 5, false));
+		bankCoordinates
+				.setBranchCode(StringUtils.truncate(paymentMethodStripe.getSepaDebit().getBranchCode(), 5, false));
+		ddPaymentMethod.setBankCoordinates(bankCoordinates);
+		ddPaymentMethod.setMandateDate(new Date());
+		String mandat = paymentMethodStripe.getSepaDebit().getFingerprint();
+		if (StringUtils.isBlank(mandat)) {
+			mandat = paymentMethodStripe.getId();
+		}
+		// mandateId not needed for Stripe, but is mandatory in ihm validation
+		ddPaymentMethod.setMandateIdentification(mandat);
+		ddPaymentMethod.setCustomerAccount(ca);
+		ddPaymentMethod.setPreferred(true);
+		ddPaymentMethod.setTokenId(paymentMethodStripe.getId());
+
+		ddPaymentMethod.setAlias("DD " + paymentMethodStripe.getSepaDebit().getLast4());
+
+		paymentMethodService.create(ddPaymentMethod);
+		log.info("execute DDPaymentMethod created ");
+
+	}
+
+	private void createCardPaymentMethod(PaymentMethod paymentMethodStripe, CustomerAccount ca) {
+		CardPaymentMethod paymentMethod = new CardPaymentMethod();
+		paymentMethod.setPaymentType(PaymentMethodEnum.CARD);
+		paymentMethod.setCardNumber("xxxxxxxxxxxx" + paymentMethodStripe.getCard().getLast4());
+		paymentMethod.setCardType(fromBrand(paymentMethodStripe.getCard().getBrand()));
+		paymentMethod.setCustomerAccount(ca);
+		paymentMethod.setPreferred(true);
+		paymentMethod.setMonthExpiration(paymentMethodStripe.getCard().getExpMonth().intValue());
+		paymentMethod.setYearExpiration(paymentMethodStripe.getCard().getExpYear().intValue() - 2000);
+		paymentMethod.setOwner(paymentMethodStripe.getBillingDetails().getName());
+		paymentMethod.setTokenId(paymentMethodStripe.getId());
+		paymentMethod.setHiddenCardNumber(
+				CardPaymentMethod.hideCardNumber("xxxxxxxxxxxx" + paymentMethodStripe.getCard().getLast4()));
+		paymentMethod.setAlias("Card " + paymentMethodStripe.getCard().getLast4());
+
+		paymentMethodService.create(paymentMethod);
+		log.info("execute CardPaymentMethod created ");
+
+	}
+
+	private CreditCardTypeEnum fromBrand(String brand) {
+		switch (brand) {
+		case "visa":
+			return CreditCardTypeEnum.VISA;
+		case "amex":
+			return CreditCardTypeEnum.AMERICAN_EXPRESS;
+		case "mastercard":
+			return CreditCardTypeEnum.MASTERCARD;
+		default:
+			return CreditCardTypeEnum.CB;
+		}
+	}
+
+	private Event validateSignature(InboundRequest inReq, PaymentGateway paymentGateway) throws BusinessException {
+		Map<String, String> headers = inReq.getHeaders();
+		String sigHeader = headers.get("Stripe-Signature");
+		Event event = null;
+		try {
+			event = Webhook.constructEvent(inReq.getBody(), sigHeader, paymentGateway.getWebhooksSecretKey());
+		} catch (SignatureVerificationException e) {
+			throw new BusinessException("InvalidSignature  " + e.getMessage());
+
+		} catch (Exception e) {
+			throw new BusinessException(e.getMessage());
+		}
+		return event;
+
+	}
+}
+
+]]>
+			</column>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="src_type" value="JAVA"/>
+			<column name="description" value="Handle Stripe webhook (async callBack)"/>						
+		</insert>
+		
+		<insert tableName="ar_payment_gateway">
+			<column name="id" valueSequenceNext="ar_payment_gateway_seq"/>
+			<column name="code" value="Stripe_CARD"/>
+			<column name="description" value="The stripe account fro CARD"/>
+			<column name="payment_method" value="CARD"/>
+			<column name="type" value="NATIF"/>
+			<column name="implementation_class_name" value="org.meveo.service.payments.impl.StripeGatewayPayment"/>
+			<column name="marchand_id" value="anasseh@yahoo.fr"/>
+			<column name="secret_key" value="sk_test_TAQVs6Q2W2IR6dZErkhHWBOH"/>
+			<column name="webhooks_secret_key" value="whsec_8YjCaTfZOqGiVwqMJjo9rE7xv3PS80Wp"/>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="disabled" valueNumeric="0" />
+	    </insert>		
+	    
+		<insert tableName="ar_payment_gateway">
+			<column name="id" valueSequenceNext="ar_payment_gateway_seq"/>
+			<column name="code" value="Stripe_DD"/>
+			<column name="description" value="The stripe account fro DirectDebit"/>
+			<column name="payment_method" value="DIRECTDEBIT"/>
+			<column name="type" value="NATIF"/>
+			<column name="implementation_class_name" value="org.meveo.service.payments.impl.StripeGatewayPayment"/>
+			<column name="marchand_id" value="anasseh@yahoo.fr"/>
+			<column name="secret_key" value="sk_test_TAQVs6Q2W2IR6dZErkhHWBOH"/>
+			<column name="webhooks_secret_key" value="whsec_8YjCaTfZOqGiVwqMJjo9rE7xv3PS80Wp"/>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="disabled" valueNumeric="0" />
+	    </insert>	    
+			        
+		<insert tableName="adm_notification">
+			<column name="id" valueSequenceNext="adm_notification_seq"/>
+			<column name="code" value="SaveStripePMInbound"/>
+			<column name="description" value="Save Stripe PM Inbound"/>
+			<column name="class_name_filter" value="org.meveo.model.notification.InboundRequest"/>
+			<column name="event_type_filter" value="INBOUND_REQ"/>
+			<column name="event_expression_filter" value="#{event.pathInfo.endsWith('/stripe/saveCard')}"/>
+			<column name="script_instance_id" valueComputed="(select id from meveo_script_instance where code='org.opencell.payment.stripe.SaveStripePMScript')"/>		
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="applicationInitializer"/>
+			<column name="version" valueNumeric="0"/>
+			<column name="disabled" valueNumeric="0" />
+	    </insert>	
+	    
+	    <insert tableName="adm_notification_params">
+			<column name="notification_id" valueComputed="(select id from adm_notification where code='SaveStripePMInbound')"/>	
+			<column name="params" value="#{event}"/>
+			<column name="params_key" value="event"/>			
+	    </insert>		              
+  
+    </changeSet>    
 </databaseChangeLog>

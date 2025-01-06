@@ -133,7 +133,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
 
         if(selectedPaymentMethod != null
                 && accountOperation.getCustomerAccount().getPaymentMethods().stream().noneMatch(paymentMethod1 -> paymentMethod1.getPaymentType().equals(selectedPaymentMethod))){
-            throw new BusinessException("the selected paymentMethod does not belong to the account operation customer account");
+            throw new BusinessException("The selected payment method does not belong to the account operation customer account");
         }
         
         LocalDate paymentLocalDate = LocalDate.ofInstant(paymentDate.toInstant(), ZoneId.systemDefault());
@@ -143,24 +143,25 @@ public class AccountOperationService extends PersistenceService<AccountOperation
         				:LocalDate.now();
 
         if ((paymentLocalDate.toEpochDay() <= collectionDate.toEpochDay())) {
-            throw new BusinessException("the paymentDate should be greated than the current collection date");
+            throw new BusinessException("The payment date should be greated than the current collection date");
         }
 
         int maxDelay = appProvider.getMaximumDelay() == null ? 0 : appProvider.getMaximumDelay();
         if ((paymentLocalDate.toEpochDay() - collectionDate.toEpochDay()) > maxDelay) {
-            throw new BusinessException("the paymentDate should not exceed the current collection date by more than " + maxDelay);
+            throw new BusinessException("The payment date should not exceed the current collection date by more than " + maxDelay);
         }
         
         if(appProvider.getMaximumDeferralPerInvoice() != null && accountOperation.getPaymentDeferralCount() != null) {
-            if(accountOperation.getPaymentDeferralCount() + 1 > appProvider.getMaximumDeferralPerInvoice()){
-                throw new BusinessException("the payment deferral count should not exceeds the configured maximum deferral per invoice.");
+            if (accountOperation.getPaymentDeferralCount() + 1 > appProvider.getMaximumDeferralPerInvoice()) {
+                throw new BusinessException(
+                    "The payment deferral count (" + accountOperation.getPaymentDeferralCount() + ") should not exceeds the configured maximum deferral per invoice (" + appProvider.getMaximumDeferralPerInvoice() + ").");
             }
         }
         if(selectedPaymentMethod != null){
             DayOfWeek paymentDateDayOfWeek = paymentLocalDate.plusDays(3).getDayOfWeek();
             if(PaymentMethodEnum.DIRECTDEBIT.equals(selectedPaymentMethod)
                     && (DayOfWeek.SATURDAY.equals(paymentDateDayOfWeek) || DayOfWeek.SUNDAY.equals(paymentDateDayOfWeek))){
-                throw new BusinessException("the paymentDate plus three days must not be a saturday or sunday.");
+                throw new BusinessException("The payment date plus three days must not be a saturday or sunday.");
             }
             accountOperation.setPaymentMethod(selectedPaymentMethod);
         }

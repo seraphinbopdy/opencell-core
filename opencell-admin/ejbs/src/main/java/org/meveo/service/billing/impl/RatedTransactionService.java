@@ -58,6 +58,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.meveo.admin.async.SubListCreator;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.exception.InvalidELException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.job.InvoiceLinesFactory;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -1962,16 +1963,16 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             String criteriaEl = (String) billingRule[1];
             String invoiceBACodeEl = (String) billingRule[2];
             try {
-                Boolean eCriteriaEL = checkCriteriaEL(ratedTransaction, criteriaEl);
+                boolean isCriteriaELMatch = checkIsCriteriaELMatch(ratedTransaction, criteriaEl);
 
                 // Billing rule did not match the criteria - continue with the next billing rule
-                if (eCriteriaEL == null || !eCriteriaEL) {
+                if (!isCriteriaELMatch) {
                     continue;
                 }
 
                 String eInvoicedBACodeEL = null;
                 try {
-                    eInvoicedBACodeEL = evaluateInvoicedBACodeEL(ratedTransaction, invoiceBACodeEl);
+                    eInvoicedBACodeEL = evaluateBACodeEL(ratedTransaction, invoiceBACodeEl);
 
                     if (eInvoicedBACodeEL != null) {
                         if ("".equals(eInvoicedBACodeEL)) {
@@ -2010,21 +2011,34 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         return false;
     }
 
-    private Boolean checkCriteriaEL(RatedTransaction rt, String expression) throws BusinessException {
+    /**
+     * Check if the criteria EL expression is matching the RatedTransaction. EL expression context parameters are: rt - RatedTransaction
+     * 
+     * @param rt Rated Transaction
+     * @param expression Expression to evaluate
+     * @return True if expression is matching
+     * @throws InvalidELException Failed to evaluate EL expression
+     */
+    private boolean checkIsCriteriaELMatch(RatedTransaction rt, String expression) throws InvalidELException {
         if (StringUtils.isBlank(expression)) {
-            return null;
+            return false;
         }
         expression = expression.replace("\\", "");
         Map<Object, Object> userMap = new HashMap<>();
         userMap.put("rt", rt);
-        Boolean code = ValueExpressionWrapper.evaluateExpression(expression, userMap, Boolean.class);
-        if (code != null) {
-           return code;
-        }
-        return null;       
+        boolean isMatch = ValueExpressionWrapper.evaluateToBoolean(expression, userMap);
+        return isMatch;
     }
-    
-    private String evaluateInvoicedBACodeEL(RatedTransaction rt, String expression) throws BusinessException {
+
+    /**
+     * Resolve Billing account code from EL expression. EL expression context parameters are: rt - RatedTransaction
+     * 
+     * @param rt Rated Transaction
+     * @param expression Expression to evaluate
+     * @return Billing account code
+     * @throws InvalidELException Failed to evaluate EL expression
+     */
+    private String evaluateBACodeEL(RatedTransaction rt, String expression) throws InvalidELException {
         if (StringUtils.isBlank(expression)) {
             return null;
         }
@@ -2032,10 +2046,11 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         Map<Object, Object> userMap = new HashMap<>();
         userMap.put("rt", rt);
         String code = ValueExpressionWrapper.evaluateExpression(expression, userMap, String.class);
+
         if (code != null) {
-           return code;
+            return code;
         }
-        return null;       
+        return null;
     }
 
     /**

@@ -135,7 +135,7 @@ public class PersistenceServiceTest {
         QueryBuilder query = new QueryBuilder(Invoice.class, "I", List.of("billingAccount.id"));
         query.addValueIsEqualToField("a.b.c", "value", false, true);
         assertThat(query.toString())
-            .isEqualTo("select I.billingAccount.id from org.meveo.model.billing.Invoice I left join I.a a_0 left join a_0.b b_1  where (b_1.c IS NULL or (lower(b_1.c) = :b_1_c)) Param name:b_1_c value:value");
+            .isEqualTo("select I.billingAccount.id from org.meveo.model.billing.Invoice I left join I.a a_1 left join a_1.b b_2  where (b_2.c IS NULL or (lower(b_2.c) = :b_2_c)) Param name:b_2_c value:value");
     }
 
     @Test
@@ -144,14 +144,14 @@ public class PersistenceServiceTest {
         QueryBuilder query = new QueryBuilder(Invoice.class, "I", List.of("billingAccount"));
         query.addValueIsEqualToField("a.b.c", "value", false, true);
         assertThat(query.toString()).isEqualTo(
-            "select I from org.meveo.model.billing.Invoice I left join fetch I.billingAccount as I_billingAccount left join I.a a_0 left join a_0.b b_1  where (b_1.c IS NULL or (lower(b_1.c) = :b_1_c)) Param name:b_1_c value:value");
+            "select I from org.meveo.model.billing.Invoice I left join fetch I.billingAccount as I_billingAccount left join I.a a_1 left join a_1.b b_2  where (b_2.c IS NULL or (lower(b_2.c) = :b_2_c)) Param name:b_2_c value:value");
     }
 
     @Test
     public void inner_join_for_is_list_requests() {
         QueryBuilder query = new QueryBuilder(Invoice.class, "I", List.of("billingAccount.id"));
         query.addListFilters("a.b.c", "Value");
-        assertThat(query.toString()).isEqualTo("select I.billingAccount.id from org.meveo.model.billing.Invoice I left join I.a a_0 left join a_0.b b_1  where :b_1_c in elements(b_1.c) Param name:b_1_c value:Value");
+        assertThat(query.toString()).isEqualTo("select I.billingAccount.id from org.meveo.model.billing.Invoice I left join I.a a_1 left join a_1.b b_2  where :b_2_c in elements(b_2.c) Param name:b_2_c value:Value");
     }
 
     @Test

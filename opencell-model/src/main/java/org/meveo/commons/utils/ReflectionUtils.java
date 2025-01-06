@@ -420,7 +420,7 @@ public class ReflectionUtils {
      */
     public static boolean isMethodImplemented(Object obj, String name) {
         try {
-            Class<? extends Object> clazz = obj.getClass();
+            Class<? extends Object> clazz = obj instanceof Class ? (Class) obj : obj.getClass();
 
             return clazz.getMethod(name).getDeclaringClass().equals(clazz);
         } catch (SecurityException e) {

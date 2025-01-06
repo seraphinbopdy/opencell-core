@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -78,7 +79,7 @@ public class RecordedInvoiceServiceTest {
 
     @Mock
     private DunningCollectionPlanService dunningCollectionPlanService;
-    
+
     @Before
     public void setUp() {
         when(entityManager.contains(any())).thenReturn(true);
@@ -92,8 +93,7 @@ public class RecordedInvoiceServiceTest {
         when(entityManager.find(any(), anyLong())).thenReturn(recordedInvoice);
         when(recordedInvoiceService.findById(recordedInvoice.getId())).thenReturn(recordedInvoice);
 
-        RecordedInvoice disputedRecordedInvoice =
-                recordedInvoiceService.setLitigation(recordedInvoice, LITIGATION_REASON);
+        RecordedInvoice disputedRecordedInvoice = recordedInvoiceService.setLitigation(recordedInvoice, LITIGATION_REASON);
 
         assertEquals(LITIGATION_REASON, disputedRecordedInvoice.getLitigationReason());
         assertEquals(I, disputedRecordedInvoice.getMatchingStatus());
@@ -165,7 +165,9 @@ public class RecordedInvoiceServiceTest {
 
     @Test
     public void shouldRemoveLitigationStatusAndSetPaymentStatusToPPaid() {
-        Date dueDate = from(Instant.parse("2023-12-31T00:00:00.000Z"));
+        Date dueDate = new Date();
+        dueDate = DateUtils.addDays(dueDate, 2);
+
         RecordedInvoice recordedInvoice = createLitigatedAO(false, dueDate, valueOf(5l));
 
         when(entityManager.find(any(), anyLong())).thenReturn(recordedInvoice);
@@ -181,7 +183,9 @@ public class RecordedInvoiceServiceTest {
 
     @Test
     public void shouldRemoveLitigationStatusAndSetPaymentStatusToPending() {
-        Date dueDate = from(Instant.parse("2023-12-31T00:00:00.000Z"));
+        Date dueDate = new Date();
+        dueDate = DateUtils.addDays(dueDate, 2);
+
         RecordedInvoice recordedInvoice = createLitigatedAO(false, dueDate, valueOf(0));
 
         when(entityManager.find(any(), anyLong())).thenReturn(recordedInvoice);
@@ -236,9 +240,7 @@ public class RecordedInvoiceServiceTest {
         recordedInvoiceService.removeLitigation(recordedInvoice, LITIGATION_REASON);
     }
 
-    private RecordedInvoice createRecordedInvoice(boolean withInvoice,
-                                                  OperationCategoryEnum transactionCategory,
-                                                  InvoicePaymentStatusEnum paymentStatus) {
+    private RecordedInvoice createRecordedInvoice(boolean withInvoice, OperationCategoryEnum transactionCategory, InvoicePaymentStatusEnum paymentStatus) {
         RecordedInvoice recordedInvoice = new RecordedInvoice();
         recordedInvoice.setId(1L);
         Auditable auditable = new Auditable();
@@ -251,7 +253,7 @@ public class RecordedInvoiceServiceTest {
         recordedInvoice.setInvoiceDate(new Date());
         recordedInvoice.setTransactionCategory(transactionCategory);
         recordedInvoice.setNetToPay(TEN);
-        if(withInvoice) {
+        if (withInvoice) {
             Invoice invoice = new Invoice();
             invoice.setId(1L);
             invoice.setStatus(VALIDATED);
@@ -281,8 +283,7 @@ public class RecordedInvoiceServiceTest {
             recordedInvoice.setUnMatchingAmount(ZERO);
         } else {
             recordedInvoice.setMatchingAmount(matchingAmount);
-            recordedInvoice
-                    .setUnMatchingAmount(recordedInvoice.getAmount().subtract(recordedInvoice.getMatchingAmount()));
+            recordedInvoice.setUnMatchingAmount(recordedInvoice.getAmount().subtract(recordedInvoice.getMatchingAmount()));
         }
         return recordedInvoice;
     }

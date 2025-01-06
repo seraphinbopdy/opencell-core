@@ -1,5 +1,6 @@
 package org.meveo.service.payments.impl;
 
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -9,6 +10,8 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 
+import org.apache.commons.lang3.time.DateUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.admin.exception.BusinessException;
@@ -34,33 +37,67 @@ public class AccountOperationServiceTest {
     @Mock
     private Provider appProvider;
 
-    @Test(expected = BusinessException.class)
+    @Before
+    public void init() {
+
+        when(appProvider.isPaymentDeferral()).thenReturn(true);
+        when(appProvider.getMaximumDelay()).thenReturn(3);
+        when(appProvider.getMaximumDeferralPerInvoice()).thenReturn(5);
+    }
+
+    @Test()
     public void selectedPaymentMethodDoesNotBelongToTheAccountOperationCustomerAccount() {
         AccountOperation accountOperation = new AccountOperation();
         CustomerAccount customerAccount = new CustomerAccount();
         customerAccount.setPaymentMethods(Arrays.asList(new CheckPaymentMethod(), new CashPaymentMethod()));
         accountOperation.setCustomerAccount(customerAccount);
         Date paymentDate = Date.from(LocalDate.now().plusDays(2).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        accountOperationService.createDeferralPayments(accountOperation, PaymentMethodEnum.CARD, paymentDate);
+
+        try {
+            accountOperationService.createDeferralPayments(accountOperation, PaymentMethodEnum.CARD, paymentDate);
+        } catch (BusinessException e) {
+            assertEquals("The selected payment method does not belong to the account operation customer account", e.getMessage());
+            return;
+        }
+        fail("Exception is expected");
     }
 
-    @Test(expected = BusinessException.class)
+    @Test
     public void paymentExceedsAppProviderMaxDelay() {
         AccountOperation accountOperation = new AccountOperation();
-        when(appProvider.getMaximumDelay()).thenReturn(1);
         Date paymentDate = Date.from(LocalDate.now().plusDays(2).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        accountOperationService.createDeferralPayments(accountOperation, null, paymentDate);
+        Date collectionDate = DateUtils.addDays(paymentDate, -2);
+        accountOperation.setCollectionDate(collectionDate);
+
+        when(appProvider.getMaximumDelay()).thenReturn(1);
+
+        try {
+            accountOperationService.createDeferralPayments(accountOperation, null, paymentDate);
+        } catch (BusinessException e) {
+            assertEquals("The payment date should not exceed the current collection date by more than 1", e.getMessage());
+            return;
+        }
+        fail("Exception is expected");
     }
 
-    @Test(expected = BusinessException.class)
+    @Test
     public void paymentExceedsAppProviderTheConfiguredMaximumDeferralPerInvoice() {
         AccountOperation accountOperation = new AccountOperation();
-        accountOperation.setPaymentDeferralCount(1);
+        accountOperation.setPaymentDeferralCount(10);
+
         Date paymentDate = Date.from(LocalDate.now().plusDays(2).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        accountOperationService.createDeferralPayments(accountOperation, null, paymentDate);
+        Date collectionDate = DateUtils.addDays(paymentDate, -2);
+        accountOperation.setCollectionDate(collectionDate);
+        try {
+            accountOperationService.createDeferralPayments(accountOperation, null, paymentDate);
+        } catch (BusinessException e) {
+            assertEquals("The payment deferral count (10) should not exceeds the configured maximum deferral per invoice (5).", e.getMessage());
+            return;
+        }
+        fail("Exception is expected");
     }
 
-    @Test(expected = BusinessException.class)
+    @Test()
     public void thePaymentDatePlusThreeDaysMustNotBeSaturdayOrSunday() {
         AccountOperation accountOperation = new AccountOperation();
         CustomerAccount customerAccount = new CustomerAccount();
@@ -69,7 +106,16 @@ public class AccountOperationServiceTest {
         accountOperation.setPaymentDeferralCount(0);
         when(appProvider.getMaximumDeferralPerInvoice()).thenReturn(1);
         Date paymentDate = Date.from(LocalDate.of(1989, 8, 20).minusDays(3).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        accountOperationService.createDeferralPayments(accountOperation, PaymentMethodEnum.DIRECTDEBIT, paymentDate);
+        Date collectionDate = DateUtils.addDays(paymentDate, -2);
+        accountOperation.setCollectionDate(collectionDate);
+
+        try {
+            accountOperationService.createDeferralPayments(accountOperation, PaymentMethodEnum.DIRECTDEBIT, paymentDate);
+        } catch (BusinessException e) {
+            assertEquals("The payment date plus three days must not be a saturday or sunday.", e.getMessage());
+            return;
+        }
+        fail("Exception is expected");
     }
 
     @Test
@@ -77,7 +123,7 @@ public class AccountOperationServiceTest {
 
         Date paymentDate = Date.from(LocalDate.of(1989, 9, 17).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
         Date collectionDate = Date.from(LocalDate.of(1989, 8, 20).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        
+
         AccountOperation accountOperation = new AccountOperation();
         doReturn(accountOperation).when(accountOperationService).update(accountOperation);
         CustomerAccount customerAccount = new CustomerAccount();

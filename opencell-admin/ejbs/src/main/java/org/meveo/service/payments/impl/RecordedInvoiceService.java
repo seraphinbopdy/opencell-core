@@ -943,7 +943,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         if (recordedInvoice.getMatchingAmount().compareTo(recordedInvoice.getAmount()) == 0) {
             updatePaymentStatus(recordedInvoice, PAID, today);
         } else {
-            if (today.before(recordedInvoice.getInvoice().getDueDate())) {
+            if (today.compareTo(recordedInvoice.getInvoice().getDueDate()) <=0) {
                 if (recordedInvoice.getMatchingAmount().compareTo(BigDecimal.ZERO) != 0) {
                     updatePaymentStatus(recordedInvoice, PPAID, today);
                 } else {

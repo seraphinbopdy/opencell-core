@@ -3,14 +3,14 @@ package org.meveo.apiv2.billing;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import jakarta.annotation.Nullable;
-
 import org.immutables.value.Value;
+import org.meveo.apiv2.admin.Seller;
 import org.meveo.apiv2.models.Resource;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 
 @Value.Immutable
 @Value.Style(jdkOnly = true, jakarta = true)
@@ -54,7 +54,7 @@ public interface BasicInvoice extends Resource {
 
 	@Schema(description = "The Seller")
 	@Nullable
-	Resource getSeller();
+	Seller getSeller();
 
 	@Schema(description = "The flag for auto matching")
 	@Nullable

@@ -68,6 +68,7 @@ public class PricePlanMatrixServiceTest {
         pricePlanMatrix3.setId(3L);
         pricePlanMatrix3.setValidityFrom(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
         pricePlanMatrix3.setValidityDate(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01"));
+        pricePlanMatrix3.setChargeTemplates(Set.of(recurringChargeTemplate));
 
         doNothing().when(pricePlanMatrixService).create(pricePlanMatrix3);
         doReturn(Arrays.asList(pricePlanMatrix1, pricePlanMatrix2)).when(pricePlanMatrixService).listByChargeCode("REC_CODE");

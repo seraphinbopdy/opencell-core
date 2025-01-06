@@ -10,7 +10,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,15 +22,19 @@ import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingRun;
+import org.meveo.model.billing.OneShotChargeInstance;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.UserAccount;
 import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.billing.WalletOperationStatusEnum;
 import org.meveo.model.rating.EDR;
+import org.meveo.security.CurrentUser;
+import org.meveo.security.MeveoUser;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.billing.impl.WalletOperationService;
+import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.test.JPAQuerySimulation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -57,9 +60,16 @@ public class ReratingServiceTest {
 
     @Mock
     private WalletOperationService walletOperationService;
-    
+
     @Mock
     private RatedTransactionService ratedTransactionService;
+    
+    @Mock
+    private AccountingArticleService accountingArticleService;
+
+    @Mock
+    @CurrentUser
+    protected MeveoUser currentUser;
 
     @Before
     public void setUp() {
@@ -110,6 +120,7 @@ public class ReratingServiceTest {
                 wallet.setUserAccount(ua);
                 wo.setWallet(wallet);
                 wo.setUserAccount(ua);
+                wo.setChargeInstance(new OneShotChargeInstance());
 
                 return wo;
             }
@@ -173,7 +184,7 @@ public class ReratingServiceTest {
                 for (Long woId : (List<Long>) getParameterRaw("woIds")) {
                     for (Object[] discountInfo : discountWos) {
                         if (woId.equals(discountInfo[3])) {
-                            values.add(new Object[] { BigInteger.valueOf((Long) discountInfo[0]), discountInfo[1], discountInfo[2] != null ? BigInteger.valueOf((Long) discountInfo[2]) : null });
+                            values.add(new Object[] { discountInfo[0], discountInfo[1], discountInfo[2] != null ? discountInfo[2] : null });
                         }
                     }
                 }
@@ -197,7 +208,7 @@ public class ReratingServiceTest {
                 for (Long woId : (List<Long>) getParameterRaw("woIds")) {
                     for (Object[] edrInfo : edrs) {
                         if (woId.equals(edrInfo[5])) {
-                            values.add(new Object[] { BigInteger.valueOf((Long) edrInfo[0]), edrInfo[1] });
+                            values.add(new Object[] { edrInfo[0], edrInfo[1] });
                         }
                     }
                 }
@@ -221,7 +232,7 @@ public class ReratingServiceTest {
                 for (Long edrId : (List<Long>) getParameterRaw("edrIds")) {
                     for (Object[] edrInfo : edrs) {
                         if (edrId.equals(edrInfo[0]) && edrInfo[3] != null && !"CANCELED".equals((String) edrInfo[3])) {
-                            values.add(new Object[] { BigInteger.valueOf((Long) edrInfo[2]), edrInfo[3], edrInfo[4] != null ? BigInteger.valueOf((Long) edrInfo[4]) : null });
+                            values.add(new Object[] { edrInfo[2], edrInfo[3], edrInfo[4] != null ? edrInfo[4] : null });
                         }
                     }
                 }
@@ -244,8 +255,9 @@ public class ReratingServiceTest {
                 for (Long rtId : (List<Long>) getParameterRaw("rtIds")) {
                     for (Object[] rtInfo : rts) {
                         if (rtId.equals(rtInfo[0])) {
-                            values.add(new Object[] { BigInteger.valueOf((Long) rtInfo[0]), rtInfo[1], BigDecimal.valueOf((Long) rtInfo[2]), BigDecimal.valueOf((Long) rtInfo[3]), BigDecimal.valueOf((Long) rtInfo[4]),
-                                    BigDecimal.valueOf((Long) rtInfo[5]), rtInfo[6] != null ? BigInteger.valueOf((Long) rtInfo[6]) : null, rtInfo[7], rtInfo[8] != null ? BigInteger.valueOf((Long) rtInfo[8]) : null,  rtInfo[9] != null ? BigDecimal.valueOf((Long) rtInfo[9]) : null });
+                            values.add(
+                                new Object[] { rtInfo[0], rtInfo[1], BigDecimal.valueOf((Long) rtInfo[2]), BigDecimal.valueOf((Long) rtInfo[3]), BigDecimal.valueOf((Long) rtInfo[4]), BigDecimal.valueOf((Long) rtInfo[5]),
+                                        rtInfo[6] != null ? rtInfo[6] : null, rtInfo[7], rtInfo[8] != null ? rtInfo[8] : null, rtInfo[9] != null ? BigDecimal.valueOf((Long) rtInfo[9]) : null });
                         }
                     }
                 }

@@ -2983,7 +2983,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public void rejectInvoice(Invoice invoice, RejectReasonInput rejectReasonInput) {
         InvoiceStatusEnum status = invoice.getStatus();
         if (!(InvoiceStatusEnum.SUSPECT.equals(status) || DRAFT.equals(status) || InvoiceStatusEnum.NEW.equals(status))) {
-            throw new BusinessException("Can only reject invoices in statuses NEW/DRAFT/SUSPECT. current invoice status is :" + status.name());
+            throw new BusinessException("Can only reject invoices in statuses NEW/DRAFT/SUSPECT. current invoice status is: " + status.name());
         }
         BillingRun billingRun = invoice.getBillingRun();
         if(billingRun == null) {
@@ -3004,7 +3004,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         	invoice.setRejectReason(resourceMessages.getString("invoice.reject.reason.default.reason", currentUser.getFullNameOrUserName()));
         }
         
-        update(invoice);
+        invoice = update(invoice);
         
         if(InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && billingRun.getRejectAutoAction() == null ){
             billingRun.setStatus(BillingRunStatusEnum.REJECTED);
@@ -8352,7 +8352,4 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	public void validateInvoicesOfBRByStatus(BillingRun billingRun, List<InvoiceStatusEnum> toValidate, InvoiceStatusEnum validationStatus) {
 		getEntityManager().createNamedQuery("Invoice.validateInvoicesByStatusAndBr").setParameter("status",validationStatus).setParameter("billingRun", billingRun).setParameter("toValidate", toValidate).executeUpdate();
 	}
-
 }
-
-

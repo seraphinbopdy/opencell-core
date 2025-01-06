@@ -91,7 +91,7 @@ public class DiscountPlanInstanceServiceTest {
         offerDiscountPlan.setCode("DISC_PLAN");
         offerTemplate.setAllowedDiscountPlans(List.of(offerDiscountPlan));
         subscription.setOffer(offerTemplate);
-        DiscountPlan dp = getDiscountPlan(DiscountPlanTypeEnum.PROMO_CODE, DiscountPlanStatusEnum.ACTIVE, false);
+        DiscountPlan dp = getDiscountPlan(DiscountPlanTypeEnum.OFFER, DiscountPlanStatusEnum.ACTIVE, false);
         discountPlanInstanceService.instantiateDiscountPlan(subscription, dp, null, false);
 
     }

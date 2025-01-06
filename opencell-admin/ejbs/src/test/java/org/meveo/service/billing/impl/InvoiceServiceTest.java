@@ -6,16 +6,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -23,8 +22,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,12 +30,15 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.util.ResourceBundle;
+import org.meveo.apiv2.admin.ImmutableSeller;
 import org.meveo.apiv2.billing.ImmutableBasicInvoice;
 import org.meveo.apiv2.billing.ImmutableInvoice;
-import org.meveo.apiv2.models.Resource;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
+import org.meveo.event.qualifier.Updated;
 import org.meveo.jpa.EntityManagerWrapper;
+import org.meveo.model.BaseEntity;
 import org.meveo.model.IBillableEntity;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
@@ -46,6 +46,7 @@ import org.meveo.model.billing.AccountingCode;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.BillingCycle;
 import org.meveo.model.billing.BillingRun;
+import org.meveo.model.billing.BillingRunAutomaticActionEnum;
 import org.meveo.model.billing.BillingRunStatusEnum;
 import org.meveo.model.billing.CategoryInvoiceAgregate;
 import org.meveo.model.billing.DiscountPlanInstance;
@@ -80,6 +81,7 @@ import org.meveo.model.crm.Provider;
 import org.meveo.model.filter.Filter;
 import org.meveo.model.order.Order;
 import org.meveo.model.payments.CardPaymentMethod;
+import org.meveo.model.payments.CashPaymentMethod;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.PaymentMethod;
 import org.meveo.model.tax.TaxClass;
@@ -87,6 +89,8 @@ import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.catalog.impl.InvoiceSubCategoryService;
+import org.meveo.service.crm.impl.CustomFieldInstanceService;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 import org.meveo.service.tax.TaxMappingService;
 import org.meveo.service.tax.TaxMappingService.TaxInfo;
 import org.meveo.util.ApplicationProvider;
@@ -98,7 +102,10 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.event.Event;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
@@ -154,14 +161,30 @@ public class InvoiceServiceTest {
 
     @Mock
     private SubscriptionService subscriptionService;
-    
+
     @Mock
     private AccountingArticleService accountingArticleService;
-    
+
+    @Mock
+    private InvoiceAgregateService invoiceAgregateService;
+
+    @Mock
+    private AdvancedSettingsService advancedSettingsService;
+
+    @Mock
+    private ResourceBundle resourceMessages;
+
+    @Mock
+    @Updated
+    protected Event<BaseEntity> entityUpdatedEventProducer;
+
+    @Mock
+    private CustomFieldInstanceService customFieldInstanceService;
+
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
-    private Random random = new Random();
+    Logger log = LoggerFactory.getLogger(InvoiceServiceTest.class);
 
     @Before
     public void setUp() {
@@ -179,9 +202,9 @@ public class InvoiceServiceTest {
             }
         });
 
-        when(invoiceLinesService.listInvoiceLinesToInvoice(any(), any(), any(), any(),any(), any(), anyInt())).thenAnswer((Answer<List<InvoiceLine>>) invocation -> {
+        when(invoiceLinesService.listInvoiceLinesToInvoice(any(), any(), any(), any(), any(), any(), anyInt())).thenAnswer((Answer<List<InvoiceLine>>) invocation -> {
             List<InvoiceLine> invoiceLines = new ArrayList<>();
-            IBillableEntity entity = (IBillableEntity) invocation.getArguments()[0];
+            IBillableEntity entity = (IBillableEntity) invocation.getArguments()[1];
             InvoiceLine invoiceLine = getInvoiceLine(entity);
             InvoiceLine invoiceLine2 = getInvoiceLine(entity);
             InvoiceLine invoiceLine3 = getInvoiceLine(entity);
@@ -193,6 +216,23 @@ public class InvoiceServiceTest {
 
         when(emWrapper.getEntityManager()).thenReturn(entityManager);
 
+        doAnswer(new Answer<AccountingArticle>() {
+            public AccountingArticle answer(InvocationOnMock invocation) throws Throwable {
+                return ((AccountingArticle) invocation.getArguments()[0]);
+            }
+        }).when(accountingArticleService).refreshOrRetrieve(any(AccountingArticle.class));
+
+        doAnswer(new Answer<Subscription>() {
+            public Subscription answer(InvocationOnMock invocation) throws Throwable {
+                return ((Subscription) invocation.getArguments()[0]);
+            }
+        }).when(subscriptionService).refreshOrRetrieve(any(Subscription.class));
+
+        doAnswer(new Answer<Invoice>() {
+            public Invoice answer(InvocationOnMock invocation) throws Throwable {
+                return ((Invoice) invocation.getArguments()[0]);
+            }
+        }).when(entityManager).merge(any(Invoice.class));
     }
 
     private RatedTransaction getRatedTransaction(IBillableEntity entity, long sellerId) {
@@ -219,7 +259,7 @@ public class InvoiceServiceTest {
         BillingCycle bc = mock(BillingCycle.class);
         InvoiceType invoiceType = mock(InvoiceType.class);
         PaymentMethod paymentMethod = mock(PaymentMethod.class);
-        
+
         List<RatedTransaction> ratedTransactions = new ArrayList<>();
         RatedTransaction rt1 = getRatedTransaction(subscription, 1l);
         RatedTransaction rt2 = getRatedTransaction(subscription, 2l);
@@ -227,7 +267,7 @@ public class InvoiceServiceTest {
         ratedTransactions.add(rt1);
         ratedTransactions.add(rt2);
         ratedTransactions.add(rt3);
-        
+
         InvoiceService.RatedTransactionsToInvoice ratedTransactionsToInvoice = invoiceService.getRatedTransactionGroups(subscription, ba, null, bc, invoiceType, false, paymentMethod, ratedTransactions.iterator());
         assertThat(ratedTransactionsToInvoice).isNotNull();
         Assert.assertEquals(ratedTransactionsToInvoice.ratedTransactionGroups.size(), 3);
@@ -242,7 +282,7 @@ public class InvoiceServiceTest {
         BillingCycle bc = mock(BillingCycle.class);
         InvoiceType invoiceType = mock(InvoiceType.class);
         PaymentMethod paymentMethod = mock(PaymentMethod.class);
-        
+
         List<RatedTransaction> ratedTransactions = new ArrayList<>();
         RatedTransaction rt1 = getRatedTransaction(ba, 1l);
         RatedTransaction rt2 = getRatedTransaction(ba, 2l);
@@ -250,7 +290,7 @@ public class InvoiceServiceTest {
         ratedTransactions.add(rt1);
         ratedTransactions.add(rt2);
         ratedTransactions.add(rt3);
-        
+
         InvoiceService.RatedTransactionsToInvoice ratedTransactionsToInvoice = invoiceService.getRatedTransactionGroups(ba, ba, null, bc, invoiceType, false, paymentMethod, ratedTransactions.iterator());
         assertThat(ratedTransactionsToInvoice).isNotNull();
         Assert.assertEquals(ratedTransactionsToInvoice.ratedTransactionGroups.size(), 3);
@@ -278,7 +318,7 @@ public class InvoiceServiceTest {
         ratedTransactions.add(rt1);
         ratedTransactions.add(rt2);
         ratedTransactions.add(rt3);
-        
+
         InvoiceService.RatedTransactionsToInvoice ratedTransactionsToInvoice = invoiceService.getRatedTransactionGroups(order, ba, new BillingRun(), bc, invoiceType, false, paymentMethod, ratedTransactions.iterator());
 
         assertThat(ratedTransactionsToInvoice).isNotNull();
@@ -287,6 +327,7 @@ public class InvoiceServiceTest {
         Assert.assertEquals(ratedTransactionGroup.getInvoiceKey().split("_").length, 5);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void test_appendInvoiceAggregates_diferentiateUserAccount() {
 
@@ -380,6 +421,7 @@ public class InvoiceServiceTest {
 
         InvoiceType invoiceType = new InvoiceType();
         invoiceType.setId(4L);
+        invoiceType.setCode("ADV");
 
         RatedTransaction rt111 = new RatedTransaction(new Date(), new BigDecimal(15), new BigDecimal(16), new BigDecimal(1), new BigDecimal(2), new BigDecimal(15), new BigDecimal(16), new BigDecimal(1),
             RatedTransactionStatusEnum.OPEN, ua1.getWallet(), ba, ua1, subCat11, null, null, null, null, null, subscription1, null, null, null, null, null, "rt111", "RT111", new Date(), new Date(), seller, tax,
@@ -434,7 +476,10 @@ public class InvoiceServiceTest {
         taxInfo.tax = tax;
         taxInfo.taxClass = taxClass;
 
-        when(taxMappingService.determineTax(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(taxInfo);
+        doCallRealMethod().when(taxMappingService).checkIfTaxHasChanged(any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+        when(taxMappingService.determineTax(eq(taxClass), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(taxInfo);
+
+        when(entityManager.getReference(eq(TaxClass.class), any())).thenReturn(taxClass);
         when(entityManager.getReference(eq(Tax.class), any())).thenReturn(tax);
 
         when(invoiceSubCategoryService.findById(eq(subCat11.getId()))).thenReturn(subCat11);
@@ -562,6 +607,7 @@ public class InvoiceServiceTest {
         assertThat(((TaxInvoiceAgregate) invoice.getInvoiceAgregates().get(6)).getTax().getCode()).isEqualTo("tax1");
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void test_appendInvoiceAggregates_diferentiateByTax() {
 
@@ -680,6 +726,7 @@ public class InvoiceServiceTest {
 
         InvoiceType invoiceType = new InvoiceType();
         invoiceType.setId(4L);
+        invoiceType.setCode("ADV");
 
         long i = 30L;
 
@@ -710,15 +757,17 @@ public class InvoiceServiceTest {
         taxInfo20.tax = tax20;
         taxInfo20.taxClass = taxClass20;
 
-        when(taxMappingService.determineTax(eq(taxClass10), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(taxInfo10);
-        when(taxMappingService.determineTax(eq(taxClass20), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(taxInfo20);
+        doCallRealMethod().when(taxMappingService).checkIfTaxHasChanged(any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+
+        when(taxMappingService.determineTax(eq(taxClass10), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(taxInfo10);
+        when(taxMappingService.determineTax(eq(taxClass20), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(taxInfo20);
 
         when(entityManager.getReference(eq(Tax.class), eq(tax10.getId()))).thenReturn(tax10);
         when(entityManager.getReference(eq(Tax.class), eq(tax20.getId()))).thenReturn(tax20);
 
         when(entityManager.getReference(eq(TaxClass.class), eq(taxClass10.getId()))).thenReturn(taxClass10);
         when(entityManager.getReference(eq(TaxClass.class), eq(taxClass20.getId()))).thenReturn(taxClass20);
-        
+
         when(invoiceSubCategoryService.findById(eq(subCat11.getId()))).thenReturn(subCat11);
         when(invoiceSubCategoryService.findById(eq(subCat12.getId()))).thenReturn(subCat12);
         when(invoiceSubCategoryService.findById(eq(subCat21.getId()))).thenReturn(subCat21);
@@ -727,7 +776,7 @@ public class InvoiceServiceTest {
         when(entityManager.getReference(eq(UserAccount.class), eq(ua1.getId()))).thenReturn(ua1);
 
         when(entityManager.getReference(eq(WalletInstance.class), eq(wallet1.getId()))).thenReturn(wallet1);
-        
+
         when(appProvider.getRoundingMode()).thenReturn(RoundingModeEnum.NEAREST);
         when(appProvider.getRounding()).thenReturn(6);
         when(appProvider.getInvoiceRoundingMode()).thenReturn(RoundingModeEnum.NEAREST);
@@ -903,6 +952,7 @@ public class InvoiceServiceTest {
         }
     }
 
+    @SuppressWarnings("serial")
     @Test
     public void test_reject_invoice() {
         Map<InvoiceStatusEnum, Boolean> rejectEligibilityMap = new HashMap<InvoiceStatusEnum, Boolean>() {
@@ -910,7 +960,7 @@ public class InvoiceServiceTest {
                 put(InvoiceStatusEnum.VALIDATED, false);
                 put(InvoiceStatusEnum.CANCELED, false);
                 put(InvoiceStatusEnum.DRAFT, true);
-                put(InvoiceStatusEnum.NEW, false);
+                put(InvoiceStatusEnum.NEW, true);
                 put(InvoiceStatusEnum.REJECTED, false);
                 put(InvoiceStatusEnum.SUSPECT, true);
             }
@@ -918,12 +968,18 @@ public class InvoiceServiceTest {
         for (InvoiceStatusEnum status : InvoiceStatusEnum.values()) {
             Invoice invoice = new Invoice();
             invoice.setStatus(status);
+            BillingRun billingRun = new BillingRun();
+            billingRun.setRejectAutoAction(BillingRunAutomaticActionEnum.CANCEL);
+            invoice.setBillingRun(billingRun);
+
+            when(billingRunService.retrieveIfNotManaged(any(BillingRun.class))).thenReturn(billingRun);
+
             if (rejectEligibilityMap.get(status)) {
                 invoiceService.rejectInvoice(invoice, null);
                 verify(invoiceService, times(1)).rejectInvoice(invoice, null);
             } else {
                 exception.expect(BusinessException.class);
-                exception.expectMessage("Can only reject invoices in statuses DRAFT/SUSPECT. current invoice status is :");
+                exception.expectMessage("Can only reject invoices in statuses NEW/DRAFT/SUSPECT. current invoice status is: " + status);
                 invoiceService.rejectInvoice(invoice, null);
                 verify(invoiceService, times(0)).rejectInvoice(invoice, null);
             }
@@ -973,14 +1029,13 @@ public class InvoiceServiceTest {
             .rawAmount(new BigDecimal(54)).netToPay(new BigDecimal(54)).discountAmount(new BigDecimal(54)).paymentStatus(InvoicePaymentStatusEnum.PPAID).dueDate(new Date()).build();
         for (InvoiceStatusEnum status : InvoiceStatusEnum.values()) {
             Invoice invoice = new Invoice();
+            InvoiceType invoiceType = new InvoiceType();
+            invoiceType.setCode("ADV");
+
+            invoice.setInvoiceType(invoiceType);
             invoice.setStatus(status);
-            Invoice input = invoice;
-            try {
-                input = instantiateRandomObject(Invoice.class, true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Mockito.doReturn(invoice).when(invoiceService).update(invoice);
+
+            Invoice input = new Invoice();
             if (updateEligibilityMap.get(status)) {
 
                 invoiceService.update(invoice, input, invoiceResource);
@@ -996,32 +1051,51 @@ public class InvoiceServiceTest {
 
     @Test
     public void test_create_advance_payment_invoice() throws Exception {
-        ImmutableBasicInvoice inputInvoice = instantiateRandomObject(ImmutableBasicInvoice.class, false);
-        Order order = instantiateRandomObject(Order.class, true);
-        BillingAccount billingAccount = instantiateRandomObject(BillingAccount.class, true);
 
-        AccountingArticle accountingArticle = instantiateRandomObject(AccountingArticle.class, true);
-        InvoiceType advType = instantiateRandomObject(InvoiceType.class, true);
-        advType.setCode("ADV");
-        CustomerAccount ca = instantiateRandomObject(CustomerAccount.class, true);
-        Customer c = instantiateRandomObject(Customer.class, true);
+        Order order = new Order();
+        order.setCode("Order");
+
+        BillingAccount billingAccount = new BillingAccount();
+        billingAccount.setCode("BA1");
+
+        AccountingArticle accountingArticle = new AccountingArticle();
+        accountingArticle.setCode("ART1");
+
+        InvoiceType invoiceType = new InvoiceType();
+        invoiceType.setCode("ADV");
+
+        CustomerAccount ca = new CustomerAccount();
+        ca.setCode("CA1");
+
+        Customer c = new Customer();
+        c.setCode("C1");
         ca.setCustomer(c);
-        BillingCycle bc = instantiateRandomObject(BillingCycle.class, true);
+
+        BillingCycle bc = new BillingCycle();
         billingAccount.setBillingCycle(bc);
         billingAccount.setCustomerAccount(ca);
 
-        Mockito.doReturn(order).when(invoiceService).tryToFindByEntityClassAndCode(Order.class, inputInvoice.getOrderCode());
-        Mockito.doReturn(billingAccount).when(invoiceService).tryToFindByEntityClassAndCode(BillingAccount.class, inputInvoice.getBillingAccountCode());
+        Seller seller = new Seller();
+        seller.setCode("seller");
+
+        ImmutableBasicInvoice inputInvoice = ImmutableBasicInvoice.builder().amountWithTax(new BigDecimal(20)).invoiceDate(new Date()).billingAccountCode(billingAccount.getCode())
+            .seller(ImmutableSeller.builder().code(seller.getCode()).build()).invoiceTypeCode(invoiceType.getCode()).orderCode(order.getCode()).build();
+
+        Mockito.doReturn(order).when(invoiceService).tryToFindByEntityClassAndCode(eq(Order.class), eq(order.getCode()));
+        Mockito.doReturn(billingAccount).when(invoiceService).tryToFindByEntityClassAndCode(eq(BillingAccount.class), eq(billingAccount.getCode()));
         // Mockito.doReturn(accountingArticle).when(invoiceService).tryToFindByEntityClassAndCode(AccountingArticle.class, inputInvoice.getArticleCode());
-        Mockito.doReturn(advType).when(invoiceService).tryToFindByEntityClassAndCode(InvoiceType.class, inputInvoice.getInvoiceTypeCode());
+        Mockito.doReturn(invoiceType).when(invoiceService).tryToFindByEntityClassAndCode(eq(InvoiceType.class), eq(invoiceType.getCode()));
+        Mockito.doReturn(seller).when(invoiceService).tryToFindByEntityClassAndCodeOrId(eq(Seller.class), eq(seller.getCode()), any());
+
         Mockito.doNothing().when(invoiceService).postCreate(any());
+
         final Invoice advancePaymentInvoice = invoiceService.createBasicInvoice(inputInvoice);
 
         BigDecimal amountWithTax = inputInvoice.getAmountWithTax();
         Date invoiceDate = inputInvoice.getInvoiceDate();
 
         assertThat(advancePaymentInvoice.getAmountTax()).isEqualTo(BigDecimal.ZERO);
-        assertThat(advancePaymentInvoice.getInvoiceType()).isEqualTo(advType);
+        assertThat(advancePaymentInvoice.getInvoiceType()).isEqualTo(invoiceType);
         assertThat(advancePaymentInvoice.getBillingAccount()).isEqualTo(billingAccount);
         assertThat(advancePaymentInvoice.getOrder()).isEqualTo(order);
         assertThat(advancePaymentInvoice.getPaymentStatus()).isEqualTo(InvoicePaymentStatusEnum.NONE);
@@ -1040,14 +1114,12 @@ public class InvoiceServiceTest {
     @Test
     public void test_update_invoice_properties() throws Exception {
         Invoice invoice = new Invoice();
+        InvoiceType invoiceType = new InvoiceType();
+        invoiceType.setCode("ADV");
+
+        invoice.setInvoiceType(invoiceType);
         invoice.setStatus(InvoiceStatusEnum.DRAFT);
-        Invoice input = null;
-        try {
-            input = instantiateRandomObject(Invoice.class, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Mockito.doReturn(invoice).when(invoiceService).update(invoice);
+        Invoice input = new Invoice();
 
         final ImmutableInvoice invoiceResource = ImmutableInvoice.builder().amountWithoutTax(new BigDecimal(15)).amountWithTax(new BigDecimal(20)).amountTax(new BigDecimal(20)).invoiceDate(new Date())
             .rawAmount(new BigDecimal(54)).netToPay(new BigDecimal(54)).discountAmount(new BigDecimal(54)).paymentStatus(InvoicePaymentStatusEnum.PPAID).dueDate(new Date()).build();
@@ -1085,23 +1157,42 @@ public class InvoiceServiceTest {
 
     @Test
     public void test_getInvoiceLines_EntityToInvoice_BillingAccount() {
-        BillingAccount ba = mock(BillingAccount.class);
-        BillingCycle bc = mock(BillingCycle.class);
-        InvoiceType invoiceType = mock(InvoiceType.class);
-        PaymentMethod paymentMethod = mock(PaymentMethod.class);
-        CustomerAccount customerAccount = mock(CustomerAccount.class);
-        Customer customer = mock(Customer.class);
+
+        BillingAccount billingAccount = new BillingAccount();
+        billingAccount.setCode("BA1");
+        billingAccount.setId(1L);
+
+        AccountingArticle accountingArticle = new AccountingArticle();
+        accountingArticle.setCode("ART1");
+
+        InvoiceType invoiceType = new InvoiceType();
+        invoiceType.setCode("ADV");
+
+        CustomerAccount ca = new CustomerAccount();
+        ca.setCode("CA1");
+
+        Customer c = new Customer();
+        c.setCode("C1");
+        ca.setCustomer(c);
+
+        BillingCycle bc = new BillingCycle();
+        billingAccount.setBillingCycle(bc);
+        billingAccount.setCustomerAccount(ca);
+
         Seller seller = new Seller();
         seller.setCode("Seller_code");
-        when(ba.getCustomerAccount()).thenReturn(customerAccount);
-        when(customerAccount.getCustomer()).thenReturn(customer);
-        when(customer.getSeller()).thenReturn(seller);
-        InvoiceService.InvoiceLinesToInvoice invoiceLinesGroups = invoiceService.getInvoiceLinesGroups(ba, ba, null, bc, invoiceType, null,null, null, null, false, paymentMethod, null, null, null, null, true);
+        c.setSeller(seller);
+
+        PaymentMethod paymentMethod = new CashPaymentMethod();
+
+        InvoiceService.InvoiceLinesToInvoice invoiceLinesGroups = invoiceService.getInvoiceLinesGroups(billingAccount, billingAccount, null, bc, invoiceType, null, null, null, null, false, paymentMethod, null, null,
+            null, null, true);
+
         assertThat(invoiceLinesGroups).isNotNull();
         Assert.assertEquals(invoiceLinesGroups.invoiceLinesGroups.size(), 1);
         InvoiceLinesGroup invoiceLinesGroup = invoiceLinesGroups.invoiceLinesGroups.get(0);
-        Assert.assertEquals(invoiceLinesGroup.getBillingAccount(), ba);
-        Assert.assertEquals(invoiceLinesGroup.getInvoiceKey().split("_").length, 4);
+        Assert.assertEquals(billingAccount, invoiceLinesGroup.getBillingAccount());
+        Assert.assertEquals(5, invoiceLinesGroup.getInvoiceKey().split("_").length);
     }
 
     @Test
@@ -1118,33 +1209,34 @@ public class InvoiceServiceTest {
         when(ba.getCustomerAccount()).thenReturn(customerAccount);
         when(customerAccount.getCustomer()).thenReturn(customer);
         when(customer.getSeller()).thenReturn(seller);
-        InvoiceService.InvoiceLinesToInvoice invoiceLinesToInvoice = invoiceService.getInvoiceLinesGroups(subscription, ba, null, bc, invoiceType, null, null, null,null, false, paymentMethod, null, null, null, null, true);
+        InvoiceService.InvoiceLinesToInvoice invoiceLinesToInvoice = invoiceService.getInvoiceLinesGroups(subscription, ba, null, bc, invoiceType, null, null, null, null, false, paymentMethod, null, null, null, null,
+            true);
         assertThat(invoiceLinesToInvoice).isNotNull();
         Assert.assertEquals(invoiceLinesToInvoice.invoiceLinesGroups.size(), 1);
         InvoiceLinesGroup invoiceLinesGroup = invoiceLinesToInvoice.invoiceLinesGroups.get(0);
         Assert.assertEquals(invoiceLinesGroup.getBillingAccount(), ba);
-        Assert.assertEquals(invoiceLinesGroup.getInvoiceKey().split("_").length, 4);
+        Assert.assertEquals(invoiceLinesGroup.getInvoiceKey().split("_").length, 5);
     }
-    
 
     @Test
     public void test_getInvoiceLinesGroups_Seller_fromSeller() {
-        Subscription subscription = mock(Subscription.class);
-        BillingAccount ba = mock(BillingAccount.class);
-        BillingCycle bc = mock(BillingCycle.class);
-        InvoiceType invoiceType = mock(InvoiceType.class);
-        PaymentMethod paymentMethod = mock(PaymentMethod.class);
-        CustomerAccount customerAccount = mock(CustomerAccount.class);
-        Customer customer = mock(Customer.class);
+        Subscription subscription = new Subscription();
+        BillingAccount ba = new BillingAccount();
+        BillingCycle bc = new BillingCycle();
+        InvoiceType invoiceType = new InvoiceType();
+        PaymentMethod paymentMethod = new CashPaymentMethod();
+        CustomerAccount customerAccount = new CustomerAccount();
+        Customer customer = new Customer();
         Seller sellerSub = new Seller();
         sellerSub.setCode("Seller_code");
         Seller sellerCust = new Seller();
         sellerCust.setCode("Seller_Custom");
-        when(ba.getCustomerAccount()).thenReturn(customerAccount);
-        when(customerAccount.getCustomer()).thenReturn(customer);
-        when(subscription.getSeller()).thenReturn(sellerSub);
-        when(customer.getSeller()).thenReturn(sellerCust);
-        InvoiceService.InvoiceLinesToInvoice invoiceLinesToInvoice = invoiceService.getInvoiceLinesGroups(subscription, ba, null, bc, invoiceType, null,null, null, null, false, paymentMethod, null, null, null, null, true);
+        ba.setCustomerAccount(customerAccount);
+        customerAccount.setCustomer(customer);
+        subscription.setSeller(sellerSub);
+        customer.setSeller(sellerCust);
+        InvoiceService.InvoiceLinesToInvoice invoiceLinesToInvoice = invoiceService.getInvoiceLinesGroups(subscription, ba, null, bc, invoiceType, null, null, null, null, false, paymentMethod, null, null, null, null,
+            true);
         assertThat(invoiceLinesToInvoice).isNotNull();
         InvoiceLinesGroup invoiceLinesGroup = invoiceLinesToInvoice.invoiceLinesGroups.get(0);
         Assert.assertEquals(invoiceLinesGroup.getSeller().getCode(), "Seller_code");
@@ -1158,12 +1250,12 @@ public class InvoiceServiceTest {
         BillingCycle bc = new BillingCycle();
         InvoiceType invoiceType = new InvoiceType();
         PaymentMethod paymentMethod = new CardPaymentMethod();
-        InvoiceService.InvoiceLinesToInvoice invoiceLinesToInvoice = invoiceService.getInvoiceLinesGroups(order, ba, new BillingRun(), bc, invoiceType, mock(Filter.class),null, mock(Date.class), mock(Date.class), false,
+        InvoiceService.InvoiceLinesToInvoice invoiceLinesToInvoice = invoiceService.getInvoiceLinesGroups(order, ba, new BillingRun(), bc, invoiceType, mock(Filter.class), null, mock(Date.class), mock(Date.class), false,
             paymentMethod, null, null, null, null, true);
         assertThat(invoiceLinesToInvoice).isNotNull();
         Assert.assertEquals(invoiceLinesToInvoice.invoiceLinesGroups.size(), 1);
         InvoiceLinesGroup invoiceLinesGroup = invoiceLinesToInvoice.invoiceLinesGroups.get(0);
-        Assert.assertEquals(invoiceLinesGroup.getInvoiceKey().split("_").length, 4);
+        Assert.assertEquals(invoiceLinesGroup.getInvoiceKey().split("_").length, 5);
     }
 
     private InvoiceLine getInvoiceLine(IBillableEntity entity) {
@@ -1176,15 +1268,25 @@ public class InvoiceServiceTest {
             invoiceLine.setOrderNumber(((Order) entity).getOrderNumber());
 
         }
-        Seller seller = new Seller();
-        seller.setCode("sellerTest");
-        BillingAccount billingAccount = mock(BillingAccount.class);
-        CustomerAccount customerAccount = mock(CustomerAccount.class);
-        Customer customer = mock(Customer.class);
-        invoiceLine.setBillingAccount(billingAccount);
-        when(billingAccount.getCustomerAccount()).thenReturn(customerAccount);
-        when(customerAccount.getCustomer()).thenReturn(customer);
-        when(customer.getSeller()).thenReturn(seller);
+
+        if (!(entity instanceof BillingAccount)) {
+
+            Seller seller = new Seller();
+            seller.setCode("sellerTest");
+            BillingAccount billingAccount = new BillingAccount();
+            billingAccount.setId(1L);
+            CustomerAccount customerAccount = new CustomerAccount();
+            Customer customer = new Customer();
+            billingAccount.setCustomerAccount(customerAccount);
+            customerAccount.setCustomer(customer);
+            customer.setSeller(seller);
+
+            invoiceLine.setBillingAccount(billingAccount);
+        }
+
+        AccountingArticle accountingArticle = new AccountingArticle();
+        invoiceLine.setAccountingArticle(accountingArticle);
+
         return invoiceLine;
     }
 
@@ -1313,6 +1415,7 @@ public class InvoiceServiceTest {
 
         InvoiceType invoiceType = new InvoiceType();
         invoiceType.setId(4L);
+        invoiceType.setCode("ADV");
 
         long i = 30L;
 
@@ -1341,6 +1444,17 @@ public class InvoiceServiceTest {
         taxInfo20.tax = tax20;
         taxInfo20.taxClass = taxClass20;
 
+        doCallRealMethod().when(taxMappingService).checkIfTaxHasChanged(any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+
+        when(taxMappingService.determineTax(eq(taxClass10), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(taxInfo10);
+        when(taxMappingService.determineTax(eq(taxClass20), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(taxInfo20);
+
+        when(entityManager.getReference(eq(Tax.class), eq(tax10.getId()))).thenReturn(tax10);
+        when(entityManager.getReference(eq(Tax.class), eq(tax20.getId()))).thenReturn(tax20);
+
+        when(entityManager.getReference(eq(TaxClass.class), eq(taxClass10.getId()))).thenReturn(taxClass10);
+        when(entityManager.getReference(eq(TaxClass.class), eq(taxClass20.getId()))).thenReturn(taxClass20);
+
         when(appProvider.getRoundingMode()).thenReturn(RoundingModeEnum.NEAREST);
         when(appProvider.getRounding()).thenReturn(6);
         when(appProvider.getInvoiceRoundingMode()).thenReturn(RoundingModeEnum.NEAREST);
@@ -1363,72 +1477,6 @@ public class InvoiceServiceTest {
         assertThat(subAggr11.getAmountWithoutTax()).isEqualTo(new BigDecimal(400.03d).setScale(2, HALF_UP));
         assertThat(subAggr11.getAmountWithTax()).isEqualTo(new BigDecimal(460.03d).setScale(2, HALF_UP));
         assertThat(subAggr11.getAmountTax()).isEqualTo(new BigDecimal(60.00d).setScale(2, HALF_UP));
-    }
-
-    public <T> T instantiateRandomObject(Class<T> clazz, boolean onlyBasicFields) throws Exception {
-        T instance = null;
-        if (Resource.class.isAssignableFrom(clazz)) {
-            Method builderMethod = clazz.getMethod("builder");
-            Object builder = builderMethod.invoke(null);
-            final Class builderClass = builder.getClass();
-            final Method build = builderClass.getMethod("build");
-
-            for (Field field : clazz.getDeclaredFields()) {
-                final String name = field.getName();
-                if (!java.lang.reflect.Modifier.isStatic(field.getModifiers()) && name != "id" && name != "links" && !name.endsWith("EL")) {
-                    Method accessor = builderClass.getMethod(name, field.getType());
-                    Object value = getRandomValueForField(field, onlyBasicFields);
-                    accessor.invoke(builder, value);
-                }
-            }
-            instance = (T) build.invoke(builder);
-        } else {
-            final Constructor<T>[] constructors = (Constructor<T>[]) clazz.getConstructors();
-            if (constructors != null && constructors.length > 0) {
-                final Constructor<T> constructor = constructors[0];
-                Object[] cargs = new Object[constructor.getParameterCount()];
-                instance = constructor.newInstance(cargs);
-                for (Field field : clazz.getDeclaredFields()) {
-                    if (!java.lang.reflect.Modifier.isStatic(field.getModifiers()) && !field.getName().endsWith("EL")) {
-                        field.setAccessible(true);
-                        Object value = getRandomValueForField(field, onlyBasicFields);
-                        field.set(instance, value);
-                    }
-                }
-            } else {
-                //System.out.println("WARNING: NO CONSTRUCTOR FOR " + clazz);
-            }
-        }
-        return instance;
-    }
-
-    private Object getRandomValueForField(Field field, boolean onlyBasicFields) throws Exception {
-        Class<?> type = field.getType();
-        if (type.isEnum()) {
-            Object[] enumValues = type.getEnumConstants();
-            return enumValues[random.nextInt(enumValues.length)];
-        } else if (type.equals(Integer.TYPE) || type.equals(Integer.class)) {
-            return random.nextInt();
-        } else if (type.equals(Long.TYPE) || type.equals(Long.class)) {
-            return random.nextLong();
-        } else if (type.equals(Double.TYPE) || type.equals(Double.class)) {
-            return random.nextDouble();
-        } else if (type.equals(Float.TYPE) || type.equals(Float.class)) {
-            return random.nextFloat();
-        } else if (type.equals(Boolean.TYPE) || type.equals(Boolean.class)) {
-            return random.nextBoolean();
-        } else if (type.equals(String.class)) {
-            return UUID.randomUUID().toString();
-        } else if (type.equals(BigInteger.class)) {
-            return BigInteger.valueOf(random.nextInt());
-        } else if (type.equals(BigDecimal.class)) {
-            return BigDecimal.valueOf(random.nextInt());
-        } else if (type.equals(Date.class)) {
-            return new Date();
-        } else if (!onlyBasicFields) {
-            return instantiateRandomObject(type, onlyBasicFields);
-        }
-        return null;
     }
 
     @Test
@@ -1546,6 +1594,7 @@ public class InvoiceServiceTest {
 
         InvoiceType invoiceType = new InvoiceType();
         invoiceType.setId(4L);
+        invoiceType.setCode("ADV");
 
         RatedTransaction rt111 = new RatedTransaction(new Date(), new BigDecimal(15), new BigDecimal(16), new BigDecimal(1), new BigDecimal(2), new BigDecimal(15), new BigDecimal(16), new BigDecimal(1),
             RatedTransactionStatusEnum.OPEN, ua1.getWallet(), ba, ua1, subCat11, null, null, null, null, null, subscription1, null, null, null, null, null, "rt111", "RT111", new Date(), new Date(), seller, tax,
@@ -1600,7 +1649,10 @@ public class InvoiceServiceTest {
         taxInfo.tax = tax;
         taxInfo.taxClass = taxClass;
 
-        when(taxMappingService.determineTax(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(taxInfo);
+        doCallRealMethod().when(taxMappingService).checkIfTaxHasChanged(any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+        when(taxMappingService.determineTax(eq(taxClass), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(taxInfo);
+
+        when(entityManager.getReference(eq(TaxClass.class), any())).thenReturn(taxClass);
         when(entityManager.getReference(eq(Tax.class), any())).thenReturn(tax);
 
         when(invoiceSubCategoryService.findById(eq(subCat11.getId()))).thenReturn(subCat11);
@@ -1752,6 +1804,7 @@ public class InvoiceServiceTest {
 
         InvoiceType invoiceType = new InvoiceType();
         invoiceType.setId(4L);
+        invoiceType.setCode("ADV");
 
         RatedTransaction rt111 = new RatedTransaction(new Date(), new BigDecimal(15), new BigDecimal(16), new BigDecimal(1), new BigDecimal(2), new BigDecimal(15), new BigDecimal(16), new BigDecimal(1),
             RatedTransactionStatusEnum.OPEN, ua1.getWallet(), ba, ua1, subCat11, null, null, null, null, null, subscription1, null, null, null, null, null, "rt111", "RT111", new Date(), new Date(), seller, tax,
@@ -1806,7 +1859,11 @@ public class InvoiceServiceTest {
         taxInfo.tax = tax;
         taxInfo.taxClass = taxClass;
 
-        when(taxMappingService.determineTax(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(taxInfo);
+        doCallRealMethod().when(taxMappingService).checkIfTaxHasChanged(any(), anyBoolean(), any(), any(), any(), any(), any(), any());
+
+        when(taxMappingService.determineTax(eq(taxClass), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(taxInfo);
+
+        when(entityManager.getReference(eq(TaxClass.class), any())).thenReturn(taxClass);
         when(entityManager.getReference(eq(Tax.class), any())).thenReturn(tax);
 
         when(invoiceSubCategoryService.findById(eq(subCat11.getId()))).thenReturn(subCat11);
@@ -1974,9 +2031,8 @@ public class InvoiceServiceTest {
         accountingArticle.setDescription("accounting");
         accountingArticle.setInvoiceSubCategory(subCat11);
 
-        InvoiceLine invoiceLine = new InvoiceLine(new Date(), new BigDecimal(1),
-                new BigDecimal(10), new BigDecimal(15), new BigDecimal(5),
-                InvoiceLineStatusEnum.OPEN, ba, "label", mainTax, mainTax.getPercent(), accountingArticle);
+        InvoiceLine invoiceLine = new InvoiceLine(new Date(), new BigDecimal(1), new BigDecimal(10), new BigDecimal(15), new BigDecimal(5), InvoiceLineStatusEnum.OPEN, ba, "label", mainTax, mainTax.getPercent(),
+            accountingArticle);
 
         invoice.setInvoiceType(invoiceType);
         invoice.setBillingAccount(ba);
@@ -1988,8 +2044,7 @@ public class InvoiceServiceTest {
 
         when(paramBeanFactory.getInstance()).thenReturn(paramBean);
 
-        invoiceService.appendInvoiceAggregatesIL(ba, ba, invoice, Arrays.asList(invoiceLine),
-                false, null, true);
+        invoiceService.appendInvoiceAggregatesIL(ba, ba, invoice, Arrays.asList(invoiceLine), false, null, true);
 
         BigDecimal amountTax = new BigDecimal(1.5);
         Assert.assertEquals(amountTax, invoice.getAmountTax());
@@ -2125,9 +2180,8 @@ public class InvoiceServiceTest {
         accountingArticle.setDescription("accounting");
         accountingArticle.setInvoiceSubCategory(subCat11);
 
-        InvoiceLine invoiceLine = new InvoiceLine(new Date(), new BigDecimal(1),
-                new BigDecimal(10), new BigDecimal(15), new BigDecimal(5),
-                InvoiceLineStatusEnum.OPEN, ba, "label", mainTax, mainTax.getPercent(), accountingArticle);
+        InvoiceLine invoiceLine = new InvoiceLine(new Date(), new BigDecimal(1), new BigDecimal(10), new BigDecimal(15), new BigDecimal(5), InvoiceLineStatusEnum.OPEN, ba, "label", mainTax, mainTax.getPercent(),
+            accountingArticle);
 
         invoice.setInvoiceType(invoiceType);
         invoice.setBillingAccount(ba);
@@ -2139,8 +2193,7 @@ public class InvoiceServiceTest {
 
         when(paramBeanFactory.getInstance()).thenReturn(paramBean);
 
-        invoiceService.appendInvoiceAggregatesIL(ba, ba, invoice, Arrays.asList(invoiceLine),
-                false, null, true);
+        invoiceService.appendInvoiceAggregatesIL(ba, ba, invoice, Arrays.asList(invoiceLine), false, null, true);
 
         Assert.assertEquals(1, invoice.getInvoiceAgregates().size());
         Assert.assertEquals(new BigDecimal(5), invoice.getInvoiceAgregates().get(0).getAmountTax());

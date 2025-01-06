@@ -1,8 +1,15 @@
 package org.meveo.service.billing.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -10,6 +17,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.model.admin.Seller;
@@ -32,19 +40,45 @@ import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
 import org.meveo.model.catalog.DiscountPlanStatusEnum;
 import org.meveo.model.catalog.DiscountPlanTypeEnum;
-import org.meveo.model.cpq.contract.BillingRule;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.tax.TaxClass;
+import org.meveo.test.JPAQuerySimulation;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+
+import jakarta.persistence.EntityManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RatedTransactionServiceTest {
     @Spy
     @InjectMocks
     private RatedTransactionService ratedTransactionService;
+
+    @Mock
+    private BillingAccountService billingAccountService;
+
+    @Mock
+    EntityManager entityManager;
+
+    @Before
+    public void setUp() {
+        doReturn(entityManager).when(ratedTransactionService).getEntityManager();
+
+        doAnswer(new Answer<RatedTransaction>() {
+            public RatedTransaction answer(InvocationOnMock invocation) throws Throwable {
+                return ((RatedTransaction) invocation.getArguments()[0]);
+            }
+        }).when(ratedTransactionService).update(any());
+
+        BillingAccount billingAccount12 = new BillingAccount();
+        billingAccount12.setCode("ba12");
+        doReturn(billingAccount12).when(billingAccountService).findByCode(eq("ba12"), anyBoolean());
+    }
 
     public List<RatedTransaction> initData() {
         Seller seller = new Seller();
@@ -54,6 +88,7 @@ public class RatedTransactionServiceTest {
         BillingAccount ba = new BillingAccount();
         ba.setCustomerAccount(ca);
         ba.setId(1002L);
+        ba.setCode("ba1");
 
         TradingLanguage tradingLanguage = new TradingLanguage();
         tradingLanguage.setLanguageCode("en");
@@ -71,8 +106,6 @@ public class RatedTransactionServiceTest {
         ua1.setWallet(wallet1);
         ua1.setBillingAccount(ba);
         ua1.setId(6L);
-
-        UserAccount ua2 = new UserAccount();
 
         Subscription subscription1 = new Subscription();
         subscription1.setCode("subsc1");
@@ -129,6 +162,12 @@ public class RatedTransactionServiceTest {
             tax.getPercent(), null, taxClass, accountingCode, null, null, null);
         rt.setId(1020L);
 
+        Contract contract = new Contract();
+        contract.setBillingAccount(rt.getBillingAccount());
+        contract.setId(1028L);
+
+        rt.setRulesContract(contract);
+
         rts.add(rt);
 
         return rts;
@@ -136,18 +175,30 @@ public class RatedTransactionServiceTest {
 
     @Test
     public void testOk() {
+
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);
-        Contract c1 = new Contract();
-        c1.setBillingAccount(rt.getBillingAccount());
-        c1.setId(1028L);
 
-        BillingRule br1 = new BillingRule();
-        br1.setContract(c1);
-        br1.setPriority(1);
-        br1.setInvoicedBACodeEL("#{rt.getUserAccount().getBillingAccount().getCode()}");
-        br1.setCriteriaEL("#{rt.getUserAccount() != null}");
         BillingAccount billingAccountAvant = rt.getBillingAccount();
+
+        JPAQuerySimulation<Object[]> billingRulesQuery = new JPAQuerySimulation<Object[]>() {
+            @Override
+            public List<Object[]> getResultList() {
+                // id, criteriaEL, invoicedBACodeEL
+                return new ArrayList<Object[]>() {
+                    {
+                        add(new Object[] { 1L, "#{rt.getUserAccount() != null}", "#{rt.getUserAccount().getBillingAccount().getCode()}2" });
+                    }
+                };
+            }
+        };
+
+        when(entityManager.createNamedQuery(eq("BillingRule.findByContractIdForRating"))).thenAnswer(new Answer<JPAQuerySimulation<Object[]>>() {
+            public JPAQuerySimulation<Object[]> answer(InvocationOnMock invocation) throws Throwable {
+                return billingRulesQuery;
+            }
+        });
+
         ratedTransactionService.applyInvoicingRules(rts);
         BillingAccount originBillingAccountTest = rt.getOriginBillingAccount();
         BillingAccount billingAccountApres = rt.getBillingAccount();
@@ -163,17 +214,24 @@ public class RatedTransactionServiceTest {
         c1.setBillingAccount(rt.getBillingAccount());
         c1.setId(1028L);
 
-        BillingRule br1 = new BillingRule();
-        br1.setContract(c1);
-        br1.setPriority(1);
-        br1.setInvoicedBACodeEL("#{rt.getUserAccount().getBillingAccount().getCode()}");
-        br1.setCriteriaEL("#{rt.getUserAccount() != null}");
+        JPAQuerySimulation<Object[]> billingRulesQuery = new JPAQuerySimulation<Object[]>() {
+            @Override
+            public List<Object[]> getResultList() {
+                // id, criteriaEL, invoicedBACodeEL
+                return new ArrayList<Object[]>() {
+                    {
+                        add(new Object[] { 1L, "#{rt.getUserAccount() != null}", "#{rt.getUserAccount().getBillingAccount().getCode()}2" });
+                        add(new Object[] { 2L, "", "" });
+                    }
+                };
+            }
+        };
 
-        BillingRule br2 = new BillingRule();
-        br2.setContract(c1);
-        br2.setPriority(1);
-        br2.setInvoicedBACodeEL("");
-        br2.setCriteriaEL("");
+        when(entityManager.createNamedQuery(eq("BillingRule.findByContractIdForRating"))).thenAnswer(new Answer<JPAQuerySimulation<Object[]>>() {
+            public JPAQuerySimulation<Object[]> answer(InvocationOnMock invocation) throws Throwable {
+                return billingRulesQuery;
+            }
+        });
 
         BillingAccount billingAccountAvant = rt.getBillingAccount();
         ratedTransactionService.applyInvoicingRules(rts);
@@ -187,26 +245,29 @@ public class RatedTransactionServiceTest {
     public void testNotEvaluateInvoicedBACodeEL() {
         List<RatedTransaction> rts = initData();
         RatedTransaction rt = rts.get(0);
-        Contract c1 = new Contract();
-        c1.setBillingAccount(rt.getBillingAccount());
-        c1.setId(1028L);
 
-        BillingRule br1 = new BillingRule();
-        br1.setContract(c1);
-        br1.setPriority(1);
-        br1.setInvoicedBACodeEL("");
-        br1.setCriteriaEL("#{rt.getUserAccount() != null}");
+        JPAQuerySimulation<Object[]> billingRulesQuery = new JPAQuerySimulation<Object[]>() {
+            @Override
+            public List<Object[]> getResultList() {
+                // id, criteriaEL, invoicedBACodeEL
+                return new ArrayList<Object[]>() {
+                    {
+                        add(new Object[] { 1L, "#{rt.getUserAccount() != null}", "" });
+                        add(new Object[] { 2L, "", "" });
+                    }
+                };
+            }
+        };
 
-        BillingRule br2 = new BillingRule();
-        br2.setContract(c1);
-        br2.setPriority(1);
-        br2.setInvoicedBACodeEL("");
-        br2.setCriteriaEL("");
+        when(entityManager.createNamedQuery(eq("BillingRule.findByContractIdForRating"))).thenAnswer(new Answer<JPAQuerySimulation<Object[]>>() {
+            public JPAQuerySimulation<Object[]> answer(InvocationOnMock invocation) throws Throwable {
+                return billingRulesQuery;
+            }
+        });
 
         ratedTransactionService.applyInvoicingRules(rts);
-        RatedTransactionStatusEnum statusTest = rt.getStatus();
         String rejectReasonTest = rt.getRejectReason();
-        assertTrue(statusTest.equals(RatedTransactionStatusEnum.REJECTED));
+        assertThat(rt.getStatus()).isEqualTo(RatedTransactionStatusEnum.REJECTED);
         assertTrue(rejectReasonTest.contains("Error evaluating invoicedBillingAccountCodeEL"));
     }
 
@@ -218,22 +279,26 @@ public class RatedTransactionServiceTest {
         c1.setBillingAccount(rt.getBillingAccount());
         c1.setId(1028L);
 
-        BillingRule br1 = new BillingRule();
-        br1.setContract(c1);
-        br1.setPriority(1);
-        br1.setInvoicedBACodeEL("#{rt.getUserAccount().getBillingAccount().getCode()}");
-        br1.setCriteriaEL("");
+        JPAQuerySimulation<Object[]> billingRulesQuery = new JPAQuerySimulation<Object[]>() {
+            @Override
+            public List<Object[]> getResultList() {
+                // id, criteriaEL, invoicedBACodeEL
+                return new ArrayList<Object[]>() {
+                    {
+                        add(new Object[] { 1L, "", "#{rt.getUserAccount().getBillingAccount().getCode()}2" });
+                        add(new Object[] { 2L, "", "" });
+                    }
+                };
+            }
+        };
 
-        BillingRule br2 = new BillingRule();
-        br2.setContract(c1);
-        br2.setPriority(1);
-        br2.setInvoicedBACodeEL("");
-        br2.setCriteriaEL("");
+        when(entityManager.createNamedQuery(eq("BillingRule.findByContractIdForRating"))).thenAnswer(new Answer<JPAQuerySimulation<Object[]>>() {
+            public JPAQuerySimulation<Object[]> answer(InvocationOnMock invocation) throws Throwable {
+                return billingRulesQuery;
+            }
+        });
 
         ratedTransactionService.applyInvoicingRules(rts);
-        RatedTransactionStatusEnum statusTest = rt.getStatus();
-        String rejectReasonTest = rt.getRejectReason();
-        assertTrue(statusTest.equals(RatedTransactionStatusEnum.REJECTED));
-        assertTrue(rejectReasonTest.contains("Error evaluating criteriaEL"));
+        assertThat(rt.getStatus()).isEqualTo(RatedTransactionStatusEnum.OPEN);
     }
 }

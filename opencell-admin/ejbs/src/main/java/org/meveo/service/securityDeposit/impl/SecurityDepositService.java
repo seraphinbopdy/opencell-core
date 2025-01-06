@@ -20,6 +20,7 @@ import org.meveo.admin.exception.InvoiceExistException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.PaymentException;
 import org.meveo.admin.exception.UnbalanceAmountException;
+import org.meveo.admin.exception.ValidationException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.apiv2.securityDeposit.SecurityDepositCancelInput;
@@ -308,7 +309,7 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
         if (securityDepositToUpdate.getTemplate().getMaxAmount() != null) {
             BigDecimal maxAmount = securityDepositToUpdate.getTemplate().getMaxAmount();
             if (nCurrentBalance.compareTo(maxAmount) > 0) {
-                throw new EntityDoesNotExistsException("The current balance + amount to credit must be less than or equal to the maximum amount of the template");
+                throw new ValidationException("The current balance plus the amount to credit (" + nCurrentBalance + ") must be less than or equal to the maximum amount (" + maxAmount + ") of the template");
             }
         }
 
@@ -391,6 +392,11 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
         return securityDepositsToRefund;
     }
 
+    /**
+     * Pay invoices
+     * @param id Security deposit Id
+     * @param securityDepositPaymentInput Security deposit payment information
+     */
     public void payInvoices(Long id, SecurityDepositPaymentInput securityDepositPaymentInput) {
         SecurityDeposit securityDeposit = getSecurityDepositOrFail(id);
         RecordedInvoice recordedInvoice = getRecordedInvoiceOrFail(securityDepositPaymentInput.getAccountOperation().getId());
@@ -543,14 +549,13 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
 
     void checkSecurityDepositPaymentAmount(SecurityDeposit securityDeposit, BigDecimal amount, AccountOperation accountOperation) {
         if (amount.compareTo(securityDeposit.getCurrentBalance()) > 0) {
-            throw new InvalidParameterException("The amount to be paid must be less than or equal to the current security deposit balance");
+            throw new InvalidParameterException("The amount to be paid (" + amount + ") must be less than or equal to the current security deposit balance (" + securityDeposit.getCurrentBalance() + ")");
         }
 
         if (amount.compareTo(accountOperation.getAmount()) > 0 || amount.compareTo(accountOperation.getUnMatchingAmount()) > 0) {
-            throw new InvalidParameterException("The amount to be paid must be less than or equal to the unpaid amount of the invoice");
+            throw new InvalidParameterException(
+                "The amount to be paid (" + amount + ") must be less than or equal to the unpaid amount of the invoice (" + accountOperation.getAmount() + ", (" + accountOperation.getUnMatchingAmount() + "))");
         }
-
-
     }
 
     SecurityDeposit getSecurityDepositOrFail(Long id) {
